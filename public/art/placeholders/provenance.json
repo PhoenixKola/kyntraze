@@ -1,0 +1,9 @@
+{
+ "status":"synthetic_debug_placeholders_not_approved_art",
+ "generator":"local Pillow geometric raster drawing",
+ "tool":"Pillow",
+ "approved":false,
+ "author":"B00 starter engineering scaffolding",
+ "assets":["kai-north.png","kai-south.png","kai-east.png","kai-west.png","enemy-pursuer.png","enemy-flanker.png","xp.png"],
+ "replacement":"Use original approved Codex ImageGen art, direction sheets, Blender rig exports and manifested atlases in B02/B03."
+}
