@@ -19,7 +19,7 @@ for im in imgs:
     same &= tuple(ref.size) == tuple(im.size) and float(np.abs(np.array(im.pixels[:]) - np.array(ref.pixels[:])).max()) < 1e-6; bpy.data.images.remove(ref)
 c["packed_pixels_equal_parts_folder"] = bool(same)
 c["actions_and_frames"] = all(bpy.data.actions.get(k["name"]) and int(bpy.data.actions[k["name"]]["frames"]) == len(k["frames"]) for k in data["clips"])
-c["drivers_present"] = sum(len(o.animation_data.drivers) for o in objs.values() if o.animation_data) == 6 + 12 + 4
+c["drivers_present"] = sum(len(o.animation_data.drivers) for o in objs.values() if o.animation_data) == 6 + 14 + 4
 sc = bpy.context.scene; cam = sc.camera; cam.location.x += 0.004 * PX; cam.location.z -= 0.004 * PX
 heads = {}
 def render_all(sub, scale):

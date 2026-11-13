@@ -7,7 +7,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__)); V5 = os.path.dirname(HERE); BASE = os.path.dirname(V5)
 PARTS_DIR = os.path.join(V5, "parts")
-CANVAS = (128, 176)
+CANVAS = (160, 176)
 REF_OFFSET = (20, 12)                     # reference px (0,0) -> canvas px
 ROOT_REF = (38.0, 152.0)                  # ground point midway between the two soles (near sole y159, far sole y146)
 
@@ -63,6 +63,7 @@ PARTS = [
     dict(id="fist_guard", img="fist_guard.png", bone="hand_f", pivot=(14.5, 23.0), angle=0.0, slot="hand_f:guard"),
     dict(id="fist_front_f", img="fist_front.png", bone="hand_f", pivot=(13.0, 25.0), angle=0.0, slot="hand_f:front"),
     dict(id="fist_angle_f", img="fist_front_angle.png", bone="hand_f", pivot=(8.5, 25.0), angle=0.0, slot="hand_f:angle"),
+    dict(id="fist_side_f", img="fist_waist.png", bone="hand_f", pivot=(3.0, 10.0), angle=0.0, slot="hand_f:side"),
     dict(id="upper_arm_n", img="upper_arm_n.png", bone="upper_arm_n", pivot=(11.0, 6.0), child=(10.5, 21.0)),
     dict(id="forearm_n", img="forearm_n.png", bone="forearm_n", pivot=(10.5, 9.0), child=(11.0, 26.0)),
     dict(id="fist_waist", img="fist_waist.png", bone="hand_n", pivot=(3.0, 10.0), angle=0.0, slot="hand_n:side"),

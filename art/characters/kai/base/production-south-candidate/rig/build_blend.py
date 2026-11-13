@@ -63,7 +63,7 @@ def drive(ob, path, index, expr, prop):
 for a_, b_ in (("shin_f", "shin_n"), ("boot_f", "boot_n"), ("thigh_f", "thigh_n")):
     da, db = objs[a_][1], objs[b_][1]
     drive(objs[a_][0], "location", 1, f"s*({db - da:.6f})", "far_leg_front"); drive(objs[b_][0], "location", 1, f"s*({da - db:.6f})", "far_leg_front")
-for side, trio in (("n", ("fist_waist", "fist_front_n", "fist_angle_n")), ("f", ("fist_guard", "fist_front_f", "fist_angle_f"))):
+for side, trio in (("n", ("fist_waist", "fist_front_n", "fist_angle_n")), ("f", ("fist_guard", "fist_front_f", "fist_angle_f", "fist_side_f"))):
     for k, oid in enumerate(trio):
         for prop in ("hide_render", "hide_viewport"): drive(objs[oid][0], prop, None, f"s != {k}", f"hand_{side}_slot")
 
@@ -89,7 +89,7 @@ for clip in data["clips"]:
             pb.rotation_euler = (0, 0, math.radians(c["rot"])); lx, ly = c["loc"]; pb.location = rest3[pb.name] @ Vector((lx * PX, 0, -ly * PX)); pb.scale = (1, c["sy"], 1)
             pb.keyframe_insert("rotation_euler", index=2, frame=f, group=pb.name); pb.keyframe_insert("location", frame=f, group=pb.name)
             pb.keyframe_insert("scale", index=1, frame=f, group=pb.name)
-        SLOT = {"front": 1, "angle": 2}
+        SLOT = {"front": 1, "angle": 2, "side": 3}
         root["far_leg_front"] = fr["far_leg_front"]; root["hand_n_slot"] = SLOT.get(fr["slots"].get("hand_n"), 0)
         root["hand_f_slot"] = SLOT.get(fr["slots"].get("hand_f"), 0)
         root["lining_f_hide"] = 1 if "lining_f" in fr["slots"].get("_hide", []) else 0

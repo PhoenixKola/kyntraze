@@ -5,14 +5,14 @@
  "direction": "south",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/kai-south.blend",
- "frame_width": 114,
+ "frame_width": 152,
  "frame_height": 167,
  "origin_px": [
-  48.0,
+  53.0,
   155.0
  ],
  "origin_normalized": [
-  0.421053,
+  0.348684,
   0.928144
  ],
  "origin_meaning": "ground point midway between the two soles of the approved stance (near sole is 13 px lower = closer to camera)",
@@ -52,9 +52,9 @@
    "duration_s": 0.875,
    "blender_action": "BasicPunch",
    "events": {
-    "anticipation_start": 2,
+    "anticipation_start": 1,
     "impact": 5,
-    "recover_start": 9,
+    "recover_start": 8,
     "interruptible_from": 11
    },
    "hit_contract": "apply damage/hitstop in Phaser on 'impact' (0-based frame 5)"

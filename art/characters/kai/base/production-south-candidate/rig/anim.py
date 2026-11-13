@@ -14,9 +14,9 @@ ART_LEN = {}
 for p in r.PARTS:
     if "child" in p: ART_LEN[p["bone"]] = float(np.linalg.norm(np.array(p["child"]) - np.array(p["pivot"])))
 
-def set_dir(ch, W, b, ang, length):
+def set_dir(ch, W, b, ang, length, cap=1.02):
     """Point bone b along world angle `ang` with on-screen length `length` (never longer than its art)."""
-    length = min(length, ART_LEN.get(b, length) * 1.02)
+    length = min(length, ART_LEN.get(b, length) * cap)
     par = r.BONES[b][0]
     ch[b]["rot"] = ang - rest_ang(b) - r.world_angle(W, par)
     ch[b]["sy"] = length / rest_len(b)
@@ -39,11 +39,12 @@ def solve(pose):
     for s in ("n", "f"):
         a = pose.get(f"arm_{s}")
         if not a: continue
-        set_dir(ch, W, f"upper_arm_{s}", *a["u"]); W = r.fk(ch)
-        set_dir(ch, W, f"forearm_{s}", *a["f"]); W = r.fk(ch)
+        set_dir(ch, W, f"upper_arm_{s}", *a["u"], cap=a.get("cap", 1.02)); W = r.fk(ch)
+        set_dir(ch, W, f"forearm_{s}", *a["f"], cap=a.get("cap", 1.02)); W = r.fk(ch)
         # the fist follows the forearm: it turns by the forearm's change from the approved rest direction (the rest pose already holds
         # the reference wrist bend) plus a small wrist offset. Front-on / angled punch fists stay upright (absolute).
         if a.get("slot") in ("front", "angle"): hw = a.get("hand", 0.0)
+        elif a.get("slot") == "side": hw = a["f"][0] - 90.0 + a.get("hand", 0.0)       # side fist art points right (90 deg)
         else: hw = a["f"][0] - ARM_REST[s]["f"][0] + a.get("hand", 0.0)
         ch[f"hand_{s}"]["rot"] = hw - r.world_angle(W, f"forearm_{s}")
         W = r.fk(ch)
@@ -80,8 +81,9 @@ def stance():
             "leg_n": {"sole": N_SOLE["n"]}, "leg_f": {"sole": N_SOLE["f"]}}
 
 def lerp(a, b, t): return a + (b - a) * t
-def arm(u_ang, u_len, f_ang, f_len, hand=None, slot=None):
+def arm(u_ang, u_len, f_ang, f_len, hand=None, slot=None, cap=None):
     d = {"u": (u_ang, u_len), "f": (f_ang, f_len)}
+    if cap: d["cap"] = cap
     if hand is not None: d["hand"] = hand
     if slot: d["slot"] = slot
     return d
@@ -140,35 +142,38 @@ def run():
 
 # ------------------------------------------------------------------ BasicPunch: 14 frames @ 16 fps, rear (near) hand cross toward camera
 def punch():
+    """Lead (far) hand straight punch to screen right: the arm swings out nearly horizontal so sleeve, cuff, wrap and fist read against
+    the background. The near hand stays in its approved waist guard (as in Idle), pulled back slightly; hips and shoulders drive the punch."""
     S = stance(); un, fn = ARM_REST["n"]["u"], ARM_REST["n"]["f"]; uf, ff = ARM_REST["f"]["u"], ARM_REST["f"]["f"]
     GUARD_F = arm(uf[0] - 4, uf[1], ff[0] + 6, ff[1], hand=0.0)
-    TIGHT_F = arm(uf[0] - 10, uf[1] - 1, ff[0] + 12, ff[1], hand=0.0)
-    PULL_F = arm(14, 12, -120, 9, hand=0.0)                                           # lead fist pulled back to the chin/ribs
-    step = (N_SOLE["n"][0] + 3, N_SOLE["n"][1] + 2)
+    TUCK_F = arm(20, 11, -158, 8, hand=0.0)                         # lead fist drawn back to the shoulder, elbow in
+    LOAD_F = arm(28, 10, -164, 7, hand=0.0)                         # deepest coil: fist tight behind the shoulder
+    NEAR = lambda d=0: arm(un[0] - d, un[1], fn[0] - d * 0.5, fn[1], hand=0.0)   # approved waist guard, elbow drawn back by d degrees
+    step = (N_SOLE["n"][0] + 4, N_SOLE["n"][1] + 2)
     k = [
-        {},                                                                                   # 0 stance
-        {"pelvis": (-1, 1), "chest": (-1, 1), "arm_f": TIGHT_F,
-         "arm_n": arm(un[0] - 14, un[1], fn[0] + 6, fn[1], hand=0.0)},                       # 1 load
-        {"pelvis": (-3, 3), "chest": (-4, 2), "head": (-2, 1), "spine_rot": 7, "arm_f": TIGHT_F,
-         "arm_n": arm(-60, 14, 0, 14, hand=-12.0), "sash": 6},                                    # 2 coil: elbow back, fist chambered at the hip
-        {"pelvis": (-3, 4), "chest": (-5, 3), "head": (-2, 2), "spine_rot": 8, "arm_f": TIGHT_F,
-         "arm_n": arm(-68, 14, -6, 14, hand=-16.0), "sash": 8},                                   # 3 coil hold (anticipation)
-        {"pelvis": (2, 2), "chest": (3, 1), "spine_rot": -3, "leg_n": {"sole": step}, "arm_f": GUARD_F,
-         "arm_n": arm(0, 15, 40, 12, hand=0.0, slot="angle"), "sash": -4},                       # 4 launch (hips lead, angled fist)
-        {"pelvis": (5, 3), "chest": (8, 2), "head": (3, 2), "spine_rot": -10, "leg_n": {"sole": step}, "arm_f": PULL_F,
-         "arm_n": arm(20, 15, 52, 11, hand=0.0, slot="front"), "sash": -12},                    # 5 IMPACT: knuckle-forward fist at chest height
-        {"pelvis": (5, 4), "chest": (9, 3), "head": (3, 2), "spine_rot": -11, "leg_n": {"sole": step}, "arm_f": PULL_F,
-         "arm_n": arm(22, 16, 56, 11, hand=0.0, slot="front"), "sash": -16},                    # 6 overshoot
-        {"pelvis": (3, 3), "chest": (4, 2), "head": (1, 1), "spine_rot": -5, "leg_n": {"sole": step}, "arm_f": GUARD_F,
-         "arm_n": arm(8, 15, 70, 13, hand=-10.0, slot="angle"), "sash": -10},                   # 7 recoil
-        {"pelvis": (1, 2), "chest": (2, 1), "spine_rot": -2, "leg_n": {"sole": step}, "arm_f": GUARD_F,
-         "arm_n": arm(0, 15, 60, 15, hand=0.0), "sash": -3},                                    # 8 retract
-        {"pelvis": (0, 1), "chest": (1, 1), "arm_f": GUARD_F,
-         "arm_n": arm(un[0] + 20, un[1], fn[0] + 8, fn[1], hand=0.0), "sash": 4},                # 9 step back, re-guard
-        {"pelvis": (0, 1), "arm_f": GUARD_F, "arm_n": arm(un[0] + 8, un[1], fn[0] + 3, fn[1], hand=0.0), "sash": 2},   # 10
-        {"pelvis": (0, 0), "arm_n": arm(un[0] + 3, un[1], fn[0] + 1, fn[1], hand=0.0), "sash": -1},  # 11
-        {},                                                                                   # 12
-        {},                                                                                   # 13 stance
+        {},                                                                                                   # 0 stance
+        {"pelvis": (-2, 2), "chest": (-3, 1), "head": (-1, 1), "spine_rot": 4, "arm_f": TUCK_F,
+         "arm_n": NEAR(6), "sash": 4},                                                                         # 1 anticipation: sink, turn back
+        {"pelvis": (-4, 4), "chest": (-6, 3), "head": (-2, 2), "spine_rot": 9, "arm_f": LOAD_F,
+         "arm_n": NEAR(12), "sash": 8},                                                                        # 2 coil
+        {"pelvis": (-5, 5), "chest": (-7, 4), "head": (-3, 3), "spine_rot": 11, "arm_f": LOAD_F,
+         "arm_n": NEAR(14), "sash": 10},                                                                       # 3 coil hold (deepest)
+        {"pelvis": (3, 3), "chest": (3, 2), "head": (1, 2), "spine_rot": -5, "leg_n": {"sole": step},
+         "arm_f": arm(62, 13, 82, 11, hand=0.0, slot="angle"), "arm_n": NEAR(8), "sash": -8},                  # 4 launch: hips snap first
+        {"pelvis": (5, 3), "chest": (6, 2), "head": (3, 2), "spine_rot": -9, "leg_n": {"sole": step},
+         "arm_f": arm(80, 15, 90, 13, hand=0.0, slot="side", cap=1.22), "arm_n": NEAR(2), "sash": -18},        # 5 IMPACT: full reach, level with the shoulder
+        {"pelvis": (6, 4), "chest": (7, 3), "head": (4, 3), "spine_rot": -10, "leg_n": {"sole": step},
+         "arm_f": arm(82, 16, 91, 13, hand=0.0, slot="side", cap=1.22), "arm_n": NEAR(0), "sash": -22},        # 6 impact hold
+        {"pelvis": (4, 3), "chest": (5, 2), "head": (2, 2), "spine_rot": -6, "leg_n": {"sole": step},
+         "arm_f": arm(58, 14, 108, 12, hand=0.0, slot="angle"), "arm_n": NEAR(2), "sash": -14},                # 7 recoil begins
+        {"pelvis": (2, 3), "chest": (2, 2), "head": (1, 1), "spine_rot": -2, "leg_n": {"sole": step},
+         "arm_f": arm(34, 13, -130, 9, hand=0.0), "arm_n": NEAR(4), "sash": -6},                               # 8 snap back, fist returns
+        {"pelvis": (1, 2), "chest": (1, 1), "spine_rot": 0, "arm_f": GUARD_F, "arm_n": NEAR(2), "sash": 4,
+         "leg_n": {"sole": (step[0] - 2, step[1] - 1)}},                                                       # 9 re-guard, foot returns
+        {"pelvis": (0, 1), "chest": (0, 1), "arm_f": GUARD_F, "arm_n": NEAR(0), "sash": 5},                    # 10
+        {"pelvis": (0, 1), "arm_f": GUARD_F, "arm_n": NEAR(0), "sash": 2},                                     # 11
+        {"pelvis": (0, 0), "arm_n": NEAR(0), "sash": -1},                                                      # 12
+        {},                                                                                                   # 13 stance
     ]
     fr = []
     for kk in k:
@@ -178,7 +183,7 @@ def punch():
             else: p[key] = v
         fr.append(p)
     return {"name": "BasicPunch", "fps": 16, "loop": False, "frames": fr,
-            "events": {"anticipation_start": 2, "impact": 5, "recover_start": 9, "interruptible_from": 11}}
+            "events": {"anticipation_start": 1, "impact": 5, "recover_start": 8, "interruptible_from": 11}}
 
 CLIPS = [idle, run, punch]
 
