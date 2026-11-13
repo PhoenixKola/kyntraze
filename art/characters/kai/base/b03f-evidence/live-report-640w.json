@@ -1,0 +1,96 @@
+{
+ "viewport": [
+  640,
+  360
+ ],
+ "errors": [
+  "warning: [GroupMarkerNotSet(crbug.com/242999)!:A0803600FC410000]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader (about:flags#enable-unsafe-swiftshader) flag to opt in to lower security guarantees for trusted content.",
+  "warning: [GroupMarkerNotSet(crbug.com/242999)!:A0B03600FC410000]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader (about:flags#enable-unsafe-swiftshader) flag to opt in to lower security guarantees for trusted content.",
+  "warning: [.WebGL-0x2c94020a6400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+  "warning: [.WebGL-0x2c94020a6400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+ ],
+ "checks": {
+  "eightWay": {
+   "E": "east/Run",
+   "W": "west/Run",
+   "S": "south/Run",
+   "N": "north/Run",
+   "NE": "north/Run",
+   "SE": "east/BasicPunch",
+   "SW": "east/BasicPunch",
+   "NW": "west/Run"
+  },
+  "stopped": {
+   "facing": "west",
+   "clip": "Idle",
+   "frame": 7,
+   "texture": "kai-west-Idle",
+   "frameIndex": 7,
+   "x": 1108,
+   "y": 824,
+   "scale": 0.5
+  },
+  "dashPose": {
+   "facing": "east",
+   "clip": "Run",
+   "frame": 6,
+   "texture": "kai-east-Run",
+   "frameIndex": 6,
+   "x": 1283,
+   "y": 824,
+   "scale": 0.5
+  },
+  "pauseFrozen": true,
+  "resumed": "running",
+  "samples": {
+   "n": 1566,
+   "missingTextures": 0,
+   "groundOffsetErrors": 0,
+   "facingsSeen": [
+    "south",
+    "east",
+    "west",
+    "north"
+   ],
+   "facingsWhilePunching": [
+    "south",
+    "east",
+    "west",
+    "north"
+   ],
+   "punchStarts": 18,
+   "simShots": 15,
+   "runSamples": 485,
+   "runFacingMismatch": 13,
+   "facingFlickers": 10,
+   "shotFrameClips": {
+    "BasicPunch:5": 15
+   }
+  },
+  "afterFight": {
+   "hp": 90,
+   "kills": 7,
+   "phase": "upgrade"
+  },
+  "died": true,
+  "deadPose": {
+   "facing": "east",
+   "clip": "Idle",
+   "frame": 0,
+   "texture": "kai-east-Idle",
+   "frameIndex": 0,
+   "x": 1116,
+   "y": 873,
+   "scale": 0.5
+  },
+  "resultsVisible": true,
+  "afterRestart": {
+   "sim": {
+    "hp": 100,
+    "phase": "running",
+    "time": 1.4
+   },
+   "pose": "south/Idle"
+  }
+ }
+}

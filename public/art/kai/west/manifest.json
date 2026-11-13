@@ -1,0 +1,62 @@
+{
+ "schema": "kyntraze.anim-manifest/0.1-pilot",
+ "character": "kai",
+ "form": "base",
+ "direction": "west",
+ "status": "PRODUCTION CANDIDATE - owner approval required",
+ "source_blend": "rig/kai-west.blend",
+ "frame_width": 122,
+ "frame_height": 164,
+ "origin_px": [
+  75.0,
+  160.0
+ ],
+ "origin_normalized": [
+  0.614754,
+  0.97561
+ ],
+ "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
+ "scale_note": "1 px = 1 native art px (approved ~160 px Kai); the game renders Kai at about 0.5x",
+ "root_motion": {
+  "baked": false,
+  "contract": "frames are in place; Phaser owns movement, collision, hitboxes and damage; events are frame indices only"
+ },
+ "animations": {
+  "Idle": {
+   "sheet": "sheets/kai_west_idle.png",
+   "frames": 16,
+   "fps": 10,
+   "loop": true,
+   "duration_s": 1.6,
+   "blender_action": "Idle",
+   "events": {}
+  },
+  "Run": {
+   "sheet": "sheets/kai_west_run.png",
+   "frames": 8,
+   "fps": 14,
+   "loop": true,
+   "duration_s": 0.5714,
+   "blender_action": "Run",
+   "events": {
+    "foot_contact_near": 0,
+    "foot_contact_far": 4
+   }
+  },
+  "BasicPunch": {
+   "sheet": "sheets/kai_west_basicpunch.png",
+   "frames": 14,
+   "fps": 16,
+   "loop": false,
+   "duration_s": 0.875,
+   "blender_action": "BasicPunch",
+   "events": {
+    "anticipation_start": 1,
+    "impact": 5,
+    "recover_start": 8,
+    "interruptible_from": 11
+   },
+   "hit_contract": "apply damage and hitstop in Phaser on event 'impact' (0-based frame 5); the animation never applies damage itself"
+  }
+ }
+}

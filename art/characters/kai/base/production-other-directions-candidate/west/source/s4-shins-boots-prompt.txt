@@ -1,0 +1,11 @@
+Parts sheet for a 2D cutout (paper-doll) game rig. Attached images: (1) the WEST view of the character, a full-figure design reference for how every piece looks from this direction; (2) the approved original character; (3) the finished SOUTH parts sheet of the SAME character, showing the same kind of pieces at the exact pixel scale, chunky pixel-block size, palette and outline weight to match. Draw the equivalent pieces of the SAME character for the WEST view, copying the rendering of the attached images faithfully: thin dark controlled outlines (no thick halo), navy-charcoal jacket with lighter purple-grey highlight folds and cream piping/cuff trim, warm tan skin, off-white wraps with grey-brown stripe lines, baggy dark grey-purple trousers with lighter folds, solid dark combat boots with a strap and grey-brown sole, golden sash with darker orange-brown shadow stripes, teal-black hair with teal highlights. Same slightly-from-above game camera. Kai faces screen LEFT and is seen from his LEFT side (his left shoulder is nearest the camera; the gold epaulette is on his far RIGHT shoulder). His left hand leads and is the near hand.
+
+CONSTRUCTION: every piece is COMPLETE as if nothing were in front of it and hangs straight down, drawn foreshortened, short and chunky exactly like the SOUTH pieces. Draw ONLY the pieces listed, each isolated on flat magenta (#ff00ff), far apart, nothing overlapping, nothing cropped. Sizes are in art pixels (one art pixel = one 10x10 block) and match the SOUTH sheet; do not draw larger.
+
+Draw ONLY these 4 pieces:
+1. NEAR SHIN: squat baggy trouser lower leg, rounded top end (knee), gathered hem at the bottom. 24 wide, 22 tall.
+2. FAR SHIN: the same, 22 wide, 21 tall.
+3. NEAR BOOT: one solid dark combat boot in PROFILE, toe pointing left, strap across the shaft, grey sole, shaft opening at the top. 24 wide, 26 tall.
+4. FAR BOOT: the same boot in profile, toe pointing left. 24 wide, 26 tall.
+
+Draw every piece with big chunky 10x10 pixel blocks and NO finer detail than the attached references (no sub-pixel noise, no anti-aliasing, no gradients). Flat solid magenta background everywhere. Wide 16:9. No full character, no text, no labels, no watermark.

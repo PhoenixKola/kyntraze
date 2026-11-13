@@ -1,24 +1,68 @@
 import Phaser from 'phaser';
 import type { GameState, InputState } from '../../sim/GameState';
+import { KAI_GROUND_DY, KAI_REGISTRY_KEY, KAI_SCALE, KAI_SPLIT_ABOVE_FEET, KaiAnimator, kaiTextureKey, type AnimPose, type KaiManifests } from '../../assets/kaiAnimation';
 export class EntityRenderer {
-  private hero: Phaser.GameObjects.Image;
+  private hero: Phaser.GameObjects.Sprite;
+  private legs: Phaser.GameObjects.Sprite;
+  private readonly manifests: KaiManifests;
+  private readonly animator: KaiAnimator;
+  private pose: AnimPose = { facing: 'south', clip: 'Idle', frame: 0, legs: null };
+  private lastShotId = 0;
+  private lastX = NaN;
+  private lastY = NaN;
+  private moveHold = 0;
   private sprites = new Map<number, Phaser.GameObjects.Image>();
   private orbs = new Map<number, Phaser.GameObjects.Image>();
-  private facing = 'south';
   constructor(private readonly scene: Phaser.Scene) {
-    this.hero = scene.add.image(1100, 800, 'kai-south').setScale(1.65).setDepth(10);
+    const manifests = scene.registry.get(KAI_REGISTRY_KEY) as KaiManifests | undefined;
+    if (!manifests) throw new Error('Kai animation manifests were not loaded by BootScene');
+    this.manifests = manifests; this.animator = new KaiAnimator(manifests);
+    this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
+    this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
   }
-  sync(state: GameState, input: InputState) {
+  /** Hero animation state, for the dev-only QA hook. */
+  /** QA-only size comparison; the shipped default stays KAI_SCALE. */
+  setHeroScale(scale: number) { this.hero.setScale(scale); this.legs.setScale(scale); }
+  debugPose() { return { ...this.pose, texture: this.hero.texture.key, frameIndex: Number(this.hero.frame.name), x: this.hero.x, y: this.hero.y, scale: this.hero.scaleX }; }
+  sync(state: GameState, input: InputState, deltaMs = 0) {
     const p = state.player;
-    this.hero.setPosition(Math.round(p.x), Math.round(p.y - 12));
-    if (input.x || input.y) {
-      if (Math.abs(input.x) > Math.abs(input.y)) this.facing = input.x > 0 ? 'east' : 'west';
-      else this.facing = input.y > 0 ? 'south' : 'north';
+    const dt = state.phase === 'running' ? Math.min(0.1, deltaMs / 1000) : 0;
+    // actual displacement (not raw key state) decides Run, so pushing against a wall or obstacle idles; a short hold bridges frames with no sim tick
+    if (Number.isNaN(this.lastX)) { this.lastX = p.x; this.lastY = p.y; }
+    if (Math.hypot(p.x - this.lastX, p.y - this.lastY) > 0.05) this.moveHold = 0.1; else this.moveHold = Math.max(0, this.moveHold - dt);
+    this.lastX = p.x; this.lastY = p.y;
+    let target: { dx: number; dy: number } | null = null; let best = p.attackRange ** 2;
+    for (const e of state.enemies) { const d = (e.x - p.x) ** 2 + (e.y - p.y) ** 2; if (e.hp > 0 && d <= best) { best = d; target = { dx: e.x - p.x, dy: e.y - p.y }; } }
+    let shot: { dx: number; dy: number } | null = null;
+    for (const fx of state.impacts) if (fx.kind === 'shot' && fx.id > this.lastShotId) {
+      this.lastShotId = fx.id; if (!shot) shot = { dx: (fx.targetX ?? p.x) - p.x, dy: (fx.targetY ?? p.y) - p.y };
     }
-    if (this.hero.texture.key !== `kai-${this.facing}`) this.hero.setTexture(`kai-${this.facing}`);
-    this.hero.setAlpha(p.invulnerable > 0 && Math.floor(state.time * 18) % 2 === 0 ? 0.56 : 1);
-    this.hero.setScale(p.form ? 1.8 : 1.65);
-    if (p.form) this.hero.setTint(0xffd78a); else this.hero.clearTint();
+    const period = Math.max(0.16, p.attackPeriod * (p.form ? 0.75 : 1));
+    this.pose = this.animator.update({
+      dt, alive: state.phase !== 'dead' && p.hp > 0, moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, inputX: input.x, inputY: input.y,
+      runSpeed: p.speed * (p.form ? 1.16 : 1), dashing: p.dashRemaining > 0, dashX: p.dashDx, dashY: p.dashDy,
+      attackClock: p.attackClock, hasTarget: target !== null, targetDx: target?.dx ?? 0, targetDy: target?.dy ?? 0, shot,
+    }, period);
+    const m = this.manifests[this.pose.facing];
+    const key = kaiTextureKey(this.pose.facing, this.pose.clip);
+    if (this.hero.texture.key !== key) this.hero.setTexture(key);
+    this.hero.setFrame(this.pose.frame);
+    this.hero.setOrigin(m.origin_px[0] / m.frame_width, m.origin_px[1] / m.frame_height);
+    this.hero.setPosition(Math.round(p.x), Math.round(p.y + KAI_GROUND_DY));
+    const alpha = p.invulnerable > 0 && Math.floor(state.time * 18) % 2 === 0 ? 0.56 : 1;
+    this.hero.setAlpha(alpha);
+    if (state.phase === 'dead') this.hero.setTint(0x6d7488); else if (p.form) this.hero.setTint(0xffd78a); else this.hero.clearTint();
+    // punching while moving: upper body from the punch frame, legs from the run cycle, split just under the belt
+    const split = m.origin_px[1] - KAI_SPLIT_ABOVE_FEET;
+    if (this.pose.legs !== null) {
+      this.hero.setCrop(0, 0, m.frame_width, split);
+      const lkey = kaiTextureKey(this.pose.facing, 'Run');
+      if (this.legs.texture.key !== lkey) this.legs.setTexture(lkey);
+      this.legs.setFrame(this.pose.legs).setCrop(0, split, m.frame_width, m.frame_height - split);
+      this.legs.setOrigin(m.origin_px[0] / m.frame_width, m.origin_px[1] / m.frame_height);
+      this.legs.setPosition(this.hero.x, this.hero.y).setAlpha(alpha).setVisible(true);
+      if (state.phase === 'dead') this.legs.setTint(0x6d7488); else if (p.form) this.legs.setTint(0xffd78a); else this.legs.clearTint();
+    } else { this.hero.setCrop(); this.legs.setVisible(false); }
     const active = new Set<number>();
     for (const e of state.enemies) {
       if (e.hp <= 0) continue;
@@ -38,5 +82,5 @@ export class EntityRenderer {
     }
     for (const [id, image] of this.orbs) if (!activeOrbs.has(id)) { image.destroy(); this.orbs.delete(id); }
   }
-  destroy() { this.hero.destroy(); for (const image of [...this.sprites.values(), ...this.orbs.values()]) image.destroy(); this.sprites.clear(); this.orbs.clear(); }
+  destroy() { this.hero.destroy(); this.legs.destroy(); for (const image of [...this.sprites.values(), ...this.orbs.values()]) image.destroy(); this.sprites.clear(); this.orbs.clear(); }
 }

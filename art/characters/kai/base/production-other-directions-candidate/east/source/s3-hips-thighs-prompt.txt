@@ -1,0 +1,12 @@
+Parts sheet for a 2D cutout (paper-doll) game rig. Attached images: (1) the EAST view of the character, a full-figure design reference for how every piece looks from this direction; (2) the approved original character; (3) the finished SOUTH parts sheet of the SAME character, showing the same kind of pieces at the exact pixel scale, chunky pixel-block size, palette and outline weight to match. Draw the equivalent pieces of the SAME character for the EAST view, copying the rendering of the attached images faithfully: thin dark controlled outlines (no thick halo), navy-charcoal jacket with lighter purple-grey highlight folds and cream piping/cuff trim, warm tan skin, off-white wraps with grey-brown stripe lines, baggy dark grey-purple trousers with lighter folds, solid dark combat boots with a strap and grey-brown sole, golden sash with darker orange-brown shadow stripes, teal-black hair with teal highlights. Same slightly-from-above game camera. Kai faces screen RIGHT and is seen from his RIGHT side (his right shoulder with the single gold epaulette is nearest the camera). His left hand leads.
+
+CONSTRUCTION: every piece is COMPLETE as if nothing were in front of it and hangs straight down, drawn foreshortened, short and chunky exactly like the SOUTH pieces. Draw ONLY the pieces listed, each isolated on flat magenta (#ff00ff), far apart, nothing overlapping, nothing cropped. Sizes are in art pixels (one art pixel = one 10x10 block) and match the SOUTH sheet; do not draw larger.
+
+Draw ONLY these 5 pieces:
+1. HIP BLOCK: the baggy trouser hip and seat region in PROFILE, one piece, flat straight TOP edge (it hides under the sash), the bottom edge a plain inverted V where the legs begin, no round bulges, a few diagonal folds. 38 wide, 25 tall.
+2. SASH BAND: the golden sash wrapped around the waist in PROFILE with its knot at the front (right) side, no tails. 32 wide, 16 tall.
+3. SASH TAILS: the two golden tails that hang down from the knot, one longer, overlapping slightly. 18 wide, 28 tall.
+4. NEAR THIGH: the very baggy trouser leg from the hip to the knee, wide and voluminous with diagonal cloth folds; flat/open top end, the bottom end gathers in at the knee. 32 wide, 45 tall.
+5. FAR THIGH: the same, slightly narrower. 29 wide, 42 tall.
+
+Draw every piece with big chunky 10x10 pixel blocks and NO finer detail than the attached references (no sub-pixel noise, no anti-aliasing, no gradients). Flat solid magenta background everywhere. Wide 16:9. No full character, no text, no labels, no watermark.

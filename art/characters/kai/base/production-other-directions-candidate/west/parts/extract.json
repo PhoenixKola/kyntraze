@@ -1,0 +1,243 @@
+{
+ "head": {
+  "sheet": "s1-heads-fists",
+  "box": [
+   228,
+   166,
+   838,
+   762
+  ],
+  "scale": 13.545,
+  "native": [
+   48,
+   47
+  ]
+ },
+ "fist_side": {
+  "sheet": "s1-heads-fists",
+  "box": [
+   1056,
+   138,
+   1368,
+   380
+  ],
+  "scale": 15.6,
+  "native": [
+   23,
+   18
+  ]
+ },
+ "fist_guard": {
+  "sheet": "s1-heads-fists",
+  "box": [
+   1106,
+   502,
+   1304,
+   810
+  ],
+  "scale": 14.0,
+  "native": [
+   17,
+   25
+  ]
+ },
+ "torso": {
+  "sheet": "s2-torso-arms",
+  "box": [
+   70,
+   248,
+   414,
+   726
+  ],
+  "scale": 12.579,
+  "native": [
+   30,
+   41
+  ]
+ },
+ "upper_arm_n": {
+  "sheet": "s2-torso-arms",
+  "box": [
+   496,
+   328,
+   740,
+   688
+  ],
+  "scale": 12.0,
+  "native": [
+   23,
+   33
+  ]
+ },
+ "upper_arm_f": {
+  "sheet": "s2-torso-arms",
+  "box": [
+   808,
+   310,
+   1040,
+   688
+  ],
+  "scale": 13.5,
+  "native": [
+   20,
+   31
+  ]
+ },
+ "forearm_n": {
+  "sheet": "s2-torso-arms",
+  "box": [
+   1112,
+   280,
+   1348,
+   728
+  ],
+  "scale": 17.231,
+  "native": [
+   16,
+   28
+  ]
+ },
+ "forearm_f": {
+  "sheet": "s2-torso-arms",
+  "box": [
+   1414,
+   290,
+   1610,
+   726
+  ],
+  "scale": 18.167,
+  "native": [
+   13,
+   26
+  ]
+ },
+ "hips": {
+  "sheet": "s3-hips-thighs",
+  "box": [
+   106,
+   50,
+   588,
+   322
+  ],
+  "scale": [
+   13.389,
+   11.333
+  ],
+  "native": [
+   39,
+   27
+  ]
+ },
+ "sash_band": {
+  "sheet": "s3-hips-thighs",
+  "box": [
+   736,
+   102,
+   1158,
+   244
+  ],
+  "scale": 15.071,
+  "native": [
+   31,
+   12
+  ]
+ },
+ "sash_tails": {
+  "sheet": "s3-hips-thighs",
+  "box": [
+   1352,
+   38,
+   1532,
+   374
+  ],
+  "scale": 12.923,
+  "native": [
+   17,
+   29
+  ]
+ },
+ "thigh_n": {
+  "sheet": "s3-hips-thighs",
+  "box": [
+   356,
+   382,
+   728,
+   902
+  ],
+  "scale": 11.304,
+  "native": [
+   36,
+   49
+  ]
+ },
+ "thigh_f": {
+  "sheet": "s3-hips-thighs",
+  "box": [
+   930,
+   398,
+   1200,
+   888
+  ],
+  "scale": 9.074,
+  "native": [
+   33,
+   57
+  ]
+ },
+ "shin_n": {
+  "sheet": "s4-shins-boots",
+  "box": [
+   400,
+   66,
+   714,
+   412
+  ],
+  "scale": 14.417,
+  "native": [
+   24,
+   27
+  ]
+ },
+ "shin_f": {
+  "sheet": "s4-shins-boots",
+  "box": [
+   1012,
+   76,
+   1254,
+   412
+  ],
+  "scale": 12.923,
+  "native": [
+   21,
+   29
+  ]
+ },
+ "boot_n": {
+  "sheet": "s4-shins-boots",
+  "box": [
+   370,
+   528,
+   682,
+   862
+  ],
+  "scale": 11.133,
+  "native": [
+   31,
+   33
+  ]
+ },
+ "boot_f": {
+  "sheet": "s4-shins-boots",
+  "box": [
+   966,
+   542,
+   1242,
+   862
+  ],
+  "scale": 11.429,
+  "native": [
+   27,
+   31
+  ]
+ }
+}

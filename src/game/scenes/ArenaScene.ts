@@ -31,7 +31,7 @@ export class ArenaScene extends Phaser.Scene {
     this.game.events.once(Phaser.Core.Events.DESTROY, () => this.dispose());
     // QA-only escape hatch: dev server AND explicit ?qa=1; never a shipping cheat.
     if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('qa') === '1') {
-      (window as Window & { __KYNT_QA__?: { grantXp: () => void } }).__KYNT_QA__ = { grantXp: () => this.bridge.debugGrantXp() };
+      (window as Window & { __KYNT_QA__?: { grantXp: () => void; heroPose: () => unknown; setHeroScale: (n: number) => void; sim: () => unknown } }).__KYNT_QA__ = { grantXp: () => this.bridge.debugGrantXp(), heroPose: () => this.entityRenderer.debugPose(), setHeroScale: (n: number) => this.entityRenderer.setHeroScale(n), sim: () => this.simulation.state };
     }
   }
   private createArena() {
@@ -63,7 +63,7 @@ export class ArenaScene extends Phaser.Scene {
     this.fixed.tick(delta, dt => { this.lastInput = this.controller.read(); this.simulation.step(dt, this.lastInput); });
     const s = this.simulation.state;
     followPlayer(this.cameras.main, s.player.x, s.player.y);
-    this.entityRenderer.sync(s, this.lastInput);
+    this.entityRenderer.sync(s, this.lastInput, delta);
     this.fx.render(s, this.bridge.getSettings().reducedEffects);
     this.publishClock += delta;
     if ((s.phase === 'running' && this.publishClock >= 100) || this.bridge.snapshot().phase !== s.phase) { this.publishClock = 0; this.bridge.publish(); }

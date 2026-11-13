@@ -1,0 +1,25 @@
+{
+ "errors": [],
+ "w960": {
+  "samples": 706,
+  "movingPunchFrames": 207,
+  "groundErrs": 0,
+  "facingFlips": 11,
+  "sim": {
+   "hp": 100,
+   "kills": 4,
+   "phase": "running"
+  }
+ },
+ "w640": {
+  "samples": 706,
+  "movingPunchFrames": 200,
+  "groundErrs": 0,
+  "facingFlips": 12,
+  "sim": {
+   "hp": 100,
+   "kills": 4,
+   "phase": "running"
+  }
+ }
+}
