@@ -1,0 +1,63 @@
+{
+ "schema": "kyntraze.anim-manifest/0.1-pilot",
+ "character": "kai",
+ "form": "base",
+ "direction": "south",
+ "status": "PRODUCTION CANDIDATE - owner approval required",
+ "source_blend": "rig/kai-south.blend",
+ "frame_width": 114,
+ "frame_height": 167,
+ "origin_px": [
+  48.0,
+  155.0
+ ],
+ "origin_normalized": [
+  0.421053,
+  0.928144
+ ],
+ "origin_meaning": "ground point midway between the two soles of the approved stance (near sole is 13 px lower = closer to camera)",
+ "scale_note": "1 px = 1 native art px (approved 160 px Kai scale); game currently shows Kai ~79 px tall (setScale ~0.49)",
+ "root_motion": {
+  "baked": false,
+  "contract": "frames are in place; Phaser owns movement, collision, hitboxes and damage; events are frame indices only"
+ },
+ "animations": {
+  "Idle": {
+   "sheet": "sheets/kai_south_idle.png",
+   "frames": 16,
+   "fps": 10,
+   "loop": true,
+   "duration_s": 1.6,
+   "blender_action": "Idle",
+   "events": {}
+  },
+  "Run": {
+   "sheet": "sheets/kai_south_run.png",
+   "frames": 8,
+   "fps": 14,
+   "loop": true,
+   "duration_s": 0.5714,
+   "blender_action": "Run",
+   "events": {
+    "foot_contact_near": 0,
+    "foot_contact_far": 4
+   },
+   "speed_note": "in-place cycle, 3.5 steps/s at 14 fps; scale fps with speed (14*speed/250, clamp 10..18). Front-view stance feet cannot lock to the world at 250 px/s."
+  },
+  "BasicPunch": {
+   "sheet": "sheets/kai_south_basicpunch.png",
+   "frames": 14,
+   "fps": 16,
+   "loop": false,
+   "duration_s": 0.875,
+   "blender_action": "BasicPunch",
+   "events": {
+    "anticipation_start": 2,
+    "impact": 5,
+    "recover_start": 9,
+    "interruptible_from": 11
+   },
+   "hit_contract": "apply damage/hitstop in Phaser on 'impact' (0-based frame 5)"
+  }
+ }
+}

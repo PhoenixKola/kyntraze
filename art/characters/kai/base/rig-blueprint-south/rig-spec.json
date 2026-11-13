@@ -1,0 +1,2671 @@
+{
+ "schema": "kyntraze.rig-blueprint/1",
+ "character": "kai",
+ "form": "base",
+ "direction": "south",
+ "status": "TECHNICAL MANNEQUIN / FIT GUIDE - not final art, not approved art",
+ "generated_by": "scripts/build_kit.py from scripts/rig_core.py (single source of truth)",
+ "coordinate_system": {
+  "character_space": "native source pixels; origin = root on ground line midway between the feet; +x = screen right; +y = DOWN",
+  "part_image_space": "pixels of the part PNG; (0,0) = top-left CORNER of the top-left pixel; 7.5 = centre of pixel column 7",
+  "angles": "degrees, positive = counter-clockwise as seen on screen; rest/neutral = 0 for every bone; child angles are relative to parent",
+  "sides": "near = Kai's right side = screen-left (x<0); far = Kai's left side = screen-right (x>0). Near leg/arm draws over far.",
+  "posed_point": "p_posed = F_parent(pivot + R(angle) * (p_rest - pivot)), applied root->leaf; root adds (dx,dy) translation",
+  "sampling": "nearest / Closest at pixel centres; no smoothing"
+ },
+ "scale": {
+  "source_px_per_art_px": 1,
+  "visible_height_neutral_px": 160,
+  "visible_top_y": -160,
+  "ground_y": 0,
+  "approved_reference": "references/kai-160-native-approved-reference.png (87x160, crouched fighting stance, same 1:1 pixel scale)",
+  "game_render_note": "renderer shows Kai at ~79-80 px visible => 0.5x of this source scale (see qa/game-scale-*.png)",
+  "blender_units_per_px": 0.01
+ },
+ "technical_canvas": {
+  "size_px": [
+   160,
+   192
+  ],
+  "root_canvas_px": [
+   80,
+   184
+  ],
+  "note": "QA/proof canvas only; final export canvas is decided at animation-export time"
+ },
+ "neutral_pose": "Rigging neutral: front-facing SOUTH, upright, limbs hanging straight (every limb bone vertical so every template is pixel-exact in the assembly), feet a hip-width apart with soles on y=0. Less dynamic than the approved fighting pose by design.",
+ "bones": [
+  {
+   "name": "root",
+   "parent": null,
+   "pivot_char_px": [
+    0,
+    0
+   ],
+   "tail_char_px": [
+    0,
+    -10
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    0
+   ],
+   "length_px": 10.0,
+   "parts": []
+  },
+  {
+   "name": "pelvis",
+   "parent": "root",
+   "pivot_char_px": [
+    0,
+    -72
+   ],
+   "tail_char_px": [
+    0,
+    -82
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    -72
+   ],
+   "length_px": 10.0,
+   "parts": [
+    "pelvis"
+   ]
+  },
+  {
+   "name": "spine",
+   "parent": "pelvis",
+   "pivot_char_px": [
+    0,
+    -82
+   ],
+   "tail_char_px": [
+    0,
+    -116
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    -10
+   ],
+   "length_px": 34.0,
+   "parts": [
+    "torso"
+   ]
+  },
+  {
+   "name": "neck",
+   "parent": "spine",
+   "pivot_char_px": [
+    0,
+    -116
+   ],
+   "tail_char_px": [
+    0,
+    -120
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    -34
+   ],
+   "length_px": 4.0,
+   "parts": [
+    "neck"
+   ]
+  },
+  {
+   "name": "head",
+   "parent": "neck",
+   "pivot_char_px": [
+    0,
+    -120
+   ],
+   "tail_char_px": [
+    0,
+    -140
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    -4
+   ],
+   "length_px": 20.0,
+   "parts": [
+    "head"
+   ]
+  },
+  {
+   "name": "hair_back",
+   "parent": "head",
+   "pivot_char_px": [
+    0,
+    -140
+   ],
+   "tail_char_px": [
+    0,
+    -150
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    -20
+   ],
+   "length_px": 10.0,
+   "parts": [
+    "hair_back"
+   ]
+  },
+  {
+   "name": "hair_front",
+   "parent": "head",
+   "pivot_char_px": [
+    0,
+    -146
+   ],
+   "tail_char_px": [
+    0,
+    -156
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    -26
+   ],
+   "length_px": 10.0,
+   "parts": [
+    "hair_front"
+   ]
+  },
+  {
+   "name": "collar",
+   "parent": "spine",
+   "pivot_char_px": [
+    0,
+    -116
+   ],
+   "tail_char_px": [
+    0,
+    -126
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    -34
+   ],
+   "length_px": 10.0,
+   "parts": [
+    "collar"
+   ]
+  },
+  {
+   "name": "sash_knot",
+   "parent": "pelvis",
+   "pivot_char_px": [
+    6,
+    -83
+   ],
+   "tail_char_px": [
+    6,
+    -78
+   ],
+   "pivot_rel_parent_px": [
+    6,
+    -11
+   ],
+   "length_px": 5.0,
+   "parts": [
+    "sash_knot"
+   ]
+  },
+  {
+   "name": "sash_tail_a",
+   "parent": "sash_knot",
+   "pivot_char_px": [
+    4.5,
+    -82
+   ],
+   "tail_char_px": [
+    3,
+    -64
+   ],
+   "pivot_rel_parent_px": [
+    -1.5,
+    1
+   ],
+   "length_px": 18.062,
+   "parts": [
+    "sash_tail_a"
+   ]
+  },
+  {
+   "name": "sash_tail_b",
+   "parent": "sash_knot",
+   "pivot_char_px": [
+    7.5,
+    -82
+   ],
+   "tail_char_px": [
+    10,
+    -66
+   ],
+   "pivot_rel_parent_px": [
+    1.5,
+    1
+   ],
+   "length_px": 16.194,
+   "parts": [
+    "sash_tail_b"
+   ]
+  },
+  {
+   "name": "shoulder_trim_n",
+   "parent": "spine",
+   "pivot_char_px": [
+    -19,
+    -110
+   ],
+   "tail_char_px": [
+    -25,
+    -110
+   ],
+   "pivot_rel_parent_px": [
+    -19,
+    -28
+   ],
+   "length_px": 6.0,
+   "parts": [
+    "shoulder_trim_n"
+   ]
+  },
+  {
+   "name": "upper_arm_n",
+   "parent": "spine",
+   "pivot_char_px": [
+    -19,
+    -110
+   ],
+   "tail_char_px": [
+    -19,
+    -89
+   ],
+   "pivot_rel_parent_px": [
+    -19,
+    -28
+   ],
+   "length_px": 21.0,
+   "parts": [
+    "upper_arm_n"
+   ]
+  },
+  {
+   "name": "forearm_n",
+   "parent": "upper_arm_n",
+   "pivot_char_px": [
+    -19,
+    -89
+   ],
+   "tail_char_px": [
+    -19,
+    -72
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    21
+   ],
+   "length_px": 17.0,
+   "parts": [
+    "forearm_n"
+   ]
+  },
+  {
+   "name": "hand_n",
+   "parent": "forearm_n",
+   "pivot_char_px": [
+    -19,
+    -72
+   ],
+   "tail_char_px": [
+    -19,
+    -62
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    17
+   ],
+   "length_px": 10.0,
+   "parts": [
+    "hand_n_fist",
+    "hand_n_open"
+   ]
+  },
+  {
+   "name": "thigh_n",
+   "parent": "pelvis",
+   "pivot_char_px": [
+    -10,
+    -70
+   ],
+   "tail_char_px": [
+    -10,
+    -36
+   ],
+   "pivot_rel_parent_px": [
+    -10,
+    2
+   ],
+   "length_px": 34.0,
+   "parts": [
+    "thigh_n"
+   ]
+  },
+  {
+   "name": "shin_n",
+   "parent": "thigh_n",
+   "pivot_char_px": [
+    -10,
+    -36
+   ],
+   "tail_char_px": [
+    -10,
+    -12
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    34
+   ],
+   "length_px": 24.0,
+   "parts": [
+    "shin_n"
+   ]
+  },
+  {
+   "name": "boot_n",
+   "parent": "shin_n",
+   "pivot_char_px": [
+    -10,
+    -12
+   ],
+   "tail_char_px": [
+    -10,
+    -2
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    24
+   ],
+   "length_px": 10.0,
+   "parts": [
+    "boot_n"
+   ]
+  },
+  {
+   "name": "shoulder_trim_f",
+   "parent": "spine",
+   "pivot_char_px": [
+    19,
+    -110
+   ],
+   "tail_char_px": [
+    25,
+    -110
+   ],
+   "pivot_rel_parent_px": [
+    19,
+    -28
+   ],
+   "length_px": 6.0,
+   "parts": [
+    "shoulder_trim_f"
+   ]
+  },
+  {
+   "name": "upper_arm_f",
+   "parent": "spine",
+   "pivot_char_px": [
+    19,
+    -110
+   ],
+   "tail_char_px": [
+    19,
+    -89
+   ],
+   "pivot_rel_parent_px": [
+    19,
+    -28
+   ],
+   "length_px": 21.0,
+   "parts": [
+    "upper_arm_f"
+   ]
+  },
+  {
+   "name": "forearm_f",
+   "parent": "upper_arm_f",
+   "pivot_char_px": [
+    19,
+    -89
+   ],
+   "tail_char_px": [
+    19,
+    -72
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    21
+   ],
+   "length_px": 17.0,
+   "parts": [
+    "forearm_f"
+   ]
+  },
+  {
+   "name": "hand_f",
+   "parent": "forearm_f",
+   "pivot_char_px": [
+    19,
+    -72
+   ],
+   "tail_char_px": [
+    19,
+    -62
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    17
+   ],
+   "length_px": 10.0,
+   "parts": [
+    "hand_f_fist",
+    "hand_f_open"
+   ]
+  },
+  {
+   "name": "thigh_f",
+   "parent": "pelvis",
+   "pivot_char_px": [
+    10,
+    -70
+   ],
+   "tail_char_px": [
+    10,
+    -36
+   ],
+   "pivot_rel_parent_px": [
+    10,
+    2
+   ],
+   "length_px": 34.0,
+   "parts": [
+    "thigh_f"
+   ]
+  },
+  {
+   "name": "shin_f",
+   "parent": "thigh_f",
+   "pivot_char_px": [
+    10,
+    -36
+   ],
+   "tail_char_px": [
+    10,
+    -12
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    34
+   ],
+   "length_px": 24.0,
+   "parts": [
+    "shin_f"
+   ]
+  },
+  {
+   "name": "boot_f",
+   "parent": "shin_f",
+   "pivot_char_px": [
+    10,
+    -12
+   ],
+   "tail_char_px": [
+    10,
+    -2
+   ],
+   "pivot_rel_parent_px": [
+    0,
+    24
+   ],
+   "length_px": 10.0,
+   "parts": [
+    "boot_f"
+   ]
+  }
+ ],
+ "parts": [
+  {
+   "id": "hair_back",
+   "file": "templates/hair_back.png",
+   "bone": "hair_back",
+   "role": "Hair mass behind the head (swap slot)",
+   "slot": "hair",
+   "default_visible": true,
+   "draw_index": 0,
+   "size_px": [
+    38,
+    33
+   ],
+   "rest_origin_char_px": [
+    -19,
+    -156
+   ],
+   "pivot_px": [
+    19,
+    16
+   ],
+   "pivot_char_px": [
+    0,
+    -140
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [
+    "head",
+    "hair_front"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 904,
+    "hidden": 719,
+    "outline": 54,
+    "paint": 131
+   },
+   "template_colors": {
+    "paint": "#7850a0",
+    "outline": "#322243",
+    "hidden_a": "#462e5d",
+    "hidden_b": "#543870"
+   }
+  },
+  {
+   "id": "shin_f",
+   "file": "templates/shin_f.png",
+   "bone": "shin_f",
+   "role": "Lower trouser leg, bottom tucked into boot",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 1,
+   "size_px": [
+    18,
+    41
+   ],
+   "rest_origin_char_px": [
+    1,
+    -45
+   ],
+   "pivot_px": [
+    9,
+    9
+   ],
+   "pivot_char_px": [
+    10,
+    -36
+   ],
+   "anchors_px": {
+    "boot_f": [
+     9,
+     33
+    ]
+   },
+   "covered_at_joint_by": [
+    "thigh_f",
+    "boot_f"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 542,
+    "hidden": 474,
+    "outline": 14,
+    "paint": 54
+   },
+   "template_colors": {
+    "paint": "#b35d27",
+    "outline": "#4b2710",
+    "hidden_a": "#683617",
+    "hidden_b": "#7d411b"
+   }
+  },
+  {
+   "id": "boot_f",
+   "file": "templates/boot_f.png",
+   "bone": "boot_f",
+   "role": "Solid boot: shaft + foot + sole",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 2,
+   "size_px": [
+    20,
+    27
+   ],
+   "rest_origin_char_px": [
+    0,
+    -26
+   ],
+   "pivot_px": [
+    10,
+    14
+   ],
+   "pivot_char_px": [
+    10,
+    -12
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [],
+   "zone_pixel_counts": {
+    "opaque": 418,
+    "hidden": 0,
+    "outline": 78,
+    "paint": 340
+   },
+   "template_colors": {
+    "paint": "#75361f",
+    "outline": "#31170d",
+    "hidden_a": "#441f12",
+    "hidden_b": "#522616"
+   },
+   "ground_contacts_px": {
+    "inner": [
+     2,
+     26
+    ],
+    "outer": [
+     18,
+     26
+    ]
+   }
+  },
+  {
+   "id": "thigh_f",
+   "file": "templates/thigh_f.png",
+   "bone": "thigh_f",
+   "role": "Baggy upper trouser leg",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 3,
+   "size_px": [
+    25,
+    53
+   ],
+   "rest_origin_char_px": [
+    -2,
+    -80
+   ],
+   "pivot_px": [
+    12,
+    10
+   ],
+   "pivot_char_px": [
+    10,
+    -70
+   ],
+   "anchors_px": {
+    "shin_f": [
+     12,
+     44
+    ]
+   },
+   "covered_at_joint_by": [
+    "pelvis"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 939,
+    "hidden": 311,
+    "outline": 78,
+    "paint": 550
+   },
+   "template_colors": {
+    "paint": "#c37c3e",
+    "outline": "#52341a",
+    "hidden_a": "#714824",
+    "hidden_b": "#88572b"
+   }
+  },
+  {
+   "id": "shin_n",
+   "file": "templates/shin_n.png",
+   "bone": "shin_n",
+   "role": "Lower trouser leg, bottom tucked into boot",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 4,
+   "size_px": [
+    18,
+    41
+   ],
+   "rest_origin_char_px": [
+    -19,
+    -45
+   ],
+   "pivot_px": [
+    9,
+    9
+   ],
+   "pivot_char_px": [
+    -10,
+    -36
+   ],
+   "anchors_px": {
+    "boot_n": [
+     9,
+     33
+    ]
+   },
+   "covered_at_joint_by": [
+    "thigh_n",
+    "boot_n"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 542,
+    "hidden": 474,
+    "outline": 14,
+    "paint": 54
+   },
+   "template_colors": {
+    "paint": "#e67832",
+    "outline": "#613215",
+    "hidden_a": "#85461d",
+    "hidden_b": "#a15423"
+   }
+  },
+  {
+   "id": "boot_n",
+   "file": "templates/boot_n.png",
+   "bone": "boot_n",
+   "role": "Solid boot: shaft + foot + sole",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 5,
+   "size_px": [
+    20,
+    27
+   ],
+   "rest_origin_char_px": [
+    -20,
+    -26
+   ],
+   "pivot_px": [
+    10,
+    14
+   ],
+   "pivot_char_px": [
+    -10,
+    -12
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [],
+   "zone_pixel_counts": {
+    "opaque": 418,
+    "hidden": 0,
+    "outline": 78,
+    "paint": 340
+   },
+   "template_colors": {
+    "paint": "#964628",
+    "outline": "#3f1d11",
+    "hidden_a": "#572917",
+    "hidden_b": "#69311c"
+   },
+   "ground_contacts_px": {
+    "inner": [
+     18,
+     26
+    ],
+    "outer": [
+     2,
+     26
+    ]
+   }
+  },
+  {
+   "id": "thigh_n",
+   "file": "templates/thigh_n.png",
+   "bone": "thigh_n",
+   "role": "Baggy upper trouser leg",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 6,
+   "size_px": [
+    25,
+    53
+   ],
+   "rest_origin_char_px": [
+    -23,
+    -80
+   ],
+   "pivot_px": [
+    13,
+    10
+   ],
+   "pivot_char_px": [
+    -10,
+    -70
+   ],
+   "anchors_px": {
+    "shin_n": [
+     13,
+     44
+    ]
+   },
+   "covered_at_joint_by": [
+    "pelvis"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 939,
+    "hidden": 311,
+    "outline": 78,
+    "paint": 550
+   },
+   "template_colors": {
+    "paint": "#faa050",
+    "outline": "#694322",
+    "hidden_a": "#915d2e",
+    "hidden_b": "#af7038"
+   }
+  },
+  {
+   "id": "torso",
+   "file": "templates/torso.png",
+   "bone": "spine",
+   "role": "Jacket body + undershirt, NO sleeves, NO collar, NO shoulder pads",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 7,
+   "size_px": [
+    34,
+    47
+   ],
+   "rest_origin_char_px": [
+    -17,
+    -122
+   ],
+   "pivot_px": [
+    17,
+    40
+   ],
+   "pivot_char_px": [
+    0,
+    -82
+   ],
+   "anchors_px": {
+    "neck": [
+     17,
+     6
+    ],
+    "collar": [
+     17,
+     6
+    ],
+    "shoulder_trim_n": [
+     -2,
+     12
+    ],
+    "upper_arm_n": [
+     -2,
+     12
+    ],
+    "shoulder_trim_f": [
+     36,
+     12
+    ],
+    "upper_arm_f": [
+     36,
+     12
+    ]
+   },
+   "covered_at_joint_by": [
+    "pelvis",
+    "neck",
+    "collar",
+    "shoulder_trim_n",
+    "shoulder_trim_f"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 1312,
+    "hidden": 653,
+    "outline": 37,
+    "paint": 622
+   },
+   "template_colors": {
+    "paint": "#3c5abe",
+    "outline": "#192650",
+    "hidden_a": "#23346e",
+    "hidden_b": "#2a3f85"
+   }
+  },
+  {
+   "id": "pelvis",
+   "file": "templates/pelvis.png",
+   "bone": "pelvis",
+   "role": "Sash band + trouser seat; hides both hip balls and the torso waist cap",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 8,
+   "size_px": [
+    42,
+    30
+   ],
+   "rest_origin_char_px": [
+    -21,
+    -89
+   ],
+   "pivot_px": [
+    21,
+    17
+   ],
+   "pivot_char_px": [
+    0,
+    -72
+   ],
+   "anchors_px": {
+    "spine": [
+     21,
+     7
+    ],
+    "sash_knot": [
+     27,
+     6
+    ],
+    "thigh_n": [
+     11,
+     19
+    ],
+    "thigh_f": [
+     31,
+     19
+    ]
+   },
+   "covered_at_joint_by": [
+    "sash_knot"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 992,
+    "hidden": 84,
+    "outline": 116,
+    "paint": 792
+   },
+   "template_colors": {
+    "paint": "#289696",
+    "outline": "#113f3f",
+    "hidden_a": "#175757",
+    "hidden_b": "#1c6969"
+   }
+  },
+  {
+   "id": "sash_tail_b",
+   "file": "templates/sash_tail_b.png",
+   "bone": "sash_tail_b",
+   "role": "Short sash tail",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 9,
+   "size_px": [
+    9,
+    23
+   ],
+   "rest_origin_char_px": [
+    4,
+    -86
+   ],
+   "pivot_px": [
+    3.5,
+    4
+   ],
+   "pivot_char_px": [
+    7.5,
+    -82
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [
+    "sash_knot"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 100,
+    "hidden": 26,
+    "outline": 32,
+    "paint": 42
+   },
+   "template_colors": {
+    "paint": "#f0c828",
+    "outline": "#655411",
+    "hidden_a": "#8b7417",
+    "hidden_b": "#a88c1c"
+   }
+  },
+  {
+   "id": "sash_tail_a",
+   "file": "templates/sash_tail_a.png",
+   "bone": "sash_tail_a",
+   "role": "Long sash tail",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 10,
+   "size_px": [
+    8,
+    26
+   ],
+   "rest_origin_char_px": [
+    0,
+    -86
+   ],
+   "pivot_px": [
+    4.5,
+    4
+   ],
+   "pivot_char_px": [
+    4.5,
+    -82
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [
+    "sash_knot"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 114,
+    "hidden": 26,
+    "outline": 38,
+    "paint": 50
+   },
+   "template_colors": {
+    "paint": "#fab414",
+    "outline": "#694c08",
+    "hidden_a": "#91680c",
+    "hidden_b": "#af7e0e"
+   }
+  },
+  {
+   "id": "sash_knot",
+   "file": "templates/sash_knot.png",
+   "bone": "sash_knot",
+   "role": "Sash knot (covers tail tops)",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 11,
+   "size_px": [
+    14,
+    10
+   ],
+   "rest_origin_char_px": [
+    -1,
+    -88
+   ],
+   "pivot_px": [
+    7,
+    5
+   ],
+   "pivot_char_px": [
+    6,
+    -83
+   ],
+   "anchors_px": {
+    "sash_tail_a": [
+     5.5,
+     6
+    ],
+    "sash_tail_b": [
+     8.5,
+     6
+    ]
+   },
+   "covered_at_joint_by": [],
+   "zone_pixel_counts": {
+    "opaque": 84,
+    "hidden": 0,
+    "outline": 28,
+    "paint": 56
+   },
+   "template_colors": {
+    "paint": "#ffdc5a",
+    "outline": "#6b5c26",
+    "hidden_a": "#948034",
+    "hidden_b": "#b29a3f"
+   }
+  },
+  {
+   "id": "neck",
+   "file": "templates/neck.png",
+   "bone": "neck",
+   "role": "Neck stub only",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 12,
+   "size_px": [
+    10,
+    17
+   ],
+   "rest_origin_char_px": [
+    -5,
+    -126
+   ],
+   "pivot_px": [
+    5,
+    10
+   ],
+   "pivot_char_px": [
+    0,
+    -116
+   ],
+   "anchors_px": {
+    "head": [
+     5,
+     6
+    ]
+   },
+   "covered_at_joint_by": [
+    "collar",
+    "head"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 120,
+    "hidden": 48,
+    "outline": 24,
+    "paint": 48
+   },
+   "template_colors": {
+    "paint": "#c88c64",
+    "outline": "#543b2a",
+    "hidden_a": "#74513a",
+    "hidden_b": "#8c6246"
+   }
+  },
+  {
+   "id": "collar",
+   "file": "templates/collar.png",
+   "bone": "collar",
+   "role": "High open collar flaps (the ONLY collar)",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 13,
+   "size_px": [
+    26,
+    20
+   ],
+   "rest_origin_char_px": [
+    -13,
+    -129
+   ],
+   "pivot_px": [
+    13,
+    13
+   ],
+   "pivot_char_px": [
+    0,
+    -116
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [
+    "head"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 173,
+    "hidden": 52,
+    "outline": 47,
+    "paint": 74
+   },
+   "template_colors": {
+    "paint": "#e6e678",
+    "outline": "#616132",
+    "hidden_a": "#858546",
+    "hidden_b": "#a1a154"
+   }
+  },
+  {
+   "id": "head",
+   "file": "templates/head.png",
+   "bone": "head",
+   "role": "Face, ears, jaw; no hair mass, no collar",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 14,
+   "size_px": [
+    30,
+    34
+   ],
+   "rest_origin_char_px": [
+    -15,
+    -152
+   ],
+   "pivot_px": [
+    15,
+    32
+   ],
+   "pivot_char_px": [
+    0,
+    -120
+   ],
+   "anchors_px": {
+    "hair_back": [
+     15,
+     12
+    ],
+    "hair_front": [
+     15,
+     6
+    ]
+   },
+   "covered_at_joint_by": [
+    "hair_front"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 627,
+    "hidden": 218,
+    "outline": 54,
+    "paint": 355
+   },
+   "template_colors": {
+    "paint": "#e6aa82",
+    "outline": "#614737",
+    "hidden_a": "#85634b",
+    "hidden_b": "#a1775b"
+   }
+  },
+  {
+   "id": "hair_front",
+   "file": "templates/hair_front.png",
+   "bone": "hair_front",
+   "role": "Front spikes + bangs (swap slot)",
+   "slot": "hair",
+   "default_visible": true,
+   "draw_index": 15,
+   "size_px": [
+    48,
+    25
+   ],
+   "rest_origin_char_px": [
+    -24,
+    -161
+   ],
+   "pivot_px": [
+    24,
+    15
+   ],
+   "pivot_char_px": [
+    0,
+    -146
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [],
+   "zone_pixel_counts": {
+    "opaque": 549,
+    "hidden": 0,
+    "outline": 105,
+    "paint": 444
+   },
+   "template_colors": {
+    "paint": "#aa6edc",
+    "outline": "#472e5c",
+    "hidden_a": "#634080",
+    "hidden_b": "#774d9a"
+   }
+  },
+  {
+   "id": "upper_arm_f",
+   "file": "templates/upper_arm_f.png",
+   "bone": "upper_arm_f",
+   "role": "Jacket sleeve shoulder->elbow",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 16,
+   "size_px": [
+    16,
+    36
+   ],
+   "rest_origin_char_px": [
+    11,
+    -118
+   ],
+   "pivot_px": [
+    8,
+    8
+   ],
+   "pivot_char_px": [
+    19,
+    -110
+   ],
+   "anchors_px": {
+    "forearm_f": [
+     8,
+     29
+    ]
+   },
+   "covered_at_joint_by": [
+    "shoulder_trim_f",
+    "forearm_f"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 434,
+    "hidden": 316,
+    "outline": 26,
+    "paint": 92
+   },
+   "template_colors": {
+    "paint": "#2e8c3e",
+    "outline": "#133b1a",
+    "hidden_a": "#1b5124",
+    "hidden_b": "#20622b"
+   }
+  },
+  {
+   "id": "shoulder_trim_f",
+   "file": "templates/shoulder_trim_f.png",
+   "bone": "shoulder_trim_f",
+   "role": "Shoulder pad / epaulet (covers shoulder socket)",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 17,
+   "size_px": [
+    18,
+    18
+   ],
+   "rest_origin_char_px": [
+    10,
+    -119
+   ],
+   "pivot_px": [
+    9,
+    9
+   ],
+   "pivot_char_px": [
+    19,
+    -110
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [],
+   "zone_pixel_counts": {
+    "opaque": 208,
+    "hidden": 0,
+    "outline": 44,
+    "paint": 164
+   },
+   "template_colors": {
+    "paint": "#c3c3c3",
+    "outline": "#525252",
+    "hidden_a": "#717171",
+    "hidden_b": "#888888"
+   }
+  },
+  {
+   "id": "forearm_f",
+   "file": "templates/forearm_f.png",
+   "bone": "forearm_f",
+   "role": "Sleeve end + cuff trim + skin + wraps",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 18,
+   "size_px": [
+    16,
+    30
+   ],
+   "rest_origin_char_px": [
+    11,
+    -97
+   ],
+   "pivot_px": [
+    8,
+    8
+   ],
+   "pivot_char_px": [
+    19,
+    -89
+   ],
+   "anchors_px": {
+    "hand_f": [
+     8,
+     25
+    ]
+   },
+   "covered_at_joint_by": [
+    "hand_f_fist",
+    "hand_f_open"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 304,
+    "hidden": 70,
+    "outline": 48,
+    "paint": 186
+   },
+   "template_colors": {
+    "paint": "#55ab5d",
+    "outline": "#244827",
+    "hidden_a": "#316336",
+    "hidden_b": "#3b7841"
+   }
+  },
+  {
+   "id": "hand_f_fist",
+   "file": "templates/hand_f_fist.png",
+   "bone": "hand_f",
+   "role": "Closed wrapped fist",
+   "slot": "hand",
+   "default_visible": true,
+   "draw_index": 19,
+   "size_px": [
+    14,
+    18
+   ],
+   "rest_origin_char_px": [
+    12,
+    -78
+   ],
+   "pivot_px": [
+    7,
+    6
+   ],
+   "pivot_char_px": [
+    19,
+    -72
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [],
+   "zone_pixel_counts": {
+    "opaque": 154,
+    "hidden": 0,
+    "outline": 40,
+    "paint": 114
+   },
+   "template_colors": {
+    "paint": "#bb5584",
+    "outline": "#4f2437",
+    "hidden_a": "#6c314d",
+    "hidden_b": "#833b5c"
+   }
+  },
+  {
+   "id": "hand_f_open",
+   "file": "templates/hand_f_open.png",
+   "bone": "hand_f",
+   "role": "Open hand (fingers down, thumb toward body)",
+   "slot": "hand",
+   "default_visible": false,
+   "draw_index": 20,
+   "size_px": [
+    14,
+    20
+   ],
+   "rest_origin_char_px": [
+    11,
+    -78
+   ],
+   "pivot_px": [
+    8,
+    6
+   ],
+   "pivot_char_px": [
+    19,
+    -72
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [],
+   "zone_pixel_counts": {
+    "opaque": 184,
+    "hidden": 0,
+    "outline": 48,
+    "paint": 136
+   },
+   "template_colors": {
+    "paint": "#9c46b3",
+    "outline": "#421d4b",
+    "hidden_a": "#5a2968",
+    "hidden_b": "#6d317d"
+   }
+  },
+  {
+   "id": "upper_arm_n",
+   "file": "templates/upper_arm_n.png",
+   "bone": "upper_arm_n",
+   "role": "Jacket sleeve shoulder->elbow",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 21,
+   "size_px": [
+    16,
+    36
+   ],
+   "rest_origin_char_px": [
+    -27,
+    -118
+   ],
+   "pivot_px": [
+    8,
+    8
+   ],
+   "pivot_char_px": [
+    -19,
+    -110
+   ],
+   "anchors_px": {
+    "forearm_n": [
+     8,
+     29
+    ]
+   },
+   "covered_at_joint_by": [
+    "shoulder_trim_n",
+    "forearm_n"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 434,
+    "hidden": 316,
+    "outline": 26,
+    "paint": 92
+   },
+   "template_colors": {
+    "paint": "#3cb450",
+    "outline": "#194c22",
+    "hidden_a": "#23682e",
+    "hidden_b": "#2a7e38"
+   }
+  },
+  {
+   "id": "shoulder_trim_n",
+   "file": "templates/shoulder_trim_n.png",
+   "bone": "shoulder_trim_n",
+   "role": "Shoulder pad / epaulet (covers shoulder socket)",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 22,
+   "size_px": [
+    18,
+    18
+   ],
+   "rest_origin_char_px": [
+    -28,
+    -119
+   ],
+   "pivot_px": [
+    9,
+    9
+   ],
+   "pivot_char_px": [
+    -19,
+    -110
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [],
+   "zone_pixel_counts": {
+    "opaque": 208,
+    "hidden": 0,
+    "outline": 44,
+    "paint": 164
+   },
+   "template_colors": {
+    "paint": "#fafafa",
+    "outline": "#696969",
+    "hidden_a": "#919191",
+    "hidden_b": "#afafaf"
+   }
+  },
+  {
+   "id": "forearm_n",
+   "file": "templates/forearm_n.png",
+   "bone": "forearm_n",
+   "role": "Sleeve end + cuff trim + skin + wraps",
+   "slot": null,
+   "default_visible": true,
+   "draw_index": 23,
+   "size_px": [
+    16,
+    30
+   ],
+   "rest_origin_char_px": [
+    -27,
+    -97
+   ],
+   "pivot_px": [
+    8,
+    8
+   ],
+   "pivot_char_px": [
+    -19,
+    -89
+   ],
+   "anchors_px": {
+    "hand_n": [
+     8,
+     25
+    ]
+   },
+   "covered_at_joint_by": [
+    "hand_n_fist",
+    "hand_n_open"
+   ],
+   "zone_pixel_counts": {
+    "opaque": 304,
+    "hidden": 70,
+    "outline": 48,
+    "paint": 186
+   },
+   "template_colors": {
+    "paint": "#6edc78",
+    "outline": "#2e5c32",
+    "hidden_a": "#408046",
+    "hidden_b": "#4d9a54"
+   }
+  },
+  {
+   "id": "hand_n_fist",
+   "file": "templates/hand_n_fist.png",
+   "bone": "hand_n",
+   "role": "Closed wrapped fist",
+   "slot": "hand",
+   "default_visible": true,
+   "draw_index": 24,
+   "size_px": [
+    14,
+    18
+   ],
+   "rest_origin_char_px": [
+    -26,
+    -78
+   ],
+   "pivot_px": [
+    7,
+    6
+   ],
+   "pivot_char_px": [
+    -19,
+    -72
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [],
+   "zone_pixel_counts": {
+    "opaque": 154,
+    "hidden": 0,
+    "outline": 40,
+    "paint": 114
+   },
+   "template_colors": {
+    "paint": "#f06eaa",
+    "outline": "#652e47",
+    "hidden_a": "#8b4063",
+    "hidden_b": "#a84d77"
+   }
+  },
+  {
+   "id": "hand_n_open",
+   "file": "templates/hand_n_open.png",
+   "bone": "hand_n",
+   "role": "Open hand (fingers down, thumb toward body)",
+   "slot": "hand",
+   "default_visible": false,
+   "draw_index": 25,
+   "size_px": [
+    14,
+    20
+   ],
+   "rest_origin_char_px": [
+    -25,
+    -78
+   ],
+   "pivot_px": [
+    6,
+    6
+   ],
+   "pivot_char_px": [
+    -19,
+    -72
+   ],
+   "anchors_px": {},
+   "covered_at_joint_by": [],
+   "zone_pixel_counts": {
+    "opaque": 184,
+    "hidden": 0,
+    "outline": 48,
+    "paint": 136
+   },
+   "template_colors": {
+    "paint": "#c85ae6",
+    "outline": "#542661",
+    "hidden_a": "#743485",
+    "hidden_b": "#8c3fa1"
+   }
+  }
+ ],
+ "draw_order_back_to_front": [
+  "hair_back",
+  "shin_f",
+  "boot_f",
+  "thigh_f",
+  "shin_n",
+  "boot_n",
+  "thigh_n",
+  "torso",
+  "pelvis",
+  "sash_tail_b",
+  "sash_tail_a",
+  "sash_knot",
+  "neck",
+  "collar",
+  "head",
+  "hair_front",
+  "upper_arm_f",
+  "shoulder_trim_f",
+  "forearm_f",
+  "hand_f_fist",
+  "hand_f_open",
+  "upper_arm_n",
+  "shoulder_trim_n",
+  "forearm_n",
+  "hand_n_fist",
+  "hand_n_open"
+ ],
+ "joints": [
+  {
+   "name": "waist",
+   "child_bone": "spine",
+   "top_part": "pelvis",
+   "under_part": "torso",
+   "cap_radius_px": null,
+   "cover_radius_px": null,
+   "qa_limits_deg": [
+    -15,
+    15
+   ],
+   "seam": "under sash band",
+   "pivot_char_px": [
+    0,
+    -82
+   ]
+  },
+  {
+   "name": "neck_base",
+   "child_bone": "neck",
+   "top_part": "collar",
+   "under_part": "neck",
+   "cap_radius_px": null,
+   "cover_radius_px": null,
+   "qa_limits_deg": [
+    -10,
+    10
+   ],
+   "seam": "inside collar",
+   "pivot_char_px": [
+    0,
+    -116
+   ]
+  },
+  {
+   "name": "head_tilt",
+   "child_bone": "head",
+   "top_part": "head",
+   "under_part": "neck",
+   "cap_radius_px": null,
+   "cover_radius_px": null,
+   "qa_limits_deg": [
+    -20,
+    20
+   ],
+   "seam": "under jaw; neck skin may show",
+   "pivot_char_px": [
+    0,
+    -120
+   ]
+  },
+  {
+   "name": "hip_n",
+   "child_bone": "thigh_n",
+   "top_part": "pelvis",
+   "under_part": "thigh_n",
+   "cap_radius_px": 9.5,
+   "cover_radius_px": 10.5,
+   "qa_limits_deg": [
+    -90,
+    90
+   ],
+   "seam": "trouser seat/hip bulge",
+   "pivot_char_px": [
+    -10,
+    -70
+   ]
+  },
+  {
+   "name": "knee_n",
+   "child_bone": "shin_n",
+   "top_part": "thigh_n",
+   "under_part": "shin_n",
+   "cap_radius_px": 8.0,
+   "cover_radius_px": 8.5,
+   "qa_limits_deg": [
+    -120,
+    120
+   ],
+   "seam": "trouser fold at knee",
+   "pivot_char_px": [
+    -10,
+    -36
+   ]
+  },
+  {
+   "name": "ankle_n",
+   "child_bone": "boot_n",
+   "top_part": "boot_n",
+   "under_part": "shin_n",
+   "cap_radius_px": 7.0,
+   "cover_radius_px": 7.5,
+   "qa_limits_deg": [
+    -45,
+    45
+   ],
+   "seam": "boot shaft top",
+   "pivot_char_px": [
+    -10,
+    -12
+   ]
+  },
+  {
+   "name": "shoulder_n",
+   "child_bone": "upper_arm_n",
+   "top_part": "shoulder_trim_n",
+   "under_part": "upper_arm_n",
+   "cap_radius_px": 7.0,
+   "cover_radius_px": 8.0,
+   "qa_limits_deg": [
+    -180,
+    180
+   ],
+   "seam": "under shoulder pad",
+   "pivot_char_px": [
+    -19,
+    -110
+   ]
+  },
+  {
+   "name": "elbow_n",
+   "child_bone": "forearm_n",
+   "top_part": "forearm_n",
+   "under_part": "upper_arm_n",
+   "cap_radius_px": 6.5,
+   "cover_radius_px": 7.0,
+   "qa_limits_deg": [
+    -150,
+    150
+   ],
+   "seam": "sleeve fold at elbow",
+   "pivot_char_px": [
+    -19,
+    -89
+   ]
+  },
+  {
+   "name": "wrist_n",
+   "child_bone": "hand_n",
+   "top_part": "hand_n_fist",
+   "under_part": "forearm_n",
+   "cap_radius_px": 4.5,
+   "cover_radius_px": 5.0,
+   "qa_limits_deg": [
+    -60,
+    60
+   ],
+   "seam": "wrap edge at wrist",
+   "pivot_char_px": [
+    -19,
+    -72
+   ]
+  },
+  {
+   "name": "hip_f",
+   "child_bone": "thigh_f",
+   "top_part": "pelvis",
+   "under_part": "thigh_f",
+   "cap_radius_px": 9.5,
+   "cover_radius_px": 10.5,
+   "qa_limits_deg": [
+    -90,
+    90
+   ],
+   "seam": "trouser seat/hip bulge",
+   "pivot_char_px": [
+    10,
+    -70
+   ]
+  },
+  {
+   "name": "knee_f",
+   "child_bone": "shin_f",
+   "top_part": "thigh_f",
+   "under_part": "shin_f",
+   "cap_radius_px": 8.0,
+   "cover_radius_px": 8.5,
+   "qa_limits_deg": [
+    -120,
+    120
+   ],
+   "seam": "trouser fold at knee",
+   "pivot_char_px": [
+    10,
+    -36
+   ]
+  },
+  {
+   "name": "ankle_f",
+   "child_bone": "boot_f",
+   "top_part": "boot_f",
+   "under_part": "shin_f",
+   "cap_radius_px": 7.0,
+   "cover_radius_px": 7.5,
+   "qa_limits_deg": [
+    -45,
+    45
+   ],
+   "seam": "boot shaft top",
+   "pivot_char_px": [
+    10,
+    -12
+   ]
+  },
+  {
+   "name": "shoulder_f",
+   "child_bone": "upper_arm_f",
+   "top_part": "shoulder_trim_f",
+   "under_part": "upper_arm_f",
+   "cap_radius_px": 7.0,
+   "cover_radius_px": 8.0,
+   "qa_limits_deg": [
+    -180,
+    180
+   ],
+   "seam": "under shoulder pad",
+   "pivot_char_px": [
+    19,
+    -110
+   ]
+  },
+  {
+   "name": "elbow_f",
+   "child_bone": "forearm_f",
+   "top_part": "forearm_f",
+   "under_part": "upper_arm_f",
+   "cap_radius_px": 6.5,
+   "cover_radius_px": 7.0,
+   "qa_limits_deg": [
+    -150,
+    150
+   ],
+   "seam": "sleeve fold at elbow",
+   "pivot_char_px": [
+    19,
+    -89
+   ]
+  },
+  {
+   "name": "wrist_f",
+   "child_bone": "hand_f",
+   "top_part": "hand_f_fist",
+   "under_part": "forearm_f",
+   "cap_radius_px": 4.5,
+   "cover_radius_px": 5.0,
+   "qa_limits_deg": [
+    -60,
+    60
+   ],
+   "seam": "wrap edge at wrist",
+   "pivot_char_px": [
+    19,
+    -72
+   ]
+  },
+  {
+   "name": "sash_tail_a",
+   "child_bone": "sash_tail_a",
+   "top_part": "sash_knot",
+   "under_part": "sash_tail_a",
+   "cap_radius_px": 2.5,
+   "cover_radius_px": 3.0,
+   "qa_limits_deg": [
+    -30,
+    30
+   ],
+   "seam": "inside knot",
+   "pivot_char_px": [
+    4.5,
+    -82
+   ]
+  },
+  {
+   "name": "sash_tail_b",
+   "child_bone": "sash_tail_b",
+   "top_part": "sash_knot",
+   "under_part": "sash_tail_b",
+   "cap_radius_px": 2.5,
+   "cover_radius_px": 3.0,
+   "qa_limits_deg": [
+    -30,
+    30
+   ],
+   "seam": "inside knot",
+   "pivot_char_px": [
+    7.5,
+    -82
+   ]
+  }
+ ],
+ "foot_contacts_char_px": {
+  "boot_n": [
+   [
+    -2,
+    0
+   ],
+   [
+    -18,
+    0
+   ]
+  ],
+  "boot_f": [
+   [
+    2,
+    0
+   ],
+   [
+    18,
+    0
+   ]
+  ]
+ },
+ "layering_rules": [
+  "Static draw order for every SOUTH pose (no per-pose swaps were needed in QA).",
+  "At hip, knee, waist, neck base, shoulder: the PARENT/attachment piece is on top; the child's round cap hides under it.",
+  "At elbow and wrist: the CHILD is on top (forearm over upper arm, hand over forearm) because forearms/hands must draw in front of the torso.",
+  "Boot draws over the shin (trouser tucked into boot shaft).",
+  "Upper arms draw in front of torso/collar/head/hair but UNDER their shoulder trim.",
+  "All far-side limb parts draw before (behind) the matching near-side parts."
+ ],
+ "costume_ownership": {
+  "high collar": "collar ONLY (not head, not torso)",
+  "neck skin": "neck ONLY",
+  "face/ears/jaw": "head",
+  "hair spikes/bangs": "hair_front",
+  "hair mass behind head": "hair_back",
+  "jacket body, hem trim, lapels, undershirt": "torso",
+  "gold/white shoulder pad": "shoulder_trim_*",
+  "sleeve shoulder->elbow": "upper_arm_*",
+  "sleeve end + white cuff + bare forearm + wraps": "forearm_*",
+  "fist / open hand incl. knuckle wraps": "hand_*_fist / hand_*_open",
+  "sash band + trouser seat/waist": "pelvis",
+  "sash knot": "sash_knot",
+  "sash tails": "sash_tail_a / sash_tail_b",
+  "baggy trouser thigh": "thigh_*",
+  "trouser below knee": "shin_*",
+  "boot shaft+foot+sole": "boot_*"
+ },
+ "template_zones": {
+  "paint": "opaque flat colour: visible in neutral - paint final art here",
+  "outline": "opaque dark 1px ring: visible silhouette edge - final dark outline goes here",
+  "hidden (checker)": "opaque checker: hidden under the covering part in neutral, REVEALED when the joint rotates - must be fully painted with plausible continuation, no outline across it",
+  "transparent": "alpha 0 - must stay alpha 0"
+ },
+ "art_constraints": {
+  "alpha": "binary (0 or 255) only",
+  "max_unique_colors_per_part": 24,
+  "outline": "1px dark outline on visible silhouette edges only",
+  "palette_reference_roles": {
+   "skin": "#d99769",
+   "skin_light": "#e39e71",
+   "hair": "#444b54",
+   "jacket": "#342c3a",
+   "jacket_light": "#3c3343",
+   "gold_trim": "#d89b39",
+   "undershirt": "#322c38",
+   "sash_shadow": "#7a4c22",
+   "sash": "#b77423",
+   "trouser": "#716374",
+   "boot": "#4c4152",
+   "boot_sole": "#6c5f63",
+   "wrap_white": "#fcecdb"
+  },
+  "palette_reference_clusters": [
+   {
+    "hex": "#6d6473",
+    "pixels": 870
+   },
+   {
+    "hex": "#e1a059",
+    "pixels": 554
+   },
+   {
+    "hex": "#423b4a",
+    "pixels": 505
+   },
+   {
+    "hex": "#1c191c",
+    "pixels": 491
+   },
+   {
+    "hex": "#464752",
+    "pixels": 491
+   },
+   {
+    "hex": "#1b181b",
+    "pixels": 472
+   },
+   {
+    "hex": "#eedac5",
+    "pixels": 456
+   },
+   {
+    "hex": "#312b36",
+    "pixels": 419
+   },
+   {
+    "hex": "#2a242d",
+    "pixels": 389
+   },
+   {
+    "hex": "#1e1b1e",
+    "pixels": 386
+   },
+   {
+    "hex": "#544957",
+    "pixels": 349
+   },
+   {
+    "hex": "#413845",
+    "pixels": 318
+   },
+   {
+    "hex": "#362f3c",
+    "pixels": 295
+   },
+   {
+    "hex": "#2e2733",
+    "pixels": 286
+   },
+   {
+    "hex": "#231e23",
+    "pixels": 266
+   },
+   {
+    "hex": "#b87950",
+    "pixels": 266
+   },
+   {
+    "hex": "#3d3543",
+    "pixels": 252
+   },
+   {
+    "hex": "#755c5e",
+    "pixels": 189
+   },
+   {
+    "hex": "#181417",
+    "pixels": 132
+   },
+   {
+    "hex": "#776874",
+    "pixels": 107
+   }
+  ],
+  "fit_tolerance": "see CODEX-ART-BRIEF.md section 'Acceptance per part' and scripts/check_part.py"
+ },
+ "variant_slots": {
+  "hand": [
+   "fist (default)",
+   "open"
+  ],
+  "hair": [
+   "hair_front + hair_back per form; same pivots"
+  ],
+  "future_not_built": [
+   "foreshortened thigh/shin/forearm variants for toward-camera stepping/jabs",
+   "blink/mouth"
+  ]
+ },
+ "geometry_checks": {
+  "joint_cap_cover": [
+   {
+    "joint": "hip_n",
+    "cap_disk_px": 276,
+    "cap_missing": 0,
+    "cover_disk_px": 332,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "knee_n",
+    "cap_disk_px": 208,
+    "cap_missing": 0,
+    "cover_disk_px": 216,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "ankle_n",
+    "cap_disk_px": 156,
+    "cap_missing": 0,
+    "cover_disk_px": 172,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "shoulder_n",
+    "cap_disk_px": 156,
+    "cap_missing": 0,
+    "cover_disk_px": 208,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "elbow_n",
+    "cap_disk_px": 124,
+    "cap_missing": 0,
+    "cover_disk_px": 156,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "wrist_n",
+    "cap_disk_px": 60,
+    "cap_missing": 0,
+    "cover_disk_px": 80,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "hip_f",
+    "cap_disk_px": 276,
+    "cap_missing": 0,
+    "cover_disk_px": 332,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "knee_f",
+    "cap_disk_px": 208,
+    "cap_missing": 0,
+    "cover_disk_px": 216,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "ankle_f",
+    "cap_disk_px": 156,
+    "cap_missing": 0,
+    "cover_disk_px": 172,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "shoulder_f",
+    "cap_disk_px": 156,
+    "cap_missing": 0,
+    "cover_disk_px": 208,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "elbow_f",
+    "cap_disk_px": 124,
+    "cap_missing": 0,
+    "cover_disk_px": 156,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "wrist_f",
+    "cap_disk_px": 60,
+    "cap_missing": 0,
+    "cover_disk_px": 80,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "sash_tail_a",
+    "cap_disk_px": 22,
+    "cap_missing": 0,
+    "cover_disk_px": 26,
+    "cover_missing": 0,
+    "pass_": true
+   },
+   {
+    "joint": "sash_tail_b",
+    "cap_disk_px": 22,
+    "cap_missing": 0,
+    "cover_disk_px": 26,
+    "cover_missing": 0,
+    "pass_": true
+   }
+  ],
+  "costume_ownership_rules": {
+   "torso_has_no_sleeve_pixels(|x|>17)": true,
+   "head_has_no_pixels_below_chin(y>-118)": true,
+   "head_has_no_collar_flap_pixels(|x|>8.5 & y>-126)": true,
+   "neck_stays_inside_collar_band(y<=-110)": true,
+   "torso_has_no_collar_flap_above_-121": true,
+   "upper_arm_stays_outside_torso_core(|x|>=12)": true,
+   "boots_separate_from_shins(boot top below knee)": true
+  }
+ },
+ "qa_poses": [
+  {
+   "name": "neutral",
+   "group": "neutral",
+   "angles": {},
+   "root": [
+    0,
+    0.0
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n",
+    "boot_f"
+   ],
+   "note": ""
+  },
+  {
+   "name": "arms_T",
+   "group": "arms",
+   "angles": {
+    "upper_arm_n": -90,
+    "upper_arm_f": 90
+   },
+   "root": [
+    0,
+    0.0
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n",
+    "boot_f"
+   ],
+   "note": "both shoulders 90 deg out"
+  },
+  {
+   "name": "arms_raised",
+   "group": "arms",
+   "angles": {
+    "upper_arm_n": -165,
+    "upper_arm_f": 165,
+    "forearm_n": -10,
+    "forearm_f": 10
+   },
+   "root": [
+    0,
+    0.0
+   ],
+   "hands": {
+    "n": "open",
+    "f": "open"
+   },
+   "planted": [
+    "boot_n",
+    "boot_f"
+   ],
+   "note": "shoulders 165, open hands"
+  },
+  {
+   "name": "arms_guard",
+   "group": "arms",
+   "angles": {
+    "upper_arm_n": -25,
+    "upper_arm_f": 25,
+    "forearm_n": 145,
+    "forearm_f": -145,
+    "hand_n": 20,
+    "hand_f": -20
+   },
+   "root": [
+    0,
+    0.0
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n",
+    "boot_f"
+   ],
+   "note": "elbows 145 flex, wrists -20"
+  },
+  {
+   "name": "punch_out_near",
+   "group": "arms",
+   "angles": {
+    "upper_arm_n": -95,
+    "forearm_n": 0,
+    "hand_n": 0,
+    "upper_arm_f": 20,
+    "forearm_f": -135
+   },
+   "root": [
+    0,
+    0.0
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n",
+    "boot_f"
+   ],
+   "note": "near arm straight punch to the side, far guard"
+  },
+  {
+   "name": "cross_body_near",
+   "group": "arms",
+   "angles": {
+    "upper_arm_n": 70,
+    "forearm_n": 60,
+    "upper_arm_f": -60,
+    "forearm_f": -70
+   },
+   "root": [
+    0,
+    0.0
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n",
+    "boot_f"
+   ],
+   "note": "both arms across the chest (near over far)"
+  },
+  {
+   "name": "wrist_extremes",
+   "group": "arms",
+   "angles": {
+    "upper_arm_n": -40,
+    "hand_n": -60,
+    "upper_arm_f": 40,
+    "hand_f": -60
+   },
+   "root": [
+    0,
+    0.0
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n",
+    "boot_f"
+   ],
+   "note": "wrists +/-60"
+  },
+  {
+   "name": "elbow_max",
+   "group": "arms",
+   "angles": {
+    "upper_arm_n": -10,
+    "upper_arm_f": 10,
+    "forearm_n": -150,
+    "forearm_f": 150
+   },
+   "root": [
+    0,
+    0.0
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n",
+    "boot_f"
+   ],
+   "note": "elbows 150 outward flex"
+  },
+  {
+   "name": "wide_stance",
+   "group": "legs",
+   "angles": {
+    "thigh_n": -25,
+    "thigh_f": 25,
+    "boot_n": 25,
+    "boot_f": -25
+   },
+   "root": [
+    0,
+    5.434148351874299
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n",
+    "boot_f"
+   ],
+   "note": "hips 25 out, soles kept flat"
+  },
+  {
+   "name": "crouch_knees_out",
+   "group": "legs",
+   "angles": {
+    "thigh_n": -40,
+    "thigh_f": 40,
+    "shin_n": 65,
+    "shin_f": -65,
+    "boot_n": -25,
+    "boot_f": 25,
+    "spine": 0
+   },
+   "root": [
+    0,
+    10.203102045075163
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n",
+    "boot_f"
+   ],
+   "note": "hips 40, knees 65 flex, ankles flat"
+  },
+  {
+   "name": "step_near_lift",
+   "group": "legs",
+   "angles": {
+    "thigh_n": -12,
+    "shin_n": 50,
+    "boot_n": -38,
+    "thigh_f": 4,
+    "boot_f": -4
+   },
+   "root": [
+    0,
+    0.14128508493019018
+   ],
+   "hands": {},
+   "planted": [
+    "boot_f"
+   ],
+   "note": "near foot lifted (in-plane only)"
+  },
+  {
+   "name": "side_kick_near",
+   "group": "legs",
+   "angles": {
+    "thigh_n": -85,
+    "shin_n": 25,
+    "boot_n": 30,
+    "upper_arm_n": -30,
+    "upper_arm_f": 30,
+    "forearm_n": 120,
+    "forearm_f": -120
+   },
+   "root": [
+    0,
+    0.0
+   ],
+   "hands": {},
+   "planted": [
+    "boot_f"
+   ],
+   "note": "near hip 85, knee 25"
+  },
+  {
+   "name": "ankle_extremes",
+   "group": "legs",
+   "angles": {
+    "boot_n": -40,
+    "boot_f": -40,
+    "thigh_n": -8,
+    "thigh_f": 8
+   },
+   "root": [
+    0,
+    -1.41027386713653
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n"
+   ],
+   "note": "ankles +/-40 (QA only, feet not flat)"
+  },
+  {
+   "name": "legs_crossed",
+   "group": "overlap",
+   "angles": {
+    "thigh_n": 22,
+    "shin_n": -8,
+    "boot_n": -14,
+    "thigh_f": 6,
+    "boot_f": -6,
+    "spine": 4
+   },
+   "root": [
+    0,
+    3.188651514105307
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n"
+   ],
+   "note": "near leg crosses in front of far leg; far foot sits higher = further from camera"
+  },
+  {
+   "name": "overlap_torso_twist",
+   "group": "overlap",
+   "angles": {
+    "spine": 15,
+    "neck": -6,
+    "head": -12,
+    "upper_arm_n": 45,
+    "forearm_n": 100,
+    "upper_arm_f": 70,
+    "forearm_f": -40,
+    "sash_tail_a": 25,
+    "sash_tail_b": 30
+   },
+   "root": [
+    0,
+    0.0
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n",
+    "boot_f"
+   ],
+   "note": "waist 15, head -18, sash swung"
+  },
+  {
+   "name": "overlap_waist_neg",
+   "group": "overlap",
+   "angles": {
+    "spine": -15,
+    "head": 20,
+    "sash_tail_a": -30,
+    "sash_tail_b": -30,
+    "upper_arm_f": -30,
+    "forearm_f": -110
+   },
+   "root": [
+    0,
+    0.0
+   ],
+   "hands": {},
+   "planted": [
+    "boot_n",
+    "boot_f"
+   ],
+   "note": "waist -15, head +20, far arm across"
+  }
+ ]
+}

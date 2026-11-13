@@ -1,0 +1,87 @@
+{
+ "hips": {
+  "sheet": "s3-lower-a.png",
+  "source_box_px": [
+   48,
+   44,
+   662,
+   328
+  ],
+  "scale_src_px_per_native_px": [
+   12.2,
+   12.08
+  ],
+  "native_size": [
+   52,
+   25
+  ]
+ },
+ "sash_band": {
+  "sheet": "s3-lower-a.png",
+  "source_box_px": [
+   734,
+   86,
+   1192,
+   244
+  ],
+  "scale_src_px_per_native_px": [
+   12.0,
+   11.14
+  ],
+  "native_size": [
+   40,
+   16
+  ]
+ },
+ "sash_tails": {
+  "sheet": "s3-lower-a.png",
+  "source_box_px": [
+   1350,
+   30,
+   1584,
+   390
+  ],
+  "scale_src_px_per_native_px": [
+   12.22,
+   12.14
+  ],
+  "native_size": [
+   21,
+   31
+  ]
+ },
+ "thigh_n": {
+  "sheet": "s3-lower-a.png",
+  "source_box_px": [
+   354,
+   370,
+   774,
+   912
+  ],
+  "scale_src_px_per_native_px": [
+   12.24,
+   12.62
+  ],
+  "native_size": [
+   36,
+   45
+  ]
+ },
+ "thigh_f": {
+  "sheet": "s3-lower-a.png",
+  "source_box_px": [
+   924,
+   392,
+   1240,
+   896
+  ],
+  "scale_src_px_per_native_px": [
+   12.02,
+   12.64
+  ],
+  "native_size": [
+   28,
+   42
+  ]
+ }
+}

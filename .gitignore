@@ -8,3 +8,27 @@ coverage/
 .env*
 !.env.example
 *.tsbuildinfo
+*prompts
+
+# KYNTRAZE generated art QA and superseded experiments
+/art-exploration/kai/_archive/
+/art/characters/kai/base/directions/
+/art/characters/kai/base/previews/
+/art/characters/kai/base/qa/
+/art/characters/kai/base/rig/
+/art/characters/kai/base/pilot-south-v2/
+/art/characters/kai/base/rig-blueprint-south/qa/
+/art/characters/kai/base/rig-blueprint-south/approved-reference-overlay.png
+/art/characters/kai/base/rig-blueprint-south/neutral-assembly.png
+/art/characters/kai/base/rig-blueprint-south/part-layout.png
+/art/characters/kai/base/rig-blueprint-south/pivot-overlay.png
+/art/characters/kai/base/rig-blueprint-south.zip
+/art/characters/kai/base/pilot-south-v2.zip
+/art/characters/kai/base.rar
+
+# Kai SOUTH: previous attempt kept locally only, and regenerable review videos (run_all.bat rebuilds them)
+/art/characters/kai/base/animation-recovery-south-v5/
+/art/characters/kai/base/production-south-candidate/review/*.mp4
+*.blend1
+*.blend2
+**/__pycache__/

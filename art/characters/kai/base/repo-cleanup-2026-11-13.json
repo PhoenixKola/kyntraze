@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-13",
+  "note": "Cleanup of the Kai art tree before the SOUTH production-candidate commit. Nothing was removed without a verified copy.",
+  "kept_and_committed": [
+    "art/characters/kai/base/references/",
+    "art/characters/kai/base/production-south-candidate/ (source sheets, prompts and provenance, refs, parts, rig scripts, packed .blend, sheets and manifest, review PNGs, tools, STATUS.md, run_all.bat)",
+    "art/characters/kai/base/rig-blueprint-south/ (rig-spec.json, scripts/, templates/, kai-south-rig-pilot.blend, STATUS.md, CODEX-ART-BRIEF.md, run_all.bat)",
+    "art/characters/kai/base/README.md",
+    "art-source/create-placeholders.py (already tracked; referenced by README.md and public/art/placeholders/provenance.json; unchanged)"
+  ],
+  "kept_locally_ignored": [
+    "art/characters/kai/base/animation-recovery-south-v5/ (previous attempt; used by the comparison image)",
+    "art/characters/kai/base/directions/, previews/, qa/, rig/, pilot-south-v2/ (older B02F four-direction candidate)",
+    "rig-blueprint-south/qa/ and its regenerable overlay PNGs",
+    "production-south-candidate/review/*.mp4 (regenerable)"
+  ],
+  "archived_outside_repo": {
+    "to": "../kyntraze-art-archive/2026-11-13-superseded-kai-south/ (sibling of the repo folder)",
+    "items": [
+      "base/parts-south-v3 (31 files, 82391 bytes)",
+      "base/parts-south-v4 (29 files, 35694 bytes)",
+      "base/animation-pilot-south-v4 (22 files, 1193382 bytes)",
+      "base/pilot-torso-recovery-v1 (3 files, 14958 bytes)",
+      "base.rar (15062271 bytes)"
+    ],
+    "verified": "file count and byte total identical after the copy; the originals were then removed from the repo tree"
+  },
+  "already_absent": ["base/pilot-south-v2.zip", "base/rig-blueprint-south.zip", "art-exploration/"],
+  "blocked_deletions": []
+}

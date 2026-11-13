@@ -1,0 +1,15 @@
+Parts sheet for a 2D cutout (paper-doll) game rig. The FIRST attached image is the approved full character (reference). The second attached image is the reference's upper body magnified 10x with nearest-neighbor and the third is its lower body magnified 10x; the fourth is the head magnified 10x. They set the pixel size and rendering style: one art pixel is a large 10x10 image-pixel block. Redraw these limb pieces of EXACTLY this character, copying the reference's pixel-art rendering faithfully: thin dark controlled outlines (no thick halo), navy-charcoal jacket sleeves with lighter purple-grey highlight folds and cream cuff trim, warm tan skin, off-white wraps with grey-brown stripes, baggy dark grey-purple trousers with lighter purple-grey folds, solid dark combat boots with a strap and a grey-brown sole. Same three-quarter view, seen slightly from above.
+
+IMPORTANT: these limbs are drawn FORESHORTENED, short and fat, as if pointing toward the viewer, exactly as short and chunky as the arms and legs look in the reference. Stick strictly to these SMALL sizes (in art pixels, one art pixel = one 10x10 block): do not draw them longer.
+
+Draw ONLY these 8 pieces, each COMPLETE and isolated on flat magenta (#ff00ff), far apart, nothing overlapping, nothing cropped, all hanging straight down:
+1. NEAR UPPER-ARM SLEEVE: short puffy navy jacket sleeve, rounded top end (shoulder), baggy with soft folds, and at the bottom an open cuff with a cream trim band around the opening. 24 wide, only 28 tall.
+2. FAR UPPER-ARM SLEEVE: the same kind, 21 wide, only 26 tall.
+3. NEAR FOREARM: bare tan forearm, rounded top end (goes inside the sleeve), the lower 60 percent covered by the off-white wrap with grey-brown stripe lines, ending at the bottom in a clean wrist opening. 14 wide, only 22 tall.
+4. FAR FOREARM: the same, 13 wide, only 21 tall.
+5. NEAR SHIN: squat baggy trouser lower leg, rounded top end (knee), gathered hem at the bottom. 24 wide, only 22 tall.
+6. FAR SHIN: the same, 22 wide, only 21 tall.
+7. NEAR BOOT: one solid dark combat boot, three-quarter view, toe toward the viewer and slightly left, strap across the shaft, grey sole, shaft opening at the top. 20 wide, only 24 tall.
+8. FAR BOOT: the same boot with the toe toward the viewer and slightly right. 20 wide, only 24 tall.
+
+Draw every piece with big chunky 10x10 pixel blocks and NO finer detail than the magnified crops (no sub-pixel noise, no anti-aliasing, no gradients). Flat solid magenta background everywhere. Wide 16:9. No full character, no head, no torso, no text, no labels, no watermark.

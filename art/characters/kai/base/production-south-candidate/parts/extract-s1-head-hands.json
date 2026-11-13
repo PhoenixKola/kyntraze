@@ -1,0 +1,87 @@
+{
+ "head": {
+  "sheet": "s1-head-hands.png",
+  "source_box_px": [
+   48,
+   132,
+   662,
+   754
+  ],
+  "scale_src_px_per_native_px": [
+   13.38,
+   13.36
+  ],
+  "native_size": [
+   48,
+   48
+  ]
+ },
+ "fist_guard": {
+  "sheet": "s1-head-hands.png",
+  "source_box_px": [
+   756,
+   72,
+   1028,
+   412
+  ],
+  "scale_src_px_per_native_px": [
+   12.58,
+   12.86
+  ],
+  "native_size": [
+   23,
+   28
+  ]
+ },
+ "fist_waist": {
+  "sheet": "s1-head-hands.png",
+  "source_box_px": [
+   1204,
+   116,
+   1562,
+   386
+  ],
+  "scale_src_px_per_native_px": [
+   13.18,
+   13.48
+  ],
+  "native_size": [
+   29,
+   22
+  ]
+ },
+ "fist_front": {
+  "sheet": "s1-head-hands.png",
+  "source_box_px": [
+   740,
+   512,
+   1052,
+   868
+  ],
+  "scale_src_px_per_native_px": [
+   12.84,
+   13.02
+  ],
+  "native_size": [
+   26,
+   29
+  ]
+ },
+ "fist_front_angle": {
+  "sheet": "s1-head-hands.png",
+  "source_box_px": [
+   1238,
+   502,
+   1562,
+   862
+  ],
+  "scale_src_px_per_native_px": [
+   13.48,
+   13.24
+  ],
+  "native_size": [
+   26,
+   29
+  ]
+ }
+}

@@ -1,0 +1,58 @@
+{
+ "upper_arm_n": {
+  "sheet": "s6-arms.png",
+  "source_box_px": [
+   62,
+   240,
+   396,
+   728
+  ],
+  "scale_src_px_per_native_px": 16.9,
+  "native_size": [
+   21,
+   30
+  ]
+ },
+ "upper_arm_f": {
+  "sheet": "s6-arms.png",
+  "source_box_px": [
+   506,
+   266,
+   816,
+   728
+  ],
+  "scale_src_px_per_native_px": 16.9,
+  "native_size": [
+   20,
+   29
+  ]
+ },
+ "forearm_n": {
+  "sheet": "s6-arms.png",
+  "source_box_px": [
+   904,
+   228,
+   1230,
+   770
+  ],
+  "scale_src_px_per_native_px": 16.9,
+  "native_size": [
+   21,
+   34
+  ]
+ },
+ "forearm_f": {
+  "sheet": "s6-arms.png",
+  "source_box_px": [
+   1326,
+   258,
+   1614,
+   764
+  ],
+  "scale_src_px_per_native_px": 16.9,
+  "native_size": [
+   19,
+   31
+  ]
+ }
+}

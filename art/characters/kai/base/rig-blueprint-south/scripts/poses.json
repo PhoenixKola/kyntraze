@@ -1,0 +1,747 @@
+[
+ {
+  "name": "neutral",
+  "group": "neutral",
+  "angles": {},
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "arms_T",
+  "group": "arms",
+  "angles": {
+   "upper_arm_n": -90,
+   "upper_arm_f": 90
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "arms_raised",
+  "group": "arms",
+  "angles": {
+   "upper_arm_n": -165,
+   "upper_arm_f": 165,
+   "forearm_n": -10,
+   "forearm_f": 10
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {
+   "n": "open",
+   "f": "open"
+  }
+ },
+ {
+  "name": "arms_guard",
+  "group": "arms",
+  "angles": {
+   "upper_arm_n": -25,
+   "upper_arm_f": 25,
+   "forearm_n": 145,
+   "forearm_f": -145,
+   "hand_n": 20,
+   "hand_f": -20
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "punch_out_near",
+  "group": "arms",
+  "angles": {
+   "upper_arm_n": -95,
+   "forearm_n": 0,
+   "hand_n": 0,
+   "upper_arm_f": 20,
+   "forearm_f": -135
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "cross_body_near",
+  "group": "arms",
+  "angles": {
+   "upper_arm_n": 70,
+   "forearm_n": 60,
+   "upper_arm_f": -60,
+   "forearm_f": -70
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "wrist_extremes",
+  "group": "arms",
+  "angles": {
+   "upper_arm_n": -40,
+   "hand_n": -60,
+   "upper_arm_f": 40,
+   "hand_f": -60
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "elbow_max",
+  "group": "arms",
+  "angles": {
+   "upper_arm_n": -10,
+   "upper_arm_f": 10,
+   "forearm_n": -150,
+   "forearm_f": 150
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "wide_stance",
+  "group": "legs",
+  "angles": {
+   "thigh_n": -25,
+   "thigh_f": 25,
+   "boot_n": 25,
+   "boot_f": -25
+  },
+  "root": [
+   0,
+   5.434148351874299
+  ],
+  "hands": {}
+ },
+ {
+  "name": "crouch_knees_out",
+  "group": "legs",
+  "angles": {
+   "thigh_n": -40,
+   "thigh_f": 40,
+   "shin_n": 65,
+   "shin_f": -65,
+   "boot_n": -25,
+   "boot_f": 25,
+   "spine": 0
+  },
+  "root": [
+   0,
+   10.203102045075163
+  ],
+  "hands": {}
+ },
+ {
+  "name": "step_near_lift",
+  "group": "legs",
+  "angles": {
+   "thigh_n": -12,
+   "shin_n": 50,
+   "boot_n": -38,
+   "thigh_f": 4,
+   "boot_f": -4
+  },
+  "root": [
+   0,
+   0.14128508493019018
+  ],
+  "hands": {}
+ },
+ {
+  "name": "side_kick_near",
+  "group": "legs",
+  "angles": {
+   "thigh_n": -85,
+   "shin_n": 25,
+   "boot_n": 30,
+   "upper_arm_n": -30,
+   "upper_arm_f": 30,
+   "forearm_n": 120,
+   "forearm_f": -120
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "ankle_extremes",
+  "group": "legs",
+  "angles": {
+   "boot_n": -40,
+   "boot_f": -40,
+   "thigh_n": -8,
+   "thigh_f": 8
+  },
+  "root": [
+   0,
+   -1.41027386713653
+  ],
+  "hands": {}
+ },
+ {
+  "name": "legs_crossed",
+  "group": "overlap",
+  "angles": {
+   "thigh_n": 22,
+   "shin_n": -8,
+   "boot_n": -14,
+   "thigh_f": 6,
+   "boot_f": -6,
+   "spine": 4
+  },
+  "root": [
+   0,
+   3.188651514105307
+  ],
+  "hands": {}
+ },
+ {
+  "name": "overlap_torso_twist",
+  "group": "overlap",
+  "angles": {
+   "spine": 15,
+   "neck": -6,
+   "head": -12,
+   "upper_arm_n": 45,
+   "forearm_n": 100,
+   "upper_arm_f": 70,
+   "forearm_f": -40,
+   "sash_tail_a": 25,
+   "sash_tail_b": 30
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "overlap_waist_neg",
+  "group": "overlap",
+  "angles": {
+   "spine": -15,
+   "head": 20,
+   "sash_tail_a": -30,
+   "sash_tail_b": -30,
+   "upper_arm_f": -30,
+   "forearm_f": -110
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "idle_00",
+  "group": "debug_idle",
+  "angles": {
+   "spine": 0.0,
+   "head": -0.0,
+   "upper_arm_n": -6.0,
+   "upper_arm_f": 6.0,
+   "forearm_n": 8.0,
+   "forearm_f": -8.0,
+   "sash_tail_a": 0.0,
+   "sash_tail_b": 0.0
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "idle_01",
+  "group": "debug_idle",
+  "angles": {
+   "spine": 1.0606601717798214,
+   "head": -1.0606601717798214,
+   "upper_arm_n": -8.121320343559642,
+   "upper_arm_f": 8.121320343559642,
+   "forearm_n": 10.82842712474619,
+   "forearm_f": -10.82842712474619,
+   "sash_tail_a": 2.8284271247461903,
+   "sash_tail_b": 3.5355339059327378
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "idle_02",
+  "group": "debug_idle",
+  "angles": {
+   "spine": 1.5,
+   "head": -1.5,
+   "upper_arm_n": -9.0,
+   "upper_arm_f": 9.0,
+   "forearm_n": 12.0,
+   "forearm_f": -12.0,
+   "sash_tail_a": 4.0,
+   "sash_tail_b": 5.0
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "idle_03",
+  "group": "debug_idle",
+  "angles": {
+   "spine": 1.0606601717798214,
+   "head": -1.0606601717798214,
+   "upper_arm_n": -8.121320343559642,
+   "upper_arm_f": 8.121320343559642,
+   "forearm_n": 10.82842712474619,
+   "forearm_f": -10.82842712474619,
+   "sash_tail_a": 2.8284271247461903,
+   "sash_tail_b": 3.5355339059327378
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "idle_04",
+  "group": "debug_idle",
+  "angles": {
+   "spine": 1.8369701987210297e-16,
+   "head": -1.8369701987210297e-16,
+   "upper_arm_n": -6.0,
+   "upper_arm_f": 6.0,
+   "forearm_n": 8.0,
+   "forearm_f": -8.0,
+   "sash_tail_a": 4.898587196589413e-16,
+   "sash_tail_b": 6.123233995736766e-16
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "idle_05",
+  "group": "debug_idle",
+  "angles": {
+   "spine": -1.0606601717798212,
+   "head": 1.0606601717798212,
+   "upper_arm_n": -3.8786796564403576,
+   "upper_arm_f": 3.8786796564403576,
+   "forearm_n": 5.17157287525381,
+   "forearm_f": -5.17157287525381,
+   "sash_tail_a": -2.82842712474619,
+   "sash_tail_b": -3.5355339059327373
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "idle_06",
+  "group": "debug_idle",
+  "angles": {
+   "spine": -1.5,
+   "head": 1.5,
+   "upper_arm_n": -3.0,
+   "upper_arm_f": 3.0,
+   "forearm_n": 4.0,
+   "forearm_f": -4.0,
+   "sash_tail_a": -4.0,
+   "sash_tail_b": -5.0
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "idle_07",
+  "group": "debug_idle",
+  "angles": {
+   "spine": -1.0606601717798214,
+   "head": 1.0606601717798214,
+   "upper_arm_n": -3.878679656440357,
+   "upper_arm_f": 3.878679656440357,
+   "forearm_n": 5.171572875253809,
+   "forearm_f": -5.171572875253809,
+   "sash_tail_a": -2.8284271247461907,
+   "sash_tail_b": -3.5355339059327386
+  },
+  "root": [
+   0,
+   0.0
+  ],
+  "hands": {}
+ },
+ {
+  "name": "step_00",
+  "group": "debug_step",
+  "angles": {
+   "thigh_n": -4.0,
+   "shin_n": 0.0,
+   "boot_n": -0.0,
+   "thigh_f": 4.0,
+   "shin_f": -0.0,
+   "boot_f": 0.0,
+   "upper_arm_n": -10.0,
+   "forearm_n": 20,
+   "upper_arm_f": 10.0,
+   "forearm_f": -20,
+   "spine": 0.0,
+   "head": -0.0,
+   "sash_tail_a": 0.0,
+   "sash_tail_b": 0.0
+  },
+  "root": [
+   0,
+   -0.38753530814070447
+  ],
+  "hands": {}
+ },
+ {
+  "name": "step_01",
+  "group": "debug_step",
+  "angles": {
+   "thigh_n": -9.65685424949238,
+   "shin_n": 28.284271247461902,
+   "boot_n": -21.213203435596427,
+   "thigh_f": 4.0,
+   "shin_f": -0.0,
+   "boot_f": 0.0,
+   "upper_arm_n": -18.48528137423857,
+   "forearm_n": 20,
+   "upper_arm_f": 1.5147186257614287,
+   "forearm_f": -20,
+   "spine": 1.4142135623730951,
+   "head": -1.4142135623730951,
+   "sash_tail_a": 7.0710678118654755,
+   "sash_tail_b": 8.485281374238571
+  },
+  "root": [
+   0,
+   -0.38753530814070447
+  ],
+  "hands": {}
+ },
+ {
+  "name": "step_02",
+  "group": "debug_step",
+  "angles": {
+   "thigh_n": -12.0,
+   "shin_n": 40.0,
+   "boot_n": -30.0,
+   "thigh_f": 4.0,
+   "shin_f": -0.0,
+   "boot_f": 0.0,
+   "upper_arm_n": -22.0,
+   "forearm_n": 20,
+   "upper_arm_f": -2.0,
+   "forearm_f": -20,
+   "spine": 2.0,
+   "head": -2.0,
+   "sash_tail_a": 10.0,
+   "sash_tail_b": 12.0
+  },
+  "root": [
+   0,
+   -0.38753530814070447
+  ],
+  "hands": {}
+ },
+ {
+  "name": "step_03",
+  "group": "debug_step",
+  "angles": {
+   "thigh_n": -9.65685424949238,
+   "shin_n": 28.284271247461902,
+   "boot_n": -21.213203435596427,
+   "thigh_f": 4.0,
+   "shin_f": -0.0,
+   "boot_f": 0.0,
+   "upper_arm_n": -18.48528137423857,
+   "forearm_n": 20,
+   "upper_arm_f": 1.5147186257614287,
+   "forearm_f": -20,
+   "spine": 1.4142135623730951,
+   "head": -1.4142135623730951,
+   "sash_tail_a": 7.0710678118654755,
+   "sash_tail_b": 8.485281374238571
+  },
+  "root": [
+   0,
+   -0.38753530814070447
+  ],
+  "hands": {}
+ },
+ {
+  "name": "step_04",
+  "group": "debug_step",
+  "angles": {
+   "thigh_n": -4.000000000000001,
+   "shin_n": 4.898587196589413e-15,
+   "boot_n": -3.67394039744206e-15,
+   "thigh_f": 4.0,
+   "shin_f": -0.0,
+   "boot_f": 0.0,
+   "upper_arm_n": -10.000000000000002,
+   "forearm_n": 20,
+   "upper_arm_f": 9.999999999999998,
+   "forearm_f": -20,
+   "spine": 2.4492935982947064e-16,
+   "head": -2.4492935982947064e-16,
+   "sash_tail_a": 1.2246467991473533e-15,
+   "sash_tail_b": 1.4695761589768238e-15
+  },
+  "root": [
+   0,
+   -0.3875353081407047
+  ],
+  "hands": {}
+ },
+ {
+  "name": "step_05",
+  "group": "debug_step",
+  "angles": {
+   "thigh_n": -4.0,
+   "shin_n": 0.0,
+   "boot_n": -0.0,
+   "thigh_f": 9.65685424949238,
+   "shin_f": -28.2842712474619,
+   "boot_f": 21.213203435596423,
+   "upper_arm_n": -1.5147186257614305,
+   "forearm_n": 20,
+   "upper_arm_f": 18.485281374238568,
+   "forearm_f": -20,
+   "spine": -1.414213562373095,
+   "head": 1.414213562373095,
+   "sash_tail_a": -7.071067811865475,
+   "sash_tail_b": -8.48528137423857
+  },
+  "root": [
+   0,
+   -0.38753530814070447
+  ],
+  "hands": {}
+ },
+ {
+  "name": "step_06",
+  "group": "debug_step",
+  "angles": {
+   "thigh_n": -4.0,
+   "shin_n": 0.0,
+   "boot_n": -0.0,
+   "thigh_f": 12.0,
+   "shin_f": -40.0,
+   "boot_f": 30.0,
+   "upper_arm_n": 2.0,
+   "forearm_n": 20,
+   "upper_arm_f": 22.0,
+   "forearm_f": -20,
+   "spine": -2.0,
+   "head": 2.0,
+   "sash_tail_a": -10.0,
+   "sash_tail_b": -12.0
+  },
+  "root": [
+   0,
+   -0.38753530814070447
+  ],
+  "hands": {}
+ },
+ {
+  "name": "step_07",
+  "group": "debug_step",
+  "angles": {
+   "thigh_n": -4.0,
+   "shin_n": 0.0,
+   "boot_n": -0.0,
+   "thigh_f": 9.656854249492381,
+   "shin_f": -28.28427124746191,
+   "boot_f": 21.21320343559643,
+   "upper_arm_n": -1.5147186257614287,
+   "forearm_n": 20,
+   "upper_arm_f": 18.48528137423857,
+   "forearm_f": -20,
+   "spine": -1.4142135623730954,
+   "head": 1.4142135623730954,
+   "sash_tail_a": -7.071067811865477,
+   "sash_tail_b": -8.485281374238571
+  },
+  "root": [
+   0,
+   -0.38753530814070447
+  ],
+  "hands": {}
+ },
+ {
+  "name": "jab_00",
+  "group": "debug_jab",
+  "angles": {
+   "upper_arm_n": -25,
+   "forearm_n": 145,
+   "hand_n": 20,
+   "upper_arm_f": 25,
+   "forearm_f": -145,
+   "hand_f": -20,
+   "spine": 0,
+   "head": 0,
+   "thigh_n": -14,
+   "thigh_f": 14,
+   "boot_n": 14,
+   "boot_f": -14
+  },
+  "root": [
+   0,
+   1.7228478759922021
+  ],
+  "hands": {}
+ },
+ {
+  "name": "jab_01",
+  "group": "debug_jab",
+  "angles": {
+   "upper_arm_n": -51.25,
+   "forearm_n": 94.25,
+   "hand_n": 13.0,
+   "upper_arm_f": 25,
+   "forearm_f": -145,
+   "hand_f": -20,
+   "spine": -2.0999999999999996,
+   "head": 1.4,
+   "thigh_n": -14,
+   "thigh_f": 14,
+   "boot_n": 14,
+   "boot_f": -14
+  },
+  "root": [
+   0,
+   1.7228478759922021
+  ],
+  "hands": {}
+ },
+ {
+  "name": "jab_02",
+  "group": "debug_jab",
+  "angles": {
+   "upper_arm_n": -100.0,
+   "forearm_n": 0.0,
+   "hand_n": 0.0,
+   "upper_arm_f": 25,
+   "forearm_f": -145,
+   "hand_f": -20,
+   "spine": -6.0,
+   "head": 4.0,
+   "thigh_n": -14,
+   "thigh_f": 14,
+   "boot_n": 14,
+   "boot_f": -14
+  },
+  "root": [
+   0,
+   1.7228478759922021
+  ],
+  "hands": {}
+ },
+ {
+  "name": "jab_03",
+  "group": "debug_jab",
+  "angles": {
+   "upper_arm_n": -100.0,
+   "forearm_n": 0.0,
+   "hand_n": 0.0,
+   "upper_arm_f": 25,
+   "forearm_f": -145,
+   "hand_f": -20,
+   "spine": -6.0,
+   "head": 4.0,
+   "thigh_n": -14,
+   "thigh_f": 14,
+   "boot_n": 14,
+   "boot_f": -14
+  },
+  "root": [
+   0,
+   1.7228478759922021
+  ],
+  "hands": {}
+ },
+ {
+  "name": "jab_04",
+  "group": "debug_jab",
+  "angles": {
+   "upper_arm_n": -62.5,
+   "forearm_n": 72.5,
+   "hand_n": 10.0,
+   "upper_arm_f": 25,
+   "forearm_f": -145,
+   "hand_f": -20,
+   "spine": -3.0,
+   "head": 2.0,
+   "thigh_n": -14,
+   "thigh_f": 14,
+   "boot_n": 14,
+   "boot_f": -14
+  },
+  "root": [
+   0,
+   1.7228478759922021
+  ],
+  "hands": {}
+ },
+ {
+  "name": "jab_05",
+  "group": "debug_jab",
+  "angles": {
+   "upper_arm_n": -25.0,
+   "forearm_n": 145.0,
+   "hand_n": 20.0,
+   "upper_arm_f": 25,
+   "forearm_f": -145,
+   "hand_f": -20,
+   "spine": -0.0,
+   "head": 0.0,
+   "thigh_n": -14,
+   "thigh_f": 14,
+   "boot_n": 14,
+   "boot_f": -14
+  },
+  "root": [
+   0,
+   1.7228478759922021
+  ],
+  "hands": {}
+ }
+]
