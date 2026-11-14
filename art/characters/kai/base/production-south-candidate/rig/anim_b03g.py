@@ -1,6 +1,8 @@
-"""B03G: Dash / Hurt / Death for Kai SOUTH. Same solver, parts and stance as anim.py (imported at its end); no new art, poses only.
-Idle / Run / BasicPunch are not touched. Poses are a few authored keys per clip, tweened with smoothstep."""
+"""B03G / B03G.1: Dash / Hurt / Death for Kai SOUTH. Same solver, parts and stance as anim.py (imported at its end); no new art, poses only.
+Idle / Run / BasicPunch are not touched. Poses are a few authored keys per clip, tweened with smoothstep.
+Death pivots the whole body about the pelvis joint (`hip_target` + `root_rot`) so the feet stay planted while the body collapses."""
 import copy, math
+import numpy as np
 import anim as a
 
 arm, stance, N_SOLE, ARM_REST = a.arm, a.stance, a.N_SOLE, a.ARM_REST
@@ -38,61 +40,70 @@ def air(s, dx, dy, **k): return lg(s, dx, dy, planted=False, straight=True, slac
 def depth(p):
     if "leg_n" in p and "leg_f" in p: p["far_leg_front"] = p["leg_f"]["sole"][1] > p["leg_n"]["sole"][1]
     return p
-
-# run-style base feet (front view: both feet under the hips)
+UL = {s: ARM_REST[s]["u"][1] for s in "nf"}; FL = {s: ARM_REST[s]["f"][1] for s in "nf"}
+def A(s, u, f, slot=None, k=1.0): return arm(u, UL[s] * k, f, FL[s] * k, hand=0.0, slot=slot)
 BN, BF = (57.0, 171.0), (75.0, 165.0)
 def foot(s, dx, dy, **k): b = BN if s == "n" else BF; return dict({"sole": (b[0] + dx, b[1] + dy), "bend": -1 if s == "n" else 1}, **k)
 def fair(s, dx, dy, **k): return foot(s, dx, dy, planted=False, straight=True, slack=3.0, **k)
-sw_n = lambda u, f: arm(-u, 13, -f, 13, hand=0.0)
-sw_f = lambda u, f: arm(u, 12, f, 12, hand=0.0)
+sw = lambda un, fn, uf, ff: {"arm_n": A("n", -un, -fn), "arm_f": A("f", uf, ff)}
 
+# ------------------------------------------------------------------ Dash: coil, push-off, launch, peak speed, scissor, touchdown, skid, recover
 def dash():
-    k0 = P(pelvis=(0, 6), chest=(0, 5), head=(0, 3), sash=-10, leg_n=foot("n", 2, 0), leg_f=foot("f", -2, 0), arm_n=sw_n(22, 30), arm_f=sw_f(26, 36))
-    k1 = P(pelvis=(0, 10), chest=(1, 8), head=(0, 6), sash=16, spine_rot=-3, leg_n=fair("n", -8, -14), leg_f=foot("f", 6, 5), arm_n=sw_n(44, 66), arm_f=sw_f(48, 70))
-    k2 = P(pelvis=(0, 12), chest=(2, 10), head=(0, 9), sash=30, spine_rot=-5, leg_n=foot("n", 8, 7), leg_f=fair("f", 6, -26, fs_t=0.6), arm_n=sw_n(58, 88), arm_f=sw_f(62, 92))
-    k3 = P(pelvis=(0, 10), chest=(1, 8), head=(0, 7), sash=-8, spine_rot=-3, leg_n=fair("n", -8, -24, fs_t=0.6), leg_f=foot("f", 6, 7), arm_n=sw_n(52, 80), arm_f=sw_f(56, 84))
-    k4 = P(pelvis=(0, 5), chest=(0, 3), head=(0, 3), sash=10, leg_n=foot("n", 3, 2), leg_f=foot("f", -1, 1))
-    k5 = P(pelvis=(0, 2), chest=(0, 1), sash=4)
-    keys = [(0, k0), (1, k0), (2, k1), (4, k2), (6, k3), (7, k4), (9, k5)]
-    fr = [depth(p) for p in tween(keys, 10)]
-    return {"name": "Dash", "fps": 22, "loop": False, "frames": fr, "events": {"anticipation_start": 0, "burst_start": 2, "travel_end": 6, "recover_start": 7}}
+    k = [
+        P(pelvis=(0, 9), chest=(0, 7), head=(0, 5), sash=-6, leg_n=foot("n", 3, 0), leg_f=foot("f", -3, 0), **sw(18, 24, 22, 30)),
+        P(pelvis=(0, 6), chest=(1, 5), head=(0, 3), sash=-22, spine_rot=-3, leg_n=fair("n", -6, -8), leg_f=foot("f", 6, 4), **sw(30, 44, 44, 60)),
+        P(pelvis=(0, 2), chest=(2, 1), head=(0, 0), sash=-36, spine_rot=-6, leg_n=fair("n", -12, -22, fs_t=0.7), leg_f=fair("f", 10, -6), **sw(38, 54, 66, 90)),
+        P(pelvis=(0, 0), chest=(2, -1), head=(0, -1), sash=-46, spine_rot=-8, leg_n=fair("n", -16, -28, fs_t=0.65), leg_f=fair("f", 14, -16), **sw(44, 62, 84, 112)),
+        P(pelvis=(0, 4), chest=(1, 3), head=(0, 2), sash=-30, spine_rot=-5, leg_n=fair("n", 10, -26, fs_t=0.6), leg_f=fair("f", -12, -18, fs_t=0.7), **sw(36, 52, 58, 86)),
+        P(pelvis=(0, 11), chest=(0, 9), head=(0, 6), sash=-8, spine_rot=-2, leg_n=foot("n", 6, -1), leg_f=fair("f", -8, -10), **sw(28, 40, 38, 54)),
+        P(pelvis=(0, 14), chest=(0, 12), head=(0, 8), sash=14, leg_n=foot("n", 10, 0), leg_f=foot("f", -6, 3), **sw(26, 34, 30, 38)),
+        P(pelvis=(0, 10), chest=(0, 8), head=(0, 5), sash=16, leg_n=foot("n", 7, 0), leg_f=foot("f", -3, 2), **sw(22, 28, 26, 30)),
+        P(pelvis=(0, 5), chest=(0, 3), head=(0, 3), sash=6, leg_n=foot("n", 3, 1), leg_f=foot("f", -1, 1)),
+        P(pelvis=(0, 2), chest=(0, 1), sash=2),
+    ]
+    return {"name": "Dash", "fps": 22, "loop": False, "frames": [depth(p) for p in k], "events": {"anticipation_start": 0, "burst_start": 2, "travel_end": 6, "recover_start": 7}}
 
+# ------------------------------------------------------------------ Hurt: hit hop with arched body and flung arms, back-step stagger, hunch clutching the ribs, recover
 def hurt_keys():
-    un, fn = ARM_REST["n"]["u"], ARM_REST["n"]["f"]; uf, ff = ARM_REST["f"]["u"], ARM_REST["f"]["f"]
-    hit = P(pelvis=(2, 3), chest=(5, 2), head=(8, -2), head_rot=-12, spine_rot=-9, sash=18, arm_n=arm(-56, 13, -92, 13, hand=0.0), arm_f=arm(50, 12, 120, 11, hand=0.0))
-    stag = P(pelvis=(5, 5), chest=(9, 3), head=(12, -1), head_rot=-18, spine_rot=-14, sash=-20, leg_n=lg("n", -3, 0), leg_f=lg("f", 5, 0, planted=False), arm_n=arm(-70, 13, -110, 13, hand=0.0), arm_f=arm(38, 12, 150, 11, hand=0.0))
-    rec = P(pelvis=(2, 3), chest=(3, 2), head=(4, 0), head_rot=-6, spine_rot=-5, sash=8)
-    return hit, stag, rec
+    hit = P(pelvis=(3, -3), chest=(6, -3), head=(9, -5), head_rot=-16, spine_rot=-11, sash=24, leg_n=air("n", 0, -5), leg_f=air("f", 0, -5), arm_n=A("n", -52, -94), arm_f=A("f", 68, 140))
+    peak = P(pelvis=(5, 0), chest=(9, -1), head=(13, -3), head_rot=-22, spine_rot=-16, sash=40, leg_n=lg("n", -4, 0), leg_f=air("f", 6, -5), arm_n=A("n", -62, -104), arm_f=A("f", 80, 150))
+    stag = P(pelvis=(6, 5), chest=(10, 4), head=(12, 2), head_rot=-16, spine_rot=-12, sash=-22, leg_n=lg("n", -5, 0), leg_f=lg("f", 6, 0), arm_n=A("n", -50, -90), arm_f=A("f", 56, 126))
+    hunch = P(pelvis=(2, 9), chest=(4, 9), head=(5, 7), head_rot=8, spine_rot=4, sash=10, leg_n=lg("n", 0, 0), leg_f=lg("f", 2, 0), arm_n=A("n", -34, -70), arm_f=A("f", 22, 100))
+    return hit, peak, stag, hunch
 
 def hurt():
-    hit, stag, rec = hurt_keys()
-    keys = [(0, hit), (2, stag), (4, stag), (6, rec), (7, P())]
+    hit, peak, stag, hunch = hurt_keys()
+    keys = [(0, hit), (1, peak), (2, stag), (3, stag), (4, hunch), (5, hunch), (6, P(pelvis=(1, 5), chest=(1, 3), head_rot=2, spine_rot=3)), (7, P())]
     return {"name": "Hurt", "fps": 20, "loop": False, "frames": [depth(p) for p in tween(keys, 8)], "events": {"impact": 0, "interruptible_from": 5}}
 
-FALL = 1
-def lie(rot, rx, ry, arms, **kw):
-    p = P(root=(rx, ry), root_rot=FALL * rot, **kw)
-    for k in ("leg_n", "leg_f"): p.pop(k, None)
-    p.update(arms); return p
+# ------------------------------------------------------------------ Death
+GROUND = 164.0; FALL = 1; HX = 84.0
+_W0 = a.r.fk(a.solve(stance())[0]); P0 = a.r.apply(_W0, "pelvis", a.REST["pelvis"][0]); P0x, P0y = float(P0[0]), float(P0[1])
+def soleabs(x, y, **k): return dict({"sole": (x, y), "bend": 1}, **k)
+def down(rot, hx, hy, legs, arms, **kw):
+    p = P(root_rot=FALL * rot, hip_target=(hx, hy), **kw); p.update(legs); p.update(arms); return p
 
 def death():
-    hit, stag, _ = hurt_keys()
-    buckle = copy.deepcopy(stag); buckle["pelvis"] = (buckle["pelvis"][0], 16); buckle["chest"] = (buckle["chest"][0], 13)
-    for s in "nf": buckle[f"leg_{s}"] = dict(buckle.get(f"leg_{s}", lg(s)), fs_t=0.78, fs_s=0.9, planted=False)
-    L, R = "f", "n"
-    up = lambda: {"arm_f": arm(FALL * 150, 12, FALL * 172, 11, hand=0.0), "arm_n": arm(-FALL * 120, 13, -FALL * 150, 13, hand=0.0)}
-    mid = lambda: {"arm_f": arm(FALL * 120, 12, FALL * 130, 11, hand=0.0), "arm_n": arm(-FALL * 100, 13, -FALL * 110, 13, hand=0.0)}
-    ground = lambda e=0: {"arm_f": arm(FALL * (112 + e), 12, FALL * (100 + e), 11, hand=0.0), "arm_n": arm(FALL * (80 + e), 13, FALL * (92 + e), 13, hand=0.0)}
-    X, Y = FALL * 96, -16
+    hit, peak, stag, hunch = hurt_keys()
+    stand = {f"leg_{s}": lg(s) for s in "nf"}
+    up = {"arm_f": A("f", 200, 190), "arm_n": A("n", 192, 184)}
+    out = {"arm_f": A("f", 160, 180), "arm_n": A("n", 196, 188)}
+    rest_arms = lambda e=0: {"arm_f": A("f", 106 + e, 160 + e), "arm_n": A("n", 88 + e, 100 + e)}
+    flung = {"arm_f": A("f", 232, 210), "arm_n": A("n", 150, 172)}
+    fin = lambda ex=0: {"leg_n": soleabs(HX + 40 + ex, GROUND, planted=False), "leg_f": soleabs(HX + 60 + ex, GROUND - 2, planted=False, straight=True, slack=6.0)}
+    lifting = {"leg_n": soleabs(HX + 24, GROUND - 24, planted=False), "leg_f": soleabs(HX + 44, GROUND - 40, planted=False)}
+    kneel = P(root_rot=0.0, hip_target=(P0x, P0y + 32), spine_rot=8, head_rot=12, head=(-3, -2), sash=30, **stand, **out)
+    stag2 = P(root_rot=0.0, hip_target=(P0x - 4, P0y + 10), spine_rot=8, head_rot=10, head=(-3, -2), sash=-20, **stand, **out)
     keys = [
-        (0, hit), (1, stag), (3, buckle),
-        (6, lie(30, X * 0.7, -6, up(), spine_rot=FALL * 8, head_rot=FALL * 14, sash=FALL * 30)),
-        (9, lie(64, X * 1.03, Y * 1.25, mid(), spine_rot=FALL * 4, head_rot=FALL * 10, sash=FALL * 40)),
-        (10, lie(90, X, Y - 3, mid(), head_rot=FALL * 6, sash=FALL * 22)),
-        (11, lie(90, X, Y + 1, ground(4), head_rot=FALL * 14, sash=FALL * 8)),
-        (13, lie(90, X, Y, ground(0), head_rot=FALL * 20, sash=0.0)),
-        (15, lie(90, X, Y, ground(0), head_rot=FALL * 20, sash=0.0)),
+        (0, hit), (1, peak), (2, stag2), (4, kneel),
+        (6, down(34, P0x + 6, P0y + 42, stand, up, spine_rot=8, head_rot=16, sash=40)),
+        (8, down(66, HX - 4, GROUND - 40, lifting, up, head_rot=14, sash=48)),
+        (10, down(90, HX, GROUND - 22, fin(-8), flung, head_rot=4, sash=30)),
+        (11, down(84, HX, GROUND - 33, fin(-14), flung, head_rot=-8, sash=14)),
+        (12, down(90, HX, GROUND - 21, fin(-4), rest_arms(10), head_rot=10, sash=6)),
+        (14, down(90, HX, GROUND - 21, fin(), rest_arms(), head_rot=12, sash=0.0)),
+        (17, down(90, HX, GROUND - 21, fin(), rest_arms(), head_rot=12, sash=0.0)),
     ]
-    return {"name": "Death", "fps": 14, "loop": False, "frames": [depth(p) for p in tween(keys, 16)], "events": {"hit": 0, "ground_contact": 10, "settled": 13}}
+    return {"name": "Death", "fps": 14, "loop": False, "frames": [depth(p) for p in tween(keys, 18)], "events": {"hit": 0, "ground_contact": 10, "settled": 14}}
 
 CLIPS = [dash, hurt, death]

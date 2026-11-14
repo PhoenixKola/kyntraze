@@ -1,0 +1,69 @@
+{
+ "errors": [],
+ "dash": {
+  "E": "east/Dash/3",
+  "N": "north/Dash/3",
+  "W": "west/Dash/3",
+  "S": "south/Dash/3"
+ },
+ "pauseFrozen": true,
+ "deaths": [
+  {
+   "died": true,
+   "resultsAfterMs": 1610,
+   "maxFrameBeforeResults": 17,
+   "lastFrameBeforeResults": 17,
+   "alwaysDeadNoRevive": true,
+   "deathClipOnlyBeforeResults": true,
+   "afterRetry": {
+    "pose": "south/Idle",
+    "sim": {
+     "hp": 100,
+     "ph": "running"
+    },
+    "resultsHidden": true
+   }
+  },
+  {
+   "died": true,
+   "resultsAfterMs": 1662,
+   "maxFrameBeforeResults": 17,
+   "lastFrameBeforeResults": 17,
+   "alwaysDeadNoRevive": true,
+   "deathClipOnlyBeforeResults": true,
+   "afterRetry": {
+    "pose": "south/Idle",
+    "sim": {
+     "hp": 100,
+     "ph": "running"
+    },
+    "resultsHidden": true
+   }
+  }
+ ],
+ "dash-640w": {
+  "E": "east/Dash/3",
+  "N": "north/Dash/3",
+  "W": "west/Dash/3",
+  "S": "south/Dash/3"
+ },
+ "pauseFrozen-640w": true,
+ "deaths-640w": [
+  {
+   "died": true,
+   "resultsAfterMs": 1668,
+   "maxFrameBeforeResults": 17,
+   "lastFrameBeforeResults": 17,
+   "alwaysDeadNoRevive": true,
+   "deathClipOnlyBeforeResults": true,
+   "afterRetry": {
+    "pose": "south/Idle",
+    "sim": {
+     "hp": 100,
+     "ph": "running"
+    },
+    "resultsHidden": true
+   }
+  }
+ ]
+}

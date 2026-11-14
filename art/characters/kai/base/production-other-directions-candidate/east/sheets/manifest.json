@@ -71,10 +71,10 @@
     "travel_end": 6,
     "recover_start": 7
    },
-   "frame_width": 142,
+   "frame_width": 166,
    "frame_height": 154,
    "origin_px": [
-    63.0,
+    68.0,
     154.0
    ],
    "terminal": "once",
@@ -91,7 +91,7 @@
     "impact": 0,
     "interruptible_from": 5
    },
-   "frame_width": 115,
+   "frame_width": 116,
    "frame_height": 159,
    "origin_px": [
     70.0,
@@ -102,21 +102,21 @@
   },
   "Death": {
    "sheet": "sheets/kai_east_death.png",
-   "frames": 16,
+   "frames": 18,
    "fps": 14,
    "loop": false,
-   "duration_s": 1.1429,
+   "duration_s": 1.2857,
    "blender_action": "Death",
    "events": {
     "hit": 0,
     "ground_contact": 10,
-    "settled": 13
+    "settled": 14
    },
-   "frame_width": 176,
+   "frame_width": 166,
    "frame_height": 168,
    "origin_px": [
-    70.0,
-    156.0
+    69.0,
+    159.0
    ],
    "terminal": "hold_last_frame",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"

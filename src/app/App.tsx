@@ -25,7 +25,7 @@ function GameStage({ bridge, seed, onHome, onSettings }: { bridge: GameBridge; s
   return <div className="game-shell" data-testid="game-shell"><div className="arena-viewport" ref={setHost} aria-label="Playable Kyntraze arena"/><Hud s={snapshot} onPause={() => bridge.togglePause()}/>
     {snapshot.phase === 'upgrade' && <LevelUpScreen level={snapshot.level} offers={snapshot.offers} onChoose={id => bridge.choose(id)} />}
     {snapshot.phase === 'paused' && <PauseMenu onResume={() => bridge.togglePause()} onHome={onHome} onSettings={onSettings}/>}
-    {snapshot.phase === 'dead' && <ResultsScreen s={snapshot} onRetry={() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))} onHome={onHome}/>}
+    {snapshot.phase === 'dead' && snapshot.deathShown && <ResultsScreen s={snapshot} onRetry={() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))} onHome={onHome}/>}
   </div>;
 }
 export default function App() {

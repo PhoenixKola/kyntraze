@@ -96,6 +96,8 @@ const FACING_DWELL = 0.12;
 const MAX_PUNCH_RATE = 2.5;
 
 const DASH_RECOVERY_SECONDS = 0.12;
+/** After the Death clip has played, hold its final frame this long before Results may appear. */
+export const DEATH_RESULTS_HOLD_SECONDS = 0.35;
 
 export class KaiAnimator {
   facing: Facing = 'south';
@@ -116,6 +118,8 @@ export class KaiAnimator {
 
   get punching() { return this.punchTime >= 0; }
   get dead() { return this.deathTime >= 0; }
+  /** True once the Death clip has played through and held its last frame for DEATH_RESULTS_HOLD_SECONDS. Never true while alive. */
+  deathPresented(): boolean { if (this.deathTime < 0) return false; const d = this.info('Death'); return this.deathTime >= d.frames / d.fps + DEATH_RESULTS_HOLD_SECONDS; }
 
   private turn(next: Facing, force = false) { if (next !== this.facing && (force || this.sinceTurn >= FACING_DWELL)) { this.facing = next; this.sinceTurn = 0; } }
 

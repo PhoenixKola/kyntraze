@@ -64,6 +64,7 @@ export class ArenaScene extends Phaser.Scene {
     const s = this.simulation.state;
     followPlayer(this.cameras.main, s.player.x, s.player.y);
     this.entityRenderer.sync(s, this.lastInput, delta);
+    if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
     this.fx.render(s, this.bridge.getSettings().reducedEffects);
     this.publishClock += delta;
     if ((s.phase === 'running' && this.publishClock >= 100) || this.bridge.snapshot().phase !== s.phase) { this.publishClock = 0; this.bridge.publish(); }

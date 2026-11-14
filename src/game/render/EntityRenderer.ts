@@ -22,6 +22,7 @@ export class EntityRenderer {
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
   }
   /** Hero animation state, for the dev-only QA hook. */
+  deathPresented() { return this.animator.deathPresented(); }
   /** QA-only size comparison; the shipped default stays KAI_SCALE. */
   setHeroScale(scale: number) { this.hero.setScale(scale); this.legs.setScale(scale); }
   debugPose() { return { ...this.pose, texture: this.hero.texture.key, frameIndex: Number(this.hero.frame.name), x: this.hero.x, y: this.hero.y, scale: this.hero.scaleX }; }

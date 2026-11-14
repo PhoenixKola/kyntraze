@@ -36,6 +36,8 @@ def solve(pose):
     ch["head"] = {"loc": tuple(pose.get("head", (0, 0))), "rot": pose.get("head_rot", 0.0)}
     ch["sash"] = {"rot": pose.get("sash", 0.0)}
     W = r.fk(ch)
+    if "hip_target" in pose:       # pivot the whole body (root) so the pelvis joint lands on this canvas point
+        p0 = r.apply(W, "pelvis", REST["pelvis"][0]); ch["root"] = dict(ch.get("root", {}), loc=tuple(np.array(pose["hip_target"], float) - p0)); W = r.fk(ch)
     # arms (world direction + length per segment), hands: slot + world angle
     for s in ("n", "f"):
         a = pose.get(f"arm_{s}")

@@ -23,6 +23,7 @@ def knee(hip, ankle, L1, L2, want_dir):
     d = ankle - hip; D_ = float(np.linalg.norm(d)); D_ = min(max(D_, abs(L1 - L2) + 1e-3), L1 + L2 - 1e-3)
     a = (L1 * L1 - L2 * L2 + D_ * D_) / (2 * D_); h = math.sqrt(max(0.0, L1 * L1 - a * a))
     u = d / np.linalg.norm(d); n = np.array([u[1], -u[0]]); c = [hip + u * a + sgn * n * h for sgn in (1, -1)]
+    if want_dir == "up": return min(c, key=lambda k: k[1])     # lying poses: the knee that points up the screen
     return max(c, key=lambda k: want_dir * k[0])        # the knee that bends toward the wanted screen side
 
 # Stance targets read from the direction anchor (anchor native px -> canvas: X = RX + SX*(ax-40), Y = ay+5). EAST measurements; WEST is the same pose mirrored.
@@ -46,6 +47,8 @@ def solve(pose):
     ch["head"] = {"loc": (hx + HEAD_OFF[0], hy + HEAD_OFF[1]), "rot": pose.get("head_rot", 0.0)}
     ch["sash"] = {"rot": pose.get("sash", 0.0)}
     W = r.fk(ch)
+    if "hip_target" in pose:       # pivot the whole body (root) so the pelvis joint lands on this canvas point
+        p0 = r.apply(W, "pelvis", REST["pelvis"][0]); ch["root"] = dict(ch.get("root", {}), loc=tuple(np.array(pose["hip_target"], float) - p0)); W = r.fk(ch)
     for s in "nf":
         a = pose.get(f"arm_{s}")
         if not a: continue

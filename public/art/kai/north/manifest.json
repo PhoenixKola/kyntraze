@@ -71,11 +71,11 @@
     "travel_end": 6,
     "recover_start": 7
    },
-   "frame_width": 100,
-   "frame_height": 158,
+   "frame_width": 114,
+   "frame_height": 163,
    "origin_px": [
-    51.0,
-    150.0
+    57.0,
+    157.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
@@ -91,32 +91,32 @@
     "impact": 0,
     "interruptible_from": 5
    },
-   "frame_width": 106,
-   "frame_height": 157,
+   "frame_width": 132,
+   "frame_height": 159,
    "origin_px": [
-    50.0,
-    155.0
+    55.0,
+    157.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
   },
   "Death": {
    "sheet": "sheets/kai_north_death.png",
-   "frames": 16,
+   "frames": 18,
    "fps": 14,
    "loop": false,
-   "duration_s": 1.1429,
+   "duration_s": 1.2857,
    "blender_action": "Death",
    "events": {
     "hit": 0,
     "ground_contact": 10,
-    "settled": 13
+    "settled": 14
    },
-   "frame_width": 166,
-   "frame_height": 162,
+   "frame_width": 156,
+   "frame_height": 160,
    "origin_px": [
-    78.0,
-    150.0
+    79.0,
+    157.0
    ],
    "terminal": "hold_last_frame",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { KAI_CLIPS, KAI_DIRS, KaiAnimator, clipFrame, SIM_DASH_SECONDS, facingFromInput, facingFromVector, parseKaiManifest, type AnimFrameInput, type Facing, type KaiManifests } from '../assets/kaiAnimation';
+import { GameBridge } from '../bridge/GameBridge';
+import { DEATH_RESULTS_HOLD_SECONDS, KAI_CLIPS, KAI_DIRS, KaiAnimator, clipFrame, SIM_DASH_SECONDS, facingFromInput, facingFromVector, parseKaiManifest, type AnimFrameInput, type Facing, type KaiManifests } from '../assets/kaiAnimation';
 
 const pub = (...p: string[]) => join(__dirname, '..', '..', 'public', 'art', 'kai', ...p);
 const manifests = Object.fromEntries(KAI_DIRS.map(d => [d, parseKaiManifest(JSON.parse(readFileSync(pub(d, 'manifest.json'), 'utf8')), d)])) as KaiManifests;
@@ -23,7 +24,7 @@ describe('Kai manifests', () => {
     }
     expect([m.animations.Dash.frames, m.animations.Dash.loop, m.animations.Dash.events.recover_start]).toEqual([10, false, 7]);
     expect([m.animations.Hurt.frames, m.animations.Hurt.loop]).toEqual([8, false]);
-    expect([m.animations.Death.frames, m.animations.Death.loop, m.animations.Death.terminal]).toEqual([16, false, 'hold_last_frame']);
+    expect([m.animations.Death.frames, m.animations.Death.loop, m.animations.Death.terminal]).toEqual([18, false, 'hold_last_frame']);
     expect(m.origin_px[0]).toBeLessThan(m.frame_width); expect(m.origin_px[1]).toBeLessThan(m.frame_height);
   });
   it('rejects a manifest for the wrong direction or with baked root motion', () => {
@@ -93,8 +94,8 @@ describe('KaiAnimator', () => {
   it('B03G Death: plays once to the last frame, holds, never loops or returns to Idle, and resets for a new run', () => {
     const a = new KaiAnimator(manifests); const dead = { ...idle, alive: false }; const seq: number[] = [];
     for (let i = 0; i < 300; i++) { const p = a.update(dead, 0.55); expect(p.clip).toBe('Death'); seq.push(p.frame); }
-    expect(seq[0]).toBe(0); expect(seq.slice().sort((x, y) => x - y)).toEqual(seq); expect(seq[seq.length - 1]).toBe(15); expect(seq.filter(f => f === 15).length).toBeGreaterThan(100);
-    const frozen = a.update({ ...dead, dt: 0 }, 0.55).frame; expect(frozen).toBe(15);
+    expect(seq[0]).toBe(0); expect(seq.slice().sort((x, y) => x - y)).toEqual(seq); expect(seq[seq.length - 1]).toBe(17); expect(seq.filter(f => f === 17).length).toBeGreaterThan(100);
+    const frozen = a.update({ ...dead, dt: 0 }, 0.55).frame; expect(frozen).toBe(17);
     expect(a.update({ ...idle, hurt: true }, 0.55).clip).toBe('Hurt');
     const b = new KaiAnimator(manifests); b.update(dead, 0.55); expect(b.update(idle, 0.55)).toMatchObject({ clip: 'Idle', frame: 0 });
   });
@@ -157,5 +158,33 @@ describe('KaiAnimator', () => {
       if (p.facing !== pf) tflips++; pf = p.facing;
     }
     expect(tflips).toBeLessThanOrEqual(240 / 7);
+  });
+
+  it('B03G.1: deathPresented is false while alive/dying, true only after the clip played through and held; a new run resets it', () => {
+    const a = new KaiAnimator(manifests); const dead = { ...idle, alive: false }; const d = manifests.south.animations.Death; const total = d.frames / d.fps + DEATH_RESULTS_HOLD_SECONDS;
+    expect(a.deathPresented()).toBe(false);
+    let t = 0; let first = -1;
+    for (let i = 0; i < 600; i++) { a.update(dead, 0.55); t += 1 / 60; if (a.deathPresented() && first < 0) first = t; }
+    expect(first).toBeGreaterThanOrEqual(total - 0.05); expect(first).toBeLessThan(total + 0.1); expect(a.deathPresented()).toBe(true);
+    const paused = new KaiAnimator(manifests); paused.update(dead, 0.55); for (let i = 0; i < 300; i++) paused.update({ ...dead, dt: 0 }, 0.55); expect(paused.deathPresented()).toBe(false);
+    a.update(idle, 0.55); expect(a.deathPresented()).toBe(false);
+  });
+});
+
+describe('B03G.1 Results delay contract (GameBridge)', () => {
+  const fakeSim = (phase: string) => ({ state: { phase, seed: 1, time: 3, kills: 2, enemies: [], upgradeOffers: [], player: { hp: phase === 'dead' ? 0 : 50, maxHp: 100, xp: 0, nextXp: 7, level: 1, dashCooldown: 0, qCooldown: 0, drive: 0, form: 0, formCooldown: 0 } }, stats: () => ({ score: 0 }) });
+  const bridge = (phase: string) => { const b = new GameBridge({ settings: {}, best: { score: 99 } } as never); const sim = fakeSim(phase); b.bind(sim as never); return { b, sim }; };
+  it('dead does not show Results until the death animation reports completion', () => {
+    const { b } = bridge('dead'); expect(b.snapshot()).toMatchObject({ phase: 'dead', deathShown: false });
+    b.markDeathShown(); expect(b.snapshot()).toMatchObject({ phase: 'dead', deathShown: true });
+  });
+  it('markDeathShown is ignored while the sim is not dead and cannot leak into the next phase or run', () => {
+    const { b, sim } = bridge('running'); b.markDeathShown(); expect(b.snapshot().deathShown).toBe(false);
+    sim.state.phase = 'dead'; b.publish(true); b.markDeathShown(); expect(b.snapshot().deathShown).toBe(true);
+    sim.state.phase = 'running'; b.publish(true); expect(b.snapshot().deathShown).toBe(false);
+    expect(bridge('dead').b.snapshot().deathShown).toBe(false);
+  });
+  it('the player cannot act or revive during the delay: pause toggling leaves the dead phase alone', () => {
+    const { b, sim } = bridge('dead'); (sim as unknown as { togglePause?: () => void }).togglePause = () => {}; b.togglePause(); expect(b.snapshot().phase).toBe('dead');
   });
 });
