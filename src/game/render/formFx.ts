@@ -16,6 +16,8 @@ interface P { img: Phaser.GameObjects.Image; age: number; life: number; x: numbe
 export class FormFx {
   private pool: P[] = [];
   private glow: Phaser.GameObjects.Image;
+  private aura: Phaser.GameObjects.Image;
+  private arcClock = 1.2;
   private glowLevel = 0;
   private persistent = false;
   private spawnClock = 0;
@@ -24,6 +26,7 @@ export class FormFx {
   private readonly look = FORM_LOOKS[FORM_I_LOOK];
   constructor(private readonly scene: Phaser.Scene) {
     this.glow = scene.add.image(0, 0, formFxKey('glow')).setBlendMode(Phaser.BlendModes.ADD).setDepth(3.5).setVisible(false).setTint(this.look.aura);
+    this.aura = scene.add.image(0, 0, formFxKey('glow')).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.8).setVisible(false).setTint(this.look.aura).setRotation(Math.PI / 2);   // body halo: the ground glow turned upright, drawn just behind Kai
   }
 
   private spawn(key: string, depth: number, tint: number, o: Partial<P> & { life: number }) {
@@ -34,7 +37,7 @@ export class FormFx {
   }
 
   /** x,y = Kai's feet on the ground; k = FX scale (1 at the default 0.5 hero scale: FX art pixels are 1 screen px); visualForm = Form I art visible; alive = still playing. */
-  update(dt: number, x: number, y: number, k: number, visualForm: boolean, alive: boolean, events: readonly KaiAnimEvent[], reduced: boolean) {
+  update(dt: number, x: number, y: number, k: number, visualForm: boolean, alive: boolean, events: readonly KaiAnimEvent[], reduced: boolean, emphasis = 0, crowded = false) {
     const rnd = Math.random;
     for (const e of events) {
       if (e === 'form_start' && !reduced) {
@@ -58,14 +61,20 @@ export class FormFx {
     this.pulse = Math.max(0, this.pulse - dt);
     const t = performance.now() / 1000;
     const gl = this.glowLevel * (0.38 + 0.1 * Math.sin(t * 7) + this.pulse * 1.2);
-    this.glow.setVisible(this.glowLevel > 0.02).setPosition(x, y - 3).setScale(FX_BASE * k * (2.1 + 0.15 * Math.sin(t * 5)) * (1 + this.pulse)).setAlpha(Math.min(1, gl));
+    this.glow.setVisible(this.glowLevel > 0.02).setPosition(x, y - 3).setScale(FX_BASE * k * (1.55 + 0.1 * Math.sin(t * 5)) * (1 + this.pulse)).setAlpha(Math.min(1, gl * 0.62 * (1 + 0.4 * emphasis)));
+    // persistent body halo: a faint upright glow behind the sprite that breathes at idle and swells while casting / dashing
+    this.aura.setVisible(this.glowLevel > 0.02).setPosition(x, y - 40 * k).setScale(FX_BASE * k * (1.55 + 0.07 * Math.sin(t * 3.1) + 0.2 * emphasis + this.pulse * 0.6)).setAlpha(Math.min(0.5, this.glowLevel * (0.12 + 0.05 * Math.sin(t * 2.3) + 0.2 * emphasis + this.pulse * 0.5)));
     if (this.persistent && dt > 0) {
-      this.spawnClock += dt; const every = reduced ? 0.2 : 0.06;
+      this.spawnClock += dt; const every = (reduced ? 0.2 : 0.06) * (crowded ? 1.8 : 1) / (1 + emphasis * 0.8);
       while (this.spawnClock > every) {
         this.spawnClock -= every; const key = ['wisp_a', 'wisp_b', 'wisp_c'][Math.floor(rnd() * 3)];
         this.spawn(key, 9, this.look.aura, { x: x + (rnd() - 0.5) * 34 * k, y: y - 2, vx: (rnd() - 0.5) * 10 * k, vy: -(52 + rnd() * 36) * k, life: 0.5 + rnd() * 0.25, s0: (1.35 + rnd() * 0.5) * k, s1: 0.7 * k, a0: 1, a1: 0, rot: (rnd() - 0.5) * 0.25 });
       }
-      if (!reduced) { this.sparkClock += dt; while (this.sparkClock > 0.22) { this.sparkClock -= 0.22; const a = rnd() * Math.PI * 2, r = (22 + rnd() * 16) * k; this.spawn('spark', 11, this.look.core, { x: x + Math.cos(a) * r, y: y - 30 * k + Math.sin(a) * r * 0.8 + 10, vy: -14 * k, life: 0.3, s0: 0.5 * k, s1: 0.25, a0: 1, a1: 0 }); } }
+      if (!reduced && !crowded) {   // an occasional tiny energy arc crackling off the shoulders / hands (never in crowded fights)
+        this.arcClock -= dt * (1 + emphasis);
+        if (this.arcClock <= 0) { this.arcClock = 1.4 + rnd() * 2.2; const v = rnd() < 0.5, side = rnd() < 0.5 ? -1 : 1; this.spawn(v ? 'arc_v' : 'arc_h', 11, this.look.core, { x: x + side * (18 + rnd() * 10) * k, y: y - (48 + rnd() * 22) * k, life: 0.13, s0: 0.7 * k, s1: 0.95 * k, a0: 0.85, a1: 0, sx: side }); }
+      }
+      if (!reduced) { this.sparkClock += dt; while (this.sparkClock > (crowded ? 0.4 : 0.22) / (1 + emphasis)) { this.sparkClock -= 0.22; const a = rnd() * Math.PI * 2, r = (22 + rnd() * 16) * k; this.spawn('spark', 11, this.look.core, { x: x + Math.cos(a) * r, y: y - 30 * k + Math.sin(a) * r * 0.8 + 10, vy: -14 * k, life: 0.3, s0: 0.5 * k, s1: 0.25, a0: 1, a1: 0 }); } }
     }
     for (let i = this.pool.length - 1; i >= 0; i--) {
       const p = this.pool[i];
@@ -77,5 +86,5 @@ export class FormFx {
     }
   }
 
-  destroy() { this.glow.destroy(); this.pool.forEach(p => p.img.destroy()); this.pool = []; }
+  destroy() { this.glow.destroy(); this.aura.destroy(); this.pool.forEach(p => p.img.destroy()); this.pool = []; }
 }

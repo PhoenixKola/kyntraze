@@ -3,11 +3,13 @@ import { distanceSquared } from '../core/Math';
 import { ENEMIES } from '../content/enemies';
 import { addPickup } from './EntityRegistry';
 import { RULES } from '../core/Rules';
+import { interruptOnHit } from './AbilitySystem';
 export function damagePlayer(state: GameState, damage: number): boolean {
   const p = state.player;
   if (p.invulnerable > 0 || state.phase !== 'running') return false;
   p.hp = Math.max(0, p.hp - Math.max(0, damage)); p.invulnerable = RULES.contactInvulnerability;
   state.impacts.push({ id: state.nextId++, kind: 'hit', x: p.x, y: p.y, ttl: 0.4, life: 0.4 });
+  interruptOnHit(state);
   if (p.hp <= 0) state.phase = 'dead'; return true;
 }
 export function damageEnemy(state: GameState, enemy: Enemy, damage: number): boolean {

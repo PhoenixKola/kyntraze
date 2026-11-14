@@ -34,7 +34,7 @@ The browser E2E suite tests title → select → boot, pause/resume, and three-u
 ## What is playable now?
 
 - Title → select **Kai** (Ren/Sora explicitly unavailable) → active survival arena.
-- Keyboard **WASD / arrow** movement (8-way normalized), Shift/Space dash with invulnerability and recharge, automatic short/mid-range Comet Fists attacks, **Q** impact radial ability, **F** temporary Form I *Flarebound* at 65+ Drive.
+- Keyboard **WASD / arrow** movement (8-way normalized), Shift/Space dash with invulnerability and recharge, automatic short/mid-range Comet Fists attacks, **Q** impact radial ability, **F** temporary Form I *Flarebound* at 65+ Drive. **E** *Fracture Lance* (focused beam) and **R** *Nova Bloom* (energy sphere) signature abilities (B05). Optional controller: left stick / D-pad move, **A** dash, **X** Q, **RB/RT** beam, **LB/LT** sphere, **Y** form, **START** pause (menus: D-pad + A / B).
 - Two debug enemy kinds with scaling seeded spawns, 2D obstacle collision, contact damage and death.
 - XP orbs, 3 deterministic weighted upgrade choices per level (8 distinct functional augments), HUD, pause on Esc/focus loss, retry same seed, return home.
 - Device-local settings and best-run record, both fail gracefully if `localStorage` is blocked/corrupted.

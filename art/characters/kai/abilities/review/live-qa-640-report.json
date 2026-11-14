@@ -1,0 +1,162 @@
+{
+ "size": [
+  640,
+  360
+ ],
+ "errors": [],
+ "checks": {
+  "beam-east": {
+   "enemiesLeft": 2,
+   "kills": 8,
+   "pose": "Idle"
+  },
+  "sphere-east": {
+   "enemiesLeft": 0,
+   "kills": 22,
+   "pose": "Idle"
+  },
+  "beam-west": {
+   "enemiesLeft": 3,
+   "kills": 29,
+   "pose": "Idle"
+  },
+  "sphere-west": {
+   "enemiesLeft": 0,
+   "kills": 43,
+   "pose": "Idle"
+  },
+  "beam-south": {
+   "enemiesLeft": 6,
+   "kills": 47,
+   "pose": "Idle"
+  },
+  "sphere-south": {
+   "enemiesLeft": 0,
+   "kills": 61,
+   "pose": "Idle"
+  },
+  "beam-north": {
+   "enemiesLeft": 3,
+   "kills": 68,
+   "pose": "Idle"
+  },
+  "sphere-north": {
+   "enemiesLeft": 0,
+   "kills": 82,
+   "pose": "Idle"
+  },
+  "f1": {
+   "t": 119.61666666666116,
+   "hp": 100000,
+   "x": 1095.8333333333333,
+   "y": 795.8333333333334,
+   "form": 1,
+   "drive": 85.1583333333332,
+   "kills": 98,
+   "en": 0,
+   "phase": "running",
+   "cast": null,
+   "sphere": false,
+   "blasts": 0,
+   "bcd": 0,
+   "scd": 13.716666666666553,
+   "pose": {
+    "facing": "north",
+    "clip": "Idle",
+    "frame": 10,
+    "legs": null,
+    "form": "f1",
+    "events": [],
+    "visualForm": "f1",
+    "transforming": false,
+    "texture": "kaif1-north-Idle",
+    "frameIndex": 10,
+    "x": 1096,
+    "y": 820,
+    "scale": 0.5
+   }
+  },
+  "dashCancel": {
+   "cast": null,
+   "clip": "Dash"
+  },
+  "pauseMidCharge": {
+   "frozen": true,
+   "phase": "paused"
+  },
+  "hurtBeforeRelease": {
+   "cast": null,
+   "hp": 99980,
+   "clip": "Hurt"
+  },
+  "fpsCrowdIdle": 60.5,
+  "fpsSphereCrowd": 60.5,
+  "fpsBeamCrowd": 60.5,
+  "death": {
+   "t": 129.31666666666172,
+   "hp": 1,
+   "x": 1427.158333333331,
+   "y": 795.8333333333334,
+   "form": 1,
+   "drive": 22.108333333332652,
+   "kills": 143,
+   "en": 46,
+   "phase": "dead",
+   "cast": null,
+   "sphere": false,
+   "blasts": 0,
+   "bcd": 6.983333333333333,
+   "scd": 11.766666666666456,
+   "pose": {
+    "facing": "east",
+    "clip": "Death",
+    "frame": 17,
+    "legs": null,
+    "form": "f1",
+    "events": [],
+    "visualForm": "f1",
+    "transforming": false,
+    "texture": "kaif1-east-Death",
+    "frameIndex": 17,
+    "x": 1427,
+    "y": 820,
+    "scale": 0.5
+   }
+  },
+  "resultsVisible": true
+ },
+ "shots": [
+  "beam-east-charge",
+  "beam-east-fire",
+  "sphere-east-gather",
+  "sphere-east-throw",
+  "sphere-east-flight",
+  "sphere-east-burst",
+  "sphere-east-after",
+  "beam-west-charge",
+  "beam-west-fire",
+  "sphere-west-gather",
+  "sphere-west-throw",
+  "sphere-west-flight",
+  "sphere-west-burst",
+  "sphere-west-after",
+  "beam-south-charge",
+  "beam-south-fire",
+  "sphere-south-gather",
+  "sphere-south-throw",
+  "sphere-south-flight",
+  "sphere-south-burst",
+  "sphere-south-after",
+  "beam-north-charge",
+  "beam-north-fire",
+  "sphere-north-gather",
+  "sphere-north-throw",
+  "sphere-north-flight",
+  "sphere-north-burst",
+  "sphere-north-after",
+  "f1-beam-fire",
+  "f1-sphere-burst",
+  "crowd-after",
+  "results"
+ ]
+}

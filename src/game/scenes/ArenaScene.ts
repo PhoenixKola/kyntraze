@@ -9,6 +9,7 @@ import { followPlayer } from '../render/CameraController';
 import { OBSTACLES } from '../../content/arena';
 import { RULES } from '../../core/Rules';
 import type { InputState } from '../../sim/GameState';
+import { sharedAbilityAudio, type AbilityAudio } from '../audio/abilityAudio';
 export class ArenaScene extends Phaser.Scene {
   private simulation!: Simulation;
   private controller!: InputController;
@@ -17,7 +18,9 @@ export class ArenaScene extends Phaser.Scene {
   private fixed = new FixedStep();
   private publishClock = 0;
   private disposed = false;
-  private lastInput: InputState = { x: 0, y: 0, dash: false, q: false, f: false };
+  private audio: AbilityAudio | null = null;
+  private readonly unlockAudio = () => { void this.audio?.unlock(); };
+  private lastInput: InputState = { x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false };
   constructor(private readonly bridge: GameBridge, private readonly seed: number) { super({ key: 'ArenaScene' }); }
   create() {
     this.simulation = new Simulation(this.seed);
@@ -25,13 +28,15 @@ export class ArenaScene extends Phaser.Scene {
     this.createArena();
     this.entityRenderer = new EntityRenderer(this);
     this.fx = new EffectsRenderer(this);
-    this.controller = new InputController(() => this.bridge.togglePause(), () => { if (this.bridge.getSettings().pauseOnBlur) this.bridge.pause(); });
+    this.controller = new InputController(() => this.bridge.togglePause(), () => { if (this.bridge.getSettings().pauseOnBlur) this.bridge.pause(); }, () => this.bridge.pause());
     this.bridge.bind(this.simulation);
+    this.audio = sharedAbilityAudio(); this.audio?.setMuted(this.bridge.getSettings().mute);
+    window.addEventListener('keydown', this.unlockAudio); window.addEventListener('pointerdown', this.unlockAudio);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.dispose());
     this.game.events.once(Phaser.Core.Events.DESTROY, () => this.dispose());
     // QA-only escape hatch: dev server AND explicit ?qa=1; never a shipping cheat.
     if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('qa') === '1') {
-      (window as Window & { __KYNT_QA__?: { grantXp: () => void; heroPose: () => unknown; setHeroScale: (n: number) => void; sim: () => unknown } }).__KYNT_QA__ = { grantXp: () => this.bridge.debugGrantXp(), heroPose: () => this.entityRenderer.debugPose(), setHeroScale: (n: number) => this.entityRenderer.setHeroScale(n), sim: () => this.simulation.state };
+      (window as Window & { __KYNT_QA__?: { grantXp: () => void; heroPose: () => unknown; setHeroScale: (n: number) => void; sim: () => unknown; hand: () => unknown; fxOrigin: () => unknown; audio: () => unknown } }).__KYNT_QA__ = { grantXp: () => this.bridge.debugGrantXp(), heroPose: () => this.entityRenderer.debugPose(), hand: () => this.entityRenderer.handAnchor(), fxOrigin: () => this.entityRenderer.fxOrigin(), audio: () => ({ state: this.audio?.state ?? 'none', loaded: this.audio?.loaded ?? 0, active: this.audio?.activeVoices ?? 0, started: [...(this.audio?.started ?? [])] }), setHeroScale: (n: number) => this.entityRenderer.setHeroScale(n), sim: () => this.simulation.state };
     }
   }
   private createArena() {
@@ -66,11 +71,13 @@ export class ArenaScene extends Phaser.Scene {
     this.entityRenderer.sync(s, this.lastInput, delta, this.bridge.getSettings().reducedEffects);
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
     this.fx.render(s, this.bridge.getSettings().reducedEffects);
+    this.audio?.setMuted(this.bridge.getSettings().mute); this.audio?.sync(s);
     this.publishClock += delta;
     if ((s.phase === 'running' && this.publishClock >= 100) || this.bridge.snapshot().phase !== s.phase) { this.publishClock = 0; this.bridge.publish(); }
   }
   private dispose() {
     if (this.disposed) return; this.disposed = true;
+    window.removeEventListener('keydown', this.unlockAudio); window.removeEventListener('pointerdown', this.unlockAudio); this.audio?.dispose();
     this.controller?.destroy(); this.entityRenderer?.destroy(); this.fx?.destroy(); this.bridge.unbind();
     delete (window as Window & { __KYNT_QA__?: unknown }).__KYNT_QA__;
   }

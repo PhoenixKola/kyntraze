@@ -37,3 +37,6 @@ coverage/
 /art/characters/kai/base/b03f-evidence/*.webm
 /art/characters/kai/base/b03g-evidence/*.webm
 /art/characters/kai/base/b03g1-evidence/*.webm
+
+# B05.1 local gameplay recordings (large; regenerate with scripts/live_b051.cjs)
+art/characters/kai/abilities/review/b05-1/*.mp4

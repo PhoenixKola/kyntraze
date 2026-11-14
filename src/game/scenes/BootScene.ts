@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { STARTER_TEXTURES } from '../../assets/atlasRegistry';
+import { ABILITY_FX_NAMES, abilityFxKey, abilityFxUrl } from '../render/abilityFx';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
-import { KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiManifests } from '../../assets/kaiAnimation';
+import { KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
   constructor() { super({ key: 'BootScene' }); }
   preload() {
@@ -9,6 +10,8 @@ export class BootScene extends Phaser.Scene {
     KAI_DIRS.forEach(dir => this.load.json(`kai-manifest-${dir}`, kaiManifestUrl(dir)));
     KAI_DIRS.forEach(dir => this.load.json(`kai-f1-manifest-${dir}`, kaiManifestUrl(dir, 'f1')));
     FORM_FX_NAMES.forEach(n => this.load.image(formFxKey(n), formFxUrl(n)));
+    this.load.json(KAI_ANCHORS_KEY, KAI_ANCHORS_URL);
+    ABILITY_FX_NAMES.forEach(n => this.load.image(abilityFxKey(n), abilityFxUrl(n)));
     this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => console.error(`[boot] failed to load ${file.key} (${file.url})`));
   }
   create() {
@@ -16,6 +19,7 @@ export class BootScene extends Phaser.Scene {
     const manifests = {} as KaiManifests;
     for (const dir of KAI_DIRS) manifests[dir] = parseKaiManifest(this.cache.json.get(`kai-manifest-${dir}`), dir);
     this.registry.set(KAI_REGISTRY_KEY, manifests);
+    this.registry.set(KAI_ANCHORS_KEY, this.cache.json.get(KAI_ANCHORS_KEY));
     const f1 = {} as KaiManifests;
     for (const dir of KAI_DIRS) f1[dir] = parseKaiManifest(this.cache.json.get(`kai-f1-manifest-${dir}`), dir, 'f1');
     this.registry.set(KAI_F1_REGISTRY_KEY, f1);

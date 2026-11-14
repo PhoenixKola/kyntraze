@@ -8,7 +8,7 @@ export function TitleScreen({ onPlay, onSettings, save }: Props) {
       <h1 className="game-logo"><span>KYNTRAZE</span><strong>FRACTURE<br/>RUSH</strong></h1>
       <p className="title-subtitle">MOVE FAST. BREAK THE HORDE.<br/>CHARGE THE FRACTURE.</p>
       <div className="title-buttons">
-        <button className="primary-button" onClick={onPlay} data-testid="play-button">ENTER THE FRACTURE <span aria-hidden="true">↗</span></button>
+        <button className="primary-button" onClick={onPlay} data-testid="play-button" data-pad-default data-pad-start>ENTER THE FRACTURE <span aria-hidden="true">↗</span></button>
         <button className="outlined-button" onClick={onSettings}>SETTINGS <span aria-hidden="true">⌁</span></button>
       </div>
       <div className="best-run">{save.best ? <>PERSONAL BEST <b>{save.best.score.toLocaleString()} PTS</b> · {save.best.kills} KILLS</> : 'NO RECORDED RUNS · YOUR FIRST FRACTURE AWAITS'}</div>

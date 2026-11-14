@@ -193,6 +193,8 @@ import danim_b03g  # noqa: E402  (B03G clips; appended to CLIPS below)
 CLIPS += danim_b03g.CLIPS
 import danim_form  # noqa: E402  (Form I: hair follow-through + Transform clip; no-ops for the base build)
 CLIPS += danim_form.CLIPS
+import danim_b05  # noqa: E402  (B05: Beam + Sphere signature abilities, base and Form I)
+CLIPS += danim_b05.CLIPS
 
 def slots_of(p):
     s = {f"hand_{s}": hand_slot(p, s) for s in "nf"}

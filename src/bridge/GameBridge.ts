@@ -22,7 +22,7 @@ export class GameBridge {
     if (s.phase !== 'dead') this.deathShown = false;
     this.current = { phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
-      dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, drive: p.drive, form: p.form,
+      dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form,
       formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown };
     if (s.phase === 'dead' && phaseChanged) {
       const stats = this.sim!.stats();

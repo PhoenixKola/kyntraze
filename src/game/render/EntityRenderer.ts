@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import type { GameState, InputState } from '../../sim/GameState';
 import { FormFx } from './formFx';
+import { AbilityFx } from './abilityFx';
+import { KAI_ANCHORS_KEY, handAnchorWorld, type AnchorTable, type HandAnchor } from '../../assets/kaiAnimation';
 import { KAI_F1_REGISTRY_KEY, KAI_GROUND_DY, KAI_REGISTRY_KEY, clipFrame, KAI_SCALE, KAI_SPLIT_ABOVE_FEET, KaiAnimator, kaiTextureKey, type AnimPose, type KaiManifests } from '../../assets/kaiAnimation';
 export class EntityRenderer {
   private hero: Phaser.GameObjects.Sprite;
@@ -8,6 +10,11 @@ export class EntityRenderer {
   private readonly manifests: KaiManifests;
   private readonly f1: KaiManifests | undefined;
   private readonly formFx: FormFx;
+  private readonly abilityFx: AbilityFx;
+  private readonly anchors: AnchorTable | undefined;
+  private hand: HandAnchor | null = null;
+  private enemyHp = new Map<number, number>();
+  private enemyFlash = new Map<number, number>();
   private readonly animator: KaiAnimator;
   private pose: AnimPose = { facing: 'south', clip: 'Idle', frame: 0, legs: null, form: 'base', events: [] };
   private lastShotId = 0;
@@ -22,7 +29,7 @@ export class EntityRenderer {
     const manifests = scene.registry.get(KAI_REGISTRY_KEY) as KaiManifests | undefined;
     if (!manifests) throw new Error('Kai animation manifests were not loaded by BootScene');
     this.f1 = scene.registry.get(KAI_F1_REGISTRY_KEY) as KaiManifests | undefined;
-    this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1); this.formFx = new FormFx(scene);
+    this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
   }
@@ -30,6 +37,10 @@ export class EntityRenderer {
   deathPresented() { return this.animator.deathPresented(); }
   /** QA-only size comparison; the shipped default stays KAI_SCALE. */
   setHeroScale(scale: number) { this.hero.setScale(scale); this.legs.setScale(scale); }
+  /** World position of Kai's fists for the frame on screen (Beam / Sphere clips only). */
+  handAnchor() { return this.hand; }
+  /** QA: the world point the beam/orb was last anchored to and whether it came from the sprite anchors or the sim fallback. */
+  fxOrigin() { return this.abilityFx.lastOrigin; }
   debugPose() { return { ...this.pose, visualForm: this.animator.visualForm, transforming: this.animator.transforming, texture: this.hero.texture.key, frameIndex: Number(this.hero.frame.name), x: this.hero.x, y: this.hero.y, scale: this.hero.scaleX }; }
   sync(state: GameState, input: InputState, deltaMs = 0, reducedEffects = false) {
     const p = state.player;
@@ -50,7 +61,7 @@ export class EntityRenderer {
     this.pose = this.animator.update({
       dt, alive: state.phase !== 'dead' && p.hp > 0, moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, inputX: input.x, inputY: input.y,
       runSpeed: p.speed * (p.form ? 1.16 : 1), dashing: p.dashRemaining > 0, dashX: p.dashDx, dashY: p.dashDy, dashRemaining: p.dashRemaining, hurt, form: p.form,
-      attackClock: p.attackClock, hasTarget: target !== null, targetDx: target?.dx ?? 0, targetDy: target?.dy ?? 0, shot,
+      cast: state.cast ? { id: state.cast.id, kind: state.cast.kind, face: state.cast.face, t: state.cast.t, dirX: state.cast.dirX, dirY: state.cast.dirY } : null, attackClock: p.attackClock, hasTarget: target !== null, targetDx: target?.dx ?? 0, targetDy: target?.dy ?? 0, shot,
     }, period);
     const set = this.pose.form === 'f1' && this.f1 ? this.f1 : this.manifests;
     const m = set[this.pose.facing]; const fr = clipFrame(m, this.pose.clip);
@@ -80,7 +91,10 @@ export class EntityRenderer {
       if (e === 'form_commit') { this.flash = 0.07; if (!reducedEffects) this.scene.cameras.main.shake(110, 0.0025); }   // the reveal: a one-frame white-hot flash of the Form I sprite and a tiny camera kick
     }
     if (this.flash > 0) { this.flash = Math.max(0, this.flash - dt); for (const spr of [this.hero, this.legs]) { spr.setTint(0xfff2cc); spr.tintMode = Phaser.TintModes.FILL; } }   // sound hook: no licensed/original audio ships yet, an audio layer can subscribe to scene.events 'kai-form' ('form_start' | 'form_commit' | 'form_end')
-    this.formFx.update(dt, this.hero.x, this.hero.y, this.hero.scaleX / KAI_SCALE, this.animator.visualForm === 'f1', !dead, this.pose.events, reducedEffects);
+    const emphasis = state.cast ? (state.cast.released ? 1 : 0.7) : p.dashRemaining > 0 ? 0.7 : 0;   // heavier presence while charging, firing, throwing and dashing
+    this.formFx.update(dt, this.hero.x, this.hero.y, this.hero.scaleX / KAI_SCALE, this.animator.visualForm === 'f1', !dead, this.pose.events, reducedEffects, emphasis, state.enemies.length > 45);
+    this.hand = this.anchors ? handAnchorWorld(this.anchors, this.pose.form, this.pose.facing, this.pose.clip, this.pose.frame, this.hero.x, this.hero.y, this.hero.scaleX) : null;
+    this.abilityFx.update(dt, state, reducedEffects, this.animator.visualForm === 'f1', this.hand);
     const active = new Set<number>();
     for (const e of state.enemies) {
       if (e.hp <= 0) continue;
@@ -89,8 +103,12 @@ export class EntityRenderer {
       if (!sprite) { sprite = this.scene.add.image(e.x, e.y, `enemy-${e.kind}`).setScale(1.8).setDepth(6); this.sprites.set(e.id, sprite); }
       sprite.setPosition(Math.round(e.x), Math.round(e.y - 7));
       sprite.setAlpha(e.hp / e.maxHp < 0.34 ? 0.72 : 1);
+      const prev = this.enemyHp.get(e.id); this.enemyHp.set(e.id, e.hp);
+      if (prev !== undefined && e.hp < prev) this.enemyFlash.set(e.id, 0.09);   // hit reaction: a brief white flash on every enemy an ability (or the basic attack) actually damaged
+      const fl = this.enemyFlash.get(e.id) ?? 0;
+      if (fl > 0) { this.enemyFlash.set(e.id, Math.max(0, fl - dt)); sprite.setTint(0xffffff); sprite.tintMode = Phaser.TintModes.FILL; } else { sprite.clearTint(); sprite.tintMode = Phaser.TintModes.MULTIPLY; }
     }
-    for (const [id, sprite] of this.sprites) if (!active.has(id)) { sprite.destroy(); this.sprites.delete(id); }
+    for (const [id, sprite] of this.sprites) if (!active.has(id)) { sprite.destroy(); this.sprites.delete(id); this.enemyHp.delete(id); this.enemyFlash.delete(id); }
     const activeOrbs = new Set<number>();
     for (const p of state.pickups) {
       activeOrbs.add(p.id);
@@ -100,5 +118,5 @@ export class EntityRenderer {
     }
     for (const [id, image] of this.orbs) if (!activeOrbs.has(id)) { image.destroy(); this.orbs.delete(id); }
   }
-  destroy() { this.formFx.destroy(); this.hero.destroy(); this.legs.destroy(); for (const image of [...this.sprites.values(), ...this.orbs.values()]) image.destroy(); this.sprites.clear(); this.orbs.clear(); }
+  destroy() { this.formFx.destroy(); this.abilityFx.destroy(); this.hero.destroy(); this.legs.destroy(); for (const image of [...this.sprites.values(), ...this.orbs.values()]) image.destroy(); this.sprites.clear(); this.orbs.clear(); }
 }

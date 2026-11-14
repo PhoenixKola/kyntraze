@@ -12,22 +12,29 @@ import { activateForm } from './FormSystem';
 import { updateDrive } from './DriveSystem';
 import { pruneDeadEntities } from './EntityRegistry';
 import type { UpgradeId } from '../content/upgrades';
+import { startAbility, updateAbilities, trackAim } from './AbilitySystem';
 import { gradeRun } from './GameTelemetry';
 export class Simulation {
   readonly state: GameState;
   readonly rng: SeededRng;
   private qHeld = false;
   private fHeld = false;
+  private eHeld = false;
+  private rHeld = false;
   constructor(seed: number) { this.rng = new SeededRng(seed); this.state = makeState(seed); }
   step(dt: number, input: InputState) {
     const s = this.state; if (s.phase !== 'running') return;
     s.time += dt;
+    trackAim(s, input);
     movePlayer(s, input, dt);
     if (input.q && !this.qHeld) activateQ(s);
     if (input.f && !this.fHeld) activateForm(s);
-    this.qHeld = input.q; this.fHeld = input.f;
+    if (input.beam && !this.eHeld) startAbility(s, 'beam');
+    if (input.sphere && !this.rHeld) startAbility(s, 'sphere');
+    this.qHeld = input.q; this.fHeld = input.f; this.eHeld = !!input.beam; this.rHeld = !!input.sphere;
     const p = s.player; p.qCooldown = Math.max(0, p.qCooldown - dt);
     updateDrive(s, dt);
+    updateAbilities(s, dt);
     updateDirector(s, this.rng, dt);
     moveEnemies(s, dt);
     updateAutoWeapon(s, dt);

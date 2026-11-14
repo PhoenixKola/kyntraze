@@ -1,0 +1,107 @@
+{
+ "beam_charge": {
+  "seconds": 1.05,
+  "peak_dBFS": -7.0,
+  "rms_dBFS": -20.47,
+  "approx_LUFS_integrated": -19.5,
+  "clipped_samples": 0
+ },
+ "beam_charge_f1": {
+  "seconds": 1.05,
+  "peak_dBFS": -7.0,
+  "rms_dBFS": -20.46,
+  "approx_LUFS_integrated": -19.5,
+  "clipped_samples": 0
+ },
+ "beam_fire": {
+  "seconds": 1.75,
+  "peak_dBFS": -1.5,
+  "rms_dBFS": -10.52,
+  "approx_LUFS_integrated": -12.1,
+  "clipped_samples": 0
+ },
+ "beam_fire_f1": {
+  "seconds": 1.75,
+  "peak_dBFS": -1.5,
+  "rms_dBFS": -10.58,
+  "approx_LUFS_integrated": -12.1,
+  "clipped_samples": 0
+ },
+ "beam_pulse_0": {
+  "seconds": 0.16,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -15.34,
+  "approx_LUFS_integrated": -14.6,
+  "clipped_samples": 0
+ },
+ "beam_pulse_1": {
+  "seconds": 0.16,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -15.37,
+  "approx_LUFS_integrated": -14.6,
+  "clipped_samples": 0
+ },
+ "beam_pulse_2": {
+  "seconds": 0.16,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -15.32,
+  "approx_LUFS_integrated": -14.3,
+  "clipped_samples": 0
+ },
+ "beam_end": {
+  "seconds": 1.05,
+  "peak_dBFS": -7.0,
+  "rms_dBFS": -23.91,
+  "approx_LUFS_integrated": -21.3,
+  "clipped_samples": 0
+ },
+ "cast_cancel": {
+  "seconds": 0.28,
+  "peak_dBFS": -10.0,
+  "rms_dBFS": -22.3,
+  "approx_LUFS_integrated": -20.7,
+  "clipped_samples": 0
+ },
+ "sphere_gather": {
+  "seconds": 1.6,
+  "peak_dBFS": -6.0,
+  "rms_dBFS": -18.59,
+  "approx_LUFS_integrated": -19.4,
+  "clipped_samples": 0
+ },
+ "sphere_gather_f1": {
+  "seconds": 1.6,
+  "peak_dBFS": -6.0,
+  "rms_dBFS": -18.57,
+  "approx_LUFS_integrated": -19.4,
+  "clipped_samples": 0
+ },
+ "sphere_throw": {
+  "seconds": 0.79,
+  "peak_dBFS": -4.0,
+  "rms_dBFS": -15.61,
+  "approx_LUFS_integrated": -15.6,
+  "clipped_samples": 0
+ },
+ "sphere_flight": {
+  "seconds": 0.55,
+  "peak_dBFS": -9.0,
+  "rms_dBFS": -21.16,
+  "approx_LUFS_integrated": -21.2,
+  "clipped_samples": 0
+ },
+ "sphere_burst": {
+  "seconds": 3.3,
+  "peak_dBFS": -1.0,
+  "rms_dBFS": -11.08,
+  "approx_LUFS_integrated": -12.9,
+  "clipped_samples": 0
+ },
+ "sphere_burst_f1": {
+  "seconds": 3.3,
+  "peak_dBFS": -1.0,
+  "rms_dBFS": -11.07,
+  "approx_LUFS_integrated": -12.8,
+  "clipped_samples": 0
+ }
+}

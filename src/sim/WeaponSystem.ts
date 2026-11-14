@@ -3,6 +3,7 @@ import { damageEnemy } from './CombatSystem';
 import { distanceSquared } from '../core/Math';
 export function updateAutoWeapon(state: GameState, dt: number) {
   const p = state.player;
+  if (state.cast) return;   // signature abilities own Kai's hands; the basic attack resumes afterwards
   p.attackClock -= dt;
   if (p.attackClock > 0) return;
   p.attackClock += Math.max(0.16, p.attackPeriod * (p.form ? 0.75 : 1));

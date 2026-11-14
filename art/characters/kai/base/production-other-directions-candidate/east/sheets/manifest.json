@@ -120,6 +120,54 @@
    ],
    "terminal": "hold_last_frame",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Beam": {
+   "sheet": "sheets/kai_east_beam.png",
+   "frames": 26,
+   "fps": 20,
+   "loop": false,
+   "duration_s": 1.3,
+   "blender_action": "Beam",
+   "events": {
+    "charge_start": 0,
+    "charge_hold": 7,
+    "release": 10,
+    "fire_end": 20,
+    "recover_start": 20,
+    "interruptible_from": 22
+   },
+   "frame_width": 108,
+   "frame_height": 159,
+   "origin_px": [
+    39.0,
+    159.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Sphere": {
+   "sheet": "sheets/kai_east_sphere.png",
+   "frames": 24,
+   "fps": 20,
+   "loop": false,
+   "duration_s": 1.2,
+   "blender_action": "Sphere",
+   "events": {
+    "gather_start": 0,
+    "raise": 7,
+    "hold": 12,
+    "release": 16,
+    "recover_start": 18,
+    "interruptible_from": 21
+   },
+   "frame_width": 106,
+   "frame_height": 159,
+   "origin_px": [
+    42.0,
+    159.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
   }
  }
 }

@@ -194,6 +194,8 @@ import anim_b03g  # noqa: E402  (B03G clips)
 CLIPS += anim_b03g.CLIPS
 import anim_form  # noqa: E402  (Form I: hair follow-through + Transform clip; no-ops for the base build)
 CLIPS += anim_form.CLIPS
+import anim_b05  # noqa: E402  (B05: Beam + Sphere signature abilities, base and Form I)
+CLIPS += anim_b05.CLIPS
 
 def slots_of(p):
     s = {}

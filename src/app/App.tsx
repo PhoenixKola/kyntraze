@@ -10,6 +10,8 @@ import { LevelUpScreen } from './ui/LevelUpScreen';
 import { PauseMenu } from './ui/PauseMenu';
 import { ResultsScreen } from './ui/ResultsScreen';
 import { SettingsPanel } from './ui/SettingsPanel';
+import { ControllerBadge } from './ui/ControllerBadge';
+import { useControllerNav } from './ui/useControllerNav';
 import './App.css';
 const initialSave = loadSave();
 function GameStage({ bridge, seed, onHome, onSettings }: { bridge: GameBridge; seed: number; onHome: () => void; onSettings: () => void }) {
@@ -29,6 +31,7 @@ function GameStage({ bridge, seed, onHome, onSettings }: { bridge: GameBridge; s
   </div>;
 }
 export default function App() {
+  const pad = useControllerNav();
   const [view, setView] = useState<'title' | 'select' | 'game'>('title');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [save, setSave] = useState(initialSave);
@@ -40,6 +43,7 @@ export default function App() {
   const updateSettings = (next: GameSettings) => { bridge.setSettings(next); const updated = { ...save, settings: next }; setSave(updated); storeSave(updated); };
   const home = () => { setView('title'); setSettingsOpen(false); setSave(loadSave()); };
   return <div className="app">
+    {pad.connected && <ControllerBadge/>}
     {view === 'title' && <TitleScreen onPlay={() => setView('select')} onSettings={() => setSettingsOpen(true)} save={save}/>}
     {view === 'select' && <HeroSelect onBack={() => setView('title')} onStart={() => start()} seed={seedInput} onSeed={setSeedInput}/>}
     {view === 'game' && <GameStage key={run.serial} bridge={bridge} seed={run.seed} onHome={home} onSettings={() => setSettingsOpen(true)}/>}
