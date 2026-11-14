@@ -46,6 +46,7 @@ def solve(pose):
     ch["spine"] = {"loc": (cx_ + CHEST_OFF[0], cy_ + CHEST_OFF[1]), "rot": pose.get("spine_rot", 0.0) + BASE_LEAN}
     ch["head"] = {"loc": (hx + HEAD_OFF[0], hy + HEAD_OFF[1]), "rot": pose.get("head_rot", 0.0)}
     ch["sash"] = {"rot": pose.get("sash", 0.0)}
+    if "hair" in r.BONES: ch["hair"] = {"rot": pose.get("hair", 0.0)}
     W = r.fk(ch)
     if "hip_target" in pose:       # pivot the whole body (root) so the pelvis joint lands on this canvas point
         p0 = r.apply(W, "pelvis", REST["pelvis"][0]); ch["root"] = dict(ch.get("root", {}), loc=tuple(np.array(pose["hip_target"], float) - p0)); W = r.fk(ch)
@@ -190,14 +191,19 @@ def punch():
 CLIPS = [idle, run, punch]
 import danim_b03g  # noqa: E402  (B03G clips; appended to CLIPS below)
 CLIPS += danim_b03g.CLIPS
+import danim_form  # noqa: E402  (Form I: hair follow-through + Transform clip; no-ops for the base build)
+CLIPS += danim_form.CLIPS
 
 def slots_of(p):
-    return {f"hand_{s}": hand_slot(p, s) for s in "nf"}
+    s = {f"hand_{s}": hand_slot(p, s) for s in "nf"}
+    if r.FORM == "f1": s["form"] = p.get("form_slot", "f1")
+    return s
 
 LINING_HIDE = ()
 def solve_clip(c):
     out = []
-    for p in c["frames"]:
+    frames = danim_form.with_hair(c) if "hair" in r.BONES else c["frames"]
+    for p in frames:
         ch, order, errs = solve(p); out.append((ch, order, errs, slots_of(p)))
     return out
 

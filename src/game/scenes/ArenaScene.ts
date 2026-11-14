@@ -63,7 +63,7 @@ export class ArenaScene extends Phaser.Scene {
     this.fixed.tick(delta, dt => { this.lastInput = this.controller.read(); this.simulation.step(dt, this.lastInput); });
     const s = this.simulation.state;
     followPlayer(this.cameras.main, s.player.x, s.player.y);
-    this.entityRenderer.sync(s, this.lastInput, delta);
+    this.entityRenderer.sync(s, this.lastInput, delta, this.bridge.getSettings().reducedEffects);
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
     this.fx.render(s, this.bridge.getSettings().reducedEffects);
     this.publishClock += delta;

@@ -78,7 +78,7 @@ if (x1 - x0) % 2: x0 = max(0, x0 - 1)
 FW, FH = x1 - x0, y1 - y0; ox, oy = r.ROOT[0] - x0, r.ROOT[1] - y0
 qa["crop_touches_canvas_edge"] = bool(xs.min() <= 0 or xs.max() >= r.CANVAS[0] - 1 or ys.min() <= 0 or ys.max() >= r.CANVAS[1] - 1)
 sh = os.path.join(DP, "sheets"); rev = os.path.join(DP, "review"); os.makedirs(sh, exist_ok=True); os.makedirs(rev, exist_ok=True)
-man = {"schema": "kyntraze.anim-manifest/0.1-pilot", "character": "kai", "form": "base", "direction": D, "status": "PRODUCTION CANDIDATE - owner approval required",
+man = {"schema": "kyntraze.anim-manifest/0.1-pilot", "character": "kai", "form": ("form-i" if r.FORM == "f1" else "base"), "direction": D, "status": "PRODUCTION CANDIDATE - owner approval required",
        "source_blend": f"rig/kai-{D}.blend", "frame_width": int(FW), "frame_height": int(FH), "origin_px": [float(ox), float(oy)],
        "origin_normalized": [round(ox / FW, 6), round(oy / FH, 6)],
        "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",

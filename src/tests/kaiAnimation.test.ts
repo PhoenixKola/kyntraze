@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { GameBridge } from '../bridge/GameBridge';
-import { DEATH_RESULTS_HOLD_SECONDS, KAI_CLIPS, KAI_DIRS, KaiAnimator, clipFrame, SIM_DASH_SECONDS, facingFromInput, facingFromVector, parseKaiManifest, type AnimFrameInput, type Facing, type KaiManifests } from '../assets/kaiAnimation';
+import { DEATH_RESULTS_HOLD_SECONDS, FORM_REVERT_SECONDS, KAI_F1_CLIPS, KAI_CLIPS, KAI_DIRS, KaiAnimator, clipFrame, SIM_DASH_SECONDS, facingFromInput, facingFromVector, parseKaiManifest, type AnimFrameInput, type Facing, type KaiManifests } from '../assets/kaiAnimation';
 
 const pub = (...p: string[]) => join(__dirname, '..', '..', 'public', 'art', 'kai', ...p);
 const manifests = Object.fromEntries(KAI_DIRS.map(d => [d, parseKaiManifest(JSON.parse(readFileSync(pub(d, 'manifest.json'), 'utf8')), d)])) as KaiManifests;
+const pubF1 = (...p: string[]) => join(__dirname, '..', '..', 'public', 'art', 'kai-f1', ...p);
+const f1 = Object.fromEntries(KAI_DIRS.map(d => [d, parseKaiManifest(JSON.parse(readFileSync(pubF1(d, 'manifest.json'), 'utf8')), d, 'f1')])) as KaiManifests;
 const pngSize = (file: string) => { const b = readFileSync(file); return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) }; };
 
 const idle: AnimFrameInput = { dt: 1 / 60, alive: true, moving: false, inputX: 0, inputY: 0, runSpeed: 250, dashing: false, dashX: 0, dashY: 0,
@@ -187,4 +189,67 @@ describe('B03G.1 Results delay contract (GameBridge)', () => {
   it('the player cannot act or revive during the delay: pause toggling leaves the dead phase alone', () => {
     const { b, sim } = bridge('dead'); (sim as unknown as { togglePause?: () => void }).togglePause = () => {}; b.togglePause(); expect(b.snapshot().phase).toBe('dead');
   });
+});
+
+describe('B04 Form I manifests', () => {
+  for (const dir of KAI_DIRS) it(`${dir}: separate Form I sheets match their frame sizes; Transform has the form_commit event; contract unchanged from base`, () => {
+    const m = f1[dir], b = manifests[dir];
+    for (const clip of KAI_F1_CLIPS) { const a = m.animations[clip]!, f = clipFrame(m, clip); expect(pngSize(pubF1(dir, a.sheet))).toEqual({ w: f.w * a.frames, h: f.h }); expect(f.ox).toBeLessThan(f.w); expect(f.oy).toBeLessThanOrEqual(f.h); }
+    for (const clip of KAI_CLIPS) expect([m.animations[clip].frames, m.animations[clip].fps, m.animations[clip].loop]).toEqual([b.animations[clip].frames, b.animations[clip].fps, b.animations[clip].loop]);
+    expect(m.animations.BasicPunch.events.impact).toBe(5);
+    const t = m.animations.Transform!; expect([t.frames, t.fps, t.loop, t.events.form_commit]).toEqual([16, 20, false, 7]);
+    expect(m.animations.Death.terminal).toBe('hold_last_frame'); expect(m.root_motion.baked).toBe(false);
+  });
+  it('the base manifests are untouched by Form I (no Transform clip)', () => { for (const d of KAI_DIRS) expect(manifests[d].animations.Transform).toBeUndefined(); });
+  it('rejects a Form I manifest without form_commit', () => { const bad = JSON.parse(JSON.stringify(f1.east)); delete bad.animations.Transform.events.form_commit; expect(() => parseKaiManifest(bad, 'east', 'f1')).toThrow(); });
+});
+
+describe('B04 Form I activation, reveal, expiry', () => {
+  const run = (a: KaiAnimator, input: Partial<AnimFrameInput>, ticks: number) => { let p = a.pose(); for (let i = 0; i < ticks; i++) p = a.update({ ...idle, ...input }, 0.55); return p; };
+  const seq = (a: KaiAnimator, input: Partial<AnimFrameInput>, ticks: number) => { const out: ReturnType<KaiAnimator['pose']>[] = []; for (let i = 0; i < ticks; i++) out.push(a.update({ ...idle, ...input }, 0.55)); return out; };
+  it('sim form 0 -> 1 starts Transform in base art, form_commit lands on frame 7 (0.35 s) and swaps to the Form I art exactly once', () => {
+    const a = new KaiAnimator(manifests, f1); a.update(idle, 0.55);
+    const ps = seq(a, { form: 1 }, 90); expect(ps[0]).toMatchObject({ clip: 'Transform', form: 'f1', frame: 0 }); expect(ps[0].events).toContain('form_start'); expect(a.visualForm).toBe('f1');
+    const commits = ps.filter(p => p.events.includes('form_commit')); expect(commits.length).toBe(1);
+    const idx = ps.indexOf(commits[0]); expect(idx / 60).toBeGreaterThanOrEqual(0.32); expect(idx / 60).toBeLessThanOrEqual(0.4); expect(commits[0].frame).toBe(7);
+    expect(ps.slice(0, idx).every(p => p.frame < 7)).toBe(true);
+    expect(ps[ps.length - 1]).toMatchObject({ clip: 'Idle', form: 'f1' });
+  });
+  it('before the commit the art is still the base head; facing is kept through the swap', () => {
+    const a = new KaiAnimator(manifests, f1); a.facing = 'east'; a.update(idle, 0.55); a.update({ ...idle, form: 1 }, 0.55); expect(a.visualForm).toBe('base'); expect(a.facing).toBe('east');
+    run(a, { form: 1 }, 40); expect(a.visualForm).toBe('f1'); expect(a.facing).toBe('east');
+  });
+  it('expiry (sim form 1 -> 0) powers down: base art returns, the cinematic plays backwards from the commit frame, then Idle', () => {
+    const a = new KaiAnimator(manifests, f1); run(a, { form: 1 }, 90);
+    const ps = seq(a, { form: 0 }, 40); expect(ps[0].events).toContain('form_end'); expect(a.visualForm).toBe('base');
+    const rev = ps.filter(p => p.clip === 'Transform').map(p => p.frame); expect(rev.length).toBeGreaterThan(5); expect(rev[0]).toBe(6); expect(rev.slice().sort((x, y) => y - x)).toEqual(rev); expect(rev.length / 60).toBeLessThanOrEqual(FORM_REVERT_SECONDS + 0.05);
+    expect(ps[ps.length - 1]).toMatchObject({ clip: 'Idle', form: 'base' });
+  });
+  it('dash or hurt during the cinematic interrupts it and commits the Form I art immediately (the sim already committed)', () => {
+    for (const inter of [{ dashing: true, dashX: 1, dashRemaining: 0.2 }, { hurt: true }] as Partial<AnimFrameInput>[]) {
+      const a = new KaiAnimator(manifests, f1); a.update({ ...idle, form: 1 }, 0.55); a.update({ ...idle, form: 1 }, 0.55); expect(a.visualForm).toBe('base');
+      const p = a.update({ ...idle, form: 1, ...inter }, 0.55); expect(a.visualForm).toBe('f1'); expect(p.events).toContain('form_commit'); expect(p.clip).toBe(inter.hurt ? 'Hurt' : 'Dash'); expect(p.form).toBe('f1'); expect(a.transforming).toBe(false);
+    }
+  });
+  it('death during the transformation plays the Form I Death once and holds; retry resets to base', () => {
+    const a = new KaiAnimator(manifests, f1); run(a, { form: 1 }, 3); const d = a.update({ ...idle, form: 1, alive: false }, 0.55); expect(d).toMatchObject({ clip: 'Death', form: 'f1', frame: 0 });
+    const last = run(a, { form: 1, alive: false }, 200); expect(last).toMatchObject({ clip: 'Death', form: 'f1', frame: 17 }); expect(a.deathPresented()).toBe(true);
+    expect(a.update({ ...idle, form: 0 }, 0.55)).toMatchObject({ clip: 'Idle', form: 'base' });
+  });
+  it('pause (dt 0) freezes the transformation; the form flag alone never repeats it', () => {
+    const a = new KaiAnimator(manifests, f1); a.update({ ...idle, form: 1 }, 0.55); run(a, { form: 1 }, 6); const frozen = a.pose();
+    const p = run(a, { form: 1, dt: 0 }, 120); expect(p.frame).toBe(frozen.frame);
+    const ps = seq(a, { form: 1 }, 200); const frames = new Set(ps.filter(x => x.clip === 'Transform').map(x => x.frame)); expect(frames.size).toBeLessThanOrEqual(16); expect(ps.filter(x => x.events.includes('form_start')).length).toBe(0); expect(ps[ps.length - 1].clip).toBe('Idle');
+  });
+  it('successive activations (expire, then activate again) each play the full cinematic', () => {
+    const a = new KaiAnimator(manifests, f1); let commits = 0;
+    for (const form of [1, 1, 0, 0, 1, 1] as const) for (const p of seq(a, { form }, 80)) if (p.events.includes('form_commit')) commits++;
+    expect(commits).toBe(2);
+  });
+  it('Form I punch keeps frame 5 timing and the moving-punch leg blend, in Form I sheets', () => {
+    const a = new KaiAnimator(manifests, f1); run(a, { form: 1 }, 90); let clock = 0.5; let impactFrame = -1; let legs = false;
+    for (let step = 0; step < 240; step++) { clock -= 1 / 60; let shot: AnimFrameInput['shot'] = null; if (clock <= 0) { clock += 0.4; shot = { dx: 80, dy: 0 }; } const p = a.update({ ...idle, form: 1, moving: true, inputY: 1, attackClock: clock, hasTarget: true, targetDx: 80, shot }, 0.4); if (shot && step > 60) impactFrame = p.frame; if (p.clip === 'BasicPunch') { expect(p.form).toBe('f1'); if (p.legs !== null) legs = true; } }
+    expect(Math.abs(impactFrame - 5)).toBeLessThanOrEqual(1); expect(legs).toBe(true);
+  });
+  it('without Form I manifests the form flag is ignored (base-only play)', () => { const a = new KaiAnimator(manifests); expect(run(a, { form: 1 }, 30).clip).toBe('Idle'); expect(a.visualForm).toBe('base'); });
 });

@@ -1,6 +1,6 @@
 """Whole pipeline for one direction: python build_dir.py east <work>   (needs Blender at BLENDER or the default path)"""
 import os, subprocess, sys
-HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
+HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.environ.get("KAI_ROOT") or os.path.dirname(HERE)
 d, work = sys.argv[1], sys.argv[2]; os.makedirs(work, exist_ok=True)
 BLENDER = os.environ.get("BLENDER", r"F:\Blender\blender-5.2.3-windows-x64\blender.exe")
 env = dict(os.environ, KAI_DIR=d); py = sys.executable

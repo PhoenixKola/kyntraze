@@ -35,6 +35,7 @@ def solve(pose):
     ch["spine"] = {"loc": tuple(pose.get("chest", (0, 0))), "rot": pose.get("spine_rot", 0.0)}
     ch["head"] = {"loc": tuple(pose.get("head", (0, 0))), "rot": pose.get("head_rot", 0.0)}
     ch["sash"] = {"rot": pose.get("sash", 0.0)}
+    if "hair" in r.BONES: ch["hair"] = {"rot": pose.get("hair", 0.0)}
     W = r.fk(ch)
     if "hip_target" in pose:       # pivot the whole body (root) so the pelvis joint lands on this canvas point
         p0 = r.apply(W, "pelvis", REST["pelvis"][0]); ch["root"] = dict(ch.get("root", {}), loc=tuple(np.array(pose["hip_target"], float) - p0)); W = r.fk(ch)
@@ -191,19 +192,23 @@ def punch():
 CLIPS = [idle, run, punch]
 import anim_b03g  # noqa: E402  (B03G clips)
 CLIPS += anim_b03g.CLIPS
+import anim_form  # noqa: E402  (Form I: hair follow-through + Transform clip; no-ops for the base build)
+CLIPS += anim_form.CLIPS
 
 def slots_of(p):
     s = {}
+    if r.FORM == "f1": s["form"] = p.get("form_slot", "f1")
     for side in ("n", "f"):
         a = p.get(f"arm_{side}", {})
         if a.get("slot"): s[f"hand_{side}"] = a["slot"]
     return s
 
 LINING_GATE = (("lining_f", "f", 6.0), ("lining_n", "n", 16.0))   # arm linings only exist while the hand is near its approved guard position
+if r.FORM == "f1": LINING_GATE += (("lining_w", "n", 16.0),)      # Form I: the waist lining beside the near wrist no longer peeks out as a dark blob when that hand leaves the notch (base clips are untouched)
 
 def solve_clip(c):
     out = []
-    for p in c["frames"]:
+    for p in (anim_form.with_hair(c) if "hair" in r.BONES else c["frames"]):
         ch, order, errs = solve(p); W = r.fk(ch); slots = slots_of(p); hide = []
         for lid, side, rad in LINING_GATE:
             if np.linalg.norm(r.apply(W, f"hand_{side}", REST[f"hand_{side}"][0]) - REST[f"hand_{side}"][0]) > rad: hide.append(lid)

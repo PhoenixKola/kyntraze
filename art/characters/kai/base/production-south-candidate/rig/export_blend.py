@@ -5,7 +5,7 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import rig as r
 work = sys.argv[sys.argv.index("--") + 1]; PX = 0.01
-data = json.load(open(os.path.join(HERE, "anim-data.json")))
+data = json.load(open(os.path.join(r.RIG_DIR, "anim-data.json")))
 c = {}; arm = bpy.data.objects.get("KaiSouth_Rig")
 c["armature_present"] = arm is not None
 c["bones_match_rig"] = {b: p for b, (p, h, t) in r.BONES.items()} == {b.name: (b.parent.name if b.parent else None) for b in arm.data.bones}
@@ -19,7 +19,7 @@ for im in imgs:
     same &= tuple(ref.size) == tuple(im.size) and float(np.abs(np.array(im.pixels[:]) - np.array(ref.pixels[:])).max()) < 1e-6; bpy.data.images.remove(ref)
 c["packed_pixels_equal_parts_folder"] = bool(same)
 c["actions_and_frames"] = all(bpy.data.actions.get(k["name"]) and int(bpy.data.actions[k["name"]]["frames"]) == len(k["frames"]) for k in data["clips"])
-c["drivers_present"] = sum(len(o.animation_data.drivers) for o in objs.values() if o.animation_data) == 6 + 14 + 4
+c["drivers_present"] = sum(len(o.animation_data.drivers) for o in objs.values() if o.animation_data) == 6 + 14 + 4 + 2 * sum(1 for p in r.PARTS if p.get("slot", "").startswith("form:")) + (2 if r.FORM == "f1" else 0)
 sc = bpy.context.scene; cam = sc.camera; cam.location.x += 0.004 * PX; cam.location.z -= 0.004 * PX
 heads = {}
 def render_all(sub, scale):

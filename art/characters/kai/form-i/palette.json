@@ -1,0 +1,9 @@
+{
+  "_note": "FINAL Form I colour: SOLAR (owner decision, B04.1). Ember and Arc are kept only as previews. Hair/eye colours are applied to the neutral ImageGen parts by scripts/prepare_parts.py (hair ramp + eye glint only; skin, jacket and boots are untouched). Aura/arc colours are read by the Phaser FX at runtime (src/game/render/formFx.ts mirrors this file). Swap by changing 'candidate' and re-running prepare_parts + the rig build; animation data is not touched.",
+  "candidate": "solar",
+  "looks": {
+    "ember":  {"label": "EMBER  (crimson-orange)", "hair": [[58,14,20],[128,28,32],[206,64,44],[255,150,100]], "eye": [255,238,200], "aura": [255,120,70], "core": [255,236,200]},
+    "solar":  {"label": "SOLAR  (amber-gold)",     "hair": [[62,40,10],[150,98,16],[228,168,34],[255,228,128]], "eye": [255,250,205], "aura": [255,200,70], "core": [255,248,214]},
+    "arc":    {"label": "ARC  (electric violet)",  "hair": [[40,20,70],[88,46,152],[142,98,232],[212,182,255]], "eye": [226,208,255], "aura": [160,110,255], "core": [236,226,255]}
+  }
+}

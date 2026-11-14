@@ -1,0 +1,7 @@
+# generated review renders and videos stay local; the curated owner previews live in review/ (top level)
+*/review/
+*.blend1
+*.webm
+/review/*.mp4
+/review/*.webm
+/review/live/

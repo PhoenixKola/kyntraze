@@ -1,6 +1,8 @@
 """Per-direction constants: draw order, hand slots, skeleton offsets, stance. Everything numeric about the PARTS comes from their masks
 (make_config.py); this file only holds what is a design decision."""
 
+import os
+
 SOLE_DY = 18.0          # ankle pivot sits this far above the sole (same as the SOUTH candidate)
 CANVAS = (176, 176)
 
@@ -13,7 +15,17 @@ SPEC = {
                knee_dir={"n": -1, "f": +1}, point={"side": -90.0, "guard": 180.0}, torso_flip=False),
 }
 
+FORM = os.environ.get("KAI_FORM", "")
+
 def parts_for(d):
+    ps = _parts_for(d)
+    if FORM == "f1":      # Form I: spikier head + a separate rear hair piece (own bone), the base head stays in the rig behind the "form" slot for the transformation clip
+        i = next(k for k, p in enumerate(ps) if p["id"] == "head")
+        ps[i]["slot"] = "form:base"
+        ps[i:i] = [dict(id="hair_f1", img="hair_f1.png", bone="hair", kind="hair", slot="form:f1"), dict(id="head_f1", img="head_f1.png", bone="head", kind="head", slot="form:f1")]
+    return ps
+
+def _parts_for(d):
     """Part list in draw order (back -> front): id, img, bone, kind and optional slot/point."""
     P = lambda id, img, bone, kind, **k: dict(id=id, img=img, bone=bone, kind=kind, **k)
     def hands(side):
@@ -35,4 +47,6 @@ def parts_for(d):
 # hands: which fist state each side starts in (the clip builders override per frame)
 def default_slots(d):
     lead, rear = SPEC[d]["lead"], SPEC[d]["rear"]
-    return {f"hand_{lead}": "guard", f"hand_{rear}": "side"}
+    s = {f"hand_{lead}": "guard", f"hand_{rear}": "side"}
+    if FORM == "f1": s["form"] = "f1"
+    return s

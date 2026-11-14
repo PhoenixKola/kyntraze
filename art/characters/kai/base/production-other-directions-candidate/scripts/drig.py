@@ -4,7 +4,8 @@ which make_config.py builds from the painted parts. Coordinates: native px, y do
 import json, math, os
 import numpy as np
 
-HERE = os.path.dirname(os.path.abspath(__file__)); ROOT_DIR = os.path.dirname(HERE)
+HERE = os.path.dirname(os.path.abspath(__file__)); ROOT_DIR = os.environ.get("KAI_ROOT") or os.path.dirname(HERE)   # KAI_ROOT: the Form I tree (art/characters/kai/form-i)
+FORM = os.environ.get("KAI_FORM", "")
 DIRECTION = os.environ.get("KAI_DIR", "east")
 DIR_PATH = os.path.join(ROOT_DIR, DIRECTION)
 PARTS_DIR = os.path.join(DIR_PATH, "parts")

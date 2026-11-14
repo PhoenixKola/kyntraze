@@ -19,7 +19,7 @@ for im in imgs:
     same &= tuple(ref.size) == tuple(im.size) and float(np.abs(np.array(im.pixels[:]) - np.array(ref.pixels[:])).max()) < 1e-6; bpy.data.images.remove(ref)
 c["packed_pixels_equal_parts_folder"] = bool(same)
 c["actions_and_frames"] = all(bpy.data.actions.get(k["name"]) and int(bpy.data.actions[k["name"]]["frames"]) == len(k["frames"]) for k in data["clips"])
-c["drivers_present"] = sum(len(o.animation_data.drivers) for o in objs.values() if o.animation_data) == 8
+c["drivers_present"] = sum(len(o.animation_data.drivers) for o in objs.values() if o.animation_data) == 8 + 2 * sum(1 for p in r.PARTS if p.get("slot", "").startswith("form:"))
 sc = bpy.context.scene; cam = sc.camera; cam.location.x += 0.004 * PX; cam.location.z -= 0.004 * PX
 sc.render.engine = "BLENDER_EEVEE"; sc.eevee.taa_render_samples = 1; sc.render.filter_size = 0.0; sc.render.film_transparent = True
 sc.render.dither_intensity = 0.0; sc.view_settings.view_transform = "Standard"; sc.view_settings.look = "None"

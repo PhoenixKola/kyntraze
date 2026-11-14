@@ -5,7 +5,10 @@ Angles: degrees, + = counter-clockwise on screen."""
 import json, math, os
 import numpy as np
 
-HERE = os.path.dirname(os.path.abspath(__file__)); V5 = os.path.dirname(HERE); BASE = os.path.dirname(V5)
+HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.path.dirname(os.path.dirname(HERE))
+V5 = os.environ.get("KAI_ROOT_SOUTH") or os.path.dirname(HERE)      # KAI_ROOT_SOUTH: the Form I SOUTH tree (art/characters/kai/form-i/south)
+RIG_DIR = os.path.join(V5, "rig") if os.environ.get("KAI_ROOT_SOUTH") else HERE
+FORM = os.environ.get("KAI_FORM", "")
 PARTS_DIR = os.path.join(V5, "parts")
 CANVAS = (160, 176)
 REF_OFFSET = (20, 12)                     # reference px (0,0) -> canvas px
@@ -71,6 +74,15 @@ PARTS = [
     dict(id="fist_angle_n", img="fist_front_angle.png", bone="hand_n", pivot=(8.5, 25.0), angle=0.0, slot="hand_n:angle"),
 ]
 DEFAULT_SLOTS = {"hand_f": "guard", "hand_n": "side"}
+
+if FORM == "f1":   # Form I: spikier head + a separate rear hair piece on its own bone; the base head stays in the rig behind the "form" slot (transformation clip)
+    _g = json.load(open(os.path.join(PARTS_DIR, "form_geometry.json")))      # written by form-i/scripts/prepare_parts.py (Blender's Python has no Pillow)
+    HEAD_F1_PIVOT = tuple(_g["head_pivot"]); _nk = C("neck")
+    _hj = (_nk[0] + _g["attach"][0] - HEAD_F1_PIVOT[0], _nk[1] + _g["attach"][1] - HEAD_F1_PIVOT[1]); BONES["hair"] = ("head", _hj, (_hj[0], _hj[1] - 12))
+    _ex, _cy = _g["hair_pivot"]
+    _i = [p["id"] for p in PARTS].index("head"); PARTS[_i]["slot"] = "form:base"
+    PARTS[_i:_i] = [dict(id="hair_f1", img="hair_f1.png", bone="hair", pivot=(_ex, _cy), angle=0.0, slot="form:f1"), dict(id="head_f1", img="head_f1.png", bone="head", pivot=HEAD_F1_PIVOT, angle=0.0, slot="form:f1")]
+    DEFAULT_SLOTS["form"] = "f1"
 
 def rot(deg):
     a = math.radians(deg); c, s = math.cos(a), math.sin(a); return np.array([[c, s], [-s, c]])

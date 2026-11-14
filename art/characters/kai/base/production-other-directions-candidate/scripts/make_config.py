@@ -8,7 +8,8 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import specs
 
-ROOT_DIR = os.path.dirname(HERE)
+ROOT_DIR = os.environ.get("KAI_ROOT") or os.path.dirname(HERE)
+ROOT_SIDE = "right"   # set per direction in build() for the Form I hair piece
 
 def mask(path):
     a = np.array(Image.open(path).convert("RGBA"))[..., 3] > 0; ys, xs = np.nonzero(a)
@@ -30,6 +31,9 @@ def anchors(kind, a, t, B, x0, x1, point=None):
     if kind == "tails":   return dict(pivot=(top, t + 3.0), angle=0.0)
     if kind == "torso":   return dict(pivot=(cx, B - 6.0), angle=0.0)
     if kind == "head":    return dict(pivot=(bot, B - 5.0), angle=0.0)
+    if kind == "hair":    # Form I rear hair: the pivot is the root of the spike mass (the plain end that hides behind the skull)
+        ys, xs = np.nonzero(a); side = ROOT_SIDE; ex = x0 + 6.0 if side == "left" else x1 - 6.0; col = a[:, int(ex)]; cy = float(np.nonzero(col)[0].mean() + 0.5) if col.any() else (t + B) / 2
+        return dict(pivot=(ex, cy), angle=0.0)
     if kind == "fist_guard": return dict(pivot=(bot, B - 5.0), angle=0.0)
     if kind == "fist_side":
         ys, xs = np.nonzero(a); cy = float(ys.mean() + 0.5)
@@ -37,12 +41,14 @@ def anchors(kind, a, t, B, x0, x1, point=None):
     raise ValueError(kind)
 
 def build(d):
+    global ROOT_SIDE; ROOT_SIDE = {"east": "right", "south": "right", "west": "left", "north": "left"}[d]
     S = specs.SPEC[d]; pdir = os.path.join(ROOT_DIR, d, "parts"); rx, ry = S["root"]; plist = specs.parts_for(d)
     info = {}; parts = []
     for p in plist:
         a, t, B, x0, x1 = mask(os.path.join(pdir, p["img"]))
         q = dict(id=p["id"], img=p["img"], bone=p["bone"]); q.update(anchors(p["kind"], a, t, B, x0, x1, p.get("point")))
-        if "slot" in p: q["slot"] = p["slot"]; q["point"] = p["point"]
+        if "slot" in p: q["slot"] = p["slot"]
+        if "point" in p: q["point"] = p["point"]
         parts.append(q); info[p["id"]] = (q, B - t)
     L = lambda pid: float(np.linalg.norm(np.array(info[pid][0]["child"]) - np.array(info[pid][0]["pivot"])))
     cx = rx
@@ -52,6 +58,9 @@ def build(d):
     waist_y = hip_y - 14.0; torso_H = info["torso"][1]; neck_y = waist_y - (torso_H - 14.0); sh_y = neck_y + 7.0
     bones = {"root": [None, [cx, ry], [cx, ry - 10]], "pelvis": ["root", [cx, hip_y - 8], [cx, waist_y]], "spine": ["pelvis", [cx, waist_y], [cx, neck_y]],
              "head": ["spine", [cx, neck_y], [cx, neck_y - 20]], "sash": ["pelvis", [cx + S["knot_dx"], waist_y + 3], [cx + S["knot_dx"], waist_y + 18]]}
+    if any(p["id"] == "hair_f1" for p in parts):      # Form I hair bone: a child of the head whose joint is on the skull behind the face (rear hair swings about it)
+        qh = info["head_f1"][0]; a_, t_, B_, x0_, x1_ = mask(os.path.join(pdir, "head_f1.png")); ax, ay = x0_ + 0.45 * (x1_ - x0_), t_ + 0.58 * (B_ - t_)
+        hj = [cx + ax - qh["pivot"][0], neck_y + ay - qh["pivot"][1]]; bones["hair"] = ["head", hj, [hj[0], hj[1] - 12]]
     for s in "nf":
         shx = cx + S["sh_dx"][s]; hx = cx + S["hip_dx"][s]
         bones[f"upper_arm_{s}"] = ["spine", [shx, sh_y], [shx, sh_y + Lu[s]]]

@@ -1,0 +1,15 @@
+Pixel-art effects sheet for a 2D game: reusable, separate transparent power-up effects for a character's transformation (they will be tinted any colour in the engine, so draw them in NEUTRAL tones only). The attached image shows the game's pixel-art style and block size: chunky clean pixel blocks (each art pixel a clear 10x10 block), no anti-aliasing, no gradients, no sub-pixel noise, stepped hard pixel shading. Seen from the same slightly-from-above game camera.
+
+COLOUR RULE: use ONLY these neutral tones: pure white (#ffffff) for the hottest core, very light grey-blue (#dfe6f2), mid grey-blue (#98a6c0) and a dark grey-blue (#3a4560) for the outer edge. No other colours, no yellow, no red, no cyan, no black outlines (the outer edge is dark grey-blue).
+
+Draw ONLY these 8 pieces, each isolated on flat magenta (#ff00ff), far apart, nothing overlapping, nothing cropped:
+1. AURA WISP A: one tall flame-like energy tongue pointing UP, curving slightly to the right, tapering to a sharp tip, white-hot core with the lighter tones outside. About 14 art pixels wide and 44 tall.
+2. AURA WISP B: a shorter, thinner flame tongue pointing up and curving to the left. About 10 wide, 30 tall.
+3. AURA WISP C: a small flame lick, almost straight, about 8 wide, 20 tall.
+4. SPARK: a small four-pointed star-shaped glint of energy, white centre, about 11x11 art pixels.
+5. SHOCKWAVE RING: a wide thin elliptical ring seen from slightly above (about twice as wide as tall), broken into jagged hard pixel segments, white-hot on the top edge fading to the dark edge, hollow in the middle. About 72 wide and 36 tall.
+6. ENERGY ARC: a single jagged lightning-like energy arc with two small branches, white core, about 40 wide and 22 tall, drawn horizontally.
+7. ENERGY ARC TALL: a jagged lightning-like arc drawn vertically with one small branch, about 16 wide and 40 tall.
+8. GROUND GLOW: a flat elliptical glow disc seen from slightly above (about twice as wide as tall), built from 3-4 concentric stepped pixel rings, white-ish centre fading out to the dark grey-blue edge. About 56 wide and 28 tall.
+
+Flat solid magenta background everywhere. Wide 16:9. No character, no text, no labels, no watermark.

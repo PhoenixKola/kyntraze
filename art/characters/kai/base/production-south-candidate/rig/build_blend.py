@@ -5,7 +5,7 @@ from mathutils import Vector, Matrix
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import rig as r
 PX = 0.01
-data = json.load(open(os.path.join(HERE, "anim-data.json")))
+data = json.load(open(os.path.join(r.RIG_DIR, "anim-data.json")))
 def W(p, depth=0.0): return Vector((p[0] * PX, depth, -p[1] * PX))
 
 sc = bpy.context.scene
@@ -27,6 +27,9 @@ for b in r.NO_INHERIT_SCALE: arm_data.bones[b].inherit_scale = "NONE"
 arm_data.display_type = "STICK"; arm.show_in_front = True
 for pb in arm.pose.bones: pb.rotation_mode = "XYZ"
 root = arm.pose.bones["root"]; root["far_leg_front"] = 0; root["hand_n_slot"] = 0; root["hand_f_slot"] = 0; root["lining_f_hide"] = 0; root["lining_n_hide"] = 0
+LIN = ("lining_f", "lining_n") + (("lining_w",) if r.FORM == "f1" else ())
+if r.FORM == "f1": root["lining_w_hide"] = 0
+FORMSLOT = {"base": 0, "f1": 1}; root["form_slot"] = 1   # Form I rigs: which head/hair set is visible
 
 coll = bpy.data.collections.new("KaiSouth_Parts"); sc.collection.children.link(coll)
 objs = {}; images = {}
@@ -67,8 +70,12 @@ for side, trio in (("n", ("fist_waist", "fist_front_n", "fist_angle_n")), ("f", 
     for k, oid in enumerate(trio):
         for prop in ("hide_render", "hide_viewport"): drive(objs[oid][0], prop, None, f"s != {k}", f"hand_{side}_slot")
 
-for lid in ("lining_f", "lining_n"):
+for lid in LIN:
     for prop in ("hide_render", "hide_viewport"): drive(objs[lid][0], prop, None, "s == 1", lid + "_hide")
+
+for p in r.PARTS:
+    if p.get("slot", "").startswith("form:"):
+        for prop in ("hide_render", "hide_viewport"): drive(objs[p["id"]][0], prop, None, f"s != {FORMSLOT[p['slot'].split(':')[1]]}", "form_slot")
 
 cam_data = bpy.data.cameras.new("KaiSouth_Cam"); cam_data.type = "ORTHO"; cam_data.ortho_scale = max(r.CANVAS) * PX
 cam = bpy.data.objects.new("KaiSouth_Cam", cam_data); sc.collection.objects.link(cam)
@@ -90,11 +97,13 @@ for clip in data["clips"]:
             pb.keyframe_insert("rotation_euler", index=2, frame=f, group=pb.name); pb.keyframe_insert("location", frame=f, group=pb.name)
             pb.keyframe_insert("scale", index=1, frame=f, group=pb.name)
         SLOT = {"front": 1, "angle": 2, "side": 3}
+        if "form" in fr["slots"]: root["form_slot"] = FORMSLOT[fr["slots"]["form"]]; root.keyframe_insert('["form_slot"]', frame=f, group="root")
         root["far_leg_front"] = fr["far_leg_front"]; root["hand_n_slot"] = SLOT.get(fr["slots"].get("hand_n"), 0)
         root["hand_f_slot"] = SLOT.get(fr["slots"].get("hand_f"), 0)
         root["lining_f_hide"] = 1 if "lining_f" in fr["slots"].get("_hide", []) else 0
         root["lining_n_hide"] = 1 if "lining_n" in fr["slots"].get("_hide", []) else 0
-        for k in ("far_leg_front", "hand_n_slot", "hand_f_slot", "lining_f_hide", "lining_n_hide"): root.keyframe_insert(f'["{k}"]', frame=f, group="root")
+        if r.FORM == "f1": root["lining_w_hide"] = 1 if "lining_w" in fr["slots"].get("_hide", []) else 0
+        for k in ("far_leg_front", "hand_n_slot", "hand_f_slot", "lining_f_hide", "lining_n_hide") + (("lining_w_hide",) if r.FORM == "f1" else ()): root.keyframe_insert(f'["{k}"]', frame=f, group="root")
     try:
         for layer in act.layers:
             for strip in layer.strips:
@@ -110,6 +119,6 @@ for clip in data["clips"]:
     acts[clip["name"]] = act
 arm.animation_data.action = acts["Idle"]; sc.frame_start = 1; sc.frame_end = len(data["clips"][0]["frames"]); sc.render.fps = data["clips"][0]["fps"]
 arm["note"] = "Kai SOUTH production candidate: neutral = approved 3/4 stance. Actions Idle/Run/BasicPunch (fake user, CONSTANT keys). root props far_leg_front/hand_n_slot/hand_f_slot drive leg depth and fist swaps (0 base, 1 front-on, 2 angled)."
-out = os.path.join(HERE, "kai-south.blend")
+out = os.path.join(r.RIG_DIR, "kai-south.blend")
 bpy.ops.wm.save_as_mainfile(filepath=out, compress=True)
 print("BUILD_V5", json.dumps({"saved": out, "actions": list(acts), "images": len(images), "parts": len(objs), "bones": len(arm_data.bones)}))

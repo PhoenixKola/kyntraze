@@ -1,0 +1,15 @@
+Pixel-art effects sheet for a 2D game: reusable, separate transparent power-up effects for a character's transformation (they will be tinted any colour in the engine, so draw them in NEUTRAL tones only). The attached image shows the game's pixel-art style and block size: FINE clean pixel blocks (each art pixel a clear 5x5 block: HALF the block size of the attached reference, so everything has about twice the pixel detail), no anti-aliasing, no gradients, no sub-pixel noise, stepped hard pixel shading. Seen from the same slightly-from-above game camera.
+
+COLOUR RULE: use ONLY these neutral tones: pure white (#ffffff) for the hottest core, very light grey-blue (#dfe6f2), mid grey-blue (#98a6c0) and a dark grey-blue (#3a4560) for the outer edge. No other colours, no yellow, no red, no cyan, no black outlines (the outer edge is dark grey-blue).
+
+Draw ONLY these 8 pieces, each isolated on flat magenta (#ff00ff), far apart, nothing overlapping, nothing cropped:
+1. AURA WISP A: one tall flame-like energy tongue pointing UP, curving slightly to the right, tapering to a sharp tip, white-hot core with the lighter tones outside. About 28 art pixels wide and 88 tall, with a finer ragged flame edge and 2-3 internal highlight streaks.
+2. AURA WISP B: a shorter, thinner flame tongue pointing up and curving to the left. About 20 wide, 60 tall.
+3. AURA WISP C: a small flame lick, almost straight, about 16 wide, 40 tall.
+4. SPARK: a small four-pointed star-shaped glint of energy, white centre, about 21x21 art pixels with a thin cross glint.
+5. SHOCKWAVE RING: a wide thin elliptical ring seen from slightly above (about twice as wide as tall), broken into jagged hard pixel segments, white-hot on the top edge fading to the dark edge, hollow in the middle. About 144 wide and 72 tall, with a thin crisp ring and fine jagged energy teeth.
+6. ENERGY ARC: a single jagged lightning-like energy arc with two small branches, white core, about 80 wide and 44 tall, drawn horizontally, thin and crisp.
+7. ENERGY ARC TALL: a jagged lightning-like arc drawn vertically with one small branch, about 32 wide and 80 tall, thin and crisp.
+8. GROUND GLOW: a flat elliptical glow disc seen from slightly above (about twice as wide as tall), built from 3-4 concentric stepped pixel rings, white-ish centre fading out to the dark grey-blue edge. About 112 wide and 56 tall, 5-6 fine concentric stepped rings.
+
+Flat solid magenta background everywhere. Wide 16:9. No character, no text, no labels, no watermark.

@@ -39,7 +39,7 @@ def holes(al):
             if 0 <= Y < H and 0 <= X < W and not al[Y, X] and not seen[Y, X]: seen[Y, X] = True; q.append((Y, X))
     return ~al & ~seen
 
-data = json.load(open(os.path.join(HERE, "anim-data.json"))); vf = json.load(open(os.path.join(work, "verify.json")))
+data = json.load(open(os.path.join(r.RIG_DIR, "anim-data.json"))); vf = json.load(open(os.path.join(work, "verify.json")))
 i1 = r.load_images(); qa = {"blender_checks": vf["checks"], "clips": {}}; finals = {}; maxe = 0.0; maxd = 0
 solved = {f()["name"]: a.solve_clip(f()) for f in a.CLIPS}
 for k in data["clips"]:
@@ -67,7 +67,7 @@ x0, x1, y0, y1 = max(0, xs.min() - 2), min(r.CANVAS[0], xs.max() + 3), max(0, ys
 if (x1 - x0) % 2: x0 -= 1
 FW, FH = x1 - x0, y1 - y0; ox, oy = r.ROOT[0] - x0, r.ROOT[1] - y0
 os.makedirs(os.path.join(V5, "sheets"), exist_ok=True); rev = os.path.join(V5, "review"); os.makedirs(rev, exist_ok=True)
-man = {"schema": "kyntraze.anim-manifest/0.1-pilot", "character": "kai", "form": "base", "direction": "south", "status": "PRODUCTION CANDIDATE - owner approval required",
+man = {"schema": "kyntraze.anim-manifest/0.1-pilot", "character": "kai", "form": ("form-i" if r.FORM == "f1" else "base"), "direction": "south", "status": "PRODUCTION CANDIDATE - owner approval required",
        "source_blend": "rig/kai-south.blend", "frame_width": int(FW), "frame_height": int(FH), "origin_px": [float(ox), float(oy)],
        "origin_normalized": [round(ox / FW, 6), round(oy / FH, 6)],
        "origin_meaning": "ground point midway between the two soles of the approved stance (near sole is 13 px lower = closer to camera)",
