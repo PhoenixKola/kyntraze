@@ -17,6 +17,9 @@ SPEC = {
 
 FORM = os.environ.get("KAI_FORM", "")
 
+# B05.2 owner fix: the BASE profile head is drawn in FRONT of the torso (collar/neck no longer cover the jaw). Form I keeps its approved order (HEAD_BEHIND)
+HEAD_BEHIND = os.environ.get("KAI_HEAD_BEHIND", "") == "1" or FORM == "f1"
+
 def parts_for(d):
     ps = _parts_for(d)
     if FORM == "f1":      # Form I: spikier head + a separate rear hair piece (own bone), the base head stays in the rig behind the "form" slot for the transformation clip
@@ -39,7 +42,7 @@ def _parts_for(d):
             P("torso", "torso.png", "spine", "torso"), P("head", "head.png", "head", "head")]
     if d in ("east", "west"):
         # profile: far leg and far arm sit behind the body, near arm in front of everything; the head is drawn under the torso so the collar covers the neck
-        prof_core = [core[0], core[1], core[3], core[2]]
+        prof_core = [core[0], core[1], core[3], core[2]] if HEAD_BEHIND else [core[0], core[1], core[2], core[3]]
         return leg("f") + arm("f") + [P("hips", "hips.png", "pelvis", "hips")] + leg("n") + prof_core + arm("n")
     # back view: sash is tied at the FRONT, so only the waistband shows (no knot, no tails); head under the torso so the collar fold covers the neck
     return leg("f") + leg("n") + [P("hips", "hips.png", "pelvis", "hips")] + [core[0], core[3], core[2]] + arm("f") + arm("n")

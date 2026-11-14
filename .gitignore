@@ -40,3 +40,4 @@ coverage/
 
 # B05.1 local gameplay recordings (large; regenerate with scripts/live_b051.cjs)
 art/characters/kai/abilities/review/b05-1/*.mp4
+art/characters/kai/abilities/review/b05-2/live*/*.webm

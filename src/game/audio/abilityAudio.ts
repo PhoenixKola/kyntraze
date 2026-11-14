@@ -68,12 +68,12 @@ export class AbilityAudio {
     const f1 = form === 1 ? '_f1' : '';
     switch (ev.kind) {
       case 'beam_charge': this.play(`beam_charge${f1}` as AbilitySound, 'charge'); break;
-      case 'beam_fire': this.stopSlot('charge', 0.025); this.play(`beam_fire${f1}` as AbilitySound, 'fire'); break;
+      case 'beam_fire': this.stopSlot('charge', 0.04); this.play(`beam_fire${f1}` as AbilitySound, 'fire'); break;
       case 'beam_pulse': this.play(`beam_pulse_${this.pulseCycle++ % 3}` as AbilitySound, 'pulse', ev.n ? 1 : 0.45, 0.97 + Math.random() * 0.06); break;
-      case 'beam_end': this.play('beam_end', 'misc', 0.8); break;
+      case 'beam_end': this.stopSlot('fire', 0.07); this.stopSlot('pulse', 0.04); this.play('beam_end', 'misc', 0.8); break;
       case 'cast_cancel': this.stopSlot('charge', 0.03); this.stopSlot('fire', 0.04); this.stopSlot('flight', 0.04); this.play('cast_cancel', 'misc', 0.8); break;
       case 'sphere_gather': this.play(`sphere_gather${f1}` as AbilitySound, 'charge'); break;
-      case 'sphere_launch': this.stopSlot('charge', 0.025); this.play('sphere_throw', 'misc'); this.play('sphere_flight', 'flight', 0.9); break;
+      case 'sphere_launch': this.stopSlot('charge', 0.06); this.play('sphere_throw', 'misc'); this.play('sphere_flight', 'flight', 0.9); break;
       case 'sphere_burst': this.stopSlot('flight', 0.03); this.play(`sphere_burst${f1}` as AbilitySound, 'burst'); break;
     }
   }

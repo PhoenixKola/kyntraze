@@ -161,10 +161,10 @@
     "interruptible_from": 21
    },
    "frame_width": 106,
-   "frame_height": 159,
+   "frame_height": 162,
    "origin_px": [
     42.0,
-    159.0
+    162.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"

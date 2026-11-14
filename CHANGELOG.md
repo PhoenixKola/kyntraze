@@ -1,5 +1,11 @@
 # Changelog
 
+## B06 · premium readability, arena, HUD and menu foundation (+ B05.2 corrective pass)
+- Readability: thin pale rim filter on Kai, contact shadows for Kai and enemies, floor light pool and halo (gold in Form I), enemies dimmed one tier, arena floor rebuilt from an ImageGen tile set (`art/ui/source`, 8 plates, baked once into a single texture, darkened one value tier + rim vignette, teal inlay lanes as landmarks).
+- HUD: portrait + HP (damage trail, low-HP pulse) + thin XP + Drive/Form bar with threshold tick; centred clock + kills; icon ability tiles with a clockwise cooldown sweep, seconds readout, key or pad glyph; compact pause. One `--u` unit scales 960x540 to 640x360 with legibility floors.
+- Menus: title with generated key art and animated Kai idle, hero select, pause (with run stats), level-up, results and settings (switches, keyboard vs controller table) share one design system; every menu has a key/pad hint bar. Controller glyphs appear on the HUD when a pad is connected.
+- Tooling: `scripts/gen-image.py` (audited Codex bridge wrapper), `scripts/build-ui-assets.py`, `scripts/b06-capture.cjs` (live Playwright capture). See `B06-STATUS.md`.
+
 ## B05.1 · premium abilities polish (uncommitted)
 - Beam/orb now start at the visible fists (exported per-frame hand anchors, all 8 form x facing cases), bounded facing/aim, synthesised ability audio, persistent Form I presence, compact HUD and controller support (mapped in-game). See art/characters/kai/abilities/B05-1-STATUS.md.
 

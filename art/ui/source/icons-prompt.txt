@@ -1,0 +1,12 @@
+Pixel-art monochrome ability icon glyph sheet for a game HUD. FINE clean pixel blocks, no anti-aliasing, no gradients, crisp hard stepped edges, each icon bold and instantly readable at tiny size (it will be shown at 24-32 screen pixels). Original designs.
+
+COLOUR RULE: draw each glyph ONLY in pure white (#ffffff) with a single darker light-grey-blue (#9fb0c8) for inner detail shading. No outline colour, no other colours, no background shading.
+
+Draw EXACTLY 6 icons on flat magenta (#ff00ff), in a row of 3 over a row of 3, far apart, each about 40x40 art pixels, nothing cropped:
+1. DASH: a stylised forward burst: three bold parallel speed streaks with a chevron arrowhead at the front.
+2. IMPACT: a downward ground-slam shockwave: a fist-like starburst with a broken ring beneath it.
+3. FRACTURE LANCE: a straight focused energy beam: a long horizontal spear of light with a bright flare at the left and a jagged splintered tip at the right.
+4. NOVA BLOOM: a round energy sphere with a petal-like burst of 8 radiating points around it.
+5. TRANSFORM FORM: a rising flame crest / crown of three flame tongues over a small diamond.
+6. PAUSE-OK SHIELD HEART: a bold heart with a small crack, used for health.
+No text, no labels, no watermark. Wide 16:9.

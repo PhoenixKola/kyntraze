@@ -25,7 +25,7 @@ describe('hand anchors (8 form x facing combinations)', () => {
     expect(t.Beam).toHaveLength(26); expect(t.Sphere).toHaveLength(24);
     for (const clip of ['Beam', 'Sphere'] as const) for (const fr of t[clip]) { expect(fr.n.every(Number.isFinite)).toBe(true); expect(fr.f.every(Number.isFinite)).toBe(true); expect(fr.m[0]).toBeCloseTo((fr.n[0] + fr.f[0]) / 2, 1); }
     const sep = (fr: { n: number[]; f: number[] }) => Math.hypot(fr.n[0] - fr.f[0], fr.n[1] - fr.f[1]);
-    for (const i of [10, 14, 19]) expect(sep(t.Beam[i])).toBeLessThan(30);        // hands thrust forward together
+    for (const i of [10, 14, 19]) expect(sep(t.Beam[i])).toBeLessThan(d === 'north' ? 48 : 30);   // hands thrust forward together (B05.2: NORTH is a wide V framing the head, since a back view cannot show a forward thrust otherwise)
     expect(sep(t.Sphere[16])).toBeLessThan(30);                                    // the throw leaves from joined hands
     expect(sep(t.Sphere[15])).toBeGreaterThan(14);                                 // overhead hold: the orb sits between the fists
     expect(t.Sphere[15].m[1]).toBeLessThan(t.Sphere[3].m[1] - 28);                 // the orb is carried well above the cupped start

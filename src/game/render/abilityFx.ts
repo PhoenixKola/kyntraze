@@ -43,7 +43,7 @@ export class AbilityFx {
     const seg = scene.textures.get(abilityFxKey('beam_seg')).getSourceImage();
     this.beamGlow = scene.add.tileSprite(0, 0, 10, seg.height, abilityFxKey('beam_seg')).setVisible(false).setBlendMode(Phaser.BlendModes.ADD).setOrigin(0, 0.5);
     this.beamCore = scene.add.tileSprite(0, 0, 10, seg.height, abilityFxKey('beam_seg')).setVisible(false).setBlendMode(Phaser.BlendModes.ADD).setOrigin(0, 0.5);
-    this.muzzle = add('muzzle'); this.orb = add('orb'); this.sphere = add('sphere'); this.trail = add('trail').setOrigin(1, 0.5);
+    this.muzzle = add('muzzle'); this.orb = add('orb'); this.sphere = add('sphere'); this.trail = add('trail').setOrigin(1, 0.5).setBlendMode(Phaser.BlendModes.SCREEN);   // SCREEN (not ADD) on purpose: an ADD trail batched with the rotating ADD sphere clipped rectangular chunks out of the sphere
   }
 
   /** Soft round glow behind the sphere: stacked translucent discs on the shared Graphics layer (a flat ellipse sprite would not read as a ball). */
@@ -68,7 +68,10 @@ export class AbilityFx {
       if (ev.id <= this.lastEvent) continue; this.lastEvent = ev.id;
       if (ev.kind === 'beam_fire') {
         if (!reduced) cam.shake(ABILITY_FEEL.beamShake.ms, ABILITY_FEEL.beamShake.intensity);
-        this.spawn('flash', 11, core, { x: ev.x, y: ev.y, life: 0.2, s0: 0.25 * K, s1: 0.7 * K, a0: 0.95, a1: 0, rot: rnd() * 3 });
+        const ho = hand ? hand.m : ev;
+        this.spawn('flash', 11, core, { x: ho.x, y: ho.y, life: 0.24, s0: 0.3 * K, s1: 1.05 * K, a0: 1, a1: 0, rot: rnd() * 3 });   // release flash at the fists
+        this.spawn('ring', 11.2, aura, { x: ho.x, y: ho.y, life: 0.3, s0: 0.12, s1: 0.75, a0: 0.9, a1: 0, rot: 0 });             // shock ring leaves the hands
+        if (!reduced) for (let i = 0; i < 8; i++) { const a = (i / 8) * 6.28 + rnd() * 0.4, v = 200 + rnd() * 180; this.spawn('streak', 11.3, i % 2 ? aura : core, { x: ho.x, y: ho.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.8, life: 0.22, s0: 0.8, s1: 0.2, a0: 1, a1: 0, rot: a }); }
         this.hitCast = 0;
       } else if (ev.kind === 'beam_pulse') {
         const o = c ? beamOrigin(s, c) : null; const dir = c ? { x: c.dirX, y: c.dirY } : { x: 0, y: 0 };
@@ -83,11 +86,15 @@ export class AbilityFx {
         }
       } else if (ev.kind === 'sphere_launch') {
         if (!reduced) cam.shake(ABILITY_FEEL.sphereLaunchShake.ms, ABILITY_FEEL.sphereLaunchShake.intensity);
-        this.spawn('flash', 11, core, { x: ev.x, y: ev.y, life: 0.2, s0: 0.3 * K, s1: 0.8 * K, a0: 0.9, a1: 0 });
+        const lo = hand ? hand.m : ev;
+        this.spawn('flash', 11, core, { x: lo.x, y: lo.y, life: 0.22, s0: 0.3 * K, s1: 1.0 * K, a0: 1, a1: 0 });
+        this.spawn('ring', 11.2, aura, { x: lo.x, y: lo.y, life: 0.3, s0: 0.12, s1: 0.65, a0: 0.9, a1: 0 });   // the throw: a ring snaps off the hands
       } else if (ev.kind === 'sphere_burst') {
         if (!reduced) { cam.shake(ABILITY_FEEL.sphereBurstShake.ms, ABILITY_FEEL.sphereBurstShake.intensity); this.pause = HIT_PAUSE.burst; }
         this.spawn('flash', 13, core, { x: ev.x, y: ev.y, life: 0.3, s0: 0.5 * 1.5, s1: 3.2 * 1.5, a0: 1, a1: 0, rot: rnd() });
         this.spawn('flash', 12.9, aura, { x: ev.x, y: ev.y, life: 0.45, s0: 0.3 * 1.5, s1: 4.2 * 1.5, a0: 0.75, a1: 0, rot: rnd() + 0.4, delay: 0.04 });
+        this.spawn('ring', 12.8, core, { x: ev.x, y: ev.y, life: 0.5, s0: 0.3, s1: 2.4, a0: 0.95, a1: 0, delay: 0.02 });       // 3-part detonation: white flash, colour flash, expanding shock ring
+        this.spawn('ring', 12.7, aura, { x: ev.x, y: ev.y, life: 0.7, s0: 0.2, s1: 3.2, a0: 0.7, a1: 0, delay: 0.1 });
         const n = reduced ? 8 : 24;
         for (let i = 0; i < n; i++) { const a = (i / n) * 6.28 + rnd() * 0.3, v = 180 + rnd() * 260; this.spawn(i % 3 ? 'streak' : 'impact', 12.5, i % 2 ? aura : core, { x: ev.x, y: ev.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.8, life: 0.45 + rnd() * 0.3, s0: 0.8 + rnd() * 0.5, s1: 0.2, a0: 1, a1: 0, rot: a }); }
       }
@@ -103,12 +110,13 @@ export class AbilityFx {
         this.orb.setVisible(true).setPosition(o.x, o.y).setDepth(c.face === 'north' ? 10.6 : front).setTint(core).setScale((0.2 + u * 0.85) * K).setAlpha(0.5 + 0.5 * u).setRotation(this.clock * 6);
         this.glowDisc(o.x, o.y, 10 * (0.3 + u), aura, 0.5 * u);
         if (dt > 0 && !reduced) { this.streakClock += dt; while (this.streakClock > 0.05) { this.streakClock -= 0.05; const a = rnd() * 6.28, r = 40 + rnd() * 26; this.spawn('streak', 10.7, aura, { x: o.x + Math.cos(a) * r, y: o.y + Math.sin(a) * r * 0.8, vx: -Math.cos(a) * r / 0.18, vy: -Math.sin(a) * r * 0.8 / 0.18, life: 0.18, s0: 0.6, s1: 0.2, a0: 0.2, a1: 1, rot: a + Math.PI }); } }
+        if (u >= 1) { const k = 0.5 + 0.5 * Math.sin(this.clock * 30); this.g.lineStyle(2, core, 0.4 + 0.5 * k); this.g.strokeCircle(o.x, o.y, 15 + 4 * k); }   // fully charged: a pulsing ready ring, so the release moment is readable
         this.g.lineStyle(2, aura, 0.28 * u); this.g.lineBetween(o.x, o.y, o.x + c.dirX * 70 * u, o.y + c.dirY * 70 * u);   // short aim tick: where the lance will go
       } else {
         const tf = c.t - BEAM.charge; const open = Math.min(1, tf / 0.07), close = Math.min(1, Math.max(0, (BEAM.fire - tf) / 0.14));
         const env = Math.min(open, close); const flick = 1 + 0.06 * Math.sin(this.clock * 70);
         const seg = this.scene.textures.get(abilityFxKey('beam_seg')).getSourceImage(); const hw = BEAM.halfWidth * (c.form ? BEAM.formWidth : 1);
-        const sy = (hw * 2 / seg.height) * Math.max(0.05, env) * flick;
+        const sy = (hw * 2 / seg.height) * Math.max(0.05, env) * flick * (1 + 0.4 * Math.max(0, 1 - tf / 0.12));   // width pop on release, settles to the lane
         const ex = simO.x + c.dirX * c.len, ey = simO.y + c.dirY * c.len;
         const len = Math.max(10, (ex - o.x) * c.dirX + (ey - o.y) * c.dirY);   // from the fists to where the sim lane ends
         const coreW = c.face === 'south' ? 0.42 : 0.55;   // a narrow bright core inside the full-width lane glow keeps Kai, the muzzle and the enemies readable
@@ -131,6 +139,7 @@ export class AbilityFx {
       this.sphere.setVisible(true).setPosition(o.x, o.y).setDepth(12).setTint(core).setScale(sc).setRotation(this.clock * 2.4).setAlpha(0.6 + 0.4 * u);
       this.glowDisc(o.x, o.y, 26 * sc, aura, 0.5 * u * (1 + 0.1 * Math.sin(this.clock * 18)));
       if (dt > 0 && !reduced) { this.streakClock += dt; while (this.streakClock > 0.04) { this.streakClock -= 0.04; const a = rnd() * 6.28, r = 56 + rnd() * 40; this.spawn('streak', 12.1, aura, { x: o.x + Math.cos(a) * r, y: o.y + Math.sin(a) * r * 0.8, vx: -Math.cos(a) * r / 0.22, vy: -Math.sin(a) * r * 0.8 / 0.22, life: 0.22, s0: 0.8, s1: 0.3, a0: 0.2, a1: 1, rot: a + Math.PI }); } }
+      const gr = (this.clock * 1.6) % 1; this.g.lineStyle(2, core, 0.55 * (1 - gr) * u); this.g.strokeCircle(o.x, o.y, 90 * (1 - gr) + 16 * sc);   // energy drawn inward to the orb
       const R = SPHERE.radius * (cs.form ? SPHERE.formRadius : 1);
       this.g.lineStyle(2, aura, 0.18 + 0.2 * u); this.g.strokeCircle(cs.tx, cs.ty, R);   // the landing point is shown from the first frame of the gather
     }

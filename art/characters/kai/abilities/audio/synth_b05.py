@@ -52,6 +52,9 @@ def reverb(x, rt=0.9, wet=0.3, seed=11, damp=3500):
     out = np.zeros(n); out[:len(x)] += x * (1 - wet * 0.6); out += y * wet; return out
 def sat(x, drive): return np.tanh(x * drive) / math.tanh(drive)
 def norm_to(x, peak_db): return x / (np.abs(x).max() + 1e-9) * 10 ** (peak_db / 20)
+def trim(x, sec, fo):
+    """Cut to `sec` seconds with a smooth `fo`-second fade-out so a reverb tail never outlives its gameplay window."""
+    n = int(sec * SR); x = pad(x, n)[:n].copy(); m = int(fo * SR); x[-m:] *= np.cos(np.linspace(0, math.pi / 2, m)) ** 2; return x
 def pad(x, n): return np.pad(x, (0, max(0, n - len(x))))[:n]
 
 def solar_layer(n, seed, base=1800.0, gain=0.5):
@@ -62,7 +65,7 @@ def solar_layer(n, seed, base=1800.0, gain=0.5):
 
 # ---------------------------------------------------------------- the sounds
 def beam_charge(solar=False):
-    n = int(0.55 * SR); t = t_of(n); u = np.linspace(0, 1, n)
+    n = int(0.5 * SR); t = t_of(n); u = np.linspace(0, 1, n)
     swell = u ** 2.2
     sweep = stft_filter(noise(n, 1), expc(350, 4200, n), 1.6) * swell * 1.4
     pad_ = osc(expc(110, 360, n), "saw", (-9, 0, 11), (5.5, 0.006)); pad_ = stft_filter(pad_, expc(500, 3400, n), 3) * swell * 0.9
@@ -70,20 +73,20 @@ def beam_charge(solar=False):
     core = osc(expc(520, 1560, n), "sine", (-4, 4)) * swell ** 2.5 * 0.35
     cr = crackle(n, 30 + 700 * u ** 2, 4) * (0.5 + swell) * 1.2
     x = sweep + pad_ + sub + core + cr + (solar_layer(n, 9) * swell if solar else 0)
-    return fade(reverb(sat(x, 1.4), 0.5, 0.18), 0.01, 0.02)
+    return trim(fade(reverb(sat(x, 1.4), 0.25, 0.14), 0.01, 0.02), 0.6, 0.1)  # swell ends exactly at the 0.5 s release; short tail only
 
 def beam_fire(solar=False):
-    n = int(1.05 * SR); t = t_of(n)
+    n = int(0.62 * SR); t = t_of(n)
     crack = stft_filter(noise(n, 7), np.full(n, 3200.0), 3, "hp") * np.exp(-t / 0.018) * 2.5
     boom = osc(expc(95, 42, n), "sine") * np.exp(-t / 0.30) * 1.6
     zap = stft_filter(osc(expc(2600, 220, n), "saw", (-12, 12)), expc(5200, 400, n), 2) * np.exp(-t / 0.10) * 1.2
     nb = int(0.5 * SR); bt = t_of(nb); fa = 190 * (1 + 0.012 * np.sin(2 * math.pi * 6 * bt))
     body = osc(fa, "saw", (-7, 0, 8)) + 0.7 * osc(fa * 2.003, "harm"); body = stft_filter(body, 900 + 700 * np.sin(2 * math.pi * 4 * bt) ** 2, 2.6)
     body += stft_filter(noise(nb, 8), np.full(nb, 1400.0), 1.8) * 0.5 + crackle(nb, 900, 10, 3000) * 0.8
-    body *= np.minimum(1, bt / 0.04) * (1 - np.clip((bt - 0.40) / 0.10, 0, 1)); sub = osc(np.full(nb, 56.0), "sine") * 0.8 * np.minimum(1, bt / 0.03)
+    body *= np.minimum(1, bt / 0.04) * (1 - np.clip((bt - 0.38) / 0.12, 0, 1)); sub = osc(np.full(nb, 56.0), "sine") * 0.8 * np.minimum(1, bt / 0.03)
     bed = pad(body + sub, n) * 0.85
     x = crack + boom + zap + bed + (solar_layer(n, 12, 2200, 0.8) * np.exp(-t / 0.5) if solar else 0)
-    return fade(reverb(sat(x, 1.7), 0.7, 0.2), 0.001, 0.05)
+    return trim(fade(reverb(sat(x, 1.7), 0.3, 0.14), 0.001, 0.05), 0.62, 0.12)  # body gated at 0.5 s (= beam fire time); the 0.12 s tail is the only overhang
 
 def beam_pulse(variant=0):
     n = int(0.16 * SR); t = t_of(n); k = (0.92, 1.0, 1.09)[variant % 3]
@@ -94,23 +97,23 @@ def beam_pulse(variant=0):
 def beam_end():
     n = int(0.5 * SR); t = t_of(n)
     tail = stft_filter(noise(n, 30), expc(3200, 220, n), 2) * np.exp(-t / 0.13) * 1.4 + osc(expc(420, 70, n), "saw", (-8, 8)) * np.exp(-t / 0.12) * 0.5 + crackle(n, 500 * np.exp(-t / 0.14), 31) * 1.2
-    return fade(reverb(sat(tail, 1.3), 0.55, 0.25), 0.002, 0.04)
+    return trim(fade(reverb(sat(tail, 1.3), 0.45, 0.22), 0.002, 0.04), 0.7, 0.25)
 
 def sphere_gather(solar=False):
-    n = int(0.9 * SR); t = t_of(n); u = np.linspace(0, 1, n); sw = u ** 1.8
+    n = int(0.8 * SR); t = t_of(n); u = np.linspace(0, 1, n); sw = u ** 1.8
     trem = 0.55 + 0.45 * np.sin(2 * math.pi * np.cumsum(lin(4, 15, n)) / SR)
     pad_ = osc(expc(86, 250, n), "sine", (-15, 0, 14), (0.7, 0.01)) + 0.5 * osc(expc(172, 500, n), "tri", (-6, 7)); pad_ *= trem * sw
     swirl = stft_filter(noise(n, 40), expc(220, 2600, n), 1.8) * sw * 1.3
     shim = sum(osc(expc(f0, f0 * 2.4, n), "sine", (0, 6)) * (0.5 / (i + 1)) for i, f0 in enumerate((420, 630, 840))) * sw ** 2.4 * 0.5
     sub = osc(lin(42, 62, n), "sine") * sw * 0.9; cr = crackle(n, 20 + 520 * u ** 2, 41) * (0.4 + sw) * 1.0
     x = pad_ * 1.2 + swirl + shim + sub + cr + (solar_layer(n, 43) * sw if solar else 0)
-    return fade(reverb(sat(x, 1.3), 0.7, 0.2), 0.02, 0.03)
+    return trim(fade(reverb(sat(x, 1.3), 0.35, 0.16), 0.02, 0.03), 0.95, 0.15)  # swell peaks at the 0.8 s throw
 
 def sphere_throw():
     n = int(0.34 * SR); t = t_of(n)
     wh = stft_filter(noise(n, 50), expc(3000, 380, n), 1.4) * env_ad(n, 0.05, 1.8) * 2.0
     thump = osc(expc(130, 48, n), "sine") * np.exp(-t / 0.10) * 1.5; ping = osc(expc(1500, 600, n), "tri", (-10, 10)) * np.exp(-t / 0.06) * 0.7
-    return fade(reverb(sat(wh + thump + ping, 1.5), 0.45, 0.15), 0.001, 0.03)
+    return trim(fade(reverb(sat(wh + thump + ping, 1.5), 0.3, 0.15), 0.001, 0.03), 0.5, 0.16)
 
 def sphere_flight():
     n = int(0.55 * SR); t = t_of(n); u = np.linspace(0, 1, n)
@@ -127,7 +130,7 @@ def sphere_burst(solar=False):
     bloom = sum(osc(expc(f0, f0 * 0.5, n), "sine", (-6, 6)) / (i + 1) for i, f0 in enumerate((440, 660, 880, 1320))) * (1 - np.exp(-t / 0.05)) * np.exp(-t / 0.55) * 0.5
     debris = crackle(n, 900 * np.exp(-t / 0.55), 72, 1800) * 1.6
     x = crack + boom + boom2 + body + bloom + debris + (solar_layer(n, 73, 2000, 1.0) * np.exp(-t / 0.7) if solar else 0)
-    return fade(reverb(sat(x, 2.0), 1.3, 0.35, 74), 0.001, 0.12)
+    return trim(fade(reverb(sat(x, 2.0), 1.0, 0.32, 74), 0.001, 0.12), 2.3, 0.5)
 
 def cast_cancel():
     n = int(0.28 * SR); t = t_of(n)

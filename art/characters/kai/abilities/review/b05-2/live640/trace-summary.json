@@ -1,0 +1,114 @@
+{
+ "base-east-beam": {
+  "frames": 77,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Beam",
+  "facings": "east"
+ },
+ "base-east-sphere": {
+  "frames": 47,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Sphere",
+  "facings": "east"
+ },
+ "base-west-beam": {
+  "frames": 77,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Beam",
+  "facings": "west"
+ },
+ "base-west-sphere": {
+  "frames": 47,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Sphere",
+  "facings": "west"
+ },
+ "base-south-beam": {
+  "frames": 77,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Beam",
+  "facings": "south"
+ },
+ "base-south-sphere": {
+  "frames": 47,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Sphere",
+  "facings": "south"
+ },
+ "base-north-beam": {
+  "frames": 77,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Beam",
+  "facings": "north"
+ },
+ "base-north-sphere": {
+  "frames": 47,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Sphere",
+  "facings": "north"
+ },
+ "f1-east-beam": {
+  "frames": 75,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Beam",
+  "facings": "east"
+ },
+ "f1-east-sphere": {
+  "frames": 47,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Sphere",
+  "facings": "east"
+ },
+ "f1-west-beam": {
+  "frames": 77,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Beam",
+  "facings": "west"
+ },
+ "f1-west-sphere": {
+  "frames": 47,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Sphere",
+  "facings": "west"
+ },
+ "f1-south-beam": {
+  "frames": 77,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Beam",
+  "facings": "south"
+ },
+ "f1-south-sphere": {
+  "frames": 37,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Sphere",
+  "facings": "south"
+ },
+ "f1-north-beam": {
+  "frames": 77,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Beam",
+  "facings": "north"
+ },
+ "f1-north-sphere": {
+  "frames": 47,
+  "maxDistPx": 0,
+  "src": "hand",
+  "clips": "Sphere",
+  "facings": "north"
+ }
+}

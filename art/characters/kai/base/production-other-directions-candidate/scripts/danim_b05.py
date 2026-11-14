@@ -26,11 +26,11 @@ def beam():
         wide = dict(leg_n=lg("n", 1, 0), leg_f=lg("f", -1, 0))
         K = [P(),
              hands(P(pelvis=(0, 4), chest=(0, 2), head=(0, 0), sash=-4, leg_n=lg("n", 0, 0), leg_f=lg("f", 0, 0)), (0, -88), 22, "guard", "outdown"),
-             hands(P(pelvis=(0, 6), chest=(0, 4), head=(0, 0), sash=6, leg_n=lg("n", 1, 0), leg_f=lg("f", -1, 0)), (0, -98), 16, "guard", "outdown"),
-             hands(P(pelvis=(0, 7), chest=(0, 4), head=(0, 0), sash=-8, **wide), (0, -101), 14, "guard", "outdown"),
-             hands(P(pelvis=(0, 3), chest=(0, 1), head=(0, 0), sash=-20, **wide), (0, -108), 24, "guard", "out"),      # RELEASE: both fists thrust away from the camera (up the screen), together
-             hands(P(pelvis=(0, 4), chest=(0, 2), head=(0, 0), sash=-26, **wide), (0, -107), 24, "guard", "out"),
-             hands(P(pelvis=(0, 5), chest=(0, 3), sash=-8, leg_n=lg("n", 0, 0), leg_f=lg("f", 0, 0)), (0, -110), 28, "guard", "out"),
+             hands(P(pelvis=(0, 6), chest=(0, 4), head=(0, 0), sash=6, leg_n=lg("n", 1, 0), leg_f=lg("f", -1, 0)), (0, -96), 26, "guard", "out"),
+             hands(P(pelvis=(0, 7), chest=(0, 4), head=(0, 0), sash=-8, **wide), (0, -100), 28, "guard", "out"),
+             hands(P(pelvis=(0, 3), chest=(0, 1), head=(0, 0), sash=-20, **wide), (0, -116), 40, "side", "out"),      # RELEASE: arms flare out and drive forward (up the screen) in a wide V that frames the head
+             hands(P(pelvis=(0, 4), chest=(0, 2), head=(0, 0), sash=-26, **wide), (0, -118), 42, "side", "out"),
+             hands(P(pelvis=(0, 5), chest=(0, 3), sash=-8, leg_n=lg("n", 0, 0), leg_f=lg("f", 0, 0)), (0, -112), 36, "side", "out"),
              P(pelvis=(0, 3), chest=(0, 1), sash=4), P()]
     else:
         lunge = {f"leg_{L}": lg(L, 2 * sx, 0), f"leg_{R}": lg(R, -2 * sx, 0)}
@@ -69,8 +69,8 @@ def sphere():
         K = [P(),
              hands(P(pelvis=(-1 * sx, 8), chest=(-2 * sx, 5), head=(0, 0), sash=-6 * sx, **low), (28, -64), 8, "guard", "down", "side"),
              hands(P(pelvis=(0, 5), chest=(0, 3), head=(0, 0), sash=8 * sx, **low), (28, -98), 10, "guard", "back", "guard"),
-             hands(P(pelvis=(0, 5), chest=(0, 3), head=(0, 0), sash=-14 * sx), (22, -118), 12, "guard", "back", "guard"),
-             hands(P(pelvis=(0, 4), chest=(-1 * sx, 2), head=(0, 0), sash=18 * sx, spine_rot=-sx * 3), (24, -124), 12, "guard", "back", "guard"),         # overhead hold, fists together above the head
+             hands(P(pelvis=(0, 5), chest=(0, 3), head=(0, 0), sash=-14 * sx), (8, -146), 14, "guard", "back", "guard"),
+             hands(P(pelvis=(0, 2), chest=(-1 * sx, 0), head=(0, 0), sash=18 * sx, spine_rot=-sx * 3), (6, -150), 16, "guard", "back", "guard"),         # overhead hold, fists together above the head
              hands(P(pelvis=(5 * sx, 3), chest=(6 * sx, 2), head=(3 * sx, 2), spine_rot=-sx * 9, sash=-24 * sx, **low), (47, -95), 6, "side", "down"),    # THROW: fists drive forward together
              hands(P(pelvis=(5 * sx, 4), chest=(6 * sx, 2), head=(3 * sx, 2), spine_rot=-sx * 9, sash=-28 * sx, **low), (46, -93), 8, "side", "down"),
              hands(P(pelvis=(2 * sx, 5), chest=(2 * sx, 3), sash=-8 * sx), (40, -90), 14, "side", "down"),

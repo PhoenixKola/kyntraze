@@ -6,7 +6,7 @@ import { InputController } from '../input/InputController';
 import { EntityRenderer } from '../render/EntityRenderer';
 import { EffectsRenderer } from '../render/EffectsRenderer';
 import { followPlayer } from '../render/CameraController';
-import { OBSTACLES } from '../../content/arena';
+import { createArenaFloor, Presentation } from '../render/arenaArt';
 import { RULES } from '../../core/Rules';
 import type { InputState } from '../../sim/GameState';
 import { sharedAbilityAudio, type AbilityAudio } from '../audio/abilityAudio';
@@ -15,6 +15,7 @@ export class ArenaScene extends Phaser.Scene {
   private controller!: InputController;
   private entityRenderer!: EntityRenderer;
   private fx!: EffectsRenderer;
+  private presentation!: Presentation;
   private fixed = new FixedStep();
   private publishClock = 0;
   private disposed = false;
@@ -39,28 +40,7 @@ export class ArenaScene extends Phaser.Scene {
       (window as Window & { __KYNT_QA__?: { grantXp: () => void; heroPose: () => unknown; setHeroScale: (n: number) => void; sim: () => unknown; hand: () => unknown; fxOrigin: () => unknown; audio: () => unknown } }).__KYNT_QA__ = { grantXp: () => this.bridge.debugGrantXp(), heroPose: () => this.entityRenderer.debugPose(), hand: () => this.entityRenderer.handAnchor(), fxOrigin: () => this.entityRenderer.fxOrigin(), audio: () => ({ state: this.audio?.state ?? 'none', loaded: this.audio?.loaded ?? 0, active: this.audio?.activeVoices ?? 0, started: [...(this.audio?.started ?? [])] }), setHeroScale: (n: number) => this.entityRenderer.setHeroScale(n), sim: () => this.simulation.state };
     }
   }
-  private createArena() {
-    const g = this.add.graphics().setDepth(-20);
-    g.fillStyle(0x101a29); g.fillRect(0, 0, RULES.worldWidth, RULES.worldHeight);
-    for (let y = 0; y < RULES.worldHeight; y += 48) for (let x = 0; x < RULES.worldWidth; x += 48) {
-      const parity = ((x / 48) * 7 + (y / 48) * 11) % 7;
-      g.fillStyle(parity === 0 ? 0x172438 : 0x132033, 1); g.fillRect(x + 2, y + 2, 44, 44);
-      if (parity === 0) { g.fillStyle(0x24374b); g.fillRect(x + 10, y + 10, 3, 3); }
-    }
-    g.lineStyle(5, 0x54a8b1); g.strokeRect(20, 20, RULES.worldWidth - 40, RULES.worldHeight - 40);
-    g.lineStyle(1, 0x447784, 0.5); g.strokeRect(30, 30, RULES.worldWidth - 60, RULES.worldHeight - 60);
-    for (const o of OBSTACLES) {
-      g.fillStyle(0x070e19, 0.5); g.fillRect(o.x + 8, o.y + 12, o.w, o.h);
-      g.fillStyle(0x293746); g.fillRect(o.x, o.y, o.w, o.h);
-      g.fillStyle(0x3c5763); g.fillRect(o.x, o.y, o.w, 9);
-      g.lineStyle(2, 0x7396a3, 0.8); g.strokeRect(o.x + 1, o.y + 1, o.w - 2, o.h - 2);
-      g.fillStyle(0xe3a766); g.fillRect(o.x + 10, o.y + o.h - 8, 18, 3);
-    }
-    for (let i = 0; i < 30; i++) {
-      const x = 145 + ((i * 263) % 1900), y = 170 + ((i * 157) % 1250);
-      g.fillStyle(0x243c4a); g.fillRect(x, y, 9, 4);
-    }
-  }
+  private createArena() { createArenaFloor(this); this.presentation = new Presentation(this); }
   update(_time: number, delta: number) {
     if (this.disposed || !this.simulation) return;
     // Sample action key presses per authoritative simulation tick so 120Hz displays
@@ -70,6 +50,7 @@ export class ArenaScene extends Phaser.Scene {
     followPlayer(this.cameras.main, s.player.x, s.player.y);
     this.entityRenderer.sync(s, this.lastInput, delta, this.bridge.getSettings().reducedEffects);
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
+    const hp = this.entityRenderer.debugPose(); this.presentation.update(s, hp.x, hp.y, hp.visualForm === 'f1', this.bridge.getSettings().reducedEffects);
     this.fx.render(s, this.bridge.getSettings().reducedEffects);
     this.audio?.setMuted(this.bridge.getSettings().mute); this.audio?.sync(s);
     this.publishClock += delta;
@@ -78,7 +59,7 @@ export class ArenaScene extends Phaser.Scene {
   private dispose() {
     if (this.disposed) return; this.disposed = true;
     window.removeEventListener('keydown', this.unlockAudio); window.removeEventListener('pointerdown', this.unlockAudio); this.audio?.dispose();
-    this.controller?.destroy(); this.entityRenderer?.destroy(); this.fx?.destroy(); this.bridge.unbind();
+    this.controller?.destroy(); this.entityRenderer?.destroy(); this.fx?.destroy(); this.presentation?.destroy(); this.bridge.unbind();
     delete (window as Window & { __KYNT_QA__?: unknown }).__KYNT_QA__;
   }
 }

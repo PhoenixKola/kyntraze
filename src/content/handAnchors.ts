@@ -2,8 +2,8 @@
 export type Face = 'south' | 'north' | 'east' | 'west';
 export interface Pt { x: number; y: number }
 export const BEAM_MUZZLE: Record<'base' | 'f1', Record<Face, Pt>> = {
-  base: { south: { x: 9.62, y: -85.81 }, north: { x: -0.19, y: -106.76 }, east: { x: 50.59, y: -104.98 }, west: { x: -50.11, y: -104.68 } },
-  f1: { south: { x: 9.62, y: -85.81 }, north: { x: -0.19, y: -106.76 }, east: { x: 50.59, y: -104.98 }, west: { x: -50.11, y: -104.68 } },
+  base: { south: { x: 9.62, y: -85.81 }, north: { x: -0.17, y: -116.98 }, east: { x: 50.59, y: -104.98 }, west: { x: -50.11, y: -104.68 } },
+  f1: { south: { x: 9.62, y: -85.81 }, north: { x: -0.17, y: -116.98 }, east: { x: 50.59, y: -104.98 }, west: { x: -50.11, y: -104.68 } },
 };
 export const SPHERE_RELEASE: Record<'base' | 'f1', Record<Face, Pt>> = {
   base: { south: { x: 9.18, y: -84.44 }, north: { x: 0.04, y: -108.69 }, east: { x: 46.81, y: -95.89 }, west: { x: -46.89, y: -95.56 } },

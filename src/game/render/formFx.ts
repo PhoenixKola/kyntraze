@@ -16,7 +16,8 @@ interface P { img: Phaser.GameObjects.Image; age: number; life: number; x: numbe
 export class FormFx {
   private pool: P[] = [];
   private glow: Phaser.GameObjects.Image;
-  private aura: Phaser.GameObjects.Image;
+  private rim: Phaser.GameObjects.Sprite[] = [];   // body-hugging aura: 4 offset copies of the hero frame, solid Solar colour, drawn BEHIND Kai so only the rim shows
+  private flameClock = 0;
   private arcClock = 1.2;
   private glowLevel = 0;
   private persistent = false;
@@ -26,7 +27,7 @@ export class FormFx {
   private readonly look = FORM_LOOKS[FORM_I_LOOK];
   constructor(private readonly scene: Phaser.Scene) {
     this.glow = scene.add.image(0, 0, formFxKey('glow')).setBlendMode(Phaser.BlendModes.ADD).setDepth(3.5).setVisible(false).setTint(this.look.aura);
-    this.aura = scene.add.image(0, 0, formFxKey('glow')).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.8).setVisible(false).setTint(this.look.aura).setRotation(Math.PI / 2);   // body halo: the ground glow turned upright, drawn just behind Kai
+    for (let i = 0; i < 4; i++) { const r = scene.add.sprite(0, 0, formFxKey('glow')).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.7).setVisible(false).setTint(this.look.aura); r.setTintMode(Phaser.TintModes.FILL); this.rim.push(r); }
   }
 
   private spawn(key: string, depth: number, tint: number, o: Partial<P> & { life: number }) {
@@ -37,7 +38,7 @@ export class FormFx {
   }
 
   /** x,y = Kai's feet on the ground; k = FX scale (1 at the default 0.5 hero scale: FX art pixels are 1 screen px); visualForm = Form I art visible; alive = still playing. */
-  update(dt: number, x: number, y: number, k: number, visualForm: boolean, alive: boolean, events: readonly KaiAnimEvent[], reduced: boolean, emphasis = 0, crowded = false) {
+  update(dt: number, x: number, y: number, k: number, visualForm: boolean, alive: boolean, events: readonly KaiAnimEvent[], reduced: boolean, emphasis = 0, crowded = false, hero?: Phaser.GameObjects.Sprite) {
     const rnd = Math.random;
     for (const e of events) {
       if (e === 'form_start' && !reduced) {
@@ -61,20 +62,26 @@ export class FormFx {
     this.pulse = Math.max(0, this.pulse - dt);
     const t = performance.now() / 1000;
     const gl = this.glowLevel * (0.38 + 0.1 * Math.sin(t * 7) + this.pulse * 1.2);
-    this.glow.setVisible(this.glowLevel > 0.02).setPosition(x, y - 3).setScale(FX_BASE * k * (1.55 + 0.1 * Math.sin(t * 5)) * (1 + this.pulse)).setAlpha(Math.min(1, gl * 0.62 * (1 + 0.4 * emphasis)));
-    // persistent body halo: a faint upright glow behind the sprite that breathes at idle and swells while casting / dashing
-    this.aura.setVisible(this.glowLevel > 0.02).setPosition(x, y - 40 * k).setScale(FX_BASE * k * (1.55 + 0.07 * Math.sin(t * 3.1) + 0.2 * emphasis + this.pulse * 0.6)).setAlpha(Math.min(0.5, this.glowLevel * (0.12 + 0.05 * Math.sin(t * 2.3) + 0.2 * emphasis + this.pulse * 0.5)));
+    this.glow.setVisible(this.glowLevel > 0.02).setPosition(x, y - 3).setScale(FX_BASE * k * (1.0 + 0.06 * Math.sin(t * 5)) * (1 + this.pulse)).setAlpha(Math.min(1, gl * 0.5 * (1 + 0.4 * emphasis)));
+    // body-hugging aura: the hero's own frame, offset a few px in 4 directions and filled with the Solar colour BEHIND him, so a soft flame rim follows his outline; it swells while casting / dashing / transforming
+    const show = this.glowLevel > 0.02 && !!hero; this.flameClock += dt;
+    for (let i = 0; i < 4; i++) {
+      const r = this.rim[i]; r.setVisible(show); if (!show || !hero) continue;
+      const rad = (2.4 + 0.7 * Math.sin(t * 6 + i * 1.7) + 1.4 * emphasis + this.pulse * 5) * k; const dx = [rad, -rad, 0, 0][i], dy = [0, 0, -rad * 1.7, rad * 0.6][i];
+      r.setTexture(hero.texture.key, hero.frame.name).setOrigin(hero.originX, hero.originY).setScale(hero.scaleX, hero.scaleY).setPosition(hero.x + dx, hero.y + dy).setFlipX(hero.flipX)
+        .setAlpha(Math.min(0.6, this.glowLevel * (i === 2 ? 0.34 : 0.26) * (1 + 0.25 * Math.sin(t * 9 + i) + 0.6 * emphasis + this.pulse * 1.5)));
+    }
     if (this.persistent && dt > 0) {
       this.spawnClock += dt; const every = (reduced ? 0.2 : 0.06) * (crowded ? 1.8 : 1) / (1 + emphasis * 0.8);
       while (this.spawnClock > every) {
         this.spawnClock -= every; const key = ['wisp_a', 'wisp_b', 'wisp_c'][Math.floor(rnd() * 3)];
-        this.spawn(key, 9, this.look.aura, { x: x + (rnd() - 0.5) * 34 * k, y: y - 2, vx: (rnd() - 0.5) * 10 * k, vy: -(52 + rnd() * 36) * k, life: 0.5 + rnd() * 0.25, s0: (1.35 + rnd() * 0.5) * k, s1: 0.7 * k, a0: 1, a1: 0, rot: (rnd() - 0.5) * 0.25 });
+        const side = rnd() < 0.5 ? -1 : 1; this.spawn(key, 9.6, this.look.aura, { x: x + side * (8 + rnd() * 9) * k, y: y - (6 + rnd() * 40) * k, vx: side * 3 * k, vy: -(26 + rnd() * 26) * k, life: 0.4 + rnd() * 0.25, s0: (0.75 + rnd() * 0.3) * k, s1: 0.4 * k, a0: 0.85, a1: 0, rot: (rnd() - 0.5) * 0.2 });
       }
       if (!reduced && !crowded) {   // an occasional tiny energy arc crackling off the shoulders / hands (never in crowded fights)
         this.arcClock -= dt * (1 + emphasis);
-        if (this.arcClock <= 0) { this.arcClock = 1.4 + rnd() * 2.2; const v = rnd() < 0.5, side = rnd() < 0.5 ? -1 : 1; this.spawn(v ? 'arc_v' : 'arc_h', 11, this.look.core, { x: x + side * (18 + rnd() * 10) * k, y: y - (48 + rnd() * 22) * k, life: 0.13, s0: 0.7 * k, s1: 0.95 * k, a0: 0.85, a1: 0, sx: side }); }
+        if (this.arcClock <= 0) { this.arcClock = 1.4 + rnd() * 2.2; const v = rnd() < 0.5, side = rnd() < 0.5 ? -1 : 1; this.spawn(v ? 'arc_v' : 'arc_h', 11, this.look.core, { x: x + side * (13 + rnd() * 7) * k, y: y - (44 + rnd() * 18) * k, life: 0.13, s0: 0.7 * k, s1: 0.95 * k, a0: 0.85, a1: 0, sx: side }); }
       }
-      if (!reduced) { this.sparkClock += dt; while (this.sparkClock > (crowded ? 0.4 : 0.22) / (1 + emphasis)) { this.sparkClock -= 0.22; const a = rnd() * Math.PI * 2, r = (22 + rnd() * 16) * k; this.spawn('spark', 11, this.look.core, { x: x + Math.cos(a) * r, y: y - 30 * k + Math.sin(a) * r * 0.8 + 10, vy: -14 * k, life: 0.3, s0: 0.5 * k, s1: 0.25, a0: 1, a1: 0 }); } }
+      if (!reduced) { this.sparkClock += dt; while (this.sparkClock > (crowded ? 0.4 : 0.22) / (1 + emphasis)) { this.sparkClock -= 0.22; const a = rnd() * Math.PI * 2, r = (14 + rnd() * 8) * k; this.spawn('spark', 11, this.look.core, { x: x + Math.cos(a) * r, y: y - 38 * k + Math.sin(a) * r * 1.5, vy: -10 * k, life: 0.3, s0: 0.5 * k, s1: 0.25, a0: 1, a1: 0 }); } }
     }
     for (let i = this.pool.length - 1; i >= 0; i--) {
       const p = this.pool[i];
@@ -86,5 +93,5 @@ export class FormFx {
     }
   }
 
-  destroy() { this.glow.destroy(); this.aura.destroy(); this.pool.forEach(p => p.img.destroy()); this.pool = []; }
+  destroy() { this.glow.destroy(); this.rim.forEach(r => r.destroy()); this.pool.forEach(p => p.img.destroy()); this.pool = []; }
 }

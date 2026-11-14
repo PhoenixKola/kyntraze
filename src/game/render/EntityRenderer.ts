@@ -32,6 +32,7 @@ export class EntityRenderer {
     this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
+    for (const spr of [this.hero, this.legs]) { spr.enableFilters(); spr.filters!.internal.addGlow(0xd8f6ff, 1.6, 0, 1, false, 4, 2); }   // B06: thin pale rim keeps the silhouette separated from the arena
   }
   /** Hero animation state, for the dev-only QA hook. */
   deathPresented() { return this.animator.deathPresented(); }
@@ -92,7 +93,7 @@ export class EntityRenderer {
     }
     if (this.flash > 0) { this.flash = Math.max(0, this.flash - dt); for (const spr of [this.hero, this.legs]) { spr.setTint(0xfff2cc); spr.tintMode = Phaser.TintModes.FILL; } }   // sound hook: no licensed/original audio ships yet, an audio layer can subscribe to scene.events 'kai-form' ('form_start' | 'form_commit' | 'form_end')
     const emphasis = state.cast ? (state.cast.released ? 1 : 0.7) : p.dashRemaining > 0 ? 0.7 : 0;   // heavier presence while charging, firing, throwing and dashing
-    this.formFx.update(dt, this.hero.x, this.hero.y, this.hero.scaleX / KAI_SCALE, this.animator.visualForm === 'f1', !dead, this.pose.events, reducedEffects, emphasis, state.enemies.length > 45);
+    this.formFx.update(dt, this.hero.x, this.hero.y, this.hero.scaleX / KAI_SCALE, this.animator.visualForm === 'f1', !dead, this.pose.events, reducedEffects, emphasis, state.enemies.length > 45, this.hero);
     this.hand = this.anchors ? handAnchorWorld(this.anchors, this.pose.form, this.pose.facing, this.pose.clip, this.pose.frame, this.hero.x, this.hero.y, this.hero.scaleX) : null;
     this.abilityFx.update(dt, state, reducedEffects, this.animator.visualForm === 'f1', this.hand);
     const active = new Set<number>();
@@ -106,7 +107,7 @@ export class EntityRenderer {
       const prev = this.enemyHp.get(e.id); this.enemyHp.set(e.id, e.hp);
       if (prev !== undefined && e.hp < prev) this.enemyFlash.set(e.id, 0.09);   // hit reaction: a brief white flash on every enemy an ability (or the basic attack) actually damaged
       const fl = this.enemyFlash.get(e.id) ?? 0;
-      if (fl > 0) { this.enemyFlash.set(e.id, Math.max(0, fl - dt)); sprite.setTint(0xffffff); sprite.tintMode = Phaser.TintModes.FILL; } else { sprite.clearTint(); sprite.tintMode = Phaser.TintModes.MULTIPLY; }
+      if (fl > 0) { this.enemyFlash.set(e.id, Math.max(0, fl - dt)); sprite.setTint(0xffffff); sprite.tintMode = Phaser.TintModes.FILL; } else { sprite.setTint(0xc4cad8); sprite.tintMode = Phaser.TintModes.MULTIPLY; }
     }
     for (const [id, sprite] of this.sprites) if (!active.has(id)) { sprite.destroy(); this.sprites.delete(id); this.enemyHp.delete(id); this.enemyFlash.delete(id); }
     const activeOrbs = new Set<number>();

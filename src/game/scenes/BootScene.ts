@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { STARTER_TEXTURES } from '../../assets/atlasRegistry';
 import { ABILITY_FX_NAMES, abilityFxKey, abilityFxUrl } from '../render/abilityFx';
+import { FLOOR_TILE_COUNT, floorTileKey, floorTileUrl } from '../render/arenaArt';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
@@ -10,6 +11,7 @@ export class BootScene extends Phaser.Scene {
     KAI_DIRS.forEach(dir => this.load.json(`kai-manifest-${dir}`, kaiManifestUrl(dir)));
     KAI_DIRS.forEach(dir => this.load.json(`kai-f1-manifest-${dir}`, kaiManifestUrl(dir, 'f1')));
     FORM_FX_NAMES.forEach(n => this.load.image(formFxKey(n), formFxUrl(n)));
+    for (let i = 0; i < FLOOR_TILE_COUNT; i++) this.load.image(floorTileKey(i), floorTileUrl(i));
     this.load.json(KAI_ANCHORS_KEY, KAI_ANCHORS_URL);
     ABILITY_FX_NAMES.forEach(n => this.load.image(abilityFxKey(n), abilityFxUrl(n)));
     this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => console.error(`[boot] failed to load ${file.key} (${file.url})`));

@@ -361,22 +361,22 @@
    "angle": 0.0
   },
   {
-   "id": "head",
-   "img": "head.png",
-   "bone": "head",
-   "pivot": [
-    25.242857142857144,
-    41.0
-   ],
-   "angle": 0.0
-  },
-  {
    "id": "torso",
    "img": "torso.png",
    "bone": "spine",
    "pivot": [
     16.5,
     34.0
+   ],
+   "angle": 0.0
+  },
+  {
+   "id": "head",
+   "img": "head.png",
+   "bone": "head",
+   "pivot": [
+    25.242857142857144,
+    41.0
    ],
    "angle": 0.0
   },

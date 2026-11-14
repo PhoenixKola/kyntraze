@@ -12,9 +12,10 @@ import { ResultsScreen } from './ui/ResultsScreen';
 import { SettingsPanel } from './ui/SettingsPanel';
 import { ControllerBadge } from './ui/ControllerBadge';
 import { useControllerNav } from './ui/useControllerNav';
-import './App.css';
+import { PadContext } from './ui/Chrome';
+import './ui.css';
 const initialSave = loadSave();
-function GameStage({ bridge, seed, onHome, onSettings }: { bridge: GameBridge; seed: number; onHome: () => void; onSettings: () => void }) {
+function GameStage({ bridge, seed, pad, onHome, onSettings }: { bridge: GameBridge; seed: number; pad: boolean; onHome: () => void; onSettings: () => void }) {
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const snapshot = useSyncExternalStore(listener => bridge.subscribe(listener), () => bridge.snapshot());
   useEffect(() => {
@@ -24,9 +25,9 @@ function GameStage({ bridge, seed, onHome, onSettings }: { bridge: GameBridge; s
     // Settings are updated as menu state; effect should NOT recreate active game.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [host, bridge, seed]);
-  return <div className="game-shell" data-testid="game-shell"><div className="arena-viewport" ref={setHost} aria-label="Playable Kyntraze arena"/><Hud s={snapshot} onPause={() => bridge.togglePause()}/>
+  return <div className="game-shell" data-testid="game-shell"><div className="arena-viewport" ref={setHost} aria-label="Playable Kyntraze arena"/><Hud s={snapshot} pad={pad} onPause={() => bridge.togglePause()}/>
     {snapshot.phase === 'upgrade' && <LevelUpScreen level={snapshot.level} offers={snapshot.offers} onChoose={id => bridge.choose(id)} />}
-    {snapshot.phase === 'paused' && <PauseMenu onResume={() => bridge.togglePause()} onHome={onHome} onSettings={onSettings}/>}
+    {snapshot.phase === 'paused' && <PauseMenu s={snapshot} onResume={() => bridge.togglePause()} onHome={onHome} onSettings={onSettings}/>}
     {snapshot.phase === 'dead' && snapshot.deathShown && <ResultsScreen s={snapshot} onRetry={() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))} onHome={onHome}/>}
   </div>;
 }
@@ -42,11 +43,11 @@ export default function App() {
   useEffect(() => { const retry = () => start(true); window.addEventListener('kyntraze-retry', retry); return () => window.removeEventListener('kyntraze-retry', retry); });
   const updateSettings = (next: GameSettings) => { bridge.setSettings(next); const updated = { ...save, settings: next }; setSave(updated); storeSave(updated); };
   const home = () => { setView('title'); setSettingsOpen(false); setSave(loadSave()); };
-  return <div className="app">
+  return <PadContext.Provider value={pad.connected}><div className="app">
     {pad.connected && <ControllerBadge/>}
     {view === 'title' && <TitleScreen onPlay={() => setView('select')} onSettings={() => setSettingsOpen(true)} save={save}/>}
     {view === 'select' && <HeroSelect onBack={() => setView('title')} onStart={() => start()} seed={seedInput} onSeed={setSeedInput}/>}
-    {view === 'game' && <GameStage key={run.serial} bridge={bridge} seed={run.seed} onHome={home} onSettings={() => setSettingsOpen(true)}/>}
+    {view === 'game' && <GameStage key={run.serial} bridge={bridge} seed={run.seed} pad={pad.connected} onHome={home} onSettings={() => setSettingsOpen(true)}/>}
     {settingsOpen && <SettingsPanel settings={save.settings} onChange={updateSettings} onClose={() => setSettingsOpen(false)}/>}
-  </div>;
+  </div></PadContext.Provider>;
 }

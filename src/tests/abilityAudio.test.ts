@@ -32,6 +32,13 @@ describe('ability audio files', () => {
     }
     expect(existsSync(join(__dirname, '..', '..', 'art', 'characters', 'kai', 'abilities', 'audio', 'synth_b05.py'))).toBe(true);
   });
+  it('sounds never outlive their gameplay window (B05.2): beam fire <= 0.5 s + 0.15 s tail, charge/gather <= window + tail, throw <= 0.55 s', () => {
+    const rep = JSON.parse(readFileSync(join(__dirname, '..', '..', 'public', 'audio', 'kai-abilities', 'loudness.json'), 'utf8'));
+    for (const n of ['beam_fire', 'beam_fire_f1']) expect(rep[n].seconds).toBeLessThanOrEqual(0.65);
+    for (const n of ['beam_charge', 'beam_charge_f1']) expect(rep[n].seconds).toBeLessThanOrEqual(0.65);
+    for (const n of ['sphere_gather', 'sphere_gather_f1']) expect(rep[n].seconds).toBeLessThanOrEqual(1.0);
+    expect(rep.sphere_throw.seconds).toBeLessThanOrEqual(0.55); expect(rep.beam_end.seconds).toBeLessThanOrEqual(0.75);
+  });
 });
 
 describe('ability audio lifecycle', () => {
@@ -45,6 +52,10 @@ describe('ability audio lifecycle', () => {
     a.handle(ev('beam_fire', 2), 0); expect(a.started).toEqual(['beam_charge', 'beam_fire']); expect(ctx.sources[0].stoppedAt).toBeGreaterThanOrEqual(0); expect(a.activeVoices).toBe(1);
     const b = await mk(); b.a.handle(ev('beam_charge', 1), 1); b.a.handle(ev('beam_fire', 2), 1); b.a.handle(ev('sphere_gather', 3), 1); b.a.handle(ev('sphere_burst', 4), 1);
     expect(b.a.started).toEqual(['beam_charge_f1', 'beam_fire_f1', 'sphere_gather_f1', 'sphere_burst_f1']);
+  });
+  it('beam end fades the fire voice out before the end sound plays; nothing keeps sounding after a full cast', async () => {
+    const { ctx, a } = await mk(); a.handle(ev('beam_fire', 1), 0); a.handle(ev('beam_pulse', 2, 1), 0); const fire = ctx.sources[0]; a.handle(ev('beam_end', 3), 0);
+    expect(fire.stoppedAt).toBeGreaterThanOrEqual(0); expect([...a['voices']].map(v => v.slot)).toEqual(['misc']); expect(a.started.at(-1)).toBe('beam_end');
   });
   it('no voice stacking: re-casting replaces the charge voice, pulses cap at two voices', async () => {
     const { a } = await mk(); a.handle(ev('sphere_gather', 1), 0); a.handle(ev('sphere_gather', 2), 0); expect(a.activeVoices).toBe(1);
