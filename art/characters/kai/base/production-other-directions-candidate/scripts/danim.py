@@ -39,6 +39,7 @@ def hand_slot(pose, s):
 
 def solve(pose):
     ch = {b: {} for b in r.BONES}
+    if "root" in pose or "root_rot" in pose: ch["root"] = {"loc": tuple(pose.get("root", (0, 0))), "rot": pose.get("root_rot", 0.0)}
     px_, py_ = pose.get("pelvis", (0, 0)); cx_, cy_ = pose.get("chest", (0, 0)); hx, hy = pose.get("head", (0, 0))
     ch["pelvis"] = {"loc": (px_ + PEL_OFF[0], py_ + PEL_OFF[1]), "rot": pose.get("pelvis_rot", 0.0)}
     ch["spine"] = {"loc": (cx_ + CHEST_OFF[0], cy_ + CHEST_OFF[1]), "rot": pose.get("spine_rot", 0.0) + BASE_LEAN}
@@ -184,6 +185,8 @@ def punch():
     return {"name": "BasicPunch", "fps": 16, "loop": False, "frames": fr, "events": {"anticipation_start": 1, "impact": 5, "recover_start": 8, "interruptible_from": 11}}
 
 CLIPS = [idle, run, punch]
+import danim_b03g  # noqa: E402  (B03G clips; appended to CLIPS below)
+CLIPS += danim_b03g.CLIPS
 
 def slots_of(p):
     return {f"hand_{s}": hand_slot(p, s) for s in "nf"}

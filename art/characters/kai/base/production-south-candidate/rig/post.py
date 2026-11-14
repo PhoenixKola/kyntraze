@@ -53,14 +53,15 @@ for k in data["clips"]:
         Wm = r.fk(ch)
         for b, hp in vf["heads"][key].items(): maxe = max(maxe, float(np.hypot(*(r.apply(Wm, b, r.BONES[b][1]) - np.array(hp)))))
         info["enclosed_holes_px"].append(int(holes(fin[..., 3] > 0).sum()))
-    info["max_sole_target_error_px"] = round(max(max(f["planted_err"].values()) for f in k["frames"]), 3)
+    info["max_sole_target_error_px"] = round(max((max(f["planted_err"].values()) for f in k["frames"] if f["planted_err"]), default=0.0), 3)
     if k["loop"]:
         dd = [int((frs[i] != frs[(i + 1) % len(frs)]).any(-1).sum()) for i in range(len(frs))]
         info["frame_to_frame_changed_px"] = dd; info["loop_seam_ok"] = dd[-1] <= max(dd[:-1]) * 1.15
     finals[nm] = frs; qa["clips"][nm] = info
 qa["fk_parity_max_px"] = round(maxe, 5); qa["blender_vs_numpy_max_px"] = maxd
 
-allf = [f for v in finals.values() for f in v]
+BASE_CLIPS = ("Idle", "Run", "BasicPunch")   # their frame (crop + origin) is fixed since B03D; B03G clips carry their own
+allf = [f for nm_, v in finals.items() if nm_ in BASE_CLIPS for f in v]
 ys, xs = np.nonzero(np.any(np.stack([f[..., 3] > 0 for f in allf]), 0))
 x0, x1, y0, y1 = max(0, xs.min() - 2), min(r.CANVAS[0], xs.max() + 3), max(0, ys.min() - 2), min(r.CANVAS[1], ys.max() + 3)
 if (x1 - x0) % 2: x0 -= 1
@@ -73,12 +74,23 @@ man = {"schema": "kyntraze.anim-manifest/0.1-pilot", "character": "kai", "form":
        "scale_note": "1 px = 1 native art px (approved 160 px Kai scale); game currently shows Kai ~79 px tall (setScale ~0.49)",
        "root_motion": {"baked": False, "contract": "frames are in place; Phaser owns movement, collision, hitboxes and damage; events are frame indices only"},
        "animations": {}}
+def clip_crop(nm):
+    """(x0, x1, y0, y1, FW, FH, ox, oy) for a clip: the shared base frame, or its own tight frame for B03G clips."""
+    if nm in BASE_CLIPS: return x0, x1, y0, y1, FW, FH, ox, oy
+    yy, xx = np.nonzero(np.any(np.stack([f[..., 3] > 0 for f in finals[nm]]), 0))
+    cx0, cx1, cy0, cy1 = max(0, xx.min() - 2), min(r.CANVAS[0], xx.max() + 3), max(0, yy.min() - 2), min(r.CANVAS[1], yy.max() + 3)
+    if (cx1 - cx0) % 2: cx0 = max(0, cx0 - 1)
+    return cx0, cx1, cy0, cy1, cx1 - cx0, cy1 - cy0, r.ROOT[0] - cx0, r.ROOT[1] - cy0
 for nm, frs in finals.items():
     k = next(c for c in data["clips"] if c["name"] == nm)
-    sheet = Image.new("RGBA", (FW * len(frs), FH))
-    for i, f in enumerate(frs): sheet.paste(Image.fromarray(f[y0:y1, x0:x1]), (i * FW, 0))
+    cx0, cx1, cy0, cy1, cw_, ch_, cox, coy = clip_crop(nm)
+    sheet = Image.new("RGBA", (cw_ * len(frs), ch_))
+    for i, f in enumerate(frs): sheet.paste(Image.fromarray(f[cy0:cy1, cx0:cx1]), (i * cw_, 0))
     fn = f"sheets/kai_south_{nm.lower()}.png"; sheet.save(os.path.join(V5, fn))
     e = {"sheet": fn, "frames": len(frs), "fps": k["fps"], "loop": k["loop"], "duration_s": round(len(frs) / k["fps"], 4), "blender_action": nm, "events": k["events"]}
+    if nm not in BASE_CLIPS:
+        e.update({"frame_width": int(cw_), "frame_height": int(ch_), "origin_px": [float(cox), float(coy)], "terminal": "hold_last_frame" if nm == "Death" else "once", "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"})
+        qa["clips"][nm]["frame"] = [int(cw_), int(ch_), float(cox), float(coy)]; qa["clips"][nm]["crop_touches_canvas_edge"] = bool(cx0 <= 0 or cx1 >= r.CANVAS[0] or cy0 <= 0 or cy1 >= r.CANVAS[1])
     if nm == "Run": e["speed_note"] = "in-place cycle, 3.5 steps/s at 14 fps; scale fps with speed (14*speed/250, clamp 10..18). Front-view stance feet cannot lock to the world at 250 px/s."
     if nm == "BasicPunch": e["hit_contract"] = "apply damage/hitstop in Phaser on 'impact' (0-based frame 5)"
     man["animations"][nm] = e
@@ -147,12 +159,13 @@ gsheet.alpha_composite(gs(ref), (len(finals["Run"]) * 0 + max(len(f) for _, f in
 gsheet.save(os.path.join(rev, "game-scale-preview.png"))
 
 # ---- MP4s at exact fps: left 4x, right ~0.5x game scale shown 4x... and a 1x strip
+_FW0, _FH0 = FW, FH
 ff = shutil.which("ffmpeg")
 for nm, frs in finals.items():
-    k = man["animations"][nm]; tmp = os.path.join(work, "mp4_" + nm); shutil.rmtree(tmp, ignore_errors=True); os.makedirs(tmp)
+    k = man["animations"][nm]; tmp = os.path.join(work, "mp4_" + nm); cx0, cx1, cy0, cy1, FW, FH, _ox, _oy = clip_crop(nm); shutil.rmtree(tmp, ignore_errors=True); os.makedirs(tmp)
     seq = (frs * 4) if k["loop"] else (frs + [frs[-1]] * 6) * 2
     for n, f in enumerate(seq):
-        src = Image.new("RGB", (FW, FH), BG); src.paste(Image.fromarray(f[y0:y1, x0:x1]), (0, 0), Image.fromarray(f[y0:y1, x0:x1]))
+        src = Image.new("RGB", (FW, FH), BG); src.paste(Image.fromarray(f[cy0:cy1, cx0:cx1]), (0, 0), Image.fromarray(f[cy0:cy1, cx0:cx1]))
         canv = Image.new("RGB", (FW * 4 + FW * 2 + FW + 48, FH * 4), BG)
         canv.paste(src.resize((FW * 4, FH * 4), Image.NEAREST), (0, 0))
         canv.paste(src.resize((FW // 2, FH // 2), Image.BOX).resize((FW * 2, FH * 2), Image.NEAREST), (FW * 4 + 16, FH * 2))
@@ -161,6 +174,7 @@ for nm, frs in finals.items():
         src.save(os.path.join(tmp, f"{n:04d}.png")) if False else canv.save(os.path.join(tmp, f"{n:04d}.png"))
     subprocess.run([ff, "-y", "-loglevel", "error", "-framerate", str(k["fps"]), "-i", os.path.join(tmp, "%04d.png"), "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2",
                     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", "30", "-crf", "16", os.path.join(rev, f"{nm}-normal-speed.mp4")], check=True)
+FW, FH = _FW0, _FH0
 before = json.load(open(os.path.join(work, "protected-before.json"))); now = hashes()
 qa["protected_files_unchanged"] = all(now.get(k_) == v for k_, v in before.items())
 qa["frame"] = [int(FW), int(FH), float(ox), float(oy)]

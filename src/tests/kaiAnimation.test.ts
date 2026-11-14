@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { KAI_CLIPS, KAI_DIRS, KaiAnimator, facingFromInput, facingFromVector, parseKaiManifest, type AnimFrameInput, type Facing, type KaiManifests } from '../assets/kaiAnimation';
+import { KAI_CLIPS, KAI_DIRS, KaiAnimator, clipFrame, SIM_DASH_SECONDS, facingFromInput, facingFromVector, parseKaiManifest, type AnimFrameInput, type Facing, type KaiManifests } from '../assets/kaiAnimation';
 
 const pub = (...p: string[]) => join(__dirname, '..', '..', 'public', 'art', 'kai', ...p);
 const manifests = Object.fromEntries(KAI_DIRS.map(d => [d, parseKaiManifest(JSON.parse(readFileSync(pub(d, 'manifest.json'), 'utf8')), d)])) as KaiManifests;
@@ -18,8 +18,12 @@ describe('Kai manifests', () => {
     expect([m.animations.BasicPunch.frames, m.animations.BasicPunch.fps, m.animations.BasicPunch.loop, m.animations.BasicPunch.events.impact]).toEqual([14, 16, false, 5]);
     for (const clip of KAI_CLIPS) {
       const a = m.animations[clip];
-      expect(pngSize(pub(dir, a.sheet))).toEqual({ w: m.frame_width * a.frames, h: m.frame_height });
+      const f = clipFrame(m, clip); expect(pngSize(pub(dir, a.sheet))).toEqual({ w: f.w * a.frames, h: f.h });
+      expect(f.ox).toBeLessThan(f.w); expect(f.oy).toBeLessThanOrEqual(f.h);
     }
+    expect([m.animations.Dash.frames, m.animations.Dash.loop, m.animations.Dash.events.recover_start]).toEqual([10, false, 7]);
+    expect([m.animations.Hurt.frames, m.animations.Hurt.loop]).toEqual([8, false]);
+    expect([m.animations.Death.frames, m.animations.Death.loop, m.animations.Death.terminal]).toEqual([16, false, 'hold_last_frame']);
     expect(m.origin_px[0]).toBeLessThan(m.frame_width); expect(m.origin_px[1]).toBeLessThan(m.frame_height);
   });
   it('rejects a manifest for the wrong direction or with baked root motion', () => {
@@ -57,9 +61,45 @@ describe('KaiAnimator', () => {
     expect(Math.abs(turned.frame - east.frame) % 8).toBeLessThanOrEqual(1);
     expect(a.update(idle, 0.55)).toMatchObject({ clip: 'Idle', facing: 'north', frame: 0 });
   });
-  it('dash plays Run faster (honest fallback: no dash art yet)', () => {
-    const frameAfter = (extra: Partial<AnimFrameInput>) => { const a = new KaiAnimator(manifests); for (let i = 0; i < 12; i++) a.update({ ...idle, moving: true, inputX: 1, ...extra }, 0.55); return a.pose().frame; };
-    expect(frameAfter({ dashing: true })).toBeGreaterThan(frameAfter({}));
+  it('B03G Dash: follows the sim dash (anticipation to travel to recovery), then returns to Run/Idle', () => {
+    const a = new KaiAnimator(manifests); const frames: number[] = []; let rem = SIM_DASH_SECONDS;
+    for (let i = 0; i < 40; i++) {
+      const dashing = rem > 0; const p = a.update({ ...idle, moving: dashing, inputX: 1, dashing, dashX: 1, dashRemaining: Math.max(0, rem) }, 0.55); rem -= 1 / 60;
+      if (p.clip === 'Dash') frames.push(p.frame);
+    }
+    expect(frames[0]).toBe(0); expect(frames.slice().sort((x, y) => x - y)).toEqual(frames);
+    expect(Math.max(...frames)).toBeGreaterThanOrEqual(8); expect(frames.filter(f => f < 7).length).toBeGreaterThanOrEqual(10);
+    expect(a.pose().clip).toBe('Idle');
+    const b = new KaiAnimator(manifests); b.update({ ...idle, dashing: true, dashX: -1, dashRemaining: 0.2 }, 0.55); expect(b.pose().facing).toBe('west');
+  });
+  it('B03G priority: Hurt/Dash never start a punch; Hurt cancels a punch; Death beats everything', () => {
+    const target = { ...idle, attackClock: 0.02, hasTarget: true, targetDx: 80 };
+    const h = new KaiAnimator(manifests); h.update({ ...target, hurt: true }, 0.55);
+    for (let i = 0; i < 6; i++) expect(h.update({ ...target }, 0.55).clip).toBe('Hurt');
+    const d = new KaiAnimator(manifests); expect(d.update({ ...target, dashing: true, dashX: 1, dashRemaining: 0.2 }, 0.55).clip).toBe('Dash');
+    const p = new KaiAnimator(manifests); for (let i = 0; i < 4; i++) p.update(target, 0.55); expect(p.pose().clip).toBe('BasicPunch');
+    expect(p.update({ ...target, hurt: true }, 0.55).clip).toBe('Hurt');
+    const k = new KaiAnimator(manifests); k.update({ ...target, hurt: true }, 0.55); expect(k.update({ ...target, alive: false }, 0.55).clip).toBe('Death');
+  });
+  it('B03G Hurt: plays once, is retriggerable, and a moving player is released after the interruptible frame', () => {
+    const a = new KaiAnimator(manifests); a.update({ ...idle, hurt: true }, 0.55); const seen: number[] = [];
+    for (let i = 0; i < 40; i++) { const p = a.update(idle, 0.55); if (p.clip === 'Hurt') seen.push(p.frame); }
+    expect(seen.length).toBeGreaterThan(0); expect(Math.max(...seen)).toBeLessThanOrEqual(7); expect(a.pose().clip).toBe('Idle');
+    a.update({ ...idle, hurt: true }, 0.55); expect(a.pose()).toMatchObject({ clip: 'Hurt', frame: 0 });
+    const m = new KaiAnimator(manifests); m.update({ ...idle, hurt: true, moving: true, inputX: 1 }, 0.55); let frames = 0;
+    for (let i = 0; i < 60 && m.pose().clip === 'Hurt'; i++, frames++) m.update({ ...idle, moving: true, inputX: 1 }, 0.55);
+    expect(frames).toBeLessThanOrEqual(16); expect(m.pose().clip).toBe('Run');
+  });
+  it('B03G Death: plays once to the last frame, holds, never loops or returns to Idle, and resets for a new run', () => {
+    const a = new KaiAnimator(manifests); const dead = { ...idle, alive: false }; const seq: number[] = [];
+    for (let i = 0; i < 300; i++) { const p = a.update(dead, 0.55); expect(p.clip).toBe('Death'); seq.push(p.frame); }
+    expect(seq[0]).toBe(0); expect(seq.slice().sort((x, y) => x - y)).toEqual(seq); expect(seq[seq.length - 1]).toBe(15); expect(seq.filter(f => f === 15).length).toBeGreaterThan(100);
+    const frozen = a.update({ ...dead, dt: 0 }, 0.55).frame; expect(frozen).toBe(15);
+    expect(a.update({ ...idle, hurt: true }, 0.55).clip).toBe('Hurt');
+    const b = new KaiAnimator(manifests); b.update(dead, 0.55); expect(b.update(idle, 0.55)).toMatchObject({ clip: 'Idle', frame: 0 });
+  });
+  it('B03G: every direction maps every new clip to its own sheet frame', () => {
+    for (const dir of KAI_DIRS) { const a = new KaiAnimator(manifests); a.facing = dir; expect(a.update({ ...idle, alive: false }, 0.55)).toMatchObject({ facing: dir, clip: 'Death', frame: 0 }); }
   });
   it('predicted punch lands its impact frame (5) on the sim weapon tick, with one punch per shot', () => {
     for (const period of [0.55, 0.41, 0.3]) {
@@ -84,11 +124,11 @@ describe('KaiAnimator', () => {
     }
     expect(pose.clip).toBe('Idle'); expect(pose.facing).toBe('north');
   });
-  it('freezes while paused (dt 0) and cancels the punch on death', () => {
+  it('freezes while paused (dt 0) and death cancels the punch', () => {
     const a = new KaiAnimator(manifests); a.update({ ...idle, attackClock: 0.05, hasTarget: true, targetDx: 50 }, 0.55);
     const p1 = a.pose(); for (let i = 0; i < 100; i++) a.update({ ...idle, dt: 0, attackClock: 0.05, hasTarget: true, targetDx: 50 }, 0.55);
     expect(a.pose()).toEqual(p1);
-    expect(a.update({ ...idle, alive: false }, 0.55).clip).toBe('Idle');
+    expect(a.update({ ...idle, alive: false }, 0.55).clip).toBe('Death');
   });
   it('a target appearing exactly at the weapon tick still gets a punch (snap-in near the impact frame)', () => {
     const a = new KaiAnimator(manifests); const p = a.update({ ...idle, attackClock: 0.5, hasTarget: true, targetDx: 40, shot: { dx: 40, dy: 0 } }, 0.55);

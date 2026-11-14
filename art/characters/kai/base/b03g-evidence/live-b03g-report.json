@@ -1,0 +1,83 @@
+{
+ "errors": [],
+ "dash": {
+  "E": "east/Dash/3",
+  "S": "south/Dash/3",
+  "W": "west/Dash/4",
+  "N": "north/Dash/4",
+  "NE": "east/Dash/3",
+  "SW": "west/Dash/4"
+ },
+ "pauseFrozen": true,
+ "died": true,
+ "deadPose": "north/Death/15",
+ "results": true,
+ "afterRetry": {
+  "pose": "south/Idle",
+  "sim": {
+   "hp": 100,
+   "ph": "running"
+  }
+ },
+ "stats": {
+  "samples": 2033,
+  "hurtStarts": 10,
+  "hpDrops": 10,
+  "dashFramesSeen": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "deathFinalFrame": 15,
+  "deathBackwards": 0,
+  "missing": 0,
+  "groundOffsetErrors": 0
+ },
+ "dash-640w": {
+  "E": "east/Dash/4",
+  "S": "south/Dash/4",
+  "W": "west/Dash/3",
+  "N": "north/Dash/3",
+  "NE": "east/Dash/3",
+  "SW": "south/Dash/3"
+ },
+ "pauseFrozen-640w": true,
+ "died-640w": true,
+ "deadPose-640w": "east/Death/15",
+ "results-640w": true,
+ "afterRetry-640w": {
+  "pose": "south/Idle",
+  "sim": {
+   "hp": 100,
+   "ph": "running"
+  }
+ },
+ "stats-640w": {
+  "samples": 2027,
+  "hurtStarts": 10,
+  "hpDrops": 10,
+  "dashFramesSeen": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "deathFinalFrame": 15,
+  "deathBackwards": 0,
+  "missing": 0,
+  "groundOffsetErrors": 0
+ }
+}

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import type { GameState, InputState } from '../../sim/GameState';
-import { KAI_GROUND_DY, KAI_REGISTRY_KEY, KAI_SCALE, KAI_SPLIT_ABOVE_FEET, KaiAnimator, kaiTextureKey, type AnimPose, type KaiManifests } from '../../assets/kaiAnimation';
+import { KAI_GROUND_DY, KAI_REGISTRY_KEY, clipFrame, KAI_SCALE, KAI_SPLIT_ABOVE_FEET, KaiAnimator, kaiTextureKey, type AnimPose, type KaiManifests } from '../../assets/kaiAnimation';
 export class EntityRenderer {
   private hero: Phaser.GameObjects.Sprite;
   private legs: Phaser.GameObjects.Sprite;
@@ -8,6 +8,7 @@ export class EntityRenderer {
   private readonly animator: KaiAnimator;
   private pose: AnimPose = { facing: 'south', clip: 'Idle', frame: 0, legs: null };
   private lastShotId = 0;
+  private lastHp = NaN;
   private lastX = NaN;
   private lastY = NaN;
   private moveHold = 0;
@@ -26,7 +27,9 @@ export class EntityRenderer {
   debugPose() { return { ...this.pose, texture: this.hero.texture.key, frameIndex: Number(this.hero.frame.name), x: this.hero.x, y: this.hero.y, scale: this.hero.scaleX }; }
   sync(state: GameState, input: InputState, deltaMs = 0) {
     const p = state.player;
-    const dt = state.phase === 'running' ? Math.min(0.1, deltaMs / 1000) : 0;
+    const dt = state.phase === 'running' || state.phase === 'dead' ? Math.min(0.1, deltaMs / 1000) : 0;
+    // hurt = the sim actually removed HP since the last render frame (never a proximity guess)
+    const hurt = !Number.isNaN(this.lastHp) && p.hp < this.lastHp && p.hp > 0; this.lastHp = p.hp;
     // actual displacement (not raw key state) decides Run, so pushing against a wall or obstacle idles; a short hold bridges frames with no sim tick
     if (Number.isNaN(this.lastX)) { this.lastX = p.x; this.lastY = p.y; }
     if (Math.hypot(p.x - this.lastX, p.y - this.lastY) > 0.05) this.moveHold = 0.1; else this.moveHold = Math.max(0, this.moveHold - dt);
@@ -40,18 +43,19 @@ export class EntityRenderer {
     const period = Math.max(0.16, p.attackPeriod * (p.form ? 0.75 : 1));
     this.pose = this.animator.update({
       dt, alive: state.phase !== 'dead' && p.hp > 0, moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, inputX: input.x, inputY: input.y,
-      runSpeed: p.speed * (p.form ? 1.16 : 1), dashing: p.dashRemaining > 0, dashX: p.dashDx, dashY: p.dashDy,
+      runSpeed: p.speed * (p.form ? 1.16 : 1), dashing: p.dashRemaining > 0, dashX: p.dashDx, dashY: p.dashDy, dashRemaining: p.dashRemaining, hurt,
       attackClock: p.attackClock, hasTarget: target !== null, targetDx: target?.dx ?? 0, targetDy: target?.dy ?? 0, shot,
     }, period);
-    const m = this.manifests[this.pose.facing];
+    const m = this.manifests[this.pose.facing]; const fr = clipFrame(m, this.pose.clip);
     const key = kaiTextureKey(this.pose.facing, this.pose.clip);
     if (this.hero.texture.key !== key) this.hero.setTexture(key);
     this.hero.setFrame(this.pose.frame);
-    this.hero.setOrigin(m.origin_px[0] / m.frame_width, m.origin_px[1] / m.frame_height);
+    this.hero.setOrigin(fr.ox / fr.w, fr.oy / fr.h);
     this.hero.setPosition(Math.round(p.x), Math.round(p.y + KAI_GROUND_DY));
-    const alpha = p.invulnerable > 0 && Math.floor(state.time * 18) % 2 === 0 ? 0.56 : 1;
+    const dead = state.phase === 'dead' || p.hp <= 0;
+    const alpha = !dead && p.invulnerable > 0 && Math.floor(state.time * 18) % 2 === 0 ? 0.56 : 1;
     this.hero.setAlpha(alpha);
-    if (state.phase === 'dead') this.hero.setTint(0x6d7488); else if (p.form) this.hero.setTint(0xffd78a); else this.hero.clearTint();
+    if (p.form && !dead) this.hero.setTint(0xffd78a); else this.hero.clearTint();
     // punching while moving: upper body from the punch frame, legs from the run cycle, split just under the belt
     const split = m.origin_px[1] - KAI_SPLIT_ABOVE_FEET;
     if (this.pose.legs !== null) {
@@ -61,7 +65,7 @@ export class EntityRenderer {
       this.legs.setFrame(this.pose.legs).setCrop(0, split, m.frame_width, m.frame_height - split);
       this.legs.setOrigin(m.origin_px[0] / m.frame_width, m.origin_px[1] / m.frame_height);
       this.legs.setPosition(this.hero.x, this.hero.y).setAlpha(alpha).setVisible(true);
-      if (state.phase === 'dead') this.legs.setTint(0x6d7488); else if (p.form) this.legs.setTint(0xffd78a); else this.legs.clearTint();
+      if (p.form) this.legs.setTint(0xffd78a); else this.legs.clearTint();
     } else { this.hero.setCrop(); this.legs.setVisible(false); }
     const active = new Set<number>();
     for (const e of state.enemies) {

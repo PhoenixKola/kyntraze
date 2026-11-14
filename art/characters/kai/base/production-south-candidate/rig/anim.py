@@ -30,6 +30,7 @@ def ik2(hip, ankle, L1, L2, bend):
 
 def solve(pose):
     ch = {b: {} for b in r.BONES}
+    if "root" in pose or "root_rot" in pose: ch["root"] = {"loc": tuple(pose.get("root", (0, 0))), "rot": pose.get("root_rot", 0.0)}
     ch["pelvis"] = {"loc": tuple(pose.get("pelvis", (0, 0))), "rot": pose.get("pelvis_rot", 0.0)}
     ch["spine"] = {"loc": tuple(pose.get("chest", (0, 0))), "rot": pose.get("spine_rot", 0.0)}
     ch["head"] = {"loc": tuple(pose.get("head", (0, 0))), "rot": pose.get("head_rot", 0.0)}
@@ -186,6 +187,8 @@ def punch():
             "events": {"anticipation_start": 1, "impact": 5, "recover_start": 8, "interruptible_from": 11}}
 
 CLIPS = [idle, run, punch]
+import anim_b03g  # noqa: E402  (B03G clips)
+CLIPS += anim_b03g.CLIPS
 
 def slots_of(p):
     s = {}

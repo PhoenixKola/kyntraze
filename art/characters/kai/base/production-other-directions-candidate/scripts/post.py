@@ -70,7 +70,8 @@ for k in data["clips"]:
     finals[nm] = frs; qa["clips"][nm] = info
 qa["fk_parity_max_px"] = round(maxe, 5); qa["blender_vs_numpy_max_px"] = maxd
 
-allf = [f for v in finals.values() for f in v]
+BASE_CLIPS = ("Idle", "Run", "BasicPunch")   # frame (crop + origin) fixed since B03E; B03G clips carry their own
+allf = [f for nm_, v in finals.items() if nm_ in BASE_CLIPS for f in v]
 ys, xs = np.nonzero(np.any(np.stack([f[..., 3] > 0 for f in allf]), 0))
 x0, x1, y0, y1 = max(0, xs.min() - 2), min(r.CANVAS[0], xs.max() + 3), max(0, ys.min() - 2), min(r.CANVAS[1], ys.max() + 3)
 if (x1 - x0) % 2: x0 = max(0, x0 - 1)
@@ -84,11 +85,20 @@ man = {"schema": "kyntraze.anim-manifest/0.1-pilot", "character": "kai", "form":
        "scale_note": "1 px = 1 native art px (approved ~160 px Kai); the game renders Kai at about 0.5x",
        "root_motion": {"baked": False, "contract": "frames are in place; Phaser owns movement, collision, hitboxes and damage; events are frame indices only"},
        "animations": {}}
+def clip_crop(nm):
+    if nm in BASE_CLIPS: return x0, x1, y0, y1, FW, FH, ox, oy
+    yy, xx = np.nonzero(np.any(np.stack([f[..., 3] > 0 for f in finals[nm]]), 0))
+    cx0, cx1, cy0, cy1 = max(0, xx.min() - 2), min(r.CANVAS[0], xx.max() + 3), max(0, yy.min() - 2), min(r.CANVAS[1], yy.max() + 3)
+    if (cx1 - cx0) % 2: cx0 = max(0, cx0 - 1)
+    return cx0, cx1, cy0, cy1, cx1 - cx0, cy1 - cy0, r.ROOT[0] - cx0, r.ROOT[1] - cy0
 for nm, frs in finals.items():
-    k = next(c for c in data["clips"] if c["name"] == nm); sheet = Image.new("RGBA", (FW * len(frs), FH))
-    for i, f in enumerate(frs): sheet.paste(Image.fromarray(f[y0:y1, x0:x1]), (i * FW, 0))
+    k = next(c for c in data["clips"] if c["name"] == nm); cx0, cx1, cy0, cy1, cw_, ch_, cox, coy = clip_crop(nm); sheet = Image.new("RGBA", (cw_ * len(frs), ch_))
+    for i, f in enumerate(frs): sheet.paste(Image.fromarray(f[cy0:cy1, cx0:cx1]), (i * cw_, 0))
     fn = f"sheets/kai_{D}_{nm.lower()}.png"; sheet.save(os.path.join(DP, fn))
     e = {"sheet": fn, "frames": len(frs), "fps": k["fps"], "loop": k["loop"], "duration_s": round(len(frs) / k["fps"], 4), "blender_action": nm, "events": k["events"]}
+    if nm not in BASE_CLIPS:
+        e.update({"frame_width": int(cw_), "frame_height": int(ch_), "origin_px": [float(cox), float(coy)], "terminal": "hold_last_frame" if nm == "Death" else "once", "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"})
+        qa["clips"][nm]["frame"] = [int(cw_), int(ch_), float(cox), float(coy)]; qa["clips"][nm]["crop_touches_canvas_edge"] = bool(cx0 <= 0 or cx1 >= r.CANVAS[0] or cy0 <= 0 or cy1 >= r.CANVAS[1])
     if nm == "BasicPunch": e["hit_contract"] = "apply damage and hitstop in Phaser on event 'impact' (0-based frame 5); the animation never applies damage itself"
     man["animations"][nm] = e
 json.dump(man, open(os.path.join(DP, "sheets", "manifest.json"), "w"), indent=1)
@@ -159,17 +169,19 @@ for j, (lab, p) in enumerate(stress):
 out.save(os.path.join(rev, "stress-poses-3x.png")); qa["stress"] = st
 # MP4s at exact fps: left 4x, middle 0.5x shown 4x, right 1x
 ff = shutil.which("ffmpeg")
+_FW0, _FH0 = FW, FH
 for nm, frs in finals.items():
-    k = man["animations"][nm]; tmp = os.path.join(work, "mp4_" + nm); shutil.rmtree(tmp, ignore_errors=True); os.makedirs(tmp)
+    k = man["animations"][nm]; tmp = os.path.join(work, "mp4_" + nm); cx0, cx1, cy0, cy1, FW, FH, _ox, _oy = clip_crop(nm); shutil.rmtree(tmp, ignore_errors=True); os.makedirs(tmp)
     seq = (frs * 4) if k["loop"] else (frs + [frs[-1]] * 6) * 2
     for n, f in enumerate(seq):
-        src = Image.new("RGB", (FW, FH), BG); sm_ = crop_rgba(f); src.paste(sm_, (0, 0), sm_)
+        src = Image.new("RGB", (FW, FH), BG); sm_ = Image.fromarray(f[cy0:cy1, cx0:cx1]); src.paste(sm_, (0, 0), sm_)
         canv = Image.new("RGB", (FW * 4 + FW * 2 + FW + 48, FH * 4), BG); canv.paste(src.resize((FW * 4, FH * 4), Image.NEAREST), (0, 0))
         canv.paste(src.resize((FW // 2, FH // 2), Image.BOX).resize((FW * 2, FH * 2), Image.NEAREST), (FW * 4 + 16, FH * 2)); canv.paste(src, (FW * 6 + 32, FH * 3))
         ImageDraw.Draw(canv).text((FW * 4 + 16, 10), f"{D.upper()} {nm}  {k['fps']} fps\nleft: 4x\nmiddle: game ~0.5x (shown 4x)\nright: 1x", fill=(220, 220, 220), font=font(15))
         canv.save(os.path.join(tmp, f"{n:04d}.png"))
     subprocess.run([ff, "-y", "-loglevel", "error", "-framerate", str(k["fps"]), "-i", os.path.join(tmp, "%04d.png"), "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2",
                     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", "30", "-crf", "17", os.path.join(rev, f"{nm}-normal-speed.mp4")], check=True)
+FW, FH = _FW0, _FH0
 qa["frame"] = [int(FW), int(FH), float(ox), float(oy)]
 json.dump(qa, open(os.path.join(work, "qa.json"), "w"), indent=1)
 print(json.dumps({k_: v for k_, v in qa.items() if k_ not in ("clips", "stress")}))

@@ -1,8 +1,10 @@
 /** Kai base-form directional animation: manifest contract + pure animation state (no Phaser, unit-testable). */
 export type Facing = 'south' | 'north' | 'east' | 'west';
-export type KaiClip = 'Idle' | 'Run' | 'BasicPunch';
+export type KaiClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death';
 export const KAI_DIRS: readonly Facing[] = ['south', 'north', 'east', 'west'];
-export const KAI_CLIPS: readonly KaiClip[] = ['Idle', 'Run', 'BasicPunch'];
+export const KAI_CLIPS: readonly KaiClip[] = ['Idle', 'Run', 'BasicPunch', 'Dash', 'Hurt', 'Death'];
+/** Sim dash length (MovementSystem): the Dash clip's travel frames are mapped onto it so the animation follows the real dash. */
+export const SIM_DASH_SECONDS = 0.22;
 export const KAI_REGISTRY_KEY = 'kai-manifests';
 
 /** Art is ~160 px tall; 0.5 is an exact 2:1 nearest-neighbour reduction (~80 px hero on the 960x540 canvas, same size as the previous placeholder). */
@@ -10,12 +12,22 @@ export const KAI_SCALE = 0.5;
 /** Manifest origin is the ground point between the soles; the sim position is the collision centre, which sits this many world px above the feet. */
 export const KAI_GROUND_DY = 24;
 
-export interface KaiClipInfo { sheet: string; frames: number; fps: number; loop: boolean; events: Record<string, number>; }
+export interface KaiClipInfo {
+  sheet: string; frames: number; fps: number; loop: boolean; events: Record<string, number>;
+  /** Clips added in B03G carry their own tight frame; Idle/Run/BasicPunch use the manifest-level frame. */
+  frame_width?: number; frame_height?: number; origin_px?: [number, number]; terminal?: 'once' | 'hold_last_frame';
+}
 export interface KaiManifest {
   direction: Facing; frame_width: number; frame_height: number; origin_px: [number, number];
   root_motion: { baked: boolean }; animations: Record<KaiClip, KaiClipInfo>;
 }
 export type KaiManifests = Record<Facing, KaiManifest>;
+
+/** Frame size and ground origin of one clip (per-clip override, else the direction's shared frame). */
+export function clipFrame(m: KaiManifest, clip: KaiClip) {
+  const a = m.animations[clip];
+  return { w: a.frame_width ?? m.frame_width, h: a.frame_height ?? m.frame_height, ox: (a.origin_px ?? m.origin_px)[0], oy: (a.origin_px ?? m.origin_px)[1] };
+}
 
 export const kaiManifestUrl = (dir: Facing) => `/art/kai/${dir}/manifest.json`;
 export const kaiSheetUrl = (dir: Facing, clip: KaiClipInfo) => `/art/kai/${dir}/${clip.sheet}`;
@@ -36,6 +48,8 @@ export function parseKaiManifest(raw: unknown, dir: Facing): KaiManifest {
     if (!a || typeof a.sheet !== 'string') throw new Error(`Kai manifest ${dir}: missing ${clip}`);
     num(a.frames, `${dir} ${clip} frames`); num(a.fps, `${dir} ${clip} fps`);
     if (typeof a.loop !== 'boolean') throw new Error(`Kai manifest ${dir}: ${clip} loop`);
+    if (a.frame_width !== undefined) { num(a.frame_width, `${dir} ${clip} frame_width`); num(a.frame_height, `${dir} ${clip} frame_height`); if (!Array.isArray(a.origin_px) || a.origin_px.length !== 2) throw new Error(`Kai manifest ${dir}: ${clip} origin_px`); }
+    if (clip === 'Death' && (a.loop || a.terminal !== 'hold_last_frame')) throw new Error(`Kai manifest ${dir}: Death must hold its last frame`);
   }
   const punch = m.animations!.BasicPunch;
   if (typeof punch.events?.impact !== 'number' || punch.events.impact < 0 || punch.events.impact >= punch.frames) throw new Error(`Kai manifest ${dir}: BasicPunch impact event`);
@@ -65,6 +79,8 @@ export interface AnimFrameInput {
   dt: number; alive: boolean;
   moving: boolean; inputX: number; inputY: number; runSpeed: number;
   dashing: boolean; dashX: number; dashY: number;
+  /** Sim dash seconds left (drives the Dash clip's progress) and a one-frame flag set when the sim actually removed player HP. */
+  dashRemaining?: number; hurt?: boolean;
   /** Seconds until the sim's automatic weapon fires, and whether an enemy is in range right now. */
   attackClock: number; hasTarget: boolean; targetDx: number; targetDy: number;
   /** Set on the render frame where the sim fired a fresh basic attack (offset to its first target). */
@@ -78,7 +94,8 @@ export const KAI_SPLIT_ABOVE_FEET = 64;
 const FACING_DWELL = 0.12;
 
 const MAX_PUNCH_RATE = 2.5;
-const DASH_RUN_RATE = 1.6;
+
+const DASH_RECOVERY_SECONDS = 0.12;
 
 export class KaiAnimator {
   facing: Facing = 'south';
@@ -89,10 +106,16 @@ export class KaiAnimator {
   private runTime = 0;
   private sinceTurn = 1;
   private movingNow = false;
+  private hurtTime = -1;
+  private deathTime = -1;
+  private dashRec = -1;
+  private dashProg = 0;
+  private dashWas = false;
 
   constructor(private readonly manifests: KaiManifests) {}
 
   get punching() { return this.punchTime >= 0; }
+  get dead() { return this.deathTime >= 0; }
 
   private turn(next: Facing, force = false) { if (next !== this.facing && (force || this.sinceTurn >= FACING_DWELL)) { this.facing = next; this.sinceTurn = 0; } }
 
@@ -107,30 +130,50 @@ export class KaiAnimator {
 
   private startPunch(t: number, rate: number) { this.punchTime = t; this.punchRate = rate; if (this.clip !== 'BasicPunch') { this.clip = 'BasicPunch'; } }
 
+  /** Priority: Death > Hurt > Dash (incl. recovery) > BasicPunch > Run > Idle. Hurt and Dash never start a punch; the sim still fires its weapon. */
   update(i: AnimFrameInput, attackPeriod: number): AnimPose {
     const plan = this.punchPlan(attackPeriod);
-    if (!i.alive) { this.punchTime = -1; this.clip = 'Idle'; this.movingNow = false; return this.pose(); }
+    if (!i.alive) {
+      if (this.deathTime < 0) { this.punchTime = -1; this.hurtTime = -1; this.dashRec = -1; this.dashWas = false; this.deathTime = 0; this.clip = 'Death'; }
+      else this.deathTime += i.dt;
+      this.movingNow = false; return this.pose();
+    }
+    if (this.deathTime >= 0) { this.deathTime = -1; this.clip = 'Idle'; this.time = 0; }
     this.sinceTurn += i.dt;
     this.movingNow = i.moving || i.dashing;
 
-    if (i.shot) {
-      // the sim just fired: keep an aligned predicted punch, otherwise (target appeared this instant / extreme fire rate) snap in near the impact frame
-      const aligned = this.punching && Math.abs(this.punchTime - plan.impactT) <= 0.2;
-      if (!aligned) { this.startPunch(Math.max(0, plan.impactT - 3 / this.info('BasicPunch').fps), plan.rate); this.turn(facingFromVector(this.facing, i.shot.dx, i.shot.dy), true); }
-    } else if (!this.punching && i.hasTarget && i.attackClock <= plan.impactT / plan.rate) {
-      this.startPunch(plan.impactT - Math.max(0, i.attackClock) * plan.rate, plan.rate);
-      this.turn(facingFromVector(this.facing, i.targetDx, i.targetDy), true);
+    if (i.hurt) { this.punchTime = -1; this.dashRec = -1; this.hurtTime = 0; }
+    if (i.dashing) {
+      if (!this.dashWas) { this.punchTime = -1; this.hurtTime = -1; this.turn(facingFromInput(this.facing, i.dashX, i.dashY), true); }
+      else this.turn(facingFromInput(this.facing, i.dashX, i.dashY));
+      this.dashRec = -1; this.dashProg = Math.min(1, Math.max(0, 1 - (i.dashRemaining ?? SIM_DASH_SECONDS / 2) / SIM_DASH_SECONDS));
+    } else if (this.dashWas) this.dashRec = 0;
+    this.dashWas = i.dashing;
+    if (this.dashRec >= 0 && !i.dashing) { this.dashRec += i.dt; if (this.dashRec >= DASH_RECOVERY_SECONDS || (i.moving && this.dashRec >= 0.05)) this.dashRec = -1; }
+    if (this.hurtTime >= 0) {
+      const h = this.info('Hurt'); this.hurtTime += i.dt;
+      if (this.hurtTime >= h.frames / h.fps || (this.movingNow && this.hurtTime >= (h.events.interruptible_from ?? h.frames) / h.fps)) this.hurtTime = -1;
     }
+    const busy = this.hurtTime >= 0 || i.dashing || this.dashRec >= 0;
 
-    if (this.punching) {
-      this.punchTime += i.dt * this.punchRate;
-      if (this.punchTime >= plan.duration) this.punchTime = -1;
-    } else if (i.dashing) this.turn(facingFromInput(this.facing, i.dashX, i.dashY));
-    else if (i.moving) this.turn(facingFromInput(this.facing, i.inputX, i.inputY));
+    if (!busy) {
+      if (i.shot) {
+        // the sim just fired: keep an aligned predicted punch, otherwise (target appeared this instant / extreme fire rate) snap in near the impact frame
+        const aligned = this.punching && Math.abs(this.punchTime - plan.impactT) <= 0.2;
+        if (!aligned) { this.startPunch(Math.max(0, plan.impactT - 3 / this.info('BasicPunch').fps), plan.rate); this.turn(facingFromVector(this.facing, i.shot.dx, i.shot.dy), true); }
+      } else if (!this.punching && i.hasTarget && i.attackClock <= plan.impactT / plan.rate) {
+        this.startPunch(plan.impactT - Math.max(0, i.attackClock) * plan.rate, plan.rate);
+        this.turn(facingFromVector(this.facing, i.targetDx, i.targetDy), true);
+      }
+      if (this.punching) {
+        this.punchTime += i.dt * this.punchRate;
+        if (this.punchTime >= plan.duration) this.punchTime = -1;
+      } else if (i.moving) this.turn(facingFromInput(this.facing, i.inputX, i.inputY));
+    } else this.punchTime = -1;
 
-    const want: KaiClip = this.punching ? 'BasicPunch' : (i.moving || i.dashing) ? 'Run' : 'Idle';
+    const want: KaiClip = this.hurtTime >= 0 ? 'Hurt' : (i.dashing || this.dashRec >= 0) ? 'Dash' : this.punching ? 'BasicPunch' : i.moving ? 'Run' : 'Idle';
     if (want !== this.clip) { this.clip = want; this.time = 0; }
-    const runStep = i.dt * Math.min(18, Math.max(10, 14 * i.runSpeed / 250)) / 14 * (i.dashing ? DASH_RUN_RATE : 1);
+    const runStep = i.dt * Math.min(18, Math.max(10, 14 * i.runSpeed / 250)) / 14;
     if (this.movingNow) this.runTime += runStep; else this.runTime = 0;
     if (want === 'Run') this.time += runStep;
     else if (want === 'Idle') this.time += i.dt;
@@ -139,10 +182,17 @@ export class KaiAnimator {
 
   pose(): AnimPose {
     const a = this.info(this.clip);
-    const t = this.clip === 'BasicPunch' ? Math.max(0, this.punchTime) : this.time;
-    const raw = Math.floor(t * a.fps + 1e-6);
+    let frame: number;
+    if (this.clip === 'Dash') {
+      const rec = a.events.recover_start ?? a.frames - 3;
+      frame = this.dashRec >= 0 ? Math.min(a.frames - 1, rec + Math.floor(this.dashRec / DASH_RECOVERY_SECONDS * (a.frames - rec))) : Math.min(rec - 1, Math.floor(this.dashProg * rec));
+    } else {
+      const t = this.clip === 'BasicPunch' ? Math.max(0, this.punchTime) : this.clip === 'Hurt' ? Math.max(0, this.hurtTime) : this.clip === 'Death' ? Math.max(0, this.deathTime) : this.time;
+      const raw = Math.floor(t * a.fps + 1e-6);
+      frame = a.loop ? raw % a.frames : Math.min(a.frames - 1, raw);
+    }
     const run = this.info('Run');
     const legs = this.clip === 'BasicPunch' && this.movingNow ? Math.floor(this.runTime * run.fps + 1e-6) % run.frames : null;
-    return { facing: this.facing, clip: this.clip, frame: a.loop ? raw % a.frames : Math.min(a.frames - 1, raw), legs };
+    return { facing: this.facing, clip: this.clip, frame, legs };
   }
 }

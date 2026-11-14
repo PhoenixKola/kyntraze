@@ -15,7 +15,7 @@ export class BootScene extends Phaser.Scene {
     this.registry.set(KAI_REGISTRY_KEY, manifests);
     for (const dir of KAI_DIRS) for (const clip of KAI_CLIPS) {
       const m = manifests[dir], a = m.animations[clip];
-      this.load.spritesheet(kaiTextureKey(dir, clip), kaiSheetUrl(dir, a), { frameWidth: m.frame_width, frameHeight: m.frame_height, endFrame: a.frames - 1 });
+      this.load.spritesheet(kaiTextureKey(dir, clip), kaiSheetUrl(dir, a), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });
     }
     this.load.once(Phaser.Loader.Events.COMPLETE, () => this.scene.start('ArenaScene'));
     this.load.start();
