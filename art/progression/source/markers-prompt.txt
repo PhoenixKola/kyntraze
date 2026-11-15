@@ -1,0 +1,12 @@
+Pixel-art monochrome minimap and HUD marker glyph sheet for a game (bold, crisp, readable at 16-28 screen pixels). FINE clean pixel blocks, no anti-aliasing, no gradients, hard stepped edges. Original designs.
+
+COLOUR RULE: draw each glyph ONLY in pure white (#ffffff) with a single darker light-grey-blue (#9fb0c8) for inner detail shading. No other colours, no background shading, no frames around the glyphs.
+
+Draw EXACTLY 6 glyphs on flat magenta (#ff00ff), in a row of 3 over a row of 3, widely spaced (at least 20 art pixels apart), each about 36x36 art pixels, nothing cropped:
+1. PLAYER: a bold pointed arrowhead / chevron pointing UP, with a small notch at its base and a thin ring around it.
+2. ELITE: a bold diamond with four small spikes at its corners.
+3. BOSS: a horned skull crown: a stylised demon skull with two curved horns, menacing but simple.
+4. HAZARD: a warning triangle with a lightning bolt inside.
+5. THREAT: a bold chevron arrowhead pointing UP with a small pip below it, used as an off-screen danger edge pointer.
+6. LEVEL STAR: a four-point star burst with a small diamond at its centre, used for level badges.
+No text, no labels, no watermark. Wide 16:9.

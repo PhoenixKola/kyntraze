@@ -6,7 +6,7 @@ test('dev-only QA hook shows three choices and selecting an upgrade resumes', as
   await page.waitForFunction(() => Boolean((window as Window & { __KYNT_QA__?: unknown }).__KYNT_QA__));
   await page.evaluate(() => (window as Window & { __KYNT_QA__?: {grantXp:()=>void} }).__KYNT_QA__?.grantXp());
   await expect(page.getByTestId('level-up')).toBeVisible();
-  await expect(page.locator('.upgrade-button')).toHaveCount(3);
-  await page.getByTestId('upgrade-impact').click();
+  await expect(page.locator('.lv-card')).toHaveCount(3);
+  await page.locator('.lv-card').first().click();
   await expect(page.getByTestId('level-up')).toHaveCount(0);
 });

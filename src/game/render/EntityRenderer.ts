@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { RULES } from '../../core/Rules';
+import { vfxKey } from './fxPool';
 import type { GameState, InputState } from '../../sim/GameState';
 import { FormFx } from './formFx';
 import { AbilityFx } from './abilityFx';
@@ -26,7 +27,7 @@ export class EntityRenderer {
   private lastY = NaN;
   private moveHold = 0;
   private flash = 0;
-  private orbs = new Map<number, Phaser.GameObjects.Image>();
+  private orbs = new Map<number, { gem: Phaser.GameObjects.Image; glow: Phaser.GameObjects.Image }>();
   constructor(private readonly scene: Phaser.Scene) {
     const manifests = scene.registry.get(KAI_REGISTRY_KEY) as KaiManifests | undefined;
     if (!manifests) throw new Error('Kai animation manifests were not loaded by BootScene');
@@ -104,12 +105,16 @@ export class EntityRenderer {
     const activeOrbs = new Set<number>();
     for (const p of state.pickups) {
       activeOrbs.add(p.id);
-      let image = this.orbs.get(p.id);
-      if (!image) { image = this.scene.add.image(p.x, p.y, 'xp').setScale(1.8).setDepth(4); this.orbs.set(p.id, image); }
-      image.setPosition(Math.round(p.x), Math.round(p.y + Math.sin(p.age * 4) * 3));
+      let orb = this.orbs.get(p.id); const tier = p.tier ?? (p.xp >= 3 ? 1 : 0);
+      if (!orb) {
+        const glow = this.scene.add.image(p.x, p.y, vfxKey('spark', false)).setBlendMode(Phaser.BlendModes.ADD).setDepth(3.9).setTint(tier === 3 ? 0xffd98a : tier === 2 ? 0xbfe8ff : 0x5fe3d6).setScale([0.3, 0.4, 0.55, 0.9][tier]).setVisible(!reducedEffects);
+        orb = { gem: this.scene.add.image(p.x, p.y, `xpgem${tier}`).setScale(0.5).setDepth(4), glow }; this.orbs.set(p.id, orb);
+      }
+      const bob = Math.sin(p.age * 4 + p.id) * 3, fading = p.age > 38 ? (Math.sin(p.age * 18) > 0 ? 1 : 0.35) : 1;   // the last seconds before a crystal fades flicker
+      orb.gem.setPosition(Math.round(p.x), Math.round(p.y + bob)).setAlpha(fading); orb.glow.setPosition(Math.round(p.x), Math.round(p.y + bob)).setAlpha((0.55 + 0.25 * Math.sin(p.age * 5 + p.id)) * fading);
     }
-    for (const [id, image] of this.orbs) if (!activeOrbs.has(id)) { image.destroy(); this.orbs.delete(id); }
+    for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies.stats(), boss: this.bosses.stats() }; }
-  destroy() { this.formFx.destroy(); this.abilityFx.destroy(); this.enemies.destroy(); this.bosses.destroy(); this.hero.destroy(); this.legs.destroy(); for (const image of this.orbs.values()) image.destroy(); this.orbs.clear(); }
+  destroy() { this.formFx.destroy(); this.abilityFx.destroy(); this.enemies.destroy(); this.bosses.destroy(); this.hero.destroy(); this.legs.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); }
 }

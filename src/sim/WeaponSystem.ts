@@ -14,8 +14,8 @@ export function updateAutoWeapon(state: GameState, dt: number) {
     const target = candidates[i];
     state.impacts.push({ id: state.nextId++, kind: 'shot', x: p.x, y: p.y - 15,
       targetX: target.x, targetY: target.y, ttl: 0.2, life: 0.2 });
-    damageEnemy(state, target, p.attackDamage * (p.form ? 1.4 : 1));
-    if (p.form === 0) p.drive = Math.min(100, p.drive + 1.7);
+    damageEnemy(state, target, p.attackDamage * (p.form ? 1.4 * state.mods.formPower : 1));
+    if (p.form === 0) p.drive = Math.min(100, p.drive + 1.7 * state.mods.driveGain);
   }
 }
 export function activateQ(state: GameState) {

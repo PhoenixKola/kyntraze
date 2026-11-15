@@ -1,5 +1,6 @@
 import type { RunPhase } from '../sim/GameState';
-import type { UpgradeId } from '../content/upgrades';
+import type { Rarity, UpgradeCategory, UpgradeId } from '../content/upgrades';
+import type { ArenaId } from '../content/arenas';
 export interface UiSnapshot {
   phase: RunPhase; seed: number; hp: number; maxHp: number; xp: number; nextXp: number; level: number;
   seconds: number; kills: number; enemies: number; dashCooldown: number; qCooldown: number; beamCooldown: number; sphereCooldown: number;
@@ -9,8 +10,23 @@ export interface UiSnapshot {
   /** Active boss for the HUD bar, or null. `intro` is seconds left of the arrival warning; `flash` ticks up when it is hurt (for the bar's damage feedback). */
   boss: BossHud | null;
   arenaName: string;
+  /** Rich level-up cards (same order as `offers`). */
+  cards: OfferCard[];
+  /** The build so far: one entry per owned card with its stack count. */
+  owned: OwnedUpgrade[];
+  map: MiniMap;
+  /** Cooldown lengths after upgrades (the HUD sweep needs the real maximum). */
+  cdMax: { dash: number; beam: number; sphere: number };
+  /** Seconds since Second Wind fired (drives a short HUD flash), or a large number. */
+  sinceRevive: number; revives: number;
 }
+export interface OfferCard { id: UpgradeId; name: string; blurb: string; category: UpgradeCategory; rarity: Rarity; stack: number; max: number; label: string; before: string; after: string }
+export interface OwnedUpgrade { id: UpgradeId; stacks: number }
+/** Minimap feed. `foes` is a flat [x, y, kind, ...] list: kind 0 grunt, 1 caster, 2 elite, 3 boss. Hazards carry warning progress (0..1) or `live` once they have fired. */
+export interface MapHazard { shape: 'circle' | 'rect' | 'cone' | 'sigil'; x: number; y: number; r: number; w: number; h: number; warn: number; live: boolean }
+export interface MiniMap { arena: ArenaId; px: number; py: number; ax: number; ay: number; foes: number[]; hazards: MapHazard[]; near: number; nearest: number; eliteNear: boolean; bossNear: boolean }
+export const blankMap: MiniMap = { arena: 'gloam', px: 1100, py: 800, ax: 0, ay: 1, foes: [], hazards: [], near: 0, nearest: 9999, eliteNear: false, bossNear: false };
 export interface BossHud { id: 'warden' | 'seraph'; name: string; hp: number; maxHp: number; phase: 1 | 2; phases: 2; mode: string; intro: number; invuln: boolean; exposed: boolean }
 export const blankSnapshot: UiSnapshot = { phase: 'running', seed: 0, hp: 100, maxHp: 100, xp: 0, nextXp: 7,
   level: 1, seconds: 0, kills: 0, enemies: 0, dashCooldown: 0, qCooldown: 0, beamCooldown: 0, sphereCooldown: 0, drive: 0,
-  form: 0, formCooldown: 0, offers: [], score: 0, deathShown: false, boss: null, arenaName: 'THE GLOAM CIRCUIT' };
+  form: 0, formCooldown: 0, offers: [], score: 0, deathShown: false, boss: null, arenaName: 'THE GLOAM CIRCUIT', cards: [], owned: [], map: blankMap, cdMax: { dash: 3.2, beam: 7, sphere: 16 }, sinceRevive: 999, revives: 0 };

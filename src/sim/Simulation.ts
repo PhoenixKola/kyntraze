@@ -36,6 +36,7 @@ export class Simulation {
     if (input.sphere && !this.rHeld) startAbility(s, 'sphere');
     this.qHeld = input.q; this.fHeld = input.f; this.eHeld = !!input.beam; this.rHeld = !!input.sphere;
     const p = s.player; p.qCooldown = Math.max(0, p.qCooldown - dt);
+    if (s.mods.regen > 0) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
     updateDrive(s, dt);
     updateAbilities(s, dt);
     updateDirector(s, this.rng, dt);
@@ -59,6 +60,8 @@ export class Simulation {
     }
     return applied;
   }
+  /** QA / tests: the next level-up, exactly as a real XP pickup would trigger it. */
+  debugLevelUp() { const s = this.state; if (s.phase !== 'running') return; gainXp(s, (s.player.nextXp - s.player.xp) / s.mods.xp, () => { s.upgradeOffers = createOffer(s, this.rng); }); }
   togglePause() { const phase = this.state.phase; if (phase === 'running') this.state.phase = 'paused'; else if (phase === 'paused') this.state.phase = 'running'; }
   forcePause() { if (this.state.phase === 'running') this.state.phase = 'paused'; }
   stats() { const s = this.state; return gradeRun({ seed: s.seed, survivalSeconds: s.time, kills: s.kills, level: s.player.level, victory: false }); }

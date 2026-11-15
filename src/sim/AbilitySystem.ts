@@ -15,6 +15,7 @@ function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: nu
 export const releaseTime = (kind: Cast['kind']) => (kind === 'beam' ? BEAM.charge : SPHERE.gather);
 export const castDuration = (kind: Cast['kind']) => (kind === 'beam' ? BEAM.charge + BEAM.fire + BEAM.recover : SPHERE.gather + SPHERE.recover);
 const BEAM_PULSES = Math.round(BEAM.fire / BEAM.pulseEvery);
+const BEAM_PULSES_MAX = BEAM_PULSES + Math.round(BEAM.recover / BEAM.pulseEvery);
 
 /** Movement scale while casting (1 when free). */
 export function castMoveScale(s: GameState): number {
@@ -81,7 +82,7 @@ export function startAbility(s: GameState, kind: Cast['kind']): boolean {
   const raw = tg ? normalize(tg.x - p.x, tg.y - p.y) : pickAim(s);
   const aim = raw.x === 0 && raw.y === 0 ? normalize(p.aimX, p.aimY) : raw; const face = faceOf(aim.x, aim.y);
   const dir = kind === 'beam' ? clampToFace(aim.x, aim.y, face, BEAM.maxAimOffset) : aim;
-  if (kind === 'beam') p.beamCooldown = BEAM.cooldown; else p.sphereCooldown = SPHERE.cooldown;
+  if (kind === 'beam') p.beamCooldown = BEAM.cooldown * s.mods.beamCd; else p.sphereCooldown = SPHERE.cooldown * s.mods.sphereCd;
   s.cast = { id: s.nextId++, kind, face, t: 0, dirX: dir.x, dirY: dir.y, form: p.form, released: false, pulses: 0, len: 0, tx: tg?.x ?? p.x, ty: tg?.y ?? p.y };
   emit(s, kind === 'beam' ? 'beam_charge' : 'sphere_gather', p.x, p.y);
   return true;
@@ -95,20 +96,21 @@ export function cancelCast(s: GameState) {
 export function interruptOnHit(s: GameState) { if (s.cast && !s.cast.released) cancelCast(s); }
 
 function beamPulse(s: GameState, c: Cast) {
-  const o = beamOrigin(s, c); let hits = 0; const hw = BEAM.halfWidth * (c.form ? BEAM.formWidth : 1); const dmg = BEAM.damage * (c.form ? BEAM.formDamage : 1);
+  const o = beamOrigin(s, c); let hits = 0; const hw = BEAM.halfWidth * s.mods.beamWidth * (c.form ? BEAM.formWidth : 1); const dmg = BEAM.damage * s.mods.beamDamage * (c.form ? BEAM.formDamage * s.mods.formPower : 1);
   for (const e of s.enemies) {
     if (e.hp <= 0) continue;
     const ex = e.x - o.x, ey = e.y - o.y; const along = ex * c.dirX + ey * c.dirY;
     if (along < -e.radius || along > c.len + e.radius) continue;
     if (Math.abs(ex * -c.dirY + ey * c.dirX) > hw + e.radius) continue;
     damageEnemy(s, e, dmg); hits++;
+    if (s.mods.beamDrive > 0 && s.player.form === 0) s.player.drive = Math.min(100, s.player.drive + s.mods.beamDrive * s.mods.driveGain);
     if (e.hp > 0) slideMove(e, c.dirX * BEAM.knockback * 60, c.dirY * BEAM.knockback * 60, 1 / 60);
   }
   emit(s, 'beam_pulse', o.x + c.dirX * c.len, o.y + c.dirY * c.len, hits);
 }
 
 function detonate(s: GameState, sh: SphereShot) {
-  const radius = SPHERE.radius * (sh.form ? SPHERE.formRadius : 1); const dmg = SPHERE.damage * (sh.form ? SPHERE.formDamage : 1);
+  const radius = SPHERE.radius * s.mods.sphereRadius * (sh.form ? SPHERE.formRadius : 1); const dmg = SPHERE.damage * s.mods.sphereDamage * (sh.form ? SPHERE.formDamage * s.mods.formPower : 1);
   for (const e of s.enemies) {
     if (e.hp <= 0) continue;
     const dx = e.x - sh.x1, dy = e.y - sh.y1; const d = Math.hypot(dx, dy);
@@ -121,6 +123,17 @@ function detonate(s: GameState, sh: SphereShot) {
   }
   s.blasts.push({ id: s.nextId++, x: sh.x1, y: sh.y1, radius, form: sh.form, ttl: 0.9, life: 0.9 });
   emit(s, 'sphere_burst', sh.x1, sh.y1);
+  if (s.mods.sphereEcho > 0) s.echoes.push({ id: s.nextId++, x: sh.x1, y: sh.y1, radius: radius * (s.mods.sphereEcho === 2 ? 1.1 : 0.85), damage: dmg * (s.mods.sphereEcho === 2 ? 1 : 0.5), form: sh.form, t: 0.85 });
+}
+function echoBurst(s: GameState, ec: GameState['echoes'][number]) {
+  for (const e of s.enemies) {
+    if (e.hp <= 0) continue;
+    const dx = e.x - ec.x, dy = e.y - ec.y, d = Math.hypot(dx, dy); if (d > ec.radius + e.radius) continue;
+    const fall = 1 - (1 - SPHERE.edgeFalloff) * clamp(d / ec.radius, 0, 1);
+    if (!damageEnemy(s, e, ec.damage * fall, { area: true })) { const dir = d < 1 ? { x: 0, y: 1 } : { x: dx / d, y: dy / d }; for (let i = 0; i < 4; i++) slideMove(e, dir.x * SPHERE.knockback * 0.6 * fall, dir.y * SPHERE.knockback * 0.6 * fall, 0.25); }
+  }
+  s.blasts.push({ id: s.nextId++, x: ec.x, y: ec.y, radius: ec.radius, form: ec.form, ttl: 0.9, life: 0.9 });
+  emit(s, 'sphere_burst', ec.x, ec.y);
 }
 
 export function updateAbilities(s: GameState, dt: number) {
@@ -128,6 +141,7 @@ export function updateAbilities(s: GameState, dt: number) {
   p.beamCooldown = Math.max(0, p.beamCooldown - dt); p.sphereCooldown = Math.max(0, p.sphereCooldown - dt);
   for (const b of s.blasts) b.ttl -= dt;
   s.blasts = s.blasts.filter(b => b.ttl > 0);
+  if (s.echoes.length) { for (const ec of s.echoes) ec.t -= dt; const due = s.echoes.filter(ec => ec.t <= 0); s.echoes = s.echoes.filter(ec => ec.t > 0); for (const ec of due) echoBurst(s, ec); }
   const sh = s.sphere;
   if (sh) { sh.t += dt; if (sh.t >= SPHERE.flight) { s.sphere = null; detonate(s, sh); } }
   const c = s.cast; if (!c) return;
@@ -137,7 +151,7 @@ export function updateAbilities(s: GameState, dt: number) {
       c.released = true; const o = beamOrigin(s, c); c.len = beamLength(o.x, o.y, c.dirX, c.dirY, BEAM.length); emit(s, 'beam_fire', o.x, o.y);
     }
     if (c.released) {
-      const due = Math.min(BEAM_PULSES, Math.floor((c.t - BEAM.charge) / BEAM.pulseEvery + 1e-9) + 1);   // pulse 0 lands on the release tick
+      const due = Math.min(Math.min(BEAM_PULSES_MAX, BEAM_PULSES + s.mods.beamLinger), Math.floor((c.t - BEAM.charge) / BEAM.pulseEvery + 1e-9) + 1);   // pulse 0 lands on the release tick
       while (c.pulses < due) { c.pulses++; beamPulse(s, c); }
       if (before < BEAM.charge + BEAM.fire && c.t >= BEAM.charge + BEAM.fire) emit(s, 'beam_end', p.x, p.y);
     }

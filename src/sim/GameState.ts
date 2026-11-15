@@ -1,4 +1,5 @@
-import type { UpgradeId } from '../content/upgrades';
+import type { UpgradeId, Mods } from '../content/upgrades';
+import { baseMods } from '../content/upgrades';
 import type { EnemyKind } from '../content/enemies';
 import type { ArenaId } from '../content/arenas';
 export type RunPhase = 'running' | 'paused' | 'upgrade' | 'dead';
@@ -22,26 +23,30 @@ export interface EnemyShot extends Vec { id: number; vx: number; vy: number; ttl
 export interface Hazard extends Vec { id: number; shape: 'circle' | 'cone' | 'sigil' | 'rect'; r: number; w?: number; h?: number; active?: number; activeLeft?: number; ang: number; arc: number; delay: number; total: number; damage: number; owner: number; tag: string; fired: boolean; ttl: number; lane?: number }
 export type EnemyEventKind = 'enemy_telegraph' | 'enemy_strike' | 'enemy_shot' | 'enemy_shot_hit' | 'enemy_death' | 'enemy_slam' | 'enemy_phase' | 'enemy_intro' | 'enemy_block' | 'enemy_hurt' | 'hazard_fire' | 'hazard_warn' | 'boss_defeated';
 export interface EnemyEvent extends Vec { id: number; kind: EnemyEventKind; enemy: EnemyKind; enemyId: number; dirX: number; dirY: number; tag?: string }
-export interface Pickup extends Vec { id: number; xp: number; age: number; }
+/** tier picks the crystal art: 0 shard, 1 gem, 2 large gem (elites), 3 boss core. */
+export interface Pickup extends Vec { id: number; xp: number; age: number; tier?: 0 | 1 | 2 | 3; }
 export interface Impact extends Vec { id: number; kind: 'shot' | 'pulse' | 'hit' | 'xp' | 'dash' | 'form'; ttl: number; life: number; targetX?: number; targetY?: number; }
 export type AbilityKind = 'beam' | 'sphere';
 /** Kai is locked into a signature ability. form and aim are snapshotted at the cast so a mid-cast form expiry cannot change damage. */
 export type Face = 'south' | 'north' | 'east' | 'west';
 export interface Cast { id: number; kind: AbilityKind; face: Face; t: number; dirX: number; dirY: number; form: 0 | 1; released: boolean; pulses: number; len: number; tx: number; ty: number }
 export interface SphereShot { id: number; x0: number; y0: number; x1: number; y1: number; t: number; form: 0 | 1 }
+/** Afterglow / Twin Bloom: a queued second burst of Nova Bloom. */
+export interface SphereEcho { id: number; x: number; y: number; radius: number; damage: number; form: 0 | 1; t: number }
 export interface Blast { id: number; x: number; y: number; radius: number; form: 0 | 1; ttl: number; life: number }
 export type AbilityEventKind = 'beam_charge' | 'beam_fire' | 'beam_pulse' | 'beam_end' | 'sphere_gather' | 'sphere_launch' | 'sphere_burst' | 'cast_cancel';
 export interface AbilityEvent extends Vec { id: number; kind: AbilityEventKind; /** beam_pulse: enemies damaged by this pulse */ n?: number }
 export interface GameState {
   seed: number; time: number; phase: RunPhase; kills: number; player: Fighter; enemies: Enemy[];
-  pickups: Pickup[]; impacts: Impact[]; upgradeOffers: UpgradeId[]; upgradeStacks: Record<string, number>;
+  pickups: Pickup[]; impacts: Impact[]; mods: Mods; echoes: SphereEcho[]; levelUpAt: number[]; reviveAt: number; upgradeOffers: UpgradeId[]; upgradeStacks: Record<string, number>;
   nextId: number; spawnTimer: number; nextFlanker: number;
   cast: Cast | null; sphere: SphereShot | null; blasts: Blast[]; abilityEvents: AbilityEvent[]; enemyShots: EnemyShot[]; enemyEvents: EnemyEvent[];
   arenaId: ArenaId; arenaHazard: { nextAt: number; count: number; quietUntil: number };
   hazards: Hazard[]; encounter: { spawned: Record<string, boolean>; forced: boolean }; bossesDefeated: number; lastHit: { src: string; t: number } | null; }
-export function xpThreshold(level: number) { return 4 + level * 3 + Math.floor(level * level * 0.9); }
+/** XP to clear `level`: a gentle opening (level 2 inside ~25 s) that steepens through the mid game so builds have time to matter. Pacing target: ~L5 at 2 min, ~L10 at 5, ~L16 at 9, ~L22 by 15. */
+export function xpThreshold(level: number) { return Math.round(4 + level * 3.2 + level * level * 1.05); }
 export function makeState(seed: number, arenaId: ArenaId = 'gloam'): GameState {
-  return { seed, arenaId, arenaHazard: { nextAt: 0, count: 0, quietUntil: 0 }, time: 0, phase: 'running', kills: 0, enemies: [], pickups: [], impacts: [], upgradeOffers: [],
+  return { seed, arenaId, arenaHazard: { nextAt: 0, count: 0, quietUntil: 0 }, time: 0, phase: 'running', kills: 0, enemies: [], pickups: [], impacts: [], mods: baseMods(), echoes: [], levelUpAt: [], reviveAt: -99, upgradeOffers: [],
     upgradeStacks: {}, nextId: 1, spawnTimer: 0.18, nextFlanker: 7, cast: null, sphere: null, blasts: [], abilityEvents: [], enemyShots: [], enemyEvents: [], hazards: [], encounter: { spawned: {}, forced: false }, bossesDefeated: 0, lastHit: null,
     player: { x: 1100, y: 800, radius: 17, hp: 100, maxHp: 100, speed: 250, attackDamage: 17,
       attackPeriod: 0.55, attackRange: 242, attackClock: 0.12, targets: 1, pickupRadius: 72,

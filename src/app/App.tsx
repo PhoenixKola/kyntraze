@@ -31,7 +31,7 @@ function GameStage({ bridge, seed, arena, pad, onHome, onSettings }: { bridge: G
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [host, bridge, seed, arena]);
   return <div className="game-shell" data-testid="game-shell"><div className="arena-viewport" ref={setHost} aria-label="Playable Kyntraze arena"/>{ready && <Hud s={snapshot} pad={pad} onPause={() => bridge.togglePause()}/>}{!ready && <LoadingScreen progress={progress} arena={ARENAS[arena].name.toUpperCase()}/>}
-    {snapshot.phase === 'upgrade' && <LevelUpScreen level={snapshot.level} offers={snapshot.offers} onChoose={id => bridge.choose(id)} />}
+    {snapshot.phase === 'upgrade' && <LevelUpScreen level={snapshot.level} cards={snapshot.cards} owned={snapshot.owned} onChoose={id => bridge.choose(id)} />}
     {snapshot.phase === 'paused' && <PauseMenu s={snapshot} onResume={() => bridge.togglePause()} onHome={onHome} onSettings={onSettings}/>}
     {snapshot.phase === 'dead' && snapshot.deathShown && <ResultsScreen s={snapshot} onRetry={() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))} onHome={onHome}/>}
   </div>;

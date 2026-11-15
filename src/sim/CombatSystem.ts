@@ -5,15 +5,21 @@ import { BOSSES } from '../content/bosses';
 import { addPickup, pushEnemyEvent } from './EntityRegistry';
 import { RULES } from '../core/Rules';
 import { interruptOnHit } from './AbilitySystem';
+import { slideMove } from './CollisionSystem';
 
 /** `src` names what hurt Kai (contact, lunge, dash, ram, slam, bolt, orb, rupture, sweep, rush, prism, ...) so feedback and tests can tell a telegraphed ability from body contact. */
 export function damagePlayer(state: GameState, damage: number, src = 'contact'): boolean {
   const p = state.player;
   if (p.invulnerable > 0 || state.phase !== 'running') return false;
-  p.hp = Math.max(0, p.hp - Math.max(0, damage)); p.invulnerable = RULES.contactInvulnerability;
+  p.hp = Math.max(0, p.hp - Math.max(0, damage) * state.mods.armor); p.invulnerable = RULES.contactInvulnerability;
   state.lastHit = { src, t: state.time };
   state.impacts.push({ id: state.nextId++, kind: 'hit', x: p.x, y: p.y, ttl: 0.4, life: 0.4 });
   interruptOnHit(state);
+  if (p.hp <= 0 && state.mods.revive > 0) {   // Second Wind: the killing blow is refused once, with a protective grace window and a ring that shoves the crowd back
+    state.mods.revive--; p.hp = p.maxHp * 0.5; p.invulnerable = 2.5; state.reviveAt = state.time;
+    state.impacts.push({ id: state.nextId++, kind: 'pulse', x: p.x, y: p.y, ttl: 0.35, life: 0.35 });
+    for (const e of state.enemies) if (e.hp > 0 && !isBoss(e.kind) && distanceSquared(p.x, p.y, e.x, e.y) < 220 ** 2) { const d = Math.hypot(e.x - p.x, e.y - p.y) || 1; slideMove(e, (e.x - p.x) / d * 900, (e.y - p.y) / d * 900, 0.2); }
+  }
   if (p.hp <= 0) state.phase = 'dead'; return true;
 }
 
@@ -26,6 +32,8 @@ export function shieldFaces(state: GameState, e: Enemy, arcDeg: number): boolean
   return dx * f >= d * Math.cos((arcDeg * Math.PI) / 180);
 }
 
+/** Kills are worth more as the run goes on: the late game thins out (boss mob caps, tougher enemies) but the level-up cadence holds. */
+export const xpTimeScale = (t: number) => 1 + t / 700;
 export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts?: { area?: boolean }): boolean {
   if (enemy.hp <= 0) return false;
   if (enemy.ai?.invuln) return false;
@@ -47,9 +55,9 @@ export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts
     return false;
   }
   pushEnemyEvent(state, 'enemy_death', enemy, enemy.aimX, enemy.aimY, boss ? 'boss' : undefined);
-  state.kills++; if (state.player.form === 0) state.player.drive = Math.min(100, state.player.drive + 8);
+  state.kills++; if (state.player.form === 0) state.player.drive = Math.min(100, state.player.drive + 8 * state.mods.driveGain);
   if (boss) { bossDefeated(state, enemy); return true; }
-  if (state.pickups.length < RULES.maxPickups) addPickup(state, { x: enemy.x, y: enemy.y, xp: ENEMIES[enemy.kind as keyof typeof ENEMIES].xp, age: 0 });
+  if (state.pickups.length < RULES.maxPickups) { const d = ENEMIES[enemy.kind as keyof typeof ENEMIES]; addPickup(state, { x: enemy.x, y: enemy.y, xp: Math.round(d.xp * xpTimeScale(state.time) * 10) / 10, age: 0, tier: d.elite ? 2 : d.xp >= 3 ? 1 : 0 }); }
   return true;
 }
 
@@ -62,7 +70,7 @@ function bossDefeated(state: GameState, boss: Enemy) {
   pushEnemyEvent(state, 'boss_defeated', boss, 0, 0, boss.kind);
   for (let i = 0; i < def.rewardOrbs && state.pickups.length < RULES.maxPickups; i++) {
     const a = (i / def.rewardOrbs) * Math.PI * 2 + 0.4, r = 50 + (i % 3) * 22;
-    addPickup(state, { x: boss.x + Math.cos(a) * r, y: boss.y + Math.sin(a) * r, xp: def.rewardXp, age: 0 });
+    addPickup(state, { x: boss.x + Math.cos(a) * r, y: boss.y + Math.sin(a) * r, xp: def.rewardXp, age: 0, tier: 3 });
   }
 }
 

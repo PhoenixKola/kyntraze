@@ -1,0 +1,86 @@
+{
+ "viewport": [
+  640,
+  360
+ ],
+ "shots": [
+  "levelup-1-first-level-640x360.png",
+  "levelup-2-epic-rare-build-640x360.png",
+  "levelup-3-hover-selected-640x360.png",
+  "map-1-calm-640x360.png",
+  "map-2-crowd-elite-640x360.png",
+  "map-3-hazard-warn-640x360.png",
+  "map-4-boss-640x360.png",
+  "map-5-ashen-hazard-640x360.png"
+ ],
+ "afterPick": {
+  "phase": "running",
+  "stacks": {
+   "novacool": 1
+  },
+  "level": 2
+ },
+ "afterRare": {
+  "phase": "running",
+  "linger": 1
+ },
+ "mapState": {
+  "enemies": 1,
+  "boss": true
+ },
+ "minimapBox": {
+  "x": 513.34375,
+  "y": 48.65625,
+  "width": 117.328125,
+  "height": 98.65625
+ },
+ "hudBoxes": [
+  [
+   "hud-panel.hud-health",
+   9,
+   9,
+   175,
+   49
+  ],
+  [
+   "boss-bar.warden",
+   180,
+   73,
+   280,
+   33
+  ],
+  [
+   "hud-panel.hud-map",
+   513,
+   49,
+   117,
+   99
+  ],
+  [
+   "hud-panel.hud-clock",
+   252,
+   9,
+   137,
+   59
+  ],
+  [
+   "hud-panel.hud-pause",
+   597,
+   9,
+   34,
+   34
+  ],
+  [
+   "hud-slots",
+   226,
+   302,
+   189,
+   47
+  ]
+ ],
+ "consoleErrors": [],
+ "NOT_VERIFIED": [
+  "frame pacing on a real GPU (swiftshader run)",
+  "long-run balance with a human player"
+ ]
+}

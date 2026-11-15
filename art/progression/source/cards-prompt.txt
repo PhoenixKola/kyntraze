@@ -1,0 +1,12 @@
+Abstract card-header artwork textures for a dark sci-fantasy action game's level-up cards. Painted, moody, high-contrast, glowing energy shapes on near-black backgrounds, no characters, no text, no letters, no logos, no UI frames. Each panel is a WIDE strip 3:1 aspect (about 120x40 art units), edge-to-edge full-bleed painted artwork inside its own rectangle, with the brightest shapes near the centre and the left and right edges fading to dark so the art can be cropped.
+
+Draw EXACTLY 8 panels arranged in a 2 columns x 4 rows grid, each panel a 3:1 wide rectangle, separated from the others by flat magenta (#ff00ff) gaps of at least 24 art pixels, nothing cropped. Reading order left-to-right then top-to-bottom:
+1. CORE: warm amber-gold comet fists / starburst shards radiating from the centre over dark navy.
+2. BEAM: a horizontal blade of cyan-white light slicing across dark teal with splintered shards.
+3. SPHERE: a glowing violet-magenta energy orb with petal-like radiating spikes over dark indigo.
+4. SURVIVAL: a crimson-rose heart-shaped glow of shield plates and soft rising sparks over dark maroon.
+5. MOBILITY: sleek mint-green speed streaks and chevrons sweeping over dark green-teal.
+6. PICKUP: floating teal-cyan crystal shards drawn toward a bright centre on dark blue-grey.
+7. DRIVE: roaring orange-gold flame crest rising from the centre over dark brown-black.
+8. EPIC FOIL: an iridescent prismatic foil of crossing gold, violet and cyan light rays on near-black.
+No text, no labels, no watermark. Wide 16:9.

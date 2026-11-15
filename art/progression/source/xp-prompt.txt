@@ -1,0 +1,8 @@
+Game pickup sprite sheet: glowing XP crystal gems for a dark sci-fantasy survivors-like action game. Hand-painted high-contrast pixel-art style with clean stepped edges (no anti-aliased blur, no gradients beyond painted pixel shading), strong readable silhouette on a dark floor, each gem lit from the top-left with a bright specular highlight and a soft teal-cyan inner glow.
+
+Draw EXACTLY 4 gems on flat magenta (#ff00ff), in one horizontal row, widely spaced (at least 30 art pixels apart), nothing cropped, each one centred in its own region:
+1. SMALL SHARD: a tiny teal-cyan crystal shard, about 14x20 art pixels.
+2. MEDIUM GEM: a faceted teal-cyan diamond gem with a brighter white-cyan core, about 22x28 art pixels.
+3. LARGE GEM: a big faceted gem, teal-cyan with a gold-amber tinted top facet and a sparkle, about 32x40 art pixels.
+4. BOSS CORE: a large radiant crystal, white-gold with violet facets and a bright halo of four sparkle points, about 44x48 art pixels.
+Colour palette: teal #2fe3d6, cyan #8ff7ef, deep teal #0f6f78, white #ffffff, amber #ffcf7a, violet #a37cff. No drop shadow, no text, no labels, no watermark. Wide 16:9.

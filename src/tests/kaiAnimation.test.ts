@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { GameBridge } from '../bridge/GameBridge';
+import { baseMods } from '../content/upgrades';
 import { DEATH_RESULTS_HOLD_SECONDS, FORM_REVERT_SECONDS, KAI_F1_CLIPS, KAI_CLIPS, KAI_DIRS, KaiAnimator, clipFrame, SIM_DASH_SECONDS, facingFromInput, facingFromVector, parseKaiManifest, type AnimFrameInput, type Facing, type KaiManifests } from '../assets/kaiAnimation';
 
 const pub = (...p: string[]) => join(__dirname, '..', '..', 'public', 'art', 'kai', ...p);
@@ -174,7 +175,7 @@ describe('KaiAnimator', () => {
 });
 
 describe('B03G.1 Results delay contract (GameBridge)', () => {
-  const fakeSim = (phase: string) => ({ state: { phase, seed: 1, time: 3, kills: 2, enemies: [], upgradeOffers: [], player: { hp: phase === 'dead' ? 0 : 50, maxHp: 100, xp: 0, nextXp: 7, level: 1, dashCooldown: 0, qCooldown: 0, drive: 0, form: 0, formCooldown: 0 } }, stats: () => ({ score: 0 }) });
+  const fakeSim = (phase: string) => ({ state: { phase, seed: 1, time: 3, kills: 2, enemies: [], upgradeOffers: [], upgradeStacks: {}, hazards: [], arenaId: 'gloam', reviveAt: -99, mods: baseMods(), player: { hp: phase === 'dead' ? 0 : 50, maxHp: 100, xp: 0, nextXp: 7, level: 1, dashCooldown: 0, qCooldown: 0, drive: 0, form: 0, formCooldown: 0 } }, stats: () => ({ score: 0 }) });
   const bridge = (phase: string) => { const b = new GameBridge({ settings: {}, best: { score: 99 } } as never); const sim = fakeSim(phase); b.bind(sim as never); return { b, sim }; };
   it('dead does not show Results until the death animation reports completion', () => {
     const { b } = bridge('dead'); expect(b.snapshot()).toMatchObject({ phase: 'dead', deathShown: false });

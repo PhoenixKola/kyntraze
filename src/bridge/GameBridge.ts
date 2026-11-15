@@ -1,8 +1,11 @@
 import type { Simulation } from '../sim/Simulation';
-import { blankSnapshot, type UiSnapshot } from './UiSnapshot';
-import type { UpgradeId } from '../content/upgrades';
+import { blankSnapshot, type MiniMap, type UiSnapshot } from './UiSnapshot';
+import { UPGRADES, UPGRADE_BY_ID, type UpgradeId } from '../content/upgrades';
+import { previewUpgrade } from '../sim/UpgradeSystem';
+import { ENEMIES, isBoss } from '../content/enemies';
 import { BOSSES } from '../content/bosses';
 import { ARENAS } from '../content/arenas';
+import { BEAM, SPHERE } from '../content/abilities';
 import { storeSave, type SaveV1, type GameSettings } from '../sim/SaveSystem';
 export class GameBridge {
   private listeners = new Set<() => void>();
@@ -25,7 +28,8 @@ export class GameBridge {
     this.current = { phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
       dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form,
-      formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
+      formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? s.upgradeOffers.map(id => offerCard(s, id)) : [], owned: UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] })), map: miniMap(s),
+      cdMax: { dash: 3.2 * s.mods.dashCd, beam: BEAM.cooldown * s.mods.beamCd, sphere: SPHERE.cooldown * s.mods.sphereCd }, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
     if (s.phase === 'dead' && phaseChanged) {
       const stats = this.sim!.stats();
       if (!this.save.best || stats.score > this.save.best.score) { this.save.best = stats; storeSave(this.save); }
@@ -38,7 +42,7 @@ export class GameBridge {
   pause() { this.sim?.forcePause(); this.publish(true); }
   togglePause() { this.sim?.togglePause(); this.publish(true); }
   choose(id: UpgradeId) { this.sim?.chooseUpgrade(id); this.publish(true); }
-  debugGrantXp() { const sim = this.sim; if (!sim) return; const s = sim.state; if (s.phase !== 'running') return; s.player.xp = s.player.nextXp; s.player.level++; s.player.xp = 0; s.player.nextXp += 3; s.phase = 'upgrade'; s.upgradeOffers = ['impact', 'stride', 'endurance']; this.publish(true); }
+  debugGrantXp(offers?: UpgradeId[]) { const sim = this.sim; if (!sim) return; sim.debugLevelUp(); if (offers && sim.state.phase === 'upgrade') sim.state.upgradeOffers = offers; this.publish(true); }
 }
 
 import type { GameState } from '../sim/GameState';
@@ -47,4 +51,22 @@ function bossHud(s: GameState): BossHud | null {
   const b = s.enemies.find(e => (e.kind === 'warden' || e.kind === 'seraph') && e.hp > 0); if (!b || !b.ai) return null;
   const def = BOSSES[b.kind as 'warden' | 'seraph'];
   return { id: def.id, name: def.name, hp: b.hp, maxHp: b.maxHp, phase: b.ai.phase, phases: 2, mode: b.mode, intro: b.mode === 'intro' ? b.modeT : 0, invuln: b.ai.invuln, exposed: b.ai.exposed };
+}
+
+function offerCard(s: GameState, id: UpgradeId) {
+  const u = UPGRADE_BY_ID[id], pv = previewUpgrade(s, id);
+  return { id, name: u.name, blurb: u.blurb, category: u.category, rarity: u.rarity, stack: s.upgradeStacks[id] ?? 0, max: u.maxStacks, label: pv.label, before: pv.before, after: pv.after };
+}
+function miniMap(s: GameState): MiniMap {
+  const p = s.player, foes: number[] = []; let near = 0, nearest = 9999, eliteNear = false, bossNear = false;
+  for (const e of s.enemies) {
+    if (e.hp <= 0) continue;
+    const boss = isBoss(e.kind), def = boss ? null : ENEMIES[e.kind as keyof typeof ENEMIES], k = boss ? 3 : def!.elite ? 2 : def!.caster ? 1 : 0;
+    foes.push(Math.round(e.x), Math.round(e.y), k);
+    const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < nearest) nearest = d;
+    if (d < 380) { near++; if (k === 2) eliteNear = true; }
+    if (k === 3 && d < 700) bossNear = true;
+  }
+  return { arena: s.arenaId, px: p.x, py: p.y, ax: p.aimX, ay: p.aimY, foes, near, nearest: Math.round(nearest), eliteNear, bossNear,
+    hazards: s.hazards.filter(h => h.shape !== 'sigil' && h.damage > 0).map(h => ({ shape: h.shape, x: h.x, y: h.y, r: h.r, w: h.w ?? 0, h: h.h ?? 0, warn: h.fired ? 1 : 1 - Math.max(0, h.delay) / Math.max(0.01, h.total), live: h.fired })) };
 }

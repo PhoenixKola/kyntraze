@@ -1,5 +1,9 @@
 # Changelog
 
+## B10 · progression, level-up UX and minimap
+- 25-card upgrade pool (7 categories, Common/Rare/Epic) with synergy-weighted, rarity-ramped, deterministic offers; build-defining epics (Rift Conductor, Twin Bloom, Second Wind, Ember Core). New `Mods` block drives beam/Nova/drive/survival effects. XP curve and time-scaled kill XP retuned toward a 10-20 minute run.
+- New level-up screen (rarity cards, before/after stats, stack pips, build strip, 1-2-3 / click / pad), HUD XP readout, Second Wind badge, ImageGen XP crystals (4 tiers) and a premium canvas minimap (landmarks, hazards, density, elites, boss, status strip). 4 ImageGen sheets. See `B10-STATUS.md`.
+
 ## B07 · premium enemy production
 - Four enemies with ImageGen art and 8-frame pose sheets: Shardwalker (`pursuer`, lunge), Rift Stalker (`flanker`, dash-slash), Breaker Sentinel (`bruiser`, telegraphed ground slam) and Shard Channeler (`ranged`, dodgeable crystal bolt). Sim-owned attack state machine, enemy projectiles and events; seeded director introduces ranged at 70 s and bruiser at 150 s under live caps.
 - New `enemyRenderer.ts` (pooled sprites, telegraph markers drawn from the sim timeline, death ghosts), 11 original enemy sounds, `ART-BIBLE.md`, `B07-STATUS.md`, review proofs in `art/enemies/review/`. Tests: +18 unit, +3 e2e; e2e now runs 2 workers (software-GL load stalls with 4).

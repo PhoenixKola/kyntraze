@@ -7,7 +7,7 @@ export function movePlayer(state: GameState, input: InputState, dt: number) {
   const direction = normalize(input.x, input.y);
   if (input.dash && p.dashCooldown <= 0 && (direction.x !== 0 || direction.y !== 0)) {
     cancelCast(state);
-    p.dashDx = direction.x; p.dashDy = direction.y; p.dashRemaining = 0.22; p.dashCooldown = 3.2; p.invulnerable = Math.max(p.invulnerable, 0.25);
+    p.dashDx = direction.x; p.dashDy = direction.y; p.dashRemaining = 0.22; p.dashCooldown = 3.2 * state.mods.dashCd; p.invulnerable = Math.max(p.invulnerable, 0.25);
     state.impacts.push({ id: state.nextId++, kind: 'dash', x: p.x, y: p.y, ttl: 0.22, life: 0.22 });
   }
   const dashing = p.dashRemaining > 0; const lock = dashing ? 1 : castMoveScale(state);
