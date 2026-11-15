@@ -6,8 +6,9 @@ export function TitleScreen({ onPlay, onSettings, save }: Props) {
     <div className="title-art" aria-hidden="true"/>
     <div className="title-shade" aria-hidden="true"/>
     <div className="title-kai" aria-hidden="true"><span className="title-kai-glow"/><span className="title-kai-sprite"/></div>
-    <div className="title-hudline"><span className="mark">K / F</span><span>BUILD 00.01 · SURVIVAL PROTOTYPE</span></div>
+    <div className="title-hudline"><span className="mark"><i className="logo-sigil" aria-hidden="true"/>K / F</span><span>BUILD 00.01 · SURVIVAL PROTOTYPE</span></div>
     <div className="title-content">
+      <img className="logo-mark" src={`${import.meta.env.BASE_URL}ui/kit/logo-mark.webp`} alt="" draggable={false}/>
       <p className="eyebrow"><span className="orange-tick"/>WORLD STATE: UNSTABLE</p>
       <h1 className="game-logo"><span>KYNTRAZE</span><strong>FRACTURE<br/>RUSH</strong></h1>
       <p className="title-subtitle">MOVE FAST. BREAK THE HORDE. CHARGE THE FRACTURE.</p>

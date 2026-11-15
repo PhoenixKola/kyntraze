@@ -1,0 +1,420 @@
+{
+ "assets": {
+  "panel-frame": {
+   "file": "panel-frame.webp",
+   "size": [
+    160,
+    160
+   ],
+   "use": "GamePanel / modal frame (border-image, stretch; hollow centre shows the dark-metal tile)",
+   "bytes": 9220,
+   "slice": [
+    66,
+    66,
+    66,
+    66
+   ],
+   "edge": 28
+  },
+  "hud-frame": {
+   "file": "hud-frame.webp",
+   "size": [
+    104,
+    104
+   ],
+   "use": "Thin HUD plate frame for clock / health block (border-image, stretch)",
+   "bytes": 5040,
+   "slice": [
+    40,
+    40,
+    40,
+    40
+   ],
+   "edge": 24
+  },
+  "btn-primary": {
+   "file": "btn-primary.webp",
+   "size": [
+    212,
+    80
+   ],
+   "use": "GameButton primary face: border-image slice 0 66 0 66 (horizontal only), height fixed 80px; hover/pressed via filter brightness",
+   "bytes": 6340,
+   "slice": [
+    0,
+    66,
+    0,
+    66
+   ],
+   "height": 80
+  },
+  "btn-secondary": {
+   "file": "btn-secondary.webp",
+   "size": [
+    212,
+    80
+   ],
+   "use": "GameButton secondary face: border-image slice 0 66 0 66 (horizontal only), height fixed 80px; hover/pressed via filter brightness",
+   "bytes": 5538,
+   "slice": [
+    0,
+    66,
+    0,
+    66
+   ],
+   "height": 80
+  },
+  "btn-disabled": {
+   "file": "btn-disabled.webp",
+   "size": [
+    212,
+    80
+   ],
+   "use": "GameButton disabled face: border-image slice 0 66 0 66 (horizontal only), height fixed 80px; hover/pressed via filter brightness",
+   "bytes": 5170,
+   "slice": [
+    0,
+    66,
+    0,
+    66
+   ],
+   "height": 80
+  },
+  "btn-danger": {
+   "file": "btn-danger.webp",
+   "size": [
+    212,
+    80
+   ],
+   "use": "GameButton danger face: border-image slice 0 66 0 66 (horizontal only), height fixed 80px; hover/pressed via filter brightness",
+   "bytes": 5230,
+   "slice": [
+    0,
+    66,
+    0,
+    66
+   ],
+   "height": 80
+  },
+  "bar-hp": {
+   "file": "bar-hp.webp",
+   "size": [
+    256,
+    61
+   ],
+   "use": "GameBar shell (bar-hp); caps via border-image slice 0 73 0 73; put fill element inside channel rect",
+   "bytes": 5682,
+   "slice": [
+    0,
+    73,
+    0,
+    73
+   ],
+   "channel": [
+    28,
+    16,
+    228,
+    45
+   ],
+   "height": 61
+  },
+  "bar-xp": {
+   "file": "bar-xp.webp",
+   "size": [
+    276,
+    36
+   ],
+   "use": "GameBar shell (bar-xp); caps via border-image slice 0 63 0 63; put fill element inside channel rect",
+   "bytes": 4210,
+   "slice": [
+    0,
+    63,
+    0,
+    63
+   ],
+   "channel": [
+    28,
+    9,
+    251,
+    27
+   ],
+   "height": 36
+  },
+  "bar-drive": {
+   "file": "bar-drive.webp",
+   "size": [
+    274,
+    34
+   ],
+   "use": "GameBar shell (bar-drive); caps via border-image slice 0 67 0 67; put fill element inside channel rect",
+   "bytes": 4066,
+   "slice": [
+    0,
+    67,
+    0,
+    67
+   ],
+   "channel": [
+    27,
+    7,
+    251,
+    27
+   ],
+   "height": 34
+  },
+  "boss-warden": {
+   "file": "boss-warden.webp",
+   "size": [
+    360,
+    86
+   ],
+   "use": "Boss bar plate (boss-warden); emblem sits in socket; fill in channel; slice 0 122 0 151",
+   "bytes": 13436,
+   "slice": [
+    0,
+    122,
+    0,
+    151
+   ],
+   "channel": [
+    96,
+    29,
+    325,
+    57
+   ],
+   "socket": [
+    28,
+    16,
+    81,
+    69
+   ],
+   "height": 86
+  },
+  "boss-seraph": {
+   "file": "boss-seraph.webp",
+   "size": [
+    374,
+    98
+   ],
+   "use": "Boss bar plate (boss-seraph); emblem sits in socket; fill in channel; slice 0 136 0 151",
+   "bytes": 15716,
+   "slice": [
+    0,
+    136,
+    0,
+    151
+   ],
+   "channel": [
+    99,
+    36,
+    322,
+    61
+   ],
+   "socket": [
+    35,
+    22,
+    89,
+    75
+   ],
+   "height": 98
+  },
+  "slot-frame": {
+   "file": "slot-frame.webp",
+   "size": [
+    99,
+    97
+   ],
+   "use": "Ability slot frame (fixed size ~ 2x of 46u). Inner hollow rect in manifest",
+   "bytes": 3672,
+   "channel": null,
+   "inner": [
+    12,
+    13,
+    87,
+    85
+   ]
+  },
+  "crest-base": {
+   "file": "crest-base.webp",
+   "size": [
+    100,
+    97
+   ],
+   "use": "Form crest medallion (HUD portrait corner, hero select, form readiness)",
+   "bytes": 5002
+  },
+  "crest-f1": {
+   "file": "crest-f1.webp",
+   "size": [
+    100,
+    97
+   ],
+   "use": "Form crest medallion (HUD portrait corner, hero select, form readiness)",
+   "bytes": 5136
+  },
+  "crest-f2": {
+   "file": "crest-f2.webp",
+   "size": [
+    100,
+    97
+   ],
+   "use": "Form crest medallion (HUD portrait corner, hero select, form readiness)",
+   "bytes": 5056
+  },
+  "crest-f3": {
+   "file": "crest-f3.webp",
+   "size": [
+    100,
+    97
+   ],
+   "use": "Form crest medallion (HUD portrait corner, hero select, form readiness)",
+   "bytes": 5030
+  },
+  "map-corner": {
+   "file": "map-corner.webp",
+   "size": [
+    133,
+    122
+   ],
+   "use": "Minimap corner bracket (top-left; mirror with scaleX/scaleY for the other three)",
+   "bytes": 4568
+  },
+  "map-strip": {
+   "file": "map-strip.webp",
+   "size": [
+    146,
+    52
+   ],
+   "use": "Status strip plate / generic nameplate; slice 0 38 0 38",
+   "bytes": 2778,
+   "slice": [
+    0,
+    38,
+    0,
+    38
+   ],
+   "height": 52
+  },
+  "tab": {
+   "file": "tab.webp",
+   "size": [
+    172,
+    63
+   ],
+   "use": "Tab / label plate with one cut corner",
+   "bytes": 3572
+  },
+  "divider": {
+   "file": "divider.webp",
+   "size": [
+    279,
+    30
+   ],
+   "use": "Divider rail with centre diamond (width-scalable by 3-slice via CSS background-size: 100% 100% for short runs)",
+   "bytes": 2478
+  },
+  "chev-l": {
+   "file": "chev-l.webp",
+   "size": [
+    43,
+    51
+   ],
+   "use": "Focus chevron, left",
+   "bytes": 1596
+  },
+  "chev-r": {
+   "file": "chev-r.webp",
+   "size": [
+    43,
+    51
+   ],
+   "use": "Focus chevron, right",
+   "bytes": 1570
+  },
+  "card-common": {
+   "file": "card-common.webp",
+   "size": [
+    148,
+    148
+   ],
+   "use": "Upgrade card frame (common); border-image slice 62 stretch; hollow centre",
+   "bytes": 7948,
+   "slice": [
+    62,
+    62,
+    62,
+    62
+   ],
+   "edge": 24
+  },
+  "card-rare": {
+   "file": "card-rare.webp",
+   "size": [
+    148,
+    148
+   ],
+   "use": "Upgrade card frame (rare); border-image slice 62 stretch; hollow centre",
+   "bytes": 9068,
+   "slice": [
+    62,
+    62,
+    62,
+    62
+   ],
+   "edge": 24
+  },
+  "card-epic": {
+   "file": "card-epic.webp",
+   "size": [
+    148,
+    148
+   ],
+   "use": "Upgrade card frame (epic); border-image slice 62 stretch; hollow centre",
+   "bytes": 11708,
+   "slice": [
+    62,
+    62,
+    62,
+    62
+   ],
+   "edge": 24
+  },
+  "logo-mark": {
+   "file": "logo-mark.webp",
+   "size": [
+    117,
+    158
+   ],
+   "use": "KYNTRAZE shard sigil (full colour), sits beside live wordmark text",
+   "bytes": 8220
+  },
+  "logo-mono": {
+   "file": "logo-mono.png",
+   "size": [
+    131,
+    170
+   ],
+   "use": "Mono white shard silhouette (use as CSS mask-image, tint with currentColor)",
+   "bytes": 7111
+  },
+  "tex-panel": {
+   "file": "tex-panel.webp",
+   "size": [
+    256,
+    256
+   ],
+   "use": "Seamless dark gunmetal tile 256px (panel / modal background, image-rendering: auto)",
+   "bytes": 652
+  },
+  "tex-plate": {
+   "file": "tex-plate.webp",
+   "size": [
+    256,
+    256
+   ],
+   "use": "Seamless raised steel plate tile 256px (inset wells, stat tiles)",
+   "bytes": 976
+  }
+ },
+ "totalBytes": 165789
+}

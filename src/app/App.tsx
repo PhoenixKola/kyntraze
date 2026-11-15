@@ -17,6 +17,7 @@ import { useControllerNav } from './ui/useControllerNav';
 import { PadContext } from './ui/Chrome';
 import { LoadingScreen } from './ui/LoadingScreen';
 import './ui.css';
+import './kit.css';
 const initialSave = loadSave();
 function GameStage({ bridge, seed, arena, pad, onHome, onSettings }: { bridge: GameBridge; seed: number; arena: ArenaId; pad: boolean; onHome: () => void; onSettings: () => void }) {
   const [host, setHost] = useState<HTMLDivElement | null>(null);
@@ -58,7 +59,7 @@ export default function App() {
   return <PadContext.Provider value={pad.connected}><div className="app">
     {pad.connected && <ControllerBadge/>}
     {view === 'title' && <div className={`screen ${leaving ? 'leaving' : ''}`}><TitleScreen onPlay={() => go('select')} onSettings={() => setSettingsOpen(true)} save={save}/></div>}
-    {view === 'select' && <div className={`screen ${leaving ? 'leaving' : ''}`}><HeroSelect onBack={() => go('title')} onStart={() => start()} seed={seedInput} onSeed={setSeedInput} arena={arena} onArena={() => go('arena')}/></div>}
+    {view === 'select' && <div className={`screen ${leaving ? 'leaving' : ''}`}><HeroSelect onBack={() => go('title')} onStart={() => start()} seed={seedInput} onSeed={setSeedInput} arena={arena} onArena={() => go('arena')} save={save}/></div>}
     {view === 'arena' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ArenaSelect selected={arena} onSelect={chooseArena} onBack={() => go('select')}/></div>}
     {view === 'game' && <GameStage key={run.serial} bridge={bridge} seed={run.seed} arena={run.arena} pad={pad.connected} onHome={home} onSettings={() => setSettingsOpen(true)}/>}
     {settingsOpen && <SettingsPanel settings={save.settings} onChange={updateSettings} onClose={() => setSettingsOpen(false)}/>}

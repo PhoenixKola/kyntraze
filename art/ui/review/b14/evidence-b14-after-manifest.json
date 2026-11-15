@@ -1,0 +1,22 @@
+{
+ "base_commit": "cd3c119",
+ "working_tree": true,
+ "hashes": {
+  "src/app/kit.css": "b34fa60b0c5f",
+  "src/app/ui.css": "03094e87861f",
+  "src/app/ui\\ArenaSelect.tsx": "717103fece2d",
+  "src/app/ui\\BuildStrip.tsx": "be582630875b",
+  "src/app/ui\\Chrome.tsx": "e617184a0c1e",
+  "src/app/ui\\ControllerBadge.tsx": "52e40ad46f75",
+  "src/app/ui\\HeroSelect.tsx": "53f275955dcd",
+  "src/app/ui\\Hud.tsx": "0af10d5396a1",
+  "src/app/ui\\LevelUpScreen.tsx": "7b0259bc79f8",
+  "src/app/ui\\LoadingScreen.tsx": "68ed84cc0f71",
+  "src/app/ui\\Minimap.tsx": "db93e0f4461b",
+  "src/app/ui\\PauseMenu.tsx": "ee6adb995e19",
+  "src/app/ui\\ResultsScreen.tsx": "9de054e32e2b",
+  "src/app/ui\\SettingsPanel.tsx": "3b5e668d7a74",
+  "src/app/ui\\TitleScreen.tsx": "ba1a3fcacd02"
+ },
+ "status": "STILL FRAMES ONLY (swiftshader); motion not watched"
+}

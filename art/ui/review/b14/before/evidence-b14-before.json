@@ -1,0 +1,178 @@
+{
+ "tag": "before",
+ "gitHead": "cd3c119850436818f272382e980ac5ea96d52f9c",
+ "uiHashes": {
+  "src/app/ui.css": "41ac67acd7e7",
+  "src/app/ui/ArenaSelect.tsx": "6e6f784172d2",
+  "src/app/ui/BuildStrip.tsx": "181bfaa08405",
+  "src/app/ui/Chrome.tsx": "23c3bcd1997b",
+  "src/app/ui/ControllerBadge.tsx": "42abbc9b5757",
+  "src/app/ui/HeroSelect.tsx": "e59eca50a0bb",
+  "src/app/ui/Hud.tsx": "c68b38a549f7",
+  "src/app/ui/LevelUpScreen.tsx": "f6511c4027a5",
+  "src/app/ui/LoadingScreen.tsx": "462cce32e917",
+  "src/app/ui/Minimap.tsx": "03eb5af4f1bc",
+  "src/app/ui/PauseMenu.tsx": "c55cc22bd7d7",
+  "src/app/ui/ResultsScreen.tsx": "7dc7b0d6acb5",
+  "src/app/ui/SettingsPanel.tsx": "85e9493ae9e4",
+  "src/app/ui/TitleScreen.tsx": "2b6eb476730c",
+  "src/app/ui/useControllerNav.ts": "22faa64869e1"
+ },
+ "status": "STILL FRAMES ONLY (OBSERVED = stills); normal-speed motion, audio, controller hardware, GPU NOT VERIFIED; swiftshader",
+ "runs": [
+  {
+   "viewport": [
+    960,
+    540
+   ],
+   "shots": [
+    "title-960x540.png",
+    "settings-960x540.png",
+    "hero-select-960x540.png",
+    "arena-select-960x540.png",
+    "hud-calm-960x540.png",
+    "hud-crowd-960x540.png",
+    "hud-late-crowd-960x540.png",
+    "hud-elite-alert-960x540.png",
+    "hud-lowhp-960x540.png",
+    "levelup-960x540.png",
+    "levelup-hover-960x540.png",
+    "hud-boss-warden-intro-960x540.png",
+    "hud-boss-warden-960x540.png",
+    "warden-reward-960x540.png",
+    "hud-boss-seraph-intro-960x540.png",
+    "hud-boss-seraph-960x540.png",
+    "pause-960x540.png",
+    "victory-beat-960x540.png",
+    "results-victory-960x540.png",
+    "hud-form1-960x540.png",
+    "hud-form2-ready-960x540.png",
+    "hud-form2-960x540.png",
+    "hud-form3-ready-960x540.png",
+    "form-selector-960x540.png",
+    "hud-form3-960x540.png",
+    "hud-cooldowns-charging-960x540.png",
+    "hud-cooldowns-960x540.png",
+    "results-defeat-960x540.png",
+    "loading-or-title-early-960x540.png",
+    "hud-ashen-crowd-960x540.png"
+   ],
+   "failures": [],
+   "consoleErrors": [],
+   "lastHudBoxes": [
+    [
+     "hud-panel.hud-health",
+     14,
+     14,
+     262,
+     74
+    ],
+    [
+     "hud-panel.hud-map",
+     770,
+     68,
+     176,
+     144
+    ],
+    [
+     "hud-panel.hud-clock",
+     371,
+     14,
+     219,
+     75
+    ],
+    [
+     "hud-panel.hud-pause",
+     900,
+     14,
+     46,
+     46
+    ],
+    [
+     "hud-slots",
+     339,
+     454,
+     282,
+     70
+    ]
+   ]
+  },
+  {
+   "viewport": [
+    640,
+    360
+   ],
+   "shots": [
+    "title-640x360.png",
+    "settings-640x360.png",
+    "hero-select-640x360.png",
+    "arena-select-640x360.png",
+    "hud-calm-640x360.png",
+    "hud-crowd-640x360.png",
+    "hud-late-crowd-640x360.png",
+    "hud-elite-alert-640x360.png",
+    "hud-lowhp-640x360.png",
+    "levelup-640x360.png",
+    "levelup-hover-640x360.png",
+    "hud-boss-warden-intro-640x360.png",
+    "hud-boss-warden-640x360.png",
+    "warden-reward-640x360.png",
+    "hud-boss-seraph-intro-640x360.png",
+    "hud-boss-seraph-640x360.png",
+    "pause-640x360.png",
+    "victory-beat-640x360.png",
+    "results-victory-640x360.png",
+    "hud-form1-640x360.png",
+    "hud-form2-ready-640x360.png",
+    "hud-form2-640x360.png",
+    "hud-form3-ready-640x360.png",
+    "form-selector-640x360.png",
+    "hud-form3-640x360.png",
+    "hud-cooldowns-charging-640x360.png",
+    "hud-cooldowns-640x360.png",
+    "results-defeat-640x360.png",
+    "loading-or-title-early-640x360.png",
+    "hud-ashen-crowd-640x360.png"
+   ],
+   "failures": [],
+   "consoleErrors": [],
+   "lastHudBoxes": [
+    [
+     "hud-panel.hud-health",
+     9,
+     9,
+     175,
+     50
+    ],
+    [
+     "hud-panel.hud-map",
+     513,
+     49,
+     117,
+     99
+    ],
+    [
+     "hud-panel.hud-clock",
+     232,
+     9,
+     175,
+     59
+    ],
+    [
+     "hud-panel.hud-pause",
+     597,
+     9,
+     34,
+     34
+    ],
+    [
+     "hud-slots",
+     226,
+     302,
+     189,
+     47
+    ]
+   ]
+  }
+ ]
+}

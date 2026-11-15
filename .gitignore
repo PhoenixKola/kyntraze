@@ -52,3 +52,10 @@ art/characters/kai/form-ii/source/_compare_*.png
 art/characters/kai/form-ii/source/west-heads-v1-faceblocked.png
 art/characters/kai/form-ii/source/west-heads-2.png
 /art/characters/kai/review/b13/**/video/
+
+# B14 UI kit scratch
+/art/ui/kit/rejected/
+/art/ui/kit/_scratch/
+/art/ui/kit/_probe.py
+/art/ui/kit/__pycache__/
+/art/ui/kit/sheets/

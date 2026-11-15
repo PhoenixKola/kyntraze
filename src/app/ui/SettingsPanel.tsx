@@ -7,7 +7,7 @@ export function SettingsPanel({ settings, onChange, onClose }: Props) {
   // capture phase + stopPropagation: Esc closes Settings only; it must not also reach the game's pause toggle underneath
   useEffect(() => { const h = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onClose(); } }; window.addEventListener('keydown', h, true); return () => window.removeEventListener('keydown', h, true); }, [onClose]);
   const toggle = (id: keyof GameSettings) => onChange({ ...settings, [id]: !settings[id] });
-  const row = (id: keyof GameSettings, name: string, note: string) => <label><span>{name}<small>{note}</small></span><input type="checkbox" role="switch" checked={settings[id]} onChange={() => toggle(id)}/></label>;
+  const row = (id: keyof GameSettings, name: string, note: string) => <label><span>{name}<small>{note}</small></span><em className={`sw-state ${settings[id] ? 'sw-on' : ''}`} aria-hidden="true">{settings[id] ? 'ON' : 'OFF'}</em><input type="checkbox" role="switch" checked={settings[id]} onChange={() => toggle(id)}/></label>;
   return <div className="overlay settings-overlay" data-testid="settings-menu"><section className="modal compact-modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="settings-title">
     <p className="eyebrow">LOCAL PLAYER CONFIGURATION</p><h2 id="settings-title">SETTINGS</h2>
     <div className="settings-cols">
