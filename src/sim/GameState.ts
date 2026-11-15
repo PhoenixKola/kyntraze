@@ -27,7 +27,7 @@ export type EnemyEventKind = 'enemy_telegraph' | 'enemy_strike' | 'enemy_shot' |
 export interface EnemyEvent extends Vec { id: number; kind: EnemyEventKind; enemy: EnemyKind; enemyId: number; dirX: number; dirY: number; tag?: string }
 /** tier picks the crystal art: 0 shard, 1 gem, 2 large gem (elites), 3 boss core. */
 export interface Pickup extends Vec { id: number; xp: number; age: number; tier?: 0 | 1 | 2 | 3; }
-export interface Impact extends Vec { id: number; kind: 'shot' | 'pulse' | 'hit' | 'xp' | 'dash' | 'form'; ttl: number; life: number; targetX?: number; targetY?: number; }
+export interface Impact extends Vec { id: number; kind: 'shot' | 'pulse' | 'hit' | 'hurt' | 'block' | 'revive' | 'xp' | 'dash' | 'form'; ttl: number; life: number; targetX?: number; targetY?: number; /** B15 presentation semantics: 'hit' = an enemy took damage, 'block' = a shield absorbed it, 'hurt' = Kai lost HP. `boss`/`heavy` pick the weight class; `elite` marks shield-bearers. */ boss?: boolean; heavy?: boolean; kill?: boolean; }
 export type AbilityKind = 'beam' | 'sphere' | 'dragon' | 'comet' | 'rift' | 'reversal';
 export type FormId = 0 | 1 | 2 | 3;
 /** B12 Form II reveal: the sim is frozen while this exists. `from` = the form Kai had when it started. */

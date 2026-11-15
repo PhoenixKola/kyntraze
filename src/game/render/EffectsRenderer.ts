@@ -3,6 +3,7 @@ import type { GameState } from '../../sim/GameState';
 import { KAI_GROUND_DY } from '../../assets/kaiAnimation';
 import { FxPool, vfxKey } from './fxPool';
 import { b14Key } from './b14fx';
+import { kick } from './cameraKick';
 
 /** Basic-attack bolt, hit bursts, dash and Q (Impact) visuals: ImageGen sprites (cyan Base / solar Form I colour ramps), all pooled. Driven by the sim's `impacts` list; each impact is consumed once. */
 const MAX_HIT_BURSTS_PER_FRAME = 8;
@@ -33,15 +34,27 @@ export class EffectsRenderer {
           this.pool.spawn({ key: k('spark'), x: e.x, y: e.y, depth: 10.5, life: 0.12, blend: 'add', s0: 0.15, s1: solar ? 0.62 : 0.5, a0: 1, a1: 0, rot: rnd() * 3 });                                   // muzzle flare at the fist
         }
         void dist;
+      } else if (e.kind === 'hurt') {   // Kai lost HP: a hot red-orange crack at his body and a short local kick (heavier for big hits)
+        this.pool.spawn({ key: vfxKey('hit', true), x: e.x, y: e.y - 8, depth: 10.6, life: 0.25, blend: 'normal', tint: 0xff7a6a, s0: e.heavy ? 0.55 : 0.4, s1: e.heavy ? 1.05 : 0.85, a0: 1, a1: 0, rot: rnd() * 6 });
+        kick(this.scene.cameras.main, e.heavy ? 160 : 90, e.heavy ? 0.0042 : 0.0022, reduced);
+      } else if (e.kind === 'block') {   // a shield took the blow: a bright deflection glint thrown back at Kai, no burst, no debris
+        if (bursts++ < MAX_HIT_BURSTS_PER_FRAME) {
+          const away = Math.atan2(p.y - e.y, p.x - e.x);
+          this.pool.spawn({ key: b14Key('glint'), x: e.x + Math.cos(away) * 22, y: e.y - 10 + Math.sin(away) * 22, depth: 11.3, life: 0.16, blend: 'add', tint: 0xcfe6ff, s0: 0.25, s1: 0.7, a0: 1, a1: 0, rot: rnd() * 3 });
+          if (!reduced) this.pool.spawn({ key: b14Key('refract'), x: e.x + Math.cos(away) * 18, y: e.y - 10 + Math.sin(away) * 18, depth: 11.2, life: 0.14, blend: 'add', tint: 0xa8c8ff, rot: away + Math.PI / 2, s0: 0.3, s1: 0.6, a0: 0.9, a1: 0 });
+        }
       } else if (e.kind === 'hit') {
-        if (e.life > 0.3) {   // Kai was hit: a hot red-orange crack at his body, not an enemy hit
-          this.pool.spawn({ key: vfxKey('hit', true), x: e.x, y: e.y - 8, depth: 10.6, life: 0.25, blend: 'normal', tint: 0xff7a6a, s0: 0.4, s1: 0.85, a0: 1, a1: 0, rot: rnd() * 6 });
-        } else if (bursts++ < MAX_HIT_BURSTS_PER_FRAME) {
-          const s = 0.5 + rnd() * 0.1;
+        if (bursts++ < MAX_HIT_BURSTS_PER_FRAME) {
+          const s = (0.5 + rnd() * 0.1) * (e.boss ? 0.8 : e.heavy ? 1.25 : 1);   // bosses keep their silhouette: smaller, no debris
           if (bursts <= 3) this.hitFx(p.form, e.x, e.y - 8, Math.atan2(e.y - p.y, e.x - p.x), reduced);
           this.pool.spawn({ key: k('hit'), x: e.x, y: e.y - 8, depth: 11, life: 0.18, blend: 'normal', s0: s * 0.5, s1: s * (solar ? 1.4 : 1.2), a0: 1, a1: 0, rot: rnd() * 6.28 });
-          if (!reduced && bursts <= 3) for (let i = 0; i < 2; i++) { const a = rnd() * 6.28, v = 90 + rnd() * 90; this.pool.spawn({ key: vfxKey('debris' + ((rnd() * 4) | 0), solar), x: e.x, y: e.y - 8, depth: 11, life: 0.28, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, ay: 380, s0: 0.45, s1: 0.2, a0: 1, a1: 0, rot: rnd() * 6, spin: 8 }); }
+          if (!reduced && !e.boss && bursts <= 3) for (let i = 0, n = e.heavy ? 4 : 2; i < n; i++) { const a = rnd() * 6.28, v = 90 + rnd() * 90; this.pool.spawn({ key: vfxKey('debris' + ((rnd() * 4) | 0), solar), x: e.x, y: e.y - 8, depth: 11, life: 0.28, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, ay: 380, s0: 0.45, s1: 0.2, a0: 1, a1: 0, rot: rnd() * 6, spin: 8 }); }
+          if (e.heavy || e.kill) { kick(this.scene.cameras.main, e.boss ? 120 : 80, e.boss ? 0.003 : 0.0018, reduced); if (e.heavy && !e.boss) this.pool.spawn({ key: b14Key('shock_ring'), x: e.x, y: e.y + 10, depth: 3.9, life: 0.26, blend: 'add', tint: solar ? 0xffc83c : 0x9fe8ff, s0: 0.2, s1: 0.7, a0: 0.7, a1: 0 }); }
         }
+      } else if (e.kind === 'revive') {   // Second Wind: a warm white-gold ring out to the shove radius, distinct from the cyan/solar Impact Pulse and from a damage hit
+        this.pool.spawn({ key: b14Key('shock_ring'), x: e.x, y: e.y + 10, depth: 5.5, life: 0.5, blend: 'add', tint: 0xfff0c0, s0: 0.2, s1: 1.9, a0: 0.9, a1: 0 });
+        this.pool.spawn({ key: b14Key('glint'), x: e.x, y: e.y - 10, depth: 11.3, life: 0.4, blend: 'add', tint: 0xfff6d8, s0: 0.5, s1: 1.4, a0: 1, a1: 0 });
+        kick(this.scene.cameras.main, 180, 0.003, reduced);
       } else if (e.kind === 'xp') {
         this.pool.spawn({ key: vfxKey('spark', false), x: e.x, y: e.y, depth: 4.5, life: 0.2, blend: 'add', s0: 0.15, s1: 0.4, a0: 0.9, a1: 0, rot: rnd() });
       } else if (e.kind === 'pulse') {

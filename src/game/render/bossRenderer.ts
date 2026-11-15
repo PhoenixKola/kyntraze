@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { kick } from './cameraKick';
 import type { Enemy, GameState } from '../../sim/GameState';
 import { BOSSES, SERAPH, WARDEN } from '../../content/bosses';
 import { groundDy, type BossKind } from '../../content/enemies';
@@ -61,19 +62,19 @@ export class BossRenderer {
           const w = this.texW(bossFxKey('rupture-burst'));
           this.pool.spawn({ key: bossFxKey('rupture-burst'), x: ev.x, y: ev.y - 14, depth: 10.2, life: 0.38, s0: (WARDEN.rupture.radius * 1.5) / w, s1: (WARDEN.rupture.radius * 1.9) / w, a0: 1, a1: 0, oy: 0.7 });
           this.addCrater(ev.x, ev.y, WARDEN.rupture.radius * 2 / this.texW(bossFxKey('rupture-crater')));
-          if (!reduced) this.scene.cameras.main.shake(70, 0.0022);
+          kick(this.scene.cameras.main, 70, 0.0022, reduced);
         } else if (ev.tag === 'residue') {
           const w = this.texW(bossFxKey('rupture-burst'));
           this.pool.spawn({ key: bossFxKey('rupture-burst'), x: ev.x, y: ev.y - 10, depth: 10.2, life: 0.35, s0: (SERAPH.blink.residueRadius * 1.5) / w, s1: (SERAPH.blink.residueRadius * 1.9) / w, a0: 1, a1: 0, oy: 0.7 });
         } else if (ev.tag === 'sweep') {
           const w = this.texW(bossFxKey('cone-strike'));
           this.pool.spawn({ key: bossFxKey('cone-strike'), x: ev.x, y: ev.y, depth: 10.1, life: 0.22, s0: WARDEN.sweep.radius / w, s1: WARDEN.sweep.radius / w * 1.04, a0: 0.95, a1: 0, rot: Math.atan2(ev.dirY, ev.dirX), ox: 0, oy: 0.5 });
-          if (!reduced) this.scene.cameras.main.shake(90, 0.003);
+          kick(this.scene.cameras.main, 90, 0.003, reduced);
         }
       } else if (ev.kind === 'enemy_phase') {
         const w = this.texW(bossFxKey('shock-ring')), r = ev.enemy === 'warden' ? 190 : 170;
         this.pool.spawn({ key: bossFxKey('shock-ring'), x: ev.x, y: ev.y + 12, depth: 10, life: 0.7, s0: 0.2 * r * 2 / w, s1: r * 2 / w, a0: 1, a1: 0 });
-        if (!reduced) this.scene.cameras.main.shake(260, 0.0035);
+        kick(this.scene.cameras.main, 260, 0.0035, reduced);
       } else if (ev.kind === 'enemy_intro') {
         if (ev.enemy === 'seraph') this.pool.spawn({ key: bossFxKey('blink-flash'), x: ev.x, y: ev.y, depth: 10.3, life: 0.9, s0: 1.6, s1: 1.1, a0: 0.9, a1: 0, oy: 1 });
       } else if (ev.kind === 'enemy_strike' && ev.tag === 'blink_in') {
@@ -81,7 +82,7 @@ export class BossRenderer {
       } else if (ev.kind === 'enemy_strike' && ev.tag === 'rush_end') {
         const w = this.texW(bossFxKey('shock-ring'));
         this.pool.spawn({ key: bossFxKey('shock-ring'), x: ev.x, y: ev.y + 20, depth: 10, life: 0.4, s0: 0.2, s1: 110 / w, a0: 0.9, a1: 0 });
-        if (!reduced) this.scene.cameras.main.shake(110, 0.0035);
+        kick(this.scene.cameras.main, 110, 0.0035, reduced);
       } else if (ev.kind === 'enemy_death' && ev.tag === 'boss') this.startDeath(ev.enemy as BossKind, ev.x, ev.y, reduced);
     }
   }
@@ -98,7 +99,7 @@ export class BossRenderer {
     this.pool.spawn({ key: bossFxKey('boss-burst'), x, y: y - 40, depth: 10.4, life: 0.8, s0: 0.7, s1: 1.5, a0: 1, a1: 0 });
     const w = this.texW(bossFxKey('shock-ring'));
     this.pool.spawn({ key: bossFxKey('shock-ring'), x, y: y + 12, depth: 10, life: 0.9, s0: 0.2, s1: 260 / w, a0: 0.9, a1: 0 });
-    if (!reduced) this.scene.cameras.main.shake(320, 0.004);
+    kick(this.scene.cameras.main, 320, 0.004, reduced);
   }
 
   sync(state: GameState, dtIn: number, reduced: boolean) {

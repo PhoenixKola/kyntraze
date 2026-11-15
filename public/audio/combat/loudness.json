@@ -1,0 +1,38 @@
+{
+ "hit_light": {
+  "seconds": 0.09,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -20.46,
+  "clipped_samples": 0
+ },
+ "hit_heavy": {
+  "seconds": 0.24,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -20.02,
+  "clipped_samples": 0
+ },
+ "hit_boss": {
+  "seconds": 0.34,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -19.82,
+  "clipped_samples": 0
+ },
+ "block_deflect": {
+  "seconds": 0.22,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -21.43,
+  "clipped_samples": 0
+ },
+ "player_hurt": {
+  "seconds": 0.3,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -17.04,
+  "clipped_samples": 0
+ },
+ "revive": {
+  "seconds": 0.7,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -18.12,
+  "clipped_samples": 0
+ }
+}

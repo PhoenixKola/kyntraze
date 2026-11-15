@@ -1,0 +1,4 @@
+# B15 — Combat feel (partial pass, OWNER REVIEW REQUIRED)
+Done: explicit impact semantics (`hit` / `hurt` / `block` / `revive`, with `boss` / `heavy` / `kill` flags; the old life>0.3 hack is gone), block ricochet instead of a damage burst, boss hits restrained (no debris), heavy-hit rings, per-class mob death fragments, camera kick budget (`cameraKick.ts`), combat audio (6 original WAVs, art/combat/audio/synth_b15.py: light/heavy/boss hit, block, player hurt, revive; rate-limited), Second Wind has its own visual/sound.
+Not done (next batch): moving-punch composite audit per form/direction, ImageGen impact art, boss phase/death rework, input-buffer audit, perf before/after, normal-speed clips. Audio quality by ear: NOT VERIFIED. Real GPU / physical pad: NOT VERIFIED.
+Evidence: art/combat/review/b15/*.png (hit, block, hurt, bruiser death at 960x540 and 640x360).

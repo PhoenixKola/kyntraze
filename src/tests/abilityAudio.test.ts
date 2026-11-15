@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ABILITY_SOUNDS, ARENA_SOUNDS, BOSS_SOUNDS, ENEMY_SOUNDS, AbilityAudio, type CtxLike, type GainLike, type SourceLike } from '../game/audio/abilityAudio';
+import { ABILITY_SOUNDS, ARENA_SOUNDS, COMBAT_SOUNDS, BOSS_SOUNDS, ENEMY_SOUNDS, AbilityAudio, type CtxLike, type GainLike, type SourceLike } from '../game/audio/abilityAudio';
 import { Simulation } from '../sim/Simulation';
 import type { AbilityEvent, InputState } from '../sim/GameState';
 
@@ -42,7 +42,7 @@ describe('ability audio files', () => {
 });
 
 describe('ability audio lifecycle', () => {
-  it('decodes every sound after the unlock gesture and resumes the context', async () => { const { ctx, a } = await mk(); expect(a.loaded).toBe(ABILITY_SOUNDS.length + ENEMY_SOUNDS.length + BOSS_SOUNDS.length + ARENA_SOUNDS.length); expect(ctx.state).toBe('running'); });
+  it('decodes every sound after the unlock gesture and resumes the context', async () => { const { ctx, a } = await mk(); expect(a.loaded).toBe(ABILITY_SOUNDS.length + ENEMY_SOUNDS.length + BOSS_SOUNDS.length + ARENA_SOUNDS.length + COMBAT_SOUNDS.length); expect(ctx.state).toBe('running'); });
   it('plays nothing before unlock (no buffers) and nothing when muted', async () => {
     const ctx = new FakeCtx(); const a = new AbilityAudio(ctx, async () => new ArrayBuffer(8)); a.handle(ev('beam_charge', 1), 0); expect(a.started).toHaveLength(0);
     await a.unlock(); a.setMuted(true); a.handle(ev('beam_charge', 2), 0); expect(a.started).toHaveLength(0); a.setMuted(false); a.handle(ev('beam_charge', 3), 0); expect(a.started).toEqual(['beam_charge']);
@@ -75,8 +75,8 @@ describe('ability audio lifecycle', () => {
       sim.step(DT, idle({ beam: true })); a.sync(s); for (let i = 0; i < 100; i++) { sim.step(DT, idle()); a.sync(s); }
       return a;
     };
-    const a1 = await run1(); expect(a1.started[0]).toBe('beam_charge'); expect(a1.started[1]).toBe('beam_fire'); expect(a1.started).toContain('beam_end'); expect(a1.started.filter(n => n.startsWith('beam_pulse')).length).toBeGreaterThanOrEqual(2);
-    const a2 = await run1(); expect(a2.started[0]).toBe('beam_charge');
+    const a1 = await run1(); expect(a1.started.filter(n => !n.startsWith('hit_'))[0]).toBe('beam_charge'); expect(a1.started.filter(n => !n.startsWith('hit_'))[1]).toBe('beam_fire'); expect(a1.started).toContain('beam_end'); expect(a1.started.filter(n => n.startsWith('beam_pulse')).length).toBeGreaterThanOrEqual(2);
+    const a2 = await run1(); expect(a2.started.filter(n => !n.startsWith('hit_'))[0]).toBe('beam_charge');
   });
   it('a failed decode never throws', async () => { const ctx = new FakeCtx(); const a = new AbilityAudio(ctx, async () => { throw new Error('404'); }); await expect(a.unlock()).resolves.toBeUndefined(); a.handle(ev('beam_charge', 1), 0); expect(a.started).toHaveLength(0); });
 });

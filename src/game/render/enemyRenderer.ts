@@ -1,7 +1,9 @@
 import Phaser from 'phaser';
+import { kick } from './cameraKick';
 import type { Enemy, GameState } from '../../sim/GameState';
 import { ENEMIES, ENEMY_KINDS, AIM_LOCK_FRACTION, groundDy, isBoss, type MobKind as EnemyKind } from '../../content/enemies';
-import { FxPool } from './fxPool';
+import { FxPool, vfxKey } from './fxPool';
+import { b14Key } from './b14fx';
 
 /** B07 enemy art: ImageGen sheets (8 frames: move x4, windup, release, hurt, death; east-facing, mirrored for west) cut by scripts/build-enemy-art.py. */
 export const ENEMY_FX_NAMES = ['aimline', 'chevron', 'bolt', 'bolt-hit', 'death-burst', 'hit-spark', 'circle-warn', 'circle-slam'] as const;
@@ -13,6 +15,15 @@ export const enemyFxKey = (n: string) => `enemy-fx-${n}`;
 export const enemyFxUrl = (n: string) => `/art/enemies/fx/${n}.png`;
 export interface EnemyManifest { frame_width: number; frame_height: number; origin_px: [number, number]; frames: number; fps: number; clips: Record<string, number[]> }
 const SCALE = 0.5;                     // sheets are authored at 2x, like Kai
+/** Per-class death payoff: a distinct fragment burst per enemy (crystal shards, fast slash-dissolve, heavy armour slabs, energy collapse). Capped by the shared 70-sprite enemy pool. */
+const DEATH_LOOK: Record<EnemyKind, { key: string; tint: number; n: number; v: number; lift: number; g: number; size: number; life: number; grow: number; ring: boolean }> = {
+  pursuer: { key: 'shatter', tint: 0xc9a8ff, n: 5, v: 150, lift: 50, g: 420, size: 0.5, life: 0.34, grow: 0.7, ring: false },
+  flanker: { key: 'slash', tint: 0xff9fd0, n: 3, v: 210, lift: 20, g: 200, size: 0.4, life: 0.26, grow: 0.9, ring: false },
+  bruiser: { key: 'shatter', tint: 0xffb066, n: 8, v: 170, lift: 70, g: 520, size: 0.75, life: 0.5, grow: 1.1, ring: true },
+  ranged: { key: 'pop', tint: 0xb890ff, n: 4, v: 110, lift: 30, g: -60, size: 0.4, life: 0.4, grow: 1.2, ring: true },
+  aegis: { key: 'shatter', tint: 0xcfe0ff, n: 8, v: 180, lift: 60, g: 480, size: 0.7, life: 0.46, grow: 1.1, ring: true },
+  cantor: { key: 'pop', tint: 0xd890ff, n: 6, v: 130, lift: 40, g: -40, size: 0.45, life: 0.45, grow: 1.4, ring: true },
+};
 const FRAME = { windup: 4, strike: 5, hurt: 6, death: 7 } as const;
 const DEATH_LIFE = 0.6;
 const HURT_POSE = 0.11;
@@ -62,7 +73,7 @@ export class EnemyRenderer {
       else if (ev.kind === 'enemy_slam') {
         const R = ENEMIES.bruiser.attack.radius, tex = this.scene.textures.get(enemyFxKey('circle-slam')).getSourceImage().width;
         this.pool.spawn({ key: enemyFxKey('circle-slam'), x: ev.x, y: ev.y + groundDy(ENEMIES.bruiser.radius), depth: 5.55, life: 0.7, s0: (R * 2) / tex, s1: (R * 2.2) / tex, a0: 1, a1: 0 });
-        if (!reduced) this.scene.cameras.main.shake(120, 0.0035);
+        kick(this.scene.cameras.main, 120, 0.0035, reduced);
       } else if (ev.kind === 'enemy_shot' && ev.enemy !== 'seraph') this.pool.spawn({ key: enemyFxKey('hit-spark'), x: ev.x + ev.dirX * 26, y: ev.y + ev.dirY * 26 - 10, depth: 10.4, life: 0.14, s0: 0.3, s1: 0.9, a0: 1, a1: 0, rot: 0.4 });
     }
   }
@@ -77,9 +88,15 @@ export class EnemyRenderer {
     spr.tintMode = Phaser.TintModes.MULTIPLY;
     this.ghosts.push({ spr, age: 0, baseY: feetY });
     this.lastFace.delete(enemyId);
-    const big = kind === 'bruiser' ? 1.5 : 1;
+    const big = kind === 'bruiser' || kind === 'aegis' ? 1.5 : 1, look = DEATH_LOOK[kind], rnd = Math.random;
     this.pool.spawn({ key: enemyFxKey('death-burst'), x, y: y - 10, depth: 10.3, life: 0.3, blend: 'normal', s0: 0.22 * big, s1: 0.5 * big, a0: 0.85, a1: 0, rot: (enemyId % 7) * 0.9 });
-    if (!reduced) this.pool.spawn({ key: enemyFxKey('hit-spark'), x, y: y - 10, depth: 10.5, life: 0.12, blend: 'add', s0: 0.4 * big, s1: 1.4 * big, a0: 0.9, a1: 0, rot: 0.3 });
+    if (!reduced) {
+      this.pool.spawn({ key: enemyFxKey('hit-spark'), x, y: y - 10, depth: 10.5, life: 0.12, blend: 'add', s0: 0.4 * big, s1: 1.4 * big, a0: 0.9, a1: 0, rot: 0.3 });
+      this.pool.spawn({ key: b14Key(look.key), x, y: y - 10, depth: 10.6, life: look.life, blend: 'add', tint: look.tint, s0: 0.25 * big, s1: look.grow * big, a0: 0.65, a1: 0, rot: (enemyId % 5) * 1.2 });
+      for (let i = 0; i < look.n; i++) { const a = rnd() * 6.28, v = look.v * (0.6 + rnd() * 0.7); this.pool.spawn({ key: vfxKey('debris' + ((rnd() * 4) | 0), false), x, y: y - 8, depth: 10.2, life: look.life + 0.12, tint: look.tint, vx: Math.cos(a) * v, vy: Math.sin(a) * v - look.lift, ay: look.g, s0: look.size * (0.7 + rnd() * 0.5), s1: look.size * 0.3, a0: 1, a1: 0, rot: rnd() * 6, spin: (rnd() - 0.5) * 16 }); }
+      if (look.ring) this.pool.spawn({ key: b14Key('shock_ring'), x, y: y + 12, depth: 3.9, life: 0.34, blend: 'add', tint: look.tint, s0: 0.2, s1: 0.85, a0: 0.55, a1: 0 });
+    }
+    if (kind === 'bruiser' || kind === 'aegis') kick(this.scene.cameras.main, 100, 0.0028, reduced);
   }
 
   sync(state: GameState, dtIn: number, reduced: boolean) {

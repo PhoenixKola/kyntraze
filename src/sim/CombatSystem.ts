@@ -19,11 +19,11 @@ export function damagePlayer(state: GameState, damage: number, src = 'contact'):
   }
   p.hp = Math.max(0, p.hp - Math.max(0, damage) * state.mods.armor); p.invulnerable = RULES.contactInvulnerability;
   state.lastHit = { src, t: state.time };
-  state.impacts.push({ id: state.nextId++, kind: 'hit', x: p.x, y: p.y, ttl: 0.4, life: 0.4 });
+  state.impacts.push({ id: state.nextId++, kind: 'hurt', x: p.x, y: p.y, ttl: 0.4, life: 0.4, heavy: damage >= 20 });
   interruptOnHit(state);
   if (p.hp <= 0 && state.mods.revive > 0) {   // Second Wind: the killing blow is refused once, with a protective grace window and a ring that shoves the crowd back
     state.mods.revive--; p.hp = p.maxHp * 0.5; p.invulnerable = 2.5; state.reviveAt = state.time;
-    state.impacts.push({ id: state.nextId++, kind: 'pulse', x: p.x, y: p.y, ttl: 0.35, life: 0.35 });
+    state.impacts.push({ id: state.nextId++, kind: 'revive', x: p.x, y: p.y, ttl: 0.6, life: 0.6 });
     for (const e of state.enemies) if (e.hp > 0 && !isBoss(e.kind) && distanceSquared(p.x, p.y, e.x, e.y) < 220 ** 2) { const d = Math.hypot(e.x - p.x, e.y - p.y) || 1; slideMove(e, (e.x - p.x) / d * 900, (e.y - p.y) / d * 900, 0.2); }
   }
   if (p.hp <= 0) state.phase = 'dead'; return true;
@@ -43,18 +43,18 @@ export const xpTimeScale = (t: number) => 1 + t / 400;
 export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts?: { area?: boolean }): boolean {
   if (enemy.hp <= 0) return false;
   if (enemy.ai?.invuln) return false;
-  let dmg = Math.max(0, damage);
+  let dmg = Math.max(0, damage), blocked = false;
   const boss = isBoss(enemy.kind);
   if (boss) { if (enemy.ai?.exposed) dmg *= 1 + BOSSES[enemy.kind as 'warden' | 'seraph'].exposedBonus; }
   else {
     const sh = ENEMIES[enemy.kind as keyof typeof ENEMIES].shield;
     if (sh && !opts?.area && shieldUp(enemy) && shieldFaces(state, enemy, sh.arc)) {
-      dmg *= 1 - sh.reduction;
+      dmg *= 1 - sh.reduction; blocked = true;
       if (state.time - (enemy.blockT ?? -1) > 0.12) { enemy.blockT = state.time; pushEnemyEvent(state, 'enemy_block', enemy, enemy.aimX >= 0 ? 1 : -1, 0); }
     }
   }
   enemy.hp = Math.max(0, enemy.hp - dmg);
-  state.impacts.push({ id: state.nextId++, kind: 'hit', x: enemy.x, y: enemy.y, ttl: 0.16, life: 0.16 });
+  state.impacts.push({ id: state.nextId++, kind: blocked ? 'block' : 'hit', x: enemy.x, y: enemy.y, ttl: 0.16, life: 0.16, boss, heavy: !blocked && (dmg >= 30 || (boss && !!enemy.ai?.exposed)), kill: enemy.hp <= 0 });
   if (enemy.hp > 0) {
     if (boss) { if (state.time - (enemy.blockT ?? -1) > 0.35) { enemy.blockT = state.time; pushEnemyEvent(state, 'enemy_hurt', enemy, 0, 0); } }
     else if (enemy.kind !== 'bruiser' && enemy.kind !== 'aegis') enemy.stagger = 0.12;

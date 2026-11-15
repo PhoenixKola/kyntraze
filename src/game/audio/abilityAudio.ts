@@ -1,4 +1,4 @@
-import type { AbilityEvent, EnemyEvent, GameState } from '../../sim/GameState';
+import type { AbilityEvent, EnemyEvent, GameState, Impact } from '../../sim/GameState';
 
 /** Minimal slice of the Web Audio API the ability sounds need; real code passes a browser AudioContext, tests pass a fake. */
 export interface GainLike { gain: { value: number; setTargetAtTime(v: number, t: number, tc: number): void }; connect(n: unknown): void; disconnect(): void }
@@ -27,12 +27,17 @@ export const bossSoundUrl = (n: string) => `/audio/bosses/${n}.wav`;
 export const ARENA_SOUNDS = ['surge_warn', 'surge_fire', 'pylon_charge', 'pylon_pulse', 'amb_gloam_a', 'amb_gloam_b', 'amb_ashen_a', 'amb_ashen_b'] as const;
 export type ArenaSound = (typeof ARENA_SOUNDS)[number];
 export const arenaSoundUrl = (n: string) => `/audio/arenas/${n}.wav`;
+/** B15 combat feedback (art/combat/audio/synth_b15.py): one voice per presentation impact, coalesced so a crowd cannot turn into a buzz. */
+export const COMBAT_SOUNDS = ['hit_light', 'hit_heavy', 'hit_boss', 'block_deflect', 'player_hurt', 'revive'] as const;
+export type CombatSound = (typeof COMBAT_SOUNDS)[number];
+export const combatSoundUrl = (n: string) => `/audio/combat/${n}.wav`;
+export const COMBAT_MIX = { light: 0.34, heavy: 0.7, boss: 0.65, block: 0.6, hurt: 0.85, maxHitVoices: 3, minGapLight: 0.07, minGapHeavy: 0.09, hearRange: 700 } as const;
 export const ARENA_MIX = { level: 0.62, hearRange: 1400, minGain: 0.4, ambient: 0.16, ambientMin: 14, ambientMax: 30 } as const;
 export const BOSS_MIX = { level: 0.78, hearRange: 1100, minGain: 0.45, maxVoices: 4, minGap: 0.045 } as const;
 export const ENEMY_MIX = { level: 0.5, hearRange: 620, minGain: 0.12, maxVoices: 6, minGap: 0.045 } as const;
 const MASTER = 0.8;
 /** Voice slots: a new sound in a slot replaces the old one (no stacked charge swells, one beam body, one burst). `pulse` allows two overlapping zaps. */
-type Slot = 'charge' | 'fire' | 'flight' | 'burst' | 'pulse' | 'misc' | 'enemy' | 'boss' | 'aura';
+type Slot = 'hit' | 'hurt' | 'charge' | 'fire' | 'flight' | 'burst' | 'pulse' | 'misc' | 'enemy' | 'boss' | 'aura';
 const MAX_PULSE_VOICES = 2;
 
 interface Voice { src: SourceLike; gain: GainLike; slot: Slot; name: string }
@@ -59,7 +64,7 @@ export class AbilityAudio {
   unlock(): Promise<void> {
     void this.ctx.resume().catch(() => undefined);
     if (!this.master) { this.master = this.ctx.createGain(); this.master.gain.value = this.muted ? 0 : MASTER; this.master.connect(this.ctx.destination); }
-    this.loading ??= Promise.all([...ABILITY_SOUNDS.map(n => [n, soundUrl(n)] as const), ...ENEMY_SOUNDS.map(n => [n, enemySoundUrl(n)] as const), ...BOSS_SOUNDS.map(n => [n, bossSoundUrl(n)] as const), ...ARENA_SOUNDS.map(n => [n, arenaSoundUrl(n)] as const)].map(async ([n, url]) => { try { this.buffers.set(n, await this.ctx.decodeAudioData(await this.fetchBuffer(url))); } catch { /* a missing sound must never break the game */ } })).then(() => undefined);
+    this.loading ??= Promise.all([...ABILITY_SOUNDS.map(n => [n, soundUrl(n)] as const), ...ENEMY_SOUNDS.map(n => [n, enemySoundUrl(n)] as const), ...BOSS_SOUNDS.map(n => [n, bossSoundUrl(n)] as const), ...ARENA_SOUNDS.map(n => [n, arenaSoundUrl(n)] as const), ...COMBAT_SOUNDS.map(n => [n, combatSoundUrl(n)] as const)].map(async ([n, url]) => { try { this.buffers.set(n, await this.ctx.decodeAudioData(await this.fetchBuffer(url))); } catch { /* a missing sound must never break the game */ } })).then(() => undefined);
     return this.loading;
   }
 
@@ -70,10 +75,11 @@ export class AbilityAudio {
 
   private lastEnemy = new Map<string, number>();
   private lastEnemyEvent = 0;
-  private play(name: AbilitySound | EnemySound | BossSound | ArenaSound, slot: Slot, vol = 1, rate = 1) {
+  private play(name: AbilitySound | EnemySound | BossSound | ArenaSound | CombatSound, slot: Slot, vol = 1, rate = 1) {
     const buf = this.buffers.get(name); if (!buf || !this.master || this.muted) return;
     if (slot === 'enemy') { if ([...this.voices].filter(v => v.slot === 'enemy').length >= ENEMY_MIX.maxVoices) return; }
     else if (slot === 'boss') { if ([...this.voices].filter(v => v.slot === 'boss').length >= BOSS_MIX.maxVoices) return; }
+    else if (slot === 'hit') { if ([...this.voices].filter(v => v.slot === 'hit').length >= COMBAT_MIX.maxHitVoices) return; }
     else if (slot === 'pulse') { if ([...this.voices].filter(v => v.slot === 'pulse').length >= MAX_PULSE_VOICES) return; }
     else this.stopSlot(slot, 0.03);
     const src = this.ctx.createBufferSource(), gain = this.ctx.createGain(); src.buffer = buf; src.playbackRate.value = rate; gain.gain.value = vol;
@@ -127,6 +133,23 @@ export class AbilityAudio {
       case 'sphere_gather': this.play(`sphere_gather${f1}` as AbilitySound, 'charge'); break;
       case 'sphere_launch': this.stopSlot('charge', 0.06); this.play('sphere_throw', 'misc'); this.play('sphere_flight', 'flight', 0.9); break;
       case 'sphere_burst': this.stopSlot('flight', 0.03); this.play(`sphere_burst${f1}` as AbilitySound, 'burst'); break;
+    }
+  }
+
+  private lastImpact = 0; private lastHitAt = new Map<string, number>();
+  /** One sim impact -> sound. Light hits are quiet, short and rate-limited; heavy / boss / block / hurt are distinct and each get their own gap so none can mask another. A kill is covered by its enemy_death sound, so a killing blow plays the heavy hit only when it was heavy. */
+  handleImpact(e: Impact, px: number, py: number) {
+    const d = Math.hypot(e.x - px, e.y - py); if (d > COMBAT_MIX.hearRange && e.kind !== 'hurt' && e.kind !== 'revive') return;
+    const fall = Math.max(0.35, 1 - d / COMBAT_MIX.hearRange), now = this.ctx.currentTime;
+    const gate = (k: string, gap: number) => { if (now - (this.lastHitAt.get(k) ?? -1) < gap) return false; this.lastHitAt.set(k, now); return true; };
+    const rate = 0.95 + Math.random() * 0.1;
+    if (e.kind === 'hurt') { if (gate('hurt', 0.12)) this.play('player_hurt', 'hurt', COMBAT_MIX.hurt * (e.heavy ? 1 : 0.8), rate); }
+    else if (e.kind === 'revive') this.play('revive', 'misc', 0.9);
+    else if (e.kind === 'block') { if (gate('block', 0.1)) this.play('block_deflect', 'hit', COMBAT_MIX.block * fall, rate); }
+    else if (e.kind === 'hit') {
+      if (e.boss) { if (gate('boss', COMBAT_MIX.minGapHeavy)) this.play('hit_boss', 'hit', COMBAT_MIX.boss * fall, rate); }
+      else if (e.heavy) { if (gate('heavy', COMBAT_MIX.minGapHeavy)) this.play('hit_heavy', 'hit', COMBAT_MIX.heavy * fall, rate); }
+      else if (gate('light', COMBAT_MIX.minGapLight)) this.play('hit_light', 'hit', COMBAT_MIX.light * fall, rate);
     }
   }
 
@@ -195,6 +218,10 @@ export class AbilityAudio {
     if (s.phase === 'running') this.ambient(s.arenaId, s.time);
     if (s.phase === 'running' && s.player.form === 3 && !s.cinema && s.time >= this.nextHover) { this.nextHover = s.time + 1.9; this.play('aura_hover', 'aura', 0.55); }   // B13: a very soft sustained hover tone, re-armed from the sim clock so pause / death / form end silence it
     if (s.phase === 'running' && s.player.form === 2 && !s.cinema && s.time >= this.nextCrackle) { this.nextCrackle = s.time + 2.4 + Math.random() * 3; this.play('aura_crackle', 'aura', 0.55); }   // a quiet low crackle while Form II burns
+    for (const im of s.impacts) {
+      if (im.id <= this.lastImpact) continue; this.lastImpact = im.id;
+      if (s.phase === 'running') this.handleImpact(im, s.player.x, s.player.y);
+    }
     for (const ev of s.abilityEvents) {
       if (ev.id <= this.lastEvent) continue; this.lastEvent = ev.id;
       if (s.phase === 'running' || (s.phase === 'victory' && ev.kind === 'finisher')) this.handle(ev, s.cast?.form ?? s.sphere?.form ?? s.player.form);
@@ -204,7 +231,7 @@ export class AbilityAudio {
       if (s.phase === 'running') this.handleEnemy(ev, s.player.x, s.player.y);
     }
   }
-  dispose() { this.nextHover = 0; this.nextAmbient = 0; this.nextCrackle = 0; this.lastEvent = 0; this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.stopAll(0.01); try { this.master?.disconnect(); } catch { /* ignore */ } this.master = null; }
+  dispose() { this.nextHover = 0; this.nextAmbient = 0; this.nextCrackle = 0; this.lastEvent = 0; this.lastImpact = 0; this.lastHitAt.clear(); this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.stopAll(0.01); try { this.master?.disconnect(); } catch { /* ignore */ } this.master = null; }
 }
 
 let shared: AbilityAudio | null = null;
