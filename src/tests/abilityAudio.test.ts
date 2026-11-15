@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ABILITY_SOUNDS, ARENA_SOUNDS, COMBAT_SOUNDS, BOSS_SOUNDS, ENEMY_SOUNDS, AbilityAudio, type CtxLike, type GainLike, type SourceLike } from '../game/audio/abilityAudio';
+import { ABILITY_SOUNDS, ARENA_SOUNDS, COMBAT_SOUNDS, UI_SOUNDS, BOSS_SOUNDS, ENEMY_SOUNDS, AbilityAudio, type CtxLike, type GainLike, type SourceLike } from '../game/audio/abilityAudio';
 import { Simulation } from '../sim/Simulation';
 import type { AbilityEvent, InputState } from '../sim/GameState';
 
@@ -42,7 +42,7 @@ describe('ability audio files', () => {
 });
 
 describe('ability audio lifecycle', () => {
-  it('decodes every sound after the unlock gesture and resumes the context', async () => { const { ctx, a } = await mk(); expect(a.loaded).toBe(ABILITY_SOUNDS.length + ENEMY_SOUNDS.length + BOSS_SOUNDS.length + ARENA_SOUNDS.length + COMBAT_SOUNDS.length); expect(ctx.state).toBe('running'); });
+  it('decodes every sound after the unlock gesture and resumes the context', async () => { const { ctx, a } = await mk(); expect(a.loaded).toBe(ABILITY_SOUNDS.length + ENEMY_SOUNDS.length + BOSS_SOUNDS.length + ARENA_SOUNDS.length + COMBAT_SOUNDS.length + UI_SOUNDS.length); expect(ctx.state).toBe('running'); });
   it('plays nothing before unlock (no buffers) and nothing when muted', async () => {
     const ctx = new FakeCtx(); const a = new AbilityAudio(ctx, async () => new ArrayBuffer(8)); a.handle(ev('beam_charge', 1), 0); expect(a.started).toHaveLength(0);
     await a.unlock(); a.setMuted(true); a.handle(ev('beam_charge', 2), 0); expect(a.started).toHaveLength(0); a.setMuted(false); a.handle(ev('beam_charge', 3), 0); expect(a.started).toEqual(['beam_charge']);
@@ -65,8 +65,8 @@ describe('ability audio lifecycle', () => {
     const { ctx, a } = await mk(); a.handle(ev('beam_charge', 1), 0); a.handle(ev('cast_cancel', 2), 0); expect([...a['voices']].filter(v => v.slot === 'charge')).toHaveLength(0);
     a.handle(ev('sphere_launch', 3), 0); a.setMuted(true); expect(a.activeVoices).toBe(0); a.setMuted(false);
     a.handle(ev('sphere_burst', 4), 0); a.dispose(); expect(a.activeVoices).toBe(0);
-    const sim = new Simulation(2); const s = sim.state; const b = await mk(); b.a.sync(s); b.a.handle(ev('beam_charge', 1), 0); s.phase = 'paused'; b.a.sync(s); expect(b.ctx.log.at(-1)).toBe('suspend');
-    s.phase = 'running'; b.a.sync(s); expect(b.ctx.log.at(-1)).toBe('resume'); s.phase = 'dead'; b.a.sync(s); expect(b.a.activeVoices).toBe(0); void ctx;
+    const sim = new Simulation(2); const s = sim.state; const b = await mk(); b.a.sync(s); b.a.handle(ev('beam_charge', 1), 0); s.phase = 'paused'; b.a.sync(s); expect([...b.a['voices']].filter(v => v.slot !== 'ui').length).toBe(0); expect(b.ctx.log).not.toContain('suspend');   // B16: pause cuts effect voices but keeps the context (score + UI) alive
+    s.phase = 'running'; b.a.sync(s); expect(b.ctx.log.at(-1)).toBe('resume'); s.phase = 'dead'; b.a.sync(s); expect([...b.a['voices']].filter(v => v.slot !== 'ui').length).toBe(0); void ctx;
   });
   it('is driven by sim events: a real cast produces charge -> fire -> pulses -> end in order, and a fresh run (ids restart) still plays', async () => {
     const run1 = async () => {

@@ -1,0 +1,67 @@
+{
+ "ui_hover": {
+  "seconds": 0.05,
+  "peak_dBFS": -14.0,
+  "clipped_samples": 0
+ },
+ "ui_click": {
+  "seconds": 0.12,
+  "peak_dBFS": -4.0,
+  "clipped_samples": 0
+ },
+ "ui_confirm": {
+  "seconds": 0.34,
+  "peak_dBFS": -4.0,
+  "clipped_samples": 0
+ },
+ "ui_back": {
+  "seconds": 0.22,
+  "peak_dBFS": -4.0,
+  "clipped_samples": 0
+ },
+ "ui_pause": {
+  "seconds": 0.3,
+  "peak_dBFS": -4.0,
+  "clipped_samples": 0
+ },
+ "ui_resume": {
+  "seconds": 0.28,
+  "peak_dBFS": -4.0,
+  "clipped_samples": 0
+ },
+ "ui_toggle_on": {
+  "seconds": 0.14,
+  "peak_dBFS": -4.0,
+  "clipped_samples": 0
+ },
+ "ui_toggle_off": {
+  "seconds": 0.14,
+  "peak_dBFS": -4.0,
+  "clipped_samples": 0
+ },
+ "ui_slider": {
+  "seconds": 0.04,
+  "peak_dBFS": -13.0,
+  "clipped_samples": 0
+ },
+ "lv_pick": {
+  "seconds": 0.5,
+  "peak_dBFS": -4.0,
+  "clipped_samples": 0
+ },
+ "lv_epic": {
+  "seconds": 1.1,
+  "peak_dBFS": -4.0,
+  "clipped_samples": 0
+ },
+ "xp_pickup": {
+  "seconds": 0.09,
+  "peak_dBFS": -9.0,
+  "clipped_samples": 0
+ },
+ "drive_ready": {
+  "seconds": 0.7,
+  "peak_dBFS": -4.0,
+  "clipped_samples": 0
+ }
+}

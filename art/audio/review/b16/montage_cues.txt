@@ -1,0 +1,13 @@
+0:00.0  MENU: title theme (motif on bells), click / confirm UI sounds
+0:09.0  ARENA START: Gloam Circuit theme (industrial pulse)
+0:11.0  combat: light hits, heavy hit (14.2), shield block (15.0), player hurt (16.0), mob death (17.0), xp pickups
+0:22.0  WARDEN ARRIVES (8:00): boss stinger + warning, theme crossfades in
+0:33.0  Warden defeated: death payoff, then reward stinger
+0:35.5  REWARD stinger -> back to the arena (Ashen Reliquary theme shown here)
+0:43.0  LEVEL-UP stinger (music ducked), card pick at 46
+0:50.0  COMETHEART (Form II): music ducks, charge -> break -> commit, then Dragonfang lunge + hit, Cometbreaker beam
+1:06.0  STILLFIRE APEX (Form III): the mix drops to near-silence for the 3.6 s reveal
+1:12.0  Silver Rift charge / blink / fire, Perfect Evasion (76.5)
+1:22.0  FINAL WARNING (14:30) stinger
+1:26.0  NULL SERAPH (15:00): boss stinger + theme
+1:41.0  SERAPH FALLS: death payoff, then VICTORY theme

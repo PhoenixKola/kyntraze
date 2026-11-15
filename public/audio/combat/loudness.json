@@ -34,5 +34,11 @@
   "peak_dBFS": -3.0,
   "rms_dBFS": -18.12,
   "clipped_samples": 0
+ },
+ "form1_ignite": {
+  "seconds": 1.0,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -19.87,
+  "clipped_samples": 0
  }
 }

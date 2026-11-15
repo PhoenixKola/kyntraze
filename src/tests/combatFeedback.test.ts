@@ -40,7 +40,7 @@ describe('B15 combat audio routing', () => {
     const a = new AbilityAudio(ctx, async () => new ArrayBuffer(8)); await a.unlock(); return { a, ctx };
   };
   const imp = (kind: string, extra = {}) => ({ id: 1, kind, x: 0, y: 0, ttl: 1, life: 1, ...extra }) as never;
-  it('registers every combat sound', () => expect(COMBAT_SOUNDS.length).toBe(6));
+  it('registers every combat sound', () => expect(COMBAT_SOUNDS.length).toBe(7));
   it('hit / block / hurt each pick their own sound', async () => {
     const { a, ctx } = await mkAudio(); const go = (i: never) => { ctx.currentTime += 1; a['voices'].clear(); a.handleImpact(i, 0, 0); };
     go(imp('hit')); go(imp('hit', { heavy: true })); go(imp('hit', { boss: true })); go(imp('block')); go(imp('hurt')); go(imp('revive'));

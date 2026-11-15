@@ -1,0 +1,993 @@
+{
+ "arenas/amb_ashen_a.wav": {
+  "seconds": 3.0,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -20.69,
+  "clipped": 0,
+  "tail_rms_dBFS": -56.8,
+  "head_rms_dBFS": -54.66
+ },
+ "arenas/amb_ashen_b.wav": {
+  "seconds": 2.2,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -16.64,
+  "clipped": 0,
+  "tail_rms_dBFS": -48.38,
+  "head_rms_dBFS": -46.61
+ },
+ "arenas/amb_gloam_a.wav": {
+  "seconds": 2.5,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -14.16,
+  "clipped": 0,
+  "tail_rms_dBFS": -50.83,
+  "head_rms_dBFS": -51.11
+ },
+ "arenas/amb_gloam_b.wav": {
+  "seconds": 2.0,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -26.72,
+  "clipped": 0,
+  "tail_rms_dBFS": -63.97,
+  "head_rms_dBFS": -61.28
+ },
+ "arenas/pylon_charge.wav": {
+  "seconds": 1.4,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -20.13,
+  "clipped": 0,
+  "tail_rms_dBFS": -17.5,
+  "head_rms_dBFS": -50.8
+ },
+ "arenas/pylon_pulse.wav": {
+  "seconds": 0.6,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -23.84,
+  "clipped": 0,
+  "tail_rms_dBFS": -57.48,
+  "head_rms_dBFS": -15.48
+ },
+ "arenas/surge_fire.wav": {
+  "seconds": 0.7,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -24.3,
+  "clipped": 0,
+  "tail_rms_dBFS": -52.07,
+  "head_rms_dBFS": -15.66
+ },
+ "arenas/surge_warn.wav": {
+  "seconds": 1.5,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -17.04,
+  "clipped": 0,
+  "tail_rms_dBFS": -19.32,
+  "head_rms_dBFS": -32.29
+ },
+ "bosses/aegis_block.wav": {
+  "seconds": 0.2,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -23.92,
+  "clipped": 0,
+  "tail_rms_dBFS": -60.29,
+  "head_rms_dBFS": -18.11
+ },
+ "bosses/aegis_brace.wav": {
+  "seconds": 0.7,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -20.54,
+  "clipped": 0,
+  "tail_rms_dBFS": -25.93,
+  "head_rms_dBFS": -29.09
+ },
+ "bosses/aegis_ram.wav": {
+  "seconds": 0.4,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -21.0,
+  "clipped": 0,
+  "tail_rms_dBFS": -37.9,
+  "head_rms_dBFS": -15.67
+ },
+ "bosses/boss_warning.wav": {
+  "seconds": 1.6,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -17.32,
+  "clipped": 0,
+  "tail_rms_dBFS": -32.24,
+  "head_rms_dBFS": -24.79
+ },
+ "bosses/cantor_aura_off.wav": {
+  "seconds": 0.4,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -16.91,
+  "clipped": 0,
+  "tail_rms_dBFS": -43.17,
+  "head_rms_dBFS": -11.44
+ },
+ "bosses/cantor_charge.wav": {
+  "seconds": 0.8,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -17.45,
+  "clipped": 0,
+  "tail_rms_dBFS": -21.63,
+  "head_rms_dBFS": -28.93
+ },
+ "bosses/cantor_fire.wav": {
+  "seconds": 0.25,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -20.85,
+  "clipped": 0,
+  "tail_rms_dBFS": -43.26,
+  "head_rms_dBFS": -15.32
+ },
+ "bosses/charge_hit.wav": {
+  "seconds": 0.5,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -24.48,
+  "clipped": 0,
+  "tail_rms_dBFS": -54.86,
+  "head_rms_dBFS": -17.61
+ },
+ "bosses/charge_wind.wav": {
+  "seconds": 0.8,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -18.8,
+  "clipped": 0,
+  "tail_rms_dBFS": -18.59,
+  "head_rms_dBFS": -33.3
+ },
+ "bosses/rupture_burst.wav": {
+  "seconds": 0.4,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -22.68,
+  "clipped": 0,
+  "tail_rms_dBFS": -47.88,
+  "head_rms_dBFS": -16.26
+ },
+ "bosses/rupture_warn.wav": {
+  "seconds": 0.8,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -20.12,
+  "clipped": 0,
+  "tail_rms_dBFS": -27.46,
+  "head_rms_dBFS": -36.74
+ },
+ "bosses/seraph_arrive.wav": {
+  "seconds": 1.5,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -16.32,
+  "clipped": 0,
+  "tail_rms_dBFS": -42.79,
+  "head_rms_dBFS": -17.36
+ },
+ "bosses/seraph_blink_in.wav": {
+  "seconds": 0.3,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -22.89,
+  "clipped": 0,
+  "tail_rms_dBFS": -27.21,
+  "head_rms_dBFS": -48.61
+ },
+ "bosses/seraph_blink_out.wav": {
+  "seconds": 0.3,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -17.85,
+  "clipped": 0,
+  "tail_rms_dBFS": -36.82,
+  "head_rms_dBFS": -13.29
+ },
+ "bosses/seraph_death.wav": {
+  "seconds": 2.0,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -24.94,
+  "clipped": 0,
+  "tail_rms_dBFS": -63.76,
+  "head_rms_dBFS": -17.92
+ },
+ "bosses/seraph_hurt.wav": {
+  "seconds": 0.2,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -19.73,
+  "clipped": 0,
+  "tail_rms_dBFS": -38.24,
+  "head_rms_dBFS": -14.92
+ },
+ "bosses/seraph_phase.wav": {
+  "seconds": 1.6,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -18.08,
+  "clipped": 0,
+  "tail_rms_dBFS": -35.69,
+  "head_rms_dBFS": -18.72
+ },
+ "bosses/seraph_ring_burst.wav": {
+  "seconds": 0.5,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -24.1,
+  "clipped": 0,
+  "tail_rms_dBFS": -55.83,
+  "head_rms_dBFS": -17.56
+ },
+ "bosses/seraph_ring_wind.wav": {
+  "seconds": 0.9,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -17.77,
+  "clipped": 0,
+  "tail_rms_dBFS": -50.33,
+  "head_rms_dBFS": -45.93
+ },
+ "bosses/seraph_spiral_pulse.wav": {
+  "seconds": 0.12,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -20.9,
+  "clipped": 0,
+  "tail_rms_dBFS": -40.19,
+  "head_rms_dBFS": -17.21
+ },
+ "bosses/seraph_volley_fire.wav": {
+  "seconds": 0.3,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -19.45,
+  "clipped": 0,
+  "tail_rms_dBFS": -47.99,
+  "head_rms_dBFS": -15.88
+ },
+ "bosses/seraph_volley_wind.wav": {
+  "seconds": 0.7,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -19.51,
+  "clipped": 0,
+  "tail_rms_dBFS": -19.82,
+  "head_rms_dBFS": -35.9
+ },
+ "bosses/sweep_hit.wav": {
+  "seconds": 0.35,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -23.87,
+  "clipped": 0,
+  "tail_rms_dBFS": -53.06,
+  "head_rms_dBFS": -17.2
+ },
+ "bosses/sweep_wind.wav": {
+  "seconds": 0.9,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -23.74,
+  "clipped": 0,
+  "tail_rms_dBFS": -22.58,
+  "head_rms_dBFS": -59.63
+ },
+ "bosses/warden_death.wav": {
+  "seconds": 2.2,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -24.82,
+  "clipped": 0,
+  "tail_rms_dBFS": -69.0,
+  "head_rms_dBFS": -13.97
+ },
+ "bosses/warden_hurt.wav": {
+  "seconds": 0.25,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -19.31,
+  "clipped": 0,
+  "tail_rms_dBFS": -38.18,
+  "head_rms_dBFS": -14.04
+ },
+ "bosses/warden_roar.wav": {
+  "seconds": 1.4,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -16.65,
+  "clipped": 0,
+  "tail_rms_dBFS": -51.22,
+  "head_rms_dBFS": -32.06
+ },
+ "bosses/warden_step.wav": {
+  "seconds": 0.3,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -16.28,
+  "clipped": 0,
+  "tail_rms_dBFS": -34.18,
+  "head_rms_dBFS": -10.96
+ },
+ "combat/block_deflect.wav": {
+  "seconds": 0.22,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -24.44,
+  "clipped": 0,
+  "tail_rms_dBFS": -48.84,
+  "head_rms_dBFS": -18.52
+ },
+ "combat/form1_ignite.wav": {
+  "seconds": 1.0,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -22.88,
+  "clipped": 0,
+  "tail_rms_dBFS": -49.07,
+  "head_rms_dBFS": -53.23
+ },
+ "combat/hit_boss.wav": {
+  "seconds": 0.34,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -22.83,
+  "clipped": 0,
+  "tail_rms_dBFS": -50.55,
+  "head_rms_dBFS": -15.86
+ },
+ "combat/hit_heavy.wav": {
+  "seconds": 0.24,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -23.04,
+  "clipped": 0,
+  "tail_rms_dBFS": -46.75,
+  "head_rms_dBFS": -17.07
+ },
+ "combat/hit_light.wav": {
+  "seconds": 0.09,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -23.47,
+  "clipped": 0,
+  "tail_rms_dBFS": -36.68,
+  "head_rms_dBFS": -20.96
+ },
+ "combat/player_hurt.wav": {
+  "seconds": 0.3,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -20.06,
+  "clipped": 0,
+  "tail_rms_dBFS": -43.66,
+  "head_rms_dBFS": -13.96
+ },
+ "combat/revive.wav": {
+  "seconds": 0.7,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -21.13,
+  "clipped": 0,
+  "tail_rms_dBFS": -46.63,
+  "head_rms_dBFS": -15.62
+ },
+ "enemies/bolt_hit.wav": {
+  "seconds": 0.26,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -24.45,
+  "clipped": 0,
+  "tail_rms_dBFS": -57.92,
+  "head_rms_dBFS": -17.8
+ },
+ "enemies/bruiser_slam.wav": {
+  "seconds": 0.8,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -24.49,
+  "clipped": 0,
+  "tail_rms_dBFS": -51.14,
+  "head_rms_dBFS": -16.44
+ },
+ "enemies/bruiser_wind.wav": {
+  "seconds": 0.95,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -18.18,
+  "clipped": 0,
+  "tail_rms_dBFS": -17.96,
+  "head_rms_dBFS": -29.96
+ },
+ "enemies/death_heavy.wav": {
+  "seconds": 0.95,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -22.59,
+  "clipped": 0,
+  "tail_rms_dBFS": -53.27,
+  "head_rms_dBFS": -15.07
+ },
+ "enemies/death_small.wav": {
+  "seconds": 0.4,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -27.55,
+  "clipped": 0,
+  "tail_rms_dBFS": -61.27,
+  "head_rms_dBFS": -20.02
+ },
+ "enemies/flanker_wind.wav": {
+  "seconds": 0.34,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -17.83,
+  "clipped": 0,
+  "tail_rms_dBFS": -16.24,
+  "head_rms_dBFS": -29.11
+ },
+ "enemies/lunge.wav": {
+  "seconds": 0.22,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -19.27,
+  "clipped": 0,
+  "tail_rms_dBFS": -34.09,
+  "head_rms_dBFS": -16.64
+ },
+ "enemies/pursuer_wind.wav": {
+  "seconds": 0.42,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -20.5,
+  "clipped": 0,
+  "tail_rms_dBFS": -20.36,
+  "head_rms_dBFS": -29.39
+ },
+ "enemies/ranged_charge.wav": {
+  "seconds": 0.75,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -18.51,
+  "clipped": 0,
+  "tail_rms_dBFS": -17.65,
+  "head_rms_dBFS": -42.65
+ },
+ "enemies/ranged_shot.wav": {
+  "seconds": 0.32,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -19.49,
+  "clipped": 0,
+  "tail_rms_dBFS": -33.16,
+  "head_rms_dBFS": -14.62
+ },
+ "enemies/slash.wav": {
+  "seconds": 0.26,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -20.4,
+  "clipped": 0,
+  "tail_rms_dBFS": -38.35,
+  "head_rms_dBFS": -17.56
+ },
+ "kai-abilities/aura_crackle.wav": {
+  "seconds": 1.0,
+  "peak_dBFS": -19.01,
+  "rms_dBFS": -29.47,
+  "clipped": 0,
+  "tail_rms_dBFS": -75.12,
+  "head_rms_dBFS": -39.89
+ },
+ "kai-abilities/aura_hover.wav": {
+  "seconds": 2.0,
+  "peak_dBFS": -27.01,
+  "rms_dBFS": -36.79,
+  "clipped": 0,
+  "tail_rms_dBFS": -35.77,
+  "head_rms_dBFS": -36.0
+ },
+ "kai-abilities/beam_charge.wav": {
+  "seconds": 0.6,
+  "peak_dBFS": -10.01,
+  "rms_dBFS": -21.0,
+  "clipped": 0,
+  "tail_rms_dBFS": -62.76,
+  "head_rms_dBFS": -44.59
+ },
+ "kai-abilities/beam_charge_f1.wav": {
+  "seconds": 0.6,
+  "peak_dBFS": -10.01,
+  "rms_dBFS": -20.97,
+  "clipped": 0,
+  "tail_rms_dBFS": -63.12,
+  "head_rms_dBFS": -44.57
+ },
+ "kai-abilities/beam_end.wav": {
+  "seconds": 0.7,
+  "peak_dBFS": -10.01,
+  "rms_dBFS": -24.97,
+  "clipped": 0,
+  "tail_rms_dBFS": -119.76,
+  "head_rms_dBFS": -16.49
+ },
+ "kai-abilities/beam_fire.wav": {
+  "seconds": 0.62,
+  "peak_dBFS": -4.51,
+  "rms_dBFS": -8.57,
+  "clipped": 0,
+  "tail_rms_dBFS": -30.49,
+  "head_rms_dBFS": -6.76
+ },
+ "kai-abilities/beam_fire_f1.wav": {
+  "seconds": 0.62,
+  "peak_dBFS": -4.51,
+  "rms_dBFS": -8.63,
+  "clipped": 0,
+  "tail_rms_dBFS": -30.53,
+  "head_rms_dBFS": -6.82
+ },
+ "kai-abilities/beam_pulse_0.wav": {
+  "seconds": 0.16,
+  "peak_dBFS": -11.01,
+  "rms_dBFS": -18.35,
+  "clipped": 0,
+  "tail_rms_dBFS": -30.37,
+  "head_rms_dBFS": -14.48
+ },
+ "kai-abilities/beam_pulse_1.wav": {
+  "seconds": 0.16,
+  "peak_dBFS": -11.01,
+  "rms_dBFS": -18.38,
+  "clipped": 0,
+  "tail_rms_dBFS": -30.62,
+  "head_rms_dBFS": -14.59
+ },
+ "kai-abilities/beam_pulse_2.wav": {
+  "seconds": 0.16,
+  "peak_dBFS": -11.01,
+  "rms_dBFS": -18.33,
+  "clipped": 0,
+  "tail_rms_dBFS": -30.33,
+  "head_rms_dBFS": -14.5
+ },
+ "kai-abilities/cast_cancel.wav": {
+  "seconds": 0.28,
+  "peak_dBFS": -13.01,
+  "rms_dBFS": -25.31,
+  "clipped": 0,
+  "tail_rms_dBFS": -50.75,
+  "head_rms_dBFS": -19.16
+ },
+ "kai-abilities/comet_end.wav": {
+  "seconds": 0.7,
+  "peak_dBFS": -9.01,
+  "rms_dBFS": -23.04,
+  "clipped": 0,
+  "tail_rms_dBFS": -87.08,
+  "head_rms_dBFS": -14.86
+ },
+ "kai-abilities/comet_fire.wav": {
+  "seconds": 2.3,
+  "peak_dBFS": -5.01,
+  "rms_dBFS": -9.08,
+  "clipped": 0,
+  "tail_rms_dBFS": -39.49,
+  "head_rms_dBFS": -7.06
+ },
+ "kai-abilities/comet_gather.wav": {
+  "seconds": 1.15,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -15.87,
+  "clipped": 0,
+  "tail_rms_dBFS": -36.75,
+  "head_rms_dBFS": -56.49
+ },
+ "kai-abilities/dragon_hit.wav": {
+  "seconds": 0.45,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -11.59,
+  "clipped": 0,
+  "tail_rms_dBFS": -34.25,
+  "head_rms_dBFS": -8.45
+ },
+ "kai-abilities/dragon_launch.wav": {
+  "seconds": 0.75,
+  "peak_dBFS": -5.01,
+  "rms_dBFS": -11.6,
+  "clipped": 0,
+  "tail_rms_dBFS": -44.69,
+  "head_rms_dBFS": -7.1
+ },
+ "kai-abilities/dragon_windup.wav": {
+  "seconds": 0.3,
+  "peak_dBFS": -11.01,
+  "rms_dBFS": -21.91,
+  "clipped": 0,
+  "tail_rms_dBFS": -18.44,
+  "head_rms_dBFS": -34.4
+ },
+ "kai-abilities/evasion.wav": {
+  "seconds": 0.4,
+  "peak_dBFS": -10.01,
+  "rms_dBFS": -24.09,
+  "clipped": 0,
+  "tail_rms_dBFS": -71.08,
+  "head_rms_dBFS": -20.81
+ },
+ "kai-abilities/finisher.wav": {
+  "seconds": 1.6,
+  "peak_dBFS": -4.01,
+  "rms_dBFS": -9.55,
+  "clipped": 0,
+  "tail_rms_dBFS": -46.66,
+  "head_rms_dBFS": -7.11
+ },
+ "kai-abilities/finisher3.wav": {
+  "seconds": 2.2,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -21.01,
+  "clipped": 0,
+  "tail_rms_dBFS": -66.1,
+  "head_rms_dBFS": -28.95
+ },
+ "kai-abilities/form2_break.wav": {
+  "seconds": 1.3,
+  "peak_dBFS": -4.01,
+  "rms_dBFS": -10.23,
+  "clipped": 0,
+  "tail_rms_dBFS": -45.49,
+  "head_rms_dBFS": -6.42
+ },
+ "kai-abilities/form2_charge.wav": {
+  "seconds": 2.0,
+  "peak_dBFS": -6.01,
+  "rms_dBFS": -15.7,
+  "clipped": 0,
+  "tail_rms_dBFS": -13.8,
+  "head_rms_dBFS": -38.99
+ },
+ "kai-abilities/form2_commit.wav": {
+  "seconds": 1.4,
+  "peak_dBFS": -4.51,
+  "rms_dBFS": -12.16,
+  "clipped": 0,
+  "tail_rms_dBFS": -53.02,
+  "head_rms_dBFS": -8.01
+ },
+ "kai-abilities/form2_end.wav": {
+  "seconds": 0.8,
+  "peak_dBFS": -9.01,
+  "rms_dBFS": -22.25,
+  "clipped": 0,
+  "tail_rms_dBFS": -74.29,
+  "head_rms_dBFS": -14.44
+ },
+ "kai-abilities/form3_dash.wav": {
+  "seconds": 0.35,
+  "peak_dBFS": -9.01,
+  "rms_dBFS": -24.55,
+  "clipped": 0,
+  "tail_rms_dBFS": -40.78,
+  "head_rms_dBFS": -19.56
+ },
+ "kai-abilities/form3_end.wav": {
+  "seconds": 0.7,
+  "peak_dBFS": -12.01,
+  "rms_dBFS": -28.56,
+  "clipped": 0,
+  "tail_rms_dBFS": -67.09,
+  "head_rms_dBFS": -23.57
+ },
+ "kai-abilities/form3_omen.wav": {
+  "seconds": 1.4,
+  "peak_dBFS": -17.01,
+  "rms_dBFS": -31.89,
+  "clipped": 0,
+  "tail_rms_dBFS": -57.27,
+  "head_rms_dBFS": -97.36
+ },
+ "kai-abilities/form3_reveal.wav": {
+  "seconds": 1.6,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -22.53,
+  "clipped": 0,
+  "tail_rms_dBFS": -65.76,
+  "head_rms_dBFS": -15.7
+ },
+ "kai-abilities/form3_silence.wav": {
+  "seconds": 1.2,
+  "peak_dBFS": -13.01,
+  "rms_dBFS": -27.83,
+  "clipped": 0,
+  "tail_rms_dBFS": -80.06,
+  "head_rms_dBFS": -24.31
+ },
+ "kai-abilities/glide.wav": {
+  "seconds": 0.5,
+  "peak_dBFS": -13.01,
+  "rms_dBFS": -28.05,
+  "clipped": 0,
+  "tail_rms_dBFS": -59.51,
+  "head_rms_dBFS": -54.62
+ },
+ "kai-abilities/reversal_end.wav": {
+  "seconds": 0.9,
+  "peak_dBFS": -11.01,
+  "rms_dBFS": -22.47,
+  "clipped": 0,
+  "tail_rms_dBFS": -53.97,
+  "head_rms_dBFS": -26.62
+ },
+ "kai-abilities/reversal_hit_a.wav": {
+  "seconds": 0.14,
+  "peak_dBFS": -11.01,
+  "rms_dBFS": -26.98,
+  "clipped": 0,
+  "tail_rms_dBFS": -40.62,
+  "head_rms_dBFS": -23.05
+ },
+ "kai-abilities/reversal_hit_b.wav": {
+  "seconds": 0.14,
+  "peak_dBFS": -11.01,
+  "rms_dBFS": -26.95,
+  "clipped": 0,
+  "tail_rms_dBFS": -40.61,
+  "head_rms_dBFS": -23.01
+ },
+ "kai-abilities/reversal_hit_c.wav": {
+  "seconds": 0.14,
+  "peak_dBFS": -11.01,
+  "rms_dBFS": -26.43,
+  "clipped": 0,
+  "tail_rms_dBFS": -40.1,
+  "head_rms_dBFS": -22.49
+ },
+ "kai-abilities/rift_blink.wav": {
+  "seconds": 0.28,
+  "peak_dBFS": -9.01,
+  "rms_dBFS": -28.81,
+  "clipped": 0,
+  "tail_rms_dBFS": -63.23,
+  "head_rms_dBFS": -22.06
+ },
+ "kai-abilities/rift_charge.wav": {
+  "seconds": 1.0,
+  "peak_dBFS": -15.01,
+  "rms_dBFS": -23.64,
+  "clipped": 0,
+  "tail_rms_dBFS": -23.66,
+  "head_rms_dBFS": -23.54
+ },
+ "kai-abilities/rift_end.wav": {
+  "seconds": 0.55,
+  "peak_dBFS": -12.01,
+  "rms_dBFS": -27.1,
+  "clipped": 0,
+  "tail_rms_dBFS": -59.91,
+  "head_rms_dBFS": -22.05
+ },
+ "kai-abilities/rift_fire.wav": {
+  "seconds": 0.9,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -24.51,
+  "clipped": 0,
+  "tail_rms_dBFS": -69.47,
+  "head_rms_dBFS": -17.34
+ },
+ "kai-abilities/sphere_burst.wav": {
+  "seconds": 2.3,
+  "peak_dBFS": -4.01,
+  "rms_dBFS": -12.31,
+  "clipped": 0,
+  "tail_rms_dBFS": -98.52,
+  "head_rms_dBFS": -7.31
+ },
+ "kai-abilities/sphere_burst_f1.wav": {
+  "seconds": 2.3,
+  "peak_dBFS": -4.01,
+  "rms_dBFS": -12.29,
+  "clipped": 0,
+  "tail_rms_dBFS": -98.56,
+  "head_rms_dBFS": -7.3
+ },
+ "kai-abilities/sphere_flight.wav": {
+  "seconds": 0.55,
+  "peak_dBFS": -12.01,
+  "rms_dBFS": -24.17,
+  "clipped": 0,
+  "tail_rms_dBFS": -44.27,
+  "head_rms_dBFS": -23.63
+ },
+ "kai-abilities/sphere_gather.wav": {
+  "seconds": 0.95,
+  "peak_dBFS": -9.01,
+  "rms_dBFS": -19.65,
+  "clipped": 0,
+  "tail_rms_dBFS": -69.61,
+  "head_rms_dBFS": -52.56
+ },
+ "kai-abilities/sphere_gather_f1.wav": {
+  "seconds": 0.95,
+  "peak_dBFS": -9.01,
+  "rms_dBFS": -19.62,
+  "clipped": 0,
+  "tail_rms_dBFS": -69.65,
+  "head_rms_dBFS": -52.53
+ },
+ "kai-abilities/sphere_throw.wav": {
+  "seconds": 0.5,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -16.61,
+  "clipped": 0,
+  "tail_rms_dBFS": -96.73,
+  "head_rms_dBFS": -10.14
+ },
+ "music/ashen.ogg": {
+  "seconds": 80.0,
+  "peak_dBFS": -1.01,
+  "rms_dBFS": -15.1,
+  "clipped": 0,
+  "tail_rms_dBFS": -14.73,
+  "head_rms_dBFS": -14.85,
+  "loop_seam_jump": 0.0137,
+  "loop_seam_vs_median_step": 1.8,
+  "loop_seam_ok": true
+ },
+ "music/defeat.ogg": {
+  "seconds": 17.06,
+  "peak_dBFS": -1.11,
+  "rms_dBFS": -17.35,
+  "clipped": 0,
+  "tail_rms_dBFS": -180.0,
+  "head_rms_dBFS": -29.63
+ },
+ "music/gloam.ogg": {
+  "seconds": 60.95,
+  "peak_dBFS": -0.68,
+  "rms_dBFS": -17.03,
+  "clipped": 0,
+  "tail_rms_dBFS": -27.28,
+  "head_rms_dBFS": -24.78,
+  "loop_seam_jump": 0.0133,
+  "loop_seam_vs_median_step": 1.5,
+  "loop_seam_ok": true
+ },
+ "music/seraph.ogg": {
+  "seconds": 68.57,
+  "peak_dBFS": -1.31,
+  "rms_dBFS": -14.11,
+  "clipped": 0,
+  "tail_rms_dBFS": -13.06,
+  "head_rms_dBFS": -13.18,
+  "loop_seam_jump": 0.051,
+  "loop_seam_vs_median_step": 2.4,
+  "loop_seam_ok": true
+ },
+ "music/stinger_boss.ogg": {
+  "seconds": 6.1,
+  "peak_dBFS": -1.12,
+  "rms_dBFS": -15.35,
+  "clipped": 0,
+  "tail_rms_dBFS": -180.0,
+  "head_rms_dBFS": -21.84
+ },
+ "music/stinger_final_warning.ogg": {
+  "seconds": 6.5,
+  "peak_dBFS": -0.82,
+  "rms_dBFS": -14.29,
+  "clipped": 0,
+  "tail_rms_dBFS": -108.69,
+  "head_rms_dBFS": -19.36
+ },
+ "music/stinger_levelup.ogg": {
+  "seconds": 3.2,
+  "peak_dBFS": -1.05,
+  "rms_dBFS": -15.99,
+  "clipped": 0,
+  "tail_rms_dBFS": -180.0,
+  "head_rms_dBFS": -19.54
+ },
+ "music/stinger_reward.ogg": {
+  "seconds": 5.9,
+  "peak_dBFS": -0.87,
+  "rms_dBFS": -15.65,
+  "clipped": 0,
+  "tail_rms_dBFS": -180.0,
+  "head_rms_dBFS": -24.37
+ },
+ "music/title.ogg": {
+  "seconds": 68.57,
+  "peak_dBFS": -1.33,
+  "rms_dBFS": -14.95,
+  "clipped": 0,
+  "tail_rms_dBFS": -14.81,
+  "head_rms_dBFS": -15.41,
+  "loop_seam_jump": 0.0225,
+  "loop_seam_vs_median_step": 1.9,
+  "loop_seam_ok": true
+ },
+ "music/victory.ogg": {
+  "seconds": 28.5,
+  "peak_dBFS": -0.99,
+  "rms_dBFS": -13.88,
+  "clipped": 0,
+  "tail_rms_dBFS": -100.03,
+  "head_rms_dBFS": -31.05
+ },
+ "music/warden.ogg": {
+  "seconds": 65.45,
+  "peak_dBFS": -1.0,
+  "rms_dBFS": -16.41,
+  "clipped": 0,
+  "tail_rms_dBFS": -35.08,
+  "head_rms_dBFS": -26.01,
+  "loop_seam_jump": 0.003,
+  "loop_seam_vs_median_step": 0.6,
+  "loop_seam_ok": true
+ },
+ "ui/drive_ready.wav": {
+  "seconds": 0.7,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -21.25,
+  "clipped": 0,
+  "tail_rms_dBFS": -46.52,
+  "head_rms_dBFS": -39.67
+ },
+ "ui/lv_epic.wav": {
+  "seconds": 1.1,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -24.42,
+  "clipped": 0,
+  "tail_rms_dBFS": -91.05,
+  "head_rms_dBFS": -16.52
+ },
+ "ui/lv_pick.wav": {
+  "seconds": 0.5,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -25.32,
+  "clipped": 0,
+  "tail_rms_dBFS": -53.66,
+  "head_rms_dBFS": -20.47
+ },
+ "ui/ui_back.wav": {
+  "seconds": 0.22,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -26.69,
+  "clipped": 0,
+  "tail_rms_dBFS": -40.96,
+  "head_rms_dBFS": -22.26
+ },
+ "ui/ui_click.wav": {
+  "seconds": 0.12,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -25.01,
+  "clipped": 0,
+  "tail_rms_dBFS": -45.83,
+  "head_rms_dBFS": -21.28
+ },
+ "ui/ui_confirm.wav": {
+  "seconds": 0.34,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -26.53,
+  "clipped": 0,
+  "tail_rms_dBFS": -47.5,
+  "head_rms_dBFS": -20.76
+ },
+ "ui/ui_hover.wav": {
+  "seconds": 0.05,
+  "peak_dBFS": -17.01,
+  "rms_dBFS": -30.86,
+  "clipped": 0,
+  "tail_rms_dBFS": -30.86,
+  "head_rms_dBFS": -30.86
+ },
+ "ui/ui_pause.wav": {
+  "seconds": 0.3,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -25.8,
+  "clipped": 0,
+  "tail_rms_dBFS": -48.05,
+  "head_rms_dBFS": -19.38
+ },
+ "ui/ui_resume.wav": {
+  "seconds": 0.28,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -26.64,
+  "clipped": 0,
+  "tail_rms_dBFS": -43.18,
+  "head_rms_dBFS": -25.57
+ },
+ "ui/ui_slider.wav": {
+  "seconds": 0.04,
+  "peak_dBFS": -16.01,
+  "rms_dBFS": -27.46,
+  "clipped": 0,
+  "tail_rms_dBFS": -27.46,
+  "head_rms_dBFS": -27.46
+ },
+ "ui/ui_toggle_off.wav": {
+  "seconds": 0.14,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -25.28,
+  "clipped": 0,
+  "tail_rms_dBFS": -39.13,
+  "head_rms_dBFS": -21.3
+ },
+ "ui/ui_toggle_on.wav": {
+  "seconds": 0.14,
+  "peak_dBFS": -7.01,
+  "rms_dBFS": -24.23,
+  "clipped": 0,
+  "tail_rms_dBFS": -37.76,
+  "head_rms_dBFS": -20.27
+ },
+ "ui/xp_pickup.wav": {
+  "seconds": 0.09,
+  "peak_dBFS": -12.01,
+  "rms_dBFS": -23.68,
+  "clipped": 0,
+  "tail_rms_dBFS": -31.31,
+  "head_rms_dBFS": -21.34
+ }
+}

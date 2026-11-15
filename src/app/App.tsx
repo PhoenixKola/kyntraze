@@ -12,6 +12,8 @@ import { LevelUpScreen } from './ui/LevelUpScreen';
 import { PauseMenu } from './ui/PauseMenu';
 import { ResultsScreen } from './ui/ResultsScreen';
 import { SettingsPanel } from './ui/SettingsPanel';
+import { sharedAbilityAudio } from '../game/audio/abilityAudio';
+import { installUiSounds } from './uiSounds';
 import { ControllerBadge } from './ui/ControllerBadge';
 import { useControllerNav } from './ui/useControllerNav';
 import { PadContext } from './ui/Chrome';
@@ -55,6 +57,10 @@ export default function App() {
   useEffect(() => { const retry = () => start(true); window.addEventListener('kyntraze-retry', retry); return () => window.removeEventListener('kyntraze-retry', retry); });
   const updateSettings = (next: GameSettings) => { bridge.setSettings(next); const updated = { ...save, settings: next }; setSave(updated); storeSave(updated); };
   const chooseArena = (id: ArenaId) => { setArena(id); const updated = { ...save, arena: id }; setSave(updated); storeSave(updated); };
+  // B16 audio: unlock on the first real gesture, follow the saved mix, play the title theme outside a run (the arena scene owns the score during one)
+  useEffect(() => { const a = sharedAbilityAudio(); const un = () => { void a?.unlock(); }; window.addEventListener('pointerdown', un); window.addEventListener('keydown', un); const off = installUiSounds(); return () => { window.removeEventListener('pointerdown', un); window.removeEventListener('keydown', un); off(); }; }, []);
+  useEffect(() => { const a = sharedAbilityAudio(); a?.setVolumes(save.settings); a?.setMuted(save.settings.mute); }, [save.settings]);
+  useEffect(() => { if (view !== 'game') sharedAbilityAudio()?.setCue('title', 1.2); }, [view]);
   const home = () => { setView('title'); setSettingsOpen(false); setSave(loadSave()); };
   return <PadContext.Provider value={pad.connected}><div className="app">
     {pad.connected && <ControllerBadge/>}

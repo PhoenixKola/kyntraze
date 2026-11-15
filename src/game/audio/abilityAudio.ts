@@ -1,4 +1,6 @@
 import type { AbilityEvent, EnemyEvent, GameState, Impact } from '../../sim/GameState';
+import { MusicDirector, STINGERS, type MusicCue } from './music';
+import { UPGRADES } from '../../content/upgrades';
 
 /** Minimal slice of the Web Audio API the ability sounds need; real code passes a browser AudioContext, tests pass a fake. */
 export interface GainLike { gain: { value: number; setTargetAtTime(v: number, t: number, tc: number): void }; connect(n: unknown): void; disconnect(): void }
@@ -28,16 +30,24 @@ export const ARENA_SOUNDS = ['surge_warn', 'surge_fire', 'pylon_charge', 'pylon_
 export type ArenaSound = (typeof ARENA_SOUNDS)[number];
 export const arenaSoundUrl = (n: string) => `/audio/arenas/${n}.wav`;
 /** B15 combat feedback (art/combat/audio/synth_b15.py): one voice per presentation impact, coalesced so a crowd cannot turn into a buzz. */
-export const COMBAT_SOUNDS = ['hit_light', 'hit_heavy', 'hit_boss', 'block_deflect', 'player_hurt', 'revive'] as const;
+export const COMBAT_SOUNDS = ['hit_light', 'hit_heavy', 'hit_boss', 'block_deflect', 'player_hurt', 'revive', 'form1_ignite'] as const;
 export type CombatSound = (typeof COMBAT_SOUNDS)[number];
 export const combatSoundUrl = (n: string) => `/audio/combat/${n}.wav`;
 export const COMBAT_MIX = { light: 0.34, heavy: 0.7, boss: 0.65, block: 0.6, hurt: 0.85, maxHitVoices: 3, minGapLight: 0.07, minGapHeavy: 0.09, hearRange: 700 } as const;
+/** B16 UI / progression sounds (art/audio/ui/synth_b16_ui.py). They play on their own bus so the Settings UI slider governs them. */
+export const UI_SOUNDS = ['ui_hover', 'ui_click', 'ui_confirm', 'ui_back', 'ui_pause', 'ui_resume', 'ui_toggle_on', 'ui_toggle_off', 'ui_slider', 'lv_pick', 'lv_epic', 'xp_pickup', 'drive_ready'] as const;
+export type UiSound = (typeof UI_SOUNDS)[number];
+export const uiSoundUrl = (n: string) => `/audio/ui/${n}.wav`;
+const UI_SET: ReadonlySet<string> = new Set(UI_SOUNDS.filter(n => n !== 'xp_pickup' && n !== 'drive_ready'));
+/** User mix: every value 0..1. Trims keep the default mix sensible (score under effects, UI under both). */
+export interface Volumes { master: number; music: number; sfx: number; ui: number }
+export const DEFAULT_VOLUMES: Volumes = { master: 1, music: 0.7, sfx: 1, ui: 0.8 };
+const TRIM = { master: 0.8, music: 0.5, sfx: 1, ui: 0.7 } as const;
 export const ARENA_MIX = { level: 0.62, hearRange: 1400, minGain: 0.4, ambient: 0.16, ambientMin: 14, ambientMax: 30 } as const;
 export const BOSS_MIX = { level: 0.78, hearRange: 1100, minGain: 0.45, maxVoices: 4, minGap: 0.045 } as const;
 export const ENEMY_MIX = { level: 0.5, hearRange: 620, minGain: 0.12, maxVoices: 6, minGap: 0.045 } as const;
-const MASTER = 0.8;
 /** Voice slots: a new sound in a slot replaces the old one (no stacked charge swells, one beam body, one burst). `pulse` allows two overlapping zaps. */
-type Slot = 'hit' | 'hurt' | 'charge' | 'fire' | 'flight' | 'burst' | 'pulse' | 'misc' | 'enemy' | 'boss' | 'aura';
+type Slot = 'ui' | 'hit' | 'hurt' | 'charge' | 'fire' | 'flight' | 'burst' | 'pulse' | 'misc' | 'enemy' | 'boss' | 'aura';
 const MAX_PULSE_VOICES = 2;
 
 interface Voice { src: SourceLike; gain: GainLike; slot: Slot; name: string }
@@ -46,6 +56,10 @@ export class AbilityAudio {
   private buffers = new Map<string, unknown>();
   private voices = new Set<Voice>();
   private master: GainLike | null = null;
+  private busMusic: GainLike | null = null; private busSfx: GainLike | null = null; private busUi: GainLike | null = null;
+  private volumes: Volumes = { ...DEFAULT_VOLUMES };
+  music: MusicDirector | null = null;
+  private wantCue: MusicCue | null = null;
   private lastEvent = 0;
   private pulseCycle = 0;
   private muted = false;
@@ -63,27 +77,47 @@ export class AbilityAudio {
   /** Call from a user gesture (keydown / pointerdown): resumes the context and decodes the sounds once. */
   unlock(): Promise<void> {
     void this.ctx.resume().catch(() => undefined);
-    if (!this.master) { this.master = this.ctx.createGain(); this.master.gain.value = this.muted ? 0 : MASTER; this.master.connect(this.ctx.destination); }
-    this.loading ??= Promise.all([...ABILITY_SOUNDS.map(n => [n, soundUrl(n)] as const), ...ENEMY_SOUNDS.map(n => [n, enemySoundUrl(n)] as const), ...BOSS_SOUNDS.map(n => [n, bossSoundUrl(n)] as const), ...ARENA_SOUNDS.map(n => [n, arenaSoundUrl(n)] as const), ...COMBAT_SOUNDS.map(n => [n, combatSoundUrl(n)] as const)].map(async ([n, url]) => { try { this.buffers.set(n, await this.ctx.decodeAudioData(await this.fetchBuffer(url))); } catch { /* a missing sound must never break the game */ } })).then(() => undefined);
+    if (!this.master) {
+      this.master = this.ctx.createGain(); this.master.gain.value = this.muted ? 0 : this.volumes.master * TRIM.master; this.master.connect(this.ctx.destination);
+      const bus = (v: number) => { const g = this.ctx.createGain(); g.gain.value = v; g.connect(this.master!); return g; };
+      this.busMusic = bus(this.volumes.music * TRIM.music); this.busSfx = bus(this.volumes.sfx * TRIM.sfx); this.busUi = bus(this.volumes.ui * TRIM.ui);
+      this.music = new MusicDirector(this.ctx, this.busMusic, this.fetchBuffer);
+      void this.music.preload(['title', ...STINGERS]).then(() => { if (this.wantCue) this.music?.setCue(this.wantCue, 0.8); });
+      if (this.wantCue) this.music.setCue(this.wantCue, 0.8);
+    }
+    this.loading ??= Promise.all([...ABILITY_SOUNDS.map(n => [n, soundUrl(n)] as const), ...ENEMY_SOUNDS.map(n => [n, enemySoundUrl(n)] as const), ...BOSS_SOUNDS.map(n => [n, bossSoundUrl(n)] as const), ...ARENA_SOUNDS.map(n => [n, arenaSoundUrl(n)] as const), ...COMBAT_SOUNDS.map(n => [n, combatSoundUrl(n)] as const), ...UI_SOUNDS.map(n => [n, uiSoundUrl(n)] as const)].map(async ([n, url]) => { try { this.buffers.set(n, await this.ctx.decodeAudioData(await this.fetchBuffer(url))); } catch { /* a missing sound must never break the game */ } })).then(() => undefined);
     return this.loading;
   }
 
   setMuted(m: boolean) {
     if (m === this.muted) return;
-    this.muted = m; if (this.master) this.master.gain.setTargetAtTime(m ? 0 : MASTER, this.ctx.currentTime, 0.01); if (m) this.stopAll(0.02);
+    this.muted = m; if (this.master) this.master.gain.setTargetAtTime(m ? 0 : this.volumes.master * TRIM.master, this.ctx.currentTime, 0.01); if (m) this.stopAll(0.02);
   }
+  /** Settings sliders: smooth, immediate, also for sounds already playing (the buses carry the level). */
+  setVolumes(v: Partial<Volumes>) {
+    const clean = (x: number | undefined, d: number) => Math.min(1, Math.max(0, Number.isFinite(x) ? x as number : d)); const t = this.ctx.currentTime;
+    this.volumes = { master: clean(v.master ?? this.volumes.master, 1), music: clean(v.music ?? this.volumes.music, 0.7), sfx: clean(v.sfx ?? this.volumes.sfx, 1), ui: clean(v.ui ?? this.volumes.ui, 0.8) };
+    if (this.master && !this.muted) this.master.gain.setTargetAtTime(this.volumes.master * TRIM.master, t, 0.02);
+    this.busMusic?.gain.setTargetAtTime(this.volumes.music * TRIM.music, t, 0.02); this.busSfx?.gain.setTargetAtTime(this.volumes.sfx * TRIM.sfx, t, 0.02); this.busUi?.gain.setTargetAtTime(this.volumes.ui * TRIM.ui, t, 0.02);
+  }
+  get volume() { return { ...this.volumes }; }
+  /** Menu / scene music request; applied as soon as the context is unlocked by a real gesture. */
+  setCue(cue: MusicCue | null, fadeS = 1.4) { this.wantCue = cue; this.music?.setCue(cue, fadeS); }
+  /** A UI sound (hover / click / toggle ...). Honours mute and the UI slider; keeps its own tiny voice cap. */
+  ui(name: UiSound, vol = 1, rate = 1) { this.play(name, 'ui', vol, rate); }
 
   private lastEnemy = new Map<string, number>();
   private lastEnemyEvent = 0;
-  private play(name: AbilitySound | EnemySound | BossSound | ArenaSound | CombatSound, slot: Slot, vol = 1, rate = 1) {
+  private play(name: AbilitySound | EnemySound | BossSound | ArenaSound | CombatSound | UiSound, slot: Slot, vol = 1, rate = 1) {
     const buf = this.buffers.get(name); if (!buf || !this.master || this.muted) return;
-    if (slot === 'enemy') { if ([...this.voices].filter(v => v.slot === 'enemy').length >= ENEMY_MIX.maxVoices) return; }
+    if (slot === 'ui') { if ([...this.voices].filter(v => v.slot === 'ui').length >= 4) return; }
+    else if (slot === 'enemy') { if ([...this.voices].filter(v => v.slot === 'enemy').length >= ENEMY_MIX.maxVoices) return; }
     else if (slot === 'boss') { if ([...this.voices].filter(v => v.slot === 'boss').length >= BOSS_MIX.maxVoices) return; }
     else if (slot === 'hit') { if ([...this.voices].filter(v => v.slot === 'hit').length >= COMBAT_MIX.maxHitVoices) return; }
     else if (slot === 'pulse') { if ([...this.voices].filter(v => v.slot === 'pulse').length >= MAX_PULSE_VOICES) return; }
     else this.stopSlot(slot, 0.03);
     const src = this.ctx.createBufferSource(), gain = this.ctx.createGain(); src.buffer = buf; src.playbackRate.value = rate; gain.gain.value = vol;
-    src.connect(gain); gain.connect(this.master); const v: Voice = { src, gain, slot, name };
+    src.connect(gain); gain.connect((UI_SET.has(name) ? this.busUi : this.busSfx) ?? this.master); const v: Voice = { src, gain, slot, name };
     src.onended = () => { this.voices.delete(v); try { src.disconnect(); gain.disconnect(); } catch { /* already gone */ } };
     this.voices.add(v); this.started.push(name); src.start();
   }
@@ -93,7 +127,7 @@ export class AbilityAudio {
   }
   private stopSlot(slot: Slot, fadeS: number) { for (const v of [...this.voices]) if (v.slot === slot) this.stopVoice(v, fadeS); }
   /** Cancelled / dead / muted / disposed: nothing may keep sounding. */
-  stopAll(fadeS = 0.04) { for (const v of [...this.voices]) this.stopVoice(v, fadeS); }
+  stopAll(fadeS = 0.04, keepUi = false) { for (const v of [...this.voices]) if (!(keepUi && v.slot === 'ui')) this.stopVoice(v, fadeS); }
 
   /** Apply one sim event. Sounds follow the simulation (charge / release / pulse / burst ticks), never display frame callbacks. */
   handle(ev: AbilityEvent, form: 0 | 1 | 2 | 3) {
@@ -136,15 +170,17 @@ export class AbilityAudio {
     }
   }
 
-  private lastImpact = 0; private lastHitAt = new Map<string, number>();
+  private lastImpact = 0; private lastXp = -1; private xpRate = 1; private lastHitAt = new Map<string, number>();
   /** One sim impact -> sound. Light hits are quiet, short and rate-limited; heavy / boss / block / hurt are distinct and each get their own gap so none can mask another. A kill is covered by its enemy_death sound, so a killing blow plays the heavy hit only when it was heavy. */
   handleImpact(e: Impact, px: number, py: number) {
     const d = Math.hypot(e.x - px, e.y - py); if (d > COMBAT_MIX.hearRange && e.kind !== 'hurt' && e.kind !== 'revive') return;
     const fall = Math.max(0.35, 1 - d / COMBAT_MIX.hearRange), now = this.ctx.currentTime;
     const gate = (k: string, gap: number) => { if (now - (this.lastHitAt.get(k) ?? -1) < gap) return false; this.lastHitAt.set(k, now); return true; };
     const rate = 0.95 + Math.random() * 0.1;
-    if (e.kind === 'hurt') { if (gate('hurt', 0.12)) this.play('player_hurt', 'hurt', COMBAT_MIX.hurt * (e.heavy ? 1 : 0.8), rate); }
+    if (e.kind === 'xp') { const streak = now - this.lastXp < 0.4 ? Math.min(1.7, this.xpRate * 1.05) : 1; this.lastXp = now; this.xpRate = streak; if (gate('xp', 0.045)) this.play('xp_pickup', 'ui', 0.8, streak); }
+    else if (e.kind === 'hurt') { if (gate('hurt', 0.12)) this.play('player_hurt', 'hurt', COMBAT_MIX.hurt * (e.heavy ? 1 : 0.8), rate); }
     else if (e.kind === 'revive') this.play('revive', 'misc', 0.9);
+    else if (e.kind === 'form') { this.play('form1_ignite', 'burst', 0.95); this.eventDuck = { until: this.ctx.currentTime + 1.1, level: 0.5 }; }
     else if (e.kind === 'block') { if (gate('block', 0.1)) this.play('block_deflect', 'hit', COMBAT_MIX.block * fall, rate); }
     else if (e.kind === 'hit') {
       if (e.boss) { if (gate('boss', COMBAT_MIX.minGapHeavy)) this.play('hit_boss', 'hit', COMBAT_MIX.boss * fall, rate); }
@@ -168,7 +204,7 @@ export class AbilityAudio {
     };
     const tag = ev.tag ?? '', k = ev.enemy;
     switch (ev.kind) {
-      case 'enemy_intro': say('boss_warning', 0.9); say(k === 'warden' ? 'warden_roar' : 'seraph_arrive'); break;
+      case 'enemy_intro': this.music?.stinger('stinger_boss', 0.9); this.eventDuck = { until: this.ctx.currentTime + 2.2, level: 0.5 }; say('boss_warning', 0.9); say(k === 'warden' ? 'warden_roar' : 'seraph_arrive'); break;
       case 'enemy_phase': say(k === 'warden' ? 'warden_roar' : 'seraph_phase'); break;
       case 'enemy_hurt': say(k === 'warden' ? 'warden_hurt' : 'seraph_hurt', 0.8); break;
       case 'enemy_block': say('aegis_block', 0.9); break;
@@ -208,13 +244,40 @@ export class AbilityAudio {
     this.play(`amb_${arena}_${Math.random() < 0.5 ? 'a' : 'b'}` as ArenaSound, 'misc', ARENA_MIX.ambient);
   }
 
+  private lastDrive = 0; private lastBosses = 0; private finalWarned = false; private eventDuck = { until: 0, level: 1 }; private lastDuck = -1; private preloaded = '';
+  /** The score follows the simulation: arena theme, boss themes while a boss is alive, victory / defeat, ducking for pause, level-up, boss warnings and transformation reveals. */
+  private driveMusic(s: GameState) {
+    const m = this.music; if (!m) return;
+    if (this.preloaded !== s.arenaId) { this.preloaded = s.arenaId; void m.preload([s.arenaId, 'warden', 'seraph', 'victory', 'defeat']); }
+    const boss = s.enemies.find(e => e.hp > 0 && (e.kind === 'warden' || e.kind === 'seraph'));
+    if (s.phase === 'victory') m.setCue('victory', 0.2); else if (s.phase === 'dead') m.setCue('defeat', 0.5); else m.setCue(boss ? boss.kind as MusicCue : s.arenaId, boss ? 0.9 : 2.4);
+    if (s.time < 5) { this.finalWarned = false; this.lastBosses = s.bossesDefeated; }
+    if (s.phase === 'running') {
+      if (s.player.drive >= 65 && this.lastDrive < 65 && s.player.form === 0) this.ui('drive_ready', 0.9); else if (s.player.drive >= 100 && this.lastDrive < 100) this.ui('drive_ready', 0.9, 1.25);
+      this.lastDrive = s.player.drive;
+      if (s.bossesDefeated > this.lastBosses && s.phase === 'running') { m.stinger('stinger_reward'); this.eventDuck = { until: this.ctx.currentTime + 2.5, level: 0.55 }; }
+      this.lastBosses = s.bossesDefeated;
+      if (!this.finalWarned && s.time >= 870 && s.time < 900 && !boss) { this.finalWarned = true; m.stinger('stinger_final_warning'); this.eventDuck = { until: this.ctx.currentTime + 4, level: 0.45 }; }
+    }
+    // duck level = the strictest of: phase, transformation reveal, recent event
+    let level = s.phase === 'paused' ? 0.3 : s.phase === 'upgrade' ? 0.5 : 1;
+    if (s.cinema) level = Math.min(level, s.cinema.to === 3 ? (s.cinema.first ? 0.04 : 0.15) : s.cinema.first ? 0.3 : 0.5);
+    if (this.ctx.currentTime < this.eventDuck.until) level = Math.min(level, this.eventDuck.level);
+    if (Math.abs(level - this.lastDuck) > 0.001) { m.setDuck(level, level < this.lastDuck ? 0.08 : 0.5); this.lastDuck = level; }
+  }
+
   /** Per render frame: feed new sim events, follow the run phase (pause freezes sound, death silences casts). */
   sync(s: GameState) {
     if (s.phase !== this.lastPhase) {
-      if (s.phase === 'running') void this.ctx.resume().catch(() => undefined);
-      else { if (s.phase === 'dead') this.stopAll(0.06); void this.ctx.suspend().catch(() => undefined); }
+      // the context stays running (music + UI keep playing); sim-driven effect voices are cut so nothing from a frozen moment lingers
+      void this.ctx.resume().catch(() => undefined);
+      if (s.phase !== 'running') this.stopAll(s.phase === 'dead' ? 0.06 : 0.04, true);
+      if (this.lastPhase === 'running' && s.phase === 'paused') this.ui('ui_pause');
+      else if (this.lastPhase === 'paused' && s.phase === 'running') this.ui('ui_resume');
+      else if (s.phase === 'upgrade' && this.lastPhase !== 'upgrade') { this.music?.stinger('stinger_levelup', 0.8); if (s.upgradeOffers.some(id => UPGRADES.find(u => u.id === id)?.rarity === 'epic')) this.ui('lv_epic', 0.9); }
       this.lastPhase = s.phase;
     }
+    this.driveMusic(s);
     if (s.phase === 'running') this.ambient(s.arenaId, s.time);
     if (s.phase === 'running' && s.player.form === 3 && !s.cinema && s.time >= this.nextHover) { this.nextHover = s.time + 1.9; this.play('aura_hover', 'aura', 0.55); }   // B13: a very soft sustained hover tone, re-armed from the sim clock so pause / death / form end silence it
     if (s.phase === 'running' && s.player.form === 2 && !s.cinema && s.time >= this.nextCrackle) { this.nextCrackle = s.time + 2.4 + Math.random() * 3; this.play('aura_crackle', 'aura', 0.55); }   // a quiet low crackle while Form II burns
@@ -231,7 +294,8 @@ export class AbilityAudio {
       if (s.phase === 'running') this.handleEnemy(ev, s.player.x, s.player.y);
     }
   }
-  dispose() { this.nextHover = 0; this.nextAmbient = 0; this.nextCrackle = 0; this.lastEvent = 0; this.lastImpact = 0; this.lastHitAt.clear(); this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.stopAll(0.01); try { this.master?.disconnect(); } catch { /* ignore */ } this.master = null; }
+  /** Scene teardown (retry / home): reset per-run counters and cut effect voices. The context, buses and score survive so the next scene (or the menu) continues the music. */
+  dispose() { this.nextHover = 0; this.nextAmbient = 0; this.nextCrackle = 0; this.lastEvent = 0; this.lastImpact = 0; this.lastHitAt.clear(); this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.lastBosses = 0; this.lastDrive = 0; this.finalWarned = false; this.eventDuck = { until: 0, level: 1 }; this.lastDuck = -1; this.preloaded = ''; this.music?.setDuck(1, 0.3); this.stopAll(0.01, true); }
 }
 
 let shared: AbilityAudio | null = null;

@@ -26,6 +26,12 @@ export function moveFocus(root: HTMLElement, dir: NavDir): HTMLElement | null {
   }
   if (best) best.focus(); return best ?? cur;
 }
+/** D-pad left/right on a focused slider nudges it (and fires React's input event) instead of moving focus; returns true when it handled the press. */
+export function stepRange(el: Element | null, dir: NavDir): boolean {
+  if (!(el instanceof HTMLInputElement) || el.type !== 'range' || (dir !== 'LEFT' && dir !== 'RIGHT')) return false;
+  const step = Number(el.step) || 1, next = Math.min(Number(el.max), Math.max(Number(el.min), Number(el.value) + (dir === 'RIGHT' ? step : -step)));
+  Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(el, String(next)); el.dispatchEvent(new Event('input', { bubbles: true })); return true;
+}
 export function activate(el: HTMLElement | null) { if (!el) return; if (el instanceof HTMLInputElement && el.type === 'text') { el.focus(); return; } el.click(); }
 
 /** Controller-only menu navigation for every React screen. Returns whether a controller is connected (for the badge / hints). `getPads` is injectable for tests. */
@@ -45,7 +51,7 @@ export function useControllerNav(getPads: () => ArrayLike<PadLike | null> = brow
         // a screen only accepts input after every button was released once: the press that opened it can never also select something on it
         if (!armed) { if (s.held.size === 0) { armed = true; const cur = document.activeElement; if (!cur || !root.contains(cur)) (root.querySelector<HTMLElement>('[data-pad-default]') ?? padFocusables(root)[0])?.focus(); } }
         else {
-          for (const d of s.navPressed) moveFocus(root, d);
+          for (const d of s.navPressed) { if (!stepRange(document.activeElement, d)) moveFocus(root, d); }
           if (s.pressed.has('A')) { const cur = document.activeElement as HTMLElement | null; activate(cur && root.contains(cur) && cur !== root ? cur : root.querySelector<HTMLElement>('[data-pad-default]') ?? padFocusables(root)[0] ?? null); }
           else if (s.pressed.has('B')) activate(root.querySelector<HTMLElement>('[data-pad-cancel]'));
           else if (s.pressed.has('START')) activate(root.querySelector<HTMLElement>('[data-pad-start]'));

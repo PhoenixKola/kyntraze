@@ -1,0 +1,87 @@
+{
+ "stinger_levelup": {
+  "loop": false,
+  "seconds": 3.2,
+  "peak_dBFS": -1.2,
+  "rms_dBFS": -16.01,
+  "bytes": 45314
+ },
+ "stinger_reward": {
+  "loop": false,
+  "seconds": 5.9,
+  "peak_dBFS": -1.2,
+  "rms_dBFS": -15.65,
+  "bytes": 88138
+ },
+ "title": {
+  "bpm": 84,
+  "bars": 24,
+  "seconds": 68.57,
+  "peak_dBFS": -1.2,
+  "rms_dBFS": -14.93,
+  "bytes": 993264
+ },
+ "gloam": {
+  "bpm": 126,
+  "bars": 32,
+  "seconds": 60.95,
+  "peak_dBFS": -1.2,
+  "rms_dBFS": -17.03,
+  "bytes": 968582
+ },
+ "ashen": {
+  "bpm": 96,
+  "bars": 32,
+  "seconds": 80.0,
+  "peak_dBFS": -1.2,
+  "rms_dBFS": -15.07,
+  "bytes": 1056259
+ },
+ "warden": {
+  "bpm": 88,
+  "bars": 24,
+  "seconds": 65.45,
+  "peak_dBFS": -1.2,
+  "rms_dBFS": -16.37,
+  "bytes": 879583
+ },
+ "seraph": {
+  "bpm": 112,
+  "bars": 32,
+  "seconds": 68.57,
+  "peak_dBFS": -1.2,
+  "rms_dBFS": -14.09,
+  "bytes": 1082936
+ },
+ "victory": {
+  "bpm": 96,
+  "bars": 10,
+  "loop": false,
+  "seconds": 28.5,
+  "peak_dBFS": -1.2,
+  "rms_dBFS": -13.86,
+  "bytes": 441398
+ },
+ "defeat": {
+  "bpm": 64,
+  "loop": false,
+  "seconds": 17.06,
+  "peak_dBFS": -1.2,
+  "rms_dBFS": -17.32,
+  "bytes": 142694
+ },
+ "stinger_boss": {
+  "loop": false,
+  "seconds": 6.1,
+  "peak_dBFS": -1.2,
+  "rms_dBFS": -15.36,
+  "bytes": 69927
+ },
+ "stinger_final_warning": {
+  "loop": false,
+  "seconds": 6.5,
+  "peak_dBFS": -1.2,
+  "rms_dBFS": -14.29,
+  "bytes": 84580
+ }
+}

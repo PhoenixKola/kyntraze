@@ -35,7 +35,14 @@ def revive():  # rising warm chime: Second Wind
     s = 0.7; n = int(SR * s); t = t_(s); x = sum(np.sin(2 * np.pi * f * t) * np.exp(-t * (3 + i)) for i, f in enumerate((392, 587, 784, 1175))) * np.linspace(0.4, 1, n) ** 0.5
     return (x + 0.4 * tone(110, 220, s) * np.exp(-t * 4)) * env(n, 0.01, 0.15)
 
-SOUNDS = dict(hit_light=hit_light, hit_heavy=hit_heavy, hit_boss=hit_boss, block_deflect=block_deflect, player_hurt=player_hurt, revive=revive)
+def form1_ignite():  # B16: Flarebound ignition - flame hiss swelling upward, a warm golden rising triad, a low whump on the light
+    s = 1.0; n = int(SR * s); t = t_(s); u = t / s
+    hiss = hp(lowpass(rng.standard_normal(n), 6500), 1200) * (u ** 1.5) * np.exp(-np.maximum(0, t - 0.55) * 7) * 0.5
+    tri = sum(np.sin(2 * np.pi * f * (1 + 0.5 * u) * t) * a for f, a in ((293.7, 1), (369.99, .7), (440, .6), (587.3, .45))) * np.minimum(1, t / 0.5) ** 1.4 * np.exp(-np.maximum(0, t - 0.5) * 3.2) * 0.35
+    whump = tone(90, 38, s) * np.exp(-np.maximum(0, t - 0.5) * 9) * (t > 0.5) * 0.9 + 0.3 * tone(60, 120, s) * u ** 2 * (t < 0.55)
+    return (hiss + tri + whump) * env(n, 0.01, 0.2)
+
+SOUNDS = dict(hit_light=hit_light, hit_heavy=hit_heavy, hit_boss=hit_boss, block_deflect=block_deflect, player_hurt=player_hurt, revive=revive, form1_ignite=form1_ignite)
 TARGET_PEAK = 10 ** (-3.0 / 20)
 if __name__ == "__main__":
     rep = {}
