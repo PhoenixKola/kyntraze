@@ -5,7 +5,7 @@ export interface BossDef {
 }
 export const BOSSES: Record<BossKind, BossDef> = {
   warden: { id: 'warden', name: 'The Fracture Warden', title: 'Obsidian guardian of the Gloam Circuit', hp: 1600, radius: 44, speed: 42, contact: 14, contactRange: 0, intro: 2.4, phaseAt: 0.5, phaseT: 1.8, cooldown: [1.2, 0.8], windupScale: [1, 0.9], exposedBonus: 0.35, rewardOrbs: 12, rewardXp: 8, deathT: 1.8 },
-  seraph: { id: 'seraph', name: 'The Null Seraph', title: 'Anomaly that fell between the Fractures', hp: 1100, radius: 28, speed: 95, contact: 10, contactRange: 0, intro: 2.0, phaseAt: 0.5, phaseT: 1.8, cooldown: [1.1, 0.75], windupScale: [1, 0.92], exposedBonus: 0.25, rewardOrbs: 10, rewardXp: 8, deathT: 1.6 },
+  seraph: { id: 'seraph', name: 'The Null Seraph', title: 'Anomaly that fell between the Fractures', hp: 2800, radius: 28, speed: 95, contact: 10, contactRange: 0, intro: 2.0, phaseAt: 0.5, phaseT: 1.8, cooldown: [1.1, 0.75], windupScale: [1, 0.92], exposedBonus: 0.25, rewardOrbs: 14, rewardXp: 10, deathT: 1.6 },
 };
 /** Warden attack numbers (seconds, px, degrees). Phase 2 entries are the second value where an array is given. */
 export const WARDEN = {

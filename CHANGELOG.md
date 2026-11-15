@@ -1,5 +1,9 @@
 # Changelog
 
+## B11 · complete survival loop + B10.1 upgrade icons
+- Real win condition: defeat the Null Seraph (15:00, HP 2800) after the Fracture Warden (8:00, reward pick + heal). Threat-budget director with breathers, finale warning and quiet, run rail and next-event hint on the HUD, victory beat, victory/defeat results with build summary and ImageGen victory art. Simulated full run wins at ~15.7 min on both arenas.
+- All 25 upgrade icons redrawn as full-colour ImageGen inventory art. See `B11-STATUS.md`.
+
 ## B10 · progression, level-up UX and minimap
 - 25-card upgrade pool (7 categories, Common/Rare/Epic) with synergy-weighted, rarity-ramped, deterministic offers; build-defining epics (Rift Conductor, Twin Bloom, Second Wind, Ember Core). New `Mods` block drives beam/Nova/drive/survival effects. XP curve and time-scaled kill XP retuned toward a 10-20 minute run.
 - New level-up screen (rarity cards, before/after stats, stack pips, build strip, 1-2-3 / click / pad), HUD XP readout, Second Wind badge, ImageGen XP crystals (4 tiers) and a premium canvas minimap (landmarks, hazards, density, elites, boss, status strip). 4 ImageGen sheets. See `B10-STATUS.md`.

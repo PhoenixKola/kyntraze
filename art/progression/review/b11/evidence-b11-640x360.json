@@ -1,0 +1,127 @@
+{
+ "viewport": [
+  640,
+  360
+ ],
+ "note": "SIMULATED/forced via QA hook; not human play. swiftshader, normal-speed motion and audio NOT verified.",
+ "flow": {
+  "afterWardenKill": {
+   "phase": "upgrade",
+   "t": 485.8,
+   "arena": "gloam",
+   "level": 9,
+   "bosses": 1,
+   "reward": true,
+   "announce": null
+  },
+  "afterRewardPick": {
+   "phase": "running",
+   "t": 486.3,
+   "arena": "gloam",
+   "level": 9,
+   "bosses": 1,
+   "reward": false,
+   "announce": null
+  },
+  "warn": {
+   "phase": "running",
+   "t": 871.7,
+   "arena": "gloam",
+   "level": 9,
+   "bosses": 1,
+   "reward": false,
+   "announce": "finale"
+  },
+  "victoryStart": {
+   "phase": "victory",
+   "t": 903.5,
+   "arena": "gloam",
+   "level": 9,
+   "bosses": 2,
+   "reward": false,
+   "announce": "finale"
+  },
+  "victoryResults": {
+   "results": true,
+   "outcome": "victory"
+  },
+  "afterVictory": {
+   "hp": 100,
+   "enemies": 0,
+   "hazards": 0
+  },
+  "retry": {
+   "phase": "running",
+   "t": 0.3,
+   "arena": "gloam",
+   "level": 1,
+   "bosses": 0,
+   "reward": false,
+   "announce": null
+  },
+  "defeat": {
+   "outcome": "defeat"
+  },
+  "ashenVictory": "victory"
+ },
+ "shots": [
+  "icons-1-circled-three-640x360.png",
+  "icons-2-hover-640x360.png",
+  "icons-3-mixed-640x360.png",
+  "run-1-warden-soon-640x360.png",
+  "run-2-warden-intro-and-map-640x360.png",
+  "run-3-warden-reward-pick-640x360.png",
+  "finale-1-warning-640x360.png",
+  "finale-2-seraph-hud-640x360.png",
+  "victory-1-beat-640x360.png",
+  "victory-2-results-640x360.png",
+  "defeat-1-results-640x360.png",
+  "ashen-finale-hud-640x360.png",
+  "ashen-victory-results-640x360.png"
+ ],
+ "consoleErrors": [],
+ "hudBoxes": [
+  [
+   "hud-panel.hud-health",
+   9,
+   9,
+   175,
+   49
+  ],
+  [
+   "hud-panel.hud-map",
+   513,
+   49,
+   117,
+   99
+  ],
+  [
+   "hud-panel.hud-clock",
+   244,
+   9,
+   153,
+   59
+  ],
+  [
+   "finale-banner",
+   160,
+   89,
+   320,
+   60
+  ],
+  [
+   "hud-panel.hud-pause",
+   597,
+   9,
+   34,
+   34
+  ],
+  [
+   "hud-slots",
+   226,
+   302,
+   189,
+   47
+  ]
+ ]
+}

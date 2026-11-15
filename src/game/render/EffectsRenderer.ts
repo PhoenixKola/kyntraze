@@ -16,7 +16,7 @@ export class EffectsRenderer {
   render(state: GameState, reduced = false) {
     const p = state.player, solar = p.form === 1;
     const k = (n: string) => vfxKey(n, solar);
-    const running = state.phase === 'running' || state.phase === 'dead';
+    const running = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory';
     const dt = running ? Math.min(0.05, this.scene.game.loop.delta / 1000) : 0;   // frozen with the sim while paused / choosing an upgrade
     const rnd = Math.random; let bursts = 0;
     for (const e of state.impacts) {

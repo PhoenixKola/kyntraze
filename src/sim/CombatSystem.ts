@@ -33,7 +33,7 @@ export function shieldFaces(state: GameState, e: Enemy, arcDeg: number): boolean
 }
 
 /** Kills are worth more as the run goes on: the late game thins out (boss mob caps, tougher enemies) but the level-up cadence holds. */
-export const xpTimeScale = (t: number) => 1 + t / 700;
+export const xpTimeScale = (t: number) => 1 + t / 400;
 export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts?: { area?: boolean }): boolean {
   if (enemy.hp <= 0) return false;
   if (enemy.ai?.invuln) return false;
@@ -61,13 +61,23 @@ export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts
   return true;
 }
 
+/** Victory: the finale boss fell while Kai was still standing. Everything hostile is gone on the same tick, so nothing can hurt Kai afterwards (the sim stops stepping in this phase). */
+export function winRun(state: GameState) {
+  if (state.phase !== 'running') return;
+  state.phase = 'victory'; state.victoryAt = state.time; state.hazards = []; state.enemyShots = []; state.arenaHazard.nextAt = 1e9;
+  for (const e of state.enemies) if (e.hp > 0 && !isBoss(e.kind)) { e.hp = 0; pushEnemyEvent(state, 'enemy_death', e, e.aimX, e.aimY); }
+  state.enemies = [];   // the boss's death event has already fired; the renderer plays its ghost, nothing stays in the frozen sim
+}
 /** Defeat: every hazard and boss bolt vanishes so nothing can hurt Kai afterwards, and a ring of XP orbs is the reward (no meta-progression is invented). */
 function bossDefeated(state: GameState, boss: Enemy) {
   const def = BOSSES[boss.kind as 'warden' | 'seraph'];
   state.hazards = state.hazards.filter(h => h.owner !== boss.id);
   state.enemyShots = state.enemyShots.filter(s => s.kind !== 'prism');
-  state.bossesDefeated++;
+  state.bossesDefeated++; state.lastBossDefeatAt = state.time;
   pushEnemyEvent(state, 'boss_defeated', boss, 0, 0, boss.kind);
+  if (boss.kind === 'seraph') { if (state.phase === 'running') winRun(state); return; }
+  // the Warden is the mid-run payoff: a heal now, then a guaranteed Rare-or-better pick once the death animation has played
+  state.player.hp = Math.min(state.player.maxHp, state.player.hp + state.player.maxHp * 0.4); state.bossReward++; state.rewardAt = state.time + def.deathT + 0.8;
   for (let i = 0; i < def.rewardOrbs && state.pickups.length < RULES.maxPickups; i++) {
     const a = (i / def.rewardOrbs) * Math.PI * 2 + 0.4, r = 50 + (i % 3) * 22;
     addPickup(state, { x: boss.x + Math.cos(a) * r, y: boss.y + Math.sin(a) * r, xp: def.rewardXp, age: 0, tier: 3 });

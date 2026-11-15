@@ -12,6 +12,7 @@ import type { ArenaId } from '../../content/arenas';
 import type { InputState } from '../../sim/GameState';
 import { DebugOverlay } from '../render/debugOverlay';
 import { startEncounter } from '../../sim/BossAiSystem';
+import { damageEnemy } from '../../sim/CombatSystem';
 import { sharedAbilityAudio, type AbilityAudio } from '../audio/abilityAudio';
 export class ArenaScene extends Phaser.Scene {
   private simulation!: Simulation;
@@ -20,7 +21,7 @@ export class ArenaScene extends Phaser.Scene {
   private fx!: EffectsRenderer;
   private presentation!: Presentation;
   private fixed = new FixedStep();
-  private publishClock = 0;
+  private publishClock = 0; private victoryClock = -1;
   private disposed = false;
   private debug: DebugOverlay | null = null;
   private props: ArenaProps | null = null; private ambience: Ambience | null = null; private hazardView: ArenaHazardView | null = null;
@@ -48,6 +49,7 @@ export class ArenaScene extends Phaser.Scene {
       if (qs.get('debug') === 'hit') this.debug = new DebugOverlay(this);
       const enc = qs.get('encounter'); if (enc) startEncounter(this.simulation.state, enc as Parameters<typeof startEncounter>[1]);
       (window as Window & { __KYNT_QA__?: { grantXp: (offers?: string[]) => void; heroPose: () => unknown; setHeroScale: (n: number) => void; sim: () => unknown; enemyStats: () => unknown; encounter: (id: string) => void; arenaHazard: () => void; scene: () => unknown; hand: () => unknown; fxOrigin: () => unknown; audio: () => unknown } }).__KYNT_QA__ = { grantXp: (offers?: string[]) => this.bridge.debugGrantXp(offers as never), heroPose: () => this.entityRenderer.debugPose(), hand: () => this.entityRenderer.handAnchor(), fxOrigin: () => this.entityRenderer.fxOrigin(), audio: () => ({ state: this.audio?.state ?? 'none', loaded: this.audio?.loaded ?? 0, active: this.audio?.activeVoices ?? 0, started: [...(this.audio?.started ?? [])] }), setHeroScale: (n: number) => this.entityRenderer.setHeroScale(n), sim: () => this.simulation.state, enemyStats: () => this.entityRenderer.enemyStats(), scene: () => this, arenaHazard: () => { this.simulation.state.arenaHazard.nextAt = this.simulation.state.time; }, encounter: (id: string) => startEncounter(this.simulation.state, id as Parameters<typeof startEncounter>[1]) };
+      (window as unknown as { __KYNT_QA__: Record<string, unknown> }).__KYNT_QA__.killBoss = (kind: string) => { const b = this.simulation.state.enemies.find(e => e.kind === kind && e.hp > 0); if (b) { if (b.ai) b.ai.invuln = false; damageEnemy(this.simulation.state, b, 1e9); } };
     }
   }
   private createArena() { createArenaFloor(this, this.arena); this.props = new ArenaProps(this, this.arena); this.ambience = import.meta.env.DEV && new URLSearchParams(window.location.search).get('noamb') === '1' ? null : new Ambience(this, this.arena); this.hazardView = new ArenaHazardView(this); this.presentation = new Presentation(this); }
@@ -62,11 +64,24 @@ export class ArenaScene extends Phaser.Scene {
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
     const hp = this.entityRenderer.debugPose(); this.presentation.update(s, hp.x, hp.y, hp.visualForm === 'f1', this.bridge.getSettings().reducedEffects);
     this.props?.update(s, this.time.now / 1000); this.ambience?.update(this.time.now / 1000, this.bridge.getSettings().reducedEffects); this.hazardView?.sync(s, s.phase === 'running' ? delta / 1000 : 0);
+    if (s.phase === 'victory') {
+      if (this.victoryClock < 0) { this.victoryClock = 0; this.celebrate(s.player.x, s.player.y); }
+      this.victoryClock += delta; if (this.victoryClock > 3600) this.bridge.markVictoryShown();
+    } else this.victoryClock = -1;
     this.debug?.draw(s);
     this.fx.render(s, this.bridge.getSettings().reducedEffects);
     this.audio?.setMuted(this.bridge.getSettings().mute); this.audio?.sync(s);
     this.publishClock += delta;
     if ((s.phase === 'running' && this.publishClock >= 100) || this.bridge.snapshot().phase !== s.phase) { this.publishClock = 0; this.bridge.publish(); }
+  }
+  /** Finale beat: a white-gold flash, a camera kick and three expanding gold shock rings from Kai (rings only with effects on). */
+  private celebrate(x: number, y: number) {
+    const reduced = this.bridge.getSettings().reducedEffects; if (reduced) return;
+    this.cameras.main.flash(600, 255, 232, 170); this.cameras.main.shake(380, 0.004);
+    for (let i = 0; i < 3; i++) {
+      const ring = this.add.circle(x, y + 10, 14).setStrokeStyle(4 - i, i === 1 ? 0x9ff7ff : 0xffd98a, 0.8).setFillStyle(0, 0).setDepth(30).setBlendMode(Phaser.BlendModes.ADD).setScale(0.2);
+      this.tweens.add({ targets: ring, scale: 18 + i * 5, alpha: 0, duration: 1200 + i * 300, delay: i * 260, ease: 'Cubic.easeOut', onComplete: () => ring.destroy() });
+    }
   }
   private dispose() {
     if (this.disposed) return; this.disposed = true; this.scale.off(Phaser.Scale.Events.RESIZE);

@@ -4,20 +4,23 @@ import type { GameState } from './GameState';
 import type { SeededRng } from '../core/SeededRng';
 import { addEnemy } from './EntityRegistry';
 import { blocked } from './CollisionSystem';
-import { BOSS_MOB_CAP, BOSS_SCHEDULE } from '../content/encounters';
+import { BOSS_MOB_CAP, BOSS_SCHEDULE, BOSS_THREAT_CAP, FINALE_WARN_AT, THREAT_COST, budgetScale, threatBudget } from '../content/encounters';
 import { bossAlive, spawnBoss } from './BossAiSystem';
+export const liveThreat = (state: GameState) => { let t = 0; for (const e of state.enemies) if (e.hp > 0 && e.kind in THREAT_COST) t += THREAT_COST[e.kind as MobKind]; return t; };
 export function updateDirector(state: GameState, rng: SeededRng, dt: number) {
-  // Bosses come on a provisional clock, one at a time; the QA-forced encounter run never auto-spawns them again.
+  // Bosses come on the run plan's clock, one at a time; the QA-forced encounter run never auto-spawns them again.
   const boss = bossAlive(state);
   if (!state.encounter.forced && !boss) for (const b of BOSS_SCHEDULE) if (!state.encounter.spawned[b.id] && state.time >= b.at) { spawnBoss(state, b.id); break; }
+  if (!state.encounter.forced && !state.announce && state.time >= FINALE_WARN_AT && !state.encounter.spawned.seraph) state.announce = { id: 'finale', text: 'THE NULL SERAPH APPROACHES', sub: 'Hold your ground. End it.', at: state.time };
   if (state.enemies.length >= (boss ? BOSS_MOB_CAP : RULES.maxEnemies)) return;
   state.spawnTimer -= dt;
   if (state.spawnTimer > 0) return;
-  const stage = Math.floor(state.time / 45);
-  const interval = Math.max(0.3, 1.55 - Math.min(stage * 0.14, 0.8));
-  state.spawnTimer = interval * rng.between(0.73, 1.2);
-  const count = 1 + Math.min(3, Math.floor(state.time / 90));
-  for (let i = 0; i < count && state.enemies.length < RULES.maxEnemies; i++) spawnEnemy(state, rng);
+  const t = state.time;
+  state.spawnTimer = (1.1 - 0.7 * Math.min(1, t / 300)) * rng.between(0.8, 1.2);
+  let budget = threatBudget(t) * budgetScale(t, state.lastBossDefeatAt); if (boss) budget = Math.min(budget * 0.5, BOSS_THREAT_CAP);
+  let threat = liveThreat(state);
+  const batch = 1 + (t > 240 ? 1 : 0) + (t > 600 ? 1 : 0);
+  for (let i = 0; i < batch && threat < budget && state.enemies.length < RULES.maxEnemies; i++) { const k = spawnEnemy(state, rng); if (!k) break; threat += THREAT_COST[k]; }
 }
 /** Heavy and ranged threats appear at their own intro times (never together), under a live cap; pursuer and flanker keep the original roll order. */
 function pickKind(state: GameState, rng: SeededRng): MobKind {
@@ -30,7 +33,7 @@ function pickKind(state: GameState, rng: SeededRng): MobKind {
   }
   return state.time > state.nextFlanker && rng.next() < 0.32 ? 'flanker' : 'pursuer';
 }
-export function spawnEnemy(state: GameState, rng: SeededRng) {
+export function spawnEnemy(state: GameState, rng: SeededRng): MobKind | null {
   const p = state.player;
   const kind = pickKind(state, rng);
   const def = ENEMIES[kind];
@@ -42,7 +45,7 @@ export function spawnEnemy(state: GameState, rng: SeededRng) {
     if (blocked(x, y, def.radius) || x < 60 || y < 60 || x > RULES.worldWidth - 60 || y > RULES.worldHeight - 60) continue;
     addEnemy(state, { kind, x, y, hp, maxHp: hp, radius: def.radius,
       speed: def.moveSpeed + Math.min(32, state.time / 18) * Math.min(1, def.moveSpeed / 74), damage: def.damage, touchCooldown: 0, attackCd: def.attack.cooldown * 0.6, aimX: -Math.cos(theta), aimY: -Math.sin(theta) });
-    return;
+    return kind;
   }
-  // No unsafe fallback spawn next to player.
+  return null;   // no unsafe fallback spawn next to the player
 }

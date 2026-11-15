@@ -102,7 +102,7 @@ export class BossRenderer {
   }
 
   sync(state: GameState, dtIn: number, reduced: boolean) {
-    const running = state.phase === 'running' || state.phase === 'dead';
+    const running = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory';
     const dt = running ? Math.min(0.1, dtIn) : 0;
     this.events(state, reduced);
     this.used = 0;

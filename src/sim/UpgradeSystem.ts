@@ -28,14 +28,14 @@ function pick(pool: UpgradeDef[], weights: number[], rng: SeededRng): number {
   return pool.length - 1;
 }
 /** Three distinct cards. Every third level one card is guaranteed to be Rare or better when one is available, and cards from an already-picked category are less likely to fill the other slots, so a choice is usually a choice between directions. */
-export function createOffer(state: GameState, rng: SeededRng): UpgradeId[] {
+export function createOffer(state: GameState, rng: SeededRng, premium = false): UpgradeId[] {
   const pool = UPGRADES.filter(u => eligible(state, u));
   const chosen: UpgradeId[] = [];
   const takeFrom = (candidates: UpgradeDef[]) => {
     const weights = candidates.map(u => weightOf(state, u) * (chosen.some(id => UPGRADE_BY_ID[id].category === u.category) ? 0.3 : 1));
     const u = candidates[pick(candidates, weights, rng)]; chosen.push(u.id); pool.splice(pool.indexOf(u), 1);
   };
-  if (state.player.level % 3 === 0) { const premium = pool.filter(u => u.rarity !== 'common'); if (premium.length) takeFrom(premium); }
+  if (premium || state.player.level % 3 === 0) { const rare = pool.filter(u => u.rarity !== 'common'); if (rare.length) takeFrom(rare); }
   while (chosen.length < 3 && pool.length > 0) takeFrom(pool);
   return chosen;
 }
@@ -60,5 +60,5 @@ export function applyUpgrade(state: GameState, id: UpgradeId) {
   if (!def || (state.upgradeStacks[id] ?? 0) >= def.maxStacks) return false;
   def.apply(state);
   state.upgradeStacks[id] = (state.upgradeStacks[id] ?? 0) + 1;
-  state.upgradeOffers = []; state.phase = 'running'; return true;
+  state.upgradeOffers = []; state.rewardPick = false; state.phase = 'running'; return true;
 }

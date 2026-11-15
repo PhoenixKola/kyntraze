@@ -48,6 +48,7 @@ export class Simulation {
     updateContactDamage(s);
     if (s.phase !== 'running') return;
     collectPickups(s, dt, () => { s.upgradeOffers = createOffer(s, this.rng); });
+    if (s.phase === 'running' && s.bossReward > 0 && s.time >= s.rewardAt) { s.bossReward--; s.phase = 'upgrade'; s.rewardPick = true; s.upgradeOffers = createOffer(s, this.rng, true); }
     pruneDeadEntities(s);
     for (const fx of s.impacts) fx.ttl -= dt;
     s.impacts = s.impacts.filter(effect => effect.ttl > 0).slice(-RULES.maxFx);
@@ -64,5 +65,5 @@ export class Simulation {
   debugLevelUp() { const s = this.state; if (s.phase !== 'running') return; gainXp(s, (s.player.nextXp - s.player.xp) / s.mods.xp, () => { s.upgradeOffers = createOffer(s, this.rng); }); }
   togglePause() { const phase = this.state.phase; if (phase === 'running') this.state.phase = 'paused'; else if (phase === 'paused') this.state.phase = 'running'; }
   forcePause() { if (this.state.phase === 'running') this.state.phase = 'paused'; }
-  stats() { const s = this.state; return gradeRun({ seed: s.seed, survivalSeconds: s.time, kills: s.kills, level: s.player.level, victory: false }); }
+  stats() { const s = this.state; return gradeRun({ seed: s.seed, survivalSeconds: s.time, kills: s.kills, level: s.player.level, victory: s.phase === 'victory', bosses: s.bossesDefeated }); }
 }

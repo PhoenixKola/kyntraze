@@ -175,7 +175,7 @@ describe('KaiAnimator', () => {
 });
 
 describe('B03G.1 Results delay contract (GameBridge)', () => {
-  const fakeSim = (phase: string) => ({ state: { phase, seed: 1, time: 3, kills: 2, enemies: [], upgradeOffers: [], upgradeStacks: {}, hazards: [], arenaId: 'gloam', reviveAt: -99, mods: baseMods(), player: { hp: phase === 'dead' ? 0 : 50, maxHp: 100, xp: 0, nextXp: 7, level: 1, dashCooldown: 0, qCooldown: 0, drive: 0, form: 0, formCooldown: 0 } }, stats: () => ({ score: 0 }) });
+  const fakeSim = (phase: string) => ({ state: { phase, seed: 1, time: 3, kills: 2, enemies: [], upgradeOffers: [], upgradeStacks: {}, hazards: [], arenaId: 'gloam', reviveAt: -99, mods: baseMods(), encounter: { spawned: {}, forced: false }, bossesDefeated: 0, announce: null, rewardPick: false, player: { hp: phase === 'dead' ? 0 : 50, maxHp: 100, xp: 0, nextXp: 7, level: 1, dashCooldown: 0, qCooldown: 0, drive: 0, form: 0, formCooldown: 0 } }, stats: () => ({ score: 0 }) });
   const bridge = (phase: string) => { const b = new GameBridge({ settings: {}, best: { score: 99 } } as never); const sim = fakeSim(phase); b.bind(sim as never); return { b, sim }; };
   it('dead does not show Results until the death animation reports completion', () => {
     const { b } = bridge('dead'); expect(b.snapshot()).toMatchObject({ phase: 'dead', deathShown: false });

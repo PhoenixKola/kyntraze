@@ -1,0 +1,16 @@
+Premium 2D pixel-art INVENTORY ICON sheet for a dark sci-fantasy action game (quality bar: Hades / Dead Cells / Eitr ability icons). Each icon is a hand-crafted pixel-art object with REAL construction, NOT a flat silhouette and NOT a monochrome glyph:
+- a crisp 1-2 pixel near-black navy outline (#0a1119) around every shape,
+- 4-5 tone shading ramps with separate material planes (bevels, facets, panels), a consistent light from the TOP-LEFT, darker bottom-right edges, bright specular highlights,
+- purposeful interior detail (segments, rivets, etching, glass, energy cores, facets) and a small controlled glow where energy is involved,
+- hard stepped pixel edges, NO anti-aliasing blur, NO gradients except painted pixel shading, NO text, NO letters, NO frame, NO box, NO diamond, NO background shape, NO drop shadow.
+Value hierarchy: dark outline, mid-tone body in the category colour, bright highlight accents; use cool steel greys (#3b4d5e, #6f879a, #aebfca) as supporting metal. Never fill large areas with flat pure white or flat black.
+Each icon must read instantly at 40 screen pixels but reward a close look. Draw each icon centred in its own region on a flat magenta (#ff00ff) background, widely spaced with at least 40 art pixels of magenta between neighbours, nothing cropped, all icons the SAME visual scale (about 150x150 art pixels each). Original designs. Wide 16:9, icons arranged in a single horizontal row, left to right in the listed order.
+
+CATEGORY LANCE: cyan and ice-blue (#7ee7f2, #2fb7d0, #0f5d78) with white-cyan highlights and steel.
+Draw EXACTLY 5 icons:
+1. WIDE LANCE: a horizontal blade of light fanning wider toward the right, emerging from a faceted steel emitter lens on the left, with two small outward arrows.
+2. HARD LIGHT: a spear of light with a large faceted diamond crystal embedded in its centre, visible facets in several cyan tones, steel guard rings either side.
+3. LANCE AFTERBURN: a cyan beam whose tail breaks into glowing orange-gold embers and small flames drifting off, steel emitter at the left.
+4. LANCE COOLING: a steel beam-emitter housing with coolant vents, frost crystals growing over it and a pale blue cold glow, a thin beam leaving to the right.
+5. RIFT CONDUCTOR (EPIC, extra rich, gold trim): a beam passing through a crackling copper-and-steel conductor coil that feeds a roaring orange flame crest, gold filigree accents, lightning arcs.
+No text, no numbers, no labels, no watermark.

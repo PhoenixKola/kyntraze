@@ -1,0 +1,15 @@
+Premium 2D pixel-art INVENTORY ICON sheet for a dark sci-fantasy action game (quality bar: Hades / Dead Cells / Eitr ability icons). Each icon is a hand-crafted pixel-art object with REAL construction, NOT a flat silhouette and NOT a monochrome glyph:
+- a crisp 1-2 pixel near-black navy outline (#0a1119) around every shape,
+- 4-5 tone shading ramps with separate material planes (bevels, facets, panels), a consistent light from the TOP-LEFT, darker bottom-right edges, bright specular highlights,
+- purposeful interior detail (segments, rivets, etching, glass, energy cores, facets) and a small controlled glow where energy is involved,
+- hard stepped pixel edges, NO anti-aliasing blur, NO gradients except painted pixel shading, NO text, NO letters, NO frame, NO box, NO diamond, NO background shape, NO drop shadow.
+Value hierarchy: dark outline, mid-tone body in the category colour, bright highlight accents; use cool steel greys (#3b4d5e, #6f879a, #aebfca) as supporting metal. Never fill large areas with flat pure white or flat black.
+Each icon must read instantly at 40 screen pixels but reward a close look. Draw each icon centred in its own region on a flat magenta (#ff00ff) background, widely spaced with at least 40 art pixels of magenta between neighbours, nothing cropped, all icons the SAME visual scale (about 150x150 art pixels each). Original designs. Wide 16:9, icons arranged in a single horizontal row, left to right in the listed order.
+
+CATEGORY NOVA: violet and magenta (#c58bff, #8a4fd6, #3d1f7a) with pale lilac highlights.
+Draw EXACTLY 4 icons:
+1. BLOOM BULK: a large glossy violet energy orb sitting in a steel cradle with eight petal-like spikes radiating, and four small outward arrows, volume and a bright specular highlight.
+2. NOVA COOLING: a violet energy orb inside a cracking shell of ice, frost crystals along the edge, cold cyan-white glints.
+3. AFTERGLOW: a violet orb floating above a glowing ground ring with ripple rings and a faded echo orb behind it.
+4. TWIN BLOOM (EPIC, extra rich, gold trim): two violet orbs, one large one small, orbiting each other inside a thin gold ring, both with petal spikes, prismatic highlights.
+No text, no numbers, no labels, no watermark.

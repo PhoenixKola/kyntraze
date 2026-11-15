@@ -16,10 +16,18 @@ export interface UiSnapshot {
   owned: OwnedUpgrade[];
   map: MiniMap;
   /** Cooldown lengths after upgrades (the HUD sweep needs the real maximum). */
-  cdMax: { dash: number; beam: number; sphere: number };
+  cdMax: { dash: number; beam: number; sphere: number; form: number };
   /** Seconds since Second Wind fired (drives a short HUD flash), or a large number. */
   sinceRevive: number; revives: number;
+  run: RunHud;
+  /** True once the finale beat has played and the Victory results may show (render-driven, like deathShown). */
+  victoryShown: boolean;
+  /** The level-up screen is a boss reward pick, not a level. */
+  rewardPick: boolean;
+  bosses: number;
 }
+/** Run progress for the HUD: the clock, the plan's two boss times, and the next event to hint at. */
+export interface RunHud { t: number; wardenAt: number; finaleAt: number; wardenDone: boolean; finaleOut: boolean; nextLabel: string; nextIn: number; announce: { text: string; sub: string; age: number } | null }
 export interface OfferCard { id: UpgradeId; name: string; blurb: string; category: UpgradeCategory; rarity: Rarity; stack: number; max: number; label: string; before: string; after: string }
 export interface OwnedUpgrade { id: UpgradeId; stacks: number }
 /** Minimap feed. `foes` is a flat [x, y, kind, ...] list: kind 0 grunt, 1 caster, 2 elite, 3 boss. Hazards carry warning progress (0..1) or `live` once they have fired. */
@@ -29,4 +37,5 @@ export const blankMap: MiniMap = { arena: 'gloam', px: 1100, py: 800, ax: 0, ay:
 export interface BossHud { id: 'warden' | 'seraph'; name: string; hp: number; maxHp: number; phase: 1 | 2; phases: 2; mode: string; intro: number; invuln: boolean; exposed: boolean }
 export const blankSnapshot: UiSnapshot = { phase: 'running', seed: 0, hp: 100, maxHp: 100, xp: 0, nextXp: 7,
   level: 1, seconds: 0, kills: 0, enemies: 0, dashCooldown: 0, qCooldown: 0, beamCooldown: 0, sphereCooldown: 0, drive: 0,
-  form: 0, formCooldown: 0, offers: [], score: 0, deathShown: false, boss: null, arenaName: 'THE GLOAM CIRCUIT', cards: [], owned: [], map: blankMap, cdMax: { dash: 3.2, beam: 7, sphere: 16 }, sinceRevive: 999, revives: 0 };
+  form: 0, formCooldown: 0, offers: [], score: 0, deathShown: false, boss: null, arenaName: 'THE GLOAM CIRCUIT', cards: [], owned: [], map: blankMap, cdMax: { dash: 3.2, beam: 7, sphere: 16, form: 6 }, sinceRevive: 999, revives: 0, victoryShown: false, rewardPick: false, bosses: 0,
+  run: { t: 0, wardenAt: 480, finaleAt: 900, wardenDone: false, finaleOut: false, nextLabel: 'FRACTURE WARDEN', nextIn: 480, announce: null } };

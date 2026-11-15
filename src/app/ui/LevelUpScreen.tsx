@@ -6,7 +6,7 @@ import { BuildStrip } from './BuildStrip';
 
 const base = import.meta.env.BASE_URL;
 export const upgradeIcon = (id: string) => `url(${base}ui/upgrades/${id}.png)`;
-interface Props { level: number; cards: OfferCard[]; owned: OwnedUpgrade[]; onChoose: (id: UpgradeId) => void; }
+interface Props { level: number; reward?: boolean; cards: OfferCard[]; owned: OwnedUpgrade[]; onChoose: (id: UpgradeId) => void; }
 
 function Card({ c, i, onChoose }: { c: OfferCard; i: number; onChoose: (id: UpgradeId) => void }) {
   const cat = CATEGORIES[c.category];
@@ -25,14 +25,14 @@ function Card({ c, i, onChoose }: { c: OfferCard; i: number; onChoose: (id: Upgr
   </button>;
 }
 
-export function LevelUpScreen({ level, cards, owned, onChoose }: Props) {
+export function LevelUpScreen({ level, reward, cards, owned, onChoose }: Props) {
   useEffect(() => {
     const on = (e: KeyboardEvent) => { const n = Number(e.key); if (n >= 1 && n <= cards.length && !e.repeat) { e.preventDefault(); onChoose(cards[n - 1].id); } };
     window.addEventListener('keydown', on); return () => window.removeEventListener('keydown', on);
   }, [cards, onChoose]);
   const hasEpic = cards.some(c => c.rarity === 'epic');
   return <div className={`overlay lv-overlay ${hasEpic ? 'has-epic' : ''}`} data-testid="level-up"><section className="lv-modal" role="dialog" aria-modal="true" aria-labelledby="level-title">
-    <header className="lv-head"><span className="lv-badge" aria-hidden="true"><b>{level}</b></span><div><p className="eyebrow">LEVEL {level} · NEW POWER</p><h2 id="level-title">CHOOSE YOUR EVOLUTION</h2></div></header>
+    <header className="lv-head"><span className="lv-badge" aria-hidden="true"><b>{reward ? '★' : level}</b></span><div><p className="eyebrow">{reward ? 'FRACTURE WARDEN DEFEATED · BOSS REWARD' : `LEVEL ${level} · NEW POWER`}</p><h2 id="level-title">{reward ? 'CLAIM YOUR SPOILS' : 'CHOOSE YOUR EVOLUTION'}</h2></div></header>
     <div className="lv-list" role="group" aria-label="Upgrade choices">{cards.map((c, i) => <Card key={c.id} c={c} i={i} onChoose={onChoose}/>)}</div>
     <BuildStrip owned={owned} title="YOUR BUILD"/>
     <HintBar hints={[{ key: '1 2 3', pad: 'A', label: 'CHOOSE' }, { key: 'CLICK', pad: 'D-PAD', label: 'PICK / MOVE' }]}/>

@@ -1,11 +1,13 @@
 import type { Simulation } from '../sim/Simulation';
-import { blankSnapshot, type MiniMap, type UiSnapshot } from './UiSnapshot';
+import { blankSnapshot, type MiniMap, type RunHud, type UiSnapshot } from './UiSnapshot';
 import { UPGRADES, UPGRADE_BY_ID, type UpgradeId } from '../content/upgrades';
 import { previewUpgrade } from '../sim/UpgradeSystem';
 import { ENEMIES, isBoss } from '../content/enemies';
 import { BOSSES } from '../content/bosses';
 import { ARENAS } from '../content/arenas';
 import { BEAM, SPHERE } from '../content/abilities';
+import { BOSS_SCHEDULE } from '../content/encounters';
+import { RULES } from '../core/Rules';
 import { storeSave, type SaveV1, type GameSettings } from '../sim/SaveSystem';
 export class GameBridge {
   private listeners = new Set<() => void>();
@@ -13,6 +15,7 @@ export class GameBridge {
   private current = blankSnapshot;
   private lastPhase = '';
   private deathShown = false;
+  private victoryShown = false;
   constructor(private readonly save: SaveV1) {}
   bind(sim: Simulation) { this.sim = sim; this.publish(true); }
   unbind() { this.sim = null; }
@@ -25,12 +28,13 @@ export class GameBridge {
     const p = s.player;
     const phaseChanged = this.lastPhase !== s.phase;
     if (s.phase !== 'dead') this.deathShown = false;
+    if (s.phase !== 'victory') this.victoryShown = false;
     this.current = { phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
       dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form,
       formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? s.upgradeOffers.map(id => offerCard(s, id)) : [], owned: UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] })), map: miniMap(s),
-      cdMax: { dash: 3.2 * s.mods.dashCd, beam: BEAM.cooldown * s.mods.beamCd, sphere: SPHERE.cooldown * s.mods.sphereCd }, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
-    if (s.phase === 'dead' && phaseChanged) {
+      cdMax: { dash: 3.2 * s.mods.dashCd, beam: BEAM.cooldown * s.mods.beamCd, sphere: SPHERE.cooldown * s.mods.sphereCd, form: RULES.formCooldown * s.mods.formCd }, run: runHud(s), victoryShown: this.victoryShown, rewardPick: s.rewardPick, bosses: s.bossesDefeated, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
+    if ((s.phase === 'dead' || s.phase === 'victory') && phaseChanged) {
       const stats = this.sim!.stats();
       if (!this.save.best || stats.score > this.save.best.score) { this.save.best = stats; storeSave(this.save); }
     }
@@ -39,6 +43,8 @@ export class GameBridge {
   }
   /** Called by the renderer when the Death clip has finished and held. Ignored unless the sim is actually dead, so it can never show Results early. */
   markDeathShown() { if (this.sim?.state.phase !== 'dead' || this.deathShown) return; this.deathShown = true; this.publish(true); }
+  /** Called by the scene once the victory beat has played. Ignored unless the run is actually won. */
+  markVictoryShown() { if (this.sim?.state.phase !== 'victory' || this.victoryShown) return; this.victoryShown = true; this.publish(true); }
   pause() { this.sim?.forcePause(); this.publish(true); }
   togglePause() { this.sim?.togglePause(); this.publish(true); }
   choose(id: UpgradeId) { this.sim?.chooseUpgrade(id); this.publish(true); }
@@ -69,4 +75,12 @@ function miniMap(s: GameState): MiniMap {
   }
   return { arena: s.arenaId, px: p.x, py: p.y, ax: p.aimX, ay: p.aimY, foes, near, nearest: Math.round(nearest), eliteNear, bossNear,
     hazards: s.hazards.filter(h => h.shape !== 'sigil' && h.damage > 0).map(h => ({ shape: h.shape, x: h.x, y: h.y, r: h.r, w: h.w ?? 0, h: h.h ?? 0, warn: h.fired ? 1 : 1 - Math.max(0, h.delay) / Math.max(0.01, h.total), live: h.fired })) };
+}
+
+function runHud(s: GameState): RunHud {
+  const [w, f] = [BOSS_SCHEDULE[0].at, BOSS_SCHEDULE[1].at], wardenDone = !!s.encounter.spawned.warden && !s.enemies.some(e => e.kind === 'warden' && e.hp > 0);
+  const finaleOut = !!s.encounter.spawned.seraph, bossUp = s.enemies.some(e => isBoss(e.kind) && e.hp > 0);
+  const next = !s.encounter.spawned.warden ? { label: 'FRACTURE WARDEN', at: w } : !finaleOut ? { label: 'NULL SERAPH', at: f } : { label: bossUp ? 'DEFEAT THE SERAPH' : '', at: 0 };
+  const a = s.announce && s.time - s.announce.at < 6 ? { text: s.announce.text, sub: s.announce.sub, age: s.time - s.announce.at } : null;
+  return { t: s.time, wardenAt: w, finaleAt: f, wardenDone: wardenDone || s.bossesDefeated > 0, finaleOut, nextLabel: next.label, nextIn: Math.max(0, next.at - s.time), announce: a };
 }

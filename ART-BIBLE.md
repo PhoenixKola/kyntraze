@@ -38,7 +38,8 @@ Eight 128 px ImageGen plates baked into one 2200×1600 canvas (plain plates weig
 Design unit `--u = 100dvh/540` with legibility floors, dark translucent panels, thin teal/amber borders, Bahnschrift-style sans, keycap + pad glyph hints. HUD never covers the centre; ability slots bottom-centre, status top-left, clock top-centre.
 
 ## 9. Icons and pickups
-Monochrome white pixel glyphs with one inner shade (`#9fb0c8`), shown ≥ 24 px, ImageGen sheets keyed on magenta. XP shards mint/teal.
+HUD ability glyphs (dash/impact/lance/nova/form/heart) stay monochrome white pixel glyphs with one inner shade (`#9fb0c8`), shown ≥ 24 px. XP crystals are four full-colour gem tiers (teal shard / gem / gold-topped elite / violet boss core) with an additive glow.
+**Upgrade icons (B10.1) are full-colour inventory art, never tinted glyphs:** 96x96 RGBA, 1-2 px near-black navy outline (`#0a1119`), 4-5 tone shading, light from the top-left, separate material planes (steel bands, bevels, facets, glass, energy cores), category palette dominant (core amber, lance cyan, nova violet, survival rose, mobility mint, salvage teal, drive orange) with cool steel as support, epics add gold trim. Drawn one category per ImageGen sheet (3-5 icons per row so each gets ~300 art px), keyed with a distance-to-magenta key (a channel-based key eats violet). They sit in the diamond medallion and may overflow its corners slightly; the same PNG is used in the build strip.
 
 ## 10. ImageGen standards (all new art)
 - Bridge: `scripts/gen-image.py` (audited Codex ImageGen bridge, `gpt-6.1-sol`); prompt file + exact source PNG + `PROVENANCE.md` stay in `art/<area>/source/`.
@@ -62,3 +63,7 @@ Monochrome white pixel glyphs with one inner shade (`#9fb0c8`), shown ≥ 24 px,
 - **Hazards:** crimson + bone-white, always a *shape* (stripe lane, ring) that fills/marches during a >= 1.4 s warning, an active window, then a fade; the drawn edge is the hit edge (+ Kai's 6 px foot disc); no strobing (< 3 Hz), never gold/cyan/teal. Lane strips tile along their length and are rotated for vertical lanes.
 - **Ambience:** <= 24 motes in 3 parallax layers (alpha <= 0.4, <= 6 px) and one slow fog layer at 0.2 alpha, normal blend only (never ADD: the batcher clipped long ADD sprites in B05). Reduced Effects removes motes and fog.
 - **Kai in a crowd:** thin dark-edged ring under Kai (above enemies, below him; brighter while i-frames run, slow pulse at low health), a soft dark cut-out behind him that grows with the number of bodies within 70 px, no alpha dimming on hit (a 0.1 s white flash instead).
+
+## 13. Run finale and victory (B11)
+- Victory is gold + teal on the existing dark navy UI: key art (`victory-key.webp`, Kai from behind facing a sealing rift, no text) behind a gold-bordered results card with the crest (`victory-crest.png`); defeat keeps the plain card. Type is the UI face; the headline uses a cream-to-amber gradient, never a new font.
+- Finale signposting is sparse: one red banner 30 s before the Seraph, the boss warning, and the clock rail. In-world celebration is a flash, a camera kick and three gold/cyan rings; Reduced Effects removes all of it.

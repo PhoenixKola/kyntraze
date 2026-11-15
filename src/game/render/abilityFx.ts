@@ -149,7 +149,7 @@ export class AbilityFx {
         if (u >= 1) { const k = 0.5 + 0.5 * Math.sin(this.clock * 30); this.g.lineStyle(2, core, 0.4 + 0.5 * k); this.g.strokeCircle(o.x, o.y, 15 + 4 * k); }   // fully charged: a pulsing ready ring, so the release moment is readable
         this.g.lineStyle(2, aura, 0.28 * u); this.g.lineBetween(o.x, o.y, o.x + c.dirX * 70 * u, o.y + c.dirY * 70 * u);   // short aim tick: where the lance will go
       } else {
-        const tf = c.t - BEAM.charge; const open = Math.min(1, tf / 0.07), close = Math.min(1, Math.max(0, (BEAM.fire - tf) / 0.14));
+        const tf = c.t - BEAM.charge; const open = Math.min(1, tf / 0.07), close = Math.min(1, Math.max(0, (BEAM.fire + s.mods.beamLinger * BEAM.pulseEvery - tf) / 0.14));
         const env = Math.min(open, close); const flick = 1 + 0.06 * Math.sin(this.clock * 70);
         const seg = this.scene.textures.get(abilityFxKey('beam_seg')).getSourceImage(); const hw = BEAM.halfWidth * s.mods.beamWidth * (c.form ? BEAM.formWidth : 1);
         const sy = (hw * 2 / seg.height) * Math.max(0.05, env) * flick * (1 + 0.4 * Math.max(0, 1 - tf / 0.12));   // width pop on release, settles to the lane

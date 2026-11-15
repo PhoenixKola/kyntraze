@@ -48,7 +48,7 @@ export class EntityRenderer {
   debugPose() { return { ...this.pose, visualForm: this.animator.visualForm, transforming: this.animator.transforming, texture: this.hero.texture.key, frameIndex: Number(this.hero.frame.name), x: this.hero.x, y: this.hero.y, scale: this.hero.scaleX }; }
   sync(state: GameState, input: InputState, deltaMs = 0, reducedEffects = false) {
     const p = state.player;
-    const dt = state.phase === 'running' || state.phase === 'dead' ? Math.min(0.1, deltaMs / 1000) : 0;
+    const dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0;
     // hurt = the sim actually removed HP since the last render frame (never a proximity guess)
     const hurt = !Number.isNaN(this.lastHp) && p.hp < this.lastHp && p.hp > 0; this.lastHp = p.hp;
     // actual displacement (not raw key state) decides Run, so pushing against a wall or obstacle idles; a short hold bridges frames with no sim tick

@@ -1,0 +1,14 @@
+Premium 2D pixel-art INVENTORY ICON sheet for a dark sci-fantasy action game (quality bar: Hades / Dead Cells / Eitr ability icons). Each icon is a hand-crafted pixel-art object with REAL construction, NOT a flat silhouette and NOT a monochrome glyph:
+- a crisp 1-2 pixel near-black navy outline (#0a1119) around every shape,
+- 4-5 tone shading ramps with separate material planes (bevels, facets, panels), a consistent light from the TOP-LEFT, darker bottom-right edges, bright specular highlights,
+- purposeful interior detail (segments, rivets, etching, glass, energy cores, facets) and a small controlled glow where energy is involved,
+- hard stepped pixel edges, NO anti-aliasing blur, NO gradients except painted pixel shading, NO text, NO letters, NO frame, NO box, NO diamond, NO background shape, NO drop shadow.
+Value hierarchy: dark outline, mid-tone body in the category colour, bright highlight accents; use cool steel greys (#3b4d5e, #6f879a, #aebfca) as supporting metal. Never fill large areas with flat pure white or flat black.
+Each icon must read instantly at 40 screen pixels but reward a close look. Draw each icon centred in its own region on a flat magenta (#ff00ff) background, widely spaced with at least 40 art pixels of magenta between neighbours, nothing cropped, all icons the SAME visual scale (about 150x150 art pixels each). Original designs. Wide 16:9, icons arranged in a single horizontal row, left to right in the listed order.
+
+CATEGORY DRIVE: orange and gold fire (#ffb347, #e8741f, #7a2d0e) with steel and a hot white-yellow core.
+Draw EXACTLY 3 icons:
+1. SURGE CELL: a recognisable charged power cell: a metal terminal cap on top, a steel rim, a glass window with a glowing orange-yellow energy core and a small lightning bolt inside, controlled glow, bolts and bevels.
+2. FLAREHEART: a heart-shaped molten core wrapped by a ring of flame tongues, ember cracks glowing through plated armour.
+3. EMBER CORE (EPIC, extra rich, gold trim): a large faceted ember crystal core with a white-hot centre, ringed by six detailed flame tongues and a thin gold ring.
+No text, no numbers, no labels, no watermark.

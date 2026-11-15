@@ -1,0 +1,15 @@
+Premium 2D pixel-art INVENTORY ICON sheet for a dark sci-fantasy action game (quality bar: Hades / Dead Cells / Eitr ability icons). Each icon is a hand-crafted pixel-art object with REAL construction, NOT a flat silhouette and NOT a monochrome glyph:
+- a crisp 1-2 pixel near-black navy outline (#0a1119) around every shape,
+- 4-5 tone shading ramps with separate material planes (bevels, facets, panels), a consistent light from the TOP-LEFT, darker bottom-right edges, bright specular highlights,
+- purposeful interior detail (segments, rivets, etching, glass, energy cores, facets) and a small controlled glow where energy is involved,
+- hard stepped pixel edges, NO anti-aliasing blur, NO gradients except painted pixel shading, NO text, NO letters, NO frame, NO box, NO diamond, NO background shape, NO drop shadow.
+Value hierarchy: dark outline, mid-tone body in the category colour, bright highlight accents; use cool steel greys (#3b4d5e, #6f879a, #aebfca) as supporting metal. Never fill large areas with flat pure white or flat black.
+Each icon must read instantly at 40 screen pixels but reward a close look. Draw each icon centred in its own region on a flat magenta (#ff00ff) background, widely spaced with at least 40 art pixels of magenta between neighbours, nothing cropped, all icons the SAME visual scale (about 150x150 art pixels each). Original designs. Wide 16:9, icons arranged in a single horizontal row, left to right in the listed order.
+
+CATEGORIES MOBILITY (mint green #7ff0b4, #2fbf86, #0f5a45) and SALVAGE (teal #5fe3d6, #1fa7a8, #0e5560), with steel.
+Draw EXACTLY 4 icons:
+1. SKY STEP: a winged combat boot, leather and steel with a feathered metal wing, two mint speed streaks behind, buckle details.
+2. DASH COOLING: three layered forward chevron dash-blades in mint with a frost crystal cluster and icy glints at the front.
+3. FIELD DRAW: a steel horseshoe magnet with red and silver pole tips pulling in four teal crystal shards along curved lines.
+4. RICH VEINS: a jagged rock chunk with a vein of bright teal crystal running through it and a large faceted gem with a sparkle at its centre.
+No text, no numbers, no labels, no watermark.
