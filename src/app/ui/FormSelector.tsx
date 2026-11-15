@@ -1,8 +1,9 @@
 import '../selector.css';
+import { ASSET_BASE } from '../assetBase';
 
 type Form = 1 | 2 | 3;
 interface Props { open: boolean; pick: 0 | 1 | 2 | 3; choices: Form[]; left: number; pad: boolean; onHover: (f: Form) => void; onChoose: (f: Form) => void }
-const kit = (n: string) => `${import.meta.env.BASE_URL}ui/kit/${n}.webp`;
+const kit = (n: string) => `${ASSET_BASE}ui/kit/${n}.webp`;
 const INFO: Record<Form, { name: string; sub: string; crest: string }> = {
   1: { name: 'FLAREBOUND', sub: 'Spends 65% Drive', crest: 'crest-f1' },
   2: { name: 'COMETHEART', sub: 'Full Drive: gold comet', crest: 'crest-f2' },

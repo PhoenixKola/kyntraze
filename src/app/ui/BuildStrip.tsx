@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react';
 import type { OwnedUpgrade } from '../../bridge/UiSnapshot';
 import { CATEGORIES, RARITY_LABEL, UPGRADE_BY_ID } from '../../content/upgrades';
+import { ASSET_BASE } from '../assetBase';
 
-const icon = (id: string) => `url(${import.meta.env.BASE_URL}ui/upgrades/${id}.png)`;
+const icon = (id: string) => `url(${ASSET_BASE}ui/upgrades/${id}.png)`;
 /** The build so far: one small medallion per owned card, rarity-bordered, category-tinted, with its stack count. Shown on the level-up and pause screens. */
 export function BuildStrip({ owned, title }: { owned: OwnedUpgrade[]; title: string }) {
   if (!owned.length) return <div className="build-strip empty" data-testid="build-strip"><span className="build-title">{title}</span><em>No upgrades yet: your first choice defines your build.</em></div>;

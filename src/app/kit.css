@@ -385,3 +385,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--k-teal-hi);
 .setting-options .vol-row { flex-wrap: nowrap; padding: calc(5 * var(--u)) 0; } .setting-options .vol-row > span small { display: none; }
 .setting-options input.vol-slider { flex: none; width: calc(150 * var(--u)); min-width: 96px; }
 .setting-options .vol-row .vol-num { margin-left: auto; }
+/* owner pass 5: no rectangular rim at all (it was the rectangle drawn over the frame art); only the chamfered fills sit in the frame window */
+.bar-hp::before, .bar-xp::before, .bar-form::before, .loading-bar::before { box-shadow: none; clip-path: polygon(calc(4 * var(--u)) 0, calc(100% - calc(4 * var(--u))) 0, 100% calc(4 * var(--u)), 100% calc(100% - calc(4 * var(--u))), calc(100% - calc(4 * var(--u))) 100%, calc(4 * var(--u)) 100%, 0 calc(100% - calc(4 * var(--u))), 0 calc(4 * var(--u))); }
+.bar-xp::before, .bar-form::before, .loading-bar::before { display: none; }
+.loading-bar i { clip-path: polygon(calc(4 * var(--u)) 0, calc(100% - calc(4 * var(--u))) 0, 100% calc(4 * var(--u)), 100% calc(100% - calc(4 * var(--u))), calc(100% - calc(4 * var(--u))) 100%, calc(4 * var(--u)) 100%, 0 calc(100% - calc(4 * var(--u))), 0 calc(4 * var(--u))); }

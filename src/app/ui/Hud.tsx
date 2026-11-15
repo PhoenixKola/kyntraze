@@ -6,10 +6,11 @@ import type { BossHud } from '../../bridge/UiSnapshot';
 import { Minimap } from './Minimap';
 import { FormSelector } from './FormSelector';
 import type { RunHud } from '../../bridge/UiSnapshot';
+import { ASSET_BASE } from '../assetBase';
 
 interface Props { s: UiSnapshot; pad: boolean; onPause: () => void; reduced?: boolean; onForm?: (f: 1 | 2 | 3, confirm: boolean) => void; }
 
-const icon = (name: string) => `url(${import.meta.env.BASE_URL}ui/icons/${name}.png)`;
+const icon = (name: string) => `url(${ASSET_BASE}ui/icons/${name}.png)`;
 const pct = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
 
 interface SlotProps { id: string; name: string; ico: string; keyLabel: string; padLabel: string; pad: boolean; seconds: number; max: number; state?: 'active' | 'locked' | 'ready'; tone?: string; text?: string; /** 0..1 Silver Rift charge, drawn as a thin bar inside the tile */ charge?: number }
@@ -25,7 +26,7 @@ function Slot({ id, name, ico, keyLabel, padLabel, pad, seconds, max, state, ton
   </div>;
 }
 
-const bossArt = (n: string) => `${import.meta.env.BASE_URL}art/bosses/fx/${n}.png`;
+const bossArt = (n: string) => `${ASSET_BASE}art/bosses/fx/${n}.png`;
 /** Boss nameplate + health bar, top-centre under the clock (never over Kai, the ability tiles or the floor warnings). Phase tick sits at the phase-change threshold. */
 function BossBar({ b }: { b: BossHud }) {
   const frac = b.hp / b.maxHp, intro = b.intro > 0;
@@ -66,7 +67,7 @@ export function Hud({ s, pad, onPause, reduced, onForm }: Props) {
     {hit.n > 0 && <div key={hit.n} className={`hit-vignette ${reduced ? 'calm' : ''}`} data-testid="hit-vignette" style={{ '--k': hit.k } as CSSProperties} aria-hidden="true"/>}
     {s.sinceRevive < 1 && <div className="revive-flash" aria-hidden="true"/>}
     <div className="hud-panel hud-health">
-      <div className={`portrait ${s.form ? 'is-form' : ''} ${f2 ? 'is-form2' : ''} ${f3 ? 'is-form3' : ''}`}><img src={`${import.meta.env.BASE_URL}ui/kai-portrait-${f3 ? 'f3' : f2 ? 'f2' : s.form ? 'f1' : 'base'}.png`} alt="" draggable={false}/><img className="crest" src={`${import.meta.env.BASE_URL}ui/kit/crest-${f3 ? 'f3' : f2 ? 'f2' : s.form ? 'f1' : 'base'}.webp`} alt="" draggable={false}/><span className="lvl" aria-label={`Level ${s.level}`}>{s.level}</span>{s.revives > 0 && <span className="revive-badge" style={{ '--ico': icon('heart') } as CSSProperties} title="Second Wind ready" aria-label="Second Wind ready"/>}</div>
+      <div className={`portrait ${s.form ? 'is-form' : ''} ${f2 ? 'is-form2' : ''} ${f3 ? 'is-form3' : ''}`}><img src={`${ASSET_BASE}ui/kai-portrait-${f3 ? 'f3' : f2 ? 'f2' : s.form ? 'f1' : 'base'}.png`} alt="" draggable={false}/><img className="crest" src={`${ASSET_BASE}ui/kit/crest-${f3 ? 'f3' : f2 ? 'f2' : s.form ? 'f1' : 'base'}.webp`} alt="" draggable={false}/><span className="lvl" aria-label={`Level ${s.level}`}>{s.level}</span>{s.revives > 0 && <span className="revive-badge" style={{ '--ico': icon('heart') } as CSSProperties} title="Second Wind ready" aria-label="Second Wind ready"/>}</div>
       <div className="vitals">
         <div className={`bar-hp ${low ? 'low' : ''}`} role="progressbar" aria-label="Health" aria-valuenow={Math.ceil(s.hp)} aria-valuemax={Math.ceil(s.maxHp)}>
           <i className="trail" style={{ width: pct(hpFrac * 100) }}/><i className="fill" style={{ width: pct(hpFrac * 100) }}/>

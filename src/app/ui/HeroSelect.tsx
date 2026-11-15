@@ -4,7 +4,8 @@ import { HintBar } from './Chrome';
 import { ARENAS, type ArenaId } from '../../content/arenas';
 import { arenaCardUrl } from './ArenaSelect';
 import type { SaveV1 } from '../../sim/SaveSystem';
-const kit = (n: string) => `${import.meta.env.BASE_URL}ui/kit/${n}.webp`;
+import { ASSET_BASE } from '../assetBase';
+const kit = (n: string) => `${ASSET_BASE}ui/kit/${n}.webp`;
 /** Form progression row: unlocked forms show their crest and name; locked ones stay unnamed (no spoilers) and are plainly not selectable. */
 function FormRow({ save }: { save: SaveV1 }) {
   const rows = [{ c: 'base', n: 'BASE', on: true }, { c: 'f1', n: 'FLAREBOUND', on: true }, { c: 'f2', n: 'COMETHEART', on: !!save.unlocks?.cometheart }, { c: 'f3', n: 'STILLFIRE', on: !!save.unlocks?.stillfire }];

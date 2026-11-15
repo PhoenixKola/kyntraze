@@ -1,8 +1,9 @@
 import { useEffect, type CSSProperties } from 'react';
 import { ARENAS, ARENA_IDS, type ArenaId } from '../../content/arenas';
 import { HintBar } from './Chrome';
+import { ASSET_BASE } from '../assetBase';
 
-export const arenaCardUrl = (id: ArenaId) => `${import.meta.env.BASE_URL}${ARENAS[id].artDir}/card.png`;
+export const arenaCardUrl = (id: ArenaId) => `${ASSET_BASE}${ARENAS[id].artDir}/card.png`;
 interface Props { selected: ArenaId; onSelect: (id: ArenaId) => void; onBack: () => void; }
 
 /** Full-screen arena choice. Selecting a card applies immediately (and is saved); CONFIRM / Esc / B return to deployment. Locked arenas (none yet) render disabled with their reason. */

@@ -2,8 +2,9 @@ import type { UiSnapshot } from '../../bridge/UiSnapshot';
 import { roundedTime } from '../../core/Math';
 import { HintBar } from './Chrome';
 import { BuildStrip } from './BuildStrip';
+import { ASSET_BASE } from '../assetBase';
 interface Props { s: UiSnapshot; onRetry: () => void; onHome: () => void; }
-const base = import.meta.env.BASE_URL;
+const base = ASSET_BASE;
 
 /** Victory and defeat share one structure (stats, build, actions) so the flow is the same; victory adds the key art, crest and a gold treatment. */
 export function ResultsScreen({ s, onRetry, onHome }: Props) {

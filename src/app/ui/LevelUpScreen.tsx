@@ -3,8 +3,9 @@ import type { OfferCard, OwnedUpgrade } from '../../bridge/UiSnapshot';
 import { CATEGORIES, RARITY_LABEL, type UpgradeId } from '../../content/upgrades';
 import { HintBar } from './Chrome';
 import { BuildStrip } from './BuildStrip';
+import { ASSET_BASE } from '../assetBase';
 
-const base = import.meta.env.BASE_URL;
+const base = ASSET_BASE;
 export const upgradeIcon = (id: string) => `url(${base}ui/upgrades/${id}.png)`;
 interface Props { level: number; reward?: boolean; cards: OfferCard[]; owned: OwnedUpgrade[]; onChoose: (id: UpgradeId) => void; }
 
