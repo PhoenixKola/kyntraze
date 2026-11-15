@@ -1,4 +1,4 @@
-# B13 - Kai Form III: STILLFIRE APEX (local commit, NOT pushed - owner review first)
+# B13 - Kai Form III: STILLFIRE APEX (pushed after owner review; aura reworked as a soft flowing glow + rising wisps, West head re-seated closer to the body)
 
 ## How to try it (dev only)
 `npm run dev`, open `http://127.0.0.1:5173/?qa=1&form3=1&seed=31` (QA route: Cometheart + Stillfire Apex unlocked, no 10:00 gate, Drive full). **Tap F** = the selected form (default: Stillfire Apex), **hold F** (~0.3 s) = compact selector (steps Stillfire -> Cometheart -> Flarebound every 0.55 s, release confirms; pad: Y). **E** = Silver Rift (hold to charge, mouse / right stick aims 360 degrees, release to blink + fire; pad RB/RT). **R** = Instinct Reversal (pad LB/LT). Perfect Evasion is automatic.

@@ -36,13 +36,15 @@ export class ApexFx {
   private readonly flashRect: Phaser.GameObjects.Rectangle;
   private readonly shadow: Phaser.GameObjects.Image | null;
   private readonly halo: Phaser.GameObjects.Image | null;
+  private readonly halo2: Phaser.GameObjects.Image | null;
+  private auraClock = 0;
   private readonly beamTex: Phaser.GameObjects.TileSprite | null;
   private readonly core: Phaser.GameObjects.Image | null;
   private ghosts: Ghost[] = [];
   private beam: Beam | null = null;
   private clock = 0; private level = 0; private lastEvent = 0; private flashA = 0; private flashRate = 5; private zoomMul = 1; private hitstop = 0; private dimA = 0; private coolA = 0;
   private dirX = 0; private dirY = 0; private wispClock = 0; private moteClock = 0; private rockClock = 1; private distortClock = 2; private dashWas = false; private tierSeen = 0; private reticleClock = 0;
-  private prevX = NaN; private prevY = NaN;
+  private flowClock = 0; private prevX = NaN; private prevY = NaN;
   constructor(private readonly scene: Phaser.Scene) {
     this.pool = new FxPool(scene, 130);
     this.g = scene.add.graphics().setDepth(10.45).setBlendMode(Phaser.BlendModes.ADD); this.under = scene.add.graphics().setDepth(3.55).setBlendMode(Phaser.BlendModes.ADD);
@@ -50,7 +52,14 @@ export class ApexFx {
     this.cool = scene.add.rectangle(0, 0, 4000, 3000, 0x93a3b8, 1).setScrollFactor(0).setDepth(40.2).setAlpha(0).setVisible(false).setOrigin(0.5);
     this.flashRect = scene.add.rectangle(0, 0, 4000, 3000, 0xeaf4ff, 1).setScrollFactor(0).setDepth(41).setAlpha(0).setVisible(false).setOrigin(0.5);
     this.shadow = this.has('shadow_soft') ? scene.add.image(0, 0, f3fxKey('shadow_soft')).setDepth(3.8).setVisible(false) : null;
-    this.halo = this.has('aura_halo') ? scene.add.image(0, 0, f3fxKey('aura_halo')).setDepth(9.6).setBlendMode(Phaser.BlendModes.ADD).setTint(SILVER).setVisible(false) : null;
+    // soft, outline-free glow (smooth radial gradient) in two layers that breathe out of phase: no hard capsule edge, nothing that looks like a static sprite
+    const gk = f3fxKey('glow');
+    if (!scene.textures.exists(gk)) {
+      const cv = scene.textures.createCanvas(gk, 128, 192); const cx = cv?.getContext();
+      if (cv && cx) { const g = cx.createRadialGradient(64, 64, 2, 64, 64, 64); g.addColorStop(0, 'rgba(255,255,255,0.6)'); g.addColorStop(0.35, 'rgba(225,238,255,0.3)'); g.addColorStop(0.7, 'rgba(200,225,255,0.09)'); g.addColorStop(1, 'rgba(200,225,255,0)'); cx.setTransform(1, 0, 0, 1.5, 0, 0); cx.fillStyle = g; cx.fillRect(0, 0, 128, 128); cv.refresh(); }
+    }
+    this.halo = scene.textures.exists(gk) ? scene.add.image(0, 0, gk).setDepth(9.6).setBlendMode(Phaser.BlendModes.ADD).setTint(SILVER).setVisible(false) : null;
+    this.halo2 = scene.textures.exists(gk) ? scene.add.image(0, 0, gk).setDepth(9.55).setBlendMode(Phaser.BlendModes.ADD).setTint(ICE).setVisible(false) : null;
     this.beamTex = this.has('rift_beam_seg') ? scene.add.tileSprite(0, 0, 10, scene.textures.get(f3fxKey('rift_beam_seg')).getSourceImage().height, f3fxKey('rift_beam_seg')).setOrigin(0, 0.5).setBlendMode(Phaser.BlendModes.ADD).setDepth(10.5).setVisible(false) : null;
     this.core = this.has('rift_core') ? scene.add.image(0, 0, f3fxKey('rift_core')).setBlendMode(Phaser.BlendModes.ADD).setDepth(10.9).setVisible(false) : null;
   }
@@ -143,9 +152,21 @@ export class ApexFx {
     const target = !show ? 0 : dashing ? 1 : charging ? 0.55 + 0.45 * clamp01((cast?.t ?? 0) / RIFT.maxCharge) : releasing ? 0.85 : moving ? 0.42 + 0.22 * clamp01(c.speed / 300) : 0.26;
     this.level += (target - this.level) * Math.min(1, dt * (target > this.level ? 8 : 2.2));
     const L = this.level;
-    if (this.halo) {
-      const breath = 0.88 + 0.12 * Math.sin(this.clock * 1.9), hs = (112 * k) / this.halo.height;
-      this.halo.setVisible(show).setPosition(Math.round(c.x), Math.round(bodyY)).setScale(hs * (0.92 + 0.18 * L), hs * (0.95 + 0.12 * L)).setAlpha((reduced ? 0.12 : 0.15 + 0.3 * L) * breath);
+    if (this.halo && this.halo2) {
+      this.auraClock += dt * (1 + 1.6 * L);   // the flow speeds up with the action level
+      const a = this.auraClock, hs = (150 * k) / this.halo.height;
+      const b1 = 0.9 + 0.1 * Math.sin(a * 1.7) + 0.04 * Math.sin(a * 4.3), b2 = 0.9 + 0.1 * Math.sin(a * 1.1 + 1.9) + 0.05 * Math.sin(a * 3.1 + 0.7);
+      // lean the glow opposite the glide so it trails instead of staying a centred blob
+      const lx = -(this.dirX) * 5 * k * L, ly = -(this.dirY) * 3 * k * L;
+      this.halo.setVisible(show).setPosition(Math.round(c.x + lx), Math.round(bodyY + ly - 2)).setScale(hs * (0.8 + 0.16 * L) * b1, hs * (0.9 + 0.1 * L) * (2 - b1)).setAlpha((reduced ? 0.22 : 0.3 + 0.35 * L) * b1).setRotation(0.05 * Math.sin(a * 0.8) - this.dirX * 0.12 * L);
+      this.halo2.setVisible(show).setPosition(Math.round(c.x + lx * 1.8), Math.round(bodyY + ly * 1.5 - 4)).setScale(hs * (0.56 + 0.12 * L) * b2, hs * (0.74 + 0.1 * L) * (2 - b2)).setAlpha((reduced ? 0.16 : 0.22 + 0.3 * L) * b2).setRotation(-0.06 * Math.sin(a * 0.9 + 1) - this.dirX * 0.18 * L);
+      // continuous rising wisps that sway: the aura reads as flowing energy rather than a shape
+      this.flowClock -= dt;
+      if (show && dt > 0 && this.flowClock <= 0 && !cin) {
+        this.flowClock = (0.11 - 0.05 * L) / thin;
+        const side = rnd() < 0.5 ? -1 : 1, off = (10 + rnd() * 12) * k, ph = rnd() * 6.283;
+        this.spawn(pick(['aura_wisp_a', 'aura_wisp_b', 'aura_wisp_c']), c.x + side * off, c.y - (4 + rnd() * 18) * k, { depth: 9.5, life: 0.95 + rnd() * 0.5, tint: SILVER, vy: -(34 + 30 * L + rnd() * 18), vx: side * (4 + rnd() * 8) + Math.sin(ph) * 6, s0: (0.55 + rnd() * 0.3) * k, s1: (0.9 + rnd() * 0.4) * k, a0: 0.5 + 0.2 * L, a1: 0, rot: -Math.PI / 2 + side * 0.18 * Math.sin(ph), spin: side * (0.4 + rnd() * 0.5) * (rnd() < 0.5 ? 1 : -1), fadeIn: 0.3 });
+      }
     }
     this.under.clear();
     if (show) { this.under.fillStyle(SILVER, (0.05 + 0.1 * L) * (reduced ? 0.6 : 1)); this.under.fillEllipse(c.x, c.y + 3, (56 + 44 * L) * k, (20 + 12 * L) * k); }
@@ -200,6 +221,6 @@ export class ApexFx {
     for (let i = this.ghosts.length - 1; i >= 0; i--) { const g = this.ghosts[i]; g.age += dt; if (g.age >= g.life) { g.spr.destroy(); this.ghosts.splice(i, 1); continue; } g.spr.setAlpha(g.a0 * (1 - g.age / g.life) ** 1.4); }
     this.pool.update(dt);
   }
-  clear() { this.pool.clear(); for (const g of this.ghosts) g.spr.destroy(); this.ghosts = []; this.beam = null; this.beamTex?.setVisible(false); this.core?.setVisible(false); this.dim.setVisible(false); this.cool.setVisible(false); this.flashRect.setVisible(false); this.zoomMul = 1; this.dimA = 0; this.coolA = 0; this.flashA = 0; this.g.clear(); this.under.clear(); this.shadow?.setVisible(false); this.halo?.setVisible(false); }
-  destroy() { this.clear(); this.pool.destroy(); this.g.destroy(); this.under.destroy(); this.dim.destroy(); this.cool.destroy(); this.flashRect.destroy(); this.shadow?.destroy(); this.halo?.destroy(); this.beamTex?.destroy(); this.core?.destroy(); }
+  clear() { this.pool.clear(); for (const g of this.ghosts) g.spr.destroy(); this.ghosts = []; this.beam = null; this.beamTex?.setVisible(false); this.core?.setVisible(false); this.dim.setVisible(false); this.cool.setVisible(false); this.flashRect.setVisible(false); this.zoomMul = 1; this.dimA = 0; this.coolA = 0; this.flashA = 0; this.g.clear(); this.under.clear(); this.shadow?.setVisible(false); this.halo?.setVisible(false); this.halo2?.setVisible(false); }
+  destroy() { this.clear(); this.pool.destroy(); this.g.destroy(); this.under.destroy(); this.dim.destroy(); this.cool.destroy(); this.flashRect.destroy(); this.shadow?.destroy(); this.halo?.destroy(); this.halo2?.destroy(); this.beamTex?.destroy(); this.core?.destroy(); }
 }
