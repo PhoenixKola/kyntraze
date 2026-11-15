@@ -20,8 +20,8 @@ export const CONTROLLER_LAYOUT: readonly { action: string; keys: string; pad: st
   { action: 'Impact (Q)', keys: 'Q', pad: 'X' },
   { action: 'Fracture Lance (beam)', keys: 'E', pad: 'RB or RT' },
   { action: 'Nova Bloom (sphere)', keys: 'R', pad: 'LB or LT' },
-  { action: 'Transform', keys: 'F (hold to choose)', pad: 'Y (hold to choose)' },
-  { action: 'Silver Rift aim (Form III)', keys: 'MOUSE', pad: 'RIGHT STICK' },
+  { action: 'Transform', keys: 'F (picker: 1-2-3 / A-D, F confirms; F F = last)', pad: 'Y (D-PAD pick, Y / A confirm, B cancel)' },
+  { action: 'Aim: Lance / Nova / Rift', keys: 'MOUSE', pad: 'RIGHT STICK' },
   { action: 'Pause / resume', keys: 'ESC', pad: 'START' },
   { action: 'Menus: select / back', keys: 'MOUSE / TAB / ENTER', pad: 'D-PAD + A / B' },
 ];

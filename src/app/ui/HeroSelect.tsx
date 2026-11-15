@@ -17,9 +17,9 @@ export function HeroSelect({ onBack, onStart, seed, onSeed, arena, onArena, save
     <div className="screen-header"><button className="text-button" onClick={onBack} data-pad-cancel>← BACK</button><span>01 / RUNNER SELECTION</span></div>
     <p className="eyebrow">SELECT YOUR RUNNER</p><h2 className="large-heading">WHO FACES THE FRACTURE?</h2>
     <div className="hero-grid">
-      {HEROES.map((h, i) => <article key={h.id} className={`hero-card ${h.playable ? 'active-hero' : 'locked-hero'}`} style={{ '--accent': h.accent } as CSSProperties}>
+      {HEROES.map((h, i) => <article key={h.id} className={`hero-card ${h.playable ? 'active-hero has-art' : 'locked-hero'}`} style={{ '--accent': h.accent } as CSSProperties}>{h.playable && <span className="hero-art" aria-hidden="true"/>}
         <div className="hero-card-index">0{i + 1} / {h.title}</div>
-        <div className={`hero-silhouette hero-${h.id}`} aria-hidden="true">{h.playable ? <span className="select-kai"/> : <span className="locked-glyph">{h.name[0]}</span>}</div>
+        <div className={`hero-silhouette hero-${h.id}`} aria-hidden="true">{!h.playable && <span className="locked-glyph">{h.name[0]}</span>}</div>
         <div className="hero-copy"><h3>{h.name}</h3><p>{h.role}</p><small>STARTER · {h.weapon}</small>{h.playable && <FormRow save={save}/>}</div>
         <div className="hero-status">{h.playable ? 'READY FOR DEPLOYMENT' : 'PLANNED · NOT YET PLAYABLE'}</div>
       </article>)}

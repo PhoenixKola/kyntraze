@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { FORM_LOOKS, FORM_I_LOOK } from '../../assets/formLooks';
 import type { KaiAnimEvent } from '../../assets/kaiAnimation';
+import { GroundDecal } from './b14fx';
 
 export const FORM_FX_NAMES = ['wisp_a', 'wisp_b', 'wisp_c', 'spark', 'ring', 'arc_h', 'arc_v', 'glow'] as const;
 export const formFxKey = (n: string) => `kaifx-${n}`;
@@ -16,6 +17,7 @@ interface P { img: Phaser.GameObjects.Image; age: number; life: number; x: numbe
 export class FormFx {
   private pool: P[] = [];
   private glow: Phaser.GameObjects.Image;
+  private readonly ground: GroundDecal;   // B14: ImageGen ember crown on the floor while Flarebound
   private rim: Phaser.GameObjects.Sprite[] = [];   // body-hugging aura: 4 offset copies of the hero frame, solid Solar colour, drawn BEHIND Kai so only the rim shows
   private flameClock = 0;
   private arcClock = 1.2;
@@ -26,6 +28,7 @@ export class FormFx {
   private pulse = 0;
   private readonly look = FORM_LOOKS[FORM_I_LOOK];
   constructor(private readonly scene: Phaser.Scene) {
+    this.ground = new GroundDecal(scene, 'ring_f1', 0xff8a3c, -0.22);
     this.glow = scene.add.image(0, 0, formFxKey('glow')).setBlendMode(Phaser.BlendModes.ADD).setDepth(3.5).setVisible(false).setTint(this.look.aura);
     for (let i = 0; i < 4; i++) { const r = scene.add.sprite(0, 0, formFxKey('glow')).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.7).setVisible(false).setTint(this.look.aura); r.setTintMode(Phaser.TintModes.FILL); this.rim.push(r); }
   }
@@ -60,6 +63,7 @@ export class FormFx {
     this.persistent = visualForm && alive;
     this.glowLevel += ((this.persistent ? 1 : 0) - this.glowLevel) * Math.min(1, dt * (this.persistent ? 6 : 9));
     this.pulse = Math.max(0, this.pulse - dt);
+    this.ground.update(dt, x, y, this.persistent, 112 * k, emphasis, reduced);
     const t = performance.now() / 1000;
     const gl = this.glowLevel * (0.38 + 0.1 * Math.sin(t * 7) + this.pulse * 1.2);
     this.glow.setVisible(this.glowLevel > 0.02).setPosition(x, y - 3).setScale(FX_BASE * k * (1.0 + 0.06 * Math.sin(t * 5)) * (1 + this.pulse)).setAlpha(Math.min(1, gl * 0.5 * (1 + 0.4 * emphasis)));
@@ -93,5 +97,5 @@ export class FormFx {
     }
   }
 
-  destroy() { this.glow.destroy(); this.rim.forEach(r => r.destroy()); this.pool.forEach(p => p.img.destroy()); this.pool = []; }
+  destroy() { this.ground.destroy(); this.glow.destroy(); this.rim.forEach(r => r.destroy()); this.pool.forEach(p => p.img.destroy()); this.pool = []; }
 }

@@ -8,7 +8,7 @@ import { ARENAS } from '../content/arenas';
 import { BEAM, SPHERE } from '../content/abilities';
 import { CANNON, DRAGON } from '../content/cometheart';
 import { EVASION, REVERSAL, RIFT } from '../content/stillfire';
-import { formChoices, selectedForm } from '../sim/FormSystem';
+import { formChoices, selectedForm, activateForm, SELECTOR_MAX } from '../sim/FormSystem';
 import { BOSS_SCHEDULE } from '../content/encounters';
 import { RULES } from '../core/Rules';
 import { storeSave, type SaveV1, type GameSettings } from '../sim/SaveSystem';
@@ -38,7 +38,7 @@ export class GameBridge {
     if (s.phase !== 'victory') this.victoryShown = false;
     this.current = { phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
-      dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form, dragonCooldown: p.dragonCooldown, cometCooldown: p.cometCooldown, cometUnlocked: s.cometUnlocked, cometReady: formChoices(s).includes(2), apexUnlocked: s.apexUnlocked, apexReady: formChoices(s).includes(3), riftCooldown: p.riftCooldown, reversalCooldown: p.reversalCooldown, evadeCooldown: p.evadeCooldown, riftCharge: s.cast?.kind === 'rift' && !s.cast.released ? Math.min(1, s.cast.t / RIFT.maxCharge) : 0, selector: { open: !!s.selector?.open, pick: selectedForm(s) ?? 0, choices: formChoices(s) }, cinema: !!s.cinema,
+      dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form, dragonCooldown: p.dragonCooldown, cometCooldown: p.cometCooldown, cometUnlocked: s.cometUnlocked, cometReady: formChoices(s).includes(2), apexUnlocked: s.apexUnlocked, apexReady: formChoices(s).includes(3), riftCooldown: p.riftCooldown, reversalCooldown: p.reversalCooldown, evadeCooldown: p.evadeCooldown, riftCharge: s.cast?.kind === 'rift' && !s.cast.released ? Math.min(1, s.cast.t / RIFT.maxCharge) : 0, selector: { open: !!s.selector?.open, pick: selectedForm(s) ?? 0, choices: formChoices(s), left: Math.max(0, SELECTOR_MAX - (s.selector?.held ?? 0)) }, cinema: !!s.cinema,
       formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? s.upgradeOffers.map(id => offerCard(s, id)) : [], owned: UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] })), map: miniMap(s),
       cdMax: { dash: 3.2 * s.mods.dashCd, beam: BEAM.cooldown * s.mods.beamCd, sphere: SPHERE.cooldown * s.mods.sphereCd, form: RULES.formCooldown * s.mods.formCd, dragon: DRAGON.cooldown * s.mods.beamCd, comet: CANNON.cooldown * s.mods.sphereCd, rift: RIFT.cooldown * s.mods.beamCd, reversal: REVERSAL.cooldown * s.mods.sphereCd, evade: EVASION.cooldown }, run: runHud(s), victoryShown: this.victoryShown, rewardPick: s.rewardPick, bosses: s.bossesDefeated, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
     if ((s.phase === 'dead' || s.phase === 'victory') && phaseChanged) {
@@ -54,6 +54,8 @@ export class GameBridge {
   markVictoryShown() { if (this.sim?.state.phase !== 'victory' || this.victoryShown) return; this.victoryShown = true; this.publish(true); }
   pause() { this.sim?.forcePause(); this.publish(true); }
   togglePause() { this.sim?.togglePause(); this.publish(true); }
+  /** Form selector, from the pointer: hover highlights a card, a click starts it. */
+  pickForm(f: 1 | 2 | 3, confirm: boolean) { const s = this.sim?.state; if (!s?.selector.open || !formChoices(s).includes(f)) return; s.selector.pick = f; if (confirm) activateForm(s, f); this.publish(true); }
   choose(id: UpgradeId) { this.sim?.chooseUpgrade(id); this.publish(true); }
   debugGrantXp(offers?: UpgradeId[]) { const sim = this.sim; if (!sim) return; sim.debugLevelUp(); if (offers && sim.state.phase === 'upgrade') sim.state.upgradeOffers = offers; this.publish(true); }
 }

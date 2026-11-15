@@ -1,0 +1,2 @@
+# B14 VFX art
+Three ImageGen sheets (Codex bridge via scripts/gen-image.py, ref = form-iii fx-rift.png for pixel craft): `source/ground.png` (Form II comet sigil, Form I ember crown, Form III silver ring), `source/strikes_a.png` (arcs / flame lashes / comet streak+shock ring), `source/strikes_b.png` (silver jab, refraction slash, glint, slash streak, glass shards, target mark, X slash, bloom, shatter ring). Prompts: `make_prompts.py`. Cut by `extract.py` into `public/art/fx/b14/` (21 white/pale or gold sprites, tinted in code). No rejected generations.

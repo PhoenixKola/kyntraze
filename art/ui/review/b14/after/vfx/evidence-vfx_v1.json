@@ -1,0 +1,11 @@
+{
+ "shots": [
+  "ground-base_v1.png",
+  "ground-f1_v1.png",
+  "ground-f2_v1.png",
+  "ground-f2b_v1.png",
+  "ground-f3_v1.png"
+ ],
+ "consoleErrors": [],
+ "note": "swiftshader stills; real-speed motion NOT watched"
+}

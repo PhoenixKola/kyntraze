@@ -19,9 +19,11 @@ function setup(enemies: Array<[number, number, number?]> = [], opts: { apex?: bo
   s.enemies = enemies.map(([x, y, hp], i) => enemy(100 + i, x, y, hp ?? 400)); return { sim, s };
 }
 const run = (sim: Simulation, sec: number, input: InputState = idle()) => { for (let i = 0; i < Math.round(sec / DT); i++) sim.step(DT, input); };
+/** A tap of F; when several forms are ready the first press opens the picker and the second press confirms the highlighted one. */
+const startForm = (sim: Simulation) => { for (let k = 0; k < 2; k++) { sim.step(DT, idle({ f: true, fHeld: true })); sim.step(DT, idle({ fHeld: false })); } };
 /** Straight into Form III (the cinematic played out). */
 function apexForm(enemies: Array<[number, number, number?]> = []) {
-  const r = setup(enemies); r.s.selector.pick = 3; r.sim.step(DT, idle({ f: true, fHeld: true })); r.sim.step(DT, idle({ fHeld: false }));
+  const r = setup(enemies); r.s.selector.pick = 3; startForm(r.sim);
   run(r.sim, APEX.cinemaFirst.dur + 0.2); r.s.player.drive = 100; r.s.player.evadeCooldown = 0; r.s.player.invulnerable = 0; return r;
 }
 
@@ -39,7 +41,7 @@ describe('Form III unlock and persistence', () => {
     expect(s.apexUnlockedNow).toBe(true); expect(s.apexUnlocked).toBe(false); expect(s.phase).toBe('victory'); expect(formChoices(s)).not.toContain(3); void sim;
   });
   it('without the save flag Form III can never start, however full the Drive', () => {
-    const { sim, s } = setup([], { apex: false }); expect(formChoices(s)).not.toContain(3); sim.step(DT, idle({ f: true, fHeld: true })); sim.step(DT, idle({ fHeld: false })); expect(s.cinema?.to).not.toBe(3);
+    const { sim, s } = setup([], { apex: false }); expect(formChoices(s)).not.toContain(3); startForm(sim); expect(s.cinema?.to).not.toBe(3);
   });
   it('is available only after the late-midgame mark (10:00) with a full Drive gauge', () => {
     const { s } = setup([], { gate: 600 }); s.time = 599; expect(formChoices(s)).not.toContain(3); s.time = 601; expect(formChoices(s)).toContain(3);
@@ -47,41 +49,46 @@ describe('Form III unlock and persistence', () => {
   });
 });
 
-describe('form selector (tap = selected, hold = choose)', () => {
-  it('with several forms ready, a tap starts the highest on release and Form II stays selectable by holding', () => {
+describe('form selector (opens on the press, run frozen while open)', () => {
+  const press = (sim: Simulation, o: Partial<InputState> = {}) => { sim.step(DT, idle({ f: true, fHeld: true, ...o })); sim.step(DT, idle({ fHeld: false })); };
+  it('with several forms ready F opens the picker at once, freezing the run; a second press (double-tap) starts the remembered form', () => {
     const a = setup(); expect(formChoices(a.s)).toEqual([1, 2, 3]); expect(selectedForm(a.s)).toBe(3);
-    a.sim.step(DT, idle({ f: true, fHeld: true })); expect(a.s.cinema).toBeNull();      // waits for the release: it might be a hold
-    a.sim.step(DT, idle({ fHeld: false })); expect(a.s.cinema?.to).toBe(3);
-    const b = setup(); run(b.sim, 0.5, idle({ fHeld: true })); expect(b.s.selector.open).toBe(true);
-    const first = b.s.selector.pick; expect(first).not.toBe(3);    // the hold stepped away from the default (descending: Cometheart next)
-    b.sim.step(DT, idle({ fHeld: false })); expect(first).toBe(2); expect(b.s.cinema?.to).toBe(2);
+    press(a.sim); expect(a.s.selector.open).toBe(true); expect(a.s.cinema).toBeNull(); expect(a.s.selector.pick).toBe(3);
+    const t = a.s.time; run(a.sim, 1); expect(a.s.time).toBe(t);      // frozen while the picker is open
+    press(a.sim); expect(a.s.cinema?.to).toBe(3); expect(a.s.selector.open).toBe(false);
   });
-  it('an explicit Cometheart pick is remembered, so a plain tap never silently swaps it for Form III', () => {
-    const a = setup(); a.s.selector.pick = 2; a.sim.step(DT, idle({ f: true, fHeld: true })); a.sim.step(DT, idle({ fHeld: false })); expect(a.s.cinema?.to).toBe(2);
+  it('1 / 2 / 3 start the card, move + confirm works, cancel closes without starting, and it times out by itself', () => {
+    const k = setup(); press(k.sim); k.sim.step(DT, idle({ selPick: 2 })); expect(k.s.cinema?.to).toBe(2);
+    const m = setup(); press(m.sim); m.sim.step(DT, idle({ selMove: -1 })); expect(m.s.selector.pick).toBe(2); m.sim.step(DT, idle({ selMove: -1 })); expect(m.s.selector.pick).toBe(1); m.sim.step(DT, idle({ selMove: 1 })); expect(m.s.selector.pick).toBe(2); m.sim.step(DT, idle({ selConfirm: true })); expect(m.s.cinema?.to).toBe(2);
+    const c = setup(); press(c.sim); c.sim.step(DT, idle({ selCancel: true })); expect(c.s.selector.open).toBe(false); expect(c.s.cinema).toBeNull(); expect(c.s.player.form).toBe(0);
+    const o = setup(); press(o.sim); run(o.sim, 4.2); expect(o.s.selector.open).toBe(false); expect(o.s.cinema).toBeNull();
   });
-  it('with only one full-Drive form (apex locked) F still starts Cometheart instantly, as in B12', () => {
-    const a = setup([], { apex: false }); a.sim.step(DT, idle({ f: true })); expect(a.s.cinema?.to).toBe(2);
+  it('an explicit Cometheart pick is remembered as the highlighted card', () => {
+    const a = setup(); a.s.selector.pick = 2; startForm(a.sim); expect(a.s.cinema?.to).toBe(2);
+  });
+  it('with exactly one ready form (Flarebound at 65%) F starts it at once', () => {
+    const a = setup(); a.s.player.drive = 70; a.sim.step(DT, idle({ f: true })); expect(a.s.selector.open).toBe(false); expect(a.s.player.form).toBe(1);
   });
 });
 
 describe('Form III reveal', () => {
   it('first activation freezes the whole run for ~3.6 s, repeats are ~1.3 s, and nothing leaks while frozen', () => {
     const { sim, s } = setup([[1180, 800, 60]]); s.enemies[0].speed = 60; s.player.dashCooldown = 2; s.player.riftCooldown = 3; s.selector.pick = 3;
-    sim.step(DT, idle({ f: true, fHeld: true })); sim.step(DT, idle({ fHeld: false })); expect(s.cinema).not.toBeNull(); expect(s.cinema!.dur).toBeGreaterThanOrEqual(3.4); expect(s.cinema!.dur).toBeLessThanOrEqual(3.8);
+    startForm(sim); expect(s.cinema).not.toBeNull(); expect(s.cinema!.dur).toBeGreaterThanOrEqual(3.4); expect(s.cinema!.dur).toBeLessThanOrEqual(3.8);
     const t0 = s.time, ex = s.enemies[0].x, cd = s.player.dashCooldown, rc = s.player.riftCooldown, hp = s.player.hp;
     run(sim, 1.5, idle({ x: 1, dash: true, beam: true, beamHeld: true, sphere: true }));
     expect([s.time, s.enemies[0].x, s.player.dashCooldown, s.player.riftCooldown, s.cast, s.player.hp]).toEqual([t0, ex, cd, rc, null, hp]);
     run(sim, APEX.cinemaFirst.dur); expect(s.cinema).toBeNull(); expect(s.player.form).toBe(3); expect(s.apexSeen).toBe(1);
     // repeat variant
-    s.player.form = 0; s.player.drive = 100; s.player.formCooldown = 0; s.selector.pick = 3; sim.step(DT, idle({ f: true, fHeld: true })); sim.step(DT, idle({ fHeld: false })); expect(s.cinema!.dur).toBeLessThanOrEqual(1.5);
+    s.player.form = 0; s.player.drive = 100; s.player.formCooldown = 0; s.selector.pick = 3; startForm(sim); expect(s.cinema!.dur).toBeLessThanOrEqual(1.5);
   });
   it('shoves and staggers nearby non-bosses at the break, never bosses; pause freezes the reveal; commit emits once', () => {
     const { sim, s } = setup([[1160, 800, 60], [2000, 800, 60]]); s.enemies.push(enemy(300, 1180, 840, 1000, 'warden')); const n0 = s.enemies[0].x, b0 = s.enemies[2].x; s.selector.pick = 3;
-    sim.step(DT, idle({ f: true, fHeld: true })); sim.step(DT, idle({ fHeld: false })); run(sim, 1.0); sim.togglePause(); const t = s.cinema!.t; run(sim, 1); expect(s.cinema!.t).toBe(t); sim.togglePause();
+    startForm(sim); run(sim, 1.0); sim.togglePause(); const t = s.cinema!.t; run(sim, 1); expect(s.cinema!.t).toBe(t); sim.togglePause();
     run(sim, APEX.cinemaFirst.breakAt - t + 0.05); expect(s.enemies[0].x).toBeGreaterThan(n0 + 30); expect(s.enemies[0].stagger).toBeGreaterThan(0); expect(s.enemies[2].x).toBe(b0);
     run(sim, 2); expect(s.abilityEvents.filter(e => e.kind === 'form3_commit').length).toBeLessThanOrEqual(1);
   });
-  it('after the reveal there is no free damage: i-frames cover the resume', () => { const r = setup(); r.s.selector.pick = 3; r.sim.step(DT, idle({ f: true, fHeld: true })); r.sim.step(DT, idle({ fHeld: false })); run(r.sim, APEX.cinemaFirst.dur + 0.02); expect(r.s.cinema).toBeNull(); expect(r.s.player.invulnerable).toBeGreaterThan(0.3); });
+  it('after the reveal there is no free damage: i-frames cover the resume', () => { const r = setup(); r.s.selector.pick = 3; startForm(r.sim); run(r.sim, APEX.cinemaFirst.dur + 0.02); expect(r.s.cinema).toBeNull(); expect(r.s.player.invulnerable).toBeGreaterThan(0.3); });
 });
 
 describe('glide, dash and drain', () => {

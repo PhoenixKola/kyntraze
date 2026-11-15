@@ -61,7 +61,7 @@ export class ArenaScene extends Phaser.Scene {
     if (this.disposed || !this.simulation) return;
     // Sample action key presses per authoritative simulation tick so 120Hz displays
     // cannot swallow a dash/Q/F press on a frame without a fixed step.
-    { const ptr = this.input.activePointer, w = this.cameras.main.getWorldPoint(ptr.x, ptr.y), pl = this.simulation.state.player, dx = w.x - pl.x, dy = w.y - (pl.y + 6), d = Math.hypot(dx, dy), moved = ptr.x !== this.lastPtrX || ptr.y !== this.lastPtrY || ptr.isDown; this.lastPtrX = ptr.x; this.lastPtrY = ptr.y; this.controller.setPointerAim(d > 14 ? { x: dx / d, y: dy / d } : null, moved); }   // B13: Silver Rift aim
+    { const ptr = this.input.activePointer, w = this.cameras.main.getWorldPoint(ptr.x, ptr.y), pl = this.simulation.state.player, dx = w.x - pl.x, dy = w.y - (pl.y + 6), d = Math.hypot(dx, dy), moved = ptr.x !== this.lastPtrX || ptr.y !== this.lastPtrY || ptr.isDown; this.lastPtrX = ptr.x; this.lastPtrY = ptr.y; this.controller.setPointerAim(d > 14 ? { x: dx / d, y: dy / d, d } : null, moved); this.controller.selectorOpen = pl && this.simulation.state.selector.open; }   // B13: Silver Rift aim
     let simDelta = delta; if (this.hitstopLeft > 0) { this.hitstopLeft -= delta; simDelta = 0; }   // B12: a visual hit-stop is just skipped sim ticks (the sim itself is never slowed or edited)
     this.fixed.tick(simDelta, dt => { this.lastInput = this.controller.read(); this.simulation.step(dt, this.lastInput); });
     const s = this.simulation.state;

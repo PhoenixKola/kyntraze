@@ -4,6 +4,7 @@ import { RIFT } from '../../content/stillfire';
 import { beamOrigin } from '../../sim/AbilitySystem';
 import type { Facing, HandAnchor } from '../../assets/kaiAnimation';
 import { FxPool } from './fxPool';
+import { GroundDecal, b14Key } from './b14fx';
 
 /** B13 Stillfire Apex effects: silver / ice-white, thin and quiet. Sprites are ImageGen art cut by art/characters/kai/form-iii/fx-scripts (manifest.json lists what exists; anything missing is skipped, never an error). */
 export const F3_FX_MANIFEST_KEY = 'f3fx-manifest';
@@ -37,6 +38,7 @@ export class ApexFx {
   private readonly shadow: Phaser.GameObjects.Image | null;
   private readonly halo: Phaser.GameObjects.Image | null;
   private readonly halo2: Phaser.GameObjects.Image | null;
+  private readonly ground: GroundDecal;   // B14: ImageGen silver ring on the floor under the hover
   private auraClock = 0;
   private readonly beamTex: Phaser.GameObjects.TileSprite | null;
   private readonly core: Phaser.GameObjects.Image | null;
@@ -58,6 +60,7 @@ export class ApexFx {
       const cv = scene.textures.createCanvas(gk, 128, 192); const cx = cv?.getContext();
       if (cv && cx) { const g = cx.createRadialGradient(64, 64, 2, 64, 64, 64); g.addColorStop(0, 'rgba(255,255,255,0.6)'); g.addColorStop(0.35, 'rgba(225,238,255,0.3)'); g.addColorStop(0.7, 'rgba(200,225,255,0.09)'); g.addColorStop(1, 'rgba(200,225,255,0)'); cx.setTransform(1, 0, 0, 1.5, 0, 0); cx.fillStyle = g; cx.fillRect(0, 0, 128, 128); cv.refresh(); }
     }
+    this.ground = new GroundDecal(scene, 'ring_f3', 0xdcecff, 0.16, 3.45);
     this.halo = scene.textures.exists(gk) ? scene.add.image(0, 0, gk).setDepth(9.6).setBlendMode(Phaser.BlendModes.ADD).setTint(SILVER).setVisible(false) : null;
     this.halo2 = scene.textures.exists(gk) ? scene.add.image(0, 0, gk).setDepth(9.55).setBlendMode(Phaser.BlendModes.ADD).setTint(ICE).setVisible(false) : null;
     this.beamTex = this.has('rift_beam_seg') ? scene.add.tileSprite(0, 0, 10, scene.textures.get(f3fxKey('rift_beam_seg')).getSourceImage().height, f3fxKey('rift_beam_seg')).setOrigin(0, 0.5).setBlendMode(Phaser.BlendModes.ADD).setDepth(10.5).setVisible(false) : null;
@@ -74,6 +77,10 @@ export class ApexFx {
   private spawn(key: string, x: number, y: number, o: { depth?: number; life: number; blend?: 'add' | 'normal'; tint?: number; vx?: number; vy?: number; ay?: number; s0?: number; s1?: number; a0?: number; a1?: number; rot?: number; spin?: number; delay?: number; ox?: number; oy?: number; sy?: number; fadeIn?: number }) {
     if (!this.has(key)) return;
     this.pool.spawn({ key: f3fxKey(key), x, y, depth: o.depth ?? 11, blend: o.blend ?? 'add', tint: o.tint ?? SILVER, ...o });
+  }
+  /** B14 ImageGen sprites (silver slash, glass shards, target reticle, bloom): additive, tinted, pooled with the rest. */
+  private b(key: string, x: number, y: number, o: { depth?: number; life: number; tint?: number; s0?: number; s1?: number; a0?: number; a1?: number; rot?: number; delay?: number; ox?: number; oy?: number; flipX?: boolean; sy?: number; spin?: number }) {
+    this.pool.spawn({ key: b14Key(key), x, y, depth: o.depth ?? 11.4, blend: 'add', tint: o.tint ?? WHITE, ...o });
   }
   private pulse(a: number, rate: number) { this.flashA = Math.max(this.flashA, a); this.flashRate = rate; }
   private ring(x: number, y: number, s: number, life = 0.6, tint = SILVER, a = 0.7) { this.spawn('ring_ripple', x, y, { depth: 3.7, life, tint, s0: 0.2, s1: s, a0: a, a1: 0, sy: 0.7 }); }
@@ -95,6 +102,7 @@ export class ApexFx {
     if (c.dt > 0) this.clock += dt;
     const k = hero.scaleX / 0.5, bodyY = c.y - 40 * k;
     const reduced = c.reduced, thin = reduced ? 0.4 : c.crowded ? 0.55 : 1;
+    this.ground.update(dt, c.x, c.y, c.f3 && s.phase !== 'dead' && !cin, 100 * k, c.dashing ? 0.6 : 0, reduced);
     // ---- events raised by the sim since the last frame
     for (const ev of s.abilityEvents) {
       if (ev.id <= this.lastEvent) continue; this.lastEvent = ev.id;
@@ -104,9 +112,37 @@ export class ApexFx {
         case 'form3_break': this.ring(ev.x, c.y, 5, 1.1, SILVER, 0.55); this.spawn('distort_ring', ev.x, c.y, { depth: 3.6, life: 1.2, tint: ICE, s0: 0.3, s1: 3.6, a0: 0.28, a1: 0, sy: 0.7 }); this.floatRocks(ev.x, c.y, reduced ? 3 : 9, 120, 2.4); this.pulse(reduced ? 0.1 : 0.2, 3); if (!reduced) this.scene.cameras.main.shake(90, 0.0012); break;
         case 'rift_blink': { const nx = s.player.x; this.spawn('blink_streak', (ev.x + nx) / 2, ev.y + (c.y - s.player.y) - 38 * k, { depth: 10.2, life: 0.2, tint: WHITE, s0: Math.max(0.4, Math.hypot(nx - ev.x, s.player.y - ev.y) / 120), s1: Math.max(0.4, Math.hypot(nx - ev.x, s.player.y - ev.y) / 120), a0: 0.9, a1: 0, rot: Math.atan2(s.player.y - ev.y, nx - ev.x) }); this.ghost(hero, 0.35, 0.5, SILVER, ev.x, ev.y + (c.y - s.player.y)); this.ring(nx, c.y, 1.4, 0.45, SILVER, 0.7); break; }
         case 'rift_fire': { const cast = s.cast; this.pulse(reduced ? 0 : 0.12, 9); if (cast && cast.kind === 'rift') { const o = c.hand?.m ?? beamOrigin(s, cast); this.beam = { ox: o.x, oy: o.y, dx: cast.dirX, dy: cast.dirY, len: cast.len, age: 0, fire: RIFT.fire[cast.tier ?? 0], tier: cast.tier ?? 0 }; this.spawn('rift_flash', o.x, o.y, { depth: 11.5, life: 0.28, tint: WHITE, s0: 0.5 + 0.3 * (cast.tier ?? 0), s1: 1.3 + 0.4 * (cast.tier ?? 0), a0: 1, a1: 0 }); this.ring(o.x, o.y, 1.6 + 0.4 * (cast.tier ?? 0), 0.5, SILVER, 0.7); } break; }
-        case 'reversal_hit': { this.strikeFlash(ev.x, ev.y - 22 * k, 1); this.spawn('strike_slash', ev.x, ev.y - 22 * k, { depth: 11.3, life: 0.2, tint: WHITE, s0: 0.9, s1: 1.2, a0: 1, a1: 0, rot: (ev.n ?? 0) * 1.1 + 0.4 }); if (Number.isFinite(this.prevX)) this.ghost(hero, 0.42, 0.45, SILVER, this.prevX, this.prevY); break; }
-        case 'reversal_flash': this.strikeFlash(ev.x, ev.y - 22 * k, 1.35); break;
-        case 'reversal_end': this.ring(ev.x, c.y, 2.2, 0.5, WHITE, 0.6); break;
+        case 'reversal_start': {   // the world goes still: a cold hush, a refraction ring and a soft bloom at Kai
+          this.ring(ev.x, c.y, 3.2, 0.7, ICE, 0.5); this.spawn('distort_ring', ev.x, c.y, { depth: 3.6, life: 0.7, tint: ICE, s0: 0.3, s1: 3.2, a0: 0.4, a1: 0, sy: 0.7 });
+          this.b('bloom', ev.x, bodyY, { life: 0.35, s0: 0.3, s1: 1.2, a0: 0.7, a1: 0, tint: ICE });
+          if (!reduced) { this.dimA = Math.max(this.dimA, 0.2); this.pulse(0.1, 6); }
+          break;
+        }
+        case 'reversal_hit': {
+          const tx = ev.x, ty = ev.y - 22 * k, ang0 = Number.isFinite(this.prevX) ? Math.atan2(ty - (this.prevY - 30 * k), tx - this.prevX) : (ev.n ?? 0) * 1.1;
+          this.strikeFlash(tx, ty, 1);
+          if (Number.isFinite(this.prevX)) {
+            const sx = this.prevX, sy = this.prevY - 30 * k, d = Math.hypot(tx - sx, ty - sy);
+            const sl = Math.max(0.5, d / 140); this.b('slash', (sx + tx) / 2, (sy + ty) / 2, { depth: 10.9, life: 0.26, tint: WHITE, rot: ang0, s0: sl, s1: sl * 1.05, sy: 0.9 / sl, a0: 1, a1: 0 });   // the path Kai just cut
+            if (!reduced) this.b('slash', (sx + tx) / 2, (sy + ty) / 2 + 3, { depth: 10.8, life: 0.4, tint: ICE, rot: ang0, s0: sl, s1: sl * 1.1, a0: 0.55, a1: 0, sy: 1.6 / sl });
+            this.ghost(hero, 0.42, 0.45, SILVER, this.prevX, this.prevY);
+          }
+          this.b('target', tx, ty, { depth: 11.5, life: 0.34, tint: WHITE, s0: 1.7, s1: 0.85, a0: 1, a1: 0, rot: 0 });   // the mark snaps onto the target
+          this.b('shatter', tx, ty, { depth: 11.2, life: 0.32, tint: ICE, s0: 0.3, s1: 0.95, a0: 1, a1: 0, rot: rnd() * 6 });
+          this.spawn('strike_slash', tx, ty, { depth: 11.3, life: 0.2, tint: WHITE, s0: 0.9, s1: 1.2, a0: 1, a1: 0, rot: ang0 + 1.2 });
+          if (!reduced) { this.b('shards', tx, ty, { depth: 11.4, life: 0.34, tint: WHITE, s0: 0.4, s1: 1.25, a0: 1, a1: 0, rot: rnd() * 6, spin: 1.2 }); this.hitstop = Math.max(this.hitstop, 35); }
+          break;
+        }
+        case 'reversal_flash': {   // every struck point lights at once: bloom, converging slashes, a shatter ring
+          const fx = ev.x, fy = ev.y - 22 * k;
+          this.strikeFlash(fx, fy, 1.5);
+          this.b('bloom', fx, fy, { depth: 11.6, life: 0.5, tint: WHITE, s0: 0.3, s1: reduced ? 1.2 : 2.0, a0: 1, a1: 0 });
+          this.b('xslash', fx, fy, { depth: 11.5, life: 0.3, tint: WHITE, s0: 1.5, s1: 0.8, a0: 1, a1: 0, rot: 0.15 });
+          this.b('shatter', fx, fy, { depth: 11.3, life: 0.5, tint: ICE, s0: 0.5, s1: 1.7, a0: 0.9, a1: 0, rot: rnd() * 6 });
+          if (!reduced) { this.pulse(0.1, 5); this.hitstop = Math.max(this.hitstop, 70); for (let i = 0; i < 3; i++) this.b('slash', fx, fy, { depth: 11.4, life: 0.24, tint: ICE, rot: (i / 3) * Math.PI + 0.3, s0: 0.2, s1: 0.8, a0: 0.9, a1: 0 }); }
+          break;
+        }
+        case 'reversal_end': this.ring(ev.x, c.y, 2.6, 0.55, WHITE, 0.6); this.b('bloom', ev.x, bodyY, { life: 0.3, s0: 0.4, s1: 1.1, a0: 0.6, a1: 0, tint: ICE }); break;
         case 'evasion': { this.ghost(hero, 0.6, 0.7, 0xf2f8ff, ev.x, ev.y + (c.y - s.player.y)); this.ring(ev.x, ev.y + (c.y - s.player.y), 1.8, 0.5, WHITE, 0.8); this.spawn('afterimage_streak', (ev.x + s.player.x) / 2, bodyY, { depth: 10.2, life: 0.22, tint: WHITE, a0: 0.8, a1: 0, rot: Math.atan2(s.player.y - ev.y, s.player.x - ev.x) }); break; }
         case 'finisher3': {
           this.hitstop = Math.max(this.hitstop, reduced ? 0 : 150); const fy = ev.y + (c.y - s.player.y) - 30 * k;
@@ -134,6 +170,7 @@ export class ApexFx {
       if (cin.t > 1.1 && !cin.committed && this.rockClock <= 0) { this.rockClock = 0.16; this.floatRocks(c.x, c.y, 1, 46 * k, 1.8); this.spawn('dust_a', c.x + (rnd() - 0.5) * 40 * k, c.y, { depth: 4.2, life: 0.9, tint: ROCK, blend: 'normal', vy: -18, s0: 0.3, s1: 0.7, a0: 0.35, a1: 0 }); }
     }
     this.moteClock -= dt; this.rockClock -= dt;
+    if (!cin && !reduced && s.cast?.kind === 'reversal') coolT = Math.max(coolT, 0.09);
     this.dimA += ((dimT || (this.dimA > 0.26 ? this.dimA : 0)) - this.dimA) * Math.min(1, dt * 7);
     if (!cin && this.dimA < 0.26) this.dimA += (0 - this.dimA) * Math.min(1, dt * 7);
     this.coolA += (coolT - this.coolA) * Math.min(1, dt * 6); this.zoomMul += (zoomT - this.zoomMul) * Math.min(1, dt * (cin ? 9 : 5)); if (Math.abs(this.zoomMul - 1) < 0.0005 && !cin) this.zoomMul = 1;
@@ -222,5 +259,5 @@ export class ApexFx {
     this.pool.update(dt);
   }
   clear() { this.pool.clear(); for (const g of this.ghosts) g.spr.destroy(); this.ghosts = []; this.beam = null; this.beamTex?.setVisible(false); this.core?.setVisible(false); this.dim.setVisible(false); this.cool.setVisible(false); this.flashRect.setVisible(false); this.zoomMul = 1; this.dimA = 0; this.coolA = 0; this.flashA = 0; this.g.clear(); this.under.clear(); this.shadow?.setVisible(false); this.halo?.setVisible(false); this.halo2?.setVisible(false); }
-  destroy() { this.clear(); this.pool.destroy(); this.g.destroy(); this.under.destroy(); this.dim.destroy(); this.cool.destroy(); this.flashRect.destroy(); this.shadow?.destroy(); this.halo?.destroy(); this.halo2?.destroy(); this.beamTex?.destroy(); this.core?.destroy(); }
+  destroy() { this.clear(); this.pool.destroy(); this.g.destroy(); this.under.destroy(); this.dim.destroy(); this.cool.destroy(); this.flashRect.destroy(); this.ground.destroy(); this.shadow?.destroy(); this.halo?.destroy(); this.halo2?.destroy(); this.beamTex?.destroy(); this.core?.destroy(); }
 }

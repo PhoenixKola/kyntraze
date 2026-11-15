@@ -13,7 +13,7 @@ export const APEX = {
   hoverPx: 7,
   /** Glide: velocity eases toward the input (seconds to reach ~63 %). */
   glideEase: 0.09,
-  /** Hold F this long (when more than one form is ready) to open the selector, then it steps on every `selectStep` seconds. */
+  /** Legacy hold-to-select timings (the B14 selector opens on the press and no longer uses them). */
   selectHold: 0.32, selectStep: 0.55,
 } as const;
 

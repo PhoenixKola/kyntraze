@@ -82,7 +82,7 @@ describe('both arenas support the full run', () => {
     const sim = new Simulation(21, arena), s = sim.state; let a = 0; const log: number[] = [];
     for (let i = 0; i < 60 * 60 * 24 && s.phase !== 'victory'; i++) {
       a += 0.012; const near = s.enemies.find(e => e.kind === 'seraph' && e.hp > 0);
-      sim.step(1 / 60, near && Math.hypot(near.x - s.player.x, near.y - s.player.y) > 150 ? { ...input, x: (near.x - s.player.x) / 100, y: (near.y - s.player.y) / 100, beam: i % 420 === 3, sphere: i % 900 === 5 } : { ...input, x: Math.cos(a), y: Math.sin(a), q: i % 510 === 0, beam: i % 420 === 3, sphere: i % 960 === 5, f: s.player.drive >= 70 });
+      sim.step(1 / 60, near && Math.hypot(near.x - s.player.x, near.y - s.player.y) > 150 ? { ...input, x: (near.x - s.player.x) / 100, y: (near.y - s.player.y) / 100, beam: i % 420 === 3, sphere: i % 900 === 5, selConfirm: s.selector.open } : { ...input, x: Math.cos(a), y: Math.sin(a), q: i % 510 === 0, beam: i % 420 === 3, sphere: i % 960 === 5, f: s.player.drive >= 70, selConfirm: s.selector.open });   // the bot confirms the form picker the moment it opens
       s.player.hp = s.player.maxHp = 1e7; if (s.phase === 'upgrade') { if (s.rewardPick) log.push(s.time); sim.chooseUpgrade(s.upgradeOffers[0]); }
     }
     expect(s.phase).toBe('victory'); expect(s.time).toBeGreaterThan(BOSS_SCHEDULE[1].at); expect(s.time).toBeLessThan(1500); expect(s.bossesDefeated).toBe(2); expect(log.length).toBe(1);

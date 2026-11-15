@@ -18,9 +18,13 @@ export function riftAim(s: GameState): { x: number; y: number } {
   return normalize(s.player.aimX, s.player.aimY);
 }
 /** Called every tick with the raw input: remembers the last pointer / stick direction. */
-export function trackFreeAim(s: GameState, ax: number | undefined, ay: number | undefined, src: 'pointer' | 'stick' | undefined) {
+/** The free aim only while it is fresh (pointer / right stick), else null: Lance, Dragonfang, Nova, Cannon and the Rift all aim with this. */
+export function freeAim(s: GameState): { x: number; y: number; d?: number } | null {
+  const a = s.aim; return a.src !== 'none' && s.time - a.at <= RIFT.aimHold ? { x: a.x, y: a.y, d: a.src === 'pointer' ? a.d : undefined } : null;
+}
+export function trackFreeAim(s: GameState, ax: number | undefined, ay: number | undefined, src: 'pointer' | 'stick' | undefined, dist?: number) {
   if (ax === undefined || ay === undefined || (ax === 0 && ay === 0)) return;
-  const n = normalize(ax, ay); s.aim.x = n.x; s.aim.y = n.y; s.aim.at = s.time; s.aim.src = src ?? 'pointer';
+  const n = normalize(ax, ay); s.aim.x = n.x; s.aim.y = n.y; s.aim.at = s.time; s.aim.src = src ?? 'pointer'; s.aim.d = dist;
 }
 
 /** Is Kai standing safely at (x, y)? Not in a wall, not inside a body, not in a telegraphed hazard or a bolt. */

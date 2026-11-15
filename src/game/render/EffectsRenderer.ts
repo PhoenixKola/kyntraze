@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { GameState } from '../../sim/GameState';
 import { KAI_GROUND_DY } from '../../assets/kaiAnimation';
 import { FxPool, vfxKey } from './fxPool';
+import { b14Key } from './b14fx';
 
 /** Basic-attack bolt, hit bursts, dash and Q (Impact) visuals: ImageGen sprites (cyan Base / solar Form I colour ramps), all pooled. Driven by the sim's `impacts` list; each impact is consumed once. */
 const MAX_HIT_BURSTS_PER_FRAME = 8;
@@ -24,6 +25,7 @@ export class EffectsRenderer {
       if (e.kind === 'shot') {
         const tx = e.targetX ?? e.x, ty = e.targetY ?? e.y; const dx = tx - e.x, dy = ty - e.y; const dist = Math.max(24, Math.hypot(dx, dy)); const ang = Math.atan2(dy, dx);
         const flight = 0.09, sc = solar ? 1.0 : 0.82;
+        if (p.form >= 1 && this.shot(p.form, e.x, e.y, dx, dy, ang, reduced)) continue;
         // bolt: bright head at the sprite's right edge (origin 1,0.5), comet tail streams behind it; it travels fist -> target, then the hit burst (from the sim's 'hit') lands
         this.pool.spawn({ key: k('bolt'), x: e.x, y: e.y, depth: 10.4, life: flight, blend: 'normal', ox: 1, oy: 0.5, rot: ang, vx: dx / flight, vy: dy / flight, s0: sc * 0.6, s1: sc, a0: 1, a1: 1 });
         if (!reduced) {
@@ -36,6 +38,7 @@ export class EffectsRenderer {
           this.pool.spawn({ key: vfxKey('hit', true), x: e.x, y: e.y - 8, depth: 10.6, life: 0.25, blend: 'normal', tint: 0xff7a6a, s0: 0.4, s1: 0.85, a0: 1, a1: 0, rot: rnd() * 6 });
         } else if (bursts++ < MAX_HIT_BURSTS_PER_FRAME) {
           const s = 0.5 + rnd() * 0.1;
+          if (bursts <= 3) this.hitFx(p.form, e.x, e.y - 8, Math.atan2(e.y - p.y, e.x - p.x), reduced);
           this.pool.spawn({ key: k('hit'), x: e.x, y: e.y - 8, depth: 11, life: 0.18, blend: 'normal', s0: s * 0.5, s1: s * (solar ? 1.4 : 1.2), a0: 1, a1: 0, rot: rnd() * 6.28 });
           if (!reduced && bursts <= 3) for (let i = 0; i < 2; i++) { const a = rnd() * 6.28, v = 90 + rnd() * 90; this.pool.spawn({ key: vfxKey('debris' + ((rnd() * 4) | 0), solar), x: e.x, y: e.y - 8, depth: 11, life: 0.28, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, ay: 380, s0: 0.45, s1: 0.2, a0: 1, a1: 0, rot: rnd() * 6, spin: 8 }); }
         }
@@ -59,6 +62,51 @@ export class EffectsRenderer {
       }
     } else this.trailClock = 0;
     this.pool.update(dt);
+  }
+
+  /** Per-form strike: each form throws its own shape (flame lash / comet streak / silver jab), not the same bolt recoloured. Returns true when it replaces the Base bolt. */
+  private shot(form: number, x: number, y: number, dx: number, dy: number, ang: number, reduced: boolean) {
+    const pool = this.pool, rnd = Math.random;
+    if (form === 1) {          // Flarebound: a flame lash that licks out from the knuckles
+      const flight = 0.1, key = b14Key(rnd() < 0.5 ? 'lash_a' : 'lash_b');
+      pool.spawn({ key, x, y, depth: 10.4, life: flight + 0.06, blend: 'add', tint: 0xff7a1a, ox: 1, oy: 0.5, rot: ang, vx: dx / flight, vy: dy / flight, s0: 0.5, s1: 0.95, sy: 1 + (rnd() - 0.5) * 0.3, a0: 1, a1: 0.2 });
+      pool.spawn({ key, x, y, depth: 10.5, life: flight + 0.04, blend: 'add', tint: 0xffe08a, ox: 1, oy: 0.5, rot: ang, vx: dx / flight, vy: dy / flight, s0: 0.3, s1: 0.6, a0: 1, a1: 0.3 });
+      if (!reduced) pool.spawn({ key: vfxKey('embers', true), x, y, depth: 10.3, life: 0.22, blend: 'add', rot: ang, vx: dx * 2, vy: dy * 2 - 30, s0: 0.7, s1: 0.4, a0: 0.9, a1: 0 });
+      return true;
+    }
+    if (form === 2) {          // Cometheart: a bright comet streak, fast, with a gold flash at the fist
+      const flight = 0.07;
+      pool.spawn({ key: b14Key('comet_streak'), x, y, depth: 10.4, life: flight + 0.08, blend: 'add', tint: 0xffc83c, ox: 1, oy: 0.5, rot: ang, vx: dx / flight, vy: dy / flight, s0: 0.7, s1: 1.25, a0: 1, a1: 0.1 });
+      pool.spawn({ key: b14Key('comet_streak'), x, y, depth: 10.5, life: flight + 0.05, blend: 'add', tint: 0xfff6c8, ox: 1, oy: 0.5, rot: ang, vx: dx / flight, vy: dy / flight, s0: 0.38, s1: 0.7, a0: 1, a1: 0.2 });
+      if (!reduced) pool.spawn({ key: b14Key('comet_flash'), x, y, depth: 10.6, life: 0.14, blend: 'add', tint: 0xffe28a, s0: 0.2, s1: 0.5, a0: 0.9, a1: 0, rot: rnd() * 3 });
+      return true;
+    }
+    // Stillfire: a razor-thin silver jab and its fainter echo, no flash at the fist
+    const flight = 0.055;
+    pool.spawn({ key: b14Key('jab'), x, y, depth: 10.4, life: flight + 0.09, blend: 'add', tint: 0xeaf4ff, ox: 1, oy: 0.5, rot: ang, vx: dx / flight, vy: dy / flight, s0: 0.8, s1: 1.15, a0: 1, a1: 0 });
+    if (!reduced) pool.spawn({ key: b14Key('jab'), x: x - dx * 0.02, y: y - dy * 0.02, depth: 10.3, life: flight + 0.14, blend: 'add', tint: 0x9fc8ff, ox: 1, oy: 0.5, rot: ang, vx: dx / (flight * 1.3), vy: dy / (flight * 1.3), s0: 0.6, s1: 1.0, a0: 0.55, a1: 0, delay: 0.035 });
+    return true;
+  }
+  /** Per-form hit: Base = crisp crescent + pop, Flarebound = ember burst, Cometheart = star flash + flat shockwave, Stillfire = crossing refraction slashes and a glint. */
+  private hitFx(form: number, x: number, y: number, ang: number, reduced: boolean) {
+    const pool = this.pool, rnd = Math.random;
+    if (form === 0) {
+      pool.spawn({ key: b14Key(rnd() < 0.5 ? 'arc_a' : 'arc_b'), x: x - Math.cos(ang) * 6, y, depth: 11.1, life: 0.14, blend: 'add', tint: 0xbff6ff, rot: ang + Math.PI, s0: 0.55, s1: 0.95, a0: 1, a1: 0 });
+      if (!reduced) pool.spawn({ key: b14Key('pop'), x, y, depth: 11.2, life: 0.12, blend: 'add', tint: 0xffffff, s0: 0.3, s1: 0.8, a0: 0.9, a1: 0, rot: rnd() });
+    } else if (form === 1) {
+      pool.spawn({ key: b14Key('ember_burst'), x, y, depth: 11.1, life: 0.22, blend: 'add', tint: 0xff8a2a, s0: 0.35, s1: 1.0, a0: 1, a1: 0, rot: rnd() * 6 });
+      if (!reduced) pool.spawn({ key: b14Key('ember_burst'), x, y, depth: 11.2, life: 0.15, blend: 'add', tint: 0xffe9a0, s0: 0.2, s1: 0.55, a0: 1, a1: 0, rot: rnd() * 6 });
+    } else if (form === 2) {
+      pool.spawn({ key: b14Key('comet_flash'), x, y, depth: 11.2, life: 0.2, blend: 'add', tint: 0xffe28a, s0: 0.35, s1: 1.05, a0: 1, a1: 0, rot: rnd() * 3 });
+      pool.spawn({ key: b14Key('shock_ring'), x, y: y + 14, depth: 3.9, life: 0.3, blend: 'add', tint: 0xffc83c, s0: 0.25, s1: 1.1, a0: 0.9, a1: 0 });
+    } else {
+      const base = ang + (rnd() < 0.5 ? 0.9 : -0.9);
+      pool.spawn({ key: b14Key('refract'), x, y, depth: 11.2, life: 0.18, blend: 'add', tint: 0xeaf4ff, rot: base, s0: 0.6, s1: 0.95, a0: 1, a1: 0 });
+      if (!reduced) {
+        pool.spawn({ key: b14Key('refract'), x, y, depth: 11.2, life: 0.2, blend: 'add', tint: 0xbfdcff, rot: base + 2.1, s0: 0.5, s1: 0.85, a0: 0.9, a1: 0, delay: 0.05, flipX: true });
+        pool.spawn({ key: b14Key('glint'), x, y, depth: 11.3, life: 0.2, blend: 'add', tint: 0xffffff, s0: 0.3, s1: 0.8, a0: 1, a1: 0, delay: 0.03 });
+      }
+    }
   }
 
   private spawnDashStart(x: number, y: number, dx: number, dy: number, solar: boolean, reduced: boolean) {

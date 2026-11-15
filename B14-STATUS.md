@@ -1,4 +1,4 @@
-# B14 - UI / HUD / menu overhaul ("Relic Plate")  [LOCAL commit, NOT pushed, owner review open]
+# B14 - UI / HUD / menu overhaul ("Relic Plate")  [pushed on owner request after pass 2; owner review open]
 
 Direction + tokens: `UI-ART-DIRECTION.md`. Kit: `public/ui/kit/` (~166 KB, `kit.json` manifest, rebuild `art/ui/kit/build_kit.py` from ImageGen sheets in `art/ui/kit/sheets/`, git-ignored 16 MB). Implementation: `src/app/kit.css` (loaded after `ui.css`, overrides it) plus small TSX edits (boss plate structure, form crest, hero form row, settings ON/OFF text, F-slot form tones).
 
@@ -17,3 +17,10 @@ Battle HUD (health/XP/Drive, clock, minimap, pause, ability bar, form selector, 
 - kit.css overrides ui.css rather than replacing it: dead rules remain in ui.css (cleanup candidate, B20).
 - 640x360 HUD uses a px floor (--u >= .8px) so it is ~20% larger than pure scale; clock/health are close but non-overlapping (hud-responsive test passes).
 - Level-up modal covers the top HUD (as before).
+
+## Owner pass 2 (16 items)
+UI: per-icon optical centring (measured), bar rims, Kai key-art hero card (ImageGen, `public/ui/kai-keyart.webp`, source `art/ui/kit/hero/`), seed field + single-line Deploy, richer modal headers, lv-art framed + hover zoom/sheen, build-chip tooltip (name, rarity, rank, blurb), living Drive bar per form (Form I flicker, II gold beat, III silver breathe, one-shot burst on activation).
+Gameplay: E/R aim by mouse/right stick in Base/F1/F2 (`aim.test.ts`); new form selector (F opens immediately, 1/2/3, A/D, click, pad; run frozen while open, 4 s auto-cancel; double-tap F = remembered form).
+VFX: Form II ground sigil (ImageGen, `public/art/fx/b14`), Cometbreaker rectangle replaced by fist glows, per-form auto-attack looks, Stillfire Reversal slashes/reticles/shards/bloom. Evidence: `art/ui/review/b14/after/vfx/`.
+Checks: tsc clean; vitest 279/279; Playwright 46 specs (menus, hud, pause, controller, bosses, boot, arenas, survival, cometheart, stillfire, abilities) pass; cometheart tolerance loosened 0.05 -> 0.15 s for the selector.
+NOT VERIFIED: motion/feel of everything above (stills only), selector feel, aim feel with a real mouse/pad, Reversal hit-stop chains, real GPU. The Reversal slash-thickness tweak was not re-shot.

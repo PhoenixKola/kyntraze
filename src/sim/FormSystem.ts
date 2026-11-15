@@ -43,27 +43,26 @@ export function activateForm(state: GameState, want?: 1 | 2 | 3) {
   emit(state, apex ? 'form3_start' : 'form2_start', p.x, p.y, first ? 1 : 0);
   return true;
 }
-const stepPick = (s: GameState) => {
-  const c = formChoices(s); if (!c.length) return; const cur = s.selector.pick && c.includes(s.selector.pick) ? s.selector.pick : (primary(c).at(-1) as 1 | 2 | 3);
-  s.selector.pick = c[(c.indexOf(cur) - 1 + c.length) % c.length];   // descending from the default: Stillfire -> Cometheart -> Flarebound
-};
-/** F handling: with a single sensible form a press starts it at once (unchanged B12 feel); when several are ready a tap starts the selected one on release and a hold opens the selector (cycles, release confirms). */
-export function formInput(s: GameState, down: boolean, wasDown: boolean, dt: number) {
-  const sel = s.selector; const c = formChoices(s);
-  if (down && !wasDown) {
-    sel.open = false; sel.step = 0; sel.held = 0;
-    const pr = primary(c), explicit = sel.pick !== 0 && c.includes(sel.pick) && sel.pick !== pr[0];
-    if (!c.length) sel.held = -1;
-    else if (c.length === 1 || (pr.length === 1 && !explicit)) { activateForm(s); sel.held = -1; }
-  } else if (down) {
-    if (sel.held < 0) return;
-    sel.held += dt;
-    if (!sel.open) { if (sel.held >= APEX.selectHold && c.length >= 2) { sel.open = true; sel.step = 0; stepPick(s); } }
-    else { sel.step += dt; if (sel.step >= APEX.selectStep) { sel.step = 0; stepPick(s); } }
-  } else {
-    if (wasDown && sel.held >= 0) activateForm(s);
-    sel.open = false; sel.held = 0;
-  }
+/** Seconds the selector may stay open before it cancels itself (the sim is frozen meanwhile). */
+export const SELECTOR_MAX = 4;
+/** F: one ready form starts at once; several open the selector immediately (the sim freezes while it is open). A press while it is open confirms the highlighted card, so a quick double-tap of F starts the remembered form. Only press edges matter. */
+export function formInput(s: GameState, down: boolean, wasDown: boolean) {
+  if (!down || wasDown) return;
+  const c = formChoices(s); if (!c.length) return;
+  if (s.selector.open) { activateForm(s, s.selector.pick || undefined); return; }
+  if (c.length === 1) { activateForm(s); return; }
+  s.selector.open = true; s.selector.held = 0; s.selector.step = 0; s.selector.pick = selectedForm(s) ?? c.at(-1)!;
+}
+export interface SelectorCmd { pick?: number; move?: number; confirm?: boolean; cancel?: boolean; fEdge?: boolean }
+/** One tick while the selector is open: only its own input runs, the run itself does not advance. */
+export function updateSelector(s: GameState, dt: number, cmd: SelectorCmd) {
+  const sel = s.selector, c = formChoices(s);
+  if (c.length < 2) { sel.open = false; return; }
+  sel.held += dt;
+  if (cmd.cancel || sel.held >= SELECTOR_MAX) { sel.open = false; return; }
+  if (cmd.pick && cmd.pick >= 1 && cmd.pick <= c.length) { activateForm(s, c[cmd.pick - 1]); return; }
+  if (cmd.move) { const cur = Math.max(0, c.indexOf(sel.pick as 1 | 2 | 3)); sel.pick = c[(cur + (cmd.move > 0 ? 1 : -1) + c.length) % c.length]; sel.held = 0; }
+  if (cmd.confirm || cmd.fEdge) activateForm(s, sel.pick || undefined);
 }
 /** One frozen-world tick of the cinematic. Nothing else in the sim advances while this runs (see Simulation.step). */
 export function updateCinema(s: GameState, dt: number) {

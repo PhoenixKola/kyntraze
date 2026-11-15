@@ -8,7 +8,7 @@ import { updateAutoWeapon, activateQ } from './WeaponSystem';
 import { updateContactDamage } from './CombatSystem';
 import { collectPickups } from './PickupSystem';
 import { applyUpgrade, createOffer, gainXp } from './UpgradeSystem';
-import { formInput, updateCinema } from './FormSystem';
+import { formInput, updateCinema, updateSelector } from './FormSystem';
 import { updateDrive } from './DriveSystem';
 import { pruneDeadEntities } from './EntityRegistry';
 import type { UpgradeId } from '../content/upgrades';
@@ -28,11 +28,16 @@ export class Simulation {
   step(dt: number, input: InputState) {
     const s = this.state; if (s.phase !== 'running') return;
     if (s.cinema) { updateCinema(s, dt); this.fHeld = !!(input.f || input.fHeld); this.qHeld = input.q; this.eHeld = !!input.beam; this.rHeld = !!input.sphere; return; }   // B12: the reveal freezes the whole run (clock, enemies, shots, hazards, cooldowns, i-frames)
+    if (s.selector.open) {   // the form selector freezes the run just like the reveal; only its own input is read
+      const fd = !!(input.f || input.fHeld); trackAim(s, input);
+      updateSelector(s, dt, { pick: input.selPick, move: input.selMove, confirm: input.selConfirm, cancel: input.selCancel, fEdge: fd && !this.fHeld });
+      this.fHeld = fd; this.qHeld = input.q; this.eHeld = !!input.beam || !!input.beamHeld; this.rHeld = !!input.sphere; return;
+    }
     s.time += dt;
     trackAim(s, input);
     movePlayer(s, input, dt);
     if (input.q && !this.qHeld) activateQ(s);
-    const fDown = !!(input.f || input.fHeld); formInput(s, fDown, this.fHeld, dt);   // the press edge counts too, so a tap shorter than one tick is never lost
+    const fDown = !!(input.f || input.fHeld); formInput(s, fDown, this.fHeld);   // the press edge counts too, so a tap shorter than one tick is never lost
     if (input.beam && !this.eHeld) startAbility(s, 'beam');
     if (input.sphere && !this.rHeld) startAbility(s, 'sphere');
     this.qHeld = input.q; this.fHeld = fDown; this.eHeld = !!input.beam || !!input.beamHeld; this.rHeld = !!input.sphere; s.eHeld = !!input.beamHeld;

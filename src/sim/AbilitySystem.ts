@@ -8,7 +8,7 @@ import { CANNON, CARRY, DRAGON } from '../content/cometheart';
 import { isBoss } from '../content/enemies';
 import { KAI_GROUND_DY, KAI_SCALE } from '../assets/kaiAnimation';
 import { RIFT, REVERSAL } from '../content/stillfire';
-import { startRift, startReversal, updateRift, updateReversal, trackFreeAim } from './ApexSystem';
+import { startRift, startReversal, updateRift, updateReversal, trackFreeAim, freeAim } from './ApexSystem';
 
 const EVENT_CAP = 24;
 function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number) {
@@ -37,7 +37,7 @@ export function castMoveScale(s: GameState): number {
 
 /** Remember the facing from real movement input; it is the aim for both abilities. */
 export function trackAim(s: GameState, input: InputState) {
-  trackFreeAim(s, input.aimX, input.aimY, input.aimSrc);
+  trackFreeAim(s, input.aimX, input.aimY, input.aimSrc, input.aimDist);
   const d = normalize(input.x, input.y); if (d.x !== 0 || d.y !== 0) { s.player.aimX = d.x; s.player.aimY = d.y; }
 }
 
@@ -73,7 +73,21 @@ function pickAim(s: GameState, range: number = BEAM.length, cosLimit: number = B
   return best ?? base;
 }
 
+/** Nova Bloom with a free aim (pointer / right stick): the blast lands where the pointer is (or, on a stick, along the aim at the default range), pulled onto the densest enemy cluster right there; walls pull it back. */
+function aimedSphereTarget(s: GameState, a: { x: number; y: number; d?: number }): { x: number; y: number } {
+  const p = s.player; let r = clamp(a.d ?? SPHERE.defaultRange, 70, SPHERE.maxRange);
+  while (r > 0 && blocked(p.x + a.x * r, p.y + a.y * r, 8)) r -= 10;
+  const pt = { x: p.x + a.x * r, y: p.y + a.y * r }; let best: { x: number; y: number } | null = null; let bestScore = -Infinity;
+  const near = s.enemies.filter(e => e.hp > 0 && Math.hypot(e.x - p.x, e.y - p.y) <= SPHERE.maxRange + 40);
+  for (const e of near) {
+    const dp = Math.hypot(e.x - pt.x, e.y - pt.y); if (dp > SPHERE.clusterRadius * 0.9) continue;
+    let n = 0; for (const o of near) if (Math.hypot(o.x - e.x, o.y - e.y) <= SPHERE.clusterRadius) n++;
+    const score = n * 1000 - dp; if (score > bestScore) { bestScore = score; best = { x: e.x, y: e.y }; }
+  }
+  return best ?? pt;
+}
 function pickSphereTarget(s: GameState): { x: number; y: number } {
+  const fa = freeAim(s); if (fa) return aimedSphereTarget(s, fa);
   const p = s.player; let best: { x: number; y: number } | null = null; let bestScore = -Infinity;
   const near = s.enemies.filter(e => e.hp > 0 && Math.hypot(e.x - p.x, e.y - p.y) <= SPHERE.maxRange);
   for (const e of near) {
@@ -95,9 +109,10 @@ export function startAbility(s: GameState, key: 'beam' | 'sphere'): boolean {
   const kind: Cast['kind'] = p.form === 2 ? (key === 'beam' ? 'dragon' : 'comet') : key;
   if (kind === 'dragon' ? p.dragonCooldown > 0 : kind === 'comet' ? p.cometCooldown > 0 : kind === 'beam' ? p.beamCooldown > 0 : p.sphereCooldown > 0) return false;
   const tg = kind === 'sphere' ? pickSphereTarget(s) : null;
-  const raw = tg ? normalize(tg.x - p.x, tg.y - p.y) : kind === 'comet' ? normalize(p.aimX, p.aimY) : pickAim(s, kind === 'dragon' ? DRAGON.aimRange : BEAM.length, kind === 'dragon' ? DRAGON.aimAssistCos : BEAM.aimAssistCos);
+  const fa = freeAim(s);   // pointer / right stick: the exact aim, any angle (the body keeps the nearest of its four facings)
+  const raw = fa && kind !== 'sphere' ? { x: fa.x, y: fa.y } : tg ? normalize(tg.x - p.x, tg.y - p.y) : kind === 'comet' ? normalize(p.aimX, p.aimY) : pickAim(s, kind === 'dragon' ? DRAGON.aimRange : BEAM.length, kind === 'dragon' ? DRAGON.aimAssistCos : BEAM.aimAssistCos);
   const aim = raw.x === 0 && raw.y === 0 ? normalize(p.aimX, p.aimY) : raw; const face = faceOf(aim.x, aim.y);
-  const dir = kind === 'sphere' ? aim : clampToFace(aim.x, aim.y, face, kind === 'beam' ? BEAM.maxAimOffset : kind === 'dragon' ? DRAGON.maxAimOffset : CANNON.maxAimOffset);
+  const dir = kind === 'sphere' || fa ? aim : clampToFace(aim.x, aim.y, face, kind === 'beam' ? BEAM.maxAimOffset : kind === 'dragon' ? DRAGON.maxAimOffset : CANNON.maxAimOffset);
   if (kind === 'beam') p.beamCooldown = BEAM.cooldown * s.mods.beamCd; else if (kind === 'sphere') p.sphereCooldown = SPHERE.cooldown * s.mods.sphereCd;
   else if (kind === 'dragon') p.dragonCooldown = DRAGON.cooldown * s.mods.beamCd; else p.cometCooldown = CANNON.cooldown * s.mods.sphereCd;
   s.cast = { id: s.nextId++, kind, face, t: 0, dirX: dir.x, dirY: dir.y, form: p.form, released: false, pulses: 0, len: 0, tx: tg?.x ?? p.x, ty: tg?.y ?? p.y, sx: p.x, sy: p.y, hits: [], dur: castDuration(kind) };

@@ -4,9 +4,10 @@ import { roundedTime } from '../../core/Math';
 import { RULES } from '../../core/Rules';
 import type { BossHud } from '../../bridge/UiSnapshot';
 import { Minimap } from './Minimap';
+import { FormSelector } from './FormSelector';
 import type { RunHud } from '../../bridge/UiSnapshot';
 
-interface Props { s: UiSnapshot; pad: boolean; onPause: () => void; reduced?: boolean; }
+interface Props { s: UiSnapshot; pad: boolean; onPause: () => void; reduced?: boolean; onForm?: (f: 1 | 2 | 3, confirm: boolean) => void; }
 
 const icon = (name: string) => `url(${import.meta.env.BASE_URL}ui/icons/${name}.png)`;
 const pct = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
@@ -17,7 +18,7 @@ function Slot({ id, name, ico, keyLabel, padLabel, pad, seconds, max, state, ton
   const cooling = seconds > 0 && state !== 'active';
   const cls = state === 'active' ? 'active' : state === 'locked' ? 'locked' : cooling ? 'cooling' : 'ready';
   const style = { '--ico': icon(ico), '--p': `${Math.min(1, seconds / max) * 360}deg` } as CSSProperties;
-  return <div className={`slot ${cls} ${tone ?? ''}`} style={style} data-testid={`cd-${id}`} aria-label={`${name}: ${text ?? (cooling ? `${seconds.toFixed(1)} seconds` : 'ready')}`} title={name}>
+  return <div className={`slot ${cls} ${tone ?? ''}`} data-ico={ico} style={style} data-testid={`cd-${id}`} aria-label={`${name}: ${text ?? (cooling ? `${seconds.toFixed(1)} seconds` : 'ready')}`} title={name}>
     <span className="slot-ico" aria-hidden="true"/>{!!charge && <i className="slot-charge" style={{ width: pct(charge * 100) }} aria-hidden="true"/>}{cooling && <span className="slot-sweep" aria-hidden="true"/>}
     {cooling && <b className="slot-num">{seconds >= 10 ? Math.ceil(seconds) : seconds.toFixed(1)}</b>}{!cooling && text && <b className="slot-tag">{text}</b>}
     <kbd className={pad ? 'pad-key' : ''}>{pad ? padLabel : keyLabel}</kbd>
@@ -56,7 +57,7 @@ function useHitVignette(s: UiSnapshot) {
   return hit;
 }
 
-export function Hud({ s, pad, onPause, reduced }: Props) {
+export function Hud({ s, pad, onPause, reduced, onForm }: Props) {
   const hit = useHitVignette(s);
   const hpFrac = s.hp / s.maxHp, low = hpFrac <= 0.3;
   const canForm = !s.form && s.drive >= RULES.formCharge && s.formCooldown <= 0;
@@ -72,13 +73,13 @@ export function Hud({ s, pad, onPause, reduced }: Props) {
           <span className="hp-num"><span className="hp-ico" style={{ '--ico': icon('heart') } as CSSProperties}/>{Math.ceil(s.hp)}<em>/{Math.ceil(s.maxHp)}</em></span>
         </div>
         <div className={`bar-xp ${s.xp / s.nextXp > 0.85 ? 'near' : ''}`} role="progressbar" aria-label="Experience" aria-valuenow={Math.floor(s.xp)} aria-valuemax={s.nextXp}><i style={{ width: pct(s.xp / s.nextXp * 100) }}/><span><b>LV {s.level}</b><em>{Math.floor(s.xp)}/{s.nextXp}</em></span></div>
-        <div className={`bar-form ${s.form ? 'on' : canForm ? 'ready' : ''} ${f2 ? 'form2' : ''} ${f3 ? 'form3' : ''} ${comet ? 'comet-ready' : ''} ${apex ? 'apex-ready' : ''}`} role="progressbar" aria-label="Transformation drive" aria-valuenow={Math.floor(s.drive)} aria-valuemax={100} title={s.apexUnlocked ? 'Drive 65%: F = Flarebound. Full Drive: F = Cometheart or (after 10:00) Stillfire Apex; tap F for the selected form, hold F to choose.' : s.cometUnlocked ? 'Drive 65%: F = Flarebound. Full Drive: F = Cometheart (Form II).' : 'Drive 65%: F = Flarebound.'}>
+        <div className={`bar-form ${s.form ? 'on' : canForm ? 'ready' : ''} ${f2 ? 'form2' : ''} ${f3 ? 'form3' : ''} ${comet ? 'comet-ready' : ''} ${apex ? 'apex-ready' : ''}`} role="progressbar" aria-label="Transformation drive" aria-valuenow={Math.floor(s.drive)} aria-valuemax={100} title={s.apexUnlocked ? 'Drive 65%: F = Flarebound. Full Drive: F = Cometheart or (after 10:00) Stillfire Apex; F opens the form picker (1-2-3 / A-D, F confirms; F F = last form).' : s.cometUnlocked ? 'Drive 65%: F = Flarebound. Full Drive: F = Cometheart (Form II).' : 'Drive 65%: F = Flarebound.'}>
           <i style={{ width: pct(s.drive) }}/><u style={{ left: `${RULES.formCharge}%` }}/>{(s.cometUnlocked || s.apexUnlocked) && <u className="tick2" style={{ left: '99%' }}/>}
           <span>{fullName}</span>
         </div>
       </div>
     </div>
-    {s.selector.open && <div className="form-selector" data-testid="form-selector" role="listbox" aria-label="Choose form">{s.selector.choices.map(c => <span key={c} role="option" aria-selected={c === s.selector.pick} className={`fs-opt f${c} ${c === s.selector.pick ? 'on' : ''}`}><i/>{c === 1 ? 'FLAREBOUND' : c === 2 ? 'COMETHEART' : 'STILLFIRE APEX'}</span>)}<em>{pad ? 'RELEASE Y' : 'RELEASE F'}</em></div>}
+    <FormSelector open={s.selector.open} pick={s.selector.pick} choices={s.selector.choices} left={s.selector.left} pad={pad} onHover={f => onForm?.(f, false)} onChoose={f => onForm?.(f, true)}/>
     {s.boss && <BossBar b={s.boss}/>}
     <Minimap map={s.map} boss={!!s.boss}/>
     <div className="hud-panel hud-clock"><span className="clock-label">{s.arenaName}</span><b>{roundedTime(s.seconds)}</b><span className="clock-kills"><i/> {s.kills}{s.run.nextLabel && <em className={`clock-next ${s.run.nextIn < 30 && s.run.nextIn > 0 ? 'soon' : ''}`}>{s.run.nextIn > 0 ? `${s.run.nextLabel} ${mmss(s.run.nextIn)}` : s.run.nextLabel}</em>}</span><RunTrack r={s.run}/></div>

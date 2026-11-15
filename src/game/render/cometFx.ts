@@ -4,6 +4,7 @@ import { CANNON, COMET, DRAGON } from '../../content/cometheart';
 import { cannonFireTime, cannonHalfWidth, dragonHead } from '../../sim/AbilitySystem';
 import type { Facing, HandAnchor } from '../../assets/kaiAnimation';
 import { FxPool } from './fxPool';
+import { GLOW_KEY, GroundDecal, ensureGlow } from './b14fx';
 
 /** B12 Form II art: ImageGen sheets cut by art/characters/kai/form-ii/scripts/extract_fx.py into neutral sprites that are tinted gold here. */
 export const COMET_FX_NAMES = ['aura_a', 'aura_b', 'beam', 'bolt_h0', 'bolt_h1', 'bolt_h2', 'bolt_h3', 'bolt_v0', 'bolt_v1', 'bolt_v2', 'bolt_v3', 'core', 'crack0', 'crack1', 'crack2', 'crack3',
@@ -40,6 +41,9 @@ export class CometFx {
   private readonly glowSlices: Phaser.GameObjects.Image[] = [];
   private readonly beamTex: Phaser.GameObjects.TileSprite;
   private readonly core: Phaser.GameObjects.Image;
+  private readonly ground: GroundDecal;                   // B14: ImageGen comet sigil under Kai (replaces the drawn gold ellipses)
+  private readonly handGlow: Phaser.GameObjects.Image[];  // soft light at the fists (mid, near, far)
+  private readonly lane: Phaser.GameObjects.Image[];      // dotted glints along the aimed lane while gathering (replaces the thin drawn line)
   private ghosts: Ghost[] = [];
   private lastEvent = 0; private clock = 0;
   private level = 0; private idleArc = 4; private bolt = 0.4; private foot = 0; private ghostClock = 0; private dustClock = 0; private glint = 0;
@@ -60,6 +64,9 @@ export class CometFx {
     void dtex;
     this.beamTex = scene.add.tileSprite(0, 0, 10, scene.textures.get(cometFxKey('beam')).getSourceImage().height, cometFxKey('beam')).setOrigin(0, 0.5).setBlendMode(Phaser.BlendModes.ADD).setVisible(false).setTint(HOT);
     this.core = scene.add.image(0, 0, cometFxKey('core')).setBlendMode(Phaser.BlendModes.ADD).setVisible(false);
+    ensureGlow(scene); this.ground = new GroundDecal(scene, 'sigil_f2', 0xff9f1a, 0.3);
+    this.handGlow = [0, 1, 2].map(() => scene.add.image(0, 0, GLOW_KEY).setBlendMode(Phaser.BlendModes.ADD).setDepth(11.1).setVisible(false));
+    this.lane = Array.from({ length: 7 }, () => scene.add.image(0, 0, cometFxKey('star')).setBlendMode(Phaser.BlendModes.ADD).setDepth(10.6).setTint(GOLD).setVisible(false));
   }
   /** Camera zoom factor for the reveal (1 outside it) and a pending visual hit-stop in ms (the scene skips sim ticks for that long). */
   cameraZoom() { return this.zoomMul; }
@@ -202,7 +209,7 @@ export class CometFx {
       r.setTexture(hero.texture.key, hero.frame.name).setOrigin(hero.originX, hero.originY).setScale(hero.scaleX, hero.scaleY).setPosition(hero.x + dx, hero.y + dy).setFlipX(hero.flipX).setAlpha(Math.min(0.75, L * (i === 2 ? 0.34 : 0.27) * (1 + 0.25 * Math.sin(t * 8 + i))));
     }
     // floor light under Kai + warm back-light
-    if (show) { const R = 34 + 22 * L + 4 * Math.sin(t * 6); this.under.fillStyle(0xffa81c, 0.1 + 0.1 * L); this.under.fillEllipse(x, y + 1, R * 2.6, R * 1.1); this.under.fillStyle(GOLD, 0.12 + 0.08 * L); this.under.fillEllipse(x, y, R * 1.7, R * 0.7); }
+    this.ground.update(dt, x, y, show, 160 + 30 * L, charging ? 0.5 + 0.5 * Math.min(1, (c?.t ?? 0) / CANNON.gather) : ctx.dashing ? 0.6 : 0, ctx.reduced);
     if (dt > 0 && active) this.ambient(ctx, L, charging);
     if (dt > 0 && !active && !s.cinema) { this.ghostClock = 0; }
     // ---- reveal flash: Kai goes white-hot for a few frames
@@ -269,14 +276,18 @@ export class CometFx {
 
   /** Cometbreaker: gather = growing core + inward streaks + a lane tick; fire = layered gold-to-white beam that starts focused and opens wide, laced with lightning, then collapses. */
   private drawCannon(ctx: CometCtx, charging: boolean) {
-    const s = ctx.state, c = s.cast; this.core.setVisible(false); this.beamTex.setVisible(false);
+    const s = ctx.state, c = s.cast; this.core.setVisible(false); this.beamTex.setVisible(false); this.handGlow.forEach(g => g.setVisible(false)); this.lane.forEach(g => g.setVisible(false));
     const comet = c?.kind === 'comet' ? c : null;
     if (comet && !comet.released) {
       const o = ctx.hand ? ctx.hand.m : { x: ctx.x, y: ctx.y - 40 }, u = clamp01(comet.t / CANNON.gather), front = comet.face === 'north' ? 10.6 : 11;
       this.core.setVisible(true).setPosition(o.x, o.y).setDepth(front).setTint(WHITE).setScale(0.12 + 0.95 * u * u).setRotation(this.clock * 5).setAlpha(0.6 + 0.4 * u);
-      this.g.fillStyle(GOLD, 0.16 * u); this.g.fillCircle(o.x, o.y, 8 + 34 * u); this.g.fillStyle(WHITE, 0.2 * u); this.g.fillCircle(o.x, o.y, 4 + 14 * u);
-      this.g.lineStyle(3, GOLD, 0.15 + 0.3 * u); this.g.lineBetween(o.x, o.y, o.x + comet.dirX * (CANNON.length * 0.7) * u, o.y + comet.dirY * (CANNON.length * 0.7) * u);   // the lane tick: where the beam will go
-      this.under.lineStyle(2, GOLD, 0.35); this.under.strokeEllipse(ctx.x, ctx.y + 2, 120 * (1.2 - 0.6 * u), 50 * (1.2 - 0.6 * u));
+      // light comes only from the fists: a smooth radial glow at each hand and at the gathering orb, never a drawn disc, box or bar
+      const hg = this.handGlow, hn = ctx.hand?.n ?? o, hf = ctx.hand?.f ?? o;
+      hg[0].setVisible(true).setPosition(o.x, o.y).setDepth(front - 0.05).setTint(GOLD).setScale((0.22 + 1.1 * u) * 1.0).setAlpha(0.35 + 0.4 * u);
+      hg[1].setVisible(true).setPosition(hn.x, hn.y).setDepth(front - 0.05).setTint(HOT).setScale(0.2 + 0.28 * u).setAlpha(0.3 + 0.45 * u);
+      hg[2].setVisible(true).setPosition(hf.x, hf.y).setDepth(front - 0.05).setTint(HOT).setScale(0.2 + 0.28 * u).setAlpha(0.3 + 0.45 * u);
+      const reach = CANNON.length * 0.7 * u;   // the lane: a dotted trail of glints that fades with distance
+      this.lane.forEach((im, i) => { const f = (i + 1) / this.lane.length; im.setVisible(u > 0.08).setPosition(o.x + comet.dirX * reach * f, o.y + comet.dirY * reach * f).setRotation(Math.atan2(comet.dirY, comet.dirX)).setScale(0.12 + 0.1 * (1 - f)).setAlpha((0.55 - 0.45 * f) * Math.min(1, u * 3)); });
       if (ctx.dt > 0 && !ctx.reduced) { this.sparkClock += ctx.dt; while (this.sparkClock > 0.04) { this.sparkClock -= 0.04; const a = rnd() * 6.283, r = 70 + rnd() * 40; this.spawn('bolt_h0', o.x + Math.cos(a) * r, o.y + Math.sin(a) * r * 0.8, { depth: 11.5, life: 0.2, tint: HOT, vx: -Math.cos(a) * r / 0.2, vy: -Math.sin(a) * r * 0.8 / 0.2, s0: 0.5, s1: 0.15, a0: 0.2 + 0.7 * u, a1: 1, rot: a + Math.PI }); } }
       return;
     }
@@ -286,7 +297,7 @@ export class CometFx {
     if (env <= 0) { this.beam = null; return; }
     const o = ctx.hand && c?.kind === 'comet' ? ctx.hand.m : { x: b.ox, y: b.oy }; const ang = Math.atan2(b.dy, b.dx), nx = -b.dy, ny = b.dx, front = b.face === 'north' ? 9.5 : 10.6;
     const hw = cannonHalfWidth(s, Math.min(tf, closeAt)) * (tf < closeAt ? 1 : (1 - clamp01((tf - closeAt) / 0.3))) * (0.96 + 0.04 * Math.sin(this.clock * 60));
-    const ex = o.x + b.dx * b.len, ey = o.y + b.dy * b.len, w0 = hw * 0.3;
+    const ex = o.x + b.dx * b.len, ey = o.y + b.dy * b.len, w0 = hw * 0.12;
     // layered body: wide gold haze -> bright gold -> white core, each a quad that opens from the fists to the full width
     const layers = [[1.0, GOLD, 0.16], [0.78, 0xffb82a, 0.26], [0.55, HOT, 0.4], [0.32, WHITE, 0.7], [0.16, 0xffffff, 0.9]] as const;
     for (const [f, col, al] of layers) {
@@ -297,6 +308,7 @@ export class CometFx {
     // scrolling energy texture inside the lane (ImageGen beam segment) for living detail
     this.beamTex.setVisible(true).setPosition(o.x, o.y).setRotation(ang).setDepth(front + 0.05).setAlpha(0.55 * env);
     this.beamTex.width = Math.max(10, b.len); const sy = (hw * 1.5) / this.beamTex.height; this.beamTex.setScale(1, Math.max(0.05, sy)); this.beamTex.tilePositionX -= 700 * ctx.dt;
+    this.handGlow[0].setVisible(true).setPosition(o.x, o.y).setDepth(front - 0.05).setTint(HOT).setScale(1.5 * Math.max(0.3, env)).setAlpha(0.7 * env);
     this.core.setVisible(true).setPosition(o.x, o.y).setDepth(front + 0.1).setTint(WHITE).setScale((0.9 + 0.12 * Math.sin(this.clock * 40)) * Math.max(0.3, env)).setRotation(this.clock * 7).setAlpha(0.95);
     // floor light along the lane + a standing glow where it ends
     this.under.lineStyle(Math.max(6, hw * 1.5), 0xffa21c, 0.12 * env); this.under.lineBetween(o.x, o.y + 22, ex, ey + 22);
@@ -310,7 +322,7 @@ export class CometFx {
   }
   /** Reveal / finisher flash for the hero sprite tint (white-hot for a few frames). */
   destroy() {
-    this.g.destroy(); this.under.destroy(); this.dim.destroy(); this.flashRect.destroy(); this.rim.forEach(r => r.destroy()); [...this.slices, ...this.glowSlices].forEach(i => i.destroy()); this.beamTex.destroy(); this.core.destroy();
+    this.ground.destroy(); this.handGlow.forEach(g => g.destroy()); this.lane.forEach(g => g.destroy()); this.g.destroy(); this.under.destroy(); this.dim.destroy(); this.flashRect.destroy(); this.rim.forEach(r => r.destroy()); [...this.slices, ...this.glowSlices].forEach(i => i.destroy()); this.beamTex.destroy(); this.core.destroy();
     this.ghosts.forEach(g => g.spr.destroy()); this.ghosts = []; this.pool.destroy();
   }
 }

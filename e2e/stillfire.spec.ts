@@ -9,17 +9,19 @@ async function start(page: Page) {
 }
 const cinemaDone = (page: Page) => page.waitForFunction(() => (window as unknown as { __KYNT_QA__: Qa }).__KYNT_QA__.sim().cinema === null, null, { timeout: 10000 });
 
-test('holding F opens the form selector; releasing starts the chosen form (Cometheart stays reachable), tapping starts Stillfire Apex with the run frozen', async ({ page }) => {
+test('F opens the form picker at once with the run frozen; 2 starts Cometheart, a double-tap of F starts Stillfire Apex', async ({ page }) => {
   await start(page);
-  await page.keyboard.down('f'); await page.waitForTimeout(700); await expect(page.getByTestId('form-selector')).toBeVisible(); await page.keyboard.up('f'); await page.waitForTimeout(200);
+  await page.keyboard.press('f'); await expect(page.getByTestId('form-selector')).toBeVisible({ timeout: 4000 });
+  const t1 = (await qa(page)).time; await page.waitForTimeout(400); expect(Math.abs((await qa(page)).time - t1)).toBeLessThan(0.02);   // frozen while the picker is open
+  await page.keyboard.press('2'); await page.waitForTimeout(200);
   let s = await qa(page); expect(s.to).toBe(2); await cinemaDone(page); expect((await qa(page)).form).toBe(2);
   await page.reload(); await start(page); const t0 = (await qa(page)).time;
-  await page.keyboard.down('f'); await page.waitForTimeout(80); await page.keyboard.up('f'); await page.waitForTimeout(600); s = await qa(page);
+  await page.keyboard.press('f'); await page.waitForTimeout(150); await page.keyboard.press('f'); await page.waitForTimeout(600); s = await qa(page);
   expect(s.to).toBe(3); expect(s.clip).toBe('Transform'); const tf = (await qa(page)).time; await page.waitForTimeout(500); expect(Math.abs((await qa(page)).time - tf)).toBeLessThan(0.02); expect(tf - t0).toBeLessThan(0.6);   // the run clock is frozen during the reveal
   await cinemaDone(page); s = await qa(page); expect(s.form).toBe(3); expect(s.vis).toBe('f3'); expect(s.seen).toBe(1);
 });
 test('E charges while Kai glides, release blinks and fires; R runs Instinct Reversal; both keep their own cooldowns', async ({ page }) => {
-  await start(page); await page.keyboard.down('f'); await page.waitForTimeout(80); await page.keyboard.up('f'); await cinemaDone(page); await page.waitForTimeout(700);
+  await start(page); await page.keyboard.press('f'); await page.waitForTimeout(150); await page.keyboard.press('f'); await cinemaDone(page); await page.waitForTimeout(700);
   const x0 = (await qa(page)).x; await page.keyboard.down('d'); await page.keyboard.down('e'); await page.waitForTimeout(500);
   let s = await qa(page); expect(s.cast).toBe('rift'); expect(s.released).toBe(false); expect(s.x).toBeGreaterThan(x0 + 15);
   await page.keyboard.up('e'); await page.keyboard.up('d'); await page.waitForTimeout(250); s = await qa(page); expect(s.released).toBe(true); expect(s.rcd).toBeGreaterThan(5);
@@ -27,7 +29,7 @@ test('E charges while Kai glides, release blinks and fires; R runs Instinct Reve
   await page.keyboard.press('r'); await page.waitForTimeout(150); s = await qa(page); expect(s.cast).toBe('reversal'); expect(s.clip).toBe('Sphere');
 });
 test('retry during the Form III reveal starts a clean run', async ({ page }) => {
-  await start(page); await page.keyboard.down('f'); await page.waitForTimeout(80); await page.keyboard.up('f'); await page.waitForTimeout(400);
+  await start(page); await page.keyboard.press('f'); await page.waitForTimeout(150); await page.keyboard.press('f'); await page.waitForTimeout(400);
   await page.evaluate(() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))); await page.waitForFunction(() => { const q = (window as unknown as { __KYNT_QA__?: Qa }).__KYNT_QA__; return !!q && q.sim().time < 1 && q.sim().cinema === null; }, null, { timeout: 8000 });
   const s = await qa(page); expect(s.form).toBe(0); expect(s.cin).toBeNull(); expect(s.seen).toBe(0);
 });

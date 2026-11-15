@@ -18,16 +18,19 @@ function setup(unlocked = true, enemies: Array<[number, number, number?]> = []) 
 }
 const run = (sim: Simulation, sec: number, input: InputState = idle()) => { for (let i = 0; i < Math.round(sec / DT); i++) sim.step(DT, input); };
 const tap = (sim: Simulation, o: Partial<InputState>) => sim.step(DT, idle(o));
+/** F with the picker: the first press opens it when several forms are ready, the second confirms the highlighted (highest) one. */
+const startForm = (sim: Simulation) => { tap(sim, { f: true }); tap(sim, { f: false }); tap(sim, { f: true }); };
+const startForm2 = (sim: Simulation) => { tap(sim, { f: false }); tap(sim, { f: true }); };
 
 describe('Form II activation rule', () => {
   it('full Drive + F starts the Cometheart reveal only when unlocked; otherwise it is Flarebound as before', () => {
     const a = setup(false); tap(a.sim, { f: true }); expect(a.s.player.form).toBe(1); expect(a.s.cinema).toBeNull();
-    const b = setup(true); tap(b.sim, { f: true }); expect(b.s.cinema).not.toBeNull(); expect(b.s.player.form).toBe(0);
+    const b = setup(true); tap(b.sim, { f: true }); expect(b.s.selector.open).toBe(true); startForm2(b.sim); expect(b.s.cinema).not.toBeNull(); expect(b.s.player.form).toBe(0);
     const c = setup(true); c.s.player.drive = 80; tap(c.sim, { f: true }); expect(c.s.player.form).toBe(1);
   });
   it('the reveal freezes the whole run (clock, enemies, cooldowns, i-frames), commits Form II once and then resumes', () => {
     const { sim, s } = setup(true, [[1160, 800, 60]]); s.enemies[0].speed = 60; s.player.dashCooldown = 2; s.player.beamCooldown = 3; s.player.invulnerable = 0;
-    tap(sim, { f: true }); const t0 = s.time, ex = s.enemies[0].x, cd = s.player.dashCooldown, bc = s.player.beamCooldown;
+    startForm(sim); const t0 = s.time, ex = s.enemies[0].x, cd = s.player.dashCooldown, bc = s.player.beamCooldown;
     run(sim, 1.0, idle({ x: 1, dash: true, beam: true, sphere: true }));   // inputs during the reveal do nothing
     expect([s.time, s.enemies[0].x, s.player.dashCooldown, s.player.beamCooldown, s.cast]).toEqual([t0, ex, cd, bc, null]);
     expect(s.cinema).not.toBeNull(); expect(s.player.form).toBe(0);
@@ -37,16 +40,16 @@ describe('Form II activation rule', () => {
   });
   it('the breaking point shoves and staggers nearby non-boss enemies once, bosses are untouched', () => {
     const { sim, s } = setup(true, [[1160, 800, 60], [1900, 800, 60]]); s.enemies.push(enemy(300, 1180, 840, 1000, 'warden')); const near0 = s.enemies[0].x, boss0 = s.enemies[2].x, far0 = s.enemies[1].x;
-    tap(sim, { f: true }); run(sim, COMET.cinemaFirst.breakAt + 0.05);
+    startForm(sim); run(sim, COMET.cinemaFirst.breakAt + 0.05);
     expect(s.enemies[0].x).toBeGreaterThan(near0 + 40); expect(s.enemies[0].stagger).toBeGreaterThan(0); expect(s.enemies[1].x).toBe(far0); expect(s.enemies[2].x).toBe(boss0);
   });
   it('later activations use the short reveal; a double press cannot retrigger it; pausing freezes it', () => {
-    const { sim, s } = setup(true); tap(sim, { f: true }); sim.step(DT, idle({ f: false })); tap(sim, { f: true }); expect(s.cinema?.first).toBe(true);
+    const { sim, s } = setup(true); startForm(sim); tap(sim, { f: false }); tap(sim, { f: true }); expect(s.cinema?.first).toBe(true);
     run(sim, 1.0); sim.togglePause(); const t = s.cinema!.t; run(sim, 1.0); expect(s.cinema!.t).toBe(t); sim.togglePause(); run(sim, 2); expect(s.cinema).toBeNull();
-    s.player.form = 0; s.player.drive = 100; s.player.formCooldown = 0; tap(sim, { f: true }); expect(s.cinema?.first).toBe(false); expect(s.cinema!.dur).toBe(COMET.cinemaRepeat.dur);
+    s.player.form = 0; s.player.drive = 100; s.player.formCooldown = 0; startForm(sim); expect(s.cinema?.first).toBe(false); expect(s.cinema!.dur).toBe(COMET.cinemaRepeat.dur);
   });
   it('Form II drains and ends cleanly with a cooldown; Drive must refill before the next activation', () => {
-    const { sim, s } = setup(true); tap(sim, { f: true }); run(sim, 3); expect(s.player.form).toBe(2);
+    const { sim, s } = setup(true); startForm(sim); run(sim, 3); expect(s.player.form).toBe(2);
     s.player.drive = 0.01; run(sim, 0.1); expect(s.player.form).toBe(0); expect(s.player.formCooldown).toBeGreaterThan(5); tap(sim, { f: false }); tap(sim, { f: true }); expect(s.cinema).toBeNull();
   });
 });
