@@ -16,7 +16,7 @@ export function updateDirector(state: GameState, rng: SeededRng, dt: number) {
   state.spawnTimer -= dt;
   if (state.spawnTimer > 0) return;
   const t = state.time;
-  state.spawnTimer = (1.1 - 0.7 * Math.min(1, t / 300)) * rng.between(0.8, 1.2);
+  state.spawnTimer = (1.1 - 0.7 * Math.min(1, t / 300)) * rng.between(0.8, 1.2) * state.run.spawnMult;
   let budget = threatBudget(t) * budgetScale(t, state.lastBossDefeatAt); if (boss) budget = Math.min(budget * 0.5, BOSS_THREAT_CAP);
   let threat = liveThreat(state);
   const batch = 1 + (t > 240 ? 1 : 0) + (t > 600 ? 1 : 0);

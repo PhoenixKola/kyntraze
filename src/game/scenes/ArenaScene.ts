@@ -35,7 +35,7 @@ export class ArenaScene extends Phaser.Scene {
   private lastInput: InputState = { x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false };
   constructor(private readonly bridge: GameBridge, private readonly seed: number, private readonly arena: ArenaId = 'gloam') { super({ key: 'ArenaScene' }); }
   create() {
-    this.simulation = new Simulation(this.seed, this.arena, this.bridge.getUnlocks().cometheart, !!this.bridge.getUnlocks().stillfire);
+    this.simulation = new Simulation(this.seed, this.arena, this.bridge.getUnlocks().cometheart, !!this.bridge.getUnlocks().stillfire, this.bridge.getRunConfig());
     const applyZoom = () => this.cameras.main.setZoom(fitZoom(this.scale.width, this.scale.height));
     applyZoom(); this.scale.on(Phaser.Scale.Events.RESIZE, applyZoom);
     this.createArena();

@@ -1,0 +1,10 @@
+Game UI icon sheet for KYNTRAZE: FRACTURE RUSH (dark sci-fi anime-action, crisp cel-shaded with thick near-black outline, hard stepped edges, no blur, no text, no letters, no numbers, no shadows). Each icon is a compact emblem medallion: a dark gunmetal angular octagon/diamond badge with a thin brass rim and a small teal glowing inlay, a bold simple readable glyph in the centre, readable at 64 px. Flat magenta (#ff00ff) background, icons far apart, each fully inside its own cell, nothing cropped. Wide 16:9 canvas.
+Draw EXACTLY 8 items in a 4x2 grid (4 columns, 2 rows), in this order left-to-right, top-to-bottom:
+1. BULWARK: a broad armored shield-heart glyph in teal and brass.
+2. SWIFT: a winged boot / speed chevrons glyph in pale green-teal.
+3. SALVAGE: a magnet pulling three small cyan crystals glyph.
+4. SPARK: a lightning spark inside a charge ring, amber and brass.
+5. SCHOLAR: an open data-book with a rising spark, teal and violet.
+6. REROLL: two circular arrows forming a cycle with a small die-like diamond in the centre, brass.
+7. BANISH: a crossed-out card with a diagonal slash, crimson accent on the slash.
+8. FRACTURE MARK: a faceted violet-teal crystal shard coin with a brass ring, no gold-orange.

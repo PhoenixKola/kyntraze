@@ -1,7 +1,8 @@
 import type { SaveV1 } from '../../sim/SaveSystem';
 import { HintBar } from './Chrome';
-interface Props { onPlay: () => void; onSettings: () => void; save: SaveV1 }
-export function TitleScreen({ onPlay, onSettings, save }: Props) {
+import { MarksBadge } from './ProgressionScreen';
+interface Props { onPlay: () => void; onSettings: () => void; onProgress: () => void; save: SaveV1 }
+export function TitleScreen({ onPlay, onSettings, onProgress, save }: Props) {
   return <main className="title-layout" data-testid="title-screen">
     <div className="title-art" aria-hidden="true"/>
     <div className="title-shade" aria-hidden="true"/>
@@ -14,8 +15,10 @@ export function TitleScreen({ onPlay, onSettings, save }: Props) {
       <p className="title-subtitle">MOVE FAST. BREAK THE HORDE. CHARGE THE FRACTURE.</p>
       <div className="title-buttons">
         <button className="primary-button" onClick={onPlay} data-testid="play-button" data-pad-default data-pad-start>ENTER THE FRACTURE <span aria-hidden="true">↗</span></button>
+        <button className="outlined-button" onClick={onProgress} data-testid="archives-button">ARCHIVES</button>
         <button className="outlined-button" onClick={onSettings}>SETTINGS</button>
       </div>
+      <div className="title-marks"><MarksBadge marks={save.meta.marks} crest={save.meta.crest}/></div>
       <div className="best-run">{save.best ? <>PERSONAL BEST <b>{save.best.score.toLocaleString()} PTS</b> · {save.best.kills} KILLS</> : 'NO RECORDED RUNS · YOUR FIRST FRACTURE AWAITS'}</div>
     </div>
     <div className="bottom-chrome"><HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'TAB', pad: 'D-PAD', label: 'NAVIGATE' }]}/><span className="chrome-note">ONE LIFE · INFINITE PRESSURE</span></div>

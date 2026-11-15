@@ -11,8 +11,10 @@ function FormRow({ save }: { save: SaveV1 }) {
   const rows = [{ c: 'base', n: 'BASE', on: true }, { c: 'f1', n: 'FLAREBOUND', on: true }, { c: 'f2', n: 'COMETHEART', on: !!save.unlocks?.cometheart }, { c: 'f3', n: 'STILLFIRE', on: !!save.unlocks?.stillfire }];
   return <ul className="form-row" aria-label="Kai forms">{rows.map(r => <li key={r.c} className={r.on ? 'open' : 'sealed'}><img src={kit(`crest-${r.c}`)} alt="" draggable={false}/><span>{r.on ? r.n : 'SEALED'}</span></li>)}</ul>;
 }
-interface Props { onBack: () => void; onStart: () => void; seed: string; onSeed: (value: string) => void; arena: ArenaId; onArena: () => void; save: SaveV1; }
-export function HeroSelect({ onBack, onStart, seed, onSeed, arena, onArena, save }: Props) {
+import type { ProgressTab } from './ProgressionScreen';
+import { CONTRACT_BY_ID, UNLOCK_BY_ID, type UnlockId } from '../../content/meta';
+interface Props { onProgress: (tab: ProgressTab) => void; onBack: () => void; onStart: () => void; seed: string; onSeed: (value: string) => void; arena: ArenaId; onArena: () => void; save: SaveV1; }
+export function HeroSelect({ onProgress, onBack, onStart, seed, onSeed, arena, onArena, save }: Props) {
   useEffect(() => { const h = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); onBack(); } }; window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h); }, [onBack]);
   return <main className="selection-layout" data-testid="hero-select">
     <div className="screen-header"><button className="text-button" onClick={onBack} data-pad-cancel>← BACK</button><span>01 / RUNNER SELECTION</span></div>
@@ -24,6 +26,11 @@ export function HeroSelect({ onBack, onStart, seed, onSeed, arena, onArena, save
         <div className="hero-copy"><h3>{h.name}</h3><p>{h.role}</p><small>STARTER · {h.weapon}</small>{h.playable && <FormRow save={save}/>}</div>
         <div className="hero-status">{h.playable ? 'READY FOR DEPLOYMENT' : 'PLANNED · NOT YET PLAYABLE'}</div>
       </article>)}
+    </div>
+    <div className="loadout-strip" data-testid="loadout-strip" aria-label="Run loadout">
+      <button className="loadout-chip" onClick={() => onProgress('armory')} data-testid="loadout-boon"><em>BOON</em><b>{save.meta.boon ? UNLOCK_BY_ID[`boon_${save.meta.boon}` as UnlockId].name : 'NONE'}</b></button>
+      <button className="loadout-chip" onClick={() => onProgress('contracts')} data-testid="loadout-contract"><em>CONTRACT</em><b>{save.meta.contract ? CONTRACT_BY_ID[save.meta.contract].name : 'STANDARD RUN'}</b></button>
+      <button className="loadout-chip armory" onClick={() => onProgress('armory')} data-testid="open-armory"><em>{save.meta.marks.toLocaleString()} MARKS</em><b>ARMORY ›</b></button>
     </div>
     <div className="start-row"><button className="arena-strip" onClick={onArena} data-testid="arena-open" style={{ '--card': `url(${arenaCardUrl(arena)})` } as CSSProperties} aria-label={`Arena: ${ARENAS[arena].name}. Change arena`}><span className="arena-strip-art" aria-hidden="true"/><span className="arena-strip-copy"><em>ARENA</em><b>{ARENAS[arena].name.toUpperCase()}</b></span><span className="arena-strip-go"><span>CHANGE</span><i aria-hidden="true"/></span></button><label className="seed-field">RUN SEED <input aria-label="Run seed" value={seed} onChange={e => onSeed(e.target.value)} placeholder="Random on start"/></label><button className="primary-button" onClick={onStart} data-testid="start-run" data-pad-default data-pad-start>DEPLOY KAI <span aria-hidden="true">↗</span></button></div>
     <HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'DEPLOY' }, { key: 'ESC', pad: 'B', label: 'BACK' }]}/>

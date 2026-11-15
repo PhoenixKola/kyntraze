@@ -17,6 +17,7 @@ import { gradeRun } from './GameTelemetry';
 import { updateArenaHazards } from './ArenaHazards';
 import { setActiveArena } from './CollisionSystem';
 import type { ArenaId } from '../content/arenas';
+import { applyRunConfig, NO_CONFIG, type RunConfig } from './RunConfig';
 export class Simulation {
   readonly state: GameState;
   readonly rng: SeededRng;
@@ -24,9 +25,10 @@ export class Simulation {
   private fHeld = false;
   private eHeld = false;
   private rHeld = false;
-  constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false, apexUnlocked = false) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked, apexUnlocked); }
+  constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false, apexUnlocked = false, config: RunConfig = NO_CONFIG) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked, apexUnlocked); applyRunConfig(this.state, config); }
   step(dt: number, input: InputState) {
     const s = this.state; if (s.phase !== 'running') return;
+    { const f = s.player.form; if (f && !s.run.formsUsed.includes(f)) s.run.formsUsed.push(f); }   // B18: feats read the forms Kai actually used
     if (s.cinema) { updateCinema(s, dt); this.fHeld = !!(input.f || input.fHeld); this.qHeld = input.q; this.eHeld = !!input.beam; this.rHeld = !!input.sphere; return; }   // B12: the reveal freezes the whole run (clock, enemies, shots, hazards, cooldowns, i-frames)
     if (s.selector.open) {   // the form selector freezes the run just like the reveal; only its own input is read
       const fd = !!(input.f || input.fHeld); trackAim(s, input);
@@ -69,6 +71,18 @@ export class Simulation {
   }
   /** QA / tests: the next level-up, exactly as a real XP pickup would trigger it. */
   debugLevelUp() { const s = this.state; if (s.phase !== 'running') return; gainXp(s, (s.player.nextXp - s.player.xp) / s.mods.xp, () => { s.upgradeOffers = createOffer(s, this.rng); }); }
+  /** B18 Reroll Module: redraw the current offer (never the same three when the pool allows). Only on the level-up screen, bounded by the run's charges. */
+  reroll() {
+    const s = this.state; if (s.phase !== 'upgrade' || s.run.rerollsLeft <= 0) return false;
+    s.run.rerollsLeft--; s.upgradeOffers = createOffer(s, this.rng, s.rewardPick, s.upgradeOffers); return true;
+  }
+  /** B18 Banish Module: strike one offered card from the rest of the run and draw its replacement. */
+  banish(id: UpgradeId) {
+    const s = this.state; if (s.phase !== 'upgrade' || s.run.banishesLeft <= 0 || !s.upgradeOffers.includes(id)) return false;
+    s.run.banishesLeft--; s.run.banished.push(id);
+    const keep = s.upgradeOffers.filter(o => o !== id), fresh = createOffer(s, this.rng, s.rewardPick, s.upgradeOffers).find(o => !keep.includes(o));
+    s.upgradeOffers = fresh ? [...keep, fresh] : keep; return true;
+  }
   togglePause() { const phase = this.state.phase; if (phase === 'running') this.state.phase = 'paused'; else if (phase === 'paused') this.state.phase = 'running'; }
   forcePause() { if (this.state.phase === 'running') this.state.phase = 'paused'; }
   stats() { const s = this.state; return gradeRun({ seed: s.seed, survivalSeconds: s.time, kills: s.kills, level: s.player.level, victory: s.phase === 'victory', bosses: s.bossesDefeated }); }

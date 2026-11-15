@@ -11,7 +11,7 @@ export function updateArenaHazards(state: GameState) {
   if (state.time < ah.nextAt || state.time < ah.quietUntil || state.hazards.some(h => h.owner === 0 && !h.fired)) return;
   const bossAlive = state.enemies.some(e => (e.kind === 'warden' || e.kind === 'seraph') && e.hp > 0);
   const u = Math.min(1, Math.max(0, (state.time - def.startAt) / Math.max(1, def.intervalEndAt - def.startAt)));
-  ah.nextAt = state.time + (def.intervalStart + (def.intervalEnd - def.intervalStart) * u) * (bossAlive ? 1.6 : 1);
+  ah.nextAt = state.time + (def.intervalStart + (def.intervalEnd - def.intervalStart) * u) * (bossAlive ? 1.6 : 1) * state.run.hazardMult;
   const i = ah.count++;
   if (def.id === 'lane-surge') {
     const lane = def.lanes![i % def.lanes!.length];

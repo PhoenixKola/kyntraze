@@ -1,6 +1,8 @@
 import type { RunPhase } from '../sim/GameState';
 import type { Rarity, UpgradeCategory, UpgradeId } from '../content/upgrades';
 import type { ArenaId } from '../content/arenas';
+import type { RunReward } from '../sim/MetaSystem';
+import type { BoonId, ContractId } from '../content/meta';
 export interface UiSnapshot {
   phase: RunPhase; seed: number; hp: number; maxHp: number; xp: number; nextXp: number; level: number;
   seconds: number; kills: number; enemies: number; dashCooldown: number; qCooldown: number; beamCooldown: number; sphereCooldown: number;
@@ -29,6 +31,8 @@ export interface UiSnapshot {
   /** The level-up screen is a boss reward pick, not a level. */
   rewardPick: boolean;
   bosses: number;
+  /** B18: this run's contract / boon, remaining level-up tools, the finished run's mark breakdown (null until the run ends) and the persistent balance */
+  contract: ContractId | null; boon: BoonId | null; rerolls: number; banishes: number; reward: RunReward | null; marks: number; crest: string | null;
 }
 /** Run progress for the HUD: the clock, the plan's two boss times, and the next event to hint at. */
 export interface RunHud { t: number; wardenAt: number; finaleAt: number; wardenDone: boolean; finaleOut: boolean; nextLabel: string; nextIn: number; announce: { text: string; sub: string; age: number } | null }
@@ -42,4 +46,4 @@ export interface BossHud { id: 'warden' | 'seraph'; name: string; hp: number; ma
 export const blankSnapshot: UiSnapshot = { phase: 'running', seed: 0, hp: 100, maxHp: 100, xp: 0, nextXp: 7,
   level: 1, seconds: 0, kills: 0, enemies: 0, dashCooldown: 0, qCooldown: 0, beamCooldown: 0, sphereCooldown: 0, drive: 0,
   form: 0, formCooldown: 0, dragonCooldown: 0, cometCooldown: 0, apexUnlocked: false, apexReady: false, riftCooldown: 0, reversalCooldown: 0, evadeCooldown: 0, riftCharge: 0, selector: { open: false, pick: 0, choices: [], left: 4 }, cometUnlocked: false, cometReady: false, cinema: false, offers: [], score: 0, deathShown: false, boss: null, arenaName: 'THE GLOAM CIRCUIT', cards: [], owned: [], map: blankMap, cdMax: { dash: 3.2, beam: 7, sphere: 16, form: 6, dragon: 9, comet: 22, rift: 8, reversal: 14, evade: 9 }, sinceRevive: 999, revives: 0, victoryShown: false, rewardPick: false, bosses: 0,
-  run: { t: 0, wardenAt: 480, finaleAt: 900, wardenDone: false, finaleOut: false, nextLabel: 'FRACTURE WARDEN', nextIn: 480, announce: null } };
+  contract: null, boon: null, rerolls: 0, banishes: 0, reward: null, marks: 0, crest: null, run: { t: 0, wardenAt: 480, finaleAt: 900, wardenDone: false, finaleOut: false, nextLabel: 'FRACTURE WARDEN', nextIn: 480, announce: null } };

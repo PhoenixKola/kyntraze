@@ -12,6 +12,10 @@ import { formChoices, selectedForm, activateForm, SELECTOR_MAX } from '../sim/Fo
 import { BOSS_SCHEDULE } from '../content/encounters';
 import { RULES } from '../core/Rules';
 import { storeSave, type SaveV1, type GameSettings } from '../sim/SaveSystem';
+import { blankMeta, finalizeRun, contractAvailable, type RunReward, type RunResult } from '../sim/MetaSystem';
+import { NO_CONFIG, toolCharges, type RunConfig } from '../sim/RunConfig';
+import { categoryStacks } from '../sim/UpgradeSystem';
+import type { UpgradeCategory } from '../content/upgrades';
 export class GameBridge {
   private listeners = new Set<() => void>();
   private sim: Simulation | null = null;
@@ -19,7 +23,17 @@ export class GameBridge {
   private lastPhase = '';
   private deathShown = false;
   private victoryShown = false;
-  constructor(private readonly save: SaveV1) {}
+  /** B18: one identity per run (never derived from the seed, so retrying the same seed is a new run); its reward is granted at most once. */
+  readonly runId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  private reward: RunReward | null = null; private finalized = false;
+  private readonly config: RunConfig;
+  constructor(private readonly save: SaveV1) {
+    if (!save.meta) save.meta = blankMeta();   // hand-built saves (tests, very old callers) get an empty meta
+    const m = save.meta, tools = toolCharges(m.owned.includes('tool_reroll'), m.owned.includes('tool_banish'));
+    this.config = { boon: m.boon && m.owned.includes(`boon_${m.boon}`) ? m.boon : null, contract: m.contract && contractAvailable(m, m.contract) ? m.contract : null, ...tools };
+  }
+  /** The loadout this run was deployed with (frozen at construction). */
+  getRunConfig(): RunConfig { return this.config ?? NO_CONFIG; }
   bind(sim: Simulation) { this.sim = sim; this.publish(true); }
   unbind() { this.sim = null; }
   setSettings(next: GameSettings) { this.save.settings = next; }
@@ -40,13 +54,23 @@ export class GameBridge {
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
       dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form, dragonCooldown: p.dragonCooldown, cometCooldown: p.cometCooldown, cometUnlocked: s.cometUnlocked, cometReady: formChoices(s).includes(2), apexUnlocked: s.apexUnlocked, apexReady: formChoices(s).includes(3), riftCooldown: p.riftCooldown, reversalCooldown: p.reversalCooldown, evadeCooldown: p.evadeCooldown, riftCharge: s.cast?.kind === 'rift' && !s.cast.released ? Math.min(1, s.cast.t / RIFT.maxCharge) : 0, selector: { open: !!s.selector?.open, pick: selectedForm(s) ?? 0, choices: formChoices(s), left: Math.max(0, SELECTOR_MAX - (s.selector?.held ?? 0)) }, cinema: !!s.cinema,
       formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? s.upgradeOffers.map(id => offerCard(s, id)) : [], owned: UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] })), map: miniMap(s),
-      cdMax: { dash: 3.2 * s.mods.dashCd, beam: BEAM.cooldown * s.mods.beamCd, sphere: SPHERE.cooldown * s.mods.sphereCd, form: RULES.formCooldown * s.mods.formCd, dragon: DRAGON.cooldown * s.mods.beamCd, comet: CANNON.cooldown * s.mods.sphereCd, rift: RIFT.cooldown * s.mods.beamCd, reversal: REVERSAL.cooldown * s.mods.sphereCd, evade: EVASION.cooldown }, run: runHud(s), victoryShown: this.victoryShown, rewardPick: s.rewardPick, bosses: s.bossesDefeated, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
+      cdMax: { dash: 3.2 * s.mods.dashCd, beam: BEAM.cooldown * s.mods.beamCd, sphere: SPHERE.cooldown * s.mods.sphereCd, form: RULES.formCooldown * s.mods.formCd, dragon: DRAGON.cooldown * s.mods.beamCd, comet: CANNON.cooldown * s.mods.sphereCd, rift: RIFT.cooldown * s.mods.beamCd, reversal: REVERSAL.cooldown * s.mods.sphereCd, evade: EVASION.cooldown }, run: runHud(s), victoryShown: this.victoryShown, rewardPick: s.rewardPick, contract: this.config.contract, boon: this.config.boon, rerolls: s.run?.rerollsLeft ?? 0, banishes: s.run?.banishesLeft ?? 0, reward: this.reward, marks: this.save.meta.marks, crest: this.save.meta.crest, bosses: s.bossesDefeated, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
     if ((s.phase === 'dead' || s.phase === 'victory') && phaseChanged) {
       const stats = this.sim!.stats();
+      this.finalizeMeta(s);
       if (!this.save.best || stats.score > this.save.best.score) { this.save.best = stats; storeSave(this.save); }
     }
     this.lastPhase = s.phase;
     if (force || phaseChanged || this.listeners.size) this.listeners.forEach(listener => listener());
+  }
+  /** Records the finished run in the meta state exactly once (guarded by the run id and the saved ledger) and stores it before any Results button can be pressed. */
+  private finalizeMeta(s: GameState) {
+    if (this.finalized) return; this.finalized = true;
+    let maxCat = 0; for (const c of ['core', 'beam', 'sphere', 'survival', 'mobility', 'pickup', 'drive'] as UpgradeCategory[]) maxCat = Math.max(maxCat, categoryStacks(s, c));
+    const won = s.phase === 'victory', warden = s.bossesDefeated >= 1 || won;
+    const result: RunResult = { runId: this.runId, arena: s.arenaId, won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, wardenKills: warden ? 1 : 0, seraphKills: won ? 1 : 0, formsUsed: [...(s.run?.formsUsed ?? [])], maxCategoryStacks: maxCat, contract: this.config.contract };
+    const out = finalizeRun(this.save.meta, result);
+    this.save.meta = { ...out.meta, introSeen: true }; this.reward = out.reward ? { ...out.reward, firstRun: out.reward.firstRun && !out.meta.introSeen } : null; storeSave(this.save);
   }
   /** Called by the renderer when the Death clip has finished and held. Ignored unless the sim is actually dead, so it can never show Results early. */
   markDeathShown() { if (this.sim?.state.phase !== 'dead' || this.deathShown) return; this.deathShown = true; this.publish(true); }
@@ -56,6 +80,8 @@ export class GameBridge {
   togglePause() { this.sim?.togglePause(); this.publish(true); }
   /** Form selector, from the pointer: hover highlights a card, a click starts it. */
   pickForm(f: 1 | 2 | 3, confirm: boolean) { const s = this.sim?.state; if (!s?.selector.open || !formChoices(s).includes(f)) return; s.selector.pick = f; if (confirm) activateForm(s, f); this.publish(true); }
+  reroll() { if (this.sim?.reroll()) this.publish(true); }
+  banish(id: UpgradeId) { if (this.sim?.banish(id)) this.publish(true); }
   choose(id: UpgradeId) { this.sim?.chooseUpgrade(id); this.publish(true); }
   debugGrantXp(offers?: UpgradeId[]) { const sim = this.sim; if (!sim) return; sim.debugLevelUp(); if (offers && sim.state.phase === 'upgrade') sim.state.upgradeOffers = offers; this.publish(true); }
 }
