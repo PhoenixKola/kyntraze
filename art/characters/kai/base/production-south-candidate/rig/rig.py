@@ -75,6 +75,8 @@ PARTS = [
 ]
 DEFAULT_SLOTS = {"hand_f": "guard", "hand_n": "side"}
 
+if FORM != "f1":   # B07-pre: the head is drawn in front of the torso, so a neck runs from under the jaw down into the collar (parts/neck.png, see base/neck_parts.py)
+    _i = [p["id"] for p in PARTS].index("head"); PARTS.insert(_i, dict(id="neck", img="neck.png", bone="head", pivot=(5.0, 1.0), angle=0.0))
 if FORM == "f1":   # Form I: spikier head + a separate rear hair piece on its own bone; the base head stays in the rig behind the "form" slot (transformation clip)
     _g = json.load(open(os.path.join(PARTS_DIR, "form_geometry.json")))      # written by form-i/scripts/prepare_parts.py (Blender's Python has no Pillow)
     HEAD_F1_PIVOT = tuple(_g["head_pivot"]); _nk = C("neck")

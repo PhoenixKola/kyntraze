@@ -1,0 +1,16 @@
+Pixel-art effects sheet for a 2D three-quarter-overhead action game: reusable, separate transparent energy effects for a martial-arts hero's BASIC ATTACK BOLT, DASH and GROUND-SLAM moves. They will be tinted any colour in the engine, so draw them in NEUTRAL tones only. The attached image shows the game's pixel-art style and block size from an earlier effects sheet: FINE clean pixel blocks (each art pixel a clear 5x5 block), no anti-aliasing, no gradients, no sub-pixel noise, hard stepped pixel shading, crisp readable contours. Seen from the same slightly-from-above game camera. Original designs, not copied from any existing franchise.
+
+COLOUR RULE: use ONLY these neutral tones: pure white (#ffffff) for the hottest core, very light grey-blue (#dfe6f2), light-mid grey-blue (#bac5dc), mid grey-blue (#8c9ab8) and a dark grey-blue (#3a4560) for the outer edge. No other colours, no black outlines.
+
+Draw ONLY these 9 pieces, each isolated on flat magenta (#ff00ff), far apart from each other, nothing overlapping, nothing cropped, arranged 3 per row in 3 rows:
+1. ENERGY BOLT: a short fast punch-bolt pointing RIGHT: a bright rounded white-hot head on the right, a tapering comet tail of 3 stacked flowing streak bands narrowing to a sharp point on the left, a couple of tiny trailing sparks. About 72 art pixels wide and 24 tall.
+2. HIT SPARK BURST: a punchy compact impact star where a punch-bolt hits an enemy: 8 sharp unequal spikes radiating from a white core, with a few tiny flying chips, crisp. About 40x40 art pixels.
+3. FIST MUZZLE SPARK: a tiny bright 4-point flare with 2 small sparks, about 20x20 art pixels.
+4. DASH SPEED STREAKS: three long thin parallel horizontal speed lines of different lengths tapering to a point on the LEFT, the thickest at the right, a bright white leading edge on the right, about 96 art pixels wide and 28 tall.
+5. DASH GHOST SLASH: one big crescent-shaped swoosh of speed energy, a thick curved arc opening to the left like a wind slash, white leading edge, tapering tips, about 64 wide and 48 tall.
+6. DASH DUST PUFF: a ground dust-and-energy puff seen from slightly above: a low wide cloud of 5 rounded billows with a bright rim on top and a darker underside, about 64 wide and 32 tall.
+7. GROUND SHOCKWAVE RING: a wide elliptical shockwave ring seen from slightly above (about twice as wide as tall), a thick crisp band with hard stepped pixel segments, 12 short jagged energy teeth on the outside edge, a white-hot top rim, hollow in the middle. About 176 wide and 88 tall.
+8. SLAM CRATER BURST: a flat elliptical cracked-impact decal seen from slightly above: a white-hot core, radial jagged crack lines spreading outwards in light and mid tones, small rock chips lifting off. About 128 wide and 64 tall.
+9. DEBRIS CHUNKS: four separate small angular stone-and-energy shards of different shapes and sizes side by side (8 to 14 art pixels each), light tops and dark undersides.
+
+Flat solid magenta background everywhere. Wide 16:9. No character, no text, no labels, no watermark.

@@ -138,13 +138,13 @@ describe('KaiAnimator', () => {
     expect(p).toMatchObject({ clip: 'BasicPunch', facing: 'east' }); expect(p.frame).toBeGreaterThanOrEqual(2);
   });
 
-  it('B03F.1: punching while moving keeps the run cycle on the legs (was frozen stance = skating)', () => {
-    const a = new KaiAnimator(manifests); const legs = new Set<number | null>();
+  it('B07pre: auto-attacking while running keeps the whole Run clip (no punch/legs composite, no seam)', () => {
+    const a = new KaiAnimator(manifests); const clips = new Set<string>(); let anyLegs = false;
     for (let i = 0; i < 60; i++) {
-      const p = a.update({ ...idle, moving: true, inputX: 1, attackClock: i < 5 ? 0.05 : 1, hasTarget: true, targetDx: 100 }, 0.55);
-      if (p.clip === 'BasicPunch') legs.add(p.legs);
+      const p = a.update({ ...idle, moving: true, inputX: 1, attackClock: i < 5 ? 0.05 : 1, hasTarget: true, targetDx: 100, shot: i === 3 ? { dx: 100, dy: 0 } : null }, 0.55);
+      clips.add(p.clip); if (p.legs !== null) anyLegs = true;
     }
-    expect(legs.size).toBeGreaterThan(3); expect(legs.has(null)).toBe(false);
+    expect([...clips]).toEqual(['Run']); expect(anyLegs).toBe(false);
     expect(a.update({ ...idle }, 0.55).legs).toBeNull();
   });
   it('B03F.1: facing cannot flip faster than the dwell while targets alternate or diagonals jitter', () => {
@@ -246,10 +246,10 @@ describe('B04 Form I activation, reveal, expiry', () => {
     for (const form of [1, 1, 0, 0, 1, 1] as const) for (const p of seq(a, { form }, 80)) if (p.events.includes('form_commit')) commits++;
     expect(commits).toBe(2);
   });
-  it('Form I punch keeps frame 5 timing and the moving-punch leg blend, in Form I sheets', () => {
+  it('Form I punch keeps frame 5 timing (standing; the moving composite was removed in B07pre), in Form I sheets', () => {
     const a = new KaiAnimator(manifests, f1); run(a, { form: 1 }, 90); let clock = 0.5; let impactFrame = -1; let legs = false;
-    for (let step = 0; step < 240; step++) { clock -= 1 / 60; let shot: AnimFrameInput['shot'] = null; if (clock <= 0) { clock += 0.4; shot = { dx: 80, dy: 0 }; } const p = a.update({ ...idle, form: 1, moving: true, inputY: 1, attackClock: clock, hasTarget: true, targetDx: 80, shot }, 0.4); if (shot && step > 60) impactFrame = p.frame; if (p.clip === 'BasicPunch') { expect(p.form).toBe('f1'); if (p.legs !== null) legs = true; } }
-    expect(Math.abs(impactFrame - 5)).toBeLessThanOrEqual(1); expect(legs).toBe(true);
+    for (let step = 0; step < 240; step++) { clock -= 1 / 60; let shot: AnimFrameInput['shot'] = null; if (clock <= 0) { clock += 0.4; shot = { dx: 80, dy: 0 }; } const p = a.update({ ...idle, form: 1, moving: false, attackClock: clock, hasTarget: true, targetDx: 80, shot }, 0.4); if (shot && step > 60) impactFrame = p.frame; if (p.clip === 'BasicPunch') { expect(p.form).toBe('f1'); if (p.legs !== null) legs = true; } }
+    expect(Math.abs(impactFrame - 5)).toBeLessThanOrEqual(1); expect(legs).toBe(false);
   });
   it('without Form I manifests the form flag is ignored (base-only play)', () => { const a = new KaiAnimator(manifests); expect(run(a, { form: 1 }, 30).clip).toBe('Idle'); expect(a.visualForm).toBe('base'); });
 });

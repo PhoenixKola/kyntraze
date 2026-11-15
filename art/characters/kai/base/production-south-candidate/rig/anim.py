@@ -137,9 +137,11 @@ def run():
         p["spine_rot"] = 3.0 * c
         p["head"] = (0, 2)
         fn_, ff_ = (1 - c) / 2, (1 + c) / 2                 # forwardness 0..1 of near / far arm
-        # back: upper arm drops down and out, forearm trails to the hip; forward: forearm pumps up to the chin, fist upright
-        p["arm_n"] = arm(lerp(-28, -6, fn_), lerp(12, 15, fn_), lerp(-40, 166, fn_), lerp(13, 9, fn_), hand=lerp(0, 0, fn_), slot=None)
-        p["arm_f"] = arm(lerp(32, 8, ff_), lerp(11, 14, ff_), lerp(48, -168, ff_), lerp(12, 8, ff_), hand=lerp(0, 0, ff_), slot=None)
+        # B07-pre: fists are placed by targets (reach_helper IK) so each fist travels a short near-vertical path beside the body: back phase = fist at the hip,
+        # forward phase = fist pumped up to chest/chin height, elbows out and down. (The old per-angle forearm sweep of ~200 deg dragged both fists across the torso.)
+        import anim_b05 as _b
+        CXr = 9.0; tn = (CXr - lerp(21, 15, fn_), lerp(-52, -80, fn_)); tf = (CXr + lerp(21, 15, ff_), lerp(-52, -80, ff_))
+        p.update(_b.reach(p, {"n": tn, "f": tf}, {"n": None, "f": None}, "out"))
         p["sash"] = 14.0 * math.sin(ph - 1.4)
         fr.append(p)
     return {"name": "Run", "fps": 14, "loop": True, "frames": fr, "events": {"foot_contact_near": 0, "foot_contact_far": 4}}

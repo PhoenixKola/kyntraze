@@ -371,6 +371,16 @@
    "angle": 0.0
   },
   {
+   "id": "neck",
+   "img": "neck.png",
+   "bone": "head",
+   "pivot": [
+    4.5,
+    1.0
+   ],
+   "angle": 0.0
+  },
+  {
    "id": "head",
    "img": "head.png",
    "bone": "head",

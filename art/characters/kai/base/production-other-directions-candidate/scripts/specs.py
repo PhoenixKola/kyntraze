@@ -42,7 +42,7 @@ def _parts_for(d):
             P("torso", "torso.png", "spine", "torso"), P("head", "head.png", "head", "head")]
     if d in ("east", "west"):
         # profile: far leg and far arm sit behind the body, near arm in front of everything; the head is drawn under the torso so the collar covers the neck
-        prof_core = [core[0], core[1], core[3], core[2]] if HEAD_BEHIND else [core[0], core[1], core[2], core[3]]
+        prof_core = [core[0], core[1], core[3], core[2]] if HEAD_BEHIND else [core[0], core[1], core[2], P("neck", "neck.png", "head", "neck"), core[3]]
         return leg("f") + arm("f") + [P("hips", "hips.png", "pelvis", "hips")] + leg("n") + prof_core + arm("n")
     # back view: sash is tied at the FRONT, so only the waistband shows (no knot, no tails); head under the torso so the collar fold covers the neck
     return leg("f") + leg("n") + [P("hips", "hips.png", "pelvis", "hips")] + [core[0], core[3], core[2]] + arm("f") + arm("n")

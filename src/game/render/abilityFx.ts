@@ -3,6 +3,7 @@ import type { GameState } from '../../sim/GameState';
 import { BEAM, SPHERE, ABILITY_FEEL } from '../../content/abilities';
 import { beamOrigin, sphereOrigin } from '../../sim/AbilitySystem';
 import type { HandAnchor } from '../../assets/kaiAnimation';
+import { FxPool, vfxKey } from './fxPool';
 
 export const ABILITY_FX_NAMES = ['beam_seg', 'muzzle', 'impact', 'orb', 'streak', 'sphere', 'trail', 'ring', 'flash', 'dome'] as const;
 export const abilityFxKey = (n: string) => `abfx-${n}`;
@@ -29,10 +30,12 @@ export class AbilityFx {
   private orb: Phaser.GameObjects.Image;
   private sphere: Phaser.GameObjects.Image;
   private trail: Phaser.GameObjects.Image;
-  private dome = new Map<number, Phaser.GameObjects.Image>();
+  private readonly vfx: FxPool;
+  private readonly zone: Phaser.GameObjects.Image; private readonly rune: Phaser.GameObjects.Image; private readonly closing: Phaser.GameObjects.Image; private readonly swirl: Phaser.GameObjects.Image; private readonly zoneFill: Phaser.GameObjects.Graphics;
   private lastEvent = 0;
   private clock = 0;
   private streakClock = 0;
+  private moteClock = 0;
   private pause = 0;
   private hitCast = 0;
   /** Debug/QA: last origin the beam / orb used, world px. */
@@ -40,6 +43,9 @@ export class AbilityFx {
   constructor(private readonly scene: Phaser.Scene) {
     const add = (k: string) => scene.add.image(0, 0, abilityFxKey(k)).setVisible(false).setBlendMode(Phaser.BlendModes.ADD);
     this.g = scene.add.graphics().setDepth(14.5);
+    this.vfx = new FxPool(scene, 130); this.zoneFill = scene.add.graphics().setDepth(3.3);
+    const tele = (n: string, d: number) => scene.add.image(0, 0, vfxKey(n, false)).setDepth(d).setVisible(false);
+    this.zone = tele('circ_zone', 3.4); this.rune = tele('circ_rune', 3.5); this.closing = tele('circ_wave', 3.45); this.swirl = tele('swirl', 11.9);
     const seg = scene.textures.get(abilityFxKey('beam_seg')).getSourceImage();
     this.beamGlow = scene.add.tileSprite(0, 0, 10, seg.height, abilityFxKey('beam_seg')).setVisible(false).setBlendMode(Phaser.BlendModes.ADD).setOrigin(0, 0.5);
     this.beamCore = scene.add.tileSprite(0, 0, 10, seg.height, abilityFxKey('beam_seg')).setVisible(false).setBlendMode(Phaser.BlendModes.ADD).setOrigin(0, 0.5);
@@ -55,6 +61,41 @@ export class AbilityFx {
     if (this.pool.length >= 120) return;
     const img = this.scene.add.image(o.x ?? 0, o.y ?? 0, abilityFxKey(key)).setBlendMode(Phaser.BlendModes.ADD).setDepth(depth).setTint(tint).setAlpha(0);
     this.pool.push({ img, age: 0, life: o.life, x: o.x ?? 0, y: o.y ?? 0, vx: o.vx ?? 0, vy: o.vy ?? 0, s0: o.s0 ?? 1, s1: o.s1 ?? 1, a0: o.a0 ?? 1, a1: o.a1 ?? 0, rot: o.rot ?? 0, delay: o.delay ?? 0 });
+  }
+
+  /** Nova Bloom detonation: scorch decal, fireball, circular shock wave that ends on the sim blast radius, rising plume, embers and debris. */
+  private detonate(x: number, y: number, blast: { radius: number; form: 0 | 1 } | undefined, formVisual: boolean, reduced: boolean) {
+    const R = blast?.radius ?? SPHERE.radius, solar = blast ? blast.form === 1 : formVisual; const k = (n: string) => vfxKey(n, solar), rnd = Math.random, v = this.vfx, f = R / 190;
+    v.spawn({ key: vfxKey('scorch', false), x, y: y + 4, depth: 2.8, life: 3.4, blend: 'normal', s0: (2 * R * 0.9) / 329, s1: (2 * R * 0.9) / 329, a0: 0.85, a1: 0, fadeIn: 0.03 });
+    this.spawn('flash', 13.2, solar ? SOLAR_TINT.core : BASE_TINT.core, { x, y, life: 0.14, s0: 1.2, s1: 3.4 * f, a0: 0.9, a1: 0, rot: rnd() });
+    v.spawn({ key: k('boom'), x, y: y - 6, depth: 13, life: 0.55, blend: 'normal', s0: 0.35 * f, s1: 1.15 * f * (solar ? 1.1 : 1), a0: 1, a1: 0, rot: 0 });
+    v.spawn({ key: k('circ_wave'), x, y, depth: 12.8, life: 0.5, blend: 'normal', s0: 0.12, s1: (2 * R * 1.02) / 303, a0: 1, a1: 0 });
+    v.spawn({ key: k('circ_wave'), x, y, depth: 12.7, life: 0.65, blend: 'normal', s0: 0.08, s1: (2 * R * 0.8) / 303, a0: 0.65, a1: 0, delay: 0.12 });
+    v.spawn({ key: k('plume'), x, y: y - 14, depth: 12.6, life: 0.95, blend: 'normal', s0: 0.55 * f, s1: 1.25 * f, a0: 0.9, a1: 0, vy: -34, delay: 0.08 });
+    v.spawn({ key: k('embers'), x, y, depth: 13.1, life: 0.85, blend: 'add', s0: 1.0 * f, s1: 2.3 * f, a0: 1, a1: 0, vy: -18 });
+    if (reduced) return;
+    for (let i = 0; i < 12; i++) { const a = (i / 12) * 6.28 + rnd() * 0.4, sp = (R * (0.7 + rnd() * 0.5)) / 0.5; v.spawn({ key: vfxKey('debris' + ((rnd() * 4) | 0), solar), x, y, depth: 12.5, life: 0.7, vx: Math.cos(a) * sp * 0.7, vy: Math.sin(a) * sp * 0.6 - 120, ay: 420, s0: 1.0 + rnd() * 0.7, s1: 0.5, a0: 1, a1: 0, rot: rnd() * 6, spin: (rnd() - 0.5) * 12 }); }
+    for (let i = 0; i < 14; i++) { const a = rnd() * 6.28, sp = 220 + rnd() * 300; v.spawn({ key: vfxKey('mote' + ((rnd() * 3) | 0), solar), x, y, depth: 12.9, life: 0.4 + rnd() * 0.3, blend: 'add', ox: 1, oy: 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.8, rot: a, s0: 1.2, s1: 0.4, a0: 1, a1: 0 }); }
+  }
+
+  /** The charging orb: a spiral inflow around the palms plus energy motes streaming in from every side. */
+  private chargeOrb(x: number, y: number, u: number, dt: number, solar: boolean, reduced: boolean) {
+    this.swirl.setTexture(vfxKey('swirl', solar)).setVisible(true).setPosition(x, y).setScale(0.28 + 0.55 * u).setAlpha(0.35 + 0.6 * u).setRotation(-Math.floor(this.clock * 9) * 0.5236);
+    if (dt <= 0 || reduced) return;
+    this.moteClock += dt; const rnd = Math.random;
+    while (this.moteClock > 0.045) {
+      this.moteClock -= 0.045; const a = rnd() * 6.28, r = 70 + rnd() * 50, life = 0.26;
+      this.vfx.spawn({ key: vfxKey('mote' + ((rnd() * 3) | 0), solar), x: x + Math.cos(a) * r, y: y + Math.sin(a) * r * 0.85, depth: 12.1, life, blend: 'add', ox: 1, oy: 0.5, rot: a + Math.PI, vx: -Math.cos(a) * r / life, vy: -Math.sin(a) * r * 0.85 / life, s0: 0.9, s1: 0.35, a0: 0.2 + 0.8 * u, a1: 1 });
+    }
+  }
+
+  /** Landing-zone telegraph: a faint disc, a crisp ring with inward ticks (exactly the sim radius) and a slowly stepping rune ring; in flight a closing ring counts down to impact. */
+  private telegraph(x: number, y: number, R: number, u: number, solar: boolean, flight: number) {
+    const pulse = 1 + 0.012 * Math.sin(this.clock * 14), col = solar ? SOLAR_TINT.aura : BASE_TINT.aura;
+    this.zoneFill.fillStyle(col, 0.07 + 0.07 * u + (flight > 0 ? 0.05 * flight : 0)); this.zoneFill.fillCircle(x, y, R);
+    this.zone.setTexture(vfxKey('circ_zone', solar)).setVisible(true).setPosition(x, y).setScale((2 * R * pulse) / 277).setAlpha(0.55 + 0.4 * u);
+    this.rune.setTexture(vfxKey('circ_rune', solar)).setVisible(true).setPosition(x, y).setScale((2 * R) / 288 * 0.92).setAlpha(0.35 + 0.45 * u).setRotation(Math.floor(this.clock * 6) * 0.1309);
+    if (flight > 0) this.closing.setTexture(vfxKey('circ_wave', solar)).setVisible(true).setPosition(x, y).setScale(((2 * R) / 303) * (1 - 0.85 * flight)).setAlpha(0.4 + 0.5 * flight);
   }
 
   update(realDt: number, s: GameState, reduced: boolean, formVisual: boolean, hand: HandAnchor | null) {
@@ -91,12 +132,7 @@ export class AbilityFx {
         this.spawn('ring', 11.2, aura, { x: lo.x, y: lo.y, life: 0.3, s0: 0.12, s1: 0.65, a0: 0.9, a1: 0 });   // the throw: a ring snaps off the hands
       } else if (ev.kind === 'sphere_burst') {
         if (!reduced) { cam.shake(ABILITY_FEEL.sphereBurstShake.ms, ABILITY_FEEL.sphereBurstShake.intensity); this.pause = HIT_PAUSE.burst; }
-        this.spawn('flash', 13, core, { x: ev.x, y: ev.y, life: 0.3, s0: 0.5 * 1.5, s1: 3.2 * 1.5, a0: 1, a1: 0, rot: rnd() });
-        this.spawn('flash', 12.9, aura, { x: ev.x, y: ev.y, life: 0.45, s0: 0.3 * 1.5, s1: 4.2 * 1.5, a0: 0.75, a1: 0, rot: rnd() + 0.4, delay: 0.04 });
-        this.spawn('ring', 12.8, core, { x: ev.x, y: ev.y, life: 0.5, s0: 0.3, s1: 2.4, a0: 0.95, a1: 0, delay: 0.02 });       // 3-part detonation: white flash, colour flash, expanding shock ring
-        this.spawn('ring', 12.7, aura, { x: ev.x, y: ev.y, life: 0.7, s0: 0.2, s1: 3.2, a0: 0.7, a1: 0, delay: 0.1 });
-        const n = reduced ? 8 : 24;
-        for (let i = 0; i < n; i++) { const a = (i / n) * 6.28 + rnd() * 0.3, v = 180 + rnd() * 260; this.spawn(i % 3 ? 'streak' : 'impact', 12.5, i % 2 ? aura : core, { x: ev.x, y: ev.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.8, life: 0.45 + rnd() * 0.3, s0: 0.8 + rnd() * 0.5, s1: 0.2, a0: 1, a1: 0, rot: a }); }
+        this.detonate(ev.x, ev.y, s.blasts.find(b => Math.abs(b.x - ev.x) < 2 && Math.abs(b.y - ev.y) < 2), formVisual, reduced);
       }
     }
 
@@ -131,7 +167,7 @@ export class AbilityFx {
     } else this.lastOrigin = null;
 
     // ---- sphere: forms between the palms, is carried up, leaves the hands on the throw, flies, bursts
-    this.sphere.setVisible(false); this.trail.setVisible(false);
+    this.sphere.setVisible(false); this.trail.setVisible(false); this.zone.setVisible(false); this.rune.setVisible(false); this.closing.setVisible(false); this.swirl.setVisible(false); this.zoneFill.clear();
     const cs = c?.kind === 'sphere' && !c.released ? c : null; const sh = s.sphere;
     if (cs) {
       const so = sphereOrigin(s, cs); const o = hand ? hand.m : so; this.lastOrigin = { x: o.x, y: o.y, src: hand ? 'hand' : 'sim' };
@@ -139,9 +175,8 @@ export class AbilityFx {
       this.sphere.setVisible(true).setPosition(o.x, o.y).setDepth(12).setTint(core).setScale(sc).setRotation(this.clock * 2.4).setAlpha(0.6 + 0.4 * u);
       this.glowDisc(o.x, o.y, 26 * sc, aura, 0.5 * u * (1 + 0.1 * Math.sin(this.clock * 18)));
       if (dt > 0 && !reduced) { this.streakClock += dt; while (this.streakClock > 0.04) { this.streakClock -= 0.04; const a = rnd() * 6.28, r = 56 + rnd() * 40; this.spawn('streak', 12.1, aura, { x: o.x + Math.cos(a) * r, y: o.y + Math.sin(a) * r * 0.8, vx: -Math.cos(a) * r / 0.22, vy: -Math.sin(a) * r * 0.8 / 0.22, life: 0.22, s0: 0.8, s1: 0.3, a0: 0.2, a1: 1, rot: a + Math.PI }); } }
-      const gr = (this.clock * 1.6) % 1; this.g.lineStyle(2, core, 0.55 * (1 - gr) * u); this.g.strokeCircle(o.x, o.y, 90 * (1 - gr) + 16 * sc);   // energy drawn inward to the orb
-      const R = SPHERE.radius * (cs.form ? SPHERE.formRadius : 1);
-      this.g.lineStyle(2, aura, 0.18 + 0.2 * u); this.g.strokeCircle(cs.tx, cs.ty, R);   // the landing point is shown from the first frame of the gather
+      this.chargeOrb(o.x, o.y, u, dt, !!cs.form, reduced);
+      this.telegraph(cs.tx, cs.ty, SPHERE.radius * (cs.form ? SPHERE.formRadius : 1), u, !!cs.form, 0);   // the landing zone is shown from the first frame of the gather
     }
     if (sh) {
       const u = Math.min(1, sh.t / SPHERE.flight); const e = u * u * (3 - 2 * u * 0.8);
@@ -150,19 +185,9 @@ export class AbilityFx {
       const sc = 0.95 + 0.4 * u; this.sphere.setVisible(true).setPosition(x, y).setDepth(12).setTint(core).setScale(sc).setRotation(this.clock * 5).setAlpha(1);
       this.glowDisc(x, y, 26 * sc, aura, 0.55);
       this.trail.setVisible(true).setPosition(x - Math.cos(ang) * 10, y - Math.sin(ang) * 10).setDepth(11.8).setTint(aura).setRotation(ang).setScale(1.2 * sc, 0.9 * sc).setAlpha(0.85);
-      const R = SPHERE.radius * (sh.form ? SPHERE.formRadius : 1); const pulse = 0.35 + 0.15 * Math.sin(this.clock * 24);
-      this.g.lineStyle(3, aura, pulse + 0.2 * u); this.g.strokeCircle(sh.x1, sh.y1, R);
-      this.g.lineStyle(2, core, 0.5 * u); this.g.strokeCircle(sh.x1, sh.y1, R * (1 - 0.9 * u));
+      this.telegraph(sh.x1, sh.y1, SPHERE.radius * (sh.form ? SPHERE.formRadius : 1), 1, !!sh.form, u);   // in flight: the zone stays and a closing ring counts down to impact
     }
-    for (const b of s.blasts) {
-      const u = 1 - b.ttl / b.life; const grow = Math.min(1, u / 0.28); const eo = 1 - (1 - grow) * (1 - grow); const R = b.radius;
-      this.g.lineStyle(5, core, Math.max(0, 1 - u) * 0.95); this.g.strokeCircle(b.x, b.y, R * (0.15 + 0.85 * eo));
-      this.g.lineStyle(3, aura, Math.max(0, 1 - u * 1.2) * 0.9); this.g.strokeCircle(b.x, b.y, R * (0.1 + 0.75 * eo));
-      let d = this.dome.get(b.id); if (!d) { d = this.scene.add.image(b.x, b.y, abilityFxKey('dome')).setBlendMode(Phaser.BlendModes.ADD).setDepth(3.2).setTint(aura); this.dome.set(b.id, d); }
-      d.setScale(2 * R / d.width * (0.3 + 0.7 * eo), 2 * R / d.height * (0.3 + 0.7 * eo)).setAlpha(Math.max(0, (b.form ? 0.22 : 0.4) * (1 - u) * (1 - u)));
-    }
-    for (const [id, d] of this.dome) if (!s.blasts.some(b => b.id === id)) { d.destroy(); this.dome.delete(id); }
-    void p;
+    void p; this.vfx.update(dt);
 
     for (let i = this.pool.length - 1; i >= 0; i--) {
       const q = this.pool[i];
@@ -175,7 +200,7 @@ export class AbilityFx {
   }
 
   destroy() {
-    this.g.destroy(); for (const o of [this.beamCore, this.beamGlow, this.muzzle, this.orb, this.sphere, this.trail]) o.destroy();
-    this.pool.forEach(q => q.img.destroy()); this.pool = []; this.dome.forEach(d => d.destroy()); this.dome.clear();
+    this.g.destroy(); this.vfx.destroy(); this.zoneFill.destroy(); for (const o of [this.zone, this.rune, this.closing, this.swirl]) o.destroy(); for (const o of [this.beamCore, this.beamGlow, this.muzzle, this.orb, this.sphere, this.trail]) o.destroy();
+    this.pool.forEach(q => q.img.destroy()); this.pool = [];
   }
 }

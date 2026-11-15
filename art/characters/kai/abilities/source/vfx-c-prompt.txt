@@ -1,0 +1,11 @@
+Pixel-art effects sheet for a 2D action game: reusable, separate transparent energy ground-effects drawn as PERFECT TOP-DOWN CIRCLES (the effect footprint must be an exact circle, not an ellipse, because it shows a real circular damage radius). They will be tinted any colour in the engine, so draw them in NEUTRAL tones only. The attached image shows the game's pixel-art style and block size from an earlier effects sheet: FINE clean pixel blocks (each art pixel a clear 5x5 block), no anti-aliasing, no gradients, no sub-pixel noise, hard stepped pixel shading, crisp readable contours. Original designs, not copied from any existing franchise.
+
+COLOUR RULE: use ONLY these neutral tones: pure white (#ffffff) for the hottest core, very light grey-blue (#dfe6f2), light-mid grey-blue (#bac5dc), mid grey-blue (#8c9ab8) and a dark grey-blue (#3a4560) for the outer edge. No other colours, no black outlines.
+
+Draw ONLY these 4 pieces, each a perfect circle about 220 art pixels across, isolated on flat magenta (#ff00ff), far apart, in a 2 x 2 grid, nothing overlapping, nothing cropped:
+1. LANDING ZONE: a glowing circular danger-zone telegraph: a solid crisp circular border band 3 art pixels thick in mid tone, an inner thin second ring, the area between filled with a sparse regular dithered pattern of small light dots, and 8 small triangular arrow ticks on the inner edge pointing towards the centre. Centre area empty.
+2. RUNE RING: an elegant magic-circle ring: two thin concentric circles with 24 short tick marks between them, 8 small diamond rune glyphs evenly spaced on the outer ring and 8 tiny dots between them. Hollow inside and outside.
+3. SHOCKWAVE RING: a thick circular blast ring with hard stepped pixel segments, 20 short sharp energy teeth pointing outwards evenly around the outside edge, white-hot outer rim, light-to-mid inner tones, hollow in the middle.
+4. SLAM CRACK BURST: a circular cracked-ground impact decal: a white-hot small core, 12 jagged crack lines radiating to the edge with branching, the cracked wedges filled in light and mid tones with dark crack edges, a ragged circular outline, a few separate small rock chips just outside.
+
+Flat solid magenta background everywhere. Wide 16:9. No character, no text, no labels, no watermark.

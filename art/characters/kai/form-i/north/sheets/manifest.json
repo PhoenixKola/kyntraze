@@ -6,14 +6,14 @@
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/kai-north.blend",
  "frame_width": 134,
- "frame_height": 170,
+ "frame_height": 167,
  "origin_px": [
   80.0,
   164.0
  ],
  "origin_normalized": [
   0.597015,
-  0.964706
+  0.982036
  ],
  "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
  "scale_note": "1 px = 1 native art px (approved ~160 px Kai); the game renders Kai at about 0.5x",

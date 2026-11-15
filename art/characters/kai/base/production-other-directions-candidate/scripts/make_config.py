@@ -31,6 +31,7 @@ def anchors(kind, a, t, B, x0, x1, point=None):
     if kind == "tails":   return dict(pivot=(top, t + 3.0), angle=0.0)
     if kind == "torso":   return dict(pivot=(cx, B - 6.0), angle=0.0)
     if kind == "head":    return dict(pivot=(bot, B - 5.0), angle=0.0)
+    if kind == "neck":    return dict(pivot=(cx, t + 1.0), angle=0.0)
     if kind == "hair":    # Form I rear hair: the pivot is the root of the spike mass (the plain end that hides behind the skull)
         ys, xs = np.nonzero(a); side = ROOT_SIDE; ex = x0 + 6.0 if side == "left" else x1 - 6.0; col = a[:, int(ex)]; cy = float(np.nonzero(col)[0].mean() + 0.5) if col.any() else (t + B) / 2
         return dict(pivot=(ex, cy), angle=0.0)

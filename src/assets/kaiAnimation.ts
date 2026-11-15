@@ -238,7 +238,10 @@ export class KaiAnimator {
     }
 
     if (casting) { /* the signature ability owns the hands */ }
-    else if (!busy) {
+    else if (!busy && this.movingNow) {
+      // B07pre: while running the ray fires with the full Run clip. The old upper-body-punch + run-legs composite showed a seam and distorted hips (owner: 'crops my character in the middle').
+      this.punchTime = -1; if (i.moving) this.turn(facingFromInput(this.facing, i.inputX, i.inputY));
+    } else if (!busy) {
       if (i.shot) {
         // the sim just fired: keep an aligned predicted punch, otherwise (target appeared this instant / extreme fire rate) snap in near the impact frame
         const aligned = this.punching && Math.abs(this.punchTime - plan.impactT) <= 0.2;

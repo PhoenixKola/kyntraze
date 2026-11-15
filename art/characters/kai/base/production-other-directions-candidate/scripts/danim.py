@@ -133,8 +133,8 @@ def idle():
 PROFILE_LEG = [(21, 0, 1.0, 1.0, True), (13, 0, 0.97, 0.97, True), (3, 0, 1.0, 1.0, True), (-11, 0, 1.0, 1.0, True),
                (-21, -10, 0.95, 0.85, False), (-3, -24, 0.9, 0.95, False), (14, -14, 0.9, 1.0, False), (21, -4, 0.97, 1.0, False)]
 # back-view legs (from the SOUTH table with the depth sense reversed: the foot reaching forward is further away = higher on screen)
-BACK_LEG = [(0, -5, 1.0, 1.0, True), (0, -2, 0.92, 0.96, True), (0, 1, 1.0, 1.0, True), (1, 4, 1.04, 1.04, True),
-            (1, -15, 0.9, 0.7, False), (0, -22, 0.55, 0.95, False), (-1, -12, 0.62, 1.0, False), (0, 1, 0.88, 1.0, False)]
+BACK_LEG = [(1, -7, 0.96, 0.96, True), (1, -3, 0.95, 0.97, True), (1, 0, 1.0, 1.0, True), (1, 3, 1.03, 1.03, True),
+            (0, 2, 0.95, 0.85, False), (-2, -12, 0.74, 0.86, False), (-2, -15, 0.72, 0.95, False), (0, -11, 0.88, 1.0, False)]
 HIP_DY = [1, 3, 1, -2, 1, 3, 1, -2]
 
 def run():
@@ -143,7 +143,7 @@ def run():
         p = stance(); ph = 2 * math.pi * i / 8; c = math.cos(ph)
         for s, off in (("n", 0), ("f", 4)):
             dx, dy, ft, fs, planted = (PROFILE_LEG if D != "north" else BACK_LEG)[(i + off) % 8]
-            if D == "north": bx, by = SOLES[s][0], SOLES[s][1]; o = -1 if s == "n" else 1; sole = (bx + o * dx, by + dy)
+            if D == "north": o = -1 if s == "n" else 1; bx, by = RX + o * 11, RY - 2; sole = (bx + o * dx, by + dy)
             else: bx = RX + (-3 if s == "n" else 3) * SX; by = RY + (2 if s == "n" else -2); sole = (bx + SX * dx, by + dy)
             p[f"leg_{s}"] = {"sole": sole, "fs_t": ft, "fs_s": fs, "planted": planted, "straight": True, "slack": 2.0 if planted else 3.0}
         p["pelvis"] = (round(1.0 * c * SX), (7 if D != "north" else 0) + HIP_DY[i]); p["chest"] = (round(-1.0 * c * SX), HIP_DY[i] // 2 + 1)
@@ -152,7 +152,7 @@ def run():
             fw = (1 - c) / 2 if s == "n" else (1 + c) / 2          # forwardness 0..1 of this arm
             if D == "north":
                 o = -1 if s == "n" else 1
-                p[f"arm_{s}"] = arm(o * lerp(30, 24, fw), lerp(LU[s] * 0.97, LU[s] * 0.88, fw), o * lerp(14, 150, fw * fw), LF[s], 0.0, "side" if fw < 0.5 else "guard")
+                p[f"arm_{s}"] = arm(o * lerp(9, 22, fw), lerp(LU[s] * 1.0, LU[s] * 0.82, fw), o * lerp(12, 150, fw ** 1.5), lerp(LF[s], LF[s] * 0.62, fw), 0.0, "side" if fw < 0.5 else "guard")
             else:
                 p[f"arm_{s}"] = arm(SX * lerp(-45, 42, fw), LU[s], SX * lerp(20, 135, fw), LF[s], 0.0, "side")
         fr.append(p)

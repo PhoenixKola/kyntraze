@@ -105,9 +105,9 @@ export class EntityRenderer {
       sprite.setPosition(Math.round(e.x), Math.round(e.y - 7));
       sprite.setAlpha(e.hp / e.maxHp < 0.34 ? 0.72 : 1);
       const prev = this.enemyHp.get(e.id); this.enemyHp.set(e.id, e.hp);
-      if (prev !== undefined && e.hp < prev) this.enemyFlash.set(e.id, 0.09);   // hit reaction: a brief white flash on every enemy an ability (or the basic attack) actually damaged
+      if (prev !== undefined && e.hp < prev) this.enemyFlash.set(e.id, 0.055);   // hit reaction: a brief white flash on every enemy an ability (or the basic attack) actually damaged
       const fl = this.enemyFlash.get(e.id) ?? 0;
-      if (fl > 0) { this.enemyFlash.set(e.id, Math.max(0, fl - dt)); sprite.setTint(0xffffff); sprite.tintMode = Phaser.TintModes.FILL; } else { sprite.setTint(0xc4cad8); sprite.tintMode = Phaser.TintModes.MULTIPLY; }
+      if (fl > 0) { this.enemyFlash.set(e.id, Math.max(0, fl - dt)); sprite.setTint(0xd3e6ff); sprite.tintMode = Phaser.TintModes.FILL; } else { sprite.setTint(0xc4cad8); sprite.tintMode = Phaser.TintModes.MULTIPLY; }
     }
     for (const [id, sprite] of this.sprites) if (!active.has(id)) { sprite.destroy(); this.sprites.delete(id); this.enemyHp.delete(id); this.enemyFlash.delete(id); }
     const activeOrbs = new Set<number>();
