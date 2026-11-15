@@ -1,0 +1,43 @@
+{
+ "schema": "kyntraze.enemy-anim/1",
+ "enemy": "ranged",
+ "frame_width": 220,
+ "frame_height": 181,
+ "origin_px": [
+  110,
+  177
+ ],
+ "frames": 8,
+ "fps": 7,
+ "clips": {
+  "idle": [
+   0
+  ],
+  "move": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "windup": [
+   4
+  ],
+  "strike": [
+   5
+  ],
+  "hurt": [
+   6
+  ],
+  "death": [
+   7
+  ]
+ },
+ "facing": "east (mirrored for west)",
+ "events": {
+  "telegraph_frame": 4,
+  "release_frame": 5,
+  "hurt_frame": 6,
+  "death_frame": 7
+ },
+ "source": "art/enemies/source/ranged.png"
+}

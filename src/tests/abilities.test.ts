@@ -6,7 +6,7 @@ import type { Enemy, InputState } from '../sim/GameState';
 import { damagePlayer } from '../sim/CombatSystem';
 const DT = 1 / 60;
 const idle = (o: Partial<InputState> = {}): InputState => ({ x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false, ...o });
-function enemy(id: number, x: number, y: number, hp = 25): Enemy { return { id, x, y, kind: 'pursuer', hp, maxHp: hp, radius: 17, speed: 0, damage: 0, touchCooldown: 0 }; }
+function enemy(id: number, x: number, y: number, hp = 25): Enemy { return { id, x, y, kind: 'pursuer', hp, maxHp: hp, radius: 17, speed: 0, damage: 0, touchCooldown: 0, mode: 'move', modeT: 0, attackCd: 99, aimX: 1, aimY: 0, stagger: 0, spawnedAt: 0 }; }
 function setup(enemies: Array<[number, number, number?]> = []) {
   const sim = new Simulation(7); const s = sim.state; s.spawnTimer = 1e9; s.nextFlanker = 1e9; s.player.x = 1100; s.player.y = 800; s.player.attackClock = 1e9;
   s.enemies = enemies.map(([x, y, hp], i) => { const e = enemy(100 + i, x, y, hp ?? 25); e.speed = 0; return e; });

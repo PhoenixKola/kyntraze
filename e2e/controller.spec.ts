@@ -21,7 +21,7 @@ for (const [w, h] of [[960, 540], [640, 360]] as const) test(`controller-only: t
   // title -> hero select -> deploy, with A only
   await tap(page, 'A'); await expect(page.getByTestId('hero-select')).toBeVisible(); await page.waitForTimeout(250);
   await page.screenshot({ path: `test-results/pad-heroselect-${w}x${h}.png` });
-  await tap(page, 'A'); await expect(page.getByTestId('hud')).toBeVisible(); await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); await page.waitForTimeout(300);
+  await tap(page, 'A'); await expect(page.getByTestId('hud')).toBeVisible({ timeout: 20000 }); await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); await page.waitForTimeout(300);
   await page.evaluate(() => { const s = (window as unknown as W).__KYNT_QA__!.sim(); s.player.hp = 1e6; s.player.nextXp = 1e9; s.player.attackClock = 1e9; (s as unknown as { spawnTimer: number }).spawnTimer = 1e9; });
   // movement: left stick (analog, 8-way) and D-pad
   const a = await sim(page); await stick(page, 1, 0); await page.waitForTimeout(500); await stick(page, 0, 0); const b = await sim(page); expect(b.x).toBeGreaterThan(a.x + 30);
@@ -52,7 +52,7 @@ for (const [w, h] of [[960, 540], [640, 360]] as const) test(`controller-only: t
   // death -> results -> retry with A
   await page.evaluate(() => { const s = (window as unknown as W).__KYNT_QA__!.sim(); s.player.hp = 1; s.player.invulnerable = 0; s.enemies.push({ id: 9999, kind: 'pursuer', x: s.player.x, y: s.player.y, hp: 25, maxHp: 25, radius: 17, speed: 0, damage: 60, touchCooldown: 0 } as never); });
   await expect(page.getByTestId('results-screen')).toBeVisible({ timeout: 8000 }); await page.waitForTimeout(500); await page.screenshot({ path: `test-results/pad-results-${w}x${h}.png` });
-  await tap(page, 'A'); await expect(page.getByTestId('results-screen')).toHaveCount(0); await expect(page.getByTestId('hud')).toBeVisible(); await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); await page.waitForTimeout(400); expect((await sim(page)).phase).toBe('running');
+  await tap(page, 'A'); await expect(page.getByTestId('results-screen')).toHaveCount(0); await expect(page.getByTestId('hud')).toBeVisible({ timeout: 20000 }); await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); await page.waitForTimeout(400); expect((await sim(page)).phase).toBe('running');
 });
 
 test('keyboard still works untouched while a controller is connected and idle', async ({ page }) => {

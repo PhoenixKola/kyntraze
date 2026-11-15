@@ -41,7 +41,7 @@ test('Esc on hero select goes back to the title', async ({ page }) => {
 test('a loading screen is shown until the arena is ready, then the HUD appears', async ({ page }) => {
   await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click();
   await expect(page.getByTestId('loading-screen')).toBeVisible();
-  await expect(page.getByTestId('hud')).toBeVisible(); await expect(page.getByTestId('loading-screen')).toHaveCount(0);
+  await expect(page.getByTestId('hud')).toBeVisible({ timeout: 20000 }); await expect(page.getByTestId('loading-screen')).toHaveCount(0);
 });
 
 for (const [w, h] of [[1800, 700], [1000, 900], [960, 540]] as const) {

@@ -1,0 +1,9 @@
+Game VFX sprite sheet for the action game KYNTRAZE: FRACTURE RUSH. Hostile enemy attack markers in hot crimson-red (#ff3050) and white-hot core with pale pink highlights; NO orange or gold. Crisp, clean, cel-shaded with dark red outline where shapes allow, hard stepped edges, no blur, no text. Draw EXACTLY 8 items on flat magenta (#ff00ff) in 2 rows of 4, far apart, nothing cropped, each on its own cell:
+1. AIM LINE: a long thin horizontal laser-sight stripe (about 6:1 aspect), crimson with a bright white core line, small chevrons along it, fading at the left end.
+2. DANGER RING: a flat top-down circular ground warning ring seen from slightly above (a wide flattened ellipse), thin crimson outline ring with a faint translucent filled disc and broken tick marks around the rim.
+3. LUNGE CHEVRON: a bold triple chevron arrow pointing right made of crimson wedges with white-hot tips (ground warning for a charge).
+4. ENEMY BOLT: a compact crimson crystal shard projectile pointing right, white-hot core, short bright tail of 3 fading shards behind it. Must read clearly against dark blue floor.
+5. BOLT IMPACT: a small crimson radial burst/starburst puff with jagged shard rays, top-down.
+6. SLAM SHOCKWAVE: an expanding flat elliptical shockwave ring with jagged crack lines radiating outward, crimson and white-hot rim, dusty debris specks.
+7. DEATH BURST: a crimson-white radial shatter burst of angular shards and sparks flying outward, with a bright core flash.
+8. HIT SPARK: a small sharp white-pink crossed spark burst (4 spikes), used when an enemy is struck.

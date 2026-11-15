@@ -1,0 +1,68 @@
+{
+ "pursuer_wind": {
+  "seconds": 0.42,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -17.49,
+  "clipped_samples": 0
+ },
+ "lunge": {
+  "seconds": 0.22,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -16.26,
+  "clipped_samples": 0
+ },
+ "flanker_wind": {
+  "seconds": 0.34,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -14.82,
+  "clipped_samples": 0
+ },
+ "slash": {
+  "seconds": 0.26,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -17.38,
+  "clipped_samples": 0
+ },
+ "bruiser_wind": {
+  "seconds": 0.95,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -15.17,
+  "clipped_samples": 0
+ },
+ "bruiser_slam": {
+  "seconds": 0.8,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -21.48,
+  "clipped_samples": 0
+ },
+ "ranged_charge": {
+  "seconds": 0.75,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -15.5,
+  "clipped_samples": 0
+ },
+ "ranged_shot": {
+  "seconds": 0.32,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -16.47,
+  "clipped_samples": 0
+ },
+ "bolt_hit": {
+  "seconds": 0.26,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -21.44,
+  "clipped_samples": 0
+ },
+ "death_small": {
+  "seconds": 0.4,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -24.54,
+  "clipped_samples": 0
+ },
+ "death_heavy": {
+  "seconds": 0.95,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -19.58,
+  "clipped_samples": 0
+ }
+}

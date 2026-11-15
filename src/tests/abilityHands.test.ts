@@ -12,7 +12,7 @@ const table = JSON.parse(readFileSync(join(__dirname, '..', '..', 'public', 'art
 const forms: KaiForm[] = ['base', 'f1'];
 const DT = 1 / 60;
 const idle = (o: Partial<InputState> = {}): InputState => ({ x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false, ...o });
-const enemy = (id: number, x: number, y: number, hp = 400): Enemy => ({ id, x, y, kind: 'pursuer', hp, maxHp: hp, radius: 17, speed: 0, damage: 0, touchCooldown: 0 });
+const enemy = (id: number, x: number, y: number, hp = 400): Enemy => ({ id, x, y, kind: 'pursuer', hp, maxHp: hp, radius: 17, speed: 0, damage: 0, touchCooldown: 0, mode: 'move', modeT: 0, attackCd: 99, aimX: 1, aimY: 0, stagger: 0, spawnedAt: 0 });
 function setup(aimX: number, aimY: number, enemies: Array<[number, number]> = []) {
   const sim = new Simulation(5); const s = sim.state; s.spawnTimer = 1e9; s.nextFlanker = 1e9; s.player.attackClock = 1e9; s.player.aimX = aimX; s.player.aimY = aimY;
   s.enemies = enemies.map(([x, y], i) => enemy(10 + i, x, y)); return { sim, s };

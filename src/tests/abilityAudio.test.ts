@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ABILITY_SOUNDS, AbilityAudio, type CtxLike, type GainLike, type SourceLike } from '../game/audio/abilityAudio';
+import { ABILITY_SOUNDS, ENEMY_SOUNDS, AbilityAudio, type CtxLike, type GainLike, type SourceLike } from '../game/audio/abilityAudio';
 import { Simulation } from '../sim/Simulation';
 import type { AbilityEvent, InputState } from '../sim/GameState';
 
@@ -42,7 +42,7 @@ describe('ability audio files', () => {
 });
 
 describe('ability audio lifecycle', () => {
-  it('decodes every sound after the unlock gesture and resumes the context', async () => { const { ctx, a } = await mk(); expect(a.loaded).toBe(ABILITY_SOUNDS.length); expect(ctx.state).toBe('running'); });
+  it('decodes every sound after the unlock gesture and resumes the context', async () => { const { ctx, a } = await mk(); expect(a.loaded).toBe(ABILITY_SOUNDS.length + ENEMY_SOUNDS.length); expect(ctx.state).toBe('running'); });
   it('plays nothing before unlock (no buffers) and nothing when muted', async () => {
     const ctx = new FakeCtx(); const a = new AbilityAudio(ctx, async () => new ArrayBuffer(8)); a.handle(ev('beam_charge', 1), 0); expect(a.started).toHaveLength(0);
     await a.unlock(); a.setMuted(true); a.handle(ev('beam_charge', 2), 0); expect(a.started).toHaveLength(0); a.setMuted(false); a.handle(ev('beam_charge', 3), 0); expect(a.started).toEqual(['beam_charge']);
@@ -71,7 +71,7 @@ describe('ability audio lifecycle', () => {
   it('is driven by sim events: a real cast produces charge -> fire -> pulses -> end in order, and a fresh run (ids restart) still plays', async () => {
     const run1 = async () => {
       const { a } = await mk(); const sim = new Simulation(9); const s = sim.state; s.spawnTimer = 1e9; s.nextFlanker = 1e9; s.player.attackClock = 1e9; s.player.aimX = 1; s.player.aimY = 0;
-      s.enemies = [{ id: 1, x: 1300, y: 800, kind: 'pursuer', hp: 999, maxHp: 999, radius: 17, speed: 0, damage: 0, touchCooldown: 0 }];
+      s.enemies = [{ id: 1, x: 1300, y: 800, kind: 'pursuer', hp: 999, maxHp: 999, radius: 17, speed: 0, damage: 0, touchCooldown: 0, mode: 'move', modeT: 0, attackCd: 99, aimX: 1, aimY: 0, stagger: 0, spawnedAt: 0 }];
       sim.step(DT, idle({ beam: true })); a.sync(s); for (let i = 0; i < 100; i++) { sim.step(DT, idle()); a.sync(s); }
       return a;
     };

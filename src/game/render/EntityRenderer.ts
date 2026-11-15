@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { GameState, InputState } from '../../sim/GameState';
 import { FormFx } from './formFx';
 import { AbilityFx } from './abilityFx';
+import { EnemyRenderer } from './enemyRenderer';
 import { KAI_ANCHORS_KEY, handAnchorWorld, type AnchorTable, type HandAnchor } from '../../assets/kaiAnimation';
 import { KAI_F1_REGISTRY_KEY, KAI_GROUND_DY, KAI_REGISTRY_KEY, clipFrame, KAI_SCALE, KAI_SPLIT_ABOVE_FEET, KaiAnimator, kaiTextureKey, type AnimPose, type KaiManifests } from '../../assets/kaiAnimation';
 export class EntityRenderer {
@@ -13,8 +14,7 @@ export class EntityRenderer {
   private readonly abilityFx: AbilityFx;
   private readonly anchors: AnchorTable | undefined;
   private hand: HandAnchor | null = null;
-  private enemyHp = new Map<number, number>();
-  private enemyFlash = new Map<number, number>();
+  private readonly enemies: EnemyRenderer;
   private readonly animator: KaiAnimator;
   private pose: AnimPose = { facing: 'south', clip: 'Idle', frame: 0, legs: null, form: 'base', events: [] };
   private lastShotId = 0;
@@ -23,13 +23,12 @@ export class EntityRenderer {
   private lastY = NaN;
   private moveHold = 0;
   private flash = 0;
-  private sprites = new Map<number, Phaser.GameObjects.Image>();
   private orbs = new Map<number, Phaser.GameObjects.Image>();
   constructor(private readonly scene: Phaser.Scene) {
     const manifests = scene.registry.get(KAI_REGISTRY_KEY) as KaiManifests | undefined;
     if (!manifests) throw new Error('Kai animation manifests were not loaded by BootScene');
     this.f1 = scene.registry.get(KAI_F1_REGISTRY_KEY) as KaiManifests | undefined;
-    this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
+    this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = new EnemyRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
     for (const spr of [this.hero, this.legs]) { spr.enableFilters(); spr.filters!.internal.addGlow(0xd8f6ff, 1.6, 0, 1, false, 4, 2); }   // B06: thin pale rim keeps the silhouette separated from the arena
@@ -96,20 +95,7 @@ export class EntityRenderer {
     this.formFx.update(dt, this.hero.x, this.hero.y, this.hero.scaleX / KAI_SCALE, this.animator.visualForm === 'f1', !dead, this.pose.events, reducedEffects, emphasis, state.enemies.length > 45, this.hero);
     this.hand = this.anchors ? handAnchorWorld(this.anchors, this.pose.form, this.pose.facing, this.pose.clip, this.pose.frame, this.hero.x, this.hero.y, this.hero.scaleX) : null;
     this.abilityFx.update(dt, state, reducedEffects, this.animator.visualForm === 'f1', this.hand);
-    const active = new Set<number>();
-    for (const e of state.enemies) {
-      if (e.hp <= 0) continue;
-      active.add(e.id);
-      let sprite = this.sprites.get(e.id);
-      if (!sprite) { sprite = this.scene.add.image(e.x, e.y, `enemy-${e.kind}`).setScale(1.8).setDepth(6); this.sprites.set(e.id, sprite); }
-      sprite.setPosition(Math.round(e.x), Math.round(e.y - 7));
-      sprite.setAlpha(e.hp / e.maxHp < 0.34 ? 0.72 : 1);
-      const prev = this.enemyHp.get(e.id); this.enemyHp.set(e.id, e.hp);
-      if (prev !== undefined && e.hp < prev) this.enemyFlash.set(e.id, 0.055);   // hit reaction: a brief white flash on every enemy an ability (or the basic attack) actually damaged
-      const fl = this.enemyFlash.get(e.id) ?? 0;
-      if (fl > 0) { this.enemyFlash.set(e.id, Math.max(0, fl - dt)); sprite.setTint(0xd3e6ff); sprite.tintMode = Phaser.TintModes.FILL; } else { sprite.setTint(0xc4cad8); sprite.tintMode = Phaser.TintModes.MULTIPLY; }
-    }
-    for (const [id, sprite] of this.sprites) if (!active.has(id)) { sprite.destroy(); this.sprites.delete(id); this.enemyHp.delete(id); this.enemyFlash.delete(id); }
+    this.enemies.sync(state, deltaMs / 1000, reducedEffects);
     const activeOrbs = new Set<number>();
     for (const p of state.pickups) {
       activeOrbs.add(p.id);
@@ -119,5 +105,6 @@ export class EntityRenderer {
     }
     for (const [id, image] of this.orbs) if (!activeOrbs.has(id)) { image.destroy(); this.orbs.delete(id); }
   }
-  destroy() { this.formFx.destroy(); this.abilityFx.destroy(); this.hero.destroy(); this.legs.destroy(); for (const image of [...this.sprites.values(), ...this.orbs.values()]) image.destroy(); this.sprites.clear(); this.orbs.clear(); }
+  enemyStats() { return this.enemies.stats(); }
+  destroy() { this.formFx.destroy(); this.abilityFx.destroy(); this.enemies.destroy(); this.hero.destroy(); this.legs.destroy(); for (const image of this.orbs.values()) image.destroy(); this.orbs.clear(); }
 }

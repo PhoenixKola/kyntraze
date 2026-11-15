@@ -81,8 +81,8 @@ export class Presentation {
     const live = new Set<number>();
     for (const e of state.enemies) {
       if (e.hp <= 0) continue; live.add(e.id);
-      let s = this.shadows.get(e.id); if (!s) { s = this.scene.add.image(e.x, e.y, 'pres-shadow').setDepth(5.5).setScale(0.62, 0.3).setAlpha(0.85); this.shadows.set(e.id, s); }
-      s.setPosition(Math.round(e.x), Math.round(e.y + 12));
+      let s = this.shadows.get(e.id); if (!s) { s = this.scene.add.image(e.x, e.y, 'pres-shadow').setDepth(5.5).setScale(0.62 * (e.radius / 17) * 1.15, 0.3 * (e.radius / 17) * 1.15).setAlpha(0.85); this.shadows.set(e.id, s); }
+      s.setPosition(Math.round(e.x), Math.round(e.y + e.radius * 0.6 + 2));
     }
     for (const [id, s] of this.shadows) if (!live.has(id)) { s.destroy(); this.shadows.delete(id); }
   }
