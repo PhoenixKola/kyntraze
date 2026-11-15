@@ -2,7 +2,7 @@ import { SeededRng } from '../core/SeededRng';
 import { RULES } from '../core/Rules';
 import { makeState, type GameState, type InputState } from './GameState';
 import { movePlayer } from './MovementSystem';
-import { moveEnemies, updateEnemyShots } from './EnemyAiSystem';
+import { moveEnemies, updateEnemyShots, updateHazards } from './EnemyAiSystem';
 import { updateDirector } from './EnemyDirector';
 import { updateAutoWeapon, activateQ } from './WeaponSystem';
 import { updateContactDamage } from './CombatSystem';
@@ -38,6 +38,7 @@ export class Simulation {
     updateDirector(s, this.rng, dt);
     moveEnemies(s, dt);
     updateEnemyShots(s, dt);
+    updateHazards(s, dt);
     updateAutoWeapon(s, dt);
     updateContactDamage(s);
     if (s.phase !== 'running') return;

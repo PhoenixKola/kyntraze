@@ -1,0 +1,76 @@
+{
+ "scenario": "seraphdodge",
+ "viewport": "960x540",
+ "capturedAt": "2026-11-15T09:11:13.481Z",
+ "commit": "065236492135f70858353aec83efd1d4b4aa7120",
+ "branch": "main",
+ "workingTree": {
+  "dirtyFiles": 44,
+  "diffSha": "44efa8964f6925c5fbfa1191bc2986744e2cd33a"
+ },
+ "fileHashes": {
+  "src/sim/BossAiSystem.ts": "ec65f08cd63e00a8",
+  "src/sim/EnemyAiSystem.ts": "fe9d3c4cdcc4f82b",
+  "src/sim/CombatSystem.ts": "d874ff47c0c9e1e6",
+  "src/content/bosses.ts": "b97c59b477acd457",
+  "src/content/enemies.ts": "05f75b1ab6fe76c4",
+  "src/game/render/bossRenderer.ts": "ba8c55c39b9a4bea",
+  "src/game/render/enemyRenderer.ts": "2866d5d204b43fa3",
+  "src/app/ui/Hud.tsx": "ef424083fed23a5a",
+  "public/art/bosses/warden.png": "1affeedf1daf2d64",
+  "public/art/bosses/seraph.png": "925ac5b870524679",
+  "public/art/enemies/aegis.png": "447ade3b2b26e938",
+  "public/art/enemies/cantor.png": "c1c5f73a796d462e",
+  "public/audio/bosses/loudness.json": "6fc0a0dfd2baff90"
+ },
+ "screenshots": [],
+ "consoleErrors": 0,
+ "errors": [],
+ "renderer": "software GL (SwiftShader)",
+ "finalSimState": {
+  "t": 6.98,
+  "hp": 100,
+  "px": 1110,
+  "py": 871,
+  "shots": 8,
+  "hz": 0,
+  "ph": "running",
+  "bd": 0,
+  "en": [
+   {
+    "k": "seraph",
+    "m": "recover",
+    "mt": 0.08,
+    "a": "ring",
+    "p": 1,
+    "hp": 1100,
+    "x": 779,
+    "y": 691
+   }
+  ]
+ },
+ "timeline": {
+  "dodge-volley": {
+   "windupSeenAfterMs": 44,
+   "control": {
+    "sawWindup": true,
+    "hp": 88
+   },
+   "dodge": {
+    "sawWindup": true,
+    "hp": 100
+   }
+  }
+ },
+ "observed": [
+  "frames captured from the real app with real keyboard input for dodges (hp deltas recorded)",
+  "console error count",
+  "sim timelines"
+ ],
+ "notVerified": [
+  "real-speed motion (stills only; software GL timing is not real-time)",
+  "audio heard by a human",
+  "real GPU performance",
+  "physical controller"
+ ]
+}

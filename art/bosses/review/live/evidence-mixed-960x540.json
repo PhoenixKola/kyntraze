@@ -1,0 +1,172 @@
+{
+ "scenario": "mixed",
+ "viewport": "960x540",
+ "capturedAt": "2026-11-15T09:08:18.993Z",
+ "commit": "065236492135f70858353aec83efd1d4b4aa7120",
+ "branch": "main",
+ "workingTree": {
+  "dirtyFiles": 44,
+  "diffSha": "44efa8964f6925c5fbfa1191bc2986744e2cd33a"
+ },
+ "fileHashes": {
+  "src/sim/BossAiSystem.ts": "ec65f08cd63e00a8",
+  "src/sim/EnemyAiSystem.ts": "fe9d3c4cdcc4f82b",
+  "src/sim/CombatSystem.ts": "d874ff47c0c9e1e6",
+  "src/content/bosses.ts": "b97c59b477acd457",
+  "src/content/enemies.ts": "05f75b1ab6fe76c4",
+  "src/game/render/bossRenderer.ts": "ba8c55c39b9a4bea",
+  "src/game/render/enemyRenderer.ts": "2866d5d204b43fa3",
+  "src/app/ui/Hud.tsx": "ef424083fed23a5a",
+  "public/art/bosses/warden.png": "1affeedf1daf2d64",
+  "public/art/bosses/seraph.png": "925ac5b870524679",
+  "public/art/enemies/aegis.png": "447ade3b2b26e938",
+  "public/art/enemies/cantor.png": "c1c5f73a796d462e",
+  "public/audio/bosses/loudness.json": "6fc0a0dfd2baff90"
+ },
+ "screenshots": [
+  "mixed-1-crowd-boss-960x540.png",
+  "mixed-2-formI-beam-over-rupture-telegraph-960x540.png",
+  "mixed-3-formI-nova-over-boss-960x540.png"
+ ],
+ "consoleErrors": 0,
+ "errors": [],
+ "renderer": "software GL (SwiftShader)",
+ "finalSimState": {
+  "t": 8.5,
+  "hp": 100,
+  "px": 1243,
+  "py": 800,
+  "shots": 2,
+  "hz": 0,
+  "ph": "running",
+  "bd": 0,
+  "en": [
+   {
+    "k": "warden",
+    "m": "move",
+    "mt": 0,
+    "a": "",
+    "p": 1,
+    "hp": 1600,
+    "x": 1143,
+    "y": 800
+   },
+   {
+    "k": "pursuer",
+    "m": "windup",
+    "mt": 0.35,
+    "hp": 25,
+    "x": 1256,
+    "y": 780
+   },
+   {
+    "k": "pursuer",
+    "m": "windup",
+    "mt": 0.23,
+    "hp": 25,
+    "x": 1226,
+    "y": 781
+   },
+   {
+    "k": "pursuer",
+    "m": "move",
+    "mt": 0,
+    "hp": 25,
+    "x": 1257,
+    "y": 809
+   },
+   {
+    "k": "pursuer",
+    "m": "recover",
+    "mt": 0.1,
+    "hp": 25,
+    "x": 1241,
+    "y": 754
+   },
+   {
+    "k": "pursuer",
+    "m": "windup",
+    "mt": 0.23,
+    "hp": 25,
+    "x": 1219,
+    "y": 810
+   },
+   {
+    "k": "pursuer",
+    "m": "move",
+    "mt": 0,
+    "hp": 25,
+    "x": 1281,
+    "y": 829
+   },
+   {
+    "k": "pursuer",
+    "m": "strike",
+    "mt": 0.19,
+    "hp": 25,
+    "x": 1243,
+    "y": 818
+   },
+   {
+    "k": "pursuer",
+    "m": "recover",
+    "mt": 0.28,
+    "hp": 25,
+    "x": 1279,
+    "y": 807
+   },
+   {
+    "k": "flanker",
+    "m": "move",
+    "mt": 0,
+    "hp": 18,
+    "x": 1241,
+    "y": 799
+   },
+   {
+    "k": "flanker",
+    "m": "move",
+    "mt": 0,
+    "hp": 18,
+    "x": 1243,
+    "y": 799
+   },
+   {
+    "k": "flanker",
+    "m": "move",
+    "mt": 0,
+    "hp": 18,
+    "x": 1245,
+    "y": 801
+   },
+   {
+    "k": "ranged",
+    "m": "move",
+    "mt": 0,
+    "hp": 20,
+    "x": 1483,
+    "y": 818
+   },
+   {
+    "k": "ranged",
+    "m": "move",
+    "mt": 0,
+    "hp": 20,
+    "x": 858,
+    "y": 802
+   }
+  ]
+ },
+ "timeline": {},
+ "observed": [
+  "frames captured from the real app with real keyboard input for dodges (hp deltas recorded)",
+  "console error count",
+  "sim timelines"
+ ],
+ "notVerified": [
+  "real-speed motion (stills only; software GL timing is not real-time)",
+  "audio heard by a human",
+  "real GPU performance",
+  "physical controller"
+ ]
+}

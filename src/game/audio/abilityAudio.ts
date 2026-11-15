@@ -13,10 +13,17 @@ export const soundUrl = (n: string) => `/audio/kai-abilities/${n}.wav`;
 export const ENEMY_SOUNDS = ['pursuer_wind', 'lunge', 'flanker_wind', 'slash', 'bruiser_wind', 'bruiser_slam', 'ranged_charge', 'ranged_shot', 'bolt_hit', 'death_small', 'death_heavy'] as const;
 export type EnemySound = (typeof ENEMY_SOUNDS)[number];
 export const enemySoundUrl = (n: string) => `/audio/enemies/${n}.wav`;
+/** B08 boss and elite sounds (original synthesis, art/bosses/audio/synth_b08.py). Bosses are heard from further away and have their own voice slot so a crowd cannot bury a boss cue. */
+export const BOSS_SOUNDS = ['boss_warning', 'warden_roar', 'warden_step', 'rupture_warn', 'rupture_burst', 'sweep_wind', 'sweep_hit', 'charge_wind', 'charge_hit', 'warden_hurt', 'warden_death',
+  'seraph_arrive', 'seraph_volley_wind', 'seraph_volley_fire', 'seraph_blink_out', 'seraph_blink_in', 'seraph_ring_wind', 'seraph_ring_burst', 'seraph_spiral_pulse', 'seraph_phase', 'seraph_hurt', 'seraph_death',
+  'aegis_brace', 'aegis_ram', 'aegis_block', 'cantor_charge', 'cantor_fire', 'cantor_aura_off'] as const;
+export type BossSound = (typeof BOSS_SOUNDS)[number];
+export const bossSoundUrl = (n: string) => `/audio/bosses/${n}.wav`;
+export const BOSS_MIX = { level: 0.78, hearRange: 1100, minGain: 0.45, maxVoices: 4, minGap: 0.045 } as const;
 export const ENEMY_MIX = { level: 0.5, hearRange: 620, minGain: 0.12, maxVoices: 6, minGap: 0.045 } as const;
 const MASTER = 0.8;
 /** Voice slots: a new sound in a slot replaces the old one (no stacked charge swells, one beam body, one burst). `pulse` allows two overlapping zaps. */
-type Slot = 'charge' | 'fire' | 'flight' | 'burst' | 'pulse' | 'misc' | 'enemy';
+type Slot = 'charge' | 'fire' | 'flight' | 'burst' | 'pulse' | 'misc' | 'enemy' | 'boss';
 const MAX_PULSE_VOICES = 2;
 
 interface Voice { src: SourceLike; gain: GainLike; slot: Slot; name: string }
@@ -42,7 +49,7 @@ export class AbilityAudio {
   unlock(): Promise<void> {
     void this.ctx.resume().catch(() => undefined);
     if (!this.master) { this.master = this.ctx.createGain(); this.master.gain.value = this.muted ? 0 : MASTER; this.master.connect(this.ctx.destination); }
-    this.loading ??= Promise.all([...ABILITY_SOUNDS.map(n => [n, soundUrl(n)] as const), ...ENEMY_SOUNDS.map(n => [n, enemySoundUrl(n)] as const)].map(async ([n, url]) => { try { this.buffers.set(n, await this.ctx.decodeAudioData(await this.fetchBuffer(url))); } catch { /* a missing sound must never break the game */ } })).then(() => undefined);
+    this.loading ??= Promise.all([...ABILITY_SOUNDS.map(n => [n, soundUrl(n)] as const), ...ENEMY_SOUNDS.map(n => [n, enemySoundUrl(n)] as const), ...BOSS_SOUNDS.map(n => [n, bossSoundUrl(n)] as const)].map(async ([n, url]) => { try { this.buffers.set(n, await this.ctx.decodeAudioData(await this.fetchBuffer(url))); } catch { /* a missing sound must never break the game */ } })).then(() => undefined);
     return this.loading;
   }
 
@@ -53,9 +60,10 @@ export class AbilityAudio {
 
   private lastEnemy = new Map<string, number>();
   private lastEnemyEvent = 0;
-  private play(name: AbilitySound | EnemySound, slot: Slot, vol = 1, rate = 1) {
+  private play(name: AbilitySound | EnemySound | BossSound, slot: Slot, vol = 1, rate = 1) {
     const buf = this.buffers.get(name); if (!buf || !this.master || this.muted) return;
     if (slot === 'enemy') { if ([...this.voices].filter(v => v.slot === 'enemy').length >= ENEMY_MIX.maxVoices) return; }
+    else if (slot === 'boss') { if ([...this.voices].filter(v => v.slot === 'boss').length >= BOSS_MIX.maxVoices) return; }
     else if (slot === 'pulse') { if ([...this.voices].filter(v => v.slot === 'pulse').length >= MAX_PULSE_VOICES) return; }
     else this.stopSlot(slot, 0.03);
     const src = this.ctx.createBufferSource(), gain = this.ctx.createGain(); src.buffer = buf; src.playbackRate.value = rate; gain.gain.value = vol;
@@ -88,19 +96,41 @@ export class AbilityAudio {
 
   /** One enemy event -> sound. Only attacks near the player are heard, loudness falls with distance, and the same sound cannot restart within a few ms. */
   handleEnemy(ev: EnemyEvent, px: number, py: number) {
-    const d = Math.hypot(ev.x - px, ev.y - py); if (d > ENEMY_MIX.hearRange) return;
-    const gain = ENEMY_MIX.level * Math.max(ENEMY_MIX.minGain, 1 - d / ENEMY_MIX.hearRange);
-    const say = (n: EnemySound, v = 1) => {
+    const boss = ev.enemy === 'warden' || ev.enemy === 'seraph' || ev.kind === 'hazard_fire' || ev.kind === 'enemy_phase' || ev.kind === 'enemy_intro';
+    const d = Math.hypot(ev.x - px, ev.y - py), mix = boss ? BOSS_MIX : ENEMY_MIX; if (d > mix.hearRange) return;
+    const gain = mix.level * Math.max(mix.minGain, 1 - d / mix.hearRange);
+    const say = (n: EnemySound | BossSound, v = 1) => {
       const now = this.ctx.currentTime, last = this.lastEnemy.get(n) ?? -1;
-      if (now - last < ENEMY_MIX.minGap) return; this.lastEnemy.set(n, now); this.play(n, 'enemy', gain * v);
+      if (now - last < mix.minGap) return; this.lastEnemy.set(n, now); this.play(n, boss ? 'boss' : 'enemy', gain * v);
     };
+    const tag = ev.tag ?? '', k = ev.enemy;
     switch (ev.kind) {
-      case 'enemy_telegraph': say(ev.enemy === 'pursuer' ? 'pursuer_wind' : ev.enemy === 'flanker' ? 'flanker_wind' : ev.enemy === 'bruiser' ? 'bruiser_wind' : 'ranged_charge'); break;
-      case 'enemy_strike': if (ev.enemy === 'pursuer') say('lunge'); else if (ev.enemy === 'flanker') say('slash'); break;
+      case 'enemy_intro': say('boss_warning', 0.9); say(k === 'warden' ? 'warden_roar' : 'seraph_arrive'); break;
+      case 'enemy_phase': say(k === 'warden' ? 'warden_roar' : 'seraph_phase'); break;
+      case 'enemy_hurt': say(k === 'warden' ? 'warden_hurt' : 'seraph_hurt', 0.8); break;
+      case 'enemy_block': say('aegis_block', 0.9); break;
+      case 'hazard_fire': if (tag === 'rupture' || tag === 'residue') say('rupture_burst', 0.9); break;
+      case 'enemy_telegraph':
+        if (k === 'warden') say(tag === 'rupture' ? 'rupture_warn' : tag === 'rush' ? 'charge_wind' : 'sweep_wind');
+        else if (k === 'seraph') say(tag === 'ring' || tag === 'spiral' ? 'seraph_ring_wind' : tag === 'blink' ? 'seraph_blink_out' : 'seraph_volley_wind');
+        else say(k === 'pursuer' ? 'pursuer_wind' : k === 'flanker' ? 'flanker_wind' : k === 'bruiser' ? 'bruiser_wind' : k === 'aegis' ? 'aegis_brace' : k === 'cantor' ? 'cantor_charge' : 'ranged_charge');
+        break;
+      case 'enemy_strike':
+        if (k === 'warden') { if (tag === 'sweep') say('sweep_hit'); else if (tag === 'rush_end') say('charge_hit'); }
+        else if (k === 'seraph') { if (tag === 'blink_in') say('seraph_blink_in'); }
+        else if (k === 'pursuer') say('lunge'); else if (k === 'flanker') say('slash'); else if (k === 'aegis') say('aegis_ram');
+        break;
       case 'enemy_slam': say('bruiser_slam', 1.3); break;
-      case 'enemy_shot': say('ranged_shot'); break;
+      case 'enemy_shot':
+        if (k === 'seraph') say(tag === 'ring' ? 'seraph_ring_burst' : tag === 'spiral' ? 'seraph_spiral_pulse' : 'seraph_volley_fire');
+        else say(k === 'cantor' ? 'cantor_fire' : 'ranged_shot');
+        break;
       case 'enemy_shot_hit': say('bolt_hit', 0.8); break;
-      case 'enemy_death': say(ev.enemy === 'bruiser' ? 'death_heavy' : 'death_small', ev.enemy === 'bruiser' ? 1.1 : 0.8); break;
+      case 'enemy_death':
+        if (k === 'warden') say('warden_death'); else if (k === 'seraph') say('seraph_death');
+        else if (k === 'cantor') { say('death_small', 0.8); say('cantor_aura_off', 0.7); }
+        else say(k === 'bruiser' || k === 'aegis' ? 'death_heavy' : 'death_small', k === 'bruiser' || k === 'aegis' ? 1.1 : 0.8);
+        break;
     }
   }
 

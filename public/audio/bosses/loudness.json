@@ -1,0 +1,170 @@
+{
+ "boss_warning": {
+  "seconds": 1.6,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -14.31,
+  "clipped_samples": 0
+ },
+ "warden_roar": {
+  "seconds": 1.4,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -13.64,
+  "clipped_samples": 0
+ },
+ "warden_step": {
+  "seconds": 0.3,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -13.26,
+  "clipped_samples": 0
+ },
+ "rupture_warn": {
+  "seconds": 0.8,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -17.11,
+  "clipped_samples": 0
+ },
+ "rupture_burst": {
+  "seconds": 0.4,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -19.67,
+  "clipped_samples": 0
+ },
+ "sweep_wind": {
+  "seconds": 0.9,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -20.73,
+  "clipped_samples": 0
+ },
+ "sweep_hit": {
+  "seconds": 0.35,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -20.86,
+  "clipped_samples": 0
+ },
+ "charge_wind": {
+  "seconds": 0.8,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -15.79,
+  "clipped_samples": 0
+ },
+ "charge_hit": {
+  "seconds": 0.5,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -21.47,
+  "clipped_samples": 0
+ },
+ "warden_hurt": {
+  "seconds": 0.25,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -16.29,
+  "clipped_samples": 0
+ },
+ "warden_death": {
+  "seconds": 2.2,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -21.81,
+  "clipped_samples": 0
+ },
+ "seraph_arrive": {
+  "seconds": 1.5,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -13.31,
+  "clipped_samples": 0
+ },
+ "seraph_volley_wind": {
+  "seconds": 0.7,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -16.5,
+  "clipped_samples": 0
+ },
+ "seraph_volley_fire": {
+  "seconds": 0.3,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -16.44,
+  "clipped_samples": 0
+ },
+ "seraph_blink_out": {
+  "seconds": 0.3,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -14.84,
+  "clipped_samples": 0
+ },
+ "seraph_blink_in": {
+  "seconds": 0.3,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -19.88,
+  "clipped_samples": 0
+ },
+ "seraph_ring_wind": {
+  "seconds": 0.9,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -14.76,
+  "clipped_samples": 0
+ },
+ "seraph_ring_burst": {
+  "seconds": 0.5,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -21.09,
+  "clipped_samples": 0
+ },
+ "seraph_spiral_pulse": {
+  "seconds": 0.12,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -17.89,
+  "clipped_samples": 0
+ },
+ "seraph_phase": {
+  "seconds": 1.6,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -15.07,
+  "clipped_samples": 0
+ },
+ "seraph_hurt": {
+  "seconds": 0.2,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -16.72,
+  "clipped_samples": 0
+ },
+ "seraph_death": {
+  "seconds": 2.0,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -21.93,
+  "clipped_samples": 0
+ },
+ "aegis_brace": {
+  "seconds": 0.7,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -17.53,
+  "clipped_samples": 0
+ },
+ "aegis_ram": {
+  "seconds": 0.4,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -17.99,
+  "clipped_samples": 0
+ },
+ "aegis_block": {
+  "seconds": 0.2,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -20.91,
+  "clipped_samples": 0
+ },
+ "cantor_charge": {
+  "seconds": 0.8,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -14.44,
+  "clipped_samples": 0
+ },
+ "cantor_fire": {
+  "seconds": 0.25,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -17.84,
+  "clipped_samples": 0
+ },
+ "cantor_aura_off": {
+  "seconds": 0.4,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -13.9,
+  "clipped_samples": 0
+ }
+}

@@ -1,11 +1,16 @@
-import { ENEMIES, type EnemyKind } from '../content/enemies';
+import { ENEMIES, type MobKind } from '../content/enemies';
 import { RULES } from '../core/Rules';
 import type { GameState } from './GameState';
 import type { SeededRng } from '../core/SeededRng';
 import { addEnemy } from './EntityRegistry';
 import { blocked } from './CollisionSystem';
+import { BOSS_MOB_CAP, BOSS_SCHEDULE } from '../content/encounters';
+import { bossAlive, spawnBoss } from './BossAiSystem';
 export function updateDirector(state: GameState, rng: SeededRng, dt: number) {
-  if (state.enemies.length >= RULES.maxEnemies) return;
+  // Bosses come on a provisional clock, one at a time; the QA-forced encounter run never auto-spawns them again.
+  const boss = bossAlive(state);
+  if (!state.encounter.forced && !boss) for (const b of BOSS_SCHEDULE) if (!state.encounter.spawned[b.id] && state.time >= b.at) { spawnBoss(state, b.id); break; }
+  if (state.enemies.length >= (boss ? BOSS_MOB_CAP : RULES.maxEnemies)) return;
   state.spawnTimer -= dt;
   if (state.spawnTimer > 0) return;
   const stage = Math.floor(state.time / 45);
@@ -15,9 +20,10 @@ export function updateDirector(state: GameState, rng: SeededRng, dt: number) {
   for (let i = 0; i < count && state.enemies.length < RULES.maxEnemies; i++) spawnEnemy(state, rng);
 }
 /** Heavy and ranged threats appear at their own intro times (never together), under a live cap; pursuer and flanker keep the original roll order. */
-function pickKind(state: GameState, rng: SeededRng): EnemyKind {
-  for (const kind of ['bruiser', 'ranged'] as const) {
-    const def = ENEMIES[kind];
+function pickKind(state: GameState, rng: SeededRng): MobKind {
+  const boss = bossAlive(state);
+  for (const kind of ['bruiser', 'ranged', 'cantor', 'aegis'] as const) {
+    const def = ENEMIES[kind]; if (def.elite && boss) continue;
     if (state.time < def.intro || rng.next() >= def.weight) continue;
     let live = 0; for (const e of state.enemies) if (e.kind === kind && e.hp > 0) live++;
     if (live < def.cap(state.time)) return kind;

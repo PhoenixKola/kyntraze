@@ -1,6 +1,7 @@
 import type { Simulation } from '../sim/Simulation';
 import { blankSnapshot, type UiSnapshot } from './UiSnapshot';
 import type { UpgradeId } from '../content/upgrades';
+import { BOSSES } from '../content/bosses';
 import { storeSave, type SaveV1, type GameSettings } from '../sim/SaveSystem';
 export class GameBridge {
   private listeners = new Set<() => void>();
@@ -23,7 +24,7 @@ export class GameBridge {
     this.current = { phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
       dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form,
-      formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown };
+      formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s) };
     if (s.phase === 'dead' && phaseChanged) {
       const stats = this.sim!.stats();
       if (!this.save.best || stats.score > this.save.best.score) { this.save.best = stats; storeSave(this.save); }
@@ -37,4 +38,12 @@ export class GameBridge {
   togglePause() { this.sim?.togglePause(); this.publish(true); }
   choose(id: UpgradeId) { this.sim?.chooseUpgrade(id); this.publish(true); }
   debugGrantXp() { const sim = this.sim; if (!sim) return; const s = sim.state; if (s.phase !== 'running') return; s.player.xp = s.player.nextXp; s.player.level++; s.player.xp = 0; s.player.nextXp += 3; s.phase = 'upgrade'; s.upgradeOffers = ['impact', 'stride', 'endurance']; this.publish(true); }
+}
+
+import type { GameState } from '../sim/GameState';
+import type { BossHud } from './UiSnapshot';
+function bossHud(s: GameState): BossHud | null {
+  const b = s.enemies.find(e => (e.kind === 'warden' || e.kind === 'seraph') && e.hp > 0); if (!b || !b.ai) return null;
+  const def = BOSSES[b.kind as 'warden' | 'seraph'];
+  return { id: def.id, name: def.name, hp: b.hp, maxHp: b.maxHp, phase: b.ai.phase, phases: 2, mode: b.mode, intro: b.mode === 'intro' ? b.modeT : 0, invuln: b.ai.invuln, exposed: b.ai.exposed };
 }

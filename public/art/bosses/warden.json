@@ -1,0 +1,42 @@
+{
+ "schema": "kyntraze.boss-anim/1",
+ "boss": "warden",
+ "frame_width": 436,
+ "frame_height": 439,
+ "origin_px": [
+  218,
+  351
+ ],
+ "frames": 16,
+ "fps": 5,
+ "clips": {
+  "move": [
+   0,
+   1,
+   2,
+   3
+  ]
+ },
+ "named": {
+  "rupture_windup": 4,
+  "rupture_release": 5,
+  "sweep_windup": 6,
+  "sweep_strike": 7,
+  "charge_windup": 8,
+  "charge_strike": 9,
+  "recover": 10,
+  "hurt": 11,
+  "roar": 12,
+  "death": [
+   13,
+   14,
+   15
+  ]
+ },
+ "facing": "east (mirrored for west)",
+ "source": [
+  "art/bosses/source/warden-a.png",
+  "art/bosses/source/warden-b.png"
+ ],
+ "columns": 4
+}

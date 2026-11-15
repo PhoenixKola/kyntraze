@@ -1,0 +1,129 @@
+{
+ "scenario": "warden",
+ "viewport": "640x360",
+ "capturedAt": "2026-11-15T09:09:28.666Z",
+ "commit": "065236492135f70858353aec83efd1d4b4aa7120",
+ "branch": "main",
+ "workingTree": {
+  "dirtyFiles": 44,
+  "diffSha": "44efa8964f6925c5fbfa1191bc2986744e2cd33a"
+ },
+ "fileHashes": {
+  "src/sim/BossAiSystem.ts": "ec65f08cd63e00a8",
+  "src/sim/EnemyAiSystem.ts": "fe9d3c4cdcc4f82b",
+  "src/sim/CombatSystem.ts": "d874ff47c0c9e1e6",
+  "src/content/bosses.ts": "b97c59b477acd457",
+  "src/content/enemies.ts": "05f75b1ab6fe76c4",
+  "src/game/render/bossRenderer.ts": "ba8c55c39b9a4bea",
+  "src/game/render/enemyRenderer.ts": "2866d5d204b43fa3",
+  "src/app/ui/Hud.tsx": "ef424083fed23a5a",
+  "public/art/bosses/warden.png": "1affeedf1daf2d64",
+  "public/art/bosses/seraph.png": "925ac5b870524679",
+  "public/art/enemies/aegis.png": "447ade3b2b26e938",
+  "public/art/enemies/cantor.png": "c1c5f73a796d462e",
+  "public/audio/bosses/loudness.json": "6fc0a0dfd2baff90"
+ },
+ "screenshots": [
+  "warden-1-intro-warning-640x360.png",
+  "warden-2-intro-roar-640x360.png",
+  "warden-3-sweep-telegraph-640x360.png",
+  "warden-4-sweep-release-640x360.png",
+  "warden-5-sweep-recover-640x360.png",
+  "warden-3-rupture-telegraph-640x360.png",
+  "warden-4-rupture-release-640x360.png",
+  "warden-5-rupture-recover-640x360.png",
+  "warden-3-rush-telegraph-640x360.png",
+  "warden-4-rush-release-640x360.png",
+  "warden-5-rush-recover-640x360.png",
+  "warden-6-phase-change-640x360.png",
+  "warden-7-sweep2-telegraph-640x360.png",
+  "warden-8-sweep2-release-640x360.png",
+  "warden-7-rupture2-telegraph-640x360.png",
+  "warden-8-rupture2-release-640x360.png",
+  "warden-9-death-a-640x360.png",
+  "warden-9-death-b-640x360.png",
+  "warden-9-death-c-640x360.png"
+ ],
+ "consoleErrors": 0,
+ "errors": [],
+ "renderer": "software GL (SwiftShader)",
+ "finalSimState": {
+  "t": 5.28,
+  "hp": 100,
+  "px": 982,
+  "py": 892,
+  "shots": 0,
+  "hz": 0,
+  "ph": "running",
+  "bd": 0,
+  "en": [
+   {
+    "k": "warden",
+    "m": "recover",
+    "mt": 0.27,
+    "a": "rush",
+    "p": 1,
+    "hp": 1600,
+    "x": 1058,
+    "y": 800
+   }
+  ]
+ },
+ "timeline": {
+  "warden-final": {
+   "t": 24.85,
+   "hp": 100,
+   "px": 1282,
+   "py": 800,
+   "shots": 0,
+   "hz": 0,
+   "ph": "running",
+   "bd": 1,
+   "en": []
+  },
+  "dodge-sweep": {
+   "windupSeenAfterMs": 33,
+   "control": {
+    "sawWindup": true,
+    "hp": 70
+   },
+   "dodge": {
+    "sawWindup": true,
+    "hp": 100
+   }
+  },
+  "dodge-rupture": {
+   "windupSeenAfterMs": 43,
+   "control": {
+    "sawWindup": true,
+    "hp": 78
+   },
+   "dodge": {
+    "sawWindup": true,
+    "hp": 100
+   }
+  },
+  "dodge-rush": {
+   "windupSeenAfterMs": 34,
+   "control": {
+    "sawWindup": true,
+    "hp": 74
+   },
+   "dodge": {
+    "sawWindup": true,
+    "hp": 100
+   }
+  }
+ },
+ "observed": [
+  "frames captured from the real app with real keyboard input for dodges (hp deltas recorded)",
+  "console error count",
+  "sim timelines"
+ ],
+ "notVerified": [
+  "real-speed motion (stills only; software GL timing is not real-time)",
+  "audio heard by a human",
+  "real GPU performance",
+  "physical controller"
+ ]
+}

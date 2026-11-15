@@ -4,6 +4,7 @@ import { ABILITY_FX_NAMES, abilityFxKey, abilityFxUrl } from '../render/abilityF
 import { VFX_NAMES, vfxKey, vfxUrl } from '../render/fxPool';
 import { FLOOR_TILE_COUNT, floorTileKey, floorTileUrl } from '../render/arenaArt';
 import { ENEMY_FX_NAMES, enemyFxKey, enemyFxUrl, enemyManifestKey, enemyManifestUrl, enemySheetKey, enemySheetUrl, type EnemyManifest } from '../render/enemyRenderer';
+import { BOSS_FX_NAMES, BOSS_KINDS, bossFxKey, bossFxUrl, bossManifestKey, bossManifestUrl, bossSheetKey, bossSheetUrl, type BossManifest } from '../render/bossRenderer';
 import { ENEMY_KINDS } from '../../content/enemies';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiManifests } from '../../assets/kaiAnimation';
@@ -21,6 +22,8 @@ export class BootScene extends Phaser.Scene {
     for (let i = 0; i < FLOOR_TILE_COUNT; i++) this.load.image(floorTileKey(i), floorTileUrl(i));
     ENEMY_KINDS.forEach(k => this.load.json(enemyManifestKey(k), enemyManifestUrl(k)));
     ENEMY_FX_NAMES.forEach(n => this.load.image(enemyFxKey(n), enemyFxUrl(n)));
+    BOSS_KINDS.forEach(k => this.load.json(bossManifestKey(k), bossManifestUrl(k)));
+    BOSS_FX_NAMES.forEach(n => this.load.image(bossFxKey(n), bossFxUrl(n)));
     this.load.json(KAI_ANCHORS_KEY, KAI_ANCHORS_URL);
     ABILITY_FX_NAMES.forEach(n => this.load.image(abilityFxKey(n), abilityFxUrl(n)));
     this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => console.error(`[boot] failed to load ${file.key} (${file.url})`));
@@ -35,6 +38,7 @@ export class BootScene extends Phaser.Scene {
     for (const dir of KAI_DIRS) f1[dir] = parseKaiManifest(this.cache.json.get(`kai-f1-manifest-${dir}`), dir, 'f1');
     this.registry.set(KAI_F1_REGISTRY_KEY, f1);
     for (const k of ENEMY_KINDS) { const m = this.cache.json.get(enemyManifestKey(k)) as EnemyManifest; this.load.spritesheet(enemySheetKey(k), enemySheetUrl(k), { frameWidth: m.frame_width, frameHeight: m.frame_height, endFrame: m.frames - 1 }); }
+    for (const k of BOSS_KINDS) { const m = this.cache.json.get(bossManifestKey(k)) as BossManifest; this.load.spritesheet(bossSheetKey(k), bossSheetUrl(k), { frameWidth: m.frame_width, frameHeight: m.frame_height, endFrame: m.frames - 1 }); }
     for (const dir of KAI_DIRS) for (const clip of KAI_F1_CLIPS) {
       const m = f1[dir], a = m.animations[clip]!;
       this.load.spritesheet(kaiTextureKey(dir, clip, 'f1'), kaiSheetUrl(dir, a, 'f1'), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });

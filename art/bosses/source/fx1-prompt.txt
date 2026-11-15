@@ -1,0 +1,5 @@
+Game VFX sprite sheet for KYNTRAZE: FRACTURE RUSH, crisp cel-shaded with dark outline, hard stepped edges, no blur, no text, no shadows. Draw EXACTLY 4 items in a 2x2 grid on flat magenta (#ff00ff), far apart, nothing cropped, each in its own cell. Wide 16:9 canvas.
+1. PRISM BOLT: a violet-white crystalline shard projectile pointing right (east), long faceted diamond shape with a bright white core, deep violet (#7a3cff) body, thick near-black violet outline, short tail of 3 small shards behind it, about 2.4:1 aspect. Reads clearly on a dark blue floor. No orange/gold/cyan.
+2. PRISM HIT: a violet-white radial shatter burst of angular crystal shards with a white core flash, top-down, dark outline on shards.
+3. ORB BOLT: a round crimson-magenta (#ff3a6e) energy orb projectile with a white-hot core, a thick dark red outline, a small crown of 6 short spikes around it and a short fading tail behind-left. No orange.
+4. SHIELD BLOCK: a small bright pale-rose and white hexagonal spark flash: a hex outline shard-burst with 6 short rays, used when a shield blocks a hit.

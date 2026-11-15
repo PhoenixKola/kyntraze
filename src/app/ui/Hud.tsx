@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import type { UiSnapshot } from '../../bridge/UiSnapshot';
 import { roundedTime } from '../../core/Math';
 import { RULES } from '../../core/Rules';
+import type { BossHud } from '../../bridge/UiSnapshot';
 
 interface Props { s: UiSnapshot; pad: boolean; onPause: () => void; }
 
@@ -19,6 +20,22 @@ function Slot({ id, name, ico, keyLabel, padLabel, pad, seconds, max, state, tex
     {cooling && <b className="slot-num">{seconds >= 10 ? Math.ceil(seconds) : seconds.toFixed(1)}</b>}{!cooling && text && <b className="slot-tag">{text}</b>}
     <kbd className={pad ? 'pad-key' : ''}>{pad ? padLabel : keyLabel}</kbd>
   </div>;
+}
+
+const bossArt = (n: string) => `${import.meta.env.BASE_URL}art/bosses/fx/${n}.png`;
+/** Boss nameplate + health bar, top-centre under the clock (never over Kai, the ability tiles or the floor warnings). Phase tick sits at the phase-change threshold. */
+function BossBar({ b }: { b: BossHud }) {
+  const frac = b.hp / b.maxHp, intro = b.intro > 0;
+  return <>
+    {intro && <div className="boss-warning" data-testid="boss-warning" role="alert"><img src={bossArt('warning-glyph')} alt="" draggable={false}/><b>WARNING</b><span>{b.name}</span></div>}
+    <div className={`boss-bar ${b.id} ${b.phase === 2 ? 'p2' : ''} ${b.exposed ? 'exposed' : ''} ${b.invuln ? 'shielded' : ''}`} data-testid="boss-bar" role="progressbar" aria-label={`${b.name} health`} aria-valuenow={Math.ceil(b.hp)} aria-valuemax={b.maxHp}>
+      <img className="boss-emblem" src={bossArt(`emblem-${b.id}`)} alt="" draggable={false}/>
+      <div className="boss-main">
+        <div className="boss-name"><b>{b.name.toUpperCase()}</b><em>{b.phase === 2 ? 'PHASE II' : 'PHASE I'}</em><u>{b.invuln ? (intro ? '' : 'SHIELDED') : b.exposed ? 'EXPOSED' : ''}</u></div>
+        <div className="boss-track"><i className="trail" style={{ width: pct(frac * 100) }}/><i className="fill" style={{ width: pct(frac * 100) }}/><span className="tick" style={{ left: '50%' }}/></div>
+      </div>
+    </div>
+  </>;
 }
 
 export function Hud({ s, pad, onPause }: Props) {
@@ -39,6 +56,7 @@ export function Hud({ s, pad, onPause }: Props) {
         </div>
       </div>
     </div>
+    {s.boss && <BossBar b={s.boss}/>}
     <div className="hud-panel hud-clock"><span className="clock-label">THE GLOAM CIRCUIT</span><b>{roundedTime(s.seconds)}</b><span className="clock-kills"><i/> {s.kills}</span></div>
     <button className="hud-panel hud-pause" onClick={onPause} aria-label="Pause game"><span className="pause-bars"/><kbd className={pad ? 'pad-key' : ''}>{pad ? 'START' : 'ESC'}</kbd></button>
     <div className="hud-slots" role="group" aria-label="Abilities">

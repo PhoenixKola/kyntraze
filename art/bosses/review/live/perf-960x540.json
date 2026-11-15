@@ -1,0 +1,190 @@
+{
+ "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+ "note": "software GL (SwiftShader), NOT a real GPU",
+ "res": {
+  "boss-30": {
+   "frames": 239,
+   "avgMs": 16.8,
+   "p95Ms": 16.8,
+   "maxMs": 33.4,
+   "enemies": 30,
+   "maxShots": 7,
+   "maxHazards": 5,
+   "stats": {
+    "sprites": 29,
+    "bolts": 3,
+    "ghosts": 0,
+    "fx": 0,
+    "tele": 2,
+    "boss": {
+     "boss": 1,
+     "tele": 10,
+     "fx": 0,
+     "craters": 0,
+     "ghost": 0
+    }
+   }
+  },
+  "boss-60": {
+   "frames": 239,
+   "avgMs": 16.9,
+   "p95Ms": 16.7,
+   "maxMs": 33.3,
+   "enemies": 60,
+   "maxShots": 12,
+   "maxHazards": 5,
+   "stats": {
+    "sprites": 59,
+    "bolts": 7,
+    "ghosts": 0,
+    "fx": 0,
+    "tele": 4,
+    "boss": {
+     "boss": 1,
+     "tele": 10,
+     "fx": 0,
+     "craters": 0,
+     "ghost": 0
+    }
+   }
+  },
+  "boss-90": {
+   "frames": 239,
+   "avgMs": 18.1,
+   "p95Ms": 33.3,
+   "maxMs": 33.5,
+   "enemies": 90,
+   "maxShots": 20,
+   "maxHazards": 5,
+   "stats": {
+    "sprites": 89,
+    "bolts": 7,
+    "ghosts": 0,
+    "fx": 0,
+    "tele": 9,
+    "boss": {
+     "boss": 1,
+     "tele": 10,
+     "fx": 0,
+     "craters": 0,
+     "ghost": 0
+    }
+   }
+  },
+  "boss-115": {
+   "frames": 239,
+   "avgMs": 20.8,
+   "p95Ms": 33.4,
+   "maxMs": 66.7,
+   "enemies": 115,
+   "maxShots": 25,
+   "maxHazards": 5,
+   "stats": {
+    "sprites": 114,
+    "bolts": 3,
+    "ghosts": 0,
+    "fx": 9,
+    "tele": 16,
+    "boss": {
+     "boss": 1,
+     "tele": 4,
+     "fx": 2,
+     "craters": 3,
+     "ghost": 0
+    }
+   }
+  },
+  "elites-30": {
+   "frames": 239,
+   "avgMs": 20.6,
+   "p95Ms": 33.4,
+   "maxMs": 50.1,
+   "enemies": 30,
+   "maxShots": 20,
+   "maxHazards": 0,
+   "stats": {
+    "sprites": 30,
+    "bolts": 0,
+    "ghosts": 0,
+    "fx": 0,
+    "tele": 7,
+    "boss": {
+     "boss": 0,
+     "tele": 0,
+     "fx": 0,
+     "craters": 0,
+     "ghost": 0
+    }
+   }
+  },
+  "elites-60": {
+   "frames": 239,
+   "avgMs": 28.7,
+   "p95Ms": 33.4,
+   "maxMs": 50.1,
+   "enemies": 60,
+   "maxShots": 37,
+   "maxHazards": 0,
+   "stats": {
+    "sprites": 60,
+    "bolts": 9,
+    "ghosts": 0,
+    "fx": 3,
+    "tele": 11,
+    "boss": {
+     "boss": 0,
+     "tele": 0,
+     "fx": 0,
+     "craters": 0,
+     "ghost": 0
+    }
+   }
+  },
+  "elites-90": {
+   "frames": 239,
+   "avgMs": 38.5,
+   "p95Ms": 50.1,
+   "maxMs": 83.4,
+   "enemies": 90,
+   "maxShots": 57,
+   "maxHazards": 0,
+   "stats": {
+    "sprites": 90,
+    "bolts": 47,
+    "ghosts": 0,
+    "fx": 4,
+    "tele": 9,
+    "boss": {
+     "boss": 0,
+     "tele": 0,
+     "fx": 0,
+     "craters": 0,
+     "ghost": 0
+    }
+   }
+  },
+  "elites-115": {
+   "frames": 239,
+   "avgMs": 47.2,
+   "p95Ms": 66.6,
+   "maxMs": 83.4,
+   "enemies": 115,
+   "maxShots": 72,
+   "maxHazards": 0,
+   "stats": {
+    "sprites": 115,
+    "bolts": 34,
+    "ghosts": 0,
+    "fx": 21,
+    "tele": 15,
+    "boss": {
+     "boss": 0,
+     "tele": 0,
+     "fx": 0,
+     "craters": 0,
+     "ghost": 0
+    }
+   }
+  }
+ }
+}

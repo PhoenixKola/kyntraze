@@ -8,6 +8,8 @@ import { EffectsRenderer } from '../render/EffectsRenderer';
 import { followPlayer, fitZoom } from '../render/CameraController';
 import { createArenaFloor, Presentation } from '../render/arenaArt';
 import type { InputState } from '../../sim/GameState';
+import { DebugOverlay } from '../render/debugOverlay';
+import { startEncounter } from '../../sim/BossAiSystem';
 import { sharedAbilityAudio, type AbilityAudio } from '../audio/abilityAudio';
 export class ArenaScene extends Phaser.Scene {
   private simulation!: Simulation;
@@ -18,6 +20,7 @@ export class ArenaScene extends Phaser.Scene {
   private fixed = new FixedStep();
   private publishClock = 0;
   private disposed = false;
+  private debug: DebugOverlay | null = null;
   private audio: AbilityAudio | null = null;
   private readonly unlockAudio = () => { void this.audio?.unlock(); };
   private lastInput: InputState = { x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false };
@@ -37,8 +40,11 @@ export class ArenaScene extends Phaser.Scene {
     window.dispatchEvent(new CustomEvent('kyntraze-ready'));
     this.game.events.once(Phaser.Core.Events.DESTROY, () => this.dispose());
     // QA-only escape hatch: dev server AND explicit ?qa=1; never a shipping cheat.
-    if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('qa') === '1') {
-      (window as Window & { __KYNT_QA__?: { grantXp: () => void; heroPose: () => unknown; setHeroScale: (n: number) => void; sim: () => unknown; enemyStats: () => unknown; hand: () => unknown; fxOrigin: () => unknown; audio: () => unknown } }).__KYNT_QA__ = { grantXp: () => this.bridge.debugGrantXp(), heroPose: () => this.entityRenderer.debugPose(), hand: () => this.entityRenderer.handAnchor(), fxOrigin: () => this.entityRenderer.fxOrigin(), audio: () => ({ state: this.audio?.state ?? 'none', loaded: this.audio?.loaded ?? 0, active: this.audio?.activeVoices ?? 0, started: [...(this.audio?.started ?? [])] }), setHeroScale: (n: number) => this.entityRenderer.setHeroScale(n), sim: () => this.simulation.state, enemyStats: () => this.entityRenderer.enemyStats() };
+    const qs = new URLSearchParams(window.location.search);
+    if (import.meta.env.DEV && qs.get('qa') === '1') {
+      if (qs.get('debug') === 'hit') this.debug = new DebugOverlay(this);
+      const enc = qs.get('encounter'); if (enc) startEncounter(this.simulation.state, enc as Parameters<typeof startEncounter>[1]);
+      (window as Window & { __KYNT_QA__?: { grantXp: () => void; heroPose: () => unknown; setHeroScale: (n: number) => void; sim: () => unknown; enemyStats: () => unknown; encounter: (id: string) => void; hand: () => unknown; fxOrigin: () => unknown; audio: () => unknown } }).__KYNT_QA__ = { grantXp: () => this.bridge.debugGrantXp(), heroPose: () => this.entityRenderer.debugPose(), hand: () => this.entityRenderer.handAnchor(), fxOrigin: () => this.entityRenderer.fxOrigin(), audio: () => ({ state: this.audio?.state ?? 'none', loaded: this.audio?.loaded ?? 0, active: this.audio?.activeVoices ?? 0, started: [...(this.audio?.started ?? [])] }), setHeroScale: (n: number) => this.entityRenderer.setHeroScale(n), sim: () => this.simulation.state, enemyStats: () => this.entityRenderer.enemyStats(), encounter: (id: string) => startEncounter(this.simulation.state, id as Parameters<typeof startEncounter>[1]) };
     }
   }
   private createArena() { createArenaFloor(this); this.presentation = new Presentation(this); }
@@ -52,6 +58,7 @@ export class ArenaScene extends Phaser.Scene {
     this.entityRenderer.sync(s, this.lastInput, delta, this.bridge.getSettings().reducedEffects);
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
     const hp = this.entityRenderer.debugPose(); this.presentation.update(s, hp.x, hp.y, hp.visualForm === 'f1', this.bridge.getSettings().reducedEffects);
+    this.debug?.draw(s);
     this.fx.render(s, this.bridge.getSettings().reducedEffects);
     this.audio?.setMuted(this.bridge.getSettings().mute); this.audio?.sync(s);
     this.publishClock += delta;
@@ -60,7 +67,7 @@ export class ArenaScene extends Phaser.Scene {
   private dispose() {
     if (this.disposed) return; this.disposed = true; this.scale.off(Phaser.Scale.Events.RESIZE);
     window.removeEventListener('keydown', this.unlockAudio); window.removeEventListener('pointerdown', this.unlockAudio); this.audio?.dispose();
-    this.controller?.destroy(); this.entityRenderer?.destroy(); this.fx?.destroy(); this.presentation?.destroy(); this.bridge.unbind();
+    this.controller?.destroy(); this.entityRenderer?.destroy(); this.fx?.destroy(); this.presentation?.destroy(); this.debug?.destroy(); this.bridge.unbind();
     delete (window as Window & { __KYNT_QA__?: unknown }).__KYNT_QA__;
   }
 }

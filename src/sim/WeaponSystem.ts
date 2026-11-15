@@ -25,7 +25,7 @@ export function activateQ(state: GameState) {
   const radius = p.qRadius * (p.form ? 1.25 : 1);
   state.impacts.push({ id: state.nextId++, kind: 'pulse', x: p.x, y: p.y, ttl: 0.35, life: 0.35 });
   for (const enemy of state.enemies) {
-    if (enemy.hp > 0 && distanceSquared(p.x, p.y, enemy.x, enemy.y) <= (radius + enemy.radius) ** 2) damageEnemy(state, enemy, p.qDamage * (p.form ? 1.25 : 1));
+    if (enemy.hp > 0 && distanceSquared(p.x, p.y, enemy.x, enemy.y) <= (radius + enemy.radius) ** 2) damageEnemy(state, enemy, p.qDamage * (p.form ? 1.25 : 1), { area: true });
   }
   return true;
 }

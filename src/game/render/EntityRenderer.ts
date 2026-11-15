@@ -3,6 +3,7 @@ import type { GameState, InputState } from '../../sim/GameState';
 import { FormFx } from './formFx';
 import { AbilityFx } from './abilityFx';
 import { EnemyRenderer } from './enemyRenderer';
+import { BossRenderer } from './bossRenderer';
 import { KAI_ANCHORS_KEY, handAnchorWorld, type AnchorTable, type HandAnchor } from '../../assets/kaiAnimation';
 import { KAI_F1_REGISTRY_KEY, KAI_GROUND_DY, KAI_REGISTRY_KEY, clipFrame, KAI_SCALE, KAI_SPLIT_ABOVE_FEET, KaiAnimator, kaiTextureKey, type AnimPose, type KaiManifests } from '../../assets/kaiAnimation';
 export class EntityRenderer {
@@ -15,6 +16,7 @@ export class EntityRenderer {
   private readonly anchors: AnchorTable | undefined;
   private hand: HandAnchor | null = null;
   private readonly enemies: EnemyRenderer;
+  private readonly bosses: BossRenderer;
   private readonly animator: KaiAnimator;
   private pose: AnimPose = { facing: 'south', clip: 'Idle', frame: 0, legs: null, form: 'base', events: [] };
   private lastShotId = 0;
@@ -28,7 +30,7 @@ export class EntityRenderer {
     const manifests = scene.registry.get(KAI_REGISTRY_KEY) as KaiManifests | undefined;
     if (!manifests) throw new Error('Kai animation manifests were not loaded by BootScene');
     this.f1 = scene.registry.get(KAI_F1_REGISTRY_KEY) as KaiManifests | undefined;
-    this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = new EnemyRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
+    this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = new EnemyRenderer(scene); this.bosses = new BossRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
     for (const spr of [this.hero, this.legs]) { spr.enableFilters(); spr.filters!.internal.addGlow(0xd8f6ff, 1.6, 0, 1, false, 4, 2); }   // B06: thin pale rim keeps the silhouette separated from the arena
@@ -96,6 +98,7 @@ export class EntityRenderer {
     this.hand = this.anchors ? handAnchorWorld(this.anchors, this.pose.form, this.pose.facing, this.pose.clip, this.pose.frame, this.hero.x, this.hero.y, this.hero.scaleX) : null;
     this.abilityFx.update(dt, state, reducedEffects, this.animator.visualForm === 'f1', this.hand);
     this.enemies.sync(state, deltaMs / 1000, reducedEffects);
+    this.bosses.sync(state, deltaMs / 1000, reducedEffects);
     const activeOrbs = new Set<number>();
     for (const p of state.pickups) {
       activeOrbs.add(p.id);
@@ -105,6 +108,6 @@ export class EntityRenderer {
     }
     for (const [id, image] of this.orbs) if (!activeOrbs.has(id)) { image.destroy(); this.orbs.delete(id); }
   }
-  enemyStats() { return this.enemies.stats(); }
-  destroy() { this.formFx.destroy(); this.abilityFx.destroy(); this.enemies.destroy(); this.hero.destroy(); this.legs.destroy(); for (const image of this.orbs.values()) image.destroy(); this.orbs.clear(); }
+  enemyStats() { return { ...this.enemies.stats(), boss: this.bosses.stats() }; }
+  destroy() { this.formFx.destroy(); this.abilityFx.destroy(); this.enemies.destroy(); this.bosses.destroy(); this.hero.destroy(); this.legs.destroy(); for (const image of this.orbs.values()) image.destroy(); this.orbs.clear(); }
 }

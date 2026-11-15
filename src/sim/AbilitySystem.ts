@@ -114,7 +114,7 @@ function detonate(s: GameState, sh: SphereShot) {
     const dx = e.x - sh.x1, dy = e.y - sh.y1; const d = Math.hypot(dx, dy);
     if (d > radius + e.radius) continue;
     const fall = 1 - (1 - SPHERE.edgeFalloff) * clamp(d / radius, 0, 1);
-    if (!damageEnemy(s, e, dmg * fall)) {
+    if (!damageEnemy(s, e, dmg * fall, { area: true })) {
       const dir = d < 1 ? { x: 0, y: 1 } : { x: dx / d, y: dy / d };
       for (let i = 0; i < 4; i++) slideMove(e, dir.x * SPHERE.knockback * fall, dir.y * SPHERE.knockback * fall, 0.25);
     }

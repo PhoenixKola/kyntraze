@@ -1,0 +1,43 @@
+{
+ "schema": "kyntraze.boss-anim/1",
+ "enemy": "seraph",
+ "frame_width": 418,
+ "frame_height": 385,
+ "origin_px": [
+  209,
+  373
+ ],
+ "hover_px": 40,
+ "frames": 16,
+ "fps": 8,
+ "clips": {
+  "idle": [
+   0
+  ],
+  "move": [
+   0,
+   1,
+   2,
+   3
+  ]
+ },
+ "named": {
+  "volley_windup": 4,
+  "volley_release": 5,
+  "blink_out": 6,
+  "blink_in": 7,
+  "ring_windup": 8,
+  "ring_release": 9,
+  "recover": 10,
+  "hurt": 11,
+  "phase": 12,
+  "death": [
+   13,
+   14,
+   15
+  ]
+ },
+ "facing": "east (mirrored for west)",
+ "source": "art/bosses/source/seraph1.png + seraph2.png",
+ "columns": 4
+}

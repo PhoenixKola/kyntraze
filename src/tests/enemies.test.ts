@@ -1,25 +1,26 @@
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ENEMIES, ENEMY_KINDS, type EnemyKind } from '../content/enemies';
+import { ENEMIES, ENEMY_KINDS, type EnemyKind, type MobKind } from '../content/enemies';
 import { Simulation } from '../sim/Simulation';
 import { addEnemy } from '../sim/EntityRegistry';
 import { damageEnemy } from '../sim/CombatSystem';
 import type { Enemy, EnemyEvent, InputState } from '../sim/GameState';
 import { AbilityAudio, ENEMY_MIX, ENEMY_SOUNDS, type CtxLike, type GainLike, type SourceLike } from '../game/audio/abilityAudio';
 
+const B07_KINDS = ['pursuer', 'flanker', 'bruiser', 'ranged'] as const;
 const DT = 1 / 60;
 const idle: InputState = { x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false };
 const quiet = (seed = 5) => { const sim = new Simulation(seed); const s = sim.state; s.spawnTimer = 1e9; s.nextFlanker = 1e9; s.player.attackClock = 1e9; s.player.hp = 100; return { sim, s }; };
-const spawn = (s: ReturnType<typeof quiet>['s'], kind: EnemyKind, dx: number, dy = 0, extra: Partial<Enemy> = {}) => { const d = ENEMIES[kind];
+const spawn = (s: ReturnType<typeof quiet>['s'], kind: MobKind, dx: number, dy = 0, extra: Partial<Enemy> = {}) => { const d = ENEMIES[kind];
   return addEnemy(s, { kind, x: s.player.x + dx, y: s.player.y + dy, hp: d.hp, maxHp: d.hp, radius: d.radius, speed: d.moveSpeed, damage: d.damage, touchCooldown: 0, attackCd: 0, ...extra }); };
 const run = (sim: Simulation, sec: number, input = idle, each?: (t: number) => void) => { for (let i = 0; i < Math.round(sec / DT); i++) { sim.step(DT, input); each?.(sim.state.time); } };
 const events = (s: ReturnType<typeof quiet>['s'], kind: EnemyEvent['kind']) => s.enemyEvents.filter(e => e.kind === kind);
 
 describe('B07 enemy content', () => {
   it('has four distinct roles with a complete telegraph -> release -> recovery timeline', () => {
-    expect(ENEMY_KINDS).toEqual(['pursuer', 'flanker', 'bruiser', 'ranged']);
-    const radii = new Set(ENEMY_KINDS.map(k => ENEMIES[k].radius)); expect(radii.size).toBe(4);
+    expect(ENEMY_KINDS).toEqual(['pursuer', 'flanker', 'bruiser', 'ranged', 'aegis', 'cantor']);
+    const radii = new Set(ENEMY_KINDS.map(k => ENEMIES[k].radius)); expect(radii.size).toBe(6);
     for (const k of ENEMY_KINDS) { const a = ENEMIES[k].attack; expect(ENEMIES[k].hp).toBeGreaterThan(0); expect(a.windup).toBeGreaterThanOrEqual(0.35); expect(a.recover).toBeGreaterThanOrEqual(0.45); expect(a.cooldown).toBeGreaterThan(a.windup); }
     expect(ENEMIES.bruiser.attack.windup).toBeGreaterThanOrEqual(0.9);   // the heavy attack has the longest, most unmissable warning
     expect(ENEMIES.bruiser.hp).toBeGreaterThan(ENEMIES.pursuer.hp * 4);
@@ -42,7 +43,7 @@ describe('B07 seeded director', () => {
     for (const seed of [1, 2]) { const r = survey(seed); if (r.first.ranged !== undefined) expect(r.first.ranged).toBeGreaterThanOrEqual(ENEMIES.ranged.intro); if (r.first.bruiser !== undefined) expect(r.first.bruiser).toBeGreaterThanOrEqual(ENEMIES.bruiser.intro);
       expect(r.peak.ranged).toBeLessThanOrEqual(ENEMIES.ranged.cap(230)); expect(r.peak.bruiser).toBeLessThanOrEqual(ENEMIES.bruiser.cap(230)); }
   });
-  it('actually introduces the new threats in a normal 4 minute run', () => { const seen = new Set<string>(); for (const seed of [1, 2]) { const r = survey(seed); for (const k of Object.keys(r.first)) seen.add(k); } expect(seen).toEqual(new Set(ENEMY_KINDS)); });
+  it('actually introduces the new threats in a normal 4 minute run', () => { const seen = new Set<string>(); for (const seed of [1, 2]) { const r = survey(seed); for (const k of Object.keys(r.first)) seen.add(k); } expect(seen).toEqual(new Set(B07_KINDS)); });
 });
 
 describe('B07 attack fairness: the telegraph always comes before the damage', () => {
@@ -102,7 +103,7 @@ describe('B07 assets', () => {
     for (const n of ['aimline', 'chevron', 'bolt', 'bolt-hit', 'death-burst', 'hit-spark', 'circle-warn', 'circle-slam']) expect(existsSync(pub('art', 'enemies', 'fx', n + '.png'))).toBe(true);
     const rep = JSON.parse(readFileSync(pub('audio', 'enemies', 'loudness.json'), 'utf8'));
     for (const n of ENEMY_SOUNDS) { const f = pub('audio', 'enemies', n + '.wav'); expect(existsSync(f)).toBe(true); const b = readFileSync(f); expect(b.toString('ascii', 0, 4)).toBe('RIFF'); expect(b.readUInt32LE(24)).toBe(44100); expect(rep[n].clipped_samples).toBe(0); expect(rep[n].peak_dBFS).toBeLessThanOrEqual(-0.9); }
-    for (const k of ENEMY_KINDS) expect(existsSync(join(__dirname, '..', '..', 'art', 'enemies', 'source', k + '.png'))).toBe(true);
+    for (const k of B07_KINDS) expect(existsSync(join(__dirname, '..', '..', 'art', 'enemies', 'source', k + '.png'))).toBe(true);
     expect(existsSync(join(__dirname, '..', '..', 'art', 'enemies', 'source', 'PROVENANCE.md'))).toBe(true); expect(existsSync(join(__dirname, '..', '..', 'art', 'enemies', 'audio', 'synth_b07.py'))).toBe(true);
   });
   it('warnings are shorter than the windup they announce', () => {
@@ -123,7 +124,7 @@ describe('B07 enemy audio mix', () => {
   const mk = async () => { const a = new AbilityAudio(new FakeCtx(), async () => new ArrayBuffer(8)); await a.unlock(); return a; };
   it('each archetype has its own warning and release sound', async () => {
     const a = await mk(); let t = 0; const ctx = a['ctx'] as FakeCtx;
-    for (const k of ENEMY_KINDS) { ctx.currentTime += 1; a.handleEnemy(evt('enemy_telegraph', k, ++t), 0, 0); }
+    for (const k of B07_KINDS) { ctx.currentTime += 1; a.handleEnemy(evt('enemy_telegraph', k, ++t), 0, 0); }
     expect(a.started).toEqual(['pursuer_wind', 'flanker_wind', 'bruiser_wind', 'ranged_charge']);
     a['voices'].clear(); ctx.currentTime += 1; a.handleEnemy(evt('enemy_slam', 'bruiser', ++t), 0, 0); ctx.currentTime += 1; a.handleEnemy(evt('enemy_shot', 'ranged', ++t), 0, 0); ctx.currentTime += 1; a.handleEnemy(evt('enemy_death', 'bruiser', ++t), 0, 0);
     expect(a.started.slice(4)).toEqual(['bruiser_slam', 'ranged_shot', 'death_heavy']);
