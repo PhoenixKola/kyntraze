@@ -1,0 +1,7 @@
+Game VFX sprite sheet for KYNTRAZE: FRACTURE RUSH (dark sci-fi anime-action 2D, crisp cel-shaded with thick near-black violet outline, hard stepped edges, no blur, no text, no shadows). Draw EXACTLY 6 items in a 3x2 grid on flat magenta (#ff00ff), far apart, nothing cropped, each fully inside its own cell. Wide 16:9 canvas. Palette: violet (#7a3cff) and white crystalline, pale lavender highlights. NO gold, NO orange, NO crimson, NO cyan.
+1. HALO RING: a thin broken angelic halo ring seen slightly from above, made of 12 faceted crystal segments with small gaps, white-violet, about 1:1 aspect.
+2. HALO FRAGMENT ARC: a quarter arc of the same crystalline halo, 3 crystal segments.
+3. LONG CRYSTAL SHARD: a tall thin faceted diamond crystal shard pointing up, violet body white core.
+4. CRYSTAL SHARD CLUSTER: three small faceted violet-white crystal shards of different sizes.
+5. PRISM FLARE: a clean white 4-point star glint with violet edges and a tiny crystal diamond in the centre, graphic and flat.
+6. DISSOLVE MOTES: a loose spray of 9 tiny violet-white diamond shaped sparks of varying size.

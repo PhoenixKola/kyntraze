@@ -46,8 +46,9 @@ describe('B16 audio hub', () => {
     const { a } = await mkHub(); a.setVolumes({ music: 5, sfx: -1, ui: Number.NaN }); expect(a.volume).toMatchObject({ music: 1, sfx: 0, ui: 0.8 });
   });
   it('a real run drives the score: arena theme, victory, defeat; dispose keeps the score alive for the next scene', async () => {
-    const { a } = await mkHub(); const s = makeState(3, 'ashen'); a.sync(s); await tick(); await tick(); expect(a.music?.cue).toBe('ashen');
-    s.phase = 'victory'; a.sync(s); await tick(); expect(a.music?.cue).toBe('victory'); a.dispose(); expect(a.music?.cue).toBe('victory');
+    const { a, ctx } = await mkHub(); const s = makeState(3, 'ashen'); a.sync(s); await tick(); await tick(); expect(a.music?.cue).toBe('ashen');
+    s.phase = 'victory'; a.sync(s); await tick(); expect(a.music?.cue).toBeNull();   // B17: a silent beat first
+    ctx.currentTime += 2; a.sync(s); await tick(); expect(a.music?.cue).toBe('victory'); a.dispose(); expect(a.music?.cue).toBe('victory');
     const s2 = makeState(4, 'gloam'); s2.phase = 'dead'; a.sync(s2); await tick(); expect(a.music?.cue).toBe('defeat');
   });
   it('a boss on the field switches to its theme, and removing it returns to the arena', async () => {

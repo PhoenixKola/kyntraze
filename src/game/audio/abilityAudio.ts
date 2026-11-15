@@ -42,6 +42,8 @@ const UI_SET: ReadonlySet<string> = new Set(UI_SOUNDS.filter(n => n !== 'xp_pick
 /** User mix: every value 0..1. Trims keep the default mix sensible (score under effects, UI under both). */
 export interface Volumes { master: number; music: number; sfx: number; ui: number }
 export const DEFAULT_VOLUMES: Volumes = { master: 1, music: 0.7, sfx: 1, ui: 0.8 };
+/** seconds of near-silence between the finale boss falling and the victory theme */
+export const VICTORY_BEAT_S = 1.7;
 const TRIM = { master: 0.8, music: 0.5, sfx: 1, ui: 0.7 } as const;
 export const ARENA_MIX = { level: 0.62, hearRange: 1400, minGain: 0.4, ambient: 0.16, ambientMin: 14, ambientMax: 30 } as const;
 export const BOSS_MIX = { level: 0.78, hearRange: 1100, minGain: 0.45, maxVoices: 4, minGap: 0.045 } as const;
@@ -244,13 +246,16 @@ export class AbilityAudio {
     this.play(`amb_${arena}_${Math.random() < 0.5 ? 'a' : 'b'}` as ArenaSound, 'misc', ARENA_MIX.ambient);
   }
 
-  private lastDrive = 0; private lastBosses = 0; private finalWarned = false; private eventDuck = { until: 0, level: 1 }; private lastDuck = -1; private preloaded = '';
+  private victorySeen = -1; private lastDrive = 0; private lastBosses = 0; private finalWarned = false; private eventDuck = { until: 0, level: 1 }; private lastDuck = -1; private preloaded = '';
   /** The score follows the simulation: arena theme, boss themes while a boss is alive, victory / defeat, ducking for pause, level-up, boss warnings and transformation reveals. */
   private driveMusic(s: GameState) {
     const m = this.music; if (!m) return;
     if (this.preloaded !== s.arenaId) { this.preloaded = s.arenaId; void m.preload([s.arenaId, 'warden', 'seraph', 'victory', 'defeat']); }
     const boss = s.enemies.find(e => e.hp > 0 && (e.kind === 'warden' || e.kind === 'seraph'));
-    if (s.phase === 'victory') m.setCue('victory', 0.2); else if (s.phase === 'dead') m.setCue('defeat', 0.5); else m.setCue(boss ? boss.kind as MusicCue : s.arenaId, boss ? 0.9 : 2.4);
+    if (s.phase === 'victory') {   // B17: the Seraph's death is staged for ~2 s; the score drops to a near-silent beat, then the victory theme enters on the shimmer
+      if (this.victorySeen < 0) this.victorySeen = this.ctx.currentTime;
+      if (this.ctx.currentTime - this.victorySeen < VICTORY_BEAT_S) m.setCue(null, 0.5); else m.setCue('victory', 0.15);
+    } else if (s.phase === 'dead') m.setCue('defeat', 0.5); else m.setCue(boss ? boss.kind as MusicCue : s.arenaId, boss ? 0.9 : 2.4);
     if (s.time < 5) { this.finalWarned = false; this.lastBosses = s.bossesDefeated; }
     if (s.phase === 'running') {
       if (s.player.drive >= 65 && this.lastDrive < 65 && s.player.form === 0) this.ui('drive_ready', 0.9); else if (s.player.drive >= 100 && this.lastDrive < 100) this.ui('drive_ready', 0.9, 1.25);
@@ -295,7 +300,7 @@ export class AbilityAudio {
     }
   }
   /** Scene teardown (retry / home): reset per-run counters and cut effect voices. The context, buses and score survive so the next scene (or the menu) continues the music. */
-  dispose() { this.nextHover = 0; this.nextAmbient = 0; this.nextCrackle = 0; this.lastEvent = 0; this.lastImpact = 0; this.lastHitAt.clear(); this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.lastBosses = 0; this.lastDrive = 0; this.finalWarned = false; this.eventDuck = { until: 0, level: 1 }; this.lastDuck = -1; this.preloaded = ''; this.music?.setDuck(1, 0.3); this.stopAll(0.01, true); }
+  dispose() { this.nextHover = 0; this.nextAmbient = 0; this.nextCrackle = 0; this.lastEvent = 0; this.lastImpact = 0; this.lastHitAt.clear(); this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.lastBosses = 0; this.victorySeen = -1; this.lastDrive = 0; this.finalWarned = false; this.eventDuck = { until: 0, level: 1 }; this.lastDuck = -1; this.preloaded = ''; this.music?.setDuck(1, 0.3); this.stopAll(0.01, true); }
 }
 
 let shared: AbilityAudio | null = null;

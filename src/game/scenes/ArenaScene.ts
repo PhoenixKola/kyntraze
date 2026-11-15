@@ -14,6 +14,8 @@ import { DebugOverlay } from '../render/debugOverlay';
 import { startEncounter } from '../../sim/BossAiSystem';
 import { damageEnemy } from '../../sim/CombatSystem';
 import { sharedAbilityAudio, type AbilityAudio } from '../audio/abilityAudio';
+/** presentation hold after the finale boss falls (render time only; the sim is already in the victory phase) */
+const VICTORY_CELEBRATE_MS = 1800, VICTORY_RESULTS_MS = 4300;
 export class ArenaScene extends Phaser.Scene {
   private simulation!: Simulation;
   private controller!: InputController;
@@ -22,6 +24,7 @@ export class ArenaScene extends Phaser.Scene {
   private presentation!: Presentation;
   private fixed = new FixedStep();
   private publishClock = 0; private victoryClock = -1;
+  private celebrated = false;
   private disposed = false;
   private debug: DebugOverlay | null = null;
   private props: ArenaProps | null = null; private ambience: Ambience | null = null; private hazardView: ArenaHazardView | null = null;
@@ -73,8 +76,10 @@ export class ArenaScene extends Phaser.Scene {
     const hp = this.entityRenderer.debugPose(); this.presentation.update(s, hp.x, hp.y, hp.visualForm !== 'base', this.bridge.getSettings().reducedEffects);
     this.props?.update(s, this.time.now / 1000); this.ambience?.update(this.time.now / 1000, this.bridge.getSettings().reducedEffects); this.hazardView?.sync(s, s.phase === 'running' ? delta / 1000 : 0);
     if (s.phase === 'victory') {
-      if (this.victoryClock < 0) { this.victoryClock = 0; this.celebrate(s.player.x, s.player.y); }
-      this.victoryClock += delta; if (this.victoryClock > 3600) this.bridge.markVictoryShown();
+      // the Seraph's death is staged for ~2.8 s (suspension, shimmer, dissolve): the gold celebration waits for the shimmer and the results screen for the end of the dissolve
+      if (this.victoryClock < 0) { this.victoryClock = 0; this.celebrated = false; }
+      this.victoryClock += delta; if (!this.celebrated && this.victoryClock >= VICTORY_CELEBRATE_MS) { this.celebrated = true; this.celebrate(s.player.x, s.player.y); }
+      if (this.victoryClock > VICTORY_RESULTS_MS) this.bridge.markVictoryShown();
     } else this.victoryClock = -1;
     this.debug?.draw(s);
     this.fx.render(s, this.bridge.getSettings().reducedEffects);

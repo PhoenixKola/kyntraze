@@ -182,3 +182,6 @@ Accepted ImageGen sheets (gpt-6.1-sol via the audited bridge, first draft each, 
 
 ## B08.1 Seraph fix (art-seraph-fix, 2026-11-15)
 No new ImageGen generation: the baked projectiles in poses 5 (volley release) and 9 (ring release) are cleanly detached from the body, so they were removed by connected components in scripts/build-elite-art.py (`strip_projectiles`, pixel-exact, identity untouched; regeneration was judged riskier for identity drift). The magenta key fringe was removed by `despill` (outer 3 px, re-coloured from non-magenta neighbours). Rebuilt from seraph1.png/seraph2.png, then scripts/repack-boss-sheets.py. Review: art/bosses/review/b09-seraph-fix/.
+
+## B17 (boss presentation effects)
+Two ImageGen sheets (gpt-6.1-sol via the audited bridge, first draft each, 0 rejected): `b17/warden-debris.png` (armour slabs, splinters, crimson core chunk, ground crack star, core flash) and `b17/seraph-crystal.png` (crystal halo, halo arc, long shard, shard cluster, prism glint, dissolve motes). Prompts in `b17/*-prompt.txt`. Keyed + cut by `art/bosses/source/b17/extract_b17.py` into `public/art/bosses/fx/b17/*.png` (magenta key tightened so crimson survives). No boss body frames were regenerated.

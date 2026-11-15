@@ -78,6 +78,21 @@ export class EnemyRenderer {
     }
   }
 
+  private prevMode = new Map<number, string>();
+  /** Arrival: a short fracture flicker where the mob appears (never hides or delays it); elites get a ring and a glint so they are recognised before they act. */
+  private arrive(e: Enemy, def: (typeof ENEMIES)[EnemyKind], reduced: boolean) {
+    if (reduced) return;
+    const elite = !!def.elite;
+    this.pool.spawn({ key: b14Key('shatter'), x: e.x, y: e.y - 6, depth: 6.1, life: elite ? 0.4 : 0.26, blend: 'add', tint: elite ? 0xffb0d8 : 0xb04898, s0: 0.15, s1: elite ? 0.7 : 0.45, a0: elite ? 0.8 : 0.5, a1: 0, rot: e.id * 0.7 });
+    if (elite) { this.pool.spawn({ key: b14Key('shock_ring'), x: e.x, y: e.y + 12, depth: 3.9, life: 0.5, blend: 'add', tint: 0xff7aa8, s0: 0.2, s1: 1.0, a0: 0.6, a1: 0 }); this.pool.spawn({ key: b14Key('glint'), x: e.x, y: e.y - 20, depth: 10.4, life: 0.35, blend: 'add', tint: 0xffe0ec, s0: 0.3, s1: 1.0, a0: 1, a1: 0 }); }
+  }
+  /** The Aegis shield drops (recover: punish window) or comes back up: a bright burst on the shield side so the opening is read at a glance. */
+  private shieldState(e: Enemy, face: 1 | -1, open: boolean, reduced: boolean) {
+    const x = e.x + face * 26, y = e.y - 12;
+    this.pool.spawn({ key: b14Key('glint'), x, y, depth: 10.4, life: open ? 0.4 : 0.22, blend: 'add', tint: open ? 0xffffff : 0xb8d0ff, s0: 0.2, s1: open ? 1.1 : 0.6, a0: 1, a1: 0 });
+    if (open && !reduced) { this.pool.spawn({ key: b14Key('shatter'), x, y, depth: 10.3, life: 0.4, blend: 'add', tint: 0xcfe0ff, s0: 0.25, s1: 0.8, a0: 0.8, a1: 0, rot: e.id }); }
+  }
+
   private spawnGhost(kind: EnemyKind, x: number, y: number, _evId: number, enemyId: number, reduced: boolean) {
     const def = ENEMIES[kind], feetY = y + def.radius * 0.6;
     const spr = this.ghostFree.pop() ?? this.newSprite(kind);
@@ -110,6 +125,7 @@ export class EnemyRenderer {
       let spr = this.sprites.get(e.id), tr = this.tracks.get(e.id);
       if (!spr || !tr) { spr = this.newSprite(e.kind as EnemyKind); this.sprites.set(e.id, spr); tr = { t: e.id * 0.137, face: p.x >= e.x ? 1 : -1, hp: e.hp, hurt: 0, flash: 0, tele: null, tele2: null, recoverT: 0, fan: [], aura: null }; this.tracks.set(e.id, tr); }
       tr.t += dt;
+      const pm = this.prevMode.get(e.id); if (pm === undefined) this.arrive(e, def, reduced); else if (pm !== e.mode && def.shield) this.shieldState(e, tr.face, e.mode === 'recover', reduced); this.prevMode.set(e.id, e.mode);
       if (e.hp < tr.hp) { tr.hurt = HURT_POSE; tr.flash = FLASH; } tr.hp = e.hp;
       tr.hurt = Math.max(0, tr.hurt - dt); tr.flash = Math.max(0, tr.flash - dt);
       // facing follows the target horizontally (aim while attacking), with a dead zone so a head-on enemy does not flicker
@@ -133,7 +149,7 @@ export class EnemyRenderer {
       this.telegraph(e, tr, prog, feetY);
       this.aura(e, tr, feetY, def);
     }
-    for (const [id, spr] of this.sprites) if (!live.has(id)) { spr.destroy(); this.sprites.delete(id); const t = this.tracks.get(id); if (t) { this.freeTele(t); t.aura?.destroy(); } this.tracks.delete(id); }
+    for (const [id, spr] of this.sprites) if (!live.has(id)) { spr.destroy(); this.sprites.delete(id); const t = this.tracks.get(id); if (t) { this.freeTele(t); t.aura?.destroy(); } this.tracks.delete(id); this.prevMode.delete(id); }
     // lingering death frame, separate from the sim: it cannot collide or damage
     for (let i = this.ghosts.length - 1; i >= 0; i--) {
       const g = this.ghosts[i]; g.age += dt; const u = g.age / DEATH_LIFE;

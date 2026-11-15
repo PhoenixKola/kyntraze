@@ -389,3 +389,6 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--k-teal-hi);
 .bar-hp::before, .bar-xp::before, .bar-form::before, .loading-bar::before { box-shadow: none; clip-path: polygon(calc(4 * var(--u)) 0, calc(100% - calc(4 * var(--u))) 0, 100% calc(4 * var(--u)), 100% calc(100% - calc(4 * var(--u))), calc(100% - calc(4 * var(--u))) 100%, calc(4 * var(--u)) 100%, 0 calc(100% - calc(4 * var(--u))), 0 calc(4 * var(--u))); }
 .bar-xp::before, .bar-form::before, .loading-bar::before { display: none; }
 .loading-bar i { clip-path: polygon(calc(4 * var(--u)) 0, calc(100% - calc(4 * var(--u))) 0, 100% calc(4 * var(--u)), 100% calc(100% - calc(4 * var(--u))), calc(100% - calc(4 * var(--u))) 100%, calc(4 * var(--u)) 100%, 0 calc(100% - calc(4 * var(--u))), 0 calc(4 * var(--u))); }
+/* B17: the finale boss's death is staged on screen for ~1.8 s before the victory banner arrives (matches VICTORY_CELEBRATE_MS) */
+.victory-banner { animation-delay: 1.8s; }
+@media (prefers-reduced-motion: reduce) { .victory-banner { animation-delay: 0s; } }

@@ -1,0 +1,7 @@
+Game VFX sprite sheet for KYNTRAZE: FRACTURE RUSH (dark sci-fi anime-action 2D, crisp cel-shaded with thick near-black outline, hard stepped edges, no blur, no text, no shadows). Draw EXACTLY 6 items in a 3x2 grid on flat magenta (#ff00ff), far apart, nothing cropped, each fully inside its own cell. Wide 16:9 canvas. Palette: obsidian / gunmetal armor with glowing crimson-magenta (#ff3a6e) cracks. NO gold, NO orange, NO cyan.
+1. LARGE ARMOR SLAB: a heavy angular broken chunk of obsidian armor plating, jagged edges, riveted, one glowing crimson crack, tumbling, about 1.3:1 aspect.
+2. MEDIUM ARMOR SLAB: a smaller jagged obsidian plate shard with a crimson glowing edge.
+3. SHARD TRIO: three small obsidian rock/armor splinters of different sizes grouped loosely.
+4. CORE FRAGMENT: a faceted crimson-magenta energy crystal chunk with a white-hot centre and dark outline.
+5. IMPACT CRACK STAR: top-down ground-crack burst, 8 jagged dark cracks radiating from a glowing crimson centre, dark outline.
+6. CORE FLASH: a bright white-hot burst with 8 sharp crimson spikes, flat graphic starburst shape, dark outline.
