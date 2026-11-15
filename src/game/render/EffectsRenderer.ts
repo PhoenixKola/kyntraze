@@ -58,7 +58,7 @@ export class EffectsRenderer {
       } else if (e.kind === 'xp') {
         this.pool.spawn({ key: vfxKey('spark', false), x: e.x, y: e.y, depth: 4.5, life: 0.2, blend: 'add', s0: 0.15, s1: 0.4, a0: 0.9, a1: 0, rot: rnd() });
       } else if (e.kind === 'pulse') {
-        this.spawnImpact(e.x, e.y, p.qRadius * (solar ? 1.25 : 1), solar, reduced);
+        if (p.form === 3) this.spawnApexImpact(e.x, e.y, p.qRadius * 1.25, reduced); else this.spawnImpact(e.x, e.y, p.qRadius * (solar ? 1.25 : 1), solar, reduced);
       } else if (e.kind === 'dash') {
         this.spawnDashStart(e.x, e.y, p.dashDx, p.dashDy, solar, reduced);
       }
@@ -130,6 +130,17 @@ export class EffectsRenderer {
     this.pool.spawn({ key: vfxKey('dash_slash', solar), x: x + ux * 6, y: y - 8 + uy * 6, depth: 9.3, life: 0.2, blend: 'normal', rot: ang, s0: solar ? 0.75 : 0.6, s1: solar ? 1.1 : 0.9, a0: 1, a1: 0, vx: ux * 70, vy: uy * 70 });
     this.pool.spawn({ key: vfxKey('spark', solar), x, y: y - 6, depth: 10.5, life: 0.14, blend: 'add', s0: 0.2, s1: solar ? 0.8 : 0.6, a0: 0.9, a1: 0, rot: rnd() * 3 });
     if (solar) this.pool.spawn({ key: vfxKey('circ_wave', true), x, y: fy, depth: 5.5, life: 0.28, blend: 'normal', s0: 0.08, s1: 0.28, sy: 0.5, a0: 0.9, a1: 0 });
+  }
+
+  /** Q in Stillfire Apex: a silver-lavender refraction burst (thin ring, radial glass slashes, floating shards) instead of the cyan slam, ending on the same damage radius. */
+  private spawnApexImpact(x: number, y: number, R: number, reduced: boolean) {
+    const pool = this.pool, rnd = Math.random, SILVER = 0xe4e6ff, LAV = 0xb9b4ff;
+    pool.spawn({ key: b14Key('ring_f3'), x, y, depth: 3.3, life: 0.9, blend: 'add', tint: LAV, s0: (2 * R * 0.35) / 110, s1: (2 * R * 0.84) / 110, a0: 0.75, a1: 0, rot: rnd() * 6.28 });
+    pool.spawn({ key: b14Key('ring_f3'), x, y, depth: 5.4, life: 0.34, blend: 'add', tint: SILVER, s0: (2 * R * 0.18) / 110, s1: (2 * R) / 110, a0: 1, a1: 0 });
+    pool.spawn({ key: b14Key('glint'), x, y: y - 6, depth: 10.5, life: 0.2, blend: 'add', tint: 0xffffff, s0: 0.6, s1: 2.2, a0: 0.8, a1: 0 });
+    if (reduced) return;
+    for (let i = 0; i < 8; i++) { const a = (i / 8) * 6.28 + 0.2; pool.spawn({ key: b14Key('refract'), x: x + Math.cos(a) * R * 0.2, y: y + Math.sin(a) * R * 0.2, depth: 9.4, life: 0.3, blend: 'add', tint: i % 2 ? SILVER : LAV, rot: a, vx: Math.cos(a) * R / 0.3 * 0.6, vy: Math.sin(a) * R / 0.3 * 0.6, s0: 0.5, s1: 0.9, a0: 0.9, a1: 0 }); }
+    for (let i = 0; i < 6; i++) { const a = rnd() * 6.28, r = R * (0.3 + rnd() * 0.6); pool.spawn({ key: b14Key('shards'), x: x + Math.cos(a) * r, y: y + Math.sin(a) * r * 0.6, depth: 9.1, life: 0.6, blend: 'add', tint: SILVER, vy: -40 - rnd() * 40, s0: 0.45, s1: 0.2, a0: 0.9, a1: 0, rot: rnd() * 6, spin: (rnd() - 0.5) * 6 }); }
   }
 
   /** Q: ground slam. The circular wave + crack decal end exactly on the sim damage radius (R); debris and dust fly out to it. */

@@ -346,3 +346,20 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--k-teal-hi);
 .hero-card.has-art .hero-silhouette { background: none; } .hero-card.has-art .hero-silhouette::after { display: none; }
 .hero-card.has-art .hero-copy h3 { text-shadow: 0 2px 0 #000, 0 0 10px rgba(0, 0, 0, .8); }
 .hero-art { background-position: 50% 16%; }
+
+/* ---------- B14 owner pass 3 ---------- */
+/* bar fills follow the chamfered inner window of the frame art instead of sitting on it as a rectangle */
+.bar-hp .trail, .bar-hp .fill, .bar-xp i, .bar-form i { clip-path: polygon(calc(4 * var(--u)) 0, calc(100% - calc(4 * var(--u))) 0, 100% calc(4 * var(--u)), 100% calc(100% - calc(4 * var(--u))), calc(100% - calc(4 * var(--u))) 100%, calc(4 * var(--u)) 100%, 0 calc(100% - calc(4 * var(--u))), 0 calc(4 * var(--u))); }
+.bar-xp i, .bar-form i { border-radius: 0; }
+/* seed + deploy: the button sits on the same baseline as the input, not centred against its label */
+.start-row { align-items: flex-end; } .start-row .arena-strip { align-self: center; }
+.start-row .primary-button { height: calc(40 * var(--u)); }
+/* level-up exit: the chosen card lifts and flares, the others sink away, the overlay fades */
+.lv-overlay.leaving { animation: lv-out .3s ease-in both; pointer-events: none; }
+.lv-overlay.leaving .lv-card:not(.picked) { animation: lv-card-out .26s ease-in both; }
+.lv-overlay.leaving .lv-card.picked { animation: lv-pick .3s ease-out both; z-index: 2; }
+.lv-overlay.leaving .lv-head, .lv-overlay.leaving .build-strip, .lv-overlay.leaving .hintbar { opacity: 0; transition: opacity .18s; }
+@keyframes lv-out { 0%, 40% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes lv-card-out { to { opacity: 0; transform: translateY(calc(18 * var(--u))) scale(.94); } }
+@keyframes lv-pick { 0% { filter: brightness(1.1); } 45% { transform: translateY(calc(-8 * var(--u))) scale(1.05); filter: brightness(1.5) drop-shadow(0 0 calc(12 * var(--u)) rgba(255, 210, 120, .9)); } 100% { transform: translateY(calc(-14 * var(--u))) scale(1.08); opacity: 0; filter: brightness(1.8); } }
+@media (prefers-reduced-motion: reduce) { .lv-overlay.leaving, .lv-overlay.leaving .lv-card { animation: none; } }
