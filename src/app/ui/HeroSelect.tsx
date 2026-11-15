@@ -1,8 +1,9 @@
-import type { CSSProperties } from 'react';
+import { useEffect, type CSSProperties } from 'react';
 import { HEROES } from '../../content/heroes';
 import { HintBar } from './Chrome';
 interface Props { onBack: () => void; onStart: () => void; seed: string; onSeed: (value: string) => void; }
 export function HeroSelect({ onBack, onStart, seed, onSeed }: Props) {
+  useEffect(() => { const h = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); onBack(); } }; window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h); }, [onBack]);
   return <main className="selection-layout" data-testid="hero-select">
     <div className="screen-header"><button className="text-button" onClick={onBack} data-pad-cancel>← BACK</button><span>01 / RUNNER SELECTION</span></div>
     <p className="eyebrow">SELECT YOUR RUNNER</p><h2 className="large-heading">WHO FACES THE FRACTURE?</h2>

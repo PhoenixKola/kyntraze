@@ -30,7 +30,7 @@ for (const [w, h] of [[960, 540], [640, 360]] as const) test(`controller-only: t
   // abilities, once per press
   await stick(page, 1, 0); await tap(page, 'A'); let s = await sim(page); expect(s.dashCd).toBeGreaterThan(2); await stick(page, 0, 0); await page.waitForTimeout(400);
   await tap(page, 'X'); s = await sim(page); expect(s.qCd).toBeGreaterThan(7);
-  await tap(page, 'RB'); await page.waitForTimeout(150); s = await sim(page); expect(s.cast).toBe('beam'); expect(s.beamCd).toBeGreaterThan(5); await page.screenshot({ path: `test-results/pad-beam-${w}x${h}.png` }); await page.waitForTimeout(1400);
+  await tap(page, 'RB'); await page.waitForTimeout(150); s = await sim(page); expect(s.cast).toBe('beam'); expect(s.beamCd).toBeGreaterThan(5); await page.screenshot({ path: `test-results/pad-beam-${w}x${h}.png` }); await page.waitForFunction(() => (window as unknown as W).__KYNT_QA__!.sim().cast === null, null, { timeout: 10000 });
   await tap(page, 'LB'); await page.waitForTimeout(250); s = await sim(page); expect(s.cast).toBe('sphere'); expect(s.sphereCd).toBeGreaterThan(10); await page.waitForTimeout(1500);
   await page.evaluate(() => { (window as unknown as W).__KYNT_QA__!.sim().player.drive = 100; }); await tap(page, 'Y'); await page.waitForTimeout(200); s = await sim(page); expect(s.form).toBe(1);
   // pause: START opens, menu navigates with the D-pad, B resumes

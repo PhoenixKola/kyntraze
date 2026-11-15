@@ -32,3 +32,22 @@ test('Esc closes Settings on the title screen', async ({ page }) => {
   await page.goto('/'); await page.getByRole('button', { name: /SETTINGS/ }).first().click(); await expect(page.getByTestId('settings-menu')).toBeVisible();
   await page.keyboard.press('Escape'); await expect(page.getByTestId('settings-menu')).toHaveCount(0);
 });
+
+test('Esc on hero select goes back to the title', async ({ page }) => {
+  await page.goto('/'); await page.getByTestId('play-button').click(); await expect(page.getByTestId('hero-select')).toBeVisible();
+  await page.keyboard.press('Escape'); await expect(page.getByTestId('title-screen')).toBeVisible();
+});
+
+test('a loading screen is shown until the arena is ready, then the HUD appears', async ({ page }) => {
+  await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click();
+  await expect(page.getByTestId('loading-screen')).toBeVisible();
+  await expect(page.getByTestId('hud')).toBeVisible(); await expect(page.getByTestId('loading-screen')).toHaveCount(0);
+});
+
+for (const [w, h] of [[1800, 700], [1000, 900], [960, 540]] as const) {
+  test(`the game canvas fills the window with no black bars at ${w}x${h}`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: h }); await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click();
+    await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); await page.waitForTimeout(400);
+    const b = await page.locator('.arena-viewport canvas').boundingBox(); expect(Math.abs(b!.width - w)).toBeLessThanOrEqual(2); expect(Math.abs(b!.height - h)).toBeLessThanOrEqual(2);
+  });
+}

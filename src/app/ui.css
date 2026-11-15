@@ -212,3 +212,18 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--amber); out
 .selection-layout .start-row { margin-top: calc(12 * var(--u)); }
 .selection-layout .hintbar { margin-top: calc(10 * var(--u)); }
 @media (max-height: 430px) { .selection-layout .hero-silhouette { height: auto; } }
+
+/* loading screen + full-bleed layout */
+.loading-screen { position: absolute; inset: 0; z-index: 25; background: var(--bg0); overflow: hidden; display: flex; align-items: center; }
+.loading-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(5, 9, 16, .95), rgba(5, 9, 16, .6) 55%, rgba(5, 9, 16, .25)), linear-gradient(0deg, rgba(5, 9, 16, .85), transparent 35%); }
+.loading-body { position: relative; z-index: 2; margin-left: clamp(24px, 7vw, 120px); width: min(560px, 80%); }
+.loading-logo { margin: 0 0 calc(22 * var(--u)); font-size: calc(30 * var(--u)); letter-spacing: -.02em; font-weight: 900; line-height: 1.05; }
+.loading-logo strong { color: var(--amber); }
+.loading-bar { position: relative; height: max(8px, calc(10 * var(--u))); background: rgba(15, 25, 38, .9); border: 1px solid var(--line-hi); }
+.loading-bar i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #d98b3a, var(--amber-hi)); box-shadow: 0 0 calc(14 * var(--u)) rgba(241, 182, 111, .55); }
+.loading-bar u { position: absolute; top: -3px; bottom: -3px; width: 3px; background: #fff; transform: translateX(-2px); box-shadow: 0 0 8px #fff; }
+.loading-meta { display: flex; justify-content: space-between; margin-top: calc(8 * var(--u)); font-size: max(9px, calc(11 * var(--u))); letter-spacing: .18em; font-weight: 800; color: var(--dim); font-variant-numeric: tabular-nums; }
+.loading-meta b { color: var(--text); }
+.loading-tip { margin-top: calc(28 * var(--u)); font-size: max(10px, calc(13 * var(--u))); color: #b9cbd6; line-height: 1.5; }
+.loading-tip em { font-style: normal; font-weight: 900; letter-spacing: .16em; color: var(--amber); margin-right: 8px; font-size: .85em; }
+.selection-layout { max-width: none; padding-inline: max(clamp(20px, 5vw, 72px), calc((100% - 1280px) / 2)); }

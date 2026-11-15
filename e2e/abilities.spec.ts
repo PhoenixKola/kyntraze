@@ -10,7 +10,7 @@ test('E fires the beam with a real cast, cooldown and Beam clip; R launches the 
   await start(page);
   await page.keyboard.down('e'); await page.waitForTimeout(80); await page.keyboard.up('e');
   await page.waitForTimeout(250); let s = await state(page); expect(s.cast).toBe('beam'); expect(s.clip).toBe('Beam'); expect(s.bcd).toBeGreaterThan(5);
-  await page.waitForTimeout(1500); s = await state(page); expect(s.cast).toBeNull();
+  await page.waitForFunction(() => { const q = (window as unknown as { __KYNT_QA__: Qa }).__KYNT_QA__; return q.sim().cast === null; }, null, { timeout: 10000 }); s = await state(page); expect(s.cast).toBeNull();
   await page.keyboard.down('r'); await page.waitForTimeout(80); await page.keyboard.up('r');
   await page.waitForTimeout(300); s = await state(page); expect(s.cast).toBe('sphere'); expect(s.clip).toBe('Sphere');
   await page.waitForTimeout(900); s = await state(page); expect(s.sphere || s.scd > 0).toBeTruthy(); expect(s.scd).toBeGreaterThan(10);

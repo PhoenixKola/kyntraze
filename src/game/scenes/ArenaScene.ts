@@ -5,9 +5,8 @@ import { GameBridge } from '../../bridge/GameBridge';
 import { InputController } from '../input/InputController';
 import { EntityRenderer } from '../render/EntityRenderer';
 import { EffectsRenderer } from '../render/EffectsRenderer';
-import { followPlayer } from '../render/CameraController';
+import { followPlayer, fitZoom } from '../render/CameraController';
 import { createArenaFloor, Presentation } from '../render/arenaArt';
-import { RULES } from '../../core/Rules';
 import type { InputState } from '../../sim/GameState';
 import { sharedAbilityAudio, type AbilityAudio } from '../audio/abilityAudio';
 export class ArenaScene extends Phaser.Scene {
@@ -25,7 +24,8 @@ export class ArenaScene extends Phaser.Scene {
   constructor(private readonly bridge: GameBridge, private readonly seed: number) { super({ key: 'ArenaScene' }); }
   create() {
     this.simulation = new Simulation(this.seed);
-    this.cameras.main.setBounds(0, 0, RULES.worldWidth, RULES.worldHeight);
+    const applyZoom = () => this.cameras.main.setZoom(fitZoom(this.scale.width, this.scale.height));
+    applyZoom(); this.scale.on(Phaser.Scale.Events.RESIZE, applyZoom);
     this.createArena();
     this.entityRenderer = new EntityRenderer(this);
     this.fx = new EffectsRenderer(this);
@@ -34,6 +34,7 @@ export class ArenaScene extends Phaser.Scene {
     this.audio = sharedAbilityAudio(); this.audio?.setMuted(this.bridge.getSettings().mute);
     window.addEventListener('keydown', this.unlockAudio); window.addEventListener('pointerdown', this.unlockAudio);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.dispose());
+    window.dispatchEvent(new CustomEvent('kyntraze-ready'));
     this.game.events.once(Phaser.Core.Events.DESTROY, () => this.dispose());
     // QA-only escape hatch: dev server AND explicit ?qa=1; never a shipping cheat.
     if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('qa') === '1') {
@@ -57,7 +58,7 @@ export class ArenaScene extends Phaser.Scene {
     if ((s.phase === 'running' && this.publishClock >= 100) || this.bridge.snapshot().phase !== s.phase) { this.publishClock = 0; this.bridge.publish(); }
   }
   private dispose() {
-    if (this.disposed) return; this.disposed = true;
+    if (this.disposed) return; this.disposed = true; this.scale.off(Phaser.Scale.Events.RESIZE);
     window.removeEventListener('keydown', this.unlockAudio); window.removeEventListener('pointerdown', this.unlockAudio); this.audio?.dispose();
     this.controller?.destroy(); this.entityRenderer?.destroy(); this.fx?.destroy(); this.presentation?.destroy(); this.bridge.unbind();
     delete (window as Window & { __KYNT_QA__?: unknown }).__KYNT_QA__;

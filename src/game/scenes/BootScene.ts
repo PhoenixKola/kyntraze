@@ -7,7 +7,10 @@ import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
   constructor() { super({ key: 'BootScene' }); }
+  /** Two load phases (starter assets, then the ~100 Kai sheets whose frame sizes come from the manifests): report one combined 0..1 to the loading screen. */
+  private report(phase: 0 | 1, v: number) { window.dispatchEvent(new CustomEvent('kyntraze-load', { detail: phase === 0 ? v * 0.2 : 0.2 + v * 0.8 })); }
   preload() {
+    this.load.on(Phaser.Loader.Events.PROGRESS, (v: number) => this.report(0, v));
     STARTER_TEXTURES.forEach(tex => this.load.image(tex.key, tex.path));
     KAI_DIRS.forEach(dir => this.load.json(`kai-manifest-${dir}`, kaiManifestUrl(dir)));
     KAI_DIRS.forEach(dir => this.load.json(`kai-f1-manifest-${dir}`, kaiManifestUrl(dir, 'f1')));
@@ -35,6 +38,7 @@ export class BootScene extends Phaser.Scene {
       const m = manifests[dir], a = m.animations[clip];
       this.load.spritesheet(kaiTextureKey(dir, clip), kaiSheetUrl(dir, a), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });
     }
+    this.load.off(Phaser.Loader.Events.PROGRESS); this.load.on(Phaser.Loader.Events.PROGRESS, (v: number) => this.report(1, v));
     this.load.once(Phaser.Loader.Events.COMPLETE, () => this.scene.start('ArenaScene'));
     this.load.start();
   }

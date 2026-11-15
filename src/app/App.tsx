@@ -13,11 +13,14 @@ import { SettingsPanel } from './ui/SettingsPanel';
 import { ControllerBadge } from './ui/ControllerBadge';
 import { useControllerNav } from './ui/useControllerNav';
 import { PadContext } from './ui/Chrome';
+import { LoadingScreen } from './ui/LoadingScreen';
 import './ui.css';
 const initialSave = loadSave();
 function GameStage({ bridge, seed, pad, onHome, onSettings }: { bridge: GameBridge; seed: number; pad: boolean; onHome: () => void; onSettings: () => void }) {
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const snapshot = useSyncExternalStore(listener => bridge.subscribe(listener), () => bridge.snapshot());
+  const [progress, setProgress] = useState(0); const [ready, setReady] = useState(false);
+  useEffect(() => { const load = (e: Event) => setProgress(Math.max(0, Math.min(1, (e as CustomEvent<number>).detail))); const done = () => setReady(true); window.addEventListener('kyntraze-load', load); window.addEventListener('kyntraze-ready', done); return () => { window.removeEventListener('kyntraze-load', load); window.removeEventListener('kyntraze-ready', done); }; }, []);
   useEffect(() => {
     if (!host) return;
     const game = createGame(host, bridge, seed);
@@ -25,7 +28,7 @@ function GameStage({ bridge, seed, pad, onHome, onSettings }: { bridge: GameBrid
     // Settings are updated as menu state; effect should NOT recreate active game.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [host, bridge, seed]);
-  return <div className="game-shell" data-testid="game-shell"><div className="arena-viewport" ref={setHost} aria-label="Playable Kyntraze arena"/><Hud s={snapshot} pad={pad} onPause={() => bridge.togglePause()}/>
+  return <div className="game-shell" data-testid="game-shell"><div className="arena-viewport" ref={setHost} aria-label="Playable Kyntraze arena"/>{ready && <Hud s={snapshot} pad={pad} onPause={() => bridge.togglePause()}/>}{!ready && <LoadingScreen progress={progress}/>}
     {snapshot.phase === 'upgrade' && <LevelUpScreen level={snapshot.level} offers={snapshot.offers} onChoose={id => bridge.choose(id)} />}
     {snapshot.phase === 'paused' && <PauseMenu s={snapshot} onResume={() => bridge.togglePause()} onHome={onHome} onSettings={onSettings}/>}
     {snapshot.phase === 'dead' && snapshot.deathShown && <ResultsScreen s={snapshot} onRetry={() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))} onHome={onHome}/>}
