@@ -103,5 +103,89 @@
   "rms_dBFS": -9.28,
   "approx_LUFS_integrated": -11.0,
   "clipped_samples": 0
+ },
+ "form2_charge": {
+  "seconds": 2.0,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -12.69,
+  "approx_LUFS_integrated": -11.6,
+  "clipped_samples": 0
+ },
+ "form2_break": {
+  "seconds": 1.3,
+  "peak_dBFS": -1.0,
+  "rms_dBFS": -7.22,
+  "approx_LUFS_integrated": -8.7,
+  "clipped_samples": 0
+ },
+ "form2_commit": {
+  "seconds": 1.4,
+  "peak_dBFS": -1.5,
+  "rms_dBFS": -9.15,
+  "approx_LUFS_integrated": -11.1,
+  "clipped_samples": 0
+ },
+ "form2_end": {
+  "seconds": 0.8,
+  "peak_dBFS": -6.0,
+  "rms_dBFS": -19.24,
+  "approx_LUFS_integrated": -16.8,
+  "clipped_samples": 0
+ },
+ "aura_crackle": {
+  "seconds": 1.0,
+  "peak_dBFS": -16.0,
+  "rms_dBFS": -26.46,
+  "approx_LUFS_integrated": -29.1,
+  "clipped_samples": 0
+ },
+ "dragon_windup": {
+  "seconds": 0.3,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -18.89,
+  "approx_LUFS_integrated": -16.4,
+  "clipped_samples": 0
+ },
+ "dragon_launch": {
+  "seconds": 0.75,
+  "peak_dBFS": -2.0,
+  "rms_dBFS": -8.59,
+  "approx_LUFS_integrated": -8.8,
+  "clipped_samples": 0
+ },
+ "dragon_hit": {
+  "seconds": 0.45,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -8.58,
+  "approx_LUFS_integrated": -9.3,
+  "clipped_samples": 0
+ },
+ "comet_gather": {
+  "seconds": 1.15,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -12.85,
+  "approx_LUFS_integrated": -11.5,
+  "clipped_samples": 0
+ },
+ "comet_fire": {
+  "seconds": 2.3,
+  "peak_dBFS": -2.0,
+  "rms_dBFS": -6.07,
+  "approx_LUFS_integrated": -8.1,
+  "clipped_samples": 0
+ },
+ "comet_end": {
+  "seconds": 0.7,
+  "peak_dBFS": -6.0,
+  "rms_dBFS": -20.03,
+  "approx_LUFS_integrated": -17.4,
+  "clipped_samples": 0
+ },
+ "finisher": {
+  "seconds": 1.6,
+  "peak_dBFS": -1.0,
+  "rms_dBFS": -6.54,
+  "approx_LUFS_integrated": -8.6,
+  "clipped_samples": 0
  }
 }

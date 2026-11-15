@@ -20,7 +20,7 @@ export const CONTROLLER_LAYOUT: readonly { action: string; keys: string; pad: st
   { action: 'Impact (Q)', keys: 'Q', pad: 'X' },
   { action: 'Fracture Lance (beam)', keys: 'E', pad: 'RB or RT' },
   { action: 'Nova Bloom (sphere)', keys: 'R', pad: 'LB or LT' },
-  { action: 'Flarebound form', keys: 'F', pad: 'Y' },
+  { action: 'Flarebound form (full Drive after the Warden: Cometheart)', keys: 'F', pad: 'Y' },
   { action: 'Pause / resume', keys: 'ESC', pad: 'START' },
   { action: 'Menus: select / back', keys: 'MOUSE / TAB / ENTER', pad: 'D-PAD + A / B' },
 ];

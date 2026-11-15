@@ -1,0 +1,373 @@
+{
+ "viewport": [
+  640,
+  360
+ ],
+ "note": "SIMULATED via dev QA route; not human play. swiftshader: normal-speed motion and audio NOT VERIFIED.",
+ "log": {
+  "cinema": {
+   "timeline": [
+    {
+     "n": "01-cinema-anticipation",
+     "t": 0.23,
+     "time": 1.22,
+     "form": 0
+    },
+    {
+     "n": "02-cinema-charge",
+     "t": 0.9,
+     "time": 1.22,
+     "form": 0
+    },
+    {
+     "n": "03-cinema-before-break",
+     "t": 1.53,
+     "time": 1.22,
+     "form": 0
+    },
+    {
+     "n": "04-cinema-break",
+     "t": 1.77,
+     "time": 1.22,
+     "form": 0
+    },
+    {
+     "n": "05-cinema-commit",
+     "t": 1.93,
+     "time": 1.22,
+     "form": 2
+    },
+    {
+     "n": "06-cinema-recovery",
+     "t": 2.38,
+     "time": 1.22,
+     "form": 2
+    }
+   ]
+  },
+  "afterCinema": {
+   "form": 2,
+   "drive": 100,
+   "cinema": false,
+   "time": 1.22,
+   "cometSeen": 1
+  },
+  "abilities": {
+   "south": {
+    "dragon": {
+     "alive": 9,
+     "damaged": 6,
+     "cd": 7.98,
+     "x": 1076,
+     "y": 956,
+     "pose": "kaif2-south-Idle"
+    },
+    "origin": {
+     "hand": {
+      "n": {
+       "x": 1101.5,
+       "y": 782
+      },
+      "f": {
+       "x": 1109.125,
+       "y": 780.49
+      },
+      "m": {
+       "x": 1105.31,
+       "y": 781.245
+      }
+     },
+     "fx": null
+    },
+    "comet": {
+     "alive": 14,
+     "damaged": 14,
+     "cd": 18.67,
+     "audio": {
+      "state": "running",
+      "loaded": 74,
+      "active": 1,
+      "started": [
+       "form2_break",
+       "form2_commit",
+       "aura_crackle",
+       "dragon_windup",
+       "dragon_launch",
+       "dragon_hit",
+       "dragon_hit",
+       "comet_gather",
+       "aura_crackle",
+       "comet_fire",
+       "comet_end",
+       "comet_end"
+      ]
+     }
+    }
+   },
+   "north": {
+    "dragon": {
+     "alive": 9,
+     "damaged": 6,
+     "cd": 7.98,
+     "x": 1124,
+     "y": 644,
+     "pose": "kaif2-north-Idle"
+    },
+    "origin": {
+     "hand": {
+      "n": {
+       "x": 1089.455,
+       "y": 765.38
+      },
+      "f": {
+       "x": 1109.295,
+       "y": 765.485
+      },
+      "m": {
+       "x": 1099.375,
+       "y": 765.435
+      }
+     },
+     "fx": null
+    },
+    "comet": {
+     "alive": 14,
+     "damaged": 14,
+     "cd": 18.68,
+     "audio": {
+      "state": "running",
+      "loaded": 74,
+      "active": 1,
+      "started": [
+       "form2_break",
+       "form2_commit",
+       "aura_crackle",
+       "dragon_windup",
+       "dragon_launch",
+       "dragon_hit",
+       "dragon_hit",
+       "comet_gather",
+       "aura_crackle",
+       "comet_fire",
+       "comet_end",
+       "comet_end",
+       "dragon_windup",
+       "dragon_launch",
+       "dragon_hit",
+       "dragon_hit",
+       "comet_gather",
+       "aura_crackle",
+       "comet_fire",
+       "comet_end",
+       "comet_end"
+      ]
+     }
+    }
+   },
+   "east": {
+    "dragon": {
+     "alive": 9,
+     "damaged": 6,
+     "cd": 7.98,
+     "x": 1261,
+     "y": 824,
+     "pose": "kaif2-east-Idle"
+    },
+    "origin": {
+     "hand": {
+      "n": {
+       "x": 1121.94,
+       "y": 771.715
+      },
+      "f": {
+       "x": 1127.82,
+       "y": 771.615
+      },
+      "m": {
+       "x": 1124.88,
+       "y": 771.665
+      }
+     },
+     "fx": null
+    },
+    "comet": {
+     "alive": 14,
+     "damaged": 14,
+     "cd": 18.67,
+     "audio": {
+      "state": "running",
+      "loaded": 74,
+      "active": 2,
+      "started": [
+       "form2_break",
+       "form2_commit",
+       "aura_crackle",
+       "dragon_windup",
+       "dragon_launch",
+       "dragon_hit",
+       "dragon_hit",
+       "comet_gather",
+       "aura_crackle",
+       "comet_fire",
+       "comet_end",
+       "comet_end",
+       "dragon_windup",
+       "dragon_launch",
+       "dragon_hit",
+       "dragon_hit",
+       "comet_gather",
+       "aura_crackle",
+       "comet_fire",
+       "comet_end",
+       "comet_end",
+       "aura_crackle",
+       "dragon_windup",
+       "dragon_launch",
+       "dragon_hit",
+       "dragon_hit",
+       "comet_gather",
+       "comet_fire",
+       "comet_end",
+       "aura_crackle",
+       "comet_end"
+      ]
+     }
+    }
+   },
+   "west": {
+    "dragon": {
+     "alive": 9,
+     "damaged": 6,
+     "cd": 7.98,
+     "x": 944,
+     "y": 776,
+     "pose": "kaif2-west-Idle"
+    },
+    "origin": {
+     "hand": {
+      "n": {
+       "x": 1072.155,
+       "y": 771.74
+      },
+      "f": {
+       "x": 1078.665,
+       "y": 771.895
+      },
+      "m": {
+       "x": 1075.41,
+       "y": 771.82
+      }
+     },
+     "fx": null
+    },
+    "comet": {
+     "alive": 14,
+     "damaged": 14,
+     "cd": 18.67,
+     "audio": {
+      "state": "running",
+      "loaded": 74,
+      "active": 1,
+      "started": [
+       "form2_break",
+       "form2_commit",
+       "aura_crackle",
+       "dragon_windup",
+       "dragon_launch",
+       "dragon_hit",
+       "dragon_hit",
+       "comet_gather",
+       "aura_crackle",
+       "comet_fire",
+       "comet_end",
+       "comet_end",
+       "dragon_windup",
+       "dragon_launch",
+       "dragon_hit",
+       "dragon_hit",
+       "comet_gather",
+       "aura_crackle",
+       "comet_fire",
+       "comet_end",
+       "comet_end",
+       "aura_crackle",
+       "dragon_windup",
+       "dragon_launch",
+       "dragon_hit",
+       "dragon_hit",
+       "comet_gather",
+       "comet_fire",
+       "comet_end",
+       "aura_crackle",
+       "comet_end",
+       "dragon_windup",
+       "dragon_launch",
+       "dragon_hit",
+       "dragon_hit",
+       "comet_gather",
+       "comet_fire",
+       "aura_crackle",
+       "comet_end",
+       "comet_end"
+      ]
+     }
+    }
+   }
+  },
+  "afterBoss": {
+   "phase": "running",
+   "unlocked": true,
+   "hazards": 0,
+   "shots": 0,
+   "bosses": 1,
+   "save": null
+  },
+  "errors": []
+ },
+ "shots": [
+  "00-base-idle-drive-full-640x360.png",
+  "01-cinema-anticipation-640x360.png",
+  "02-cinema-charge-640x360.png",
+  "03-cinema-before-break-640x360.png",
+  "04-cinema-break-640x360.png",
+  "05-cinema-commit-640x360.png",
+  "06-cinema-recovery-640x360.png",
+  "07-form2-idle-640x360.png",
+  "08-form2-run-east-640x360.png",
+  "09-form2-dash-640x360.png",
+  "10-form2-stop-decay-640x360.png",
+  "dragon-south-a-windup-640x360.png",
+  "dragon-south-b-launch-640x360.png",
+  "dragon-south-c-lunge-640x360.png",
+  "dragon-south-d-impact-640x360.png",
+  "comet-south-1-gather-640x360.png",
+  "comet-south-2-fire-640x360.png",
+  "comet-south-3-wide-640x360.png",
+  "dragon-north-a-windup-640x360.png",
+  "dragon-north-b-launch-640x360.png",
+  "dragon-north-c-lunge-640x360.png",
+  "dragon-north-d-impact-640x360.png",
+  "comet-north-1-gather-640x360.png",
+  "comet-north-2-fire-640x360.png",
+  "comet-north-3-wide-640x360.png",
+  "dragon-east-a-windup-640x360.png",
+  "dragon-east-b-launch-640x360.png",
+  "dragon-east-c-lunge-640x360.png",
+  "dragon-east-d-impact-640x360.png",
+  "comet-east-1-gather-640x360.png",
+  "comet-east-2-fire-640x360.png",
+  "comet-east-3-wide-640x360.png",
+  "dragon-west-a-windup-640x360.png",
+  "dragon-west-b-launch-640x360.png",
+  "dragon-west-c-lunge-640x360.png",
+  "dragon-west-d-impact-640x360.png",
+  "comet-west-1-gather-640x360.png",
+  "comet-west-2-fire-640x360.png",
+  "comet-west-3-wide-640x360.png",
+  "crowd-run-640x360.png",
+  "boss-warden-form2-640x360.png",
+  "boss-finisher-1-640x360.png",
+  "boss-finisher-2-640x360.png"
+ ],
+ "consoleErrors": []
+}

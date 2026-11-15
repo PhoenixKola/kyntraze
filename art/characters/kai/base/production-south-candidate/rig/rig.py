@@ -10,8 +10,10 @@ V5 = os.environ.get("KAI_ROOT_SOUTH") or os.path.dirname(HERE)      # KAI_ROOT_S
 RIG_DIR = os.path.join(V5, "rig") if os.environ.get("KAI_ROOT_SOUTH") else HERE
 FORM = os.environ.get("KAI_FORM", "")
 PARTS_DIR = os.path.join(V5, "parts")
-CANVAS = (160, 176)
-REF_OFFSET = (20, 12)                     # reference px (0,0) -> canvas px
+PAD_TOP = int(os.environ.get("KAI_PAD_TOP", "0"))   # Form II: extra canvas headroom for the taller hair (0 = unchanged)
+PAD_LEFT = int(os.environ.get("KAI_PAD_LEFT", "0"))
+CANVAS = (160 + PAD_LEFT, 176 + PAD_TOP)
+REF_OFFSET = (20 + PAD_LEFT, 12 + PAD_TOP)                     # reference px (0,0) -> canvas px
 ROOT_REF = (38.0, 152.0)                  # ground point midway between the two soles (near sole y159, far sole y146)
 
 J_REF = {  # joint positions measured on the approved reference

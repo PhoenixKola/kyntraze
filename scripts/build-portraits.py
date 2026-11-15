@@ -1,9 +1,9 @@
-"""Pre-B12: Kai HUD portraits (Base + Form I) from the ImageGen busts in art/ui/portraits -> public/ui/kai-portrait-{base,f1}.png (128x128, keyed).
+"""Pre-B12: Kai HUD portraits (Base + Form I + Form II) from the ImageGen busts in art/ui/portraits -> public/ui/kai-portrait-{base,f1}.png (128x128, keyed).
   python scripts/build-portraits.py"""
 import numpy as np, os
 from PIL import Image
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); S = os.path.join(R, "art", "ui", "portraits"); P = os.path.join(R, "public", "ui")
-for name, out in (("base", "base"), ("f1", "f1")):
+for name, out in (("base", "base"), ("f1", "f1"), ("f2", "f2")):
     a = np.asarray(Image.open(os.path.join(S, name + ".png")).convert("RGB")).astype(float); r, g, b = a[..., 0], a[..., 1], a[..., 2]
     mag = np.clip((90 - np.sqrt((255 - r) ** 2 + g ** 2 + (255 - b) ** 2)) / 50.0, 0, 1); al = 1 - mag
     rgb = np.clip((a - mag[..., None] * np.array([255.0, 0.0, 255.0])) / np.maximum(al, 1e-3)[..., None], 0, 255); al = np.where(al < 0.1, 0, al)

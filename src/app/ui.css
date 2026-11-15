@@ -420,3 +420,10 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--amber); out
 @keyframes select-motes { from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; } to { background-position: 0 -40px, 0 -70px, 0 -30px, 0 -55px, 0 -45px, 0 -80px, 0 0; } }
 @media (prefers-reduced-motion: reduce) { .screen, .screen.leaving, .overlay, .modal, .selection-layout::before, .selection-layout::after, .hit-vignette { animation-duration: .01s !important; animation-iteration-count: 1 !important; } .hit-vignette { animation: hit-vig-static .25s linear both !important; } }
 @keyframes hit-vig-static { 0% { opacity: .75; } 100% { opacity: 0; } }
+
+/* B12 Form II: second Drive tick, Cometheart-ready glow and the Form II portrait frame (HUD never draws over the play field centre) */
+.bar-form .tick2 { background: #ffe9a8; opacity: .95; }
+.bar-form.comet-ready { border-color: #fff3c4; box-shadow: 0 0 calc(12 * var(--u)) rgba(255, 224, 120, .8); animation: form-ready .7s ease-in-out infinite; }
+.bar-form.form2 i { background: linear-gradient(180deg, #fffbe0, #ffd23a); }
+.bar-form.form2 { border-color: #fff3c4; box-shadow: 0 0 calc(12 * var(--u)) rgba(255, 224, 120, .7); }
+.portrait.is-form2 { box-shadow: 0 0 calc(12 * var(--u)) rgba(255, 224, 120, .75); }

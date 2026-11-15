@@ -383,34 +383,22 @@
    "slot": "form:f1"
   },
   {
-   "id": "head_f1",
-   "img": "head_f1.png",
-   "bone": "head",
-   "pivot": [
-    31.37878787878788,
-    54.0
-   ],
-   "angle": 0.0,
-   "slot": "form:f1"
-  },
-  {
-   "id": "head",
-   "img": "head.png",
-   "bone": "head",
-   "pivot": [
-    25.242857142857144,
-    41.0
-   ],
-   "angle": 0.0,
-   "slot": "form:base"
-  },
-  {
    "id": "torso",
    "img": "torso.png",
    "bone": "spine",
    "pivot": [
     16.5,
     34.0
+   ],
+   "angle": 0.0
+  },
+  {
+   "id": "neck",
+   "img": "neck.png",
+   "bone": "head",
+   "pivot": [
+    4.5,
+    1.0
    ],
    "angle": 0.0
   },
@@ -439,6 +427,28 @@
     8.73076923076923,
     21.5
    ]
+  },
+  {
+   "id": "head_f1",
+   "img": "head_f1.png",
+   "bone": "head",
+   "pivot": [
+    31.37878787878788,
+    54.0
+   ],
+   "angle": 0.0,
+   "slot": "form:f1"
+  },
+  {
+   "id": "head",
+   "img": "head.png",
+   "bone": "head",
+   "pivot": [
+    25.242857142857144,
+    41.0
+   ],
+   "angle": 0.0,
+   "slot": "form:base"
   },
   {
    "id": "fist_guard_n",

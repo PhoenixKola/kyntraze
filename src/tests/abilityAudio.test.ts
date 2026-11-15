@@ -23,7 +23,7 @@ const ev = (kind: AbilityEvent['kind'], id: number, n?: number): AbilityEvent =>
 const DT = 1 / 60; const idle = (o: Partial<InputState> = {}): InputState => ({ x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false, ...o });
 
 describe('ability audio files', () => {
-  it('all 15 original sounds ship as 16-bit mono 44.1 kHz WAV, within level limits, with the generator source next to the art', () => {
+  it('all original sounds ship (B05 + B12) as 16-bit mono 44.1 kHz WAV, within level limits, with the generator source next to the art', () => {
     const rep = JSON.parse(readFileSync(join(__dirname, '..', '..', 'public', 'audio', 'kai-abilities', 'loudness.json'), 'utf8'));
     for (const n of ABILITY_SOUNDS) {
       const f = join(__dirname, '..', '..', 'public', 'audio', 'kai-abilities', n + '.wav'); expect(existsSync(f)).toBe(true);

@@ -27,11 +27,12 @@ def knee(hip, ankle, L1, L2, want_dir):
     return max(c, key=lambda k: want_dir * k[0])        # the knee that bends toward the wanted screen side
 
 # Stance targets read from the direction anchor (anchor native px -> canvas: X = RX + SX*(ax-40), Y = ay+5). EAST measurements; WEST is the same pose mirrored.
-def canv(ax, ay): return (RX + SX * (ax - 40.0), ay + 5.0)
+PAD = float(__import__('os').environ.get('KAI_PAD_TOP', '0'))   # Form II headroom
+def canv(ax, ay): return (RX + SX * (ax - 40.0), ay + 5.0 + PAD)
 if D in ("east", "west"):
     TGT = {"hips": canv(40, 86), "waist": canv(40, 65), "neck": canv(46, 42)}; BASE_LEAN = -SX * 10.0
 else:
-    def canvN(ax, ay): return (RX + (ax - 42.0), ay + 8.0)          # NORTH anchor native px -> canvas
+    def canvN(ax, ay): return (RX + (ax - 42.0), ay + 8.0 + PAD)          # NORTH anchor native px -> canvas
     TGT = {"hips": canvN(42, 86), "waist": canvN(42, 66), "neck": canvN(44, 40)}; BASE_LEAN = 0.0
 PEL_OFF = (0, 0); CHEST_OFF = (0, 0); HEAD_OFF = (0, 0)
 

@@ -1,0 +1,30 @@
+{
+ "head_f1": {
+  "sheet": "source/west-heads.png",
+  "box": [
+   92,
+   26,
+   718,
+   896
+  ],
+  "scale": 14.0,
+  "native": [
+   47,
+   65
+  ]
+ },
+ "hair_f1": {
+  "sheet": "source/west-heads.png",
+  "box": [
+   1064,
+   348,
+   1584,
+   868
+  ],
+  "scale": 14.0,
+  "native": [
+   40,
+   40
+  ]
+ }
+}

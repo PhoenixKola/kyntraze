@@ -1,7 +1,7 @@
 """B03G / B03G.1: Dash / Hurt / Death for Kai NORTH / EAST / WEST. Same solver, same parts, same stance as danim.py (imported at its end).
 Poses are authored as a few keys per clip and tweened (smoothstep); everything is a pose on the existing rig, no new art.
 Death pivots the whole body about the pelvis joint (`hip_target` + `root_rot`) so the legs stay planted while the body collapses."""
-import copy, math
+import copy, math, os
 import numpy as np
 import danim as a
 
@@ -44,7 +44,7 @@ Lu, Lf, Ru, Rf = LU[L], LF[L], LU[R], LF[R]
 NORTH = D == "north"
 sx = SX if not NORTH else 1
 O = {"n": -1, "f": 1}
-GROUND = 164.0
+GROUND = 164.0 + float(os.environ.get("KAI_PAD_TOP", "0"))
 
 # ------------------------------------------------------------------ Dash: coil, push-off, launch, peak speed, scissor, reach, skid, recover
 def dash():

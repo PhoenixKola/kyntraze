@@ -1,0 +1,30 @@
+{
+ "head_f1": {
+  "sheet": "source/south-heads.png",
+  "box": [
+   66,
+   26,
+   746,
+   908
+  ],
+  "scale": 14.0,
+  "native": [
+   51,
+   66
+  ]
+ },
+ "hair_f1": {
+  "sheet": "source/south-heads.png",
+  "box": [
+   1006,
+   220,
+   1610,
+   856
+  ],
+  "scale": 14.0,
+  "native": [
+   46,
+   48
+  ]
+ }
+}

@@ -11,7 +11,7 @@ export function updateDirector(state: GameState, rng: SeededRng, dt: number) {
   // Bosses come on the run plan's clock, one at a time; the QA-forced encounter run never auto-spawns them again.
   const boss = bossAlive(state);
   if (!state.encounter.forced && !boss) for (const b of BOSS_SCHEDULE) if (!state.encounter.spawned[b.id] && state.time >= b.at) { spawnBoss(state, b.id); break; }
-  if (!state.encounter.forced && !state.announce && state.time >= FINALE_WARN_AT && !state.encounter.spawned.seraph) state.announce = { id: 'finale', text: 'THE NULL SERAPH APPROACHES', sub: 'Hold your ground. End it.', at: state.time };
+  if (!state.encounter.forced && (!state.announce || state.announce.id === 'cometheart') && state.time >= FINALE_WARN_AT && !state.encounter.spawned.seraph) state.announce = { id: 'finale', text: 'THE NULL SERAPH APPROACHES', sub: 'Hold your ground. End it.', at: state.time };
   if (state.enemies.length >= (boss ? BOSS_MOB_CAP : RULES.maxEnemies)) return;
   state.spawnTimer -= dt;
   if (state.spawnTimer > 0) return;

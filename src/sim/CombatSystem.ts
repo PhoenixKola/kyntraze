@@ -6,6 +6,7 @@ import { addPickup, pushEnemyEvent } from './EntityRegistry';
 import { RULES } from '../core/Rules';
 import { interruptOnHit } from './AbilitySystem';
 import { slideMove } from './CollisionSystem';
+import { COMET } from '../content/cometheart';
 
 /** `src` names what hurt Kai (contact, lunge, dash, ram, slam, bolt, orb, rupture, sweep, rush, prism, ...) so feedback and tests can tell a telegraphed ability from body contact. */
 export function damagePlayer(state: GameState, damage: number, src = 'contact'): boolean {
@@ -55,6 +56,7 @@ export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts
     return false;
   }
   pushEnemyEvent(state, 'enemy_death', enemy, enemy.aimX, enemy.aimY, boss ? 'boss' : undefined);
+  if (boss && state.player.form === 2) state.abilityEvents.push({ id: state.nextId++, kind: 'finisher', x: enemy.x, y: enemy.y, n: enemy.kind === 'seraph' ? 1 : 0 });   // B12: Kai delivered the boss's last blow in Cometheart
   state.kills++; if (state.player.form === 0) state.player.drive = Math.min(100, state.player.drive + 8 * state.mods.driveGain);
   if (boss) { bossDefeated(state, enemy); return true; }
   if (state.pickups.length < RULES.maxPickups) { const d = ENEMIES[enemy.kind as keyof typeof ENEMIES]; addPickup(state, { x: enemy.x, y: enemy.y, xp: Math.round(d.xp * xpTimeScale(state.time) * 10) / 10, age: 0, tier: d.elite ? 2 : d.xp >= 3 ? 1 : 0 }); }
@@ -74,6 +76,10 @@ function bossDefeated(state: GameState, boss: Enemy) {
   state.hazards = state.hazards.filter(h => h.owner !== boss.id);
   state.enemyShots = state.enemyShots.filter(s => s.kind !== 'prism');
   state.bossesDefeated++; state.lastBossDefeatAt = state.time;
+  if (boss.kind === COMET.unlockBoss && !state.cometUnlocked) {   // B12: the Warden unlocks Cometheart for good; Drive is filled so Form II is playable at once (~7 min of a run remain)
+    state.cometUnlocked = true; state.cometUnlockedNow = true; state.player.drive = 100;
+    state.announce = { id: 'cometheart', text: 'COMETHEART UNLOCKED', sub: 'Full Drive + F awakens Form II', at: state.time + 2.5 };
+  }
   pushEnemyEvent(state, 'boss_defeated', boss, 0, 0, boss.kind);
   if (boss.kind === 'seraph') { if (state.phase === 'running') winRun(state); return; }
   // the Warden is the mid-run payoff: a heal now, then a guaranteed Rare-or-better pick once the death animation has played

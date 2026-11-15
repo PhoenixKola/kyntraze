@@ -64,8 +64,8 @@ export class AbilityFx {
   }
 
   /** Nova Bloom detonation: scorch decal, fireball, circular shock wave that ends on the sim blast radius, rising plume, embers and debris. */
-  private detonate(x: number, y: number, blast: { radius: number; form: 0 | 1 } | undefined, formVisual: boolean, reduced: boolean) {
-    const R = blast?.radius ?? SPHERE.radius, solar = blast ? blast.form === 1 : formVisual; const k = (n: string) => vfxKey(n, solar), rnd = Math.random, v = this.vfx, f = R / 190;
+  private detonate(x: number, y: number, blast: { radius: number; form: 0 | 1 | 2 } | undefined, formVisual: boolean, reduced: boolean) {
+    const R = blast?.radius ?? SPHERE.radius, solar = blast ? blast.form >= 1 : formVisual; const k = (n: string) => vfxKey(n, solar), rnd = Math.random, v = this.vfx, f = R / 190;
     v.spawn({ key: vfxKey('scorch', false), x, y: y + 4, depth: 2.8, life: 3.4, blend: 'normal', s0: (2 * R * 0.9) / 329, s1: (2 * R * 0.9) / 329, a0: 0.85, a1: 0, fadeIn: 0.03 });
     this.spawn('flash', 13.2, solar ? SOLAR_TINT.core : BASE_TINT.core, { x, y, life: 0.14, s0: 1.2, s1: 3.4 * f, a0: 0.9, a1: 0, rot: rnd() });
     v.spawn({ key: k('boom'), x, y: y - 6, depth: 13, life: 0.55, blend: 'normal', s0: 0.35 * f, s1: 1.15 * f * (solar ? 1.1 : 1), a0: 1, a1: 0, rot: 0 });

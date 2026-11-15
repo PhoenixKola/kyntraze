@@ -6,7 +6,9 @@ export interface SourceLike { buffer: unknown; playbackRate: { value: number }; 
 export interface CtxLike { state: string; currentTime: number; destination: unknown; createGain(): GainLike; createBufferSource(): SourceLike; resume(): Promise<void>; suspend(): Promise<void>; decodeAudioData(b: ArrayBuffer): Promise<unknown> }
 
 export const ABILITY_SOUNDS = ['beam_charge', 'beam_charge_f1', 'beam_fire', 'beam_fire_f1', 'beam_pulse_0', 'beam_pulse_1', 'beam_pulse_2', 'beam_end', 'cast_cancel',
-  'sphere_gather', 'sphere_gather_f1', 'sphere_throw', 'sphere_flight', 'sphere_burst', 'sphere_burst_f1'] as const;
+  'sphere_gather', 'sphere_gather_f1', 'sphere_throw', 'sphere_flight', 'sphere_burst', 'sphere_burst_f1',
+  /** B12 Form II (art/characters/kai/abilities/audio/synth_b12.py) */
+  'form2_charge', 'form2_break', 'form2_commit', 'form2_end', 'aura_crackle', 'dragon_windup', 'dragon_launch', 'dragon_hit', 'comet_gather', 'comet_fire', 'comet_end', 'finisher'] as const;
 export type AbilitySound = (typeof ABILITY_SOUNDS)[number];
 export const soundUrl = (n: string) => `/audio/kai-abilities/${n}.wav`;
 /** B07 enemy sounds (original synthesis, art/enemies/audio/synth_b07.py). Quieter than Kai's, distance-attenuated, voice-capped so a crowd cannot bury the ability mix. */
@@ -28,7 +30,7 @@ export const BOSS_MIX = { level: 0.78, hearRange: 1100, minGain: 0.45, maxVoices
 export const ENEMY_MIX = { level: 0.5, hearRange: 620, minGain: 0.12, maxVoices: 6, minGap: 0.045 } as const;
 const MASTER = 0.8;
 /** Voice slots: a new sound in a slot replaces the old one (no stacked charge swells, one beam body, one burst). `pulse` allows two overlapping zaps. */
-type Slot = 'charge' | 'fire' | 'flight' | 'burst' | 'pulse' | 'misc' | 'enemy' | 'boss';
+type Slot = 'charge' | 'fire' | 'flight' | 'burst' | 'pulse' | 'misc' | 'enemy' | 'boss' | 'aura';
 const MAX_PULSE_VOICES = 2;
 
 interface Voice { src: SourceLike; gain: GainLike; slot: Slot; name: string }
@@ -85,14 +87,26 @@ export class AbilityAudio {
   stopAll(fadeS = 0.04) { for (const v of [...this.voices]) this.stopVoice(v, fadeS); }
 
   /** Apply one sim event. Sounds follow the simulation (charge / release / pulse / burst ticks), never display frame callbacks. */
-  handle(ev: AbilityEvent, form: 0 | 1) {
-    const f1 = form === 1 ? '_f1' : '';
+  handle(ev: AbilityEvent, form: 0 | 1 | 2) {
+    const f1 = form >= 1 ? '_f1' : '';
     switch (ev.kind) {
+      // B12 Form II: every voice is started and stopped by a sim event, so the sound follows the timeline exactly (and cancel / death / pause silence it through the shared slots)
+      case 'form2_start': if (ev.n) { this.play('form2_charge', 'charge', 1, 2.0 / 1.55); } else this.play('dragon_windup', 'charge', 0.9, 0.6); break;
+      case 'form2_break': this.stopSlot('charge', 0.03); this.play('form2_break', 'burst'); break;
+      case 'form2_commit': this.play('form2_commit', 'fire'); break;
+      case 'form2_end': this.stopSlot('aura', 0.1); this.play('form2_end', 'misc', 0.8); break;
+      case 'dragon_windup': this.play('dragon_windup', 'charge'); break;
+      case 'dragon_launch': this.stopSlot('charge', 0.02); this.play('dragon_launch', 'fire'); break;
+      case 'dragon_hit': this.play('dragon_hit', 'pulse', 1, 0.95 + Math.random() * 0.1); break;
+      case 'comet_gather': this.play('comet_gather', 'charge'); break;
+      case 'comet_fire': this.stopSlot('charge', 0.03); this.play('comet_fire', 'fire'); break;
+      case 'comet_end': this.stopSlot('fire', 0.14); this.play('comet_end', 'misc', 0.8); break;
+      case 'finisher': this.play('finisher', 'burst'); break;
       case 'beam_charge': this.play(`beam_charge${f1}` as AbilitySound, 'charge'); break;
       case 'beam_fire': this.stopSlot('charge', 0.04); this.play(`beam_fire${f1}` as AbilitySound, 'fire'); break;
       case 'beam_pulse': this.play(`beam_pulse_${this.pulseCycle++ % 3}` as AbilitySound, 'pulse', ev.n ? 1 : 0.45, 0.97 + Math.random() * 0.06); break;
       case 'beam_end': this.stopSlot('fire', 0.07); this.stopSlot('pulse', 0.04); this.play('beam_end', 'misc', 0.8); break;
-      case 'cast_cancel': this.stopSlot('charge', 0.03); this.stopSlot('fire', 0.04); this.stopSlot('flight', 0.04); this.play('cast_cancel', 'misc', 0.8); break;
+      case 'cast_cancel': this.stopSlot('aura', 0.05); this.stopSlot('charge', 0.03); this.stopSlot('fire', 0.04); this.stopSlot('flight', 0.04); this.play('cast_cancel', 'misc', 0.8); break;
       case 'sphere_gather': this.play(`sphere_gather${f1}` as AbilitySound, 'charge'); break;
       case 'sphere_launch': this.stopSlot('charge', 0.06); this.play('sphere_throw', 'misc'); this.play('sphere_flight', 'flight', 0.9); break;
       case 'sphere_burst': this.stopSlot('flight', 0.03); this.play(`sphere_burst${f1}` as AbilitySound, 'burst'); break;
@@ -144,6 +158,7 @@ export class AbilityAudio {
   }
 
   private nextAmbient = 0;
+  private nextCrackle = 0;
   /** A rare, quiet distant accent for the arena (not a soundtrack): one of two sounds every ~14-30 s of running time. Render-side randomness only; the sim never sees it. */
   ambient(arena: 'gloam' | 'ashen', time: number) {
     if (this.nextAmbient === 0) { this.nextAmbient = time + 10 + Math.random() * 10; return; }
@@ -161,16 +176,17 @@ export class AbilityAudio {
       this.lastPhase = s.phase;
     }
     if (s.phase === 'running') this.ambient(s.arenaId, s.time);
+    if (s.phase === 'running' && s.player.form === 2 && !s.cinema && s.time >= this.nextCrackle) { this.nextCrackle = s.time + 2.4 + Math.random() * 3; this.play('aura_crackle', 'aura', 0.55); }   // a quiet low crackle while Form II burns
     for (const ev of s.abilityEvents) {
       if (ev.id <= this.lastEvent) continue; this.lastEvent = ev.id;
-      if (s.phase === 'running') this.handle(ev, s.cast?.form ?? s.sphere?.form ?? s.player.form);
+      if (s.phase === 'running' || (s.phase === 'victory' && ev.kind === 'finisher')) this.handle(ev, s.cast?.form ?? s.sphere?.form ?? s.player.form);
     }
     for (const ev of s.enemyEvents) {
       if (ev.id <= this.lastEnemyEvent) continue; this.lastEnemyEvent = ev.id;
       if (s.phase === 'running') this.handleEnemy(ev, s.player.x, s.player.y);
     }
   }
-  dispose() { this.nextAmbient = 0; this.lastEvent = 0; this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.stopAll(0.01); try { this.master?.disconnect(); } catch { /* ignore */ } this.master = null; }
+  dispose() { this.nextAmbient = 0; this.nextCrackle = 0; this.lastEvent = 0; this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.stopAll(0.01); try { this.master?.disconnect(); } catch { /* ignore */ } this.master = null; }
 }
 
 let shared: AbilityAudio | null = null;

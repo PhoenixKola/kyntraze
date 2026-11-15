@@ -1,12 +1,13 @@
 /** Kai base-form directional animation: manifest contract + pure animation state (no Phaser, unit-testable). */
 import { BEAM, SPHERE } from '../content/abilities';
+import { CANNON, DRAGON } from '../content/cometheart';
 export type Facing = 'south' | 'north' | 'east' | 'west';
 /** RunLower + RunPunchUpper are the two LAYERS of the moving attack (legs+hips of the Run cycle, and an upper body whose frames are `step * 8 + leg phase`); the runtime draws the lower one first. */
 export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere' | 'RunLower' | 'RunPunchUpper';
 /** Transform exists only in the Form I sheets. */
 export type KaiClip = KaiBaseClip | 'Transform';
 /** Which art set is shown: the approved base Kai, or the separately authored Form I sheets (never a tinted base). */
-export type KaiForm = 'base' | 'f1';
+export type KaiForm = 'base' | 'f1' | 'f2';
 export const KAI_DIRS: readonly Facing[] = ['south', 'north', 'east', 'west'];
 export const KAI_CLIPS: readonly KaiBaseClip[] = ['Idle', 'Run', 'BasicPunch', 'Dash', 'Hurt', 'Death', 'Beam', 'Sphere', 'RunLower', 'RunPunchUpper'];
 /** Leg phases per strike step in RunPunchUpper. */
@@ -19,17 +20,19 @@ export const KAI_ANCHORS_KEY = 'kai-anchors';
 export const KAI_ANCHORS_URL = '/art/kai-anchors.json';
 /** Fist anchors of the Beam / Sphere clips, exported with the sprites (sprite px relative to the manifest ground origin, y down). n = near/screen-left fist, f = far, m = midpoint. */
 export interface AnchorFrame { n: [number, number]; f: [number, number]; m: [number, number] }
-export interface AnchorTable { forms: Record<KaiForm, Record<Facing, Record<'Beam' | 'Sphere', AnchorFrame[]>>> }
+export type AnchorClip = 'Beam' | 'Sphere' | 'BasicPunch';
+export interface AnchorTable { forms: Record<KaiForm, Record<Facing, Record<AnchorClip, AnchorFrame[]>>> }
 export interface WorldPt { x: number; y: number }
 export interface HandAnchor { n: WorldPt; f: WorldPt; m: WorldPt }
 /** World position of the two fists for a drawn frame. (heroX, heroY) is where the sprite's ground origin is placed in the world, `scale` the sprite scale. */
 export function handAnchorWorld(t: AnchorTable, form: KaiForm, facing: Facing, clip: KaiClip, frame: number, heroX: number, heroY: number, scale: number): HandAnchor | null {
-  if (clip !== 'Beam' && clip !== 'Sphere') return null;
+  if (clip !== 'Beam' && clip !== 'Sphere' && clip !== 'BasicPunch') return null;
   const fr = t.forms[form]?.[facing]?.[clip]?.[frame]; if (!fr) return null;
   const w = (p: [number, number]) => ({ x: heroX + p[0] * scale, y: heroY + p[1] * scale });
   return { n: w(fr.n), f: w(fr.f), m: w(fr.m) };
 }
 export const KAI_F1_REGISTRY_KEY = 'kai-f1-manifests';
+export const KAI_F2_REGISTRY_KEY = 'kai-f2-manifests';
 
 /** Art is ~160 px tall; 0.5 is an exact 2:1 nearest-neighbour reduction (~80 px hero on the 960x540 canvas, same size as the previous placeholder). */
 export const KAI_SCALE = 0.5;
@@ -53,10 +56,10 @@ export function clipFrame(m: KaiManifest, clip: KaiClip) {
   return { w: a.frame_width ?? m.frame_width, h: a.frame_height ?? m.frame_height, ox: (a.origin_px ?? m.origin_px)[0], oy: (a.origin_px ?? m.origin_px)[1] };
 }
 
-const formRoot = (form: KaiForm) => (form === 'f1' ? '/art/kai-f1' : '/art/kai');
+const formRoot = (form: KaiForm) => (form === 'f2' ? '/art/kai-f2' : form === 'f1' ? '/art/kai-f1' : '/art/kai');
 export const kaiManifestUrl = (dir: Facing, form: KaiForm = 'base') => `${formRoot(form)}/${dir}/manifest.json`;
 export const kaiSheetUrl = (dir: Facing, clip: KaiClipInfo, form: KaiForm = 'base') => `${formRoot(form)}/${dir}/${clip.sheet}`;
-export const kaiTextureKey = (dir: Facing, clip: KaiClip, form: KaiForm = 'base') => `${form === 'f1' ? 'kaif1' : 'kai'}-${dir}-${clip}`;
+export const kaiTextureKey = (dir: Facing, clip: KaiClip, form: KaiForm = 'base') => `${form === 'f2' ? 'kaif2' : form === 'f1' ? 'kaif1' : 'kai'}-${dir}-${clip}`;
 
 const num = (v: unknown, what: string) => { if (typeof v !== 'number' || !Number.isFinite(v) || v <= 0) throw new Error(`Kai manifest: bad ${what}`); return v; };
 
@@ -68,7 +71,7 @@ export function parseKaiManifest(raw: unknown, dir: Facing, form: KaiForm = 'bas
   if (!Array.isArray(m.origin_px) || m.origin_px.length !== 2) throw new Error(`Kai manifest ${dir}: origin_px`);
   num(m.origin_px[0], `${dir} origin x`); num(m.origin_px[1], `${dir} origin y`);
   if (!m.root_motion || m.root_motion.baked !== false) throw new Error(`Kai manifest ${dir}: root_motion.baked must be false`);
-  for (const clip of form === 'f1' ? KAI_F1_CLIPS : KAI_CLIPS) {
+  for (const clip of form !== 'base' ? KAI_F1_CLIPS : KAI_CLIPS) {
     const a = (m.animations as Record<string, KaiClipInfo> | undefined)?.[clip];
     if (!a || typeof a.sheet !== 'string') throw new Error(`Kai manifest ${dir}: missing ${clip}`);
     num(a.frames, `${dir} ${clip} frames`); num(a.fps, `${dir} ${clip} fps`);
@@ -76,7 +79,7 @@ export function parseKaiManifest(raw: unknown, dir: Facing, form: KaiForm = 'bas
     if (a.frame_width !== undefined) { num(a.frame_width, `${dir} ${clip} frame_width`); num(a.frame_height, `${dir} ${clip} frame_height`); if (!Array.isArray(a.origin_px) || a.origin_px.length !== 2) throw new Error(`Kai manifest ${dir}: ${clip} origin_px`); }
     if (clip === 'Death' && (a.loop || a.terminal !== 'hold_last_frame')) throw new Error(`Kai manifest ${dir}: Death must hold its last frame`);
   }
-  if (form === 'f1' && typeof m.animations!.Transform?.events?.form_commit !== 'number') throw new Error(`Kai manifest ${dir}: Transform needs a form_commit event`);
+  if (form !== 'base' && typeof m.animations!.Transform?.events?.form_commit !== 'number') throw new Error(`Kai manifest ${dir}: Transform needs a form_commit event`);
   for (const c of ['Beam', 'Sphere'] as const) { const r = m.animations![c].events?.release; if (typeof r !== 'number' || r < 1 || r >= m.animations![c].frames - 1) throw new Error(`Kai manifest ${dir}: ${c} release event`); }
   const punch = m.animations!.BasicPunch;
   if (typeof punch.events?.impact !== 'number' || punch.events.impact < 0 || punch.events.impact >= punch.frames) throw new Error(`Kai manifest ${dir}: BasicPunch impact event`);
@@ -109,13 +112,15 @@ export interface AnimFrameInput {
   /** Sim dash seconds left (drives the Dash clip's progress) and a one-frame flag set when the sim actually removed player HP. */
   dashRemaining?: number; hurt?: boolean;
   /** The sim's form flag (player.form); an edge 0 -> 1 starts the transformation, 1 -> 0 the power-down. */
-  form?: 0 | 1;
+  form?: 0 | 1 | 2;
+  /** B12 Form II reveal (sim.cinema): the whole body plays the Transform clip mapped onto this timeline. */
+  cinema?: { t: number; dur: number; commitAt: number } | null;
   /** Seconds until the sim's automatic weapon fires, and whether an enemy is in range right now. */
   attackClock: number; hasTarget: boolean; targetDx: number; targetDy: number;
   /** Set on the render frame where the sim fired a fresh basic attack (offset to its first target). */
   shot: { dx: number; dy: number } | null;
   /** The sim's active signature ability (player.cast): its clock drives the Beam / Sphere clip so the release frame lands on the sim's release tick. */
-  cast?: { id: number; kind: 'beam' | 'sphere'; face: Facing; t: number; dirX: number; dirY: number } | null;
+  cast?: { id: number; kind: 'beam' | 'sphere' | 'dragon' | 'comet'; face: Facing; t: number; dur?: number; dirX: number; dirY: number } | null;
 }
 /** `legs` is the RunLower frame drawn under the hero sprite while the attack plays during movement (null = the whole body is the clip frame). */
 export interface AnimPose { facing: Facing; clip: KaiClip; frame: number; legs: number | null; /** which sheet set the frame belongs to */ form: KaiForm; /** events raised by the update that produced this pose */ events: readonly KaiAnimEvent[]; }
@@ -134,9 +139,13 @@ export const FORM_REVERT_SECONDS = 0.25;
 export type KaiAnimEvent = 'form_start' | 'form_commit' | 'form_end';
 
 /** Clip frame for a cast at sim time t: frames before the clip's `release` event are spread over the sim's wind-up, the rest over what is left, so the release frame lands on the release tick whatever the clip's fps. */
-export function castFrame(a: KaiClipInfo, kind: 'beam' | 'sphere', t: number): number {
-  const rel = a.events.release ?? Math.floor(a.frames / 2);
-  const tr = kind === 'beam' ? BEAM.charge : SPHERE.gather, total = kind === 'beam' ? BEAM.charge + BEAM.fire + BEAM.recover : SPHERE.gather + SPHERE.recover;
+export type CastKind = 'beam' | 'sphere' | 'dragon' | 'comet';
+/** The sheet clip each cast plays: Dragonfang Rush is a body-driven BasicPunch (its `impact` frame is the release), Cometbreaker the Beam clip. */
+export const CAST_CLIP: Record<CastKind, 'Beam' | 'Sphere' | 'BasicPunch'> = { beam: 'Beam', sphere: 'Sphere', dragon: 'BasicPunch', comet: 'Beam' };
+export function castFrame(a: KaiClipInfo, kind: CastKind, t: number, dur?: number): number {
+  const rel = (kind === 'dragon' ? a.events.impact : a.events.release) ?? Math.floor(a.frames / 2);
+  const tr = kind === 'beam' ? BEAM.charge : kind === 'sphere' ? SPHERE.gather : kind === 'dragon' ? DRAGON.windup : CANNON.gather;
+  const total = dur ?? (kind === 'beam' ? BEAM.charge + BEAM.fire + BEAM.recover : kind === 'sphere' ? SPHERE.gather + SPHERE.recover : kind === 'dragon' ? DRAGON.windup + DRAGON.lunge + DRAGON.recover : CANNON.gather + CANNON.fire + CANNON.recover);
   if (t < tr) return Math.min(rel - 1, Math.max(0, Math.floor(t / tr * rel)));
   return Math.min(a.frames - 1, rel + Math.floor(Math.min(0.999999, (t - tr) / (total - tr)) * (a.frames - rel)));
 }
@@ -163,25 +172,31 @@ export class KaiAnimator {
   private simFormPrev = 0;
   private events: KaiAnimEvent[] = [];
   private castT = 0;
-  private castKind: 'beam' | 'sphere' = 'beam';
+  private castKind: CastKind = 'beam';
+  private castDur: number | undefined;
+  private casting = false;
+  private cinemaOn = false;
+  private cinemaT = 0;
+  private cinemaCommitAt = 1;
+  private cinemaDur = 1;
   private castId = 0;
 
   /** `f1` = the Form I manifests; without them the form input is ignored (base-only play). */
-  constructor(private readonly manifests: KaiManifests, private readonly f1?: KaiManifests) {}
+  constructor(private readonly manifests: KaiManifests, private readonly f1?: KaiManifests, private readonly f2?: KaiManifests) {}
 
   get punching() { return this.punchTime >= 0; }
   get runPunching() { return this.runPunchTime >= 0; }
   get dead() { return this.deathTime >= 0; }
-  get transforming() { return this.transformTime >= 0; }
+  get transforming() { return this.transformTime >= 0 || this.cinemaOn; }
   /** True once the Death clip has played through and held its last frame for DEATH_RESULTS_HOLD_SECONDS. Never true while alive. */
   deathPresented(): boolean { if (this.deathTime < 0) return false; const d = this.info('Death'); return this.deathTime >= d.frames / d.fps + DEATH_RESULTS_HOLD_SECONDS; }
 
   private turn(next: Facing, force = false) { if (next !== this.facing && (force || this.sinceTurn >= FACING_DWELL)) { this.facing = next; this.sinceTurn = 0; } }
 
-  private set(form: KaiForm) { return form === 'f1' && this.f1 ? this.f1 : this.manifests; }
+  private set(form: KaiForm) { return form === 'f2' && this.f2 ? this.f2 : form !== 'base' && this.f1 ? this.f1 : this.manifests; }
   private info(clip: KaiClip, form: KaiForm = this.formOf(clip)): KaiClipInfo { return this.set(form)[this.facing].animations[clip] as KaiClipInfo; }
   /** Transform and its reverse live in the Form I sheets; everything else uses the visible art set. */
-  private formOf(clip: KaiClip): KaiForm { return clip === 'Transform' ? 'f1' : this.visualForm; }
+  private formOf(clip: KaiClip): KaiForm { return clip === 'Transform' ? (this.cinemaOn ? 'f2' : 'f1') : this.visualForm; }
 
   /** Playback rate and lead time so that the impact frame lands on the sim's weapon tick even when attack speed outruns the 0.875 s clip. */
   private punchPlan(period: number) {
@@ -200,18 +215,26 @@ export class KaiAnimator {
   /** Priority: Death > Hurt > Dash (incl. recovery) > Transform > Power-down > Beam/Sphere cast > BasicPunch > Run > Idle. Hurt and Dash never start a punch; the sim still fires its weapon. */
   update(i: AnimFrameInput, attackPeriod: number): AnimPose {
     this.events = [];
-    const simForm = this.f1 ? (i.form ?? 0) : 0;
+    const simForm = this.f1 ? Math.min(i.form ?? 0, this.f2 ? 2 : 1) : 0;
     if (!i.alive) {
-      if (this.deathTime < 0) { this.commitNow(simForm); this.punchTime = -1; this.runPunchTime = -1; this.hurtTime = -1; this.dashRec = -1; this.dashWas = false; this.revertTime = -1; if (simForm) this.visualForm = 'f1'; this.deathTime = 0; this.clip = 'Death'; }
+      if (this.deathTime < 0) { this.commitNow(simForm); this.punchTime = -1; this.runPunchTime = -1; this.hurtTime = -1; this.dashRec = -1; this.dashWas = false; this.revertTime = -1; if (simForm) this.visualForm = simForm === 2 ? 'f2' : 'f1'; this.deathTime = 0; this.clip = 'Death'; }
       else this.deathTime += i.dt;
       this.simFormPrev = simForm; this.movingNow = false; return this.pose();
     }
-    if (this.deathTime >= 0) { this.deathTime = -1; this.clip = 'Idle'; this.time = 0; this.visualForm = 'base'; this.transformTime = -1; this.revertTime = -1; this.simFormPrev = 0; }   // a new run reuses the animator
+    if (this.deathTime >= 0) { this.deathTime = -1; this.clip = 'Idle'; this.time = 0; this.visualForm = 'base'; this.transformTime = -1; this.revertTime = -1; this.simFormPrev = 0; this.cinemaOn = false; }   // a new run reuses the animator
     this.sinceTurn += i.dt;
     this.movingNow = i.moving || i.dashing;
 
-    if (simForm === 1 && this.simFormPrev === 0) { this.punchTime = -1; this.runPunchTime = -1; this.hurtTime = -1; this.dashRec = -1; this.revertTime = -1; this.transformTime = 0; this.visualForm = 'base'; this.events.push('form_start'); }
-    else if (simForm === 0 && this.simFormPrev === 1) { this.transformTime = -1; this.punchTime = -1; this.runPunchTime = -1; this.visualForm = 'base'; this.revertTime = 0; this.events.push('form_end'); }
+    if (i.cinema && this.f2) {   // B12 Form II reveal: the whole body plays the Form II Transform clip on the sim's cinematic timeline
+      if (!this.cinemaOn) { this.cinemaOn = true; this.punchTime = -1; this.runPunchTime = -1; this.hurtTime = -1; this.dashRec = -1; this.revertTime = -1; this.transformTime = -1; this.dashWas = false; this.casting = false; this.events.push('form_start'); }
+      this.cinemaT = i.cinema.t; this.cinemaDur = i.cinema.dur; this.cinemaCommitAt = i.cinema.commitAt; this.clip = 'Transform';
+      if (simForm === 2 && this.visualForm !== 'f2') { this.visualForm = 'f2'; this.events.push('form_commit'); }
+      this.simFormPrev = simForm; this.movingNow = false; return this.pose();
+    }
+    if (this.cinemaOn) { this.cinemaOn = false; this.clip = 'Idle'; this.time = 0; if (simForm === 2) this.visualForm = 'f2'; }
+    if (simForm === 2 && this.simFormPrev !== 2) { this.visualForm = 'f2'; this.transformTime = -1; this.revertTime = -1; this.events.push('form_commit'); }
+    else if (simForm === 1 && this.simFormPrev === 0) { this.punchTime = -1; this.runPunchTime = -1; this.hurtTime = -1; this.dashRec = -1; this.revertTime = -1; this.transformTime = 0; this.visualForm = 'base'; this.events.push('form_start'); }
+    else if (simForm === 0 && this.simFormPrev >= 1) { this.transformTime = -1; this.punchTime = -1; this.runPunchTime = -1; this.visualForm = 'base'; this.revertTime = 0; this.events.push('form_end'); }
     this.simFormPrev = simForm;
 
     if (i.hurt) { this.commitNow(simForm); this.punchTime = -1; this.runPunchTime = -1; this.dashRec = -1; this.revertTime = -1; this.hurtTime = 0; }
@@ -237,8 +260,9 @@ export class KaiAnimator {
     const casting = !!i.cast && !busy;
     if (i.cast && casting) {
       if (i.cast.id !== this.castId) { this.castId = i.cast.id; this.turn(i.cast.face, true); }
-      this.castT = i.cast.t; this.castKind = i.cast.kind; this.punchTime = -1; this.runPunchTime = -1;
+      this.castT = i.cast.t; this.castKind = i.cast.kind; this.castDur = i.cast.dur; this.punchTime = -1; this.runPunchTime = -1;
     }
+    this.casting = casting;
 
     if (casting) { /* the signature ability owns the hands */ }
     else if (!busy && this.movingNow) {
@@ -266,7 +290,7 @@ export class KaiAnimator {
       } else if (i.moving) this.turn(facingFromInput(this.facing, i.inputX, i.inputY));
     } else { this.punchTime = -1; this.runPunchTime = -1; }
 
-    const want: KaiClip = this.hurtTime >= 0 ? 'Hurt' : (i.dashing || this.dashRec >= 0) ? 'Dash' : (this.transformTime >= 0 || this.revertTime >= 0) ? 'Transform' : casting ? (i.cast!.kind === 'beam' ? 'Beam' : 'Sphere') : this.punching ? 'BasicPunch' : this.runPunching && i.moving ? 'RunPunchUpper' : i.moving ? 'Run' : 'Idle';
+    const want: KaiClip = this.hurtTime >= 0 ? 'Hurt' : (i.dashing || this.dashRec >= 0) ? 'Dash' : (this.transformTime >= 0 || this.revertTime >= 0) ? 'Transform' : casting ? CAST_CLIP[i.cast!.kind] : this.punching ? 'BasicPunch' : this.runPunching && i.moving ? 'RunPunchUpper' : i.moving ? 'Run' : 'Idle';
     if (want !== this.clip) { this.clip = want; this.time = 0; }
     const runStep = i.dt * Math.min(18, Math.max(10, 14 * i.runSpeed / 250)) / 14;
     if (this.movingNow) this.runTime += runStep; else this.runTime = 0;
@@ -286,13 +310,16 @@ export class KaiAnimator {
     if (this.clip === 'Dash') {
       const rec = a.events.recover_start ?? a.frames - 3;
       frame = this.dashRec >= 0 ? Math.min(a.frames - 1, rec + Math.floor(this.dashRec / DASH_RECOVERY_SECONDS * (a.frames - rec))) : Math.min(rec - 1, Math.floor(this.dashProg * rec));
+    } else if (this.clip === 'Transform' && this.cinemaOn) {
+      const commit = a.events.form_commit ?? 5, u = Math.min(1, this.cinemaT / this.cinemaCommitAt);
+      frame = this.cinemaT < this.cinemaCommitAt ? Math.min(commit - 1, Math.floor(Math.pow(u, 0.75) * commit)) : Math.min(a.frames - 1, commit + Math.floor(Math.min(0.999, (this.cinemaT - this.cinemaCommitAt) / Math.max(0.01, this.cinemaDur - this.cinemaCommitAt)) * (a.frames - commit)));
     } else if (this.clip === 'Transform') {
       const commit = a.events.form_commit ?? 5;
       frame = this.transformTime >= 0 ? Math.min(a.frames - 1, Math.floor(this.transformTime * a.fps + 1e-6)) : Math.max(0, commit - 1 - Math.floor(Math.min(0.999, this.revertTime / FORM_REVERT_SECONDS) * commit));
     } else if (this.clip === 'RunPunchUpper') {
       frame = Math.min(a.frames / RUN_PHASES - 1, Math.floor(Math.max(0, this.runPunchTime) * a.fps + 1e-6)) * RUN_PHASES + this.legPhase();
-    } else if (this.clip === 'Beam' || this.clip === 'Sphere') {
-      frame = castFrame(a, this.castKind, this.castT);
+    } else if (this.casting && (this.clip === 'Beam' || this.clip === 'Sphere' || this.clip === 'BasicPunch')) {
+      frame = castFrame(a, this.castKind, this.castT, this.castDur);
     } else {
       const t = this.clip === 'BasicPunch' ? Math.max(0, this.punchTime) : this.clip === 'Hurt' ? Math.max(0, this.hurtTime) : this.clip === 'Death' ? Math.max(0, this.deathTime) : this.time;
       const raw = Math.floor(t * a.fps + 1e-6);

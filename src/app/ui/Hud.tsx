@@ -60,20 +60,21 @@ export function Hud({ s, pad, onPause, reduced }: Props) {
   const hit = useHitVignette(s);
   const hpFrac = s.hp / s.maxHp, low = hpFrac <= 0.3;
   const canForm = !s.form && s.drive >= RULES.formCharge && s.formCooldown <= 0;
+  const f2 = s.form === 2, comet = s.cometReady && !s.cinema, fullName = f2 ? 'COMETHEART' : s.form ? 'FLAREBOUND' : comet ? 'COMETHEART READY' : canForm ? 'FORM READY' : 'DRIVE';
   return <div className="hud" data-testid="hud">
     {hit.n > 0 && <div key={hit.n} className={`hit-vignette ${reduced ? 'calm' : ''}`} data-testid="hit-vignette" style={{ '--k': hit.k } as CSSProperties} aria-hidden="true"/>}
     {s.sinceRevive < 1 && <div className="revive-flash" aria-hidden="true"/>}
     <div className="hud-panel hud-health">
-      <div className={`portrait ${s.form ? 'is-form' : ''}`}><img src={`${import.meta.env.BASE_URL}ui/kai-portrait-${s.form ? 'f1' : 'base'}.png`} alt="" draggable={false}/><span className="lvl" aria-label={`Level ${s.level}`}>{s.level}</span>{s.revives > 0 && <span className="revive-badge" style={{ '--ico': icon('heart') } as CSSProperties} title="Second Wind ready" aria-label="Second Wind ready"/>}</div>
+      <div className={`portrait ${s.form ? 'is-form' : ''} ${f2 ? 'is-form2' : ''}`}><img src={`${import.meta.env.BASE_URL}ui/kai-portrait-${f2 ? 'f2' : s.form ? 'f1' : 'base'}.png`} alt="" draggable={false}/><span className="lvl" aria-label={`Level ${s.level}`}>{s.level}</span>{s.revives > 0 && <span className="revive-badge" style={{ '--ico': icon('heart') } as CSSProperties} title="Second Wind ready" aria-label="Second Wind ready"/>}</div>
       <div className="vitals">
         <div className={`bar-hp ${low ? 'low' : ''}`} role="progressbar" aria-label="Health" aria-valuenow={Math.ceil(s.hp)} aria-valuemax={Math.ceil(s.maxHp)}>
           <i className="trail" style={{ width: pct(hpFrac * 100) }}/><i className="fill" style={{ width: pct(hpFrac * 100) }}/>
           <span className="hp-num"><span className="hp-ico" style={{ '--ico': icon('heart') } as CSSProperties}/>{Math.ceil(s.hp)}<em>/{Math.ceil(s.maxHp)}</em></span>
         </div>
         <div className={`bar-xp ${s.xp / s.nextXp > 0.85 ? 'near' : ''}`} role="progressbar" aria-label="Experience" aria-valuenow={Math.floor(s.xp)} aria-valuemax={s.nextXp}><i style={{ width: pct(s.xp / s.nextXp * 100) }}/><span><b>LV {s.level}</b><em>{Math.floor(s.xp)}/{s.nextXp}</em></span></div>
-        <div className={`bar-form ${s.form ? 'on' : canForm ? 'ready' : ''}`} role="progressbar" aria-label="Transformation drive" aria-valuenow={Math.floor(s.drive)} aria-valuemax={100}>
-          <i style={{ width: pct(s.drive) }}/><u style={{ left: `${RULES.formCharge}%` }}/>
-          <span>{s.form ? 'FLAREBOUND' : canForm ? 'FORM READY' : 'DRIVE'}</span>
+        <div className={`bar-form ${s.form ? 'on' : canForm ? 'ready' : ''} ${f2 ? 'form2' : ''} ${comet ? 'comet-ready' : ''}`} role="progressbar" aria-label="Transformation drive" aria-valuenow={Math.floor(s.drive)} aria-valuemax={100} title={s.cometUnlocked ? 'Drive 65%: F = Flarebound. Full Drive: F = Cometheart (Form II).' : 'Drive 65%: F = Flarebound.'}>
+          <i style={{ width: pct(s.drive) }}/><u style={{ left: `${RULES.formCharge}%` }}/>{s.cometUnlocked && <u className="tick2" style={{ left: '99%' }}/>}
+          <span>{fullName}</span>
         </div>
       </div>
     </div>
@@ -86,10 +87,10 @@ export function Hud({ s, pad, onPause, reduced }: Props) {
     <div className="hud-slots" role="group" aria-label="Abilities">
       <Slot id="shift" name="Dash" ico="dash" keyLabel="SHIFT" padLabel="A" pad={pad} seconds={s.dashCooldown} max={s.cdMax.dash}/>
       <Slot id="q" name="Impact" ico="impact" keyLabel="Q" padLabel="X" pad={pad} seconds={s.qCooldown} max={8.5}/>
-      <Slot id="e" name="Fracture Lance" ico="lance" keyLabel="E" padLabel="RB" pad={pad} seconds={s.beamCooldown} max={s.cdMax.beam}/>
-      <Slot id="r" name="Nova Bloom" ico="nova" keyLabel="R" padLabel="LB" pad={pad} seconds={s.sphereCooldown} max={s.cdMax.sphere}/>
-      <Slot id="f" name="Flarebound form" ico="form" keyLabel="F" padLabel="Y" pad={pad} seconds={s.form ? 0 : s.formCooldown} max={s.cdMax.form}
-        state={s.form ? 'active' : canForm ? 'ready' : s.formCooldown > 0 ? undefined : 'locked'} text={s.form ? 'ON' : canForm ? 'GO' : s.formCooldown > 0 ? undefined : `${Math.floor(s.drive)}%`}/>
+      {f2 ? <Slot id="e" name="Dragonfang Rush" ico="dragon" keyLabel="E" padLabel="RB" pad={pad} seconds={s.dragonCooldown} max={s.cdMax.dragon}/> : <Slot id="e" name="Fracture Lance" ico="lance" keyLabel="E" padLabel="RB" pad={pad} seconds={s.beamCooldown} max={s.cdMax.beam}/>}
+      {f2 ? <Slot id="r" name="Cometbreaker Cannon" ico="comet" keyLabel="R" padLabel="LB" pad={pad} seconds={s.cometCooldown} max={s.cdMax.comet}/> : <Slot id="r" name="Nova Bloom" ico="nova" keyLabel="R" padLabel="LB" pad={pad} seconds={s.sphereCooldown} max={s.cdMax.sphere}/>}
+      <Slot id="f" name={f2 || comet ? 'Cometheart form' : 'Flarebound form'} ico={f2 || comet || (s.cometUnlocked && !s.form) ? 'form2' : 'form'} keyLabel="F" padLabel="Y" pad={pad} seconds={s.form ? 0 : s.formCooldown} max={s.cdMax.form}
+        state={s.form === 2 ? 'active' : comet ? 'ready' : s.form ? 'active' : canForm ? 'ready' : s.formCooldown > 0 ? undefined : 'locked'} text={s.form ? 'ON' : comet ? 'II' : canForm ? 'GO' : s.formCooldown > 0 ? undefined : `${Math.floor(s.drive)}%`}/>
     </div>
   </div>;
 }

@@ -32,4 +32,4 @@ def run(name):
             c = fist_points(ch, slots, s); fr[s] = [round(float(c[0]), 2), round(float(c[1]), 2)] if c is not None else None
         res.append(fr)
     return res
-if __name__ == "__main__": print(json.dumps({"Beam": run("Beam"), "Sphere": run("Sphere")}))
+if __name__ == "__main__": print(json.dumps({"Beam": run("Beam"), "Sphere": run("Sphere"), "BasicPunch": run("BasicPunch")}))

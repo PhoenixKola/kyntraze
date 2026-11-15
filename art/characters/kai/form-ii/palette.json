@@ -1,0 +1,46 @@
+{
+ "_note": "Form II COMETHEART colour: brighter luminous yellow with deep amber shadow (hair ramp + eye glint only). Aura/core colours mirror src/assets/formLooks.ts.",
+ "candidate": "comet",
+ "looks": {
+  "comet": {
+   "label": "COMET (luminous yellow / amber)",
+   "hair": [
+    [
+     84,
+     44,
+     6
+    ],
+    [
+     190,
+     112,
+     10
+    ],
+    [
+     255,
+     214,
+     36
+    ],
+    [
+     255,
+     250,
+     150
+    ]
+   ],
+   "eye": [
+    255,
+    255,
+    225
+   ],
+   "aura": [
+    255,
+    214,
+    60
+   ],
+   "core": [
+    255,
+    252,
+    226
+   ]
+  }
+ }
+}

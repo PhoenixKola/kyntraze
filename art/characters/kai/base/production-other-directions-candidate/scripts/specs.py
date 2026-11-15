@@ -4,7 +4,8 @@
 import os
 
 SOLE_DY = 18.0          # ankle pivot sits this far above the sole (same as the SOUTH candidate)
-CANVAS = (176, 176)
+PAD_TOP = int(os.environ.get("KAI_PAD_TOP", "0"))   # Form II: extra canvas headroom for the taller hair (0 = unchanged)
+CANVAS = (176, 176 + PAD_TOP)
 
 SPEC = {
  "east": dict(root=(70, 164), facing=+1, lead="f", rear="n", sh_dx={"n": -10.0, "f": 6.0}, hip_dx={"n": -10.0, "f": 10.0}, knot_dx=8.0,
@@ -14,18 +15,23 @@ SPEC = {
  "north": dict(root=(88, 164), facing=-1, lead="n", rear="f", sh_dx={"n": -15.0, "f": 13.0}, hip_dx={"n": -12.0, "f": 12.0}, knot_dx=0.0,
                knee_dir={"n": -1, "f": +1}, point={"side": -90.0, "guard": 180.0}, torso_flip=False),
 }
+for _s in SPEC.values(): _s["root"] = (_s["root"][0], _s["root"][1] + PAD_TOP)
 
 FORM = os.environ.get("KAI_FORM", "")
 
 # B05.2 owner fix: the BASE profile head is drawn in FRONT of the torso (collar/neck no longer cover the jaw). Form I keeps its approved order (HEAD_BEHIND)
-HEAD_BEHIND = os.environ.get("KAI_HEAD_BEHIND", "") == "1" or FORM == "f1"
+HEAD_BEHIND = os.environ.get("KAI_HEAD_BEHIND", "") == "1"   # owner fix B12: Form I/II profile heads are also drawn in FRONT of the jacket
 
 def parts_for(d):
     ps = _parts_for(d)
     if FORM == "f1":      # Form I: spikier head + a separate rear hair piece (own bone), the base head stays in the rig behind the "form" slot for the transformation clip
         i = next(k for k, p in enumerate(ps) if p["id"] == "head")
         ps[i]["slot"] = "form:base"
-        ps[i:i] = [dict(id="hair_f1", img="hair_f1.png", bone="hair", kind="hair", slot="form:f1"), dict(id="head_f1", img="head_f1.png", bone="head", kind="head", slot="form:f1")]
+        hair = dict(id="hair_f1", img="hair_f1.png", bone="hair", kind="hair", slot="form:f1")
+        if d in ("east", "west") and not HEAD_BEHIND:   # rear hair sits behind the torso, the head itself in front of the jacket
+            ps.insert(next(k for k, p in enumerate(ps) if p["id"] == "torso"), hair); i = next(k for k, p in enumerate(ps) if p["id"] == "head")
+            ps[i:i] = [dict(id="head_f1", img="head_f1.png", bone="head", kind="head", slot="form:f1")]
+        else: ps[i:i] = [hair, dict(id="head_f1", img="head_f1.png", bone="head", kind="head", slot="form:f1")]
     return ps
 
 def _parts_for(d):

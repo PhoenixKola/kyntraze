@@ -6,6 +6,8 @@ import { ENEMIES, isBoss } from '../content/enemies';
 import { BOSSES } from '../content/bosses';
 import { ARENAS } from '../content/arenas';
 import { BEAM, SPHERE } from '../content/abilities';
+import { CANNON, DRAGON } from '../content/cometheart';
+import { formReady } from '../sim/FormSystem';
 import { BOSS_SCHEDULE } from '../content/encounters';
 import { RULES } from '../core/Rules';
 import { storeSave, type SaveV1, type GameSettings } from '../sim/SaveSystem';
@@ -21,19 +23,22 @@ export class GameBridge {
   unbind() { this.sim = null; }
   setSettings(next: GameSettings) { this.save.settings = next; }
   getSettings() { return this.save.settings; }
+  /** Permanent unlocks (read once when a run starts). */
+  getUnlocks() { return this.save.unlocks ?? { cometheart: false }; }
   subscribe(listener: () => void) { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; }
   snapshot(): UiSnapshot { return this.current; }
   publish(force = false) {
     const s = this.sim?.state; if (!s) return;
     const p = s.player;
     const phaseChanged = this.lastPhase !== s.phase;
+    if (s.cometUnlockedNow) { s.cometUnlockedNow = false; this.save.unlocks = { ...(this.save.unlocks ?? { cometheart: false }), cometheart: true }; storeSave(this.save); }
     if (s.phase !== 'dead') this.deathShown = false;
     if (s.phase !== 'victory') this.victoryShown = false;
     this.current = { phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
-      dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form,
+      dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form, dragonCooldown: p.dragonCooldown, cometCooldown: p.cometCooldown, cometUnlocked: s.cometUnlocked, cometReady: formReady(s) === 2, cinema: !!s.cinema,
       formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? s.upgradeOffers.map(id => offerCard(s, id)) : [], owned: UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] })), map: miniMap(s),
-      cdMax: { dash: 3.2 * s.mods.dashCd, beam: BEAM.cooldown * s.mods.beamCd, sphere: SPHERE.cooldown * s.mods.sphereCd, form: RULES.formCooldown * s.mods.formCd }, run: runHud(s), victoryShown: this.victoryShown, rewardPick: s.rewardPick, bosses: s.bossesDefeated, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
+      cdMax: { dash: 3.2 * s.mods.dashCd, beam: BEAM.cooldown * s.mods.beamCd, sphere: SPHERE.cooldown * s.mods.sphereCd, form: RULES.formCooldown * s.mods.formCd, dragon: DRAGON.cooldown * s.mods.beamCd, comet: CANNON.cooldown * s.mods.sphereCd }, run: runHud(s), victoryShown: this.victoryShown, rewardPick: s.rewardPick, bosses: s.bossesDefeated, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
     if ((s.phase === 'dead' || s.phase === 'victory') && phaseChanged) {
       const stats = this.sim!.stats();
       if (!this.save.best || stats.score > this.save.best.score) { this.save.best = stats; storeSave(this.save); }

@@ -3,7 +3,9 @@ import { BEAM, SPHERE } from '../content/abilities';
 import { damageEnemy } from './CombatSystem';
 import { blocked, slideMove } from './CollisionSystem';
 import { clamp, normalize } from '../core/Math';
-import { BEAM_MUZZLE, SPHERE_RELEASE } from '../content/handAnchors';
+import { BEAM_MUZZLE, SPHERE_RELEASE, PUNCH_FIST } from '../content/handAnchors';
+import { CANNON, CARRY, DRAGON } from '../content/cometheart';
+import { isBoss } from '../content/enemies';
 import { KAI_GROUND_DY, KAI_SCALE } from '../assets/kaiAnimation';
 
 const EVENT_CAP = 24;
@@ -12,14 +14,17 @@ function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: nu
   if (s.abilityEvents.length > EVENT_CAP) s.abilityEvents.splice(0, s.abilityEvents.length - EVENT_CAP);
 }
 /** Seconds into the cast at which the ability is released (beam fires / sphere is thrown). */
-export const releaseTime = (kind: Cast['kind']) => (kind === 'beam' ? BEAM.charge : SPHERE.gather);
-export const castDuration = (kind: Cast['kind']) => (kind === 'beam' ? BEAM.charge + BEAM.fire + BEAM.recover : SPHERE.gather + SPHERE.recover);
+export const releaseTime = (kind: Cast['kind']) => (kind === 'beam' ? BEAM.charge : kind === 'sphere' ? SPHERE.gather : kind === 'dragon' ? DRAGON.windup : CANNON.gather);
+export const castDuration = (kind: Cast['kind']) => (kind === 'beam' ? BEAM.charge + BEAM.fire + BEAM.recover : kind === 'sphere' ? SPHERE.gather + SPHERE.recover : kind === 'dragon' ? DRAGON.windup + DRAGON.lunge + DRAGON.recover : CANNON.gather + CANNON.fire + CANNON.recover);
+const FORM_KEY = ['base', 'f1', 'f2'] as const;
 const BEAM_PULSES = Math.round(BEAM.fire / BEAM.pulseEvery);
 const BEAM_PULSES_MAX = BEAM_PULSES + Math.round(BEAM.recover / BEAM.pulseEvery);
 
 /** Movement scale while casting (1 when free). */
 export function castMoveScale(s: GameState): number {
   const c = s.cast; if (!c) return 1;
+  if (c.kind === 'dragon') return c.t < DRAGON.windup ? DRAGON.moveScaleWindup : c.t < DRAGON.windup + DRAGON.lunge ? 0 : DRAGON.moveScaleRecover;
+  if (c.kind === 'comet') return c.t < CANNON.gather ? CANNON.moveScaleGather : c.t < c.dur - CANNON.recover ? CANNON.moveScaleFire : CANNON.moveScaleRecover;
   if (c.kind === 'beam') return c.t < BEAM.charge ? BEAM.moveScaleCharge : c.t < BEAM.charge + BEAM.fire ? BEAM.moveScaleFire : BEAM.moveScaleRecover;
   return c.t < SPHERE.gather ? SPHERE.moveScaleGather : SPHERE.moveScaleRecover;
 }
@@ -42,19 +47,20 @@ export function clampToFace(dx: number, dy: number, face: Face, max: number) {
   if (Math.abs(a) <= max) return n;
   const t = Math.sign(a) * max; const c = Math.cos(t), s2 = Math.sin(t); return { x: ax * c - ay * s2, y: ax * s2 + ay * c };
 }
+export const punchOrigin = (s: GameState, c: Cast) => worldPoint(s, PUNCH_FIST[FORM_KEY[c.form]][c.face]);
 const worldPoint = (s: GameState, pt: { x: number; y: number }) => ({ x: s.player.x + pt.x * KAI_SCALE, y: s.player.y + KAI_GROUND_DY + pt.y * KAI_SCALE });
 /** Where the two fists meet at release, in world px: the sim lane and the thrown sphere start here (table generated from the exported sprite anchors). */
-export const beamOrigin = (s: GameState, c: Cast) => worldPoint(s, BEAM_MUZZLE[c.form ? 'f1' : 'base'][c.face]);
-export const sphereOrigin = (s: GameState, c: Cast) => worldPoint(s, SPHERE_RELEASE[c.form ? 'f1' : 'base'][c.face]);
+export const beamOrigin = (s: GameState, c: Cast) => worldPoint(s, BEAM_MUZZLE[FORM_KEY[c.form]][c.face]);
+export const sphereOrigin = (s: GameState, c: Cast) => worldPoint(s, SPHERE_RELEASE[FORM_KEY[c.form]][c.face]);
 
-function pickAim(s: GameState): { x: number; y: number } {
+function pickAim(s: GameState, range: number = BEAM.length, cosLimit: number = BEAM.aimAssistCos): { x: number; y: number } {
   const p = s.player; const base = normalize(p.aimX, p.aimY);
   let best: { x: number; y: number } | null = null; let bestD = Infinity;
   for (const e of s.enemies) {
     if (e.hp <= 0) continue;
-    const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < 1 || d > BEAM.length) continue;
+    const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < 1 || d > range) continue;
     const v = { x: (e.x - p.x) / d, y: (e.y - p.y) / d };
-    if (v.x * base.x + v.y * base.y < BEAM.aimAssistCos) continue;
+    if (v.x * base.x + v.y * base.y < cosLimit) continue;
     if (d < bestD) { bestD = d; best = v; }
   }
   return best ?? base;
@@ -74,17 +80,20 @@ function pickSphereTarget(s: GameState): { x: number; y: number } {
   return { x: p.x + d.x * r, y: p.y + d.y * r };
 }
 
-export function startAbility(s: GameState, kind: Cast['kind']): boolean {
+export function startAbility(s: GameState, key: 'beam' | 'sphere'): boolean {
   const p = s.player;
-  if (s.phase !== 'running' || s.cast || p.dashRemaining > 0 || p.hp <= 0) return false;
-  if (kind === 'beam' ? p.beamCooldown > 0 : p.sphereCooldown > 0) return false;
+  if (s.phase !== 'running' || s.cinema || s.cast || p.dashRemaining > 0 || p.hp <= 0) return false;
+  // B12: in Cometheart the E / R keys fire Dragonfang Rush / Cometbreaker Cannon (own cooldowns); Base / Flarebound keep Fracture Lance / Nova Bloom untouched
+  const kind: Cast['kind'] = p.form === 2 ? (key === 'beam' ? 'dragon' : 'comet') : key;
+  if (kind === 'dragon' ? p.dragonCooldown > 0 : kind === 'comet' ? p.cometCooldown > 0 : kind === 'beam' ? p.beamCooldown > 0 : p.sphereCooldown > 0) return false;
   const tg = kind === 'sphere' ? pickSphereTarget(s) : null;
-  const raw = tg ? normalize(tg.x - p.x, tg.y - p.y) : pickAim(s);
+  const raw = tg ? normalize(tg.x - p.x, tg.y - p.y) : kind === 'comet' ? normalize(p.aimX, p.aimY) : pickAim(s, kind === 'dragon' ? DRAGON.aimRange : BEAM.length, kind === 'dragon' ? DRAGON.aimAssistCos : BEAM.aimAssistCos);
   const aim = raw.x === 0 && raw.y === 0 ? normalize(p.aimX, p.aimY) : raw; const face = faceOf(aim.x, aim.y);
-  const dir = kind === 'beam' ? clampToFace(aim.x, aim.y, face, BEAM.maxAimOffset) : aim;
-  if (kind === 'beam') p.beamCooldown = BEAM.cooldown * s.mods.beamCd; else p.sphereCooldown = SPHERE.cooldown * s.mods.sphereCd;
-  s.cast = { id: s.nextId++, kind, face, t: 0, dirX: dir.x, dirY: dir.y, form: p.form, released: false, pulses: 0, len: 0, tx: tg?.x ?? p.x, ty: tg?.y ?? p.y };
-  emit(s, kind === 'beam' ? 'beam_charge' : 'sphere_gather', p.x, p.y);
+  const dir = kind === 'sphere' ? aim : clampToFace(aim.x, aim.y, face, kind === 'beam' ? BEAM.maxAimOffset : kind === 'dragon' ? DRAGON.maxAimOffset : CANNON.maxAimOffset);
+  if (kind === 'beam') p.beamCooldown = BEAM.cooldown * s.mods.beamCd; else if (kind === 'sphere') p.sphereCooldown = SPHERE.cooldown * s.mods.sphereCd;
+  else if (kind === 'dragon') p.dragonCooldown = DRAGON.cooldown * s.mods.beamCd; else p.cometCooldown = CANNON.cooldown * s.mods.sphereCd;
+  s.cast = { id: s.nextId++, kind, face, t: 0, dirX: dir.x, dirY: dir.y, form: p.form, released: false, pulses: 0, len: 0, tx: tg?.x ?? p.x, ty: tg?.y ?? p.y, sx: p.x, sy: p.y, hits: [], dur: castDuration(kind) };
+  emit(s, kind === 'beam' ? 'beam_charge' : kind === 'sphere' ? 'sphere_gather' : kind === 'dragon' ? 'dragon_windup' : 'comet_gather', p.x, p.y);
   return true;
 }
 
@@ -138,7 +147,7 @@ function echoBurst(s: GameState, ec: GameState['echoes'][number]) {
 
 export function updateAbilities(s: GameState, dt: number) {
   const p = s.player;
-  p.beamCooldown = Math.max(0, p.beamCooldown - dt); p.sphereCooldown = Math.max(0, p.sphereCooldown - dt);
+  p.beamCooldown = Math.max(0, p.beamCooldown - dt); p.sphereCooldown = Math.max(0, p.sphereCooldown - dt); p.dragonCooldown = Math.max(0, p.dragonCooldown - dt); p.cometCooldown = Math.max(0, p.cometCooldown - dt);
   for (const b of s.blasts) b.ttl -= dt;
   s.blasts = s.blasts.filter(b => b.ttl > 0);
   if (s.echoes.length) { for (const ec of s.echoes) ec.t -= dt; const due = s.echoes.filter(ec => ec.t <= 0); s.echoes = s.echoes.filter(ec => ec.t > 0); for (const ec of due) echoBurst(s, ec); }
@@ -146,7 +155,8 @@ export function updateAbilities(s: GameState, dt: number) {
   if (sh) { sh.t += dt; if (sh.t >= SPHERE.flight) { s.sphere = null; detonate(s, sh); } }
   const c = s.cast; if (!c) return;
   const before = c.t; c.t += dt;
-  if (c.kind === 'beam') {
+  if (c.kind === 'dragon') updateDragon(s, c, dt); else if (c.kind === 'comet') updateComet(s, c, before);
+  else if (c.kind === 'beam') {
     if (!c.released && c.t >= BEAM.charge - 1e-9) {
       c.released = true; const o = beamOrigin(s, c); c.len = beamLength(o.x, o.y, c.dirX, c.dirY, BEAM.length); emit(s, 'beam_fire', o.x, o.y);
     }
@@ -160,5 +170,65 @@ export function updateAbilities(s: GameState, dt: number) {
     s.sphere = { id: s.nextId++, x0: o.x, y0: o.y, x1: c.tx, y1: c.ty, t: 0, form: c.form };
     emit(s, 'sphere_launch', o.x, o.y);
   }
-  if (c.t >= castDuration(c.kind) - 1e-9) s.cast = null;
+  if (c.t >= c.dur - 1e-9) { if (c.kind === 'dragon') emit(s, 'dragon_end', p.x, p.y); else if (c.kind === 'comet' && c.released) emit(s, 'comet_end', p.x, p.y); s.cast = null; }
+}
+
+const easeOut = (u: number) => 1 - (1 - clamp(u, 0, 1)) ** 3;
+const dragonReach = (s: GameState) => DRAGON.reach + CARRY.afterburnReach * s.mods.beamLinger;
+/** Distance of the dragon's tip along the strike (from where Kai started) `tl` seconds after the release. */
+export const dragonHead = (s: GameState, tl: number) => easeOut(tl / (DRAGON.lunge + 0.1)) * (dragonReach(s) + DRAGON.lungeDist) + 28;
+/** Dragonfang Rush: wind-up, then Kai lunges while a dragon of gold energy runs out of the fist; every enemy in the lane is bitten once, in order of distance along the strike. */
+function updateDragon(s: GameState, c: Cast, dt: number) {
+  const p = s.player;
+  if (!c.released && c.t >= DRAGON.windup - 1e-9) {
+    c.released = true; const o = punchOrigin(s, c); c.tx = o.x; c.ty = o.y; emit(s, 'dragon_launch', o.x, o.y);
+  }
+  if (!c.released) return;
+  const tl = c.t - DRAGON.windup;
+  if (tl <= DRAGON.lunge + 1e-9) {   // the committed lunge: Kai really moves (collision-checked), with a few i-frames so the commit is not cheaply interrupted
+    const want = DRAGON.lungeDist * easeOut(tl / DRAGON.lunge), tx = c.sx + c.dirX * want, ty = c.sy + c.dirY * want;
+    if (dt > 0) slideMove(p, (tx - p.x) / dt, (ty - p.y) / dt, dt);
+    p.invulnerable = Math.max(p.invulnerable, 0.12);
+  }
+  const head = dragonHead(s, tl);
+  const hw = DRAGON.halfWidth * s.mods.beamWidth, dmg = DRAGON.damage * s.mods.beamDamage * s.mods.formPower; let hits = 0;
+  for (const e of s.enemies) {
+    if (e.hp <= 0 || c.hits.includes(e.id)) continue;
+    const ex = e.x - c.sx, ey = e.y - c.sy, along = ex * c.dirX + ey * c.dirY;
+    if (along < -e.radius || along > head + e.radius) continue;
+    if (Math.abs(ex * -c.dirY + ey * c.dirX) > hw + e.radius) continue;
+    c.hits.push(e.id); hits++;
+    const weak = !isBoss(e.kind) && e.hp <= e.maxHp * DRAGON.executeBelow;
+    if (!damageEnemy(s, e, weak ? e.hp + 1 : dmg) && e.hp > 0 && !isBoss(e.kind)) {
+      for (let i = 0; i < 3; i++) slideMove(e, c.dirX * DRAGON.knockback / 0.6, c.dirY * DRAGON.knockback / 0.6, 0.2);
+      e.stagger = Math.max(e.stagger, DRAGON.stagger);
+    }
+    if (s.mods.beamDrive > 0 && p.form !== 1) p.drive = Math.min(100, p.drive + s.mods.beamDrive * s.mods.driveGain);
+  }
+  if (hits) emit(s, 'dragon_hit', c.sx + c.dirX * head, c.sy + c.dirY * head, hits);
+}
+export const cannonHalfWidth = (s: GameState, tf: number) => (CANNON.halfWidth0 + (CANNON.halfWidth1 - CANNON.halfWidth0) * easeOut(tf / CANNON.expand)) * s.mods.sphereRadius;
+export const cannonFireTime = (s: GameState) => CANNON.fire + CARRY.echoSeconds * s.mods.sphereEcho;
+/** Cometbreaker Cannon: planted gather, then a beam that starts focused and opens to its full width; finite (fire time + Nova echo) and always followed by a recovery. */
+function updateComet(s: GameState, c: Cast, before: number) {
+  const fireT = cannonFireTime(s);
+  if (!c.released && c.t >= CANNON.gather - 1e-9) {
+    c.released = true; c.dur = CANNON.gather + fireT + CANNON.recover; const o = beamOrigin(s, c); c.len = beamLength(o.x, o.y, c.dirX, c.dirY, CANNON.length); emit(s, 'comet_fire', o.x, o.y);
+  }
+  if (!c.released) return;
+  const tf = c.t - CANNON.gather; const due = Math.min(Math.round(fireT / CANNON.pulseEvery), Math.floor(tf / CANNON.pulseEvery + 1e-9) + 1);
+  while (c.pulses < due) { c.pulses++; cometPulse(s, c, Math.min(tf, c.pulses * CANNON.pulseEvery)); }
+  if (before < CANNON.gather + fireT && c.t >= CANNON.gather + fireT) emit(s, 'comet_end', s.player.x, s.player.y);
+}
+function cometPulse(s: GameState, c: Cast, tf: number) {
+  const o = beamOrigin(s, c); const hw = cannonHalfWidth(s, tf), dmg = CANNON.damage * s.mods.sphereDamage * s.mods.formPower; let hits = 0;
+  for (const e of s.enemies) {
+    if (e.hp <= 0) continue;
+    const ex = e.x - o.x, ey = e.y - o.y, along = ex * c.dirX + ey * c.dirY;
+    if (along < -e.radius || along > c.len + e.radius) continue;
+    if (Math.abs(ex * -c.dirY + ey * c.dirX) > hw + e.radius) continue;
+    damageEnemy(s, e, dmg); hits++;
+    if (e.hp > 0 && !isBoss(e.kind)) slideMove(e, c.dirX * CANNON.knockback * 60, c.dirY * CANNON.knockback * 60, 1 / 60);
+  }
+  emit(s, 'comet_pulse', o.x + c.dirX * c.len, o.y + c.dirY * c.len, hits);
 }

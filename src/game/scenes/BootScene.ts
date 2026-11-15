@@ -8,7 +8,8 @@ import { ENEMY_FX_NAMES, enemyFxKey, enemyFxUrl, enemyManifestKey, enemyManifest
 import { BOSS_FX_NAMES, BOSS_KINDS, bossFxKey, bossFxUrl, bossManifestKey, bossManifestUrl, bossSheetKey, bossSheetUrl, type BossManifest } from '../render/bossRenderer';
 import { ENEMY_KINDS } from '../../content/enemies';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
-import { KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiManifests } from '../../assets/kaiAnimation';
+import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
+import { KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
   constructor(private readonly arena: ArenaId = 'gloam') { super({ key: 'BootScene' }); }
   /** Two load phases (starter assets, then the ~100 Kai sheets whose frame sizes come from the manifests): report one combined 0..1 to the loading screen. */
@@ -18,6 +19,8 @@ export class BootScene extends Phaser.Scene {
     STARTER_TEXTURES.forEach(tex => this.load.image(tex.key, tex.path));
     KAI_DIRS.forEach(dir => this.load.json(`kai-manifest-${dir}`, kaiManifestUrl(dir)));
     KAI_DIRS.forEach(dir => this.load.json(`kai-f1-manifest-${dir}`, kaiManifestUrl(dir, 'f1')));
+    KAI_DIRS.forEach(dir => this.load.json(`kai-f2-manifest-${dir}`, kaiManifestUrl(dir, 'f2')));
+    COMET_FX_NAMES.forEach(n => this.load.image(cometFxKey(n), cometFxUrl(n)));
     FORM_FX_NAMES.forEach(n => this.load.image(formFxKey(n), formFxUrl(n)));
     VFX_NAMES.forEach(n => { this.load.image(vfxKey(n, false), vfxUrl(n, false)); this.load.image(vfxKey(n, true), vfxUrl(n, true)); });
     for (let i = 0; i < FLOOR_TILE_COUNT; i++) this.load.image(floorTileKey(i), floorTileUrl(this.arena, i));
@@ -40,6 +43,13 @@ export class BootScene extends Phaser.Scene {
     const f1 = {} as KaiManifests;
     for (const dir of KAI_DIRS) f1[dir] = parseKaiManifest(this.cache.json.get(`kai-f1-manifest-${dir}`), dir, 'f1');
     this.registry.set(KAI_F1_REGISTRY_KEY, f1);
+    const f2 = {} as KaiManifests;
+    for (const dir of KAI_DIRS) f2[dir] = parseKaiManifest(this.cache.json.get(`kai-f2-manifest-${dir}`), dir, 'f2');
+    this.registry.set(KAI_F2_REGISTRY_KEY, f2);
+    for (const dir of KAI_DIRS) for (const clip of KAI_F1_CLIPS) {
+      const m = f2[dir], a = m.animations[clip]!;
+      this.load.spritesheet(kaiTextureKey(dir, clip, 'f2'), kaiSheetUrl(dir, a, 'f2'), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });
+    }
     for (const k of ENEMY_KINDS) { const m = this.cache.json.get(enemyManifestKey(k)) as EnemyManifest; this.load.spritesheet(enemySheetKey(k), enemySheetUrl(k), { frameWidth: m.frame_width, frameHeight: m.frame_height, endFrame: m.frames - 1 }); }
     // arena art (selected arena only): props/decor named by the arena data, rim, corner, ambience and hazard fx
     const man = parsePropManifest(this.cache.json.get(PROPS_KEY(this.arena)));

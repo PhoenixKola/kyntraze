@@ -8,7 +8,7 @@ import { updateAutoWeapon, activateQ } from './WeaponSystem';
 import { updateContactDamage } from './CombatSystem';
 import { collectPickups } from './PickupSystem';
 import { applyUpgrade, createOffer, gainXp } from './UpgradeSystem';
-import { activateForm } from './FormSystem';
+import { activateForm, updateCinema } from './FormSystem';
 import { updateDrive } from './DriveSystem';
 import { pruneDeadEntities } from './EntityRegistry';
 import type { UpgradeId } from '../content/upgrades';
@@ -24,9 +24,10 @@ export class Simulation {
   private fHeld = false;
   private eHeld = false;
   private rHeld = false;
-  constructor(seed: number, arenaId: ArenaId = 'gloam') { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId); }
+  constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked); }
   step(dt: number, input: InputState) {
     const s = this.state; if (s.phase !== 'running') return;
+    if (s.cinema) { updateCinema(s, dt); this.fHeld = input.f; this.qHeld = input.q; this.eHeld = !!input.beam; this.rHeld = !!input.sphere; return; }   // B12: the reveal freezes the whole run (clock, enemies, shots, hazards, cooldowns, i-frames)
     s.time += dt;
     trackAim(s, input);
     movePlayer(s, input, dt);
