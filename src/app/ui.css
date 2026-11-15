@@ -427,3 +427,18 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--amber); out
 .bar-form.form2 i { background: linear-gradient(180deg, #fffbe0, #ffd23a); }
 .bar-form.form2 { border-color: #fff3c4; box-shadow: 0 0 calc(12 * var(--u)) rgba(255, 224, 120, .7); }
 .portrait.is-form2 { box-shadow: 0 0 calc(12 * var(--u)) rgba(255, 224, 120, .75); }
+
+/* B13 Stillfire Apex: silver / ice, quiet (Form II is gold) */
+.bar-form.form3 i { background: linear-gradient(180deg, #f4faff, #9fc4ea); }
+.bar-form.form3 { border-color: #e6f2ff; box-shadow: 0 0 calc(12 * var(--u)) rgba(190, 220, 255, .7); }
+.bar-form.apex-ready { border-color: #e6f2ff; box-shadow: 0 0 calc(12 * var(--u)) rgba(190, 220, 255, .85); animation: form-ready .9s ease-in-out infinite; }
+.portrait.is-form3 { box-shadow: 0 0 calc(12 * var(--u)) rgba(190, 220, 255, .8); }
+.slot-charge { position: absolute; left: 6%; bottom: 7%; height: calc(3 * var(--u)); min-height: 2px; background: linear-gradient(90deg, #cfe6ff, #fff); box-shadow: 0 0 calc(5 * var(--u)) rgba(200, 228, 255, .9); z-index: 2; }
+.hud-slots .slot.active:has(.slot-charge) { border-color: #dcecff; background: radial-gradient(circle at 50% 35%, #2a4562, #0d1621); box-shadow: 0 0 calc(12 * var(--u)) rgba(190, 220, 255, .7); }
+.hud-slots .slot.active:has(.slot-charge) .slot-ico { background: #f2f9ff; } .hud-slots .slot.active:has(.slot-charge) .slot-tag { background: #dcecff; color: #0a1a2c; }
+.form-selector { position: absolute; bottom: calc(92 * var(--u)); left: 50%; transform: translateX(-50%); display: flex; gap: calc(6 * var(--u)); align-items: center; padding: calc(6 * var(--u)) calc(10 * var(--u)); background: rgba(8, 14, 24, .86); border: 1px solid #3c5568; pointer-events: none; z-index: 5; }
+.form-selector .fs-opt { display: flex; align-items: center; gap: calc(5 * var(--u)); padding: calc(3 * var(--u)) calc(8 * var(--u)); font-size: max(8px, calc(11 * var(--u))); font-weight: 800; letter-spacing: .08em; color: #8da3b3; border: 1px solid transparent; }
+.form-selector .fs-opt i { width: calc(8 * var(--u)); height: calc(8 * var(--u)); background: #5d7487; transform: rotate(45deg); }
+.form-selector .fs-opt.f1 i { background: #ff8a3c; } .form-selector .fs-opt.f2 i { background: #ffd23a; } .form-selector .fs-opt.f3 i { background: #cfe6ff; }
+.form-selector .fs-opt.on { color: #fff; border-color: #e6f2ff; box-shadow: 0 0 calc(8 * var(--u)) rgba(190, 220, 255, .6); }
+.form-selector em { font-size: max(7px, calc(9 * var(--u))); font-style: normal; color: #8da3b3; letter-spacing: .08em; }

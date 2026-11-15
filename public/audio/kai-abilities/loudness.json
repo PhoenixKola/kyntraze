@@ -187,5 +187,164 @@
   "rms_dBFS": -6.54,
   "approx_LUFS_integrated": -8.6,
   "clipped_samples": 0
+ },
+ "form3_silence": {
+  "seconds": 1.2,
+  "peak_dBFS": -10.0,
+  "rms_dBFS": -24.82,
+  "approx_LUFS_integrated": -26.7,
+  "clipped_samples": 0,
+  "dc": -9e-05,
+  "centroid_hz": 3458
+ },
+ "form3_omen": {
+  "seconds": 1.4,
+  "peak_dBFS": -14.0,
+  "rms_dBFS": -28.88,
+  "approx_LUFS_integrated": -29.3,
+  "clipped_samples": 0,
+  "dc": 0.0,
+  "centroid_hz": 8438
+ },
+ "form3_reveal": {
+  "seconds": 1.6,
+  "peak_dBFS": -4.0,
+  "rms_dBFS": -19.51,
+  "approx_LUFS_integrated": -20.2,
+  "clipped_samples": 0,
+  "dc": -1e-05,
+  "centroid_hz": 2534
+ },
+ "form3_end": {
+  "seconds": 0.7,
+  "peak_dBFS": -9.0,
+  "rms_dBFS": -25.55,
+  "approx_LUFS_integrated": -25.0,
+  "clipped_samples": 0,
+  "dc": 1e-05,
+  "centroid_hz": 5643
+ },
+ "aura_hover": {
+  "seconds": 2.0,
+  "peak_dBFS": -24.0,
+  "rms_dBFS": -33.77,
+  "approx_LUFS_integrated": -34.8,
+  "clipped_samples": 0,
+  "dc": -0.0,
+  "centroid_hz": 3886,
+  "loop_seam_step": 0.00257,
+  "max_internal_step": 0.00775,
+  "seam_ok": true
+ },
+ "glide": {
+  "seconds": 0.5,
+  "peak_dBFS": -10.0,
+  "rms_dBFS": -25.04,
+  "approx_LUFS_integrated": -22.0,
+  "clipped_samples": 0,
+  "dc": 0.0,
+  "centroid_hz": 5898
+ },
+ "form3_dash": {
+  "seconds": 0.35,
+  "peak_dBFS": -6.0,
+  "rms_dBFS": -21.54,
+  "approx_LUFS_integrated": -19.4,
+  "clipped_samples": 0,
+  "dc": 0.00011,
+  "centroid_hz": 6766
+ },
+ "rift_charge": {
+  "seconds": 1.0,
+  "peak_dBFS": -12.0,
+  "rms_dBFS": -20.63,
+  "approx_LUFS_integrated": -19.4,
+  "clipped_samples": 0,
+  "dc": 0.0,
+  "centroid_hz": 2201,
+  "loop_seam_step": 0.01986,
+  "max_internal_step": 0.069,
+  "seam_ok": true
+ },
+ "rift_blink": {
+  "seconds": 0.28,
+  "peak_dBFS": -6.0,
+  "rms_dBFS": -25.8,
+  "approx_LUFS_integrated": -24.5,
+  "clipped_samples": 0,
+  "dc": 1e-05,
+  "centroid_hz": 4602
+ },
+ "rift_fire": {
+  "seconds": 0.9,
+  "peak_dBFS": -4.0,
+  "rms_dBFS": -21.5,
+  "approx_LUFS_integrated": -21.3,
+  "clipped_samples": 0,
+  "dc": -0.0,
+  "centroid_hz": 6357
+ },
+ "rift_end": {
+  "seconds": 0.55,
+  "peak_dBFS": -9.0,
+  "rms_dBFS": -24.09,
+  "approx_LUFS_integrated": -23.5,
+  "clipped_samples": 0,
+  "dc": -0.0,
+  "centroid_hz": 5533
+ },
+ "reversal_hit_a": {
+  "seconds": 0.14,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -23.97,
+  "approx_LUFS_integrated": -21.7,
+  "clipped_samples": 0,
+  "dc": 0.00027,
+  "centroid_hz": 6009
+ },
+ "reversal_hit_b": {
+  "seconds": 0.14,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -23.94,
+  "approx_LUFS_integrated": -21.3,
+  "clipped_samples": 0,
+  "dc": 0.00026,
+  "centroid_hz": 6978
+ },
+ "reversal_hit_c": {
+  "seconds": 0.14,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -23.42,
+  "approx_LUFS_integrated": -20.4,
+  "clipped_samples": 0,
+  "dc": 0.00029,
+  "centroid_hz": 7146
+ },
+ "reversal_end": {
+  "seconds": 0.9,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -19.45,
+  "approx_LUFS_integrated": -17.3,
+  "clipped_samples": 0,
+  "dc": -0.0,
+  "centroid_hz": 2621
+ },
+ "evasion": {
+  "seconds": 0.4,
+  "peak_dBFS": -7.0,
+  "rms_dBFS": -21.07,
+  "approx_LUFS_integrated": -18.3,
+  "clipped_samples": 0,
+  "dc": -0.00014,
+  "centroid_hz": 3715
+ },
+ "finisher3": {
+  "seconds": 2.2,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -18.0,
+  "approx_LUFS_integrated": -18.0,
+  "clipped_samples": 0,
+  "dc": 0.00029,
+  "centroid_hz": 5218
  }
 }

@@ -1,5 +1,5 @@
 """Per-frame fist anchors for the Beam / Sphere clips, measured on the REAL rig (same FK, parts and slots as the Blender export; numpy parity is checked by the pipeline).
-  python hand_anchors.py <south|north|east|west> <base|f1>      -> prints JSON {clip: [{n:[x,y], f:[x,y]} per frame]}
+  python hand_anchors.py <south|north|east|west> <base|f1|f3>      -> prints JSON {clip: [{n:[x,y], f:[x,y]} per frame]}
 Anchor = centroid of the visible fist art, in exported sprite px RELATIVE to the manifest ground origin (x right, y down), so
 world = hero position + anchor * hero scale, whatever the clip's tight crop is."""
 import json, os, sys
@@ -7,13 +7,15 @@ import numpy as np
 d, form = sys.argv[1], sys.argv[2]
 HERE = os.path.dirname(os.path.abspath(__file__)); KAI = os.path.abspath(os.path.join(HERE, "..", ".."))
 BASE = os.path.join(KAI, "base"); FORM = os.path.join(KAI, "form-i")
+if form == "f3":      # Form III (Stillfire Apex): the hover/levitation rig in form-iii (needs its built config.json for north/east/west)
+    FORM = os.path.join(KAI, "form-iii"); os.environ.update(KAI_FORM="f1", KAI_F3="1", KAI_F3_SCRIPTS=os.path.join(FORM, "scripts"), KAI_PAD_TOP="24", KAI_PAD_LEFT="16" if d == "south" else "0")
 if form == "f1": os.environ["KAI_FORM"] = "f1"
 if d == "south":
-    if form == "f1": os.environ["KAI_ROOT_SOUTH"] = os.path.join(FORM, "south")
+    if form in ("f1", "f3"): os.environ["KAI_ROOT_SOUTH"] = os.path.join(FORM, "south")
     sys.path.insert(0, os.path.join(BASE, "production-south-candidate", "rig")); import anim as a, rig as r
 else:
     os.environ["KAI_DIR"] = d
-    if form == "f1": os.environ["KAI_ROOT"] = FORM
+    if form in ("f1", "f3"): os.environ["KAI_ROOT"] = FORM
     sys.path.insert(0, os.path.join(BASE, "production-other-directions-candidate", "scripts")); import danim as a, drig as r
 imgs = r.load_images()
 def fist_points(ch, slots, side):

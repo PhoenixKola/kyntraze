@@ -67,7 +67,7 @@ x0, x1, y0, y1 = max(0, xs.min() - 2), min(r.CANVAS[0], xs.max() + 3), max(0, ys
 if (x1 - x0) % 2: x0 -= 1
 FW, FH = x1 - x0, y1 - y0; ox, oy = r.ROOT[0] - x0, r.ROOT[1] - y0
 os.makedirs(os.path.join(V5, "sheets"), exist_ok=True); rev = os.path.join(V5, "review"); os.makedirs(rev, exist_ok=True)
-man = {"schema": "kyntraze.anim-manifest/0.1-pilot", "character": "kai", "form": ("form-i" if r.FORM == "f1" else "base"), "direction": "south", "status": "PRODUCTION CANDIDATE - owner approval required",
+man = {"schema": "kyntraze.anim-manifest/0.1-pilot", "character": "kai", "form": ("form-iii" if getattr(r, "F3", False) else ("form-i" if r.FORM == "f1" else "base")), "direction": "south", "status": "PRODUCTION CANDIDATE - owner approval required",
        "source_blend": "rig/kai-south.blend", "frame_width": int(FW), "frame_height": int(FH), "origin_px": [float(ox), float(oy)],
        "origin_normalized": [round(ox / FW, 6), round(oy / FH, 6)],
        "origin_meaning": "ground point midway between the two soles of the approved stance (near sole is 13 px lower = closer to camera)",

@@ -28,10 +28,11 @@ export class ArenaScene extends Phaser.Scene {
   private audio: AbilityAudio | null = null;
   private readonly unlockAudio = () => { void this.audio?.unlock(); };
   private hitstopLeft = 0;
+  private lastPtrX = NaN; private lastPtrY = NaN;
   private lastInput: InputState = { x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false };
   constructor(private readonly bridge: GameBridge, private readonly seed: number, private readonly arena: ArenaId = 'gloam') { super({ key: 'ArenaScene' }); }
   create() {
-    this.simulation = new Simulation(this.seed, this.arena, this.bridge.getUnlocks().cometheart);
+    this.simulation = new Simulation(this.seed, this.arena, this.bridge.getUnlocks().cometheart, !!this.bridge.getUnlocks().stillfire);
     const applyZoom = () => this.cameras.main.setZoom(fitZoom(this.scale.width, this.scale.height));
     applyZoom(); this.scale.on(Phaser.Scale.Events.RESIZE, applyZoom);
     this.createArena();
@@ -47,6 +48,7 @@ export class ArenaScene extends Phaser.Scene {
     // QA-only escape hatch: dev server AND explicit ?qa=1; never a shipping cheat.
     const qs = new URLSearchParams(window.location.search);
     if (import.meta.env.DEV && qs.get('qa') === '1') {
+      if (qs.get('form3') === '1') { const st = this.simulation.state; st.cometUnlocked = true; st.apexUnlocked = true; st.apexGate = 0; st.player.drive = 100; }   // QA / owner route: Cometheart + Stillfire Apex unlocked, no time gate, Drive full (F = tap the selected form, hold F to choose)
       if (qs.get('form2') === '1') { const st = this.simulation.state; st.cometUnlocked = true; st.player.drive = 100; }   // QA / owner route: Cometheart unlocked and Drive full (F awakens it)
       if (qs.get('debug') === 'hit') this.debug = new DebugOverlay(this);
       const enc = qs.get('encounter'); if (enc) startEncounter(this.simulation.state, enc as Parameters<typeof startEncounter>[1]);
@@ -59,6 +61,7 @@ export class ArenaScene extends Phaser.Scene {
     if (this.disposed || !this.simulation) return;
     // Sample action key presses per authoritative simulation tick so 120Hz displays
     // cannot swallow a dash/Q/F press on a frame without a fixed step.
+    { const ptr = this.input.activePointer, w = this.cameras.main.getWorldPoint(ptr.x, ptr.y), pl = this.simulation.state.player, dx = w.x - pl.x, dy = w.y - (pl.y + 6), d = Math.hypot(dx, dy), moved = ptr.x !== this.lastPtrX || ptr.y !== this.lastPtrY || ptr.isDown; this.lastPtrX = ptr.x; this.lastPtrY = ptr.y; this.controller.setPointerAim(d > 14 ? { x: dx / d, y: dy / d } : null, moved); }   // B13: Silver Rift aim
     let simDelta = delta; if (this.hitstopLeft > 0) { this.hitstopLeft -= delta; simDelta = 0; }   // B12: a visual hit-stop is just skipped sim ticks (the sim itself is never slowed or edited)
     this.fixed.tick(simDelta, dt => { this.lastInput = this.controller.read(); this.simulation.step(dt, this.lastInput); });
     const s = this.simulation.state;

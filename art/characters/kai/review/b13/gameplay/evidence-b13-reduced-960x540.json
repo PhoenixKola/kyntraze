@@ -1,0 +1,183 @@
+{
+ "viewport": [
+  960,
+  540
+ ],
+ "arena": "gloam",
+ "reduced": true,
+ "note": "SIMULATED via dev QA route; not human play. swiftshader: normal-speed motion and audio NOT VERIFIED.",
+ "log": {
+  "cinema": {
+   "timeline": [
+    {
+     "n": "01-cinema-stillness",
+     "t": 0.18,
+     "dur": 3.6,
+     "time": 1.78,
+     "form": 0,
+     "to": 3
+    },
+    {
+     "n": "02-cinema-omen",
+     "t": 0.82,
+     "dur": 3.6,
+     "time": 1.78,
+     "form": 0,
+     "to": 3
+    },
+    {
+     "n": "03-cinema-tearing",
+     "t": 1.32,
+     "dur": 3.6,
+     "time": 1.78,
+     "form": 0,
+     "to": 3
+    },
+    {
+     "n": "04-cinema-commit",
+     "t": 1.87,
+     "dur": 3.6,
+     "time": 1.78,
+     "form": 0,
+     "to": 3
+    },
+    {
+     "n": "05-cinema-rise",
+     "t": 2.22,
+     "dur": 3.6,
+     "time": 1.78,
+     "form": 3,
+     "to": 3
+    },
+    {
+     "n": "06-cinema-reveal-pulse",
+     "t": 2.63,
+     "dur": 3.6,
+     "time": 1.78,
+     "form": 3,
+     "to": 3
+    },
+    {
+     "n": "07-cinema-settle",
+     "t": 3.13,
+     "dur": 3.6,
+     "time": 1.78,
+     "form": 3,
+     "to": 3
+    },
+    {
+     "n": "08-cinema-return",
+     "t": 3.55,
+     "dur": 3.6,
+     "time": 1.78,
+     "form": 3,
+     "to": 3
+    }
+   ]
+  },
+  "afterCinema": {
+   "form": 3,
+   "drive": 99.5,
+   "cinema": false,
+   "time": 1.95,
+   "apexSeen": 1
+  },
+  "rift": {
+   "after": {
+    "tier": 2,
+    "blink": null,
+    "dir": [
+     0.769,
+     -0.639
+    ],
+    "hand": {
+     "n": {
+      "x": 1341.94,
+      "y": 768.215
+     },
+     "f": {
+      "x": 1347.82,
+      "y": 768.115
+     },
+     "m": {
+      "x": 1344.88,
+      "y": 768.165
+     }
+    },
+    "fx": null,
+    "cd": 7.85,
+    "damaged": 3
+   },
+   "corner": {
+    "x": 70,
+    "y": 70,
+    "blink": null
+   }
+  },
+  "reversal": {
+   "hit": 7,
+   "cd": 12.77,
+   "x": 1198,
+   "y": 792
+  },
+  "evasion": {
+   "hp": 1000000,
+   "cd": 8.73,
+   "x": 1100,
+   "y": 722
+  },
+  "perf": {
+   "frames": 149,
+   "avgMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "enemies": 36,
+   "note": "software GL (swiftshader), not a real GPU"
+  },
+  "afterBoss": {
+   "phase": "running",
+   "hazards": 0,
+   "shots": 0,
+   "bosses": 1
+  },
+  "errors": []
+ },
+ "shots": [
+  "00-base-idle-drive-full-reduced-960x540.png",
+  "01-cinema-stillness-reduced-960x540.png",
+  "02-cinema-omen-reduced-960x540.png",
+  "03-cinema-tearing-reduced-960x540.png",
+  "04-cinema-commit-reduced-960x540.png",
+  "05-cinema-rise-reduced-960x540.png",
+  "06-cinema-reveal-pulse-reduced-960x540.png",
+  "07-cinema-settle-reduced-960x540.png",
+  "08-cinema-return-reduced-960x540.png",
+  "09-form3-idle-hover-reduced-960x540.png",
+  "10-glide-south-reduced-960x540.png",
+  "11-glide-stop-settle-reduced-960x540.png",
+  "10-glide-north-reduced-960x540.png",
+  "10-glide-east-reduced-960x540.png",
+  "10-glide-west-reduced-960x540.png",
+  "12-dash-vanish-reduced-960x540.png",
+  "13-dash-arrive-reduced-960x540.png",
+  "20-rift-charge-moving-short-reduced-960x540.png",
+  "21-rift-charge-full-diagonal-reduced-960x540.png",
+  "22-rift-release-blink-reduced-960x540.png",
+  "23-rift-aim-sw-reduced-960x540.png",
+  "23-rift-aim-nw-reduced-960x540.png",
+  "23-rift-aim-se-reduced-960x540.png",
+  "24-rift-corner-reduced-960x540.png",
+  "30-reversal-before-reduced-960x540.png",
+  "31-reversal-during-a-reduced-960x540.png",
+  "32-reversal-during-b-reduced-960x540.png",
+  "33-reversal-finish-flash-reduced-960x540.png",
+  "34-reversal-after-reduced-960x540.png",
+  "40-evasion-ghost-reduced-960x540.png",
+  "50-crowd-glide-reduced-960x540.png",
+  "51-boss-form3-reduced-960x540.png",
+  "52-finisher-a-reduced-960x540.png",
+  "53-finisher-b-reduced-960x540.png",
+  "54-finisher-c-reduced-960x540.png"
+ ],
+ "consoleErrors": []
+}

@@ -1,6 +1,6 @@
 /** Optional controller support: pure mapping, deadzone, edge and repeat logic on top of the browser Gamepad API (no Phaser plugin, no dependency).
  *  Layout (Xbox names, browser 'standard' mapping): Left stick / D-pad move (8 directions) | A dash | X Q impact | Y F form | RB or RT E beam | LB or LT R sphere | START pause.
- *  Menus: D-pad / Left stick move focus | A confirm | B back / resume | START confirm on title, hero select and results. Right stick is reserved (unused). */
+ *  Menus: D-pad / Left stick move focus | A confirm | B back / resume | START confirm on title, hero select and results. Right stick (B13): free 360-degree aim for Silver Rift in Form III (hold RB / RT to charge, release to fire); hold Y to open the form selector when several forms are ready. */
 export interface PadButtonLike { pressed: boolean; value: number }
 export interface PadLike { index: number; connected: boolean; mapping: string; id?: string; axes: readonly number[]; buttons: readonly PadButtonLike[] }
 export type PadButton = 'A' | 'B' | 'X' | 'Y' | 'LB' | 'RB' | 'LT' | 'RT' | 'BACK' | 'START' | 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
@@ -20,7 +20,8 @@ export const CONTROLLER_LAYOUT: readonly { action: string; keys: string; pad: st
   { action: 'Impact (Q)', keys: 'Q', pad: 'X' },
   { action: 'Fracture Lance (beam)', keys: 'E', pad: 'RB or RT' },
   { action: 'Nova Bloom (sphere)', keys: 'R', pad: 'LB or LT' },
-  { action: 'Flarebound form (full Drive after the Warden: Cometheart)', keys: 'F', pad: 'Y' },
+  { action: 'Transform: Flarebound / Cometheart / Stillfire Apex (tap = selected form, hold = choose)', keys: 'F (hold to choose)', pad: 'Y (hold to choose)' },
+  { action: 'Silver Rift aim (Form III)', keys: 'MOUSE', pad: 'RIGHT STICK' },
   { action: 'Pause / resume', keys: 'ESC', pad: 'START' },
   { action: 'Menus: select / back', keys: 'MOUSE / TAB / ENTER', pad: 'D-PAD + A / B' },
 ];
@@ -37,7 +38,8 @@ export function snap8(x: number, y: number): { x: number; y: number } {
 }
 
 const held = (p: PadLike, name: PadButton) => { const b = p.buttons[BUTTON_INDEX[name]]; return !!b && (b.pressed || b.value > 0.5); };
-export interface PadReading { move: { x: number; y: number }; held: Set<PadButton>; dirs: Set<NavDir> }
+export interface PadReading { move: { x: number; y: number }; /** B13: right stick, radial deadzone, NOT snapped to 8 directions (Silver Rift aims freely) */ aim: { x: number; y: number }; held: Set<PadButton>; dirs: Set<NavDir> }
+export const AIM_DEADZONE = 0.3;
 /** One controller -> movement vector (stick, else D-pad), held buttons, and the menu directions currently pushed. */
 export function readPad(p: PadLike): PadReading {
   const h = new Set<PadButton>(); for (const n of Object.keys(BUTTON_INDEX) as PadButton[]) if (held(p, n)) h.add(n);
@@ -50,11 +52,12 @@ export function readPad(p: PadLike): PadReading {
   if (h.has('DOWN') || (mag > NAV_THRESHOLD && raw.y > Math.abs(raw.x) * 0.8)) dirs.add('DOWN');
   if (h.has('LEFT') || (mag > NAV_THRESHOLD && raw.x < -Math.abs(raw.y) * 0.8)) dirs.add('LEFT');
   if (h.has('RIGHT') || (mag > NAV_THRESHOLD && raw.x > Math.abs(raw.y) * 0.8)) dirs.add('RIGHT');
-  return { move, held: h, dirs };
+  const aim = applyDeadzone(p.axes[2] ?? 0, p.axes[3] ?? 0, AIM_DEADZONE);
+  return { move, aim, held: h, dirs };
 }
 
 export interface PadSample {
-  connected: boolean; id: string | null; move: { x: number; y: number }; held: ReadonlySet<PadButton>;
+  connected: boolean; id: string | null; move: { x: number; y: number }; aim: { x: number; y: number }; held: ReadonlySet<PadButton>;
   /** Buttons that went down since the previous sample (edge, one per press). */
   pressed: ReadonlySet<PadButton>;
   /** Menu directions: fire on push, then repeat after a delay (stick repeat). */
@@ -62,7 +65,7 @@ export interface PadSample {
   /** This sample is the first one after a controller was (re)connected / lost. */
   gained: boolean; lost: boolean;
 }
-const IDLE: PadSample = { connected: false, id: null, move: { x: 0, y: 0 }, held: new Set(), pressed: new Set(), navPressed: new Set(), gained: false, lost: false };
+const IDLE: PadSample = { connected: false, id: null, move: { x: 0, y: 0 }, aim: { x: 0, y: 0 }, held: new Set(), pressed: new Set(), navPressed: new Set(), gained: false, lost: false };
 
 /** Stateful sampler: call once per frame / tick. Picks the first connected pad (a 'standard' mapped pad is preferred) so a reconnect on another index still works. */
 export class PadTracker {
@@ -78,7 +81,7 @@ export class PadTracker {
     if (!pad) { const lost = this.was; this.was = false; this.prev.clear(); this.dirSince.clear(); this.dirNext.clear(); return lost ? { ...IDLE, lost: true, id: this.lastId } : IDLE; }
     const r = readPad(pad); const pressed = new Set<PadButton>(); for (const b of r.held) if (!this.prev.has(b)) pressed.add(b);
     const gained = !this.was; this.was = true; this.lastId = pad.id ?? `pad-${pad.index}`;
-    if (gained) { /* do not treat buttons that are already down at connect time as presses */ this.prev = new Set(r.held); return { connected: true, id: this.lastId, move: r.move, held: r.held, pressed: new Set(), navPressed: new Set(), gained: true, lost: false }; }
+    if (gained) { /* do not treat buttons that are already down at connect time as presses */ this.prev = new Set(r.held); return { connected: true, id: this.lastId, move: r.move, aim: r.aim, held: r.held, pressed: new Set(), navPressed: new Set(), gained: true, lost: false }; }
     this.prev = new Set(r.held);
     const nav = new Set<NavDir>();
     for (const d of ['UP', 'DOWN', 'LEFT', 'RIGHT'] as NavDir[]) {
@@ -86,7 +89,7 @@ export class PadTracker {
       if (!this.dirSince.has(d)) { this.dirSince.set(d, nowSeconds); this.dirNext.set(d, nowSeconds + NAV_REPEAT_DELAY); nav.add(d); }
       else if (nowSeconds >= (this.dirNext.get(d) ?? Infinity)) { this.dirNext.set(d, nowSeconds + NAV_REPEAT_RATE); nav.add(d); }
     }
-    return { connected: true, id: this.lastId, move: r.move, held: r.held, pressed, navPressed: nav, gained: false, lost: false };
+    return { connected: true, id: this.lastId, move: r.move, aim: r.aim, held: r.held, pressed, navPressed: nav, gained: false, lost: false };
   }
   reset() { this.prev.clear(); this.dirSince.clear(); this.dirNext.clear(); this.was = false; }
 }

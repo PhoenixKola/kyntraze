@@ -46,6 +46,9 @@ def build(d):
     S = specs.SPEC[d]; pdir = os.path.join(ROOT_DIR, d, "parts"); rx, ry = S["root"]; plist = specs.parts_for(d)
     info = {}; parts = []
     for p in plist:
+        if "like" in p:      # Form III variant: identical canvas to the intact base part (padded), so it takes that part's anchors
+            q = {k: v for k, v in info[p["like"]][0].items() if k not in ("id", "img", "slot")}; q.update(id=p["id"], img=p["img"], bone=p["bone"]); q["slot"] = p["slot"]
+            parts.append(q); info[p["id"]] = (q, info[p["like"]][1]); continue
         a, t, B, x0, x1 = mask(os.path.join(pdir, p["img"]))
         q = dict(id=p["id"], img=p["img"], bone=p["bone"]); q.update(anchors(p["kind"], a, t, B, x0, x1, p.get("point")))
         if "slot" in p: q["slot"] = p["slot"]

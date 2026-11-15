@@ -7,6 +7,8 @@ import { BEAM_MUZZLE, SPHERE_RELEASE, PUNCH_FIST } from '../content/handAnchors'
 import { CANNON, CARRY, DRAGON } from '../content/cometheart';
 import { isBoss } from '../content/enemies';
 import { KAI_GROUND_DY, KAI_SCALE } from '../assets/kaiAnimation';
+import { RIFT, REVERSAL } from '../content/stillfire';
+import { startRift, startReversal, updateRift, updateReversal, trackFreeAim } from './ApexSystem';
 
 const EVENT_CAP = 24;
 function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number) {
@@ -14,15 +16,19 @@ function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: nu
   if (s.abilityEvents.length > EVENT_CAP) s.abilityEvents.splice(0, s.abilityEvents.length - EVENT_CAP);
 }
 /** Seconds into the cast at which the ability is released (beam fires / sphere is thrown). */
-export const releaseTime = (kind: Cast['kind']) => (kind === 'beam' ? BEAM.charge : kind === 'sphere' ? SPHERE.gather : kind === 'dragon' ? DRAGON.windup : CANNON.gather);
-export const castDuration = (kind: Cast['kind']) => (kind === 'beam' ? BEAM.charge + BEAM.fire + BEAM.recover : kind === 'sphere' ? SPHERE.gather + SPHERE.recover : kind === 'dragon' ? DRAGON.windup + DRAGON.lunge + DRAGON.recover : CANNON.gather + CANNON.fire + CANNON.recover);
-const FORM_KEY = ['base', 'f1', 'f2'] as const;
+export const releaseTime = (kind: Cast['kind']) => (kind === 'rift' ? RIFT.minCharge : kind === 'reversal' ? REVERSAL.lead : kind === 'beam' ? BEAM.charge : kind === 'sphere' ? SPHERE.gather : kind === 'dragon' ? DRAGON.windup : CANNON.gather);
+export const castDuration = (kind: Cast['kind']) => (kind === 'rift' ? RIFT.maxCharge + RIFT.fire[2] + RIFT.recover : kind === 'reversal' ? REVERSAL.lead + REVERSAL.maxTargets * REVERSAL.hop + 0.06 + REVERSAL.recover : kind === 'beam' ? BEAM.charge + BEAM.fire + BEAM.recover : kind === 'sphere' ? SPHERE.gather + SPHERE.recover : kind === 'dragon' ? DRAGON.windup + DRAGON.lunge + DRAGON.recover : CANNON.gather + CANNON.fire + CANNON.recover);
+const FORM_KEY = ['base', 'f1', 'f2', 'f3'] as const;
+/** Anchor table lookup that falls back to Form II until the Form III anchors exist for a table/facing. */
+const anchor = <T extends Record<string, Record<Face, { x: number; y: number }>>>(t: T, form: number, face: Face) => ((t as Record<string, Record<Face, { x: number; y: number }> | undefined>)[FORM_KEY[form]] ?? t.f2)[face];
 const BEAM_PULSES = Math.round(BEAM.fire / BEAM.pulseEvery);
 const BEAM_PULSES_MAX = BEAM_PULSES + Math.round(BEAM.recover / BEAM.pulseEvery);
 
 /** Movement scale while casting (1 when free). */
 export function castMoveScale(s: GameState): number {
   const c = s.cast; if (!c) return 1;
+  if (c.kind === 'rift') return !c.released ? RIFT.moveScaleCharge : (c.rt ?? 0) < RIFT.fire[c.tier ?? 0] ? RIFT.moveScaleFire : RIFT.moveScaleRecover;
+  if (c.kind === 'reversal') return REVERSAL.moveScale;
   if (c.kind === 'dragon') return c.t < DRAGON.windup ? DRAGON.moveScaleWindup : c.t < DRAGON.windup + DRAGON.lunge ? 0 : DRAGON.moveScaleRecover;
   if (c.kind === 'comet') return c.t < CANNON.gather ? CANNON.moveScaleGather : c.t < c.dur - CANNON.recover ? CANNON.moveScaleFire : CANNON.moveScaleRecover;
   if (c.kind === 'beam') return c.t < BEAM.charge ? BEAM.moveScaleCharge : c.t < BEAM.charge + BEAM.fire ? BEAM.moveScaleFire : BEAM.moveScaleRecover;
@@ -31,6 +37,7 @@ export function castMoveScale(s: GameState): number {
 
 /** Remember the facing from real movement input; it is the aim for both abilities. */
 export function trackAim(s: GameState, input: InputState) {
+  trackFreeAim(s, input.aimX, input.aimY, input.aimSrc);
   const d = normalize(input.x, input.y); if (d.x !== 0 || d.y !== 0) { s.player.aimX = d.x; s.player.aimY = d.y; }
 }
 
@@ -47,11 +54,11 @@ export function clampToFace(dx: number, dy: number, face: Face, max: number) {
   if (Math.abs(a) <= max) return n;
   const t = Math.sign(a) * max; const c = Math.cos(t), s2 = Math.sin(t); return { x: ax * c - ay * s2, y: ax * s2 + ay * c };
 }
-export const punchOrigin = (s: GameState, c: Cast) => worldPoint(s, PUNCH_FIST[FORM_KEY[c.form]][c.face]);
+export const punchOrigin = (s: GameState, c: Cast) => worldPoint(s, anchor(PUNCH_FIST, c.form, c.face));
 const worldPoint = (s: GameState, pt: { x: number; y: number }) => ({ x: s.player.x + pt.x * KAI_SCALE, y: s.player.y + KAI_GROUND_DY + pt.y * KAI_SCALE });
 /** Where the two fists meet at release, in world px: the sim lane and the thrown sphere start here (table generated from the exported sprite anchors). */
-export const beamOrigin = (s: GameState, c: Cast) => worldPoint(s, BEAM_MUZZLE[FORM_KEY[c.form]][c.face]);
-export const sphereOrigin = (s: GameState, c: Cast) => worldPoint(s, SPHERE_RELEASE[FORM_KEY[c.form]][c.face]);
+export const beamOrigin = (s: GameState, c: Cast) => worldPoint(s, anchor(BEAM_MUZZLE, c.form, c.face));
+export const sphereOrigin = (s: GameState, c: Cast) => worldPoint(s, anchor(SPHERE_RELEASE, c.form, c.face));
 
 function pickAim(s: GameState, range: number = BEAM.length, cosLimit: number = BEAM.aimAssistCos): { x: number; y: number } {
   const p = s.player; const base = normalize(p.aimX, p.aimY);
@@ -83,6 +90,7 @@ function pickSphereTarget(s: GameState): { x: number; y: number } {
 export function startAbility(s: GameState, key: 'beam' | 'sphere'): boolean {
   const p = s.player;
   if (s.phase !== 'running' || s.cinema || s.cast || p.dashRemaining > 0 || p.hp <= 0) return false;
+  if (p.form === 3) return key === 'beam' ? startRift(s) : startReversal(s);   // B13: Silver Rift / Instinct Reversal own E / R in Stillfire Apex
   // B12: in Cometheart the E / R keys fire Dragonfang Rush / Cometbreaker Cannon (own cooldowns); Base / Flarebound keep Fracture Lance / Nova Bloom untouched
   const kind: Cast['kind'] = p.form === 2 ? (key === 'beam' ? 'dragon' : 'comet') : key;
   if (kind === 'dragon' ? p.dragonCooldown > 0 : kind === 'comet' ? p.cometCooldown > 0 : kind === 'beam' ? p.beamCooldown > 0 : p.sphereCooldown > 0) return false;
@@ -99,7 +107,8 @@ export function startAbility(s: GameState, key: 'beam' | 'sphere'): boolean {
 
 /** End the cast now (dash, or a hit before release). The cooldown stays spent. */
 export function cancelCast(s: GameState) {
-  if (!s.cast) return; emit(s, 'cast_cancel', s.player.x, s.player.y); s.cast = null;
+  if (!s.cast) return; if (s.cast.kind === 'rift' && !s.cast.released) s.player.riftCooldown = Math.max(s.player.riftCooldown, RIFT.cancelCooldown * s.mods.beamCd);   // a cancelled charge is never free
+  emit(s, 'cast_cancel', s.player.x, s.player.y); s.cast = null;
 }
 /** A hit interrupts only the wind-up; once released the attack always completes. */
 export function interruptOnHit(s: GameState) { if (s.cast && !s.cast.released) cancelCast(s); }
@@ -147,7 +156,7 @@ function echoBurst(s: GameState, ec: GameState['echoes'][number]) {
 
 export function updateAbilities(s: GameState, dt: number) {
   const p = s.player;
-  p.beamCooldown = Math.max(0, p.beamCooldown - dt); p.sphereCooldown = Math.max(0, p.sphereCooldown - dt); p.dragonCooldown = Math.max(0, p.dragonCooldown - dt); p.cometCooldown = Math.max(0, p.cometCooldown - dt);
+  p.beamCooldown = Math.max(0, p.beamCooldown - dt); p.sphereCooldown = Math.max(0, p.sphereCooldown - dt); p.dragonCooldown = Math.max(0, p.dragonCooldown - dt); p.cometCooldown = Math.max(0, p.cometCooldown - dt); p.riftCooldown = Math.max(0, p.riftCooldown - dt); p.reversalCooldown = Math.max(0, p.reversalCooldown - dt); p.evadeCooldown = Math.max(0, p.evadeCooldown - dt);
   for (const b of s.blasts) b.ttl -= dt;
   s.blasts = s.blasts.filter(b => b.ttl > 0);
   if (s.echoes.length) { for (const ec of s.echoes) ec.t -= dt; const due = s.echoes.filter(ec => ec.t <= 0); s.echoes = s.echoes.filter(ec => ec.t > 0); for (const ec of due) echoBurst(s, ec); }
@@ -155,6 +164,8 @@ export function updateAbilities(s: GameState, dt: number) {
   if (sh) { sh.t += dt; if (sh.t >= SPHERE.flight) { s.sphere = null; detonate(s, sh); } }
   const c = s.cast; if (!c) return;
   const before = c.t; c.t += dt;
+  if (c.kind === 'rift') { updateRift(s, c, dt); if (c.released && c.t >= c.dur - 1e-9) s.cast = null; return; }
+  if (c.kind === 'reversal') { updateReversal(s, c); if (c.t >= c.dur - 1e-9) s.cast = null; return; }
   if (c.kind === 'dragon') updateDragon(s, c, dt); else if (c.kind === 'comet') updateComet(s, c, before);
   else if (c.kind === 'beam') {
     if (!c.released && c.t >= BEAM.charge - 1e-9) {

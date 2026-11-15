@@ -1,0 +1,67 @@
+{
+ "torso_f3": {
+  "sheet": "source/east-torn.png",
+  "box": [
+   72,
+   112,
+   580,
+   840
+  ],
+  "scale": 14.0,
+  "native": [
+   39,
+   55
+  ],
+  "align": [
+   0.6473569876900797,
+   -3,
+   -6,
+   3,
+   6
+  ]
+ },
+ "sleeve_a": {
+  "sheet": "source/east-torn.png",
+  "box": [
+   730,
+   122,
+   1068,
+   730
+  ],
+  "scale": 14.0,
+  "native": [
+   27,
+   46
+  ],
+  "assigned": "upper_arm_n",
+  "align": [
+   0.5696969696969697,
+   -2,
+   -2,
+   2,
+   2
+  ]
+ },
+ "sleeve_b": {
+  "sheet": "source/east-torn.png",
+  "box": [
+   1224,
+   128,
+   1556,
+   720
+  ],
+  "scale": 14.0,
+  "native": [
+   26,
+   45
+  ],
+  "assigned": "upper_arm_f",
+  "align": [
+   0.5297157622739018,
+   -2,
+   -5,
+   2,
+   5
+  ]
+ }
+}

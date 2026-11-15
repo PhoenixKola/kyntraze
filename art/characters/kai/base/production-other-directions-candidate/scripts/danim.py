@@ -221,6 +221,19 @@ CLIPS += danim_form.CLIPS
 import danim_b05  # noqa: E402  (B05: Beam + Sphere signature abilities, base and Form I)
 CLIPS += danim_b05.CLIPS
 
+if r.F3:        # Form III (Stillfire Apex): levitation layer over the Form II poses (form-iii/scripts/hover3.py); every clip name and event the runtime knows stays
+    sys.path.insert(0, os.environ["KAI_F3_SCRIPTS"]); import hover3
+    _idle_raw = idle(); _run_raw = run()["frames"]; _punch_raw = punch(); _ctx = hover3.Ctx(D, SX if D in ("east", "west") else 0, _idle_raw["frames"])
+    def _wrap(fn):
+        def w():
+            c = fn(); nm = c["name"]
+            if nm == "Transform": return hover3.transform3(c, _ctx)
+            if nm == "Sphere": return hover3.sphere3(_ctx, _punch_raw)
+            c = hover3.hoverize(nm, c, _ctx, _run_raw)
+            return hover3.beam_events(c) if nm == "Beam" else c
+        return w
+    CLIPS = [_wrap(f) for f in CLIPS] + [lambda: hover3.idle_special(_ctx, _idle_raw)]
+
 def slots_of(p):
     s = {f"hand_{s}": hand_slot(p, s) for s in "nf"}; s["layer"] = p.get("layer", 0)
     if r.FORM == "f1": s["form"] = p.get("form_slot", "f1")

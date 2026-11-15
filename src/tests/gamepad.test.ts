@@ -81,5 +81,5 @@ describe('unified InputController: keyboard + controller, one path', () => {
     const used = make([pad(), pad({ down: ['A'] }), null, null]); for (let k = 0; k < 4; k++) { used.c.read(); used.next(); } expect(used.lost()).toBe(1);
     const idle = make([pad(), pad(), null, null]); for (let k = 0; k < 4; k++) { idle.c.read(); idle.next(); } expect(idle.lost()).toBe(0);
   });
-  it('without any controller the input is the unchanged keyboard-only shape', () => { const { c } = make([null]); expect(c.read()).toEqual({ x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false }); });
+  it('without any controller the input is the unchanged keyboard-only shape', () => { const { c } = make([null]); expect(c.read()).toEqual({ x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false, beamHeld: false, fHeld: false }); });
 });

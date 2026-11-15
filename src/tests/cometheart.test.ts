@@ -57,8 +57,8 @@ describe('unlock milestone + save', () => {
     damageEnemy(s, w, 1e9); expect(s.cometUnlocked).toBe(true); expect(s.cometUnlockedNow).toBe(true); expect(s.player.drive).toBe(100); expect(s.announce?.id).toBe('cometheart'); void sim;
   });
   it('older saves migrate to "locked"; a stored unlock survives a round trip and junk is ignored', () => {
-    expect(migrateSave({ version: 1 }).unlocks).toEqual({ cometheart: false }); expect(migrateSave(null).unlocks).toEqual({ cometheart: false });
-    expect(migrateSave(JSON.parse(JSON.stringify({ unlocks: { cometheart: true } }))).unlocks).toEqual({ cometheart: true }); expect(migrateSave({ unlocks: { cometheart: 'yes' } }).unlocks).toEqual({ cometheart: false });
+    expect(migrateSave({ version: 1 }).unlocks).toEqual({ cometheart: false, stillfire: false }); expect(migrateSave(null).unlocks).toEqual({ cometheart: false, stillfire: false });
+    expect(migrateSave(JSON.parse(JSON.stringify({ unlocks: { cometheart: true } }))).unlocks).toEqual({ cometheart: true, stillfire: false }); expect(migrateSave({ unlocks: { cometheart: 'yes' } }).unlocks).toEqual({ cometheart: false, stillfire: false });
   });
 });
 

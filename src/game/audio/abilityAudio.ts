@@ -8,7 +8,9 @@ export interface CtxLike { state: string; currentTime: number; destination: unkn
 export const ABILITY_SOUNDS = ['beam_charge', 'beam_charge_f1', 'beam_fire', 'beam_fire_f1', 'beam_pulse_0', 'beam_pulse_1', 'beam_pulse_2', 'beam_end', 'cast_cancel',
   'sphere_gather', 'sphere_gather_f1', 'sphere_throw', 'sphere_flight', 'sphere_burst', 'sphere_burst_f1',
   /** B12 Form II (art/characters/kai/abilities/audio/synth_b12.py) */
-  'form2_charge', 'form2_break', 'form2_commit', 'form2_end', 'aura_crackle', 'dragon_windup', 'dragon_launch', 'dragon_hit', 'comet_gather', 'comet_fire', 'comet_end', 'finisher'] as const;
+  'form2_charge', 'form2_break', 'form2_commit', 'form2_end', 'aura_crackle', 'dragon_windup', 'dragon_launch', 'dragon_hit', 'comet_gather', 'comet_fire', 'comet_end', 'finisher',
+  /** B13 Form III (art/characters/kai/abilities/audio/synth_b13.py) */
+  'form3_silence', 'form3_omen', 'form3_reveal', 'form3_end', 'aura_hover', 'glide', 'form3_dash', 'rift_charge', 'rift_blink', 'rift_fire', 'rift_end', 'reversal_hit_a', 'reversal_hit_b', 'reversal_hit_c', 'reversal_end', 'evasion', 'finisher3'] as const;
 export type AbilitySound = (typeof ABILITY_SOUNDS)[number];
 export const soundUrl = (n: string) => `/audio/kai-abilities/${n}.wav`;
 /** B07 enemy sounds (original synthesis, art/enemies/audio/synth_b07.py). Quieter than Kai's, distance-attenuated, voice-capped so a crowd cannot bury the ability mix. */
@@ -44,6 +46,7 @@ export class AbilityAudio {
   private muted = false;
   private loading: Promise<void> | null = null;
   private lastPhase = '';
+  private nextHover = 0;
   /** QA: every sound that actually started, in order. */
   readonly started: string[] = [];
   constructor(private readonly ctx: CtxLike, private readonly fetchBuffer: (url: string) => Promise<ArrayBuffer>) {}
@@ -87,7 +90,7 @@ export class AbilityAudio {
   stopAll(fadeS = 0.04) { for (const v of [...this.voices]) this.stopVoice(v, fadeS); }
 
   /** Apply one sim event. Sounds follow the simulation (charge / release / pulse / burst ticks), never display frame callbacks. */
-  handle(ev: AbilityEvent, form: 0 | 1 | 2) {
+  handle(ev: AbilityEvent, form: 0 | 1 | 2 | 3) {
     const f1 = form >= 1 ? '_f1' : '';
     switch (ev.kind) {
       // B12 Form II: every voice is started and stopped by a sim event, so the sound follows the timeline exactly (and cancel / death / pause silence it through the shared slots)
@@ -102,6 +105,20 @@ export class AbilityAudio {
       case 'comet_fire': this.stopSlot('charge', 0.03); this.play('comet_fire', 'fire'); break;
       case 'comet_end': this.stopSlot('fire', 0.14); this.play('comet_end', 'misc', 0.8); break;
       case 'finisher': this.play('finisher', 'burst'); break;
+      // B13 Form III: quiet and precise; the same slots, so charge / hover / beam voices can never outlive their sim state
+      case 'form3_start': this.stopSlot('aura', 0.05); this.play('form3_silence', 'charge', ev.n ? 1 : 0.7, ev.n ? 1 : 1.4); break;
+      case 'form3_omen': this.play('form3_omen', 'misc', 0.8); break;
+      case 'form3_commit': this.stopSlot('charge', 0.05); this.play('form3_reveal', 'fire', ev.n === 0 ? 0.9 : 1, 1); break;
+      case 'form3_end': this.stopSlot('aura', 0.12); this.stopSlot('charge', 0.04); this.play('form3_end', 'misc', 0.8); break;
+      case 'form3_dash': this.play('form3_dash', 'misc', 0.9, 0.95 + Math.random() * 0.1); break;
+      case 'rift_charge': this.play('rift_charge', 'charge', 0.85, 0.68); break;
+      case 'rift_blink': this.play('rift_blink', 'misc', 0.9); break;
+      case 'rift_fire': this.stopSlot('charge', 0.03); this.play('rift_fire', 'fire', 0.7 + 0.15 * (ev.n ?? 0), 1.1 - 0.05 * (ev.n ?? 0)); break;
+      case 'rift_end': this.stopSlot('fire', 0.1); this.play('rift_end', 'misc', 0.7); break;
+      case 'reversal_hit': this.play((['reversal_hit_a', 'reversal_hit_b', 'reversal_hit_c'] as const)[(ev.n ?? 0) % 3], 'pulse', 0.9, 1 + 0.06 * (ev.n ?? 0)); break;
+      case 'reversal_end': this.play('reversal_end', 'burst', ev.n ? 0.9 : 0.4); break;
+      case 'evasion': this.play('evasion', 'misc', 1); break;
+      case 'finisher3': this.stopSlot('aura', 0.05); this.play('finisher3', 'burst'); break;
       case 'beam_charge': this.play(`beam_charge${f1}` as AbilitySound, 'charge'); break;
       case 'beam_fire': this.stopSlot('charge', 0.04); this.play(`beam_fire${f1}` as AbilitySound, 'fire'); break;
       case 'beam_pulse': this.play(`beam_pulse_${this.pulseCycle++ % 3}` as AbilitySound, 'pulse', ev.n ? 1 : 0.45, 0.97 + Math.random() * 0.06); break;
@@ -176,6 +193,7 @@ export class AbilityAudio {
       this.lastPhase = s.phase;
     }
     if (s.phase === 'running') this.ambient(s.arenaId, s.time);
+    if (s.phase === 'running' && s.player.form === 3 && !s.cinema && s.time >= this.nextHover) { this.nextHover = s.time + 1.9; this.play('aura_hover', 'aura', 0.55); }   // B13: a very soft sustained hover tone, re-armed from the sim clock so pause / death / form end silence it
     if (s.phase === 'running' && s.player.form === 2 && !s.cinema && s.time >= this.nextCrackle) { this.nextCrackle = s.time + 2.4 + Math.random() * 3; this.play('aura_crackle', 'aura', 0.55); }   // a quiet low crackle while Form II burns
     for (const ev of s.abilityEvents) {
       if (ev.id <= this.lastEvent) continue; this.lastEvent = ev.id;
@@ -186,7 +204,7 @@ export class AbilityAudio {
       if (s.phase === 'running') this.handleEnemy(ev, s.player.x, s.player.y);
     }
   }
-  dispose() { this.nextAmbient = 0; this.nextCrackle = 0; this.lastEvent = 0; this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.stopAll(0.01); try { this.master?.disconnect(); } catch { /* ignore */ } this.master = null; }
+  dispose() { this.nextHover = 0; this.nextAmbient = 0; this.nextCrackle = 0; this.lastEvent = 0; this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.stopAll(0.01); try { this.master?.disconnect(); } catch { /* ignore */ } this.master = null; }
 }
 
 let shared: AbilityAudio | null = null;

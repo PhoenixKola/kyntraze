@@ -1,0 +1,67 @@
+{
+ "torso_f3": {
+  "sheet": "source/west-torn.png",
+  "box": [
+   88,
+   114,
+   560,
+   822
+  ],
+  "scale": 14.0,
+  "native": [
+   36,
+   53
+  ],
+  "align": [
+   0.6804835924006909,
+   -2,
+   -8,
+   2,
+   8
+  ]
+ },
+ "sleeve_a": {
+  "sheet": "source/west-torn.png",
+  "box": [
+   728,
+   168,
+   1066,
+   710
+  ],
+  "scale": 14.0,
+  "native": [
+   27,
+   41
+  ],
+  "assigned": "upper_arm_n",
+  "align": [
+   0.7442922374429224,
+   -1,
+   -2,
+   1,
+   2
+  ]
+ },
+ "sleeve_b": {
+  "sheet": "source/west-torn.png",
+  "box": [
+   1240,
+   168,
+   1530,
+   690
+  ],
+  "scale": 14.0,
+  "native": [
+   23,
+   40
+  ],
+  "assigned": "upper_arm_f",
+  "align": [
+   0.6695652173913044,
+   -2,
+   -1,
+   2,
+   1
+  ]
+ }
+}

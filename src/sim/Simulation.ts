@@ -8,7 +8,7 @@ import { updateAutoWeapon, activateQ } from './WeaponSystem';
 import { updateContactDamage } from './CombatSystem';
 import { collectPickups } from './PickupSystem';
 import { applyUpgrade, createOffer, gainXp } from './UpgradeSystem';
-import { activateForm, updateCinema } from './FormSystem';
+import { formInput, updateCinema } from './FormSystem';
 import { updateDrive } from './DriveSystem';
 import { pruneDeadEntities } from './EntityRegistry';
 import type { UpgradeId } from '../content/upgrades';
@@ -24,18 +24,18 @@ export class Simulation {
   private fHeld = false;
   private eHeld = false;
   private rHeld = false;
-  constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked); }
+  constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false, apexUnlocked = false) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked, apexUnlocked); }
   step(dt: number, input: InputState) {
     const s = this.state; if (s.phase !== 'running') return;
-    if (s.cinema) { updateCinema(s, dt); this.fHeld = input.f; this.qHeld = input.q; this.eHeld = !!input.beam; this.rHeld = !!input.sphere; return; }   // B12: the reveal freezes the whole run (clock, enemies, shots, hazards, cooldowns, i-frames)
+    if (s.cinema) { updateCinema(s, dt); this.fHeld = !!(input.f || input.fHeld); this.qHeld = input.q; this.eHeld = !!input.beam; this.rHeld = !!input.sphere; return; }   // B12: the reveal freezes the whole run (clock, enemies, shots, hazards, cooldowns, i-frames)
     s.time += dt;
     trackAim(s, input);
     movePlayer(s, input, dt);
     if (input.q && !this.qHeld) activateQ(s);
-    if (input.f && !this.fHeld) activateForm(s);
+    const fDown = !!(input.f || input.fHeld); formInput(s, fDown, this.fHeld, dt);   // the press edge counts too, so a tap shorter than one tick is never lost
     if (input.beam && !this.eHeld) startAbility(s, 'beam');
     if (input.sphere && !this.rHeld) startAbility(s, 'sphere');
-    this.qHeld = input.q; this.fHeld = input.f; this.eHeld = !!input.beam; this.rHeld = !!input.sphere;
+    this.qHeld = input.q; this.fHeld = fDown; this.eHeld = !!input.beam || !!input.beamHeld; this.rHeld = !!input.sphere; s.eHeld = !!input.beamHeld;
     const p = s.player; p.qCooldown = Math.max(0, p.qCooldown - dt);
     if (s.mods.regen > 0) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
     updateDrive(s, dt);

@@ -29,7 +29,7 @@ for pb in arm.pose.bones: pb.rotation_mode = "XYZ"
 root = arm.pose.bones["root"]; root["far_leg_front"] = 0; root["layer"] = 0; root["hand_n_slot"] = 0; root["hand_f_slot"] = 0; root["lining_f_hide"] = 0; root["lining_n_hide"] = 0
 LIN = ("lining_f", "lining_n") + (("lining_w",) if r.FORM == "f1" else ())
 if r.FORM == "f1": root["lining_w_hide"] = 0
-FORMSLOT = {"base": 0, "f1": 1}; root["form_slot"] = 1   # Form I rigs: which head/hair set is visible
+FORMSLOT = {"base": 0, "f1": 1, "t1": 2, "t2": 3}; root["form_slot"] = 1   # Form I rigs: which head/hair set is visible
 
 coll = bpy.data.collections.new("KaiSouth_Parts"); sc.collection.children.link(coll)
 objs = {}; images = {}
@@ -71,7 +71,7 @@ for side, trio in (("n", ("fist_waist", "fist_front_n", "fist_angle_n")), ("f", 
     for k, oid in enumerate(trio): SLOTCOND[oid] = (f"s != {k}", f"hand_{side}_slot")
 for lid in LIN: SLOTCOND[lid] = ("s == 1", lid + "_hide")
 for p in r.PARTS:
-    if p.get("slot", "").startswith("form:"): SLOTCOND[p["id"]] = (f"s != {FORMSLOT[p['slot'].split(':')[1]]}", "form_slot")
+    if p.get("slot", "").startswith("form:"): SLOTCOND[p["id"]] = (" and ".join(f"s != {FORMSLOT[n]}" for n in p["slot"].split(":")[1].split("+")), "form_slot")
 def hide_driver(ob, path, cond, props):
     fc = ob.driver_add(path); d = fc.driver; d.type = "SCRIPTED"
     for name, prop in props.items():

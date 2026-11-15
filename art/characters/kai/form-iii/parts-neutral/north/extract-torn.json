@@ -1,0 +1,67 @@
+{
+ "torso_f3": {
+  "sheet": "source/north-torn.png",
+  "box": [
+   54,
+   112,
+   672,
+   842
+  ],
+  "scale": 14.0,
+  "native": [
+   47,
+   55
+  ],
+  "align": [
+   0.72808701215611,
+   -2,
+   -5,
+   2,
+   5
+  ]
+ },
+ "sleeve_a": {
+  "sheet": "source/north-torn.png",
+  "box": [
+   804,
+   136,
+   1104,
+   702
+  ],
+  "scale": 14.0,
+  "native": [
+   24,
+   43
+  ],
+  "assigned": "upper_arm_n",
+  "align": [
+   0.6623376623376623,
+   -1,
+   -4,
+   1,
+   4
+  ]
+ },
+ "sleeve_b": {
+  "sheet": "source/north-torn.png",
+  "box": [
+   1256,
+   124,
+   1558,
+   696
+  ],
+  "scale": 14.0,
+  "native": [
+   24,
+   43
+  ],
+  "assigned": "upper_arm_f",
+  "align": [
+   0.6284329563812601,
+   -1,
+   -5,
+   1,
+   5
+  ]
+ }
+}

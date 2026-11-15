@@ -87,6 +87,22 @@ if FORM == "f1":   # Form I: spikier head + a separate rear hair piece on its ow
     _i = [p["id"] for p in PARTS].index("head"); PARTS[_i]["slot"] = "form:base"
     PARTS[_i:_i] = [dict(id="hair_f1", img="hair_f1.png", bone="hair", pivot=(_ex, _cy), angle=0.0, slot="form:f1"), dict(id="head_f1", img="head_f1.png", bone="head", pivot=HEAD_F1_PIVOT, angle=0.0, slot="form:f1")]
     DEFAULT_SLOTS["form"] = "f1"
+F3 = os.environ.get("KAI_F3") == "1"      # Form III (Stillfire Apex): torn-jacket torso/sleeve variants switched by the form slot, Form II head as the 'before' head
+if F3:
+    _pads = json.load(open(os.path.join(PARTS_DIR, "f3_variants.json")))["pads"]     # written by form-iii/scripts/prepare_parts.py: canvas pad of the base torso / sleeves
+    def _shift(q, pad):
+        q["pivot"] = (q["pivot"][0] + pad[0], q["pivot"][1] + pad[1])
+        if "child" in q: q["child"] = (q["child"][0] + pad[0], q["child"][1] + pad[1])
+        return q
+    def _variants(base_id, specs):
+        i = [p["id"] for p in PARTS].index(base_id); src = PARTS[i]; _shift(src, _pads[base_id]); src["slot"] = specs[0][1]
+        PARTS[i + 1:i + 1] = [dict(_shift(dict(src), [0, 0]), id=vid, img=vid + ".png", slot=sl) for vid, sl in specs[1:]]
+    _variants("torso", [("torso", "form:base"), ("torso_t1", "form:t1"), ("torso_t2", "form:t2"), ("torso_f3", "form:f1")])
+    _variants("upper_arm_n", [("upper_arm_n", "form:base+t1"), ("upper_arm_n_f3", "form:t2+f1")])
+    _variants("upper_arm_f", [("upper_arm_f", "form:base+t1"), ("upper_arm_f_f3", "form:t2+f1")])
+    for _p in PARTS:
+        if _p["id"] == "head": _p["slot"] = "form:base+t1+t2"
+    _i = [p["id"] for p in PARTS].index("hair_f1"); PARTS.insert(_i, dict(id="hair_f2", img="hair_f2.png", bone="hair", pivot=tuple(_g["hair2_pivot"]), angle=0.0, slot="form:base+t1+t2"))   # Form II rear hair until the commit
 
 def rot(deg):
     a = math.radians(deg); c, s = math.cos(a), math.sin(a); return np.array([[c, s], [-s, c]])
@@ -157,7 +173,7 @@ def visible(slots=None):
     slots = dict(slots or {}); hide = set(slots.pop("_hide", [])); layer = slots.pop("layer", 0)
     if layer: hide |= {p["id"] for p in PARTS if (p["id"] in LOWER_IDS) == (layer == 2)}   # layer 1 = lower body only (legs + hips), 2 = upper body only (everything else)
     s = dict(DEFAULT_SLOTS); s.update(slots)
-    return [p for p in PARTS if p["id"] not in hide and ("slot" not in p or s[p["slot"].split(":")[0]] == p["slot"].split(":")[1])]
+    return [p for p in PARTS if p["id"] not in hide and ("slot" not in p or s[p["slot"].split(":")[0]] in p["slot"].split(":")[1].split("+"))]
 
 EPS = 0.004
 def render(ch, images, scale=1, slots=None, order=None):

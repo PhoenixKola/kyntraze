@@ -6,6 +6,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT_DIR = os.environ.get("KAI_ROOT") or os.path.dirname(HERE)   # KAI_ROOT: the Form I tree (art/characters/kai/form-i)
 FORM = os.environ.get("KAI_FORM", "")
+F3 = os.environ.get("KAI_F3", "") == "1"   # Form III (Stillfire Apex) levitation build
 DIRECTION = os.environ.get("KAI_DIR", "east")
 DIR_PATH = os.path.join(ROOT_DIR, DIRECTION)
 PARTS_DIR = os.path.join(DIR_PATH, "parts")
@@ -81,7 +82,7 @@ def visible(slots=None):
     slots = dict(slots or {}); hide = set(slots.pop("_hide", [])); layer = slots.pop("layer", 0)
     if layer: hide |= {p["id"] for p in PARTS if (p["id"] in LOWER_IDS) == (layer == 2)}   # layer 1 = lower body only (legs + hips), 2 = upper body only (everything else)
     s = dict(DEFAULT_SLOTS); s.update(slots)
-    return [p for p in PARTS if p["id"] not in hide and ("slot" not in p or s[p["slot"].split(":")[0]] == p["slot"].split(":")[1])]
+    return [p for p in PARTS if p["id"] not in hide and ("slot" not in p or s[p["slot"].split(":")[0]] in p["slot"].split(":")[1].split("+"))]
 
 def render(ch, images, scale=1, slots=None, order=None):
     Wc, Hc = CANVAS[0] * scale, CANVAS[1] * scale

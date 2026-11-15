@@ -1,0 +1,157 @@
+{
+ "aura_halo": {
+  "file": "aura_halo.png",
+  "w": 61,
+  "h": 96
+ },
+ "aura_wisp_a": {
+  "file": "aura_wisp_a.png",
+  "w": 72,
+  "h": 14
+ },
+ "aura_wisp_b": {
+  "file": "aura_wisp_b.png",
+  "w": 66,
+  "h": 14
+ },
+ "aura_wisp_c": {
+  "file": "aura_wisp_c.png",
+  "w": 60,
+  "h": 16
+ },
+ "mote_a": {
+  "file": "mote_a.png",
+  "w": 14,
+  "h": 14
+ },
+ "mote_b": {
+  "file": "mote_b.png",
+  "w": 10,
+  "h": 10
+ },
+ "dust_a": {
+  "file": "dust_a.png",
+  "w": 40,
+  "h": 29
+ },
+ "ring_ripple": {
+  "file": "ring_ripple.png",
+  "w": 95,
+  "h": 96
+ },
+ "distort_ring": {
+  "file": "distort_ring.png",
+  "w": 128,
+  "h": 128
+ },
+ "rock_a": {
+  "file": "rock_a.png",
+  "w": 26,
+  "h": 20
+ },
+ "rock_b": {
+  "file": "rock_b.png",
+  "w": 20,
+  "h": 19
+ },
+ "rock_c": {
+  "file": "rock_c.png",
+  "w": 30,
+  "h": 20
+ },
+ "pebble_a": {
+  "file": "pebble_a.png",
+  "w": 9,
+  "h": 9
+ },
+ "pebble_b": {
+  "file": "pebble_b.png",
+  "w": 11,
+  "h": 7
+ },
+ "pebble_c": {
+  "file": "pebble_c.png",
+  "w": 7,
+  "h": 9
+ },
+ "finisher_mote_a": {
+  "file": "finisher_mote_a.png",
+  "w": 17,
+  "h": 24
+ },
+ "finisher_mote_b": {
+  "file": "finisher_mote_b.png",
+  "w": 17,
+  "h": 24
+ },
+ "finisher_mote_c": {
+  "file": "finisher_mote_c.png",
+  "w": 9,
+  "h": 24
+ },
+ "rift_core": {
+  "file": "rift_core.png",
+  "w": 63,
+  "h": 64
+ },
+ "rift_flash": {
+  "file": "rift_flash.png",
+  "w": 96,
+  "h": 93
+ },
+ "rift_reticle_ring": {
+  "file": "rift_reticle_ring.png",
+  "w": 70,
+  "h": 72
+ },
+ "rift_beam_seg": {
+  "file": "rift_beam_seg.png",
+  "w": 128,
+  "h": 56
+ },
+ "rift_reticle_tick": {
+  "file": "rift_reticle_tick.png",
+  "w": 17,
+  "h": 18
+ },
+ "blink_streak": {
+  "file": "blink_streak.png",
+  "w": 110,
+  "h": 8
+ },
+ "afterimage_streak": {
+  "file": "afterimage_streak.png",
+  "w": 120,
+  "h": 21
+ },
+ "strike_flash_a": {
+  "file": "strike_flash_a.png",
+  "w": 55,
+  "h": 56
+ },
+ "strike_flash_b": {
+  "file": "strike_flash_b.png",
+  "w": 60,
+  "h": 43
+ },
+ "strike_slash": {
+  "file": "strike_slash.png",
+  "w": 110,
+  "h": 46
+ },
+ "finisher_pulse": {
+  "file": "finisher_pulse.png",
+  "w": 127,
+  "h": 128
+ },
+ "shadow_soft": {
+  "file": "shadow_soft.png",
+  "w": 70,
+  "h": 16
+ },
+ "evasion_ghost_mask": {
+  "file": "evasion_ghost_mask.png",
+  "w": 31,
+  "h": 64
+ }
+}

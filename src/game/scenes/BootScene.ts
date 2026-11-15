@@ -9,7 +9,8 @@ import { BOSS_FX_NAMES, BOSS_KINDS, bossFxKey, bossFxUrl, bossManifestKey, bossM
 import { ENEMY_KINDS } from '../../content/enemies';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
-import { KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiManifests } from '../../assets/kaiAnimation';
+import { F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL, f3fxKey, f3fxUrl } from '../render/stillfireFx';
+import { KAI_F3_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiClipInfo, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
   constructor(private readonly arena: ArenaId = 'gloam') { super({ key: 'BootScene' }); }
   /** Two load phases (starter assets, then the ~100 Kai sheets whose frame sizes come from the manifests): report one combined 0..1 to the loading screen. */
@@ -20,6 +21,8 @@ export class BootScene extends Phaser.Scene {
     KAI_DIRS.forEach(dir => this.load.json(`kai-manifest-${dir}`, kaiManifestUrl(dir)));
     KAI_DIRS.forEach(dir => this.load.json(`kai-f1-manifest-${dir}`, kaiManifestUrl(dir, 'f1')));
     KAI_DIRS.forEach(dir => this.load.json(`kai-f2-manifest-${dir}`, kaiManifestUrl(dir, 'f2')));
+    KAI_DIRS.forEach(dir => this.load.json(`kai-f3-manifest-${dir}`, kaiManifestUrl(dir, 'f3')));   // B13: optional - without them Form III falls back to the Form II art
+    this.load.json(F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL);
     COMET_FX_NAMES.forEach(n => this.load.image(cometFxKey(n), cometFxUrl(n)));
     FORM_FX_NAMES.forEach(n => this.load.image(formFxKey(n), formFxUrl(n)));
     VFX_NAMES.forEach(n => { this.load.image(vfxKey(n, false), vfxUrl(n, false)); this.load.image(vfxKey(n, true), vfxUrl(n, true)); });
@@ -46,6 +49,18 @@ export class BootScene extends Phaser.Scene {
     const f2 = {} as KaiManifests;
     for (const dir of KAI_DIRS) f2[dir] = parseKaiManifest(this.cache.json.get(`kai-f2-manifest-${dir}`), dir, 'f2');
     this.registry.set(KAI_F2_REGISTRY_KEY, f2);
+    const f3Raw = KAI_DIRS.map(dir => this.cache.json.get(`kai-f3-manifest-${dir}`)); const f3Ok = f3Raw.every(r => r && typeof r === 'object' && (r as { direction?: string }).direction);
+    if (f3Ok) {
+      const f3 = {} as KaiManifests;
+      KAI_DIRS.forEach((dir, i) => { f3[dir] = parseKaiManifest(f3Raw[i], dir, 'f3'); });
+      this.registry.set(KAI_F3_REGISTRY_KEY, f3);
+      for (const dir of KAI_DIRS) for (const clip of [...KAI_F1_CLIPS, 'IdleSpecial'] as const) {
+        const m = f3[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue;
+        this.load.spritesheet(kaiTextureKey(dir, clip, 'f3'), kaiSheetUrl(dir, a, 'f3'), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });
+      }
+    }
+    const fx3 = this.cache.json.get(F3_FX_MANIFEST_KEY) as Record<string, unknown> | undefined;
+    if (fx3 && typeof fx3 === 'object') for (const n of Object.keys((fx3 as { sprites?: Record<string, unknown> }).sprites ?? fx3)) if (/^[a-z0-9_]+$/.test(n)) this.load.image(f3fxKey(n), f3fxUrl(n));
     for (const dir of KAI_DIRS) for (const clip of KAI_F1_CLIPS) {
       const m = f2[dir], a = m.animations[clip]!;
       this.load.spritesheet(kaiTextureKey(dir, clip, 'f2'), kaiSheetUrl(dir, a, 'f2'), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });

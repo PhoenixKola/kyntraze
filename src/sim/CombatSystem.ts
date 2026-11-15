@@ -7,11 +7,16 @@ import { RULES } from '../core/Rules';
 import { interruptOnHit } from './AbilitySystem';
 import { slideMove } from './CollisionSystem';
 import { COMET } from '../content/cometheart';
+import { tryPerfectEvasion } from './ApexSystem';
 
 /** `src` names what hurt Kai (contact, lunge, dash, ram, slam, bolt, orb, rupture, sweep, rush, prism, ...) so feedback and tests can tell a telegraphed ability from body contact. */
 export function damagePlayer(state: GameState, damage: number, src = 'contact'): boolean {
   const p = state.player;
   if (p.invulnerable > 0 || state.phase !== 'running') return false;
+  if (p.form === 3 && p.evadeCooldown <= 0) {   // B13 Perfect Evasion: the nearest attacker is the threat Kai reads; one hit refused, then a cooldown
+    let from: { x: number; y: number } | undefined, best = Infinity; for (const e of state.enemies) { if (e.hp <= 0) continue; const d = (e.x - p.x) ** 2 + (e.y - p.y) ** 2; if (d < best) { best = d; from = e; } }
+    if (tryPerfectEvasion(state, from)) return false;
+  }
   p.hp = Math.max(0, p.hp - Math.max(0, damage) * state.mods.armor); p.invulnerable = RULES.contactInvulnerability;
   state.lastHit = { src, t: state.time };
   state.impacts.push({ id: state.nextId++, kind: 'hit', x: p.x, y: p.y, ttl: 0.4, life: 0.4 });
@@ -56,7 +61,8 @@ export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts
     return false;
   }
   pushEnemyEvent(state, 'enemy_death', enemy, enemy.aimX, enemy.aimY, boss ? 'boss' : undefined);
-  if (boss && state.player.form === 2) state.abilityEvents.push({ id: state.nextId++, kind: 'finisher', x: enemy.x, y: enemy.y, n: enemy.kind === 'seraph' ? 1 : 0 });   // B12: Kai delivered the boss's last blow in Cometheart
+  if (boss && state.player.form === 3) state.abilityEvents.push({ id: state.nextId++, kind: 'finisher3', x: enemy.x, y: enemy.y, n: enemy.kind === 'seraph' ? 1 : 0 });   // B13: the silver finisher
+  else if (boss && state.player.form === 2) state.abilityEvents.push({ id: state.nextId++, kind: 'finisher', x: enemy.x, y: enemy.y, n: enemy.kind === 'seraph' ? 1 : 0 });   // B12: Kai delivered the boss's last blow in Cometheart
   state.kills++; if (state.player.form === 0) state.player.drive = Math.min(100, state.player.drive + 8 * state.mods.driveGain);
   if (boss) { bossDefeated(state, enemy); return true; }
   if (state.pickups.length < RULES.maxPickups) { const d = ENEMIES[enemy.kind as keyof typeof ENEMIES]; addPickup(state, { x: enemy.x, y: enemy.y, xp: Math.round(d.xp * xpTimeScale(state.time) * 10) / 10, age: 0, tier: d.elite ? 2 : d.xp >= 3 ? 1 : 0 }); }
@@ -81,7 +87,7 @@ function bossDefeated(state: GameState, boss: Enemy) {
     state.announce = { id: 'cometheart', text: 'COMETHEART UNLOCKED', sub: 'Full Drive + F awakens Form II', at: state.time + 2.5 };
   }
   pushEnemyEvent(state, 'boss_defeated', boss, 0, 0, boss.kind);
-  if (boss.kind === 'seraph') { if (state.phase === 'running') winRun(state); return; }
+  if (boss.kind === 'seraph') { if (!state.apexUnlocked) state.apexUnlockedNow = true; if (state.phase === 'running') winRun(state); return; }   // B13: a Seraph victory unlocks Stillfire Apex for the NEXT run (never mid-run)
   // the Warden is the mid-run payoff: a heal now, then a guaranteed Rare-or-better pick once the death animation has played
   state.player.hp = Math.min(state.player.maxHp, state.player.hp + state.player.maxHp * 0.4); state.bossReward++; state.rewardAt = state.time + def.deathT + 0.8;
   for (let i = 0; i < def.rewardOrbs && state.pickups.length < RULES.maxPickups; i++) {

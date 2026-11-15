@@ -18,6 +18,7 @@ SPEC = {
 for _s in SPEC.values(): _s["root"] = (_s["root"][0], _s["root"][1] + PAD_TOP)
 
 FORM = os.environ.get("KAI_FORM", "")
+F3 = os.environ.get("KAI_F3", "") == "1"   # Form III (Stillfire Apex) build switch (requires KAI_FORM=f1)
 
 # B05.2 owner fix: the BASE profile head is drawn in FRONT of the torso (collar/neck no longer cover the jaw). Form I keeps its approved order (HEAD_BEHIND)
 HEAD_BEHIND = os.environ.get("KAI_HEAD_BEHIND", "") == "1"   # owner fix B12: Form I/II profile heads are also drawn in FRONT of the jacket
@@ -32,6 +33,15 @@ def parts_for(d):
             ps.insert(next(k for k, p in enumerate(ps) if p["id"] == "torso"), hair); i = next(k for k, p in enumerate(ps) if p["id"] == "head")
             ps[i:i] = [dict(id="head_f1", img="head_f1.png", bone="head", kind="head", slot="form:f1")]
         else: ps[i:i] = [hair, dict(id="head_f1", img="head_f1.png", bone="head", kind="head", slot="form:f1")]
+    if F3:      # Form III: torn-jacket torso / sleeve variants (same draw position as the intact art, switched by the form slot) + the Form II head as the 'before' head
+        def group(base_id, vids):
+            i = next(k for k, p in enumerate(ps) if p["id"] == base_id); src = ps[i]; src["slot"] = vids[0][1]
+            ps[i + 1:i + 1] = [dict(src, id=vid, img=vid + ".png", slot=sl, like=base_id) for vid, sl in vids[1:]]
+        group("torso", [("torso", "form:base"), ("torso_t1", "form:t1"), ("torso_t2", "form:t2"), ("torso_f3", "form:f1")])
+        for s in "nf": group(f"upper_arm_{s}", [(f"upper_arm_{s}", "form:base+t1"), (f"upper_arm_{s}_f3", "form:t2+f1")])
+        for p in ps:
+            if p["id"] == "head": p["slot"] = "form:base+t1+t2"
+        i = next(k for k, p in enumerate(ps) if p["id"] == "hair_f1"); ps.insert(i, dict(id="hair_f2", img="hair_f2.png", bone="hair", kind="hair", slot="form:base+t1+t2"))   # Form II rear hair until the commit
     return ps
 
 def _parts_for(d):

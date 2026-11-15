@@ -14,7 +14,7 @@ export class EffectsRenderer {
   constructor(private readonly scene: Phaser.Scene) { this.pool = new FxPool(scene, 150); }
 
   render(state: GameState, reduced = false) {
-    const p = state.player, solar = p.form >= 1;
+    const p = state.player, solar = p.form >= 1 && p.form !== 3;   // B13: Stillfire Apex keeps the cool cyan/silver effect set
     const k = (n: string) => vfxKey(n, solar);
     const running = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory';
     const dt = running ? Math.min(0.05, this.scene.game.loop.delta / 1000) : 0;   // frozen with the sim while paused / choosing an upgrade

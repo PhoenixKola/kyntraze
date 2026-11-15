@@ -1,0 +1,7 @@
+{
+ "_note": "Form III STILLFIRE APEX colour: silver-white hair with cool steel shadow, pale ice-blue eyes (hair ramp + eye glint only). Aura colours are owned by the effects stream.",
+ "candidate": "stillfire",
+ "looks": {
+  "stillfire": {"label": "STILLFIRE (silver-white / steel)", "hair": [[62, 72, 102], [138, 152, 184], [206, 220, 238], [250, 253, 255]], "eye": [186, 232, 255]}
+ }
+}
