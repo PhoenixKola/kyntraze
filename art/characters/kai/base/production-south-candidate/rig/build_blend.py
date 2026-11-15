@@ -26,7 +26,7 @@ bpy.ops.object.mode_set(mode="OBJECT")
 for b in r.NO_INHERIT_SCALE: arm_data.bones[b].inherit_scale = "NONE"
 arm_data.display_type = "STICK"; arm.show_in_front = True
 for pb in arm.pose.bones: pb.rotation_mode = "XYZ"
-root = arm.pose.bones["root"]; root["far_leg_front"] = 0; root["hand_n_slot"] = 0; root["hand_f_slot"] = 0; root["lining_f_hide"] = 0; root["lining_n_hide"] = 0
+root = arm.pose.bones["root"]; root["far_leg_front"] = 0; root["layer"] = 0; root["hand_n_slot"] = 0; root["hand_f_slot"] = 0; root["lining_f_hide"] = 0; root["lining_n_hide"] = 0
 LIN = ("lining_f", "lining_n") + (("lining_w",) if r.FORM == "f1" else ())
 if r.FORM == "f1": root["lining_w_hide"] = 0
 FORMSLOT = {"base": 0, "f1": 1}; root["form_slot"] = 1   # Form I rigs: which head/hair set is visible
@@ -66,16 +66,21 @@ def drive(ob, path, index, expr, prop):
 for a_, b_ in (("shin_f", "shin_n"), ("boot_f", "boot_n"), ("thigh_f", "thigh_n")):
     da, db = objs[a_][1], objs[b_][1]
     drive(objs[a_][0], "location", 1, f"s*({db - da:.6f})", "far_leg_front"); drive(objs[b_][0], "location", 1, f"s*({da - db:.6f})", "far_leg_front")
+SLOTCOND = {}
 for side, trio in (("n", ("fist_waist", "fist_front_n", "fist_angle_n")), ("f", ("fist_guard", "fist_front_f", "fist_angle_f", "fist_side_f"))):
-    for k, oid in enumerate(trio):
-        for prop in ("hide_render", "hide_viewport"): drive(objs[oid][0], prop, None, f"s != {k}", f"hand_{side}_slot")
-
-for lid in LIN:
-    for prop in ("hide_render", "hide_viewport"): drive(objs[lid][0], prop, None, "s == 1", lid + "_hide")
-
+    for k, oid in enumerate(trio): SLOTCOND[oid] = (f"s != {k}", f"hand_{side}_slot")
+for lid in LIN: SLOTCOND[lid] = ("s == 1", lid + "_hide")
 for p in r.PARTS:
-    if p.get("slot", "").startswith("form:"):
-        for prop in ("hide_render", "hide_viewport"): drive(objs[p["id"]][0], prop, None, f"s != {FORMSLOT[p['slot'].split(':')[1]]}", "form_slot")
+    if p.get("slot", "").startswith("form:"): SLOTCOND[p["id"]] = (f"s != {FORMSLOT[p['slot'].split(':')[1]]}", "form_slot")
+def hide_driver(ob, path, cond, props):
+    fc = ob.driver_add(path); d = fc.driver; d.type = "SCRIPTED"
+    for name, prop in props.items():
+        v = d.variables.new(); v.name = name; v.type = "SINGLE_PROP"; v.targets[0].id_type = "OBJECT"; v.targets[0].id = arm; v.targets[0].data_path = f'pose.bones["root"]["{prop}"]'
+    d.expression = cond
+for p in r.PARTS:
+    lay = "l == 2" if p["id"] in r.LOWER_IDS else "l == 1"; props = {"l": "layer"}; cond = f"({lay})"
+    if p["id"] in SLOTCOND: sc_, sp_ = SLOTCOND[p["id"]]; cond = f"({sc_}) or ({lay})"; props["s"] = sp_
+    for prop in ("hide_render", "hide_viewport"): hide_driver(objs[p["id"]][0], prop, cond, props)
 
 cam_data = bpy.data.cameras.new("KaiSouth_Cam"); cam_data.type = "ORTHO"; cam_data.ortho_scale = max(r.CANVAS) * PX
 cam = bpy.data.objects.new("KaiSouth_Cam", cam_data); sc.collection.objects.link(cam)
@@ -98,6 +103,7 @@ for clip in data["clips"]:
             pb.keyframe_insert("scale", index=1, frame=f, group=pb.name)
         SLOT = {"front": 1, "angle": 2, "side": 3}
         if "form" in fr["slots"]: root["form_slot"] = FORMSLOT[fr["slots"]["form"]]; root.keyframe_insert('["form_slot"]', frame=f, group="root")
+        root["layer"] = fr["slots"].get("layer", 0); root.keyframe_insert('["layer"]', frame=f, group="root")
         root["far_leg_front"] = fr["far_leg_front"]; root["hand_n_slot"] = SLOT.get(fr["slots"].get("hand_n"), 0)
         root["hand_f_slot"] = SLOT.get(fr["slots"].get("hand_f"), 0)
         root["lining_f_hide"] = 1 if "lining_f" in fr["slots"].get("_hide", []) else 0

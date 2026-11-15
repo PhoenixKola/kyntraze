@@ -1,5 +1,8 @@
 # Changelog
 
+## Pre-B12 · Kai motion + premium UI repair
+- NORTH rear view rebuilt (arms behind the jacket, back-of-fist hands, rear-view run/idle), SOUTH run fists moved beside the torso, WEST head/shoulder layering and guard fixed; Base + Form I rebuilt in Blender. Moving auto-attack restored as a two-layer rig export (RunLower + RunPunchUpper, leg-phase matched; no pixel crop). New ImageGen HUD portraits, select backdrop, hit vignette, route/modal transitions, aligned CHANGE strip. Notes and proofs: `art/characters/kai/review/pre-b12-motion/`.
+
 ## B11 · complete survival loop + B10.1 upgrade icons
 - Real win condition: defeat the Null Seraph (15:00, HP 2800) after the Fracture Warden (8:00, reward pick + heal). Threat-budget director with breathers, finale warning and quiet, run rail and next-event hint on the HUD, victory beat, victory/defeat results with build summary and ImageGen victory art. Simulated full run wins at ~15.7 min on both arenas.
 - All 25 upgrade icons redrawn as full-colour ImageGen inventory art. See `B11-STATUS.md`.

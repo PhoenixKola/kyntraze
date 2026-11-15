@@ -105,9 +105,10 @@ else:
 def stance_arms():
     """(lead guard, rear waist) arm dicts for this direction."""
     if D in ("east", "west"):
-        lead = arm(SX * 28.3, 15.0, SX * 132.0, 13.5, SX * 56.0, "guard", 1.3); rear = arm(-SX * 46.8, 22.0, SX * 40.2, 17.0, SX * 40.0, "side", 1.3)
+        lead = arm(SX * (28.3 if D == "east" else 38.0), 15.0, SX * (132.0 if D == "east" else 112.0), 13.5, SX * (56.0 if D == "east" else 62.0), "guard", 1.3); rear = arm(-SX * 46.8, 22.0, SX * 40.2, 17.0, SX * 40.0, "side", 1.3)
     else:
-        lead = arm(-58.0, 17.0, -160.0, 14.0, -20.0, "guard", 1.3); rear = arm(48.0, 24.0, -54.0, 17.0, 0.0, "side", 1.3)
+        # rear view: the guard hand is in front of the chest, so the near arm is foreshortened (forearm folded in behind the jacket) and the far arm is a relaxed hand-on-hip; back-of-hand fists only
+        lead = arm(-26.0, LU["n"] * 0.92, 168.0, LF["n"] * 0.4, 0.0, "side", 1.3); rear = arm(40.0, LU["f"] * 0.98, -48.0, LF["f"] * 0.86, 0.0, "side", 1.3)
     return lead, rear
 LEAD_GUARD, REAR_WAIST = stance_arms()
 
@@ -147,14 +148,17 @@ def run():
             else: bx = RX + (-3 if s == "n" else 3) * SX; by = RY + (2 if s == "n" else -2); sole = (bx + SX * dx, by + dy)
             p[f"leg_{s}"] = {"sole": sole, "fs_t": ft, "fs_s": fs, "planted": planted, "straight": True, "slack": 2.0 if planted else 3.0}
         p["pelvis"] = (round(1.0 * c * SX), (7 if D != "north" else 0) + HIP_DY[i]); p["chest"] = (round(-1.0 * c * SX), HIP_DY[i] // 2 + 1)
+        if D == "north": p["pelvis"] = (round(2.0 * math.sin(ph + 1.57)), HIP_DY[i]); p["chest"] = (round(-1.0 * math.sin(ph + 1.57)), HIP_DY[i] // 2 + 1)   # weight shift over the planted foot
         p["spine_rot"] = -SX * 1.0 + 2.0 * c; p["head"] = (0, 2); p["sash"] = 12.0 * math.sin(ph - 1.4) * SX
         for s in "nf":
             fw = (1 - c) / 2 if s == "n" else (1 + c) / 2          # forwardness 0..1 of this arm
             if D == "north":
+                # carried arm swing seen from behind: the arm swinging BACK (toward the camera) hangs long beside the hip with the back of the fist showing;
+                # the arm swinging FORWARD (away from the camera) is foreshortened and folds in and up behind the jacket (hand never faces the camera)
                 o = -1 if s == "n" else 1
-                p[f"arm_{s}"] = arm(o * lerp(9, 22, fw), lerp(LU[s] * 1.0, LU[s] * 0.82, fw), o * lerp(12, 150, fw ** 1.5), lerp(LF[s], LF[s] * 0.62, fw), 0.0, "side" if fw < 0.5 else "guard")
+                p[f"arm_{s}"] = arm(o * lerp(16, 9, fw), lerp(LU[s] * 1.0, LU[s] * 0.74, fw), o * (lerp(8, 34, fw / 0.6) if fw < 0.6 else lerp(34, -128, ((fw - 0.6) / 0.4) ** 0.8)), lerp(LF[s] * 1.0, LF[s] * 0.5, max(0.0, (fw - 0.45) / 0.55)), 0.0, "side")   # passes OUTSIDE the hip, folds in only at the far end
             else:
-                p[f"arm_{s}"] = arm(SX * lerp(-45, 42, fw), LU[s], SX * lerp(20, 135, fw), LF[s], 0.0, "side")
+                p[f"arm_{s}"] = arm(SX * lerp(-45, 42, fw), LU[s], SX * lerp(20, 135 if D == "east" else 104, fw), LF[s], 0.0, "side")   # WEST: the swinging near fist stays below the jaw
         fr.append(p)
     return {"name": "Run", "fps": 14, "loop": True, "frames": fr, "events": {"foot_contact_near": 0, "foot_contact_far": 4}}
 
@@ -188,7 +192,27 @@ def punch():
         fr.append(p)
     return {"name": "BasicPunch", "fps": 16, "loop": False, "frames": fr, "events": {"anticipation_start": 1, "impact": 5, "recover_start": 8, "interruptible_from": 11}}
 
-CLIPS = [idle, run, punch]
+# ------------------------------------------------------------------ B12-pre: moving attack as two LAYERS of the same rig (no pixel crop)
+# RunLower = legs + hips of the Run cycle; RunPunchUpper = everything else, one 8-frame leg-phase block per strike step (frame = step * 8 + leg phase), so the torso bob and
+# pelvis sway always match the legs. The runtime draws the lower layer first and the upper layer over it, joined under the jacket hem.
+PUNCH_STEPS = (1, 3, 4, 5, 7, 9)        # BasicPunch keyframes reused: tuck, load, launch, IMPACT, recover, guard
+def run_lower():
+    c = run(); fr = []
+    for p in c["frames"]: q = copy.deepcopy(p); q["layer"] = 1; fr.append(q)
+    return {"name": "RunLower", "fps": 14, "loop": True, "frames": fr, "events": {}}
+def run_punch_upper():
+    base = run()["frames"]; pk = punch()["frames"]; fr = []
+    for kk in PUNCH_STEPS:
+        src = pk[kk]
+        for i in range(8):
+            p = copy.deepcopy(base[i]); p["layer"] = 2
+            if f"arm_{LEAD}" in src: p[f"arm_{LEAD}"] = copy.deepcopy(src[f"arm_{LEAD}"])
+            p["spine_rot"] = p.get("spine_rot", 0.0) + 0.7 * src.get("spine_rot", 0.0)
+            cx, cy = src.get("chest", (0, 0)); p["chest"] = (p["chest"][0] + round(0.5 * cx), p["chest"][1]); p["head"] = (p["head"][0] + round(0.5 * src.get("head", (0, 0))[0]), p["head"][1])
+            p["sash"] = 0.5 * p["sash"] + 0.8 * src.get("sash", 0.0)
+            fr.append(p)
+    return {"name": "RunPunchUpper", "fps": 16, "loop": False, "frames": fr, "events": {"impact": 3 * 8}}
+CLIPS = [idle, run, punch, run_lower, run_punch_upper]
 import danim_b03g  # noqa: E402  (B03G clips; appended to CLIPS below)
 CLIPS += danim_b03g.CLIPS
 import danim_form  # noqa: E402  (Form I: hair follow-through + Transform clip; no-ops for the base build)
@@ -197,7 +221,7 @@ import danim_b05  # noqa: E402  (B05: Beam + Sphere signature abilities, base an
 CLIPS += danim_b05.CLIPS
 
 def slots_of(p):
-    s = {f"hand_{s}": hand_slot(p, s) for s in "nf"}
+    s = {f"hand_{s}": hand_slot(p, s) for s in "nf"}; s["layer"] = p.get("layer", 0)
     if r.FORM == "f1": s["form"] = p.get("form_slot", "f1")
     return s
 

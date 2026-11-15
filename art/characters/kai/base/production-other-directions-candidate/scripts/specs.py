@@ -43,9 +43,15 @@ def _parts_for(d):
     if d in ("east", "west"):
         # profile: far leg and far arm sit behind the body, near arm in front of everything; the head is drawn under the torso so the collar covers the neck
         prof_core = [core[0], core[1], core[3], core[2]] if HEAD_BEHIND else [core[0], core[1], core[2], P("neck", "neck.png", "head", "neck"), core[3]]
-        return leg("f") + arm("f") + [P("hips", "hips.png", "pelvis", "hips")] + leg("n") + prof_core + arm("n")
-    # back view: sash is tied at the FRONT, so only the waistband shows (no knot, no tails); head under the torso so the collar fold covers the neck
-    return leg("f") + leg("n") + [P("hips", "hips.png", "pelvis", "hips")] + [core[0], core[3], core[2]] + arm("f") + arm("n")
+        na = arm("n")
+        if not HEAD_BEHIND:
+            # pre-B12: the NEAR sleeve and forearm sit under the head (so the shoulder can never swallow the jaw/hair of a left-facing Kai), only the fists stay over everything
+            return leg("f") + arm("f") + [P("hips", "hips.png", "pelvis", "hips")] + leg("n") + prof_core[:-1] + na[:2] + [prof_core[-1]] + na[2:]
+        return leg("f") + arm("f") + [P("hips", "hips.png", "pelvis", "hips")] + leg("n") + prof_core + na
+    # back view: sash is tied at the FRONT, so only the waistband shows (no knot, no tails); head under the torso so the collar fold covers the neck.
+    # Pre-B12: Kai's guard is carried IN FRONT of his chest, so from behind both whole arms sit BEHIND the jacket layer: only the shoulders / upper arms / elbows
+    # peek out at the sides and a forearm shows below the hem when it swings back. (They used to draw over the back, which is what read as hands pasted on it.)
+    return leg("f") + leg("n") + [P("hips", "hips.png", "pelvis", "hips")] + [core[0]] + arm("f") + arm("n") + [core[3], core[2]]
 
 # hands: which fist state each side starts in (the clip builders override per frame)
 def default_slots(d):

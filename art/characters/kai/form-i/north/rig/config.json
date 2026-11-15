@@ -312,49 +312,6 @@
    "angle": 0.0
   },
   {
-   "id": "hair_f1",
-   "img": "hair_f1.png",
-   "bone": "hair",
-   "pivot": [
-    8.0,
-    19.5
-   ],
-   "angle": 0.0,
-   "slot": "form:f1"
-  },
-  {
-   "id": "head_f1",
-   "img": "head_f1.png",
-   "bone": "head",
-   "pivot": [
-    21.653846153846153,
-    49.0
-   ],
-   "angle": 0.0,
-   "slot": "form:f1"
-  },
-  {
-   "id": "head",
-   "img": "head.png",
-   "bone": "head",
-   "pivot": [
-    20.141025641025642,
-    39.0
-   ],
-   "angle": 0.0,
-   "slot": "form:base"
-  },
-  {
-   "id": "torso",
-   "img": "torso.png",
-   "bone": "spine",
-   "pivot": [
-    21.5,
-    34.0
-   ],
-   "angle": 0.0
-  },
-  {
    "id": "upper_arm_f",
    "img": "upper_arm_f.png",
    "bone": "upper_arm_f",
@@ -453,6 +410,49 @@
    "angle": 0.0,
    "slot": "hand_n:side",
    "point": -90.0
+  },
+  {
+   "id": "hair_f1",
+   "img": "hair_f1.png",
+   "bone": "hair",
+   "pivot": [
+    8.0,
+    19.5
+   ],
+   "angle": 0.0,
+   "slot": "form:f1"
+  },
+  {
+   "id": "head_f1",
+   "img": "head_f1.png",
+   "bone": "head",
+   "pivot": [
+    21.653846153846153,
+    49.0
+   ],
+   "angle": 0.0,
+   "slot": "form:f1"
+  },
+  {
+   "id": "head",
+   "img": "head.png",
+   "bone": "head",
+   "pivot": [
+    20.141025641025642,
+    39.0
+   ],
+   "angle": 0.0,
+   "slot": "form:base"
+  },
+  {
+   "id": "torso",
+   "img": "torso.png",
+   "bone": "spine",
+   "pivot": [
+    21.5,
+    34.0
+   ],
+   "angle": 0.0
   }
  ],
  "default_slots": {

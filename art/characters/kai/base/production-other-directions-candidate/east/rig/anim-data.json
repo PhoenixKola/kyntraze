@@ -148,7 +148,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 7.105427357601002e-15,
@@ -297,7 +298,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 7.105427357601002e-15,
@@ -446,7 +448,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -595,7 +598,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -744,7 +748,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -893,7 +898,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -1042,7 +1048,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -1191,7 +1198,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -1340,7 +1348,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -1489,7 +1498,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -1638,7 +1648,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 2.842170943040401e-14,
@@ -1787,7 +1798,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 2.842170943040401e-14,
@@ -1936,7 +1948,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 2.842170943040401e-14,
@@ -2085,7 +2098,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -2234,7 +2248,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -2383,7 +2398,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 7.105427357601002e-15,
@@ -2543,7 +2559,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0
@@ -2691,7 +2708,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0
@@ -2839,7 +2857,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0
@@ -2987,7 +3006,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0
@@ -3135,7 +3155,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "f": 3.1776437161565096e-14
@@ -3283,7 +3304,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "f": 0.0
@@ -3431,7 +3453,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "f": 0.0
@@ -3579,7 +3602,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "f": 2.842170943040401e-14
@@ -3740,7 +3764,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -3889,7 +3914,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -4038,7 +4064,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -4187,7 +4214,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -4336,7 +4364,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -4485,7 +4514,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -4634,7 +4664,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -4783,7 +4814,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -4932,7 +4964,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 2.842170943040401e-14,
@@ -5081,7 +5114,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 7.105427357601002e-15,
@@ -5230,7 +5264,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 2.842170943040401e-14,
@@ -5379,7 +5414,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 2.842170943040401e-14,
@@ -5528,7 +5564,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -5677,11 +5714,8374 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
       "f": 1.4210854715202004e-14
+     }
+    }
+   ]
+  },
+  {
+   "name": "RunLower",
+   "fps": 14,
+   "loop": true,
+   "events": {},
+   "frames": [
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -9.0,
+       "loc": [
+        -1,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -11.8254,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -36.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 65.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 40.86304,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "shin_n": {
+       "rot": -30.77532,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "boot_n": {
+       "rot": -10.08772,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 51.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 93.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -24.66342,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -35.33587,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93887
+      },
+      "boot_f": {
+       "rot": 59.99929,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 1
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -9.58579,
+       "loc": [
+        -1,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -6.9196,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -22.67336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.6266,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "shin_n": {
+       "rot": -32.26941,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "boot_n": {
+       "rot": -2.35719,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 38.84493,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -4.21354,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.50647
+      },
+      "shin_f": {
+       "rot": -56.70145,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.53461
+      },
+      "boot_f": {
+       "rot": 60.91499,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 1
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -11.0,
+       "loc": [
+        0,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 2.03961,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 9.5,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 24.29791,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "shin_n": {
+       "rot": -32.47586,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "boot_n": {
+       "rot": 8.17795,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 9.5,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 34.72775,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.68789
+      },
+      "shin_f": {
+       "rot": -47.83171,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.76432
+      },
+      "boot_f": {
+       "rot": 13.10396,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 1
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -12.41421,
+       "loc": [
+        1,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 9.80404,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 41.67336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 9.31623,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "shin_n": {
+       "rot": -31.84381,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "boot_n": {
+       "rot": 22.52758,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": -19.84493,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 35.07073,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.00961
+      },
+      "shin_f": {
+       "rot": -37.29026,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": 2.21954,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 1
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -13.0,
+       "loc": [
+        1,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 11.8254,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 55.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 93.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": -2.23648,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79496
+      },
+      "shin_n": {
+       "rot": -43.88451,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.71128
+      },
+      "boot_n": {
+       "rot": 46.12099,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": -32.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 65.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 32.28208,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -31.96383,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": -0.31825,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 1
+     },
+     "planted_err": {
+      "f": 3.1776437161565096e-14
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -12.41421,
+       "loc": [
+        1,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 6.9196,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 41.67336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.54246,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.45068
+      },
+      "shin_n": {
+       "rot": -55.61715,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.47572
+      },
+      "boot_n": {
+       "rot": 21.07469,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": -19.84493,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 24.12731,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "shin_f": {
+       "rot": -34.21183,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "boot_f": {
+       "rot": 10.08452,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 1
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -11.0,
+       "loc": [
+        0,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -2.03961,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 9.5,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 48.7846,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.72405
+      },
+      "shin_n": {
+       "rot": -43.03257,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8045
+      },
+      "boot_n": {
+       "rot": -5.75204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 9.5,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 9.65765,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "shin_f": {
+       "rot": -33.6212,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "boot_f": {
+       "rot": 23.96355,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 1
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -9.58579,
+       "loc": [
+        -1,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -9.80404,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -22.67336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 44.29789,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.98831
+      },
+      "shin_n": {
+       "rot": -37.59928,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.01888
+      },
+      "boot_n": {
+       "rot": -6.69861,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 38.84493,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -21.13204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -0.69359,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12734
+      },
+      "boot_f": {
+       "rot": 21.82563,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 1
+     },
+     "planted_err": {
+      "f": 2.842170943040401e-14
+     }
+    }
+   ]
+  },
+  {
+   "name": "RunPunchUpper",
+   "fps": 16,
+   "loop": false,
+   "events": {
+    "impact": 24
+   },
+   "frames": [
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -6.2,
+       "loc": [
+        -3,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -2.7127,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -38.8,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 65.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 40.86304,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "shin_n": {
+       "rot": -30.77532,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "boot_n": {
+       "rot": -10.08772,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 26.2,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8
+      },
+      "forearm_f": {
+       "rot": -178.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.7
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -24.66342,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -35.33587,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93887
+      },
+      "boot_f": {
+       "rot": 59.99929,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -6.78579,
+       "loc": [
+        -3,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -0.2598,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -25.47336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.6266,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "shin_n": {
+       "rot": -32.26941,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "boot_n": {
+       "rot": -2.35719,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 26.78579,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8
+      },
+      "forearm_f": {
+       "rot": -178.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.7
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -4.21354,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.50647
+      },
+      "shin_f": {
+       "rot": -56.70145,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.53461
+      },
+      "boot_f": {
+       "rot": 60.91499,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -8.2,
+       "loc": [
+        -2,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 4.2198,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 6.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 24.29791,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "shin_n": {
+       "rot": -32.47586,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "boot_n": {
+       "rot": 8.17795,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 28.2,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8
+      },
+      "forearm_f": {
+       "rot": -178.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.7
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 34.72775,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.68789
+      },
+      "shin_f": {
+       "rot": -47.83171,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.76432
+      },
+      "boot_f": {
+       "rot": 13.10396,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -9.61421,
+       "loc": [
+        -1,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 8.10202,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 38.87336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 9.31623,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "shin_n": {
+       "rot": -31.84381,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "boot_n": {
+       "rot": 22.52758,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 29.61421,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8
+      },
+      "forearm_f": {
+       "rot": -178.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.7
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 35.07073,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.00961
+      },
+      "shin_f": {
+       "rot": -37.29026,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": 2.21954,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -10.2,
+       "loc": [
+        -1,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 9.1127,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 52.2,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 93.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": -2.23648,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79496
+      },
+      "shin_n": {
+       "rot": -43.88451,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.71128
+      },
+      "boot_n": {
+       "rot": 46.12099,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 30.2,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8
+      },
+      "forearm_f": {
+       "rot": -178.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.7
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 32.28208,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -31.96383,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": -0.31825,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 3.1776437161565096e-14
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -9.61421,
+       "loc": [
+        -1,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 6.6598,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 38.87336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.54246,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.45068
+      },
+      "shin_n": {
+       "rot": -55.61715,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.47572
+      },
+      "boot_n": {
+       "rot": 21.07469,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 29.61421,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8
+      },
+      "forearm_f": {
+       "rot": -178.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.7
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 24.12731,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "shin_f": {
+       "rot": -34.21183,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "boot_f": {
+       "rot": 10.08452,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -8.2,
+       "loc": [
+        -2,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 2.1802,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 6.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 48.7846,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.72405
+      },
+      "shin_n": {
+       "rot": -43.03257,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8045
+      },
+      "boot_n": {
+       "rot": -5.75204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 28.2,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8
+      },
+      "forearm_f": {
+       "rot": -178.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.7
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 9.65765,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "shin_f": {
+       "rot": -33.6212,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "boot_f": {
+       "rot": 23.96355,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -6.78579,
+       "loc": [
+        -3,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -1.70202,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -25.47336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 44.29789,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.98831
+      },
+      "shin_n": {
+       "rot": -37.59928,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.01888
+      },
+      "boot_n": {
+       "rot": -6.69861,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 26.78579,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8
+      },
+      "forearm_f": {
+       "rot": -178.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.7
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -21.13204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -0.69359,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12734
+      },
+      "boot_f": {
+       "rot": 21.82563,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 2.842170943040401e-14
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -1.3,
+       "loc": [
+        -5,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 2.0873,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -43.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 65.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 40.86304,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "shin_n": {
+       "rot": -30.77532,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "boot_n": {
+       "rot": -10.08772,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 29.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.75
+      },
+      "forearm_f": {
+       "rot": -192.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.65
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -24.66342,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -35.33587,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93887
+      },
+      "boot_f": {
+       "rot": 59.99929,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -1.88579,
+       "loc": [
+        -5,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 4.5402,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -30.37336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.6266,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "shin_n": {
+       "rot": -32.26941,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "boot_n": {
+       "rot": -2.35719,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 29.88579,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.75
+      },
+      "forearm_f": {
+       "rot": -192.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.65
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -4.21354,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.50647
+      },
+      "shin_f": {
+       "rot": -56.70145,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.53461
+      },
+      "boot_f": {
+       "rot": 60.91499,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -3.3,
+       "loc": [
+        -4,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 9.0198,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 1.8,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 24.29791,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "shin_n": {
+       "rot": -32.47586,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "boot_n": {
+       "rot": 8.17795,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 31.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.75
+      },
+      "forearm_f": {
+       "rot": -192.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.65
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 34.72775,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.68789
+      },
+      "shin_f": {
+       "rot": -47.83171,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.76432
+      },
+      "boot_f": {
+       "rot": 13.10396,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -4.71421,
+       "loc": [
+        -3,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 12.90202,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 33.97336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 9.31623,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "shin_n": {
+       "rot": -31.84381,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "boot_n": {
+       "rot": 22.52758,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 32.71421,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.75
+      },
+      "forearm_f": {
+       "rot": -192.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.65
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 35.07073,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.00961
+      },
+      "shin_f": {
+       "rot": -37.29026,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": 2.21954,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -5.3,
+       "loc": [
+        -3,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 13.9127,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 47.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 93.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": -2.23648,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79496
+      },
+      "shin_n": {
+       "rot": -43.88451,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.71128
+      },
+      "boot_n": {
+       "rot": 46.12099,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 33.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.75
+      },
+      "forearm_f": {
+       "rot": -192.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.65
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 32.28208,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -31.96383,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": -0.31825,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 3.1776437161565096e-14
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -4.71421,
+       "loc": [
+        -3,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 11.4598,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 33.97336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.54246,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.45068
+      },
+      "shin_n": {
+       "rot": -55.61715,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.47572
+      },
+      "boot_n": {
+       "rot": 21.07469,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 32.71421,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.75
+      },
+      "forearm_f": {
+       "rot": -192.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.65
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 24.12731,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "shin_f": {
+       "rot": -34.21183,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "boot_f": {
+       "rot": 10.08452,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -3.3,
+       "loc": [
+        -4,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 6.9802,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 1.8,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 48.7846,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.72405
+      },
+      "shin_n": {
+       "rot": -43.03257,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8045
+      },
+      "boot_n": {
+       "rot": -5.75204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 31.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.75
+      },
+      "forearm_f": {
+       "rot": -192.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.65
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 9.65765,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "shin_f": {
+       "rot": -33.6212,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "boot_f": {
+       "rot": 23.96355,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -1.88579,
+       "loc": [
+        -5,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 3.09798,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -30.37336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 44.29789,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.98831
+      },
+      "shin_n": {
+       "rot": -37.59928,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.01888
+      },
+      "boot_n": {
+       "rot": -6.69861,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 29.88579,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.75
+      },
+      "forearm_f": {
+       "rot": -192.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.65
+      },
+      "hand_f": {
+       "rot": -180.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -21.13204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -0.69359,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12734
+      },
+      "boot_f": {
+       "rot": 21.82563,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 2.842170943040401e-14
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -12.5,
+       "loc": [
+        1,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -12.3127,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -32.5,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 65.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 40.86304,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "shin_n": {
+       "rot": -30.77532,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "boot_n": {
+       "rot": -10.08772,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 74.5,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 20.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -24.66342,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -35.33587,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93887
+      },
+      "boot_f": {
+       "rot": 59.99929,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -13.08579,
+       "loc": [
+        1,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -9.8598,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -19.17336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.6266,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "shin_n": {
+       "rot": -32.26941,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "boot_n": {
+       "rot": -2.35719,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 75.08579,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 20.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -4.21354,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.50647
+      },
+      "shin_f": {
+       "rot": -56.70145,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.53461
+      },
+      "boot_f": {
+       "rot": 60.91499,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -14.5,
+       "loc": [
+        2,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -5.3802,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 13.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 24.29791,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "shin_n": {
+       "rot": -32.47586,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "boot_n": {
+       "rot": 8.17795,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 76.5,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 20.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 34.72775,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.68789
+      },
+      "shin_f": {
+       "rot": -47.83171,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.76432
+      },
+      "boot_f": {
+       "rot": 13.10396,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -15.91421,
+       "loc": [
+        3,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -1.49798,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 45.17336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 9.31623,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "shin_n": {
+       "rot": -31.84381,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "boot_n": {
+       "rot": 22.52758,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 77.91421,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 20.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 35.07073,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.00961
+      },
+      "shin_f": {
+       "rot": -37.29026,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": 2.21954,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -16.5,
+       "loc": [
+        3,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -0.4873,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 58.5,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 93.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": -2.23648,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79496
+      },
+      "shin_n": {
+       "rot": -43.88451,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.71128
+      },
+      "boot_n": {
+       "rot": 46.12099,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 78.5,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 20.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 32.28208,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -31.96383,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": -0.31825,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 3.1776437161565096e-14
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -15.91421,
+       "loc": [
+        3,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -2.9402,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 45.17336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.54246,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.45068
+      },
+      "shin_n": {
+       "rot": -55.61715,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.47572
+      },
+      "boot_n": {
+       "rot": 21.07469,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 77.91421,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 20.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 24.12731,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "shin_f": {
+       "rot": -34.21183,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "boot_f": {
+       "rot": 10.08452,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -14.5,
+       "loc": [
+        2,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -7.4198,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 13.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 48.7846,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.72405
+      },
+      "shin_n": {
+       "rot": -43.03257,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8045
+      },
+      "boot_n": {
+       "rot": -5.75204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 76.5,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 20.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 9.65765,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "shin_f": {
+       "rot": -33.6212,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "boot_f": {
+       "rot": 23.96355,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -13.08579,
+       "loc": [
+        1,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -11.30202,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -19.17336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 44.29789,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.98831
+      },
+      "shin_n": {
+       "rot": -37.59928,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.01888
+      },
+      "boot_n": {
+       "rot": -6.69861,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 75.08579,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 20.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -21.13204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -0.69359,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12734
+      },
+      "boot_f": {
+       "rot": 21.82563,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 2.842170943040401e-14
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -15.3,
+       "loc": [
+        2,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        4,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -20.3127,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -29.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 65.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 40.86304,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "shin_n": {
+       "rot": -30.77532,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "boot_n": {
+       "rot": -10.08772,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 95.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 10.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -24.66342,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -35.33587,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93887
+      },
+      "boot_f": {
+       "rot": 59.99929,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -15.88579,
+       "loc": [
+        2,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        4,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -17.8598,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -16.37336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.6266,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "shin_n": {
+       "rot": -32.26941,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "boot_n": {
+       "rot": -2.35719,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 95.88579,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 10.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -4.21354,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.50647
+      },
+      "shin_f": {
+       "rot": -56.70145,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.53461
+      },
+      "boot_f": {
+       "rot": 60.91499,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -17.3,
+       "loc": [
+        3,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        4,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -13.3802,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 15.8,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 24.29791,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "shin_n": {
+       "rot": -32.47586,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "boot_n": {
+       "rot": 8.17795,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 97.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 10.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 34.72775,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.68789
+      },
+      "shin_f": {
+       "rot": -47.83171,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.76432
+      },
+      "boot_f": {
+       "rot": 13.10396,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -18.71421,
+       "loc": [
+        4,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        4,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -9.49798,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 47.97336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 9.31623,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "shin_n": {
+       "rot": -31.84381,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "boot_n": {
+       "rot": 22.52758,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 98.71421,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 10.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 35.07073,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.00961
+      },
+      "shin_f": {
+       "rot": -37.29026,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": 2.21954,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -19.3,
+       "loc": [
+        4,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        4,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -8.4873,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 61.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 93.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": -2.23648,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79496
+      },
+      "shin_n": {
+       "rot": -43.88451,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.71128
+      },
+      "boot_n": {
+       "rot": 46.12099,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 99.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 10.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 32.28208,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -31.96383,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": -0.31825,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 3.1776437161565096e-14
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -18.71421,
+       "loc": [
+        4,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        4,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -10.9402,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 47.97336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.54246,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.45068
+      },
+      "shin_n": {
+       "rot": -55.61715,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.47572
+      },
+      "boot_n": {
+       "rot": 21.07469,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 98.71421,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 10.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 24.12731,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "shin_f": {
+       "rot": -34.21183,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "boot_f": {
+       "rot": 10.08452,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -17.3,
+       "loc": [
+        3,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        4,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -15.4198,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 15.8,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 48.7846,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.72405
+      },
+      "shin_n": {
+       "rot": -43.03257,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8045
+      },
+      "boot_n": {
+       "rot": -5.75204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 97.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 10.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 9.65765,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "shin_f": {
+       "rot": -33.6212,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "boot_f": {
+       "rot": 23.96355,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -15.88579,
+       "loc": [
+        2,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        4,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -19.30202,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -16.37336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 44.29789,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.98831
+      },
+      "shin_n": {
+       "rot": -37.59928,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.01888
+      },
+      "boot_n": {
+       "rot": -6.69861,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 95.88579,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 10.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -21.13204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -0.69359,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12734
+      },
+      "boot_f": {
+       "rot": 21.82563,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 2.842170943040401e-14
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -13.2,
+       "loc": [
+        1,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        3,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -17.1127,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -31.8,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 65.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 40.86304,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "shin_n": {
+       "rot": -30.77532,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "boot_n": {
+       "rot": -10.08772,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 71.2,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 50.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -24.66342,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -35.33587,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93887
+      },
+      "boot_f": {
+       "rot": 59.99929,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -13.78579,
+       "loc": [
+        1,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        3,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -14.6598,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -18.47336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.6266,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "shin_n": {
+       "rot": -32.26941,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "boot_n": {
+       "rot": -2.35719,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 71.78579,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 50.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -4.21354,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.50647
+      },
+      "shin_f": {
+       "rot": -56.70145,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.53461
+      },
+      "boot_f": {
+       "rot": 60.91499,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -15.2,
+       "loc": [
+        2,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        3,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -10.1802,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 13.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 24.29791,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "shin_n": {
+       "rot": -32.47586,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "boot_n": {
+       "rot": 8.17795,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 73.2,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 50.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 34.72775,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.68789
+      },
+      "shin_f": {
+       "rot": -47.83171,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.76432
+      },
+      "boot_f": {
+       "rot": 13.10396,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -16.61421,
+       "loc": [
+        3,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        3,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -6.29798,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 45.87336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 9.31623,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "shin_n": {
+       "rot": -31.84381,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "boot_n": {
+       "rot": 22.52758,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 74.61421,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 50.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 35.07073,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.00961
+      },
+      "shin_f": {
+       "rot": -37.29026,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": 2.21954,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -17.2,
+       "loc": [
+        3,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        3,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -5.2873,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 59.2,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 93.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": -2.23648,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79496
+      },
+      "shin_n": {
+       "rot": -43.88451,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.71128
+      },
+      "boot_n": {
+       "rot": 46.12099,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 75.2,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 50.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 32.28208,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -31.96383,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": -0.31825,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 3.1776437161565096e-14
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -16.61421,
+       "loc": [
+        3,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        3,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -7.7402,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 45.87336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.54246,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.45068
+      },
+      "shin_n": {
+       "rot": -55.61715,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.47572
+      },
+      "boot_n": {
+       "rot": 21.07469,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 74.61421,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 50.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 24.12731,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "shin_f": {
+       "rot": -34.21183,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "boot_f": {
+       "rot": 10.08452,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -15.2,
+       "loc": [
+        2,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        3,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -12.2198,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 13.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 48.7846,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.72405
+      },
+      "shin_n": {
+       "rot": -43.03257,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8045
+      },
+      "boot_n": {
+       "rot": -5.75204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 73.2,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 50.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 9.65765,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "shin_f": {
+       "rot": -33.6212,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "boot_f": {
+       "rot": 23.96355,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -13.78579,
+       "loc": [
+        1,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        3,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -16.10202,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -18.47336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 44.29789,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.98831
+      },
+      "shin_n": {
+       "rot": -37.59928,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.01888
+      },
+      "boot_n": {
+       "rot": -6.69861,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 71.78579,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_f": {
+       "rot": 50.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_f": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -21.13204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -0.69359,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12734
+      },
+      "boot_f": {
+       "rot": 21.82563,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "side",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 2.842170943040401e-14
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -9.0,
+       "loc": [
+        -1,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -2.7127,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -36.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 65.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 40.86304,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "shin_n": {
+       "rot": -30.77532,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.99834
+      },
+      "boot_n": {
+       "rot": -10.08772,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 37.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79365
+      },
+      "forearm_f": {
+       "rot": 103.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12472
+      },
+      "hand_f": {
+       "rot": -124.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -24.66342,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -35.33587,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93887
+      },
+      "boot_f": {
+       "rot": 59.99929,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -9.58579,
+       "loc": [
+        -1,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -0.2598,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -22.67336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.6266,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "shin_n": {
+       "rot": -32.26941,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.90865
+      },
+      "boot_n": {
+       "rot": -2.35719,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 37.88579,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79365
+      },
+      "forearm_f": {
+       "rot": 103.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12472
+      },
+      "hand_f": {
+       "rot": -124.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -4.21354,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.50647
+      },
+      "shin_f": {
+       "rot": -56.70145,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.53461
+      },
+      "boot_f": {
+       "rot": 60.91499,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -11.0,
+       "loc": [
+        0,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 4.2198,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 9.5,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 24.29791,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "shin_n": {
+       "rot": -32.47586,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.89722
+      },
+      "boot_n": {
+       "rot": 8.17795,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 39.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79365
+      },
+      "forearm_f": {
+       "rot": 103.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12472
+      },
+      "hand_f": {
+       "rot": -124.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 34.72775,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.68789
+      },
+      "shin_f": {
+       "rot": -47.83171,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.76432
+      },
+      "boot_f": {
+       "rot": 13.10396,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -12.41421,
+       "loc": [
+        1,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 8.10202,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 41.67336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 9.31623,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "shin_n": {
+       "rot": -31.84381,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.93292
+      },
+      "boot_n": {
+       "rot": 22.52758,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 40.71421,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79365
+      },
+      "forearm_f": {
+       "rot": 103.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12472
+      },
+      "hand_f": {
+       "rot": -124.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 35.07073,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.00961
+      },
+      "shin_f": {
+       "rot": -37.29026,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": 2.21954,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "n": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -13.0,
+       "loc": [
+        1,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 9.1127,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 55.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 93.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": -2.23648,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79496
+      },
+      "shin_n": {
+       "rot": -43.88451,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.71128
+      },
+      "boot_n": {
+       "rot": 46.12099,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 41.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79365
+      },
+      "forearm_f": {
+       "rot": 103.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12472
+      },
+      "hand_f": {
+       "rot": -124.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 32.28208,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -31.96383,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "boot_f": {
+       "rot": -0.31825,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 3.1776437161565096e-14
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        -1,
+        13
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -12.41421,
+       "loc": [
+        1,
+        -5
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 6.6598,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 41.67336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 88.89949,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 34.54246,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.45068
+      },
+      "shin_n": {
+       "rot": -55.61715,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.47572
+      },
+      "boot_n": {
+       "rot": 21.07469,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 40.71421,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79365
+      },
+      "forearm_f": {
+       "rot": 103.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12472
+      },
+      "hand_f": {
+       "rot": -124.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 24.12731,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "shin_f": {
+       "rot": -34.21183,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.94307
+      },
+      "boot_f": {
+       "rot": 10.08452,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        11
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -11.0,
+       "loc": [
+        0,
+        -6
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": 2.1802,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": 9.5,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 79.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 48.7846,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.72405
+      },
+      "shin_n": {
+       "rot": -43.03257,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.8045
+      },
+      "boot_n": {
+       "rot": -5.75204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 39.3,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79365
+      },
+      "forearm_f": {
+       "rot": 103.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12472
+      },
+      "hand_f": {
+       "rot": -124.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": 9.65765,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "shin_f": {
+       "rot": -33.6212,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.97624
+      },
+      "boot_f": {
+       "rot": 23.96355,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 0.0
+     }
+    },
+    {
+     "bones": {
+      "root": {
+       "rot": 0.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "pelvis": {
+       "rot": 0.0,
+       "loc": [
+        1,
+        8
+       ],
+       "sy": 1.0
+      },
+      "spine": {
+       "rot": -9.58579,
+       "loc": [
+        -1,
+        -7
+       ],
+       "sy": 1.0
+      },
+      "head": {
+       "rot": 0.0,
+       "loc": [
+        2,
+        3
+       ],
+       "sy": 1.0
+      },
+      "sash": {
+       "rot": -1.70202,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_n": {
+       "rot": -22.67336,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "forearm_n": {
+       "rot": 69.10051,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "hand_n": {
+       "rot": -90.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_n": {
+       "rot": 44.29789,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.98831
+      },
+      "shin_n": {
+       "rot": -37.59928,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.01888
+      },
+      "boot_n": {
+       "rot": -6.69861,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "upper_arm_f": {
+       "rot": 37.88579,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 0.79365
+      },
+      "forearm_f": {
+       "rot": 103.7,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12472
+      },
+      "hand_f": {
+       "rot": -124.0,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      },
+      "thigh_f": {
+       "rot": -21.13204,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.02
+      },
+      "shin_f": {
+       "rot": -0.69359,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.12734
+      },
+      "boot_f": {
+       "rot": 21.82563,
+       "loc": [
+        0,
+        0
+       ],
+       "sy": 1.0
+      }
+     },
+     "far_leg_front": 0,
+     "slots": {
+      "hand_n": "side",
+      "hand_f": "guard",
+      "layer": 2
+     },
+     "planted_err": {
+      "f": 2.842170943040401e-14
      }
     }
    ]
@@ -5839,7 +14239,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -5988,7 +14389,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "f": 3.1776437161565096e-14
@@ -6136,7 +14538,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -6282,7 +14685,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -6428,7 +14832,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -6574,7 +14979,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 2.842170943040401e-14
@@ -6722,7 +15128,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -6871,7 +15278,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -7020,7 +15428,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -7169,7 +15578,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -7329,7 +15739,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -7475,7 +15886,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -7621,7 +16033,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0
@@ -7769,7 +16182,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -7918,7 +16332,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 2.842170943040401e-14,
@@ -8067,7 +16482,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 2.842170943040401e-14,
@@ -8216,7 +16632,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -8365,7 +16782,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -8526,7 +16944,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -8672,7 +17091,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -8818,7 +17238,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 3.1776437161565096e-14
@@ -8966,7 +17387,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -9115,7 +17537,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -9264,7 +17687,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -9410,7 +17834,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -9556,7 +17981,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -9702,7 +18128,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -9848,7 +18275,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -9994,7 +18422,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -10140,7 +18569,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -10286,7 +18716,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -10432,7 +18863,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -10578,7 +19010,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -10724,7 +19157,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -10870,7 +19304,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     },
@@ -11016,7 +19451,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {}
     }
@@ -11177,7 +19613,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -11326,7 +19763,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 7.105427357601002e-15,
@@ -11475,7 +19913,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -11624,7 +20063,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -11773,7 +20213,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -11922,7 +20363,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -12071,7 +20513,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -12220,7 +20663,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -12369,7 +20813,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -12518,7 +20963,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -12667,7 +21113,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 5.684341886080802e-14,
@@ -12816,7 +21263,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -12965,7 +21413,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 5.684341886080802e-14,
@@ -13114,7 +21563,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -13263,7 +21713,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 5.684341886080802e-14,
@@ -13412,7 +21863,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -13561,7 +22013,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 5.684341886080802e-14,
@@ -13710,7 +22163,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -13859,7 +22313,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 5.684341886080802e-14,
@@ -14008,7 +22463,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -14157,7 +22613,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -14306,7 +22763,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -14455,7 +22913,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -14604,7 +23063,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -14753,7 +23213,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -14902,7 +23363,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -15066,7 +23528,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -15215,7 +23678,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -15364,7 +23828,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 3.1776437161565096e-14,
@@ -15513,7 +23978,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -15662,7 +24128,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -15811,7 +24278,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "guard",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 2.842170943040401e-14,
@@ -15960,7 +24428,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "guard",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -16109,7 +24578,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "guard",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -16258,7 +24728,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "guard",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -16407,7 +24878,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "guard",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -16556,7 +25028,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "guard",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 3.1776437161565096e-14,
@@ -16705,7 +25178,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "guard",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -16854,7 +25328,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "guard",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -17003,7 +25478,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "guard",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -17152,7 +25628,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "guard",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -17301,7 +25778,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "guard",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -17450,7 +25928,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -17599,7 +26078,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 5.684341886080802e-14,
@@ -17748,7 +26228,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 2.842170943040401e-14,
@@ -17897,7 +26378,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -18046,7 +26528,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "side"
+      "hand_f": "side",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,
@@ -18195,7 +26678,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 1.4210854715202004e-14,
@@ -18344,7 +26828,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 7.105427357601002e-15,
@@ -18493,7 +26978,8 @@
      "far_leg_front": 0,
      "slots": {
       "hand_n": "side",
-      "hand_f": "guard"
+      "hand_f": "guard",
+      "layer": 0
      },
      "planted_err": {
       "n": 0.0,

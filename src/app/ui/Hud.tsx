@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { UiSnapshot } from '../../bridge/UiSnapshot';
 import { roundedTime } from '../../core/Math';
 import { RULES } from '../../core/Rules';
@@ -6,7 +6,7 @@ import type { BossHud } from '../../bridge/UiSnapshot';
 import { Minimap } from './Minimap';
 import type { RunHud } from '../../bridge/UiSnapshot';
 
-interface Props { s: UiSnapshot; pad: boolean; onPause: () => void; }
+interface Props { s: UiSnapshot; pad: boolean; onPause: () => void; reduced?: boolean; }
 
 const icon = (name: string) => `url(${import.meta.env.BASE_URL}ui/icons/${name}.png)`;
 const pct = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
@@ -46,10 +46,22 @@ function RunTrack({ r }: { r: RunHud }) {
 }
 const mmss = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 
-export function Hud({ s, pad, onPause }: Props) {
+/** Brief red screen-edge flash on a REAL hp loss (not on i-frames, regen, revive or a full-tank refill). Keyed so each new hit restarts it; Reduced Effects gets a short static edge instead of the pulse. */
+function useHitVignette(s: UiSnapshot) {
+  const prev = useRef(s.hp), [hit, setHit] = useState({ n: 0, k: 0 });
+  useEffect(() => {
+    const loss = prev.current - s.hp; prev.current = s.hp;
+    if (loss > 0.5 && s.phase !== 'victory') setHit(h => ({ n: h.n + 1, k: Math.min(1, 0.4 + (loss / Math.max(1, s.maxHp)) * 2.2) }));
+  }, [s.hp, s.maxHp, s.phase]);
+  return hit;
+}
+
+export function Hud({ s, pad, onPause, reduced }: Props) {
+  const hit = useHitVignette(s);
   const hpFrac = s.hp / s.maxHp, low = hpFrac <= 0.3;
   const canForm = !s.form && s.drive >= RULES.formCharge && s.formCooldown <= 0;
   return <div className="hud" data-testid="hud">
+    {hit.n > 0 && <div key={hit.n} className={`hit-vignette ${reduced ? 'calm' : ''}`} data-testid="hit-vignette" style={{ '--k': hit.k } as CSSProperties} aria-hidden="true"/>}
     {s.sinceRevive < 1 && <div className="revive-flash" aria-hidden="true"/>}
     <div className="hud-panel hud-health">
       <div className={`portrait ${s.form ? 'is-form' : ''}`}><img src={`${import.meta.env.BASE_URL}ui/kai-portrait-${s.form ? 'f1' : 'base'}.png`} alt="" draggable={false}/><span className="lvl" aria-label={`Level ${s.level}`}>{s.level}</span>{s.revives > 0 && <span className="revive-badge" style={{ '--ico': icon('heart') } as CSSProperties} title="Second Wind ready" aria-label="Second Wind ready"/>}</div>

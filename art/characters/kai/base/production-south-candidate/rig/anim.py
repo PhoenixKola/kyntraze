@@ -140,7 +140,7 @@ def run():
         # B07-pre: fists are placed by targets (reach_helper IK) so each fist travels a short near-vertical path beside the body: back phase = fist at the hip,
         # forward phase = fist pumped up to chest/chin height, elbows out and down. (The old per-angle forearm sweep of ~200 deg dragged both fists across the torso.)
         import anim_b05 as _b
-        CXr = 9.0; tn = (CXr - lerp(21, 15, fn_), lerp(-52, -80, fn_)); tf = (CXr + lerp(21, 15, ff_), lerp(-52, -80, ff_))
+        CXr = 9.0; tn = (CXr - lerp(30, 24, fn_), lerp(-50, -78, fn_)); tf = (CXr + lerp(30, 24, ff_), lerp(-50, -78, ff_))   # pre-B12: wider path, beside the torso edges, so the fists no longer cross the sash / belly
         p.update(_b.reach(p, {"n": tn, "f": tf}, {"n": None, "f": None}, "out"))
         p["sash"] = 14.0 * math.sin(ph - 1.4)
         fr.append(p)
@@ -191,7 +191,25 @@ def punch():
     return {"name": "BasicPunch", "fps": 16, "loop": False, "frames": fr,
             "events": {"anticipation_start": 1, "impact": 5, "recover_start": 8, "interruptible_from": 11}}
 
-CLIPS = [idle, run, punch]
+# ------------------------------------------------------------------ B12-pre: moving attack as two LAYERS of the same rig (no pixel crop). See danim.py (other directions).
+PUNCH_STEPS = (1, 3, 4, 5, 7, 9)
+def run_lower():
+    c = run(); fr = []
+    for p in c["frames"]: q = copy.deepcopy(p); q["layer"] = 1; fr.append(q)
+    return {"name": "RunLower", "fps": 14, "loop": True, "frames": fr, "events": {}}
+def run_punch_upper():
+    base = run()["frames"]; pk = punch()["frames"]; fr = []
+    for kk in PUNCH_STEPS:
+        src = pk[kk]
+        for i in range(8):
+            p = copy.deepcopy(base[i]); p["layer"] = 2
+            if "arm_f" in src: p["arm_f"] = copy.deepcopy(src["arm_f"])
+            p["spine_rot"] = p.get("spine_rot", 0.0) + 0.7 * src.get("spine_rot", 0.0)
+            cx, cy = src.get("chest", (0, 0)); p["chest"] = (p["chest"][0] + round(0.5 * cx), p["chest"][1]); p["head"] = (p["head"][0] + round(0.5 * src.get("head", (0, 0))[0]), p["head"][1])
+            p["sash"] = 0.5 * p["sash"] + 0.8 * src.get("sash", 0.0)
+            fr.append(p)
+    return {"name": "RunPunchUpper", "fps": 16, "loop": False, "frames": fr, "events": {"impact": 3 * 8}}
+CLIPS = [idle, run, punch, run_lower, run_punch_upper]
 import anim_b03g  # noqa: E402  (B03G clips)
 CLIPS += anim_b03g.CLIPS
 import anim_form  # noqa: E402  (Form I: hair follow-through + Transform clip; no-ops for the base build)
@@ -200,7 +218,7 @@ import anim_b05  # noqa: E402  (B05: Beam + Sphere signature abilities, base and
 CLIPS += anim_b05.CLIPS
 
 def slots_of(p):
-    s = {}
+    s = {"layer": p.get("layer", 0)}
     if r.FORM == "f1": s["form"] = p.get("form_slot", "f1")
     for side in ("n", "f"):
         a = p.get(f"arm_{side}", {})

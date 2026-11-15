@@ -149,8 +149,10 @@ def load_images(prefilter=False, folder=PARTS_DIR):
         out[p["id"]] = (prefilter8(a), 8) if prefilter else (a, 1)
     return out
 
+LOWER_IDS = ("hips", "thigh_n", "thigh_f", "shin_n", "shin_f", "boot_n", "boot_f", "lining_c")
 def visible(slots=None):
-    slots = dict(slots or {}); hide = set(slots.pop("_hide", []))
+    slots = dict(slots or {}); hide = set(slots.pop("_hide", [])); layer = slots.pop("layer", 0)
+    if layer: hide |= {p["id"] for p in PARTS if (p["id"] in LOWER_IDS) == (layer == 2)}   # layer 1 = lower body only (legs + hips), 2 = upper body only (everything else)
     s = dict(DEFAULT_SLOTS); s.update(slots)
     return [p for p in PARTS if p["id"] not in hide and ("slot" not in p or s[p["slot"].split(":")[0]] == p["slot"].split(":")[1])]
 

@@ -23,8 +23,10 @@ describe('Kai manifests', () => {
     for (const clip of KAI_CLIPS) {
       const a = m.animations[clip];
       const f = clipFrame(m, clip); expect(pngSize(pub(dir, a.sheet))).toEqual({ w: f.w * a.frames, h: f.h });
-      expect(f.ox).toBeLessThan(f.w); expect(f.oy).toBeLessThanOrEqual(f.h);
+      expect(f.ox).toBeLessThan(f.w); if (clip !== 'RunPunchUpper') expect(f.oy).toBeLessThanOrEqual(f.h);   // the upper-body layer is cropped above the feet: its ground origin lies below its frame
     }
+    expect([m.animations.RunLower.frames, m.animations.RunLower.fps, m.animations.RunLower.loop]).toEqual([8, 14, true]);
+    expect([m.animations.RunPunchUpper.frames, m.animations.RunPunchUpper.fps, m.animations.RunPunchUpper.loop, m.animations.RunPunchUpper.events.impact]).toEqual([48, 16, false, 24]);
     expect([m.animations.Dash.frames, m.animations.Dash.loop, m.animations.Dash.events.recover_start]).toEqual([10, false, 7]);
     expect([m.animations.Hurt.frames, m.animations.Hurt.loop]).toEqual([8, false]);
     expect([m.animations.Death.frames, m.animations.Death.loop, m.animations.Death.terminal]).toEqual([18, false, 'hold_last_frame']);
@@ -139,14 +141,30 @@ describe('KaiAnimator', () => {
     expect(p).toMatchObject({ clip: 'BasicPunch', facing: 'east' }); expect(p.frame).toBeGreaterThanOrEqual(2);
   });
 
-  it('B07pre: auto-attacking while running keeps the whole Run clip (no punch/legs composite, no seam)', () => {
-    const a = new KaiAnimator(manifests); const clips = new Set<string>(); let anyLegs = false;
-    for (let i = 0; i < 60; i++) {
-      const p = a.update({ ...idle, moving: true, inputX: 1, attackClock: i < 5 ? 0.05 : 1, hasTarget: true, targetDx: 100, shot: i === 3 ? { dx: 100, dy: 0 } : null }, 0.55);
-      clips.add(p.clip); if (p.legs !== null) anyLegs = true;
+  it('pre-B12: auto-attacking while running plays the layered RunPunchUpper over a leg-phase-matched RunLower, with no turn toward the target and one strike per shot', () => {
+    const a = new KaiAnimator(manifests); const clips = new Set<string>(); const facings = new Set<string>(); let layered = 0, impactFrames = 0, prevLegs = -1;
+    for (let i = 0; i < 90; i++) {
+      const shotNow = i % 30 === 12;
+      const p = a.update({ ...idle, moving: true, inputX: 1, attackClock: i % 30 > 20 ? 0.05 : 1, hasTarget: true, targetDx: -100, shot: shotNow ? { dx: -100, dy: 0 } : null }, 0.55);
+      clips.add(p.clip); facings.add(p.facing);
+      if (p.clip === 'RunPunchUpper') { layered++; expect(p.legs).not.toBeNull(); expect(p.frame % 8).toBe(p.legs); expect(p.legs!).toBeGreaterThanOrEqual(0); expect(p.legs!).toBeLessThan(8); if (Math.floor(p.frame / 8) === 3) impactFrames++; }
+      else expect(p.legs).toBeNull();
+      void prevLegs; prevLegs = p.legs ?? -1;
     }
-    expect([...clips]).toEqual(['Run']); expect(anyLegs).toBe(false);
+    expect(clips.has('RunPunchUpper')).toBe(true); expect(clips.has('Run')).toBe(true); expect(layered).toBeGreaterThan(8); expect(impactFrames).toBeGreaterThanOrEqual(3);
+    expect([...facings]).toEqual(['east']);   // moving east while the target is west: the body never flips to chase the target
     expect(a.update({ ...idle }, 0.55).legs).toBeNull();
+  });
+  it('pre-B12: stopping mid-attack finishes it as the standing punch, and starting to run mid-punch carries it into the run punch (no snap to idle/run)', () => {
+    const a = new KaiAnimator(manifests); const moving = { ...idle, moving: true, inputX: 1 };
+    for (let i = 0; i < 10; i++) a.update({ ...moving, attackClock: 0.05, hasTarget: true, targetDx: 100 }, 0.55);
+    expect(a.runPunching).toBe(true); const p = a.update({ ...idle, attackClock: 1 }, 0.55); expect(p.clip).toBe('BasicPunch'); expect(a.runPunching).toBe(false);
+    const b = new KaiAnimator(manifests); for (let i = 0; i < 12; i++) b.update({ ...idle, attackClock: 0.05, hasTarget: true, targetDx: 100 }, 0.55);
+    expect(b.punching).toBe(true); const q = b.update({ ...moving, attackClock: 1 }, 0.55); expect(q.clip).toBe('RunPunchUpper'); expect(b.punching).toBe(false);
+  });
+  it('pre-B12: hurt, dash and casts cancel the run punch', () => {
+    const a = new KaiAnimator(manifests); for (let i = 0; i < 10; i++) a.update({ ...idle, moving: true, inputX: 1, attackClock: 0.05, hasTarget: true, targetDx: 100 }, 0.55);
+    expect(a.runPunching).toBe(true); a.update({ ...idle, moving: true, inputX: 1, hurt: true }, 0.55); expect(a.runPunching).toBe(false);
   });
   it('B03F.1: facing cannot flip faster than the dwell while targets alternate or diagonals jitter', () => {
     const a = new KaiAnimator(manifests); let flips = 0; let prev = a.facing;
@@ -195,7 +213,7 @@ describe('B03G.1 Results delay contract (GameBridge)', () => {
 describe('B04 Form I manifests', () => {
   for (const dir of KAI_DIRS) it(`${dir}: separate Form I sheets match their frame sizes; Transform has the form_commit event; contract unchanged from base`, () => {
     const m = f1[dir], b = manifests[dir];
-    for (const clip of KAI_F1_CLIPS) { const a = m.animations[clip]!, f = clipFrame(m, clip); expect(pngSize(pubF1(dir, a.sheet))).toEqual({ w: f.w * a.frames, h: f.h }); expect(f.ox).toBeLessThan(f.w); expect(f.oy).toBeLessThanOrEqual(f.h); }
+    for (const clip of KAI_F1_CLIPS) { const a = m.animations[clip]!, f = clipFrame(m, clip); expect(pngSize(pubF1(dir, a.sheet))).toEqual({ w: f.w * a.frames, h: f.h }); expect(f.ox).toBeLessThan(f.w); if (clip !== 'RunPunchUpper') expect(f.oy).toBeLessThanOrEqual(f.h); }
     for (const clip of KAI_CLIPS) expect([m.animations[clip].frames, m.animations[clip].fps, m.animations[clip].loop]).toEqual([b.animations[clip].frames, b.animations[clip].fps, b.animations[clip].loop]);
     expect(m.animations.BasicPunch.events.impact).toBe(5);
     const t = m.animations.Transform!; expect([t.frames, t.fps, t.loop, t.events.form_commit]).toEqual([16, 20, false, 7]);

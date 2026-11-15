@@ -7,7 +7,7 @@ import { AbilityFx } from './abilityFx';
 import { EnemyRenderer } from './enemyRenderer';
 import { BossRenderer } from './bossRenderer';
 import { KAI_ANCHORS_KEY, handAnchorWorld, type AnchorTable, type HandAnchor } from '../../assets/kaiAnimation';
-import { KAI_F1_REGISTRY_KEY, KAI_GROUND_DY, KAI_REGISTRY_KEY, clipFrame, KAI_SCALE, KAI_SPLIT_ABOVE_FEET, KaiAnimator, kaiTextureKey, type AnimPose, type KaiManifests } from '../../assets/kaiAnimation';
+import { KAI_F1_REGISTRY_KEY, KAI_GROUND_DY, KAI_REGISTRY_KEY, clipFrame, KAI_SCALE, KaiAnimator, kaiTextureKey, type AnimPose, type KaiManifests } from '../../assets/kaiAnimation';
 export class EntityRenderer {
   private hero: Phaser.GameObjects.Sprite;
   private legs: Phaser.GameObjects.Sprite;
@@ -80,17 +80,14 @@ export class EntityRenderer {
     this.hero.setAlpha(alpha);
     this.hero.tintMode = Phaser.TintModes.MULTIPLY; this.legs.tintMode = Phaser.TintModes.MULTIPLY;
     if (hitFlash && !state.cast) { this.hero.setTint(0xffeef2); this.hero.tintMode = Phaser.TintModes.FILL; this.legs.setTint(0xffeef2); this.legs.tintMode = Phaser.TintModes.FILL; } else this.hero.clearTint();   // Form I is separate art (kaif1-* sheets), never a tint of the base
-    // punching while moving: upper body from the punch frame, legs from the run cycle, split just under the belt
-    const split = m.origin_px[1] - KAI_SPLIT_ABOVE_FEET;
+    // attacking while moving: the hero sprite is the upper-body layer (RunPunchUpper), the legs sprite is the leg-phase-matched RunLower layer from the same rig, drawn under it. No pixel crop.
     if (this.pose.legs !== null) {
-      this.hero.setCrop(0, 0, m.frame_width, split);
-      const lkey = kaiTextureKey(this.pose.facing, 'Run', this.pose.form);
+      const lf = clipFrame(m, 'RunLower'), lkey = kaiTextureKey(this.pose.facing, 'RunLower', this.pose.form);
       if (this.legs.texture.key !== lkey) this.legs.setTexture(lkey);
-      this.legs.setFrame(this.pose.legs).setCrop(0, split, m.frame_width, m.frame_height - split);
-      this.legs.setOrigin(m.origin_px[0] / m.frame_width, m.origin_px[1] / m.frame_height);
+      this.legs.setFrame(this.pose.legs).setOrigin(lf.ox / lf.w, lf.oy / lf.h);
       this.legs.setPosition(this.hero.x, this.hero.y).setAlpha(alpha).setVisible(true);
       if (!(hitFlash && !state.cast)) this.legs.clearTint();
-    } else { this.hero.setCrop(); this.legs.setVisible(false); }
+    } else this.legs.setVisible(false);
     for (const e of this.pose.events) {
       this.scene.events.emit('kai-form', e);
       if (e === 'form_commit') { this.flash = 0.07; if (!reducedEffects) this.scene.cameras.main.shake(110, 0.0025); }   // the reveal: a one-frame white-hot flash of the Form I sprite and a tiny camera kick

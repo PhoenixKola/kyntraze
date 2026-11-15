@@ -1,0 +1,43 @@
+{
+ "viewport": [
+  960,
+  540
+ ],
+ "flow": {
+  "strip": {
+   "strip": [
+    48,
+    425,
+    346,
+    62
+   ],
+   "go": [
+    315,
+    450,
+    64,
+    12
+   ],
+   "copy": [
+    153,
+    440,
+    142,
+    31
+   ],
+   "goCentreDelta": 0,
+   "overflowX": false
+  },
+  "vignetteDuring": null,
+  "vignetteAfter": "absent"
+ },
+ "shots": [
+  "ui-0-title-before-960x540.png",
+  "ui-1-hero-select-before-960x540.png",
+  "ui-2-arena-select-before-960x540.png",
+  "hud-1-portrait-base-before-960x540.png",
+  "hud-2-hit-vignette-peak-before-960x540.png",
+  "hud-3-after-hit-before-960x540.png",
+  "hud-4-portrait-form1-before-960x540.png"
+ ],
+ "consoleErrors": [],
+ "note": "swiftshader; motion not watched in real time"
+}

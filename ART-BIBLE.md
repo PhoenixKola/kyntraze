@@ -67,3 +67,9 @@ HUD ability glyphs (dash/impact/lance/nova/form/heart) stay monochrome white pix
 ## 13. Run finale and victory (B11)
 - Victory is gold + teal on the existing dark navy UI: key art (`victory-key.webp`, Kai from behind facing a sealing rift, no text) behind a gold-bordered results card with the crest (`victory-crest.png`); defeat keeps the plain card. Type is the UI face; the headline uses a cream-to-amber gradient, never a new font.
 - Finale signposting is sparse: one red banner 30 s before the Seraph, the boss warning, and the clock rail. In-world celebration is a flash, a camera kick and three gold/cyan rings; Reduced Effects removes all of it.
+
+## 14. Kai rear view, profile layering and the moving attack (pre-B12)
+- Rear view (NORTH): the guard is carried in front of the chest, so both whole arms draw BEHIND the jacket layer; only sleeves / elbows / a back-of-fist wrap at the hip peek out. Never use the front `guard` fist (exposed knuckles) in a back view; the swinging-forward arm is foreshortened and folds in behind the jacket.
+- Profile (EAST/WEST): the head draws over the near sleeve and forearm so a shoulder can never swallow the jaw or hair; only fists stay in front. A guard fist rests forward of the jaw, never on the mouth.
+- Running + attacking is a two-layer export of one rig (`RunLower` legs+hips, `RunPunchUpper` strike x leg phase). Never crop two sprites at the belt.
+- HUD portraits are composed busts (ImageGen, bottom-anchored shoulders, face unobstructed), Base black hair / Form I Solar gold; menu backdrops stay <= 85% opacity under a dark gradient so card text keeps its contrast.

@@ -301,26 +301,6 @@
    "angle": 0.0
   },
   {
-   "id": "head",
-   "img": "head.png",
-   "bone": "head",
-   "pivot": [
-    20.141025641025642,
-    39.0
-   ],
-   "angle": 0.0
-  },
-  {
-   "id": "torso",
-   "img": "torso.png",
-   "bone": "spine",
-   "pivot": [
-    21.5,
-    34.0
-   ],
-   "angle": 0.0
-  },
-  {
    "id": "upper_arm_f",
    "img": "upper_arm_f.png",
    "bone": "upper_arm_f",
@@ -419,6 +399,26 @@
    "angle": 0.0,
    "slot": "hand_n:side",
    "point": -90.0
+  },
+  {
+   "id": "head",
+   "img": "head.png",
+   "bone": "head",
+   "pivot": [
+    20.141025641025642,
+    39.0
+   ],
+   "angle": 0.0
+  },
+  {
+   "id": "torso",
+   "img": "torso.png",
+   "bone": "spine",
+   "pivot": [
+    21.5,
+    34.0
+   ],
+   "angle": 0.0
   }
  ],
  "default_slots": {

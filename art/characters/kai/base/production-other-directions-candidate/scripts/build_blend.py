@@ -26,7 +26,7 @@ bpy.ops.object.mode_set(mode="OBJECT")
 for b in r.NO_INHERIT_SCALE: arm_data.bones[b].inherit_scale = "NONE"
 arm_data.display_type = "STICK"; arm.show_in_front = True
 for pb in arm.pose.bones: pb.rotation_mode = "XYZ"
-root = arm.pose.bones["root"]; root["hand_n_slot"] = 0; root["hand_f_slot"] = 0
+root = arm.pose.bones["root"]; root["layer"] = 0; root["hand_n_slot"] = 0; root["hand_f_slot"] = 0
 SLOTS = ("guard", "side")
 FORMSLOT = {"base": 0, "f1": 1}; root["form_slot"] = 1   # Form I rigs: which head/hair set is visible (the base head stays in the file for the transformation clip)
 
@@ -54,17 +54,20 @@ for i, p in enumerate(r.PARTS):
     ob.matrix_parent_inverse = (arm.matrix_world @ bone.matrix_local @ Matrix.Translation((0, bone.length, 0))).inverted()
     ob["rig_part_id"] = p["id"]; ob["draw_index"] = i; objs[p["id"]] = ob
 
-def drive(ob, path, expr, prop):
-    fc = ob.driver_add(path); d = fc.driver; d.type = "SCRIPTED"
-    v = d.variables.new(); v.name = "s"; v.type = "SINGLE_PROP"
-    v.targets[0].id_type = "OBJECT"; v.targets[0].id = arm; v.targets[0].data_path = f'pose.bones["root"]["{prop}"]'; d.expression = expr
+SLOTCOND = {}
 for side in "nf":
-    for k, sname in enumerate(SLOTS):
-        for prop in ("hide_render", "hide_viewport"): drive(objs[f"fist_{sname}_{side}"], prop, f"s != {k}", f"hand_{side}_slot")
-
+    for k, sname in enumerate(SLOTS): SLOTCOND[f"fist_{sname}_{side}"] = (f"s != {k}", f"hand_{side}_slot")
 for p in r.PARTS:
-    if p.get("slot", "").startswith("form:"):
-        for prop in ("hide_render", "hide_viewport"): drive(objs[p["id"]], prop, f"s != {FORMSLOT[p['slot'].split(':')[1]]}", "form_slot")
+    if p.get("slot", "").startswith("form:"): SLOTCOND[p["id"]] = (f"s != {FORMSLOT[p['slot'].split(':')[1]]}", "form_slot")
+def hide_driver(ob, path, cond, props):
+    fc = ob.driver_add(path); d = fc.driver; d.type = "SCRIPTED"
+    for name, prop in props.items():
+        v = d.variables.new(); v.name = name; v.type = "SINGLE_PROP"; v.targets[0].id_type = "OBJECT"; v.targets[0].id = arm; v.targets[0].data_path = f'pose.bones["root"]["{prop}"]'
+    d.expression = cond
+for p in r.PARTS:
+    lay = "l == 2" if p["id"] in r.LOWER_IDS else "l == 1"; props = {"l": "layer"}; cond = f"({lay})"
+    if p["id"] in SLOTCOND: sc_, sp_ = SLOTCOND[p["id"]]; cond = f"({sc_}) or ({lay})"; props["s"] = sp_
+    for prop in ("hide_render", "hide_viewport"): hide_driver(objs[p["id"]], prop, cond, props)
 
 cam_data = bpy.data.cameras.new(NAME + "_Cam"); cam_data.type = "ORTHO"; cam_data.ortho_scale = max(r.CANVAS) * PX
 cam = bpy.data.objects.new(NAME + "_Cam", cam_data); sc.collection.objects.link(cam)
@@ -86,6 +89,7 @@ for clip in data["clips"]:
             pb.keyframe_insert("scale", index=1, frame=f, group=pb.name)
         for side in "nf":
             root[f"hand_{side}_slot"] = SLOTS.index(fr["slots"][f"hand_{side}"]); root.keyframe_insert(f'["hand_{side}_slot"]', frame=f, group="root")
+        root["layer"] = fr["slots"].get("layer", 0); root.keyframe_insert('["layer"]', frame=f, group="root")
         if "form" in fr["slots"]: root["form_slot"] = FORMSLOT[fr["slots"]["form"]]; root.keyframe_insert('["form_slot"]', frame=f, group="root")
     try:
         for layer in act.layers:

@@ -30,7 +30,7 @@ function GameStage({ bridge, seed, arena, pad, onHome, onSettings }: { bridge: G
     // Settings are updated as menu state; effect should NOT recreate active game.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [host, bridge, seed, arena]);
-  return <div className="game-shell" data-testid="game-shell"><div className="arena-viewport" ref={setHost} aria-label="Playable Kyntraze arena"/>{ready && <Hud s={snapshot} pad={pad} onPause={() => bridge.togglePause()}/>}{!ready && <LoadingScreen progress={progress} arena={ARENAS[arena].name.toUpperCase()}/>}
+  return <div className="game-shell" data-testid="game-shell"><div className="arena-viewport" ref={setHost} aria-label="Playable Kyntraze arena"/>{ready && <Hud s={snapshot} pad={pad} onPause={() => bridge.togglePause()} reduced={bridge.getSettings().reducedEffects}/>}{!ready && <LoadingScreen progress={progress} arena={ARENAS[arena].name.toUpperCase()}/>}
     {snapshot.phase === 'upgrade' && <LevelUpScreen level={snapshot.level} reward={snapshot.rewardPick} cards={snapshot.cards} owned={snapshot.owned} onChoose={id => bridge.choose(id)} />}
     {snapshot.phase === 'paused' && <PauseMenu s={snapshot} onResume={() => bridge.togglePause()} onHome={onHome} onSettings={onSettings}/>}
     {((snapshot.phase === 'dead' && snapshot.deathShown) || (snapshot.phase === 'victory' && snapshot.victoryShown)) && <ResultsScreen s={snapshot} onRetry={() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))} onHome={onHome}/>}
@@ -40,6 +40,10 @@ export default function App() {
   const pad = useControllerNav();
   const [view, setView] = useState<'title' | 'select' | 'arena' | 'game'>('title');
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+  type View = 'title' | 'select' | 'arena' | 'game';
+  /** Menu route change: the current screen eases out (~110 ms) and the next eases in. Input is never blocked after the swap; a second press during the exit is ignored. */
+  const go = (to: View) => { if (leaving) return; if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { setView(to); return; } setLeaving(true); window.setTimeout(() => { setView(to); setLeaving(false); }, 110); };
   const [save, setSave] = useState(initialSave);
   const [seedInput, setSeedInput] = useState(new URLSearchParams(window.location.search).get('seed') ?? '');
   const urlArena = new URLSearchParams(window.location.search).get('arena');
@@ -53,9 +57,9 @@ export default function App() {
   const home = () => { setView('title'); setSettingsOpen(false); setSave(loadSave()); };
   return <PadContext.Provider value={pad.connected}><div className="app">
     {pad.connected && <ControllerBadge/>}
-    {view === 'title' && <TitleScreen onPlay={() => setView('select')} onSettings={() => setSettingsOpen(true)} save={save}/>}
-    {view === 'select' && <HeroSelect onBack={() => setView('title')} onStart={() => start()} seed={seedInput} onSeed={setSeedInput} arena={arena} onArena={() => setView('arena')}/>}
-    {view === 'arena' && <ArenaSelect selected={arena} onSelect={chooseArena} onBack={() => setView('select')}/>}
+    {view === 'title' && <div className={`screen ${leaving ? 'leaving' : ''}`}><TitleScreen onPlay={() => go('select')} onSettings={() => setSettingsOpen(true)} save={save}/></div>}
+    {view === 'select' && <div className={`screen ${leaving ? 'leaving' : ''}`}><HeroSelect onBack={() => go('title')} onStart={() => start()} seed={seedInput} onSeed={setSeedInput} arena={arena} onArena={() => go('arena')}/></div>}
+    {view === 'arena' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ArenaSelect selected={arena} onSelect={chooseArena} onBack={() => go('select')}/></div>}
     {view === 'game' && <GameStage key={run.serial} bridge={bridge} seed={run.seed} arena={run.arena} pad={pad.connected} onHome={home} onSettings={() => setSettingsOpen(true)}/>}
     {settingsOpen && <SettingsPanel settings={save.settings} onChange={updateSettings} onClose={() => setSettingsOpen(false)}/>}
   </div></PadContext.Provider>;

@@ -58,6 +58,42 @@
    },
    "hit_contract": "apply damage and hitstop in Phaser on event 'impact' (0-based frame 5); the animation never applies damage itself"
   },
+  "RunLower": {
+   "sheet": "sheets/kai_west_runlower.png",
+   "frames": 8,
+   "fps": 14,
+   "loop": true,
+   "duration_s": 0.5714,
+   "blender_action": "RunLower",
+   "events": {},
+   "frame_width": 78,
+   "frame_height": 91,
+   "origin_px": [
+    42.0,
+    87.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "RunPunchUpper": {
+   "sheet": "sheets/kai_west_runpunchupper.png",
+   "frames": 48,
+   "fps": 16,
+   "loop": false,
+   "duration_s": 3.0,
+   "blender_action": "RunPunchUpper",
+   "events": {
+    "impact": 24
+   },
+   "frame_width": 100,
+   "frame_height": 102,
+   "origin_px": [
+    66.0,
+    151.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
   "Dash": {
    "sheet": "sheets/kai_west_dash.png",
    "frames": 10,

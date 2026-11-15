@@ -1,13 +1,16 @@
 /** Kai base-form directional animation: manifest contract + pure animation state (no Phaser, unit-testable). */
 import { BEAM, SPHERE } from '../content/abilities';
 export type Facing = 'south' | 'north' | 'east' | 'west';
-export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere';
+/** RunLower + RunPunchUpper are the two LAYERS of the moving attack (legs+hips of the Run cycle, and an upper body whose frames are `step * 8 + leg phase`); the runtime draws the lower one first. */
+export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere' | 'RunLower' | 'RunPunchUpper';
 /** Transform exists only in the Form I sheets. */
 export type KaiClip = KaiBaseClip | 'Transform';
 /** Which art set is shown: the approved base Kai, or the separately authored Form I sheets (never a tinted base). */
 export type KaiForm = 'base' | 'f1';
 export const KAI_DIRS: readonly Facing[] = ['south', 'north', 'east', 'west'];
-export const KAI_CLIPS: readonly KaiBaseClip[] = ['Idle', 'Run', 'BasicPunch', 'Dash', 'Hurt', 'Death', 'Beam', 'Sphere'];
+export const KAI_CLIPS: readonly KaiBaseClip[] = ['Idle', 'Run', 'BasicPunch', 'Dash', 'Hurt', 'Death', 'Beam', 'Sphere', 'RunLower', 'RunPunchUpper'];
+/** Leg phases per strike step in RunPunchUpper. */
+export const RUN_PHASES = 8;
 export const KAI_F1_CLIPS: readonly KaiClip[] = [...KAI_CLIPS, 'Transform'];
 /** Sim dash length (MovementSystem): the Dash clip's travel frames are mapped onto it so the animation follows the real dash. */
 export const SIM_DASH_SECONDS = 0.22;
@@ -114,10 +117,8 @@ export interface AnimFrameInput {
   /** The sim's active signature ability (player.cast): its clock drives the Beam / Sphere clip so the release frame lands on the sim's release tick. */
   cast?: { id: number; kind: 'beam' | 'sphere'; face: Facing; t: number; dirX: number; dirY: number } | null;
 }
-/** `legs` is the Run frame to draw for the lower body while the punch plays during movement (null = the whole body is the clip frame). */
+/** `legs` is the RunLower frame drawn under the hero sprite while the attack plays during movement (null = the whole body is the clip frame). */
 export interface AnimPose { facing: Facing; clip: KaiClip; frame: number; legs: number | null; /** which sheet set the frame belongs to */ form: KaiForm; /** events raised by the update that produced this pose */ events: readonly KaiAnimEvent[]; }
-/** Frame split between upper body (punch) and legs (run): this many frame-px above the ground origin, just under the belt. */
-export const KAI_SPLIT_ABOVE_FEET = 64;
 /** Minimum seconds between facing changes, so target switches and diagonal jitter cannot flip the sprite every frame. */
 const FACING_DWELL = 0.12;
 
@@ -148,6 +149,7 @@ export class KaiAnimator {
   private time = 0;
   private punchTime = -1;
   private punchRate = 1;
+  private runPunchTime = -1;
   private runTime = 0;
   private sinceTurn = 1;
   private movingNow = false;
@@ -168,6 +170,7 @@ export class KaiAnimator {
   constructor(private readonly manifests: KaiManifests, private readonly f1?: KaiManifests) {}
 
   get punching() { return this.punchTime >= 0; }
+  get runPunching() { return this.runPunchTime >= 0; }
   get dead() { return this.deathTime >= 0; }
   get transforming() { return this.transformTime >= 0; }
   /** True once the Death clip has played through and held its last frame for DEATH_RESULTS_HOLD_SECONDS. Never true while alive. */
@@ -199,7 +202,7 @@ export class KaiAnimator {
     this.events = [];
     const simForm = this.f1 ? (i.form ?? 0) : 0;
     if (!i.alive) {
-      if (this.deathTime < 0) { this.commitNow(simForm); this.punchTime = -1; this.hurtTime = -1; this.dashRec = -1; this.dashWas = false; this.revertTime = -1; if (simForm) this.visualForm = 'f1'; this.deathTime = 0; this.clip = 'Death'; }
+      if (this.deathTime < 0) { this.commitNow(simForm); this.punchTime = -1; this.runPunchTime = -1; this.hurtTime = -1; this.dashRec = -1; this.dashWas = false; this.revertTime = -1; if (simForm) this.visualForm = 'f1'; this.deathTime = 0; this.clip = 'Death'; }
       else this.deathTime += i.dt;
       this.simFormPrev = simForm; this.movingNow = false; return this.pose();
     }
@@ -207,13 +210,13 @@ export class KaiAnimator {
     this.sinceTurn += i.dt;
     this.movingNow = i.moving || i.dashing;
 
-    if (simForm === 1 && this.simFormPrev === 0) { this.punchTime = -1; this.hurtTime = -1; this.dashRec = -1; this.revertTime = -1; this.transformTime = 0; this.visualForm = 'base'; this.events.push('form_start'); }
-    else if (simForm === 0 && this.simFormPrev === 1) { this.transformTime = -1; this.punchTime = -1; this.visualForm = 'base'; this.revertTime = 0; this.events.push('form_end'); }
+    if (simForm === 1 && this.simFormPrev === 0) { this.punchTime = -1; this.runPunchTime = -1; this.hurtTime = -1; this.dashRec = -1; this.revertTime = -1; this.transformTime = 0; this.visualForm = 'base'; this.events.push('form_start'); }
+    else if (simForm === 0 && this.simFormPrev === 1) { this.transformTime = -1; this.punchTime = -1; this.runPunchTime = -1; this.visualForm = 'base'; this.revertTime = 0; this.events.push('form_end'); }
     this.simFormPrev = simForm;
 
-    if (i.hurt) { this.commitNow(simForm); this.punchTime = -1; this.dashRec = -1; this.revertTime = -1; this.hurtTime = 0; }
+    if (i.hurt) { this.commitNow(simForm); this.punchTime = -1; this.runPunchTime = -1; this.dashRec = -1; this.revertTime = -1; this.hurtTime = 0; }
     if (i.dashing) {
-      if (!this.dashWas) { this.commitNow(simForm); this.punchTime = -1; this.hurtTime = -1; this.revertTime = -1; this.turn(facingFromInput(this.facing, i.dashX, i.dashY), true); }
+      if (!this.dashWas) { this.commitNow(simForm); this.punchTime = -1; this.runPunchTime = -1; this.hurtTime = -1; this.revertTime = -1; this.turn(facingFromInput(this.facing, i.dashX, i.dashY), true); }
       else this.turn(facingFromInput(this.facing, i.dashX, i.dashY));
       this.dashRec = -1; this.dashProg = Math.min(1, Math.max(0, 1 - (i.dashRemaining ?? SIM_DASH_SECONDS / 2) / SIM_DASH_SECONDS));
     } else if (this.dashWas) this.dashRec = 0;
@@ -234,14 +237,21 @@ export class KaiAnimator {
     const casting = !!i.cast && !busy;
     if (i.cast && casting) {
       if (i.cast.id !== this.castId) { this.castId = i.cast.id; this.turn(i.cast.face, true); }
-      this.castT = i.cast.t; this.castKind = i.cast.kind; this.punchTime = -1;
+      this.castT = i.cast.t; this.castKind = i.cast.kind; this.punchTime = -1; this.runPunchTime = -1;
     }
 
     if (casting) { /* the signature ability owns the hands */ }
     else if (!busy && this.movingNow) {
-      // B07pre: while running the ray fires with the full Run clip. The old upper-body-punch + run-legs composite showed a seam and distorted hips (owner: 'crops my character in the middle').
-      this.punchTime = -1; if (i.moving) this.turn(facingFromInput(this.facing, i.inputX, i.inputY));
+      // Pre-B12: the auto-attack is visible while running as two layers of the SAME rig (RunPunchUpper over RunLower, leg-phase matched), not a pixel crop of two sprites.
+      // Facing stays input-driven (target changes never turn the body mid-run); the sim keeps sole authority over when the hit lands, we only predict it from attackClock.
+      if (i.moving) this.turn(facingFromInput(this.facing, i.inputX, i.inputY));
+      const rp = this.info('RunPunchUpper'), rpDur = rp.frames / RUN_PHASES / rp.fps, rpImpact = (rp.events.impact ?? 3 * RUN_PHASES) / RUN_PHASES / rp.fps;
+      if (this.punchTime >= 0) { const bp = this.info('BasicPunch'); this.runPunchTime = Math.min(rpDur - 1e-3, this.punchTime / (bp.frames / bp.fps) * rpDur); this.punchTime = -1; }   // started moving mid-punch: carry its progress over
+      if (i.shot) { if (!(this.runPunching && Math.abs(this.runPunchTime - rpImpact) <= 0.12)) this.runPunchTime = Math.max(0, rpImpact - 1.5 / rp.fps); }
+      else if (!this.runPunching && i.hasTarget && i.attackClock <= rpImpact) this.runPunchTime = rpImpact - Math.max(0, i.attackClock);
+      if (this.runPunching) { this.runPunchTime += i.dt; if (this.runPunchTime >= rpDur) this.runPunchTime = -1; }
     } else if (!busy) {
+      if (this.runPunchTime >= 0) { const bp = this.info('BasicPunch'), rp = this.info('RunPunchUpper'); this.punchTime = Math.min(bp.frames / bp.fps - 1e-3, this.runPunchTime / (rp.frames / RUN_PHASES / rp.fps) * (bp.frames / bp.fps)); this.runPunchTime = -1; }   // stopped mid-attack: finish it as the standing punch
       if (i.shot) {
         // the sim just fired: keep an aligned predicted punch, otherwise (target appeared this instant / extreme fire rate) snap in near the impact frame
         const aligned = this.punching && Math.abs(this.punchTime - plan.impactT) <= 0.2;
@@ -254,9 +264,9 @@ export class KaiAnimator {
         this.punchTime += i.dt * this.punchRate;
         if (this.punchTime >= plan.duration) this.punchTime = -1;
       } else if (i.moving) this.turn(facingFromInput(this.facing, i.inputX, i.inputY));
-    } else this.punchTime = -1;
+    } else { this.punchTime = -1; this.runPunchTime = -1; }
 
-    const want: KaiClip = this.hurtTime >= 0 ? 'Hurt' : (i.dashing || this.dashRec >= 0) ? 'Dash' : (this.transformTime >= 0 || this.revertTime >= 0) ? 'Transform' : casting ? (i.cast!.kind === 'beam' ? 'Beam' : 'Sphere') : this.punching ? 'BasicPunch' : i.moving ? 'Run' : 'Idle';
+    const want: KaiClip = this.hurtTime >= 0 ? 'Hurt' : (i.dashing || this.dashRec >= 0) ? 'Dash' : (this.transformTime >= 0 || this.revertTime >= 0) ? 'Transform' : casting ? (i.cast!.kind === 'beam' ? 'Beam' : 'Sphere') : this.punching ? 'BasicPunch' : this.runPunching && i.moving ? 'RunPunchUpper' : i.moving ? 'Run' : 'Idle';
     if (want !== this.clip) { this.clip = want; this.time = 0; }
     const runStep = i.dt * Math.min(18, Math.max(10, 14 * i.runSpeed / 250)) / 14;
     if (this.movingNow) this.runTime += runStep; else this.runTime = 0;
@@ -264,6 +274,9 @@ export class KaiAnimator {
     else if (want === 'Idle') this.time += i.dt;
     return this.pose();
   }
+
+  /** Which of the 8 Run leg poses the body is in right now (the same value drives RunLower and the upper layer's frame block). */
+  private legPhase() { const run = this.info('Run'); return Math.floor(this.runTime * run.fps + 1e-6) % RUN_PHASES % run.frames; }
 
   /** Events raised by the most recent update(). */
   pose(): AnimPose {
@@ -276,6 +289,8 @@ export class KaiAnimator {
     } else if (this.clip === 'Transform') {
       const commit = a.events.form_commit ?? 5;
       frame = this.transformTime >= 0 ? Math.min(a.frames - 1, Math.floor(this.transformTime * a.fps + 1e-6)) : Math.max(0, commit - 1 - Math.floor(Math.min(0.999, this.revertTime / FORM_REVERT_SECONDS) * commit));
+    } else if (this.clip === 'RunPunchUpper') {
+      frame = Math.min(a.frames / RUN_PHASES - 1, Math.floor(Math.max(0, this.runPunchTime) * a.fps + 1e-6)) * RUN_PHASES + this.legPhase();
     } else if (this.clip === 'Beam' || this.clip === 'Sphere') {
       frame = castFrame(a, this.castKind, this.castT);
     } else {
@@ -283,8 +298,7 @@ export class KaiAnimator {
       const raw = Math.floor(t * a.fps + 1e-6);
       frame = a.loop ? raw % a.frames : Math.min(a.frames - 1, raw);
     }
-    const run = this.info('Run');
-    const legs = this.clip === 'BasicPunch' && this.movingNow ? Math.floor(this.runTime * run.fps + 1e-6) % run.frames : null;
+    const legs = this.clip === 'RunPunchUpper' ? this.legPhase() : null;
     return { facing: this.facing, clip: this.clip, frame, legs, form, events: this.events };
   }
 }

@@ -5,14 +5,14 @@
  "direction": "north",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/kai-north.blend",
- "frame_width": 134,
+ "frame_width": 132,
  "frame_height": 160,
  "origin_px": [
   80.0,
   157.0
  ],
  "origin_normalized": [
-  0.597015,
+  0.606061,
   0.98125
  ],
  "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
@@ -57,6 +57,42 @@
     "interruptible_from": 11
    },
    "hit_contract": "apply damage and hitstop in Phaser on event 'impact' (0-based frame 5); the animation never applies damage itself"
+  },
+  "RunLower": {
+   "sheet": "sheets/kai_north_runlower.png",
+   "frames": 8,
+   "fps": 14,
+   "loop": true,
+   "duration_s": 0.5714,
+   "blender_action": "RunLower",
+   "events": {},
+   "frame_width": 76,
+   "frame_height": 94,
+   "origin_px": [
+    40.0,
+    91.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "RunPunchUpper": {
+   "sheet": "sheets/kai_north_runpunchupper.png",
+   "frames": 48,
+   "fps": 16,
+   "loop": false,
+   "duration_s": 3.0,
+   "blender_action": "RunPunchUpper",
+   "events": {
+    "impact": 24
+   },
+   "frame_width": 112,
+   "frame_height": 103,
+   "origin_px": [
+    70.0,
+    156.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
   },
   "Dash": {
    "sheet": "sheets/kai_north_dash.png",
@@ -136,10 +172,10 @@
     "recover_start": 20,
     "interruptible_from": 22
    },
-   "frame_width": 110,
+   "frame_width": 108,
    "frame_height": 157,
    "origin_px": [
-    55.0,
+    53.0,
     155.0
    ],
    "terminal": "once",
@@ -160,10 +196,10 @@
     "recover_start": 18,
     "interruptible_from": 21
    },
-   "frame_width": 108,
+   "frame_width": 98,
    "frame_height": 157,
    "origin_px": [
-    62.0,
+    52.0,
     155.0
    ],
    "terminal": "once",

@@ -381,16 +381,6 @@
    "angle": 0.0
   },
   {
-   "id": "head",
-   "img": "head.png",
-   "bone": "head",
-   "pivot": [
-    21.57547169811321,
-    40.0
-   ],
-   "angle": 0.0
-  },
-  {
    "id": "upper_arm_n",
    "img": "upper_arm_n.png",
    "bone": "upper_arm_n",
@@ -415,6 +405,16 @@
     8.0,
     21.5
    ]
+  },
+  {
+   "id": "head",
+   "img": "head.png",
+   "bone": "head",
+   "pivot": [
+    21.57547169811321,
+    40.0
+   ],
+   "angle": 0.0
   },
   {
    "id": "fist_guard_n",
