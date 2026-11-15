@@ -2,6 +2,7 @@ import type { Simulation } from '../sim/Simulation';
 import { blankSnapshot, type UiSnapshot } from './UiSnapshot';
 import type { UpgradeId } from '../content/upgrades';
 import { BOSSES } from '../content/bosses';
+import { ARENAS } from '../content/arenas';
 import { storeSave, type SaveV1, type GameSettings } from '../sim/SaveSystem';
 export class GameBridge {
   private listeners = new Set<() => void>();
@@ -24,7 +25,7 @@ export class GameBridge {
     this.current = { phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
       dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form,
-      formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s) };
+      formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
     if (s.phase === 'dead' && phaseChanged) {
       const stats = this.sim!.stats();
       if (!this.save.best || stats.score > this.save.best.score) { this.save.best = stats; storeSave(this.save); }

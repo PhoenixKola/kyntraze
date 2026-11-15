@@ -14,6 +14,9 @@ import { pruneDeadEntities } from './EntityRegistry';
 import type { UpgradeId } from '../content/upgrades';
 import { startAbility, updateAbilities, trackAim } from './AbilitySystem';
 import { gradeRun } from './GameTelemetry';
+import { updateArenaHazards } from './ArenaHazards';
+import { setActiveArena } from './CollisionSystem';
+import type { ArenaId } from '../content/arenas';
 export class Simulation {
   readonly state: GameState;
   readonly rng: SeededRng;
@@ -21,7 +24,7 @@ export class Simulation {
   private fHeld = false;
   private eHeld = false;
   private rHeld = false;
-  constructor(seed: number) { this.rng = new SeededRng(seed); this.state = makeState(seed); }
+  constructor(seed: number, arenaId: ArenaId = 'gloam') { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId); }
   step(dt: number, input: InputState) {
     const s = this.state; if (s.phase !== 'running') return;
     s.time += dt;
@@ -38,6 +41,7 @@ export class Simulation {
     updateDirector(s, this.rng, dt);
     moveEnemies(s, dt);
     updateEnemyShots(s, dt);
+    updateArenaHazards(s);
     updateHazards(s, dt);
     updateAutoWeapon(s, dt);
     updateContactDamage(s);

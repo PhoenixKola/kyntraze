@@ -19,6 +19,11 @@ export const BOSS_SOUNDS = ['boss_warning', 'warden_roar', 'warden_step', 'ruptu
   'aegis_brace', 'aegis_ram', 'aegis_block', 'cantor_charge', 'cantor_fire', 'cantor_aura_off'] as const;
 export type BossSound = (typeof BOSS_SOUNDS)[number];
 export const bossSoundUrl = (n: string) => `/audio/bosses/${n}.wav`;
+/** B09 arena hazard and ambient sounds (art/arenas/audio/synth_b09.py). Ambient accents are rare, quiet and render-side only. */
+export const ARENA_SOUNDS = ['surge_warn', 'surge_fire', 'pylon_charge', 'pylon_pulse', 'amb_gloam_a', 'amb_gloam_b', 'amb_ashen_a', 'amb_ashen_b'] as const;
+export type ArenaSound = (typeof ARENA_SOUNDS)[number];
+export const arenaSoundUrl = (n: string) => `/audio/arenas/${n}.wav`;
+export const ARENA_MIX = { level: 0.62, hearRange: 1400, minGain: 0.4, ambient: 0.16, ambientMin: 14, ambientMax: 30 } as const;
 export const BOSS_MIX = { level: 0.78, hearRange: 1100, minGain: 0.45, maxVoices: 4, minGap: 0.045 } as const;
 export const ENEMY_MIX = { level: 0.5, hearRange: 620, minGain: 0.12, maxVoices: 6, minGap: 0.045 } as const;
 const MASTER = 0.8;
@@ -49,7 +54,7 @@ export class AbilityAudio {
   unlock(): Promise<void> {
     void this.ctx.resume().catch(() => undefined);
     if (!this.master) { this.master = this.ctx.createGain(); this.master.gain.value = this.muted ? 0 : MASTER; this.master.connect(this.ctx.destination); }
-    this.loading ??= Promise.all([...ABILITY_SOUNDS.map(n => [n, soundUrl(n)] as const), ...ENEMY_SOUNDS.map(n => [n, enemySoundUrl(n)] as const), ...BOSS_SOUNDS.map(n => [n, bossSoundUrl(n)] as const)].map(async ([n, url]) => { try { this.buffers.set(n, await this.ctx.decodeAudioData(await this.fetchBuffer(url))); } catch { /* a missing sound must never break the game */ } })).then(() => undefined);
+    this.loading ??= Promise.all([...ABILITY_SOUNDS.map(n => [n, soundUrl(n)] as const), ...ENEMY_SOUNDS.map(n => [n, enemySoundUrl(n)] as const), ...BOSS_SOUNDS.map(n => [n, bossSoundUrl(n)] as const), ...ARENA_SOUNDS.map(n => [n, arenaSoundUrl(n)] as const)].map(async ([n, url]) => { try { this.buffers.set(n, await this.ctx.decodeAudioData(await this.fetchBuffer(url))); } catch { /* a missing sound must never break the game */ } })).then(() => undefined);
     return this.loading;
   }
 
@@ -60,7 +65,7 @@ export class AbilityAudio {
 
   private lastEnemy = new Map<string, number>();
   private lastEnemyEvent = 0;
-  private play(name: AbilitySound | EnemySound | BossSound, slot: Slot, vol = 1, rate = 1) {
+  private play(name: AbilitySound | EnemySound | BossSound | ArenaSound, slot: Slot, vol = 1, rate = 1) {
     const buf = this.buffers.get(name); if (!buf || !this.master || this.muted) return;
     if (slot === 'enemy') { if ([...this.voices].filter(v => v.slot === 'enemy').length >= ENEMY_MIX.maxVoices) return; }
     else if (slot === 'boss') { if ([...this.voices].filter(v => v.slot === 'boss').length >= BOSS_MIX.maxVoices) return; }
@@ -96,6 +101,10 @@ export class AbilityAudio {
 
   /** One enemy event -> sound. Only attacks near the player are heard, loudness falls with distance, and the same sound cannot restart within a few ms. */
   handleEnemy(ev: EnemyEvent, px: number, py: number) {
+    if ((ev.kind === 'hazard_warn' || ev.kind === 'hazard_fire') && (ev.tag === 'surge' || ev.tag === 'pylon')) {
+      const d = Math.hypot(ev.x - px, ev.y - py), g = ARENA_MIX.level * Math.max(ARENA_MIX.minGain, 1 - d / ARENA_MIX.hearRange);
+      this.play(ev.tag === 'surge' ? (ev.kind === 'hazard_warn' ? 'surge_warn' : 'surge_fire') : (ev.kind === 'hazard_warn' ? 'pylon_charge' : 'pylon_pulse'), 'boss', g); return;
+    }
     const boss = ev.enemy === 'warden' || ev.enemy === 'seraph' || ev.kind === 'hazard_fire' || ev.kind === 'enemy_phase' || ev.kind === 'enemy_intro';
     const d = Math.hypot(ev.x - px, ev.y - py), mix = boss ? BOSS_MIX : ENEMY_MIX; if (d > mix.hearRange) return;
     const gain = mix.level * Math.max(mix.minGain, 1 - d / mix.hearRange);
@@ -134,6 +143,16 @@ export class AbilityAudio {
     }
   }
 
+  private nextAmbient = 0;
+  /** A rare, quiet distant accent for the arena (not a soundtrack): one of two sounds every ~14-30 s of running time. Render-side randomness only; the sim never sees it. */
+  ambient(arena: 'gloam' | 'ashen', time: number) {
+    if (this.nextAmbient === 0) { this.nextAmbient = time + 10 + Math.random() * 10; return; }
+    if (time < this.nextAmbient) return;
+    this.nextAmbient = time + ARENA_MIX.ambientMin + Math.random() * (ARENA_MIX.ambientMax - ARENA_MIX.ambientMin);
+    if (this.voices.size > 0) return;
+    this.play(`amb_${arena}_${Math.random() < 0.5 ? 'a' : 'b'}` as ArenaSound, 'misc', ARENA_MIX.ambient);
+  }
+
   /** Per render frame: feed new sim events, follow the run phase (pause freezes sound, death silences casts). */
   sync(s: GameState) {
     if (s.phase !== this.lastPhase) {
@@ -141,6 +160,7 @@ export class AbilityAudio {
       else { if (s.phase === 'dead') this.stopAll(0.06); void this.ctx.suspend().catch(() => undefined); }
       this.lastPhase = s.phase;
     }
+    if (s.phase === 'running') this.ambient(s.arenaId, s.time);
     for (const ev of s.abilityEvents) {
       if (ev.id <= this.lastEvent) continue; this.lastEvent = ev.id;
       if (s.phase === 'running') this.handle(ev, s.cast?.form ?? s.sphere?.form ?? s.player.form);
@@ -150,7 +170,7 @@ export class AbilityAudio {
       if (s.phase === 'running') this.handleEnemy(ev, s.player.x, s.player.y);
     }
   }
-  dispose() { this.lastEvent = 0; this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.stopAll(0.01); try { this.master?.disconnect(); } catch { /* ignore */ } this.master = null; }
+  dispose() { this.nextAmbient = 0; this.lastEvent = 0; this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.stopAll(0.01); try { this.master?.disconnect(); } catch { /* ignore */ } this.master = null; }
 }
 
 let shared: AbilityAudio | null = null;

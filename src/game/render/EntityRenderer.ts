@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { RULES } from '../../core/Rules';
 import type { GameState, InputState } from '../../sim/GameState';
 import { FormFx } from './formFx';
 import { AbilityFx } from './abilityFx';
@@ -73,10 +74,11 @@ export class EntityRenderer {
     this.hero.setOrigin(fr.ox / fr.w, fr.oy / fr.h);
     this.hero.setPosition(Math.round(p.x), Math.round(p.y + KAI_GROUND_DY));
     const dead = state.phase === 'dead' || p.hp <= 0;
-    const alpha = !dead && this.pose.clip !== 'Transform' && p.invulnerable > 0 && Math.floor(state.time * 18) % 2 === 0 ? 0.56 : 1;
+    const alpha = !dead && this.pose.clip !== 'Transform' && p.invulnerable > 0 && Math.floor(state.time * 18) % 2 === 0 ? 0.86 : 1;   // B08.1: i-frames never grey Kai out (was 0.56)
+    const hitFlash = !dead && p.invulnerable > RULES.contactInvulnerability - 0.1;   // a clear white 0.1 s flash says "you were hit" without dimming him afterwards
     this.hero.setAlpha(alpha);
     this.hero.tintMode = Phaser.TintModes.MULTIPLY; this.legs.tintMode = Phaser.TintModes.MULTIPLY;
-    this.hero.clearTint();   // Form I is separate art (kaif1-* sheets), never a tint of the base
+    if (hitFlash && !state.cast) { this.hero.setTint(0xffeef2); this.hero.tintMode = Phaser.TintModes.FILL; this.legs.setTint(0xffeef2); this.legs.tintMode = Phaser.TintModes.FILL; } else this.hero.clearTint();   // Form I is separate art (kaif1-* sheets), never a tint of the base
     // punching while moving: upper body from the punch frame, legs from the run cycle, split just under the belt
     const split = m.origin_px[1] - KAI_SPLIT_ABOVE_FEET;
     if (this.pose.legs !== null) {
@@ -86,7 +88,7 @@ export class EntityRenderer {
       this.legs.setFrame(this.pose.legs).setCrop(0, split, m.frame_width, m.frame_height - split);
       this.legs.setOrigin(m.origin_px[0] / m.frame_width, m.origin_px[1] / m.frame_height);
       this.legs.setPosition(this.hero.x, this.hero.y).setAlpha(alpha).setVisible(true);
-      this.legs.clearTint();
+      if (!(hitFlash && !state.cast)) this.legs.clearTint();
     } else { this.hero.setCrop(); this.legs.setVisible(false); }
     for (const e of this.pose.events) {
       this.scene.events.emit('kai-form', e);

@@ -1,0 +1,14 @@
+{
+ "before_seraph_png_sha256": "925ac5b870524679d70f9fa709cd0831a39cfa0b9851585220aefb5ba7052747",
+ "after_seraph_png_sha256": "d6c8576b08673724b4e1c3a578cd8925c3b976f2dc1cd0e1b4bd37496ad45bc3",
+ "before": "git 2ff0e13 public/art/bosses/seraph.png",
+ "magenta_edge_px_before_after": [
+  12664,
+  1127
+ ],
+ "method": "scripts/build-elite-art.py strip_projectiles + despill",
+ "projectile_components_removed": {
+  "frame5": 5,
+  "frame9": 8
+ }
+}

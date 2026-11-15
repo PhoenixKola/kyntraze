@@ -1,8 +1,8 @@
-import type { Enemy, GameState } from './GameState';
+import type { Enemy, GameState, Hazard } from './GameState';
 import { normalize } from '../core/Math';
 import { slideMove, blocked } from './CollisionSystem';
 import { AIM_LOCK_FRACTION, ENEMIES, RANGED_BAND, groundDy, isBoss, type MobKind } from '../content/enemies';
-import { feetInCircle, feetInCone } from './Ground';
+import { feetInCircle, feetInCone, feetInRect } from './Ground';
 import { damagePlayer } from './CombatSystem';
 import { pushEnemyEvent } from './EntityRegistry';
 import { updateBoss } from './BossAiSystem';
@@ -126,17 +126,19 @@ export function updateEnemyShots(state: GameState, dt: number) {
   state.enemyShots = keep;
 }
 
-/** Timed ground hazards (boss ruptures and cones): they warn for `delay`, resolve once against Kai's feet, then linger only visually. */
+/** Timed ground hazards (boss ruptures, cones, arena lanes and pylons): they warn for `delay`, are active for `active` seconds (0 = a single instant check), then linger only visually. Active hazards check Kai's feet every tick; i-frames stop stacked hits. */
+const hazardHit = (state: GameState, h: Hazard) => h.shape === 'cone' ? feetInCone(state, h) : h.shape === 'rect' ? feetInRect(state, { x: h.x, y: h.y, w: h.w ?? 0, h: h.h ?? 0 }) : feetInCircle(state, h.x, h.y, h.r);
 export function updateHazards(state: GameState, dt: number) {
   if (!state.hazards.length) return;
   for (const h of state.hazards) {
-    if (h.fired) { h.ttl -= dt; continue; }
-    h.delay -= dt; if (h.delay > 0) continue;
-    h.fired = true; h.ttl = 0.4;
-    if (h.shape !== 'sigil' && h.damage > 0) {
-      const hit = h.shape === 'cone' ? feetInCone(state, h) : feetInCircle(state, h.x, h.y, h.r);
-      if (hit) damagePlayer(state, h.damage, h.tag);
+    if (h.fired) {
+      h.ttl -= dt;
+      if ((h.activeLeft ?? 0) > 0) { h.activeLeft = Math.max(0, (h.activeLeft ?? 0) - dt); if (h.shape !== 'sigil' && h.damage > 0 && hazardHit(state, h)) damagePlayer(state, h.damage, h.tag); }
+      continue;
     }
+    h.delay -= dt; if (h.delay > 0) continue;
+    h.fired = true; h.activeLeft = h.active ?? 0; h.ttl = Math.max(0.4, (h.active ?? 0) + 0.45);
+    if (h.shape !== 'sigil' && h.damage > 0 && hazardHit(state, h)) damagePlayer(state, h.damage, h.tag);
     state.enemyEvents.push({ id: state.nextId++, kind: 'hazard_fire', enemy: 'warden', enemyId: h.owner, x: h.x, y: h.y, dirX: Math.cos(h.ang), dirY: Math.sin(h.ang), tag: h.tag }); capEvents(state);
   }
   state.hazards = state.hazards.filter(h => !h.fired || h.ttl > 0);

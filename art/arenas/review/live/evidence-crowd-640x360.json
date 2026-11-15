@@ -1,0 +1,67 @@
+{
+ "scenario": "crowd",
+ "viewport": "640x360",
+ "capturedAt": "2026-11-15T10:13:39.642Z",
+ "commit": "2ff0e13ad6b4ba30ac95ab1eeb59eec9c78b99b9",
+ "branch": "main",
+ "workingTree": {
+  "dirtyFiles": 48,
+  "diffSha": "a06ef50d67606a1c755bbee1444fcdb5b15f1f8b"
+ },
+ "fileHashes": {
+  "src/content/arenas.ts": "2035d77f3adb8f31",
+  "src/sim/ArenaHazards.ts": "942841d89af6a975",
+  "src/sim/EnemyAiSystem.ts": "ae059f2d800e785e",
+  "src/game/render/arenaWorld.ts": "6105fb479ecf05f7",
+  "src/game/render/arenaArt.ts": "1033e8d4b5f4ef4c",
+  "src/game/render/EntityRenderer.ts": "3bb572bc67a9c731",
+  "src/app/ui/ArenaSelect.tsx": "717103fece2d6563",
+  "src/app/ui.css": "1949316af6a84c88",
+  "public/art/arenas/gloam/props.json": "2f536cfea31ffda8",
+  "public/art/arenas/gloam/card.png": "1b61b399ee68b4f8",
+  "public/art/arenas/ashen/props.json": "b14f69aede03fa4b",
+  "public/art/arenas/ashen/card.png": "875c5c1261dff6df",
+  "public/art/bosses/seraph.png": "d6c8576b08673724"
+ },
+ "screenshots": [
+  "gloam-crowd-1-base-640x360.png",
+  "gloam-crowd-2-hit-iframes-640x360.png",
+  "gloam-crowd-3-low-health-640x360.png",
+  "gloam-crowd-4-formI-640x360.png",
+  "ashen-crowd-1-base-640x360.png",
+  "ashen-crowd-2-hit-iframes-640x360.png",
+  "ashen-crowd-3-low-health-640x360.png",
+  "ashen-crowd-4-formI-640x360.png"
+ ],
+ "consoleProblems": 4,
+ "errors": [
+  "warning: [.WebGL-0x572c0018e600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+  "warning: [.WebGL-0x572c0018e600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+  "warning: [.WebGL-0x572c0018e600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+  "warning: [.WebGL-0x572c0018e600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+ ],
+ "renderer": "software GL (SwiftShader)",
+ "finalSimState": {
+  "t": 4.53,
+  "hp": 88,
+  "arena": "ashen",
+  "hz": [],
+  "ah": {
+   "nextAt": 45,
+   "count": 0,
+   "quietUntil": 0
+  },
+  "en": 70
+ },
+ "timeline": {},
+ "observed": [
+  "frames captured from the real app; real keyboard for dodges (hp recorded)",
+  "console error/warning count"
+ ],
+ "notVerified": [
+  "real-speed motion (stills only; software GL timing is not real-time)",
+  "audio heard by a human",
+  "real GPU performance",
+  "physical controller"
+ ]
+}

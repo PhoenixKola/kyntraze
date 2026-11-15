@@ -15,7 +15,8 @@ export class DebugOverlay {
       if (!isBoss(e.kind)) { const a = ENEMIES[e.kind as MobKind].attack; if (a.kind === 'slam') g.lineStyle(1, 0x00ff66, 1).strokeCircle(e.x, e.y + groundDy(e.radius), a.radius + FOOT_RADIUS).lineStyle(1, 0xffffff, 1).strokeCircle(e.x, e.y + groundDy(e.radius), a.radius); }
     }
     for (const h of s.hazards) {
-      if (h.shape === 'circle') g.lineStyle(1, 0x00ff66, 1).strokeCircle(h.x, h.y, h.r + FOOT_RADIUS).lineStyle(1, 0xffffff, 1).strokeCircle(h.x, h.y, h.r);
+      if (h.shape === 'rect') { const hw = (h.w ?? 0) / 2, hh = (h.h ?? 0) / 2; g.lineStyle(1, 0xffffff, 1).strokeRect(h.x - hw, h.y - hh, hw * 2, hh * 2).lineStyle(1, 0x00ff66, 1).strokeRect(h.x - hw - FOOT_RADIUS, h.y - hh - FOOT_RADIUS, hw * 2 + FOOT_RADIUS * 2, hh * 2 + FOOT_RADIUS * 2); }
+      else if (h.shape === 'circle') g.lineStyle(1, 0x00ff66, 1).strokeCircle(h.x, h.y, h.r + FOOT_RADIUS).lineStyle(1, 0xffffff, 1).strokeCircle(h.x, h.y, h.r);
       else if (h.shape === 'cone') { g.lineStyle(1, 0x00ff66, 1).beginPath().moveTo(h.x, h.y).arc(h.x, h.y, h.r, h.ang - h.arc / 2, h.ang + h.arc / 2).lineTo(h.x, h.y).strokePath(); }
     }
     g.lineStyle(1, 0xff00ff, 1); for (const b of s.enemyShots) g.strokeCircle(b.x, b.y, b.radius);

@@ -1,0 +1,50 @@
+{
+ "surge_warn": {
+  "seconds": 1.5,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -14.03,
+  "clipped_samples": 0
+ },
+ "surge_fire": {
+  "seconds": 0.7,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -21.29,
+  "clipped_samples": 0
+ },
+ "pylon_charge": {
+  "seconds": 1.4,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -17.12,
+  "clipped_samples": 0
+ },
+ "pylon_pulse": {
+  "seconds": 0.6,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -20.83,
+  "clipped_samples": 0
+ },
+ "amb_gloam_a": {
+  "seconds": 2.5,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -11.14,
+  "clipped_samples": 0
+ },
+ "amb_gloam_b": {
+  "seconds": 2.0,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -23.71,
+  "clipped_samples": 0
+ },
+ "amb_ashen_a": {
+  "seconds": 3.0,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -17.68,
+  "clipped_samples": 0
+ },
+ "amb_ashen_b": {
+  "seconds": 2.2,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -13.63,
+  "clipped_samples": 0
+ }
+}

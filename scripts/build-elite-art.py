@@ -35,8 +35,40 @@ def body_anchor(al):
     ys, xs = np.nonzero(m & al); return xs.mean(), ys.max() + 1
 
 
+def strip_projectiles(frames):
+    """B08.1 A1: the release poses (5 volley, 9 ring) had the projectiles drawn into the character art while the game also spawns the real bolts, so each one showed twice.
+    The baked bolts/orbs/streaks are detached from the body, so they are removed by connected components (identity-safe: no pixel of the character is touched). The attached white flash at the hands/torso stays."""
+    for idx in (5, 9):
+        arr = np.asarray(frames[idx]).copy(); lab, n = ndi.label(arr[..., 3] > 0); yy = np.arange(arr.shape[0])[:, None]
+        for i in range(1, n + 1):
+            m = lab == i; area = int(m.sum()); ys, xs = np.nonzero(m); white = float((arr[..., :3][m].min(1) > 200).mean())
+            if idx == 5: kill = area < 5000 and xs.min() >= 290                      # the five prism bolts launched to the right of the hands
+            else: kill = (area < 600 and white > 0.7) or area < 60                    # the eight orbs and their white streaks around the ring burst
+            if idx == 9 and xs.min() == 74 and ys.max() > 320: arr[m & (yy >= 279), 3] = 0   # lower-left orb + streak, merged with a small wing shard above it: cut below the shard only
+            if kill: arr[m, 3] = 0
+        frames[idx] = Image.fromarray(arr, "RGBA")
+    return frames
+
+
+def despill(arr, band=3):
+    """B08.1 A2: edge pixels (outer `band` px) that carry the #ff00ff key's magenta are re-coloured from their non-magenta neighbours (fallback: the dark violet outline colour). Interior violet/magenta seams are untouched."""
+    a = arr[..., 3] > 0
+    inner = np.asarray(Image.fromarray((a * 255).astype(np.uint8)).filter(ImageFilter.MinFilter(2 * band + 1))) > 0
+    edge = a & ~inner; f = arr[..., :3].astype(float) / 255; mx = f.max(-1); mn = f.min(-1); d = mx - mn + 1e-9
+    r, g, b = f[..., 0], f[..., 1], f[..., 2]
+    h = np.where(mx == r, ((g - b) / d) % 6, np.where(mx == g, (b - r) / d + 2, (r - g) / d + 4)) * 60
+    mag = edge & (h >= 290) & (h <= 350) & (d / (mx + 1e-9) > 0.35) & (mx > 0.25)
+    good = (a & ~mag).astype(float); acc = np.zeros((*a.shape, 3)); wsum = np.zeros(a.shape); P = 4
+    gp = np.pad(good, P); cp = np.pad(arr[..., :3].astype(float) * good[..., None], ((P, P), (P, P), (0, 0)))
+    for dy in range(-P, P + 1):
+        for dx in range(-P, P + 1):
+            wsum += gp[P + dy:P + dy + a.shape[0], P + dx:P + dx + a.shape[1]]; acc += cp[P + dy:P + dy + a.shape[0], P + dx:P + dx + a.shape[1]]
+    fill = np.where(wsum[..., None] > 0, acc / np.maximum(wsum[..., None], 1), np.array([44, 26, 76.0]))
+    out = arr.copy(); out[mag, :3] = fill[mag].astype(np.uint8); return out, int(mag.sum())
+
+
 def build_seraph():
-    frames = cells(os.path.join(SRC, "seraph1.png"), 4, 2) + cells(os.path.join(SRC, "seraph2.png"), 4, 2)
+    frames = strip_projectiles(cells(os.path.join(SRC, "seraph1.png"), 4, 2) + cells(os.path.join(SRC, "seraph2.png"), 4, 2))
     walk_h = max(f.getbbox()[3] - f.getbbox()[1] for f in frames[:4]); k = SERAPH_H / walk_h
     info = []
     for f in frames:
@@ -51,10 +83,10 @@ def build_seraph():
     strip = Image.new("RGBA", (FW * 16, FH), (0, 0, 0, 0))
     for idx, (im, cx, bot, top, bottom) in enumerate(info):
         strip.alpha_composite(im, (idx * FW + int(round(half - cx)), int(round(up - bot))))
-    arr = np.asarray(strip).copy(); solid = arr[..., 3] > 0
-    inner = np.asarray(Image.fromarray((solid * 255).astype(np.uint8)).filter(ImageFilter.MinFilter(5))) > 0   # defringe: the keyed outline picked up magenta; edge pixels (2 px band) with a magenta tint become the dark violet outline colour
-    edge = solid & ~inner; rr, gg, bb_ = arr[..., 0].astype(int), arr[..., 1].astype(int), arr[..., 2].astype(int)
-    tint = edge & (rr > 120) & (bb_ > 120) & (gg < rr - 50) & (gg < bb_ - 50); arr[tint, :3] = (44, 26, 76)
+    arr = np.asarray(strip).copy(); n_fixed = 0
+    for i in range(16):   # per frame so the 3 px band never reaches a neighbouring cell
+        sl = arr[:, i * FW:(i + 1) * FW]; fixed, c = despill(sl); arr[:, i * FW:(i + 1) * FW] = fixed; n_fixed += c
+    solid = arr[..., 3] > 0; print("despilled edge pixels:", n_fixed)
     ring = ndi.binary_dilation(solid, iterations=1) & ~solid
     arr[ring] = (225, 205, 255, 150); strip = Image.fromarray(arr, "RGBA")   # pale violet-white rim for the violet boss (the pink rim would read as a Warden-family tint)
     strip.save(os.path.join(BOSS_OUT, "seraph.png"))

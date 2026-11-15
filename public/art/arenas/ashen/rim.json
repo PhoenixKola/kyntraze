@@ -1,0 +1,21 @@
+{
+ "rim": {
+  "file": "rim.png",
+  "tile": "x",
+  "h": 108
+ },
+ "rim-bottom": {
+  "file": "rim-bottom.png",
+  "tile": "x",
+  "note": "cap strip, drawn at the bottom edge, already flipped"
+ },
+ "corner": {
+  "file": "corner.png",
+  "note": "top-left, mirror for the other corners"
+ },
+ "rim-side": {
+  "file": "rim-side.png",
+  "tile": "y",
+  "note": "left side wall strip, mirror for the right side"
+ }
+}

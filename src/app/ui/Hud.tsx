@@ -57,7 +57,7 @@ export function Hud({ s, pad, onPause }: Props) {
       </div>
     </div>
     {s.boss && <BossBar b={s.boss}/>}
-    <div className="hud-panel hud-clock"><span className="clock-label">THE GLOAM CIRCUIT</span><b>{roundedTime(s.seconds)}</b><span className="clock-kills"><i/> {s.kills}</span></div>
+    <div className="hud-panel hud-clock"><span className="clock-label">{s.arenaName}</span><b>{roundedTime(s.seconds)}</b><span className="clock-kills"><i/> {s.kills}</span></div>
     <button className="hud-panel hud-pause" onClick={onPause} aria-label="Pause game"><span className="pause-bars"/><kbd className={pad ? 'pad-key' : ''}>{pad ? 'START' : 'ESC'}</kbd></button>
     <div className="hud-slots" role="group" aria-label="Abilities">
       <Slot id="shift" name="Dash" ico="dash" keyLabel="SHIFT" padLabel="A" pad={pad} seconds={s.dashCooldown} max={3.2}/>

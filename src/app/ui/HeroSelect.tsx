@@ -1,8 +1,10 @@
 import { useEffect, type CSSProperties } from 'react';
 import { HEROES } from '../../content/heroes';
 import { HintBar } from './Chrome';
-interface Props { onBack: () => void; onStart: () => void; seed: string; onSeed: (value: string) => void; }
-export function HeroSelect({ onBack, onStart, seed, onSeed }: Props) {
+import { ARENAS, type ArenaId } from '../../content/arenas';
+import { arenaCardUrl } from './ArenaSelect';
+interface Props { onBack: () => void; onStart: () => void; seed: string; onSeed: (value: string) => void; arena: ArenaId; onArena: () => void; }
+export function HeroSelect({ onBack, onStart, seed, onSeed, arena, onArena }: Props) {
   useEffect(() => { const h = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); onBack(); } }; window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h); }, [onBack]);
   return <main className="selection-layout" data-testid="hero-select">
     <div className="screen-header"><button className="text-button" onClick={onBack} data-pad-cancel>← BACK</button><span>01 / RUNNER SELECTION</span></div>
@@ -15,7 +17,7 @@ export function HeroSelect({ onBack, onStart, seed, onSeed }: Props) {
         <div className="hero-status">{h.playable ? 'READY FOR DEPLOYMENT' : 'PLANNED · NOT YET PLAYABLE'}</div>
       </article>)}
     </div>
-    <div className="start-row"><label className="seed-field">RUN SEED <input aria-label="Run seed" value={seed} onChange={e => onSeed(e.target.value)} placeholder="Random on start"/></label><button className="primary-button" onClick={onStart} data-testid="start-run" data-pad-default data-pad-start>DEPLOY KAI <span aria-hidden="true">↗</span></button></div>
+    <div className="start-row"><button className="arena-strip" onClick={onArena} data-testid="arena-open" style={{ '--card': `url(${arenaCardUrl(arena)})` } as CSSProperties} aria-label={`Arena: ${ARENAS[arena].name}. Change arena`}><span className="arena-strip-art" aria-hidden="true"/><span className="arena-strip-copy"><em>ARENA</em><b>{ARENAS[arena].name.toUpperCase()}</b></span><span className="arena-strip-go">CHANGE ▸</span></button><label className="seed-field">RUN SEED <input aria-label="Run seed" value={seed} onChange={e => onSeed(e.target.value)} placeholder="Random on start"/></label><button className="primary-button" onClick={onStart} data-testid="start-run" data-pad-default data-pad-start>DEPLOY KAI <span aria-hidden="true">↗</span></button></div>
     <HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'DEPLOY' }, { key: 'ESC', pad: 'B', label: 'BACK' }]}/>
   </main>;
 }

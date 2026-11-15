@@ -1,0 +1,10 @@
+Sprite sheet of 9 floor DECALS and flat floor props for the arena 'The Gloam Circuit' (industrial powered machine hall). Style: 2D top-down action game environment art for KYNTRAZE: FRACTURE RUSH, crisp cel-shaded pixel-art look (clean dark navy-black outline about 3-4 px, flat 2-3 step shading, hard stepped edges, NO blur, NO painterly noise, NO text, NO letters). Palette: dark navy steel (#1b2735, #2a3a4d, #0c1522), cold teal circuit inlay (#3fa8b2) used sparingly as thin glowing lines, tiny amber (#e3a766) marker lights ONLY as small accents. Everything must be LOW-CONTRAST and dark-to-mid values (it sits on a dark floor behind a hero), no bright whites, no red, no orange fills. The first reference image shows the existing floor tiles (match their navy steel plating, rivets and lightning-glint texture). The second shows the hero Kai for scale: props must feel sized against him. View: straight top-down; these lie flat on the floor. Draw EXACTLY 9 items on flat magenta (#ff00ff), 3 columns x 3 rows, far apart, nothing cropped, each fully inside its own cell, NO cast shadows, dark and low-contrast:
+1. CABLE BUNDLE A: a thick bundle of dark cables lying in a gentle S curve, about 200 x 40 proportion, with two clamp rings.
+2. CABLE BUNDLE B: a different cable run with a loop and a small junction box, about 180 x 50 proportion.
+3. FLOOR GRATE: a square steel maintenance grate with dark slots and bolts, about 96 x 96, seen from above.
+4. SCORCH A: a burnt black scorch mark on steel plating with faint cracked edges, irregular blob about 130 px.
+5. SCORCH B: another scorch / blast mark, more radial with tiny debris chips, about 130 px.
+6. CRACK A: a long jagged crack running through the metal plating with a faint teal glow deep inside, about 170 x 60.
+7. CRACK B: a shorter branching crack, no glow, about 150 x 90.
+8. HAZARD STRIPES: a flat painted warning strip of diagonal dull amber-grey and black stripes, scuffed and worn, about 192 x 48 (muted, dark, not bright).
+9. COOLANT PUDDLE: a dark shallow puddle of coolant fluid with a faint teal sheen and a couple of drips, organic outline, about 120 x 70.

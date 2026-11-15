@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ABILITY_SOUNDS, BOSS_SOUNDS, ENEMY_SOUNDS, AbilityAudio, type CtxLike, type GainLike, type SourceLike } from '../game/audio/abilityAudio';
+import { ABILITY_SOUNDS, ARENA_SOUNDS, BOSS_SOUNDS, ENEMY_SOUNDS, AbilityAudio, type CtxLike, type GainLike, type SourceLike } from '../game/audio/abilityAudio';
 import { Simulation } from '../sim/Simulation';
 import type { AbilityEvent, InputState } from '../sim/GameState';
 
@@ -42,7 +42,7 @@ describe('ability audio files', () => {
 });
 
 describe('ability audio lifecycle', () => {
-  it('decodes every sound after the unlock gesture and resumes the context', async () => { const { ctx, a } = await mk(); expect(a.loaded).toBe(ABILITY_SOUNDS.length + ENEMY_SOUNDS.length + BOSS_SOUNDS.length); expect(ctx.state).toBe('running'); });
+  it('decodes every sound after the unlock gesture and resumes the context', async () => { const { ctx, a } = await mk(); expect(a.loaded).toBe(ABILITY_SOUNDS.length + ENEMY_SOUNDS.length + BOSS_SOUNDS.length + ARENA_SOUNDS.length); expect(ctx.state).toBe('running'); });
   it('plays nothing before unlock (no buffers) and nothing when muted', async () => {
     const ctx = new FakeCtx(); const a = new AbilityAudio(ctx, async () => new ArrayBuffer(8)); a.handle(ev('beam_charge', 1), 0); expect(a.started).toHaveLength(0);
     await a.unlock(); a.setMuted(true); a.handle(ev('beam_charge', 2), 0); expect(a.started).toHaveLength(0); a.setMuted(false); a.handle(ev('beam_charge', 3), 0); expect(a.started).toEqual(['beam_charge']);

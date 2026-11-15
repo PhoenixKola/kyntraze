@@ -247,3 +247,30 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--amber); out
 .boss-warning img { width: calc(36 * var(--u)); min-width: 24px; } .boss-warning b { font-size: max(14px, calc(26 * var(--u))); letter-spacing: .5em; color: #ff8aa6; text-shadow: 0 2px 0 rgba(0, 0, 0, .7); } .boss-warning span { font-size: max(9px, calc(13 * var(--u))); letter-spacing: .24em; color: #ffd6e0; text-shadow: 0 2px 0 rgba(0, 0, 0, .7); }
 @keyframes boss-warn { 0% { opacity: 0; } 12% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .boss-warning { animation: none; } .boss-track .trail { transition: none; } }
+
+/* B09 arena selection: two large illustrated cards in the B06 language (dark navy panels, thin teal/amber rules) */
+.arena-layout .arena-grid { flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(16 * var(--u)); }
+.arena-card { position: relative; display: flex; flex-direction: column; justify-content: flex-end; text-align: left; padding: 0; border: 1px solid var(--line); background: #0b131d; color: var(--text); overflow: hidden; cursor: pointer; font: inherit; min-height: 0; transition: border-color .15s, transform .15s, box-shadow .15s; }
+.arena-art { position: absolute; inset: 0; background: var(--card) center / cover no-repeat, linear-gradient(180deg, #14202e, #0a1119); image-rendering: auto; transition: transform .5s ease, filter .3s; filter: saturate(.85) brightness(.78); }
+.arena-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6, 11, 19, 0) 30%, rgba(6, 11, 19, .72) 62%, rgba(6, 11, 19, .95) 100%); pointer-events: none; }
+.arena-card:hover:not(:disabled) .arena-art, .arena-card:focus-visible .arena-art { transform: scale(1.03); filter: saturate(1) brightness(.92); }
+.arena-card:hover:not(:disabled) { border-color: var(--line-hi); }
+.arena-card.selected { border-color: var(--teal); box-shadow: 0 0 0 1px var(--teal), 0 0 calc(22 * var(--u)) rgba(95, 216, 220, .22); }
+.arena-card:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.arena-card.locked { opacity: .55; cursor: not-allowed; }
+.arena-index { position: absolute; top: calc(10 * var(--u)); left: calc(12 * var(--u)); z-index: 1; font-size: max(9px, calc(11 * var(--u))); letter-spacing: .2em; font-weight: 800; color: #b8cdd3; text-shadow: 0 1px 0 rgba(0, 0, 0, .8); }
+.arena-body { position: relative; z-index: 1; display: flex; flex-direction: column; gap: calc(6 * var(--u)); padding: calc(14 * var(--u)) calc(16 * var(--u)) calc(14 * var(--u)); }
+.arena-name { font-size: max(14px, calc(24 * var(--u))); letter-spacing: .04em; font-weight: 900; color: #f2f7f6; text-shadow: 0 2px 0 rgba(0, 0, 0, .7); }
+.arena-blurb { font-size: max(9px, calc(12 * var(--u))); line-height: 1.4; color: #b9ccd2; max-width: 52ch; }
+.arena-chips { display: flex; flex-wrap: wrap; gap: calc(6 * var(--u)); } .arena-chips i { font-style: normal; font-size: max(8px, calc(10 * var(--u))); letter-spacing: .16em; font-weight: 800; padding: 2px calc(7 * var(--u)); border: 1px solid #3c5568; color: #9fb7c0; background: rgba(8, 14, 22, .6); }
+.arena-chips .chip-diff { border-color: var(--amber); color: var(--amber); }
+.arena-hazard { font-size: max(8px, calc(10 * var(--u))); letter-spacing: .08em; color: #ffb3c4; } .arena-hazard u { text-decoration: none; letter-spacing: .2em; font-weight: 900; color: #ff7d9b; margin-right: 6px; }
+.arena-state { position: absolute; top: calc(10 * var(--u)); right: calc(12 * var(--u)); z-index: 1; font-size: max(8px, calc(10 * var(--u))); letter-spacing: .2em; font-weight: 900; padding: 3px calc(9px); background: rgba(8, 14, 22, .75); border: 1px solid #3c5568; color: #9fb7c0; }
+.arena-card.selected .arena-state { color: #0a1a1c; background: var(--teal); border-color: var(--teal); }
+.arena-strip { display: flex; align-items: center; gap: calc(12 * var(--u)); position: relative; overflow: hidden; margin-right: auto; padding: calc(6 * var(--u)) calc(14 * var(--u)) calc(6 * var(--u)) calc(6 * var(--u)); border: 1px solid var(--line-hi); background: #0c1520; color: var(--text); cursor: pointer; font: inherit; }
+.arena-strip:hover { border-color: var(--teal); } .arena-strip:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.arena-strip-art { width: calc(86 * var(--u)); min-width: 44px; aspect-ratio: 16 / 9; background: #121c28 var(--card) center / cover no-repeat; border: 1px solid #2a3f51; }
+.arena-strip-copy { display: flex; flex-direction: column; gap: 2px; text-align: left; } .arena-strip-copy em { font-style: normal; font-size: max(8px, calc(10 * var(--u))); letter-spacing: .22em; color: var(--amber); font-weight: 800; } .arena-strip-copy b { font-size: max(10px, calc(14 * var(--u))); letter-spacing: .06em; }
+.arena-strip-go { font-size: max(8px, calc(10 * var(--u))); letter-spacing: .18em; color: var(--teal); font-weight: 800; margin-left: calc(8 * var(--u)); }
+@media (max-height: 430px) { .arena-blurb { display: none; } .arena-card .arena-chips { display: none; } .arena-name { font-size: 15px; } }
+@media (max-height: 430px) { .arena-hazard { font-size: 8px; line-height: 1.25; } .arena-body { padding: 8px 10px; gap: 3px; } .arena-state { top: 6px; right: 8px; } .arena-index { top: 6px; left: 8px; } }

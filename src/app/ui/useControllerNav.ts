@@ -8,7 +8,7 @@ const centre = (el: Element) => { const r = el.getBoundingClientRect(); return {
 /** The screen the controller currently drives: the topmost overlay (settings > pause / upgrade / results), else the title / hero-select page. In-game (no overlay) the Phaser InputController owns the pad. */
 export function findPadRoot(doc: Document = document): HTMLElement | null {
   const overlays = doc.querySelectorAll<HTMLElement>('.overlay'); if (overlays.length) return overlays[overlays.length - 1];
-  return doc.querySelector<HTMLElement>('main[data-testid="title-screen"], main[data-testid="hero-select"]');
+  return doc.querySelector<HTMLElement>('main[data-testid="title-screen"], main[data-testid="hero-select"], main[data-testid="arena-select"]');
 }
 export const padFocusables = (root: HTMLElement) => [...root.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(visible);
 

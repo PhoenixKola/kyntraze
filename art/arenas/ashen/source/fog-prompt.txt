@@ -1,0 +1,1 @@
+Seamless tileable soft ground haze texture for a dark 2D game: very low-contrast wispy drifting ash-smoke clouds in warm grey (#3a342d) on a nearly black warm background (#0d0b0a), soft organic cloud shapes, NO objects, NO hard edges, NO text, evenly distributed with no bright spot and no vignette, the pattern wraps across all four edges. Square image.

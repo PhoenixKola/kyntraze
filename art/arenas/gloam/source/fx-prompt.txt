@@ -1,0 +1,5 @@
+Sprite sheet of 4 environment effect textures for the game KYNTRAZE: FRACTURE RUSH. All hostile hazard art in hot crimson (#ff3050 / #ff3a6e) and bone-white (#e8dcc8) ONLY, no orange, no gold, no cyan, crisp hard-edged cel-shaded stripes, no blur, no text. Draw EXACTLY 4 items on flat magenta (#ff00ff), 2 columns x 2 rows, each a wide horizontal strip about 3:1 filling most of its cell, far apart, nothing cropped:
+1. SURGE WARNING STRIP: a horizontal danger-lane texture: bold diagonal hazard stripes alternating translucent dark crimson and bone-white-edged crimson, with a repeating row of chevrons pointing right along the middle, outlined top and bottom by thin crimson lines. Must tile seamlessly left to right.
+2. SURGE WARNING STRIP VARIANT: same layout but chevrons shifted half a period and stripes a half step offset (animation frame two).
+3. SURGE ACTIVE STRIP: a horizontal surge of live energy: a white-hot core band with crimson electric arcs and jagged lightning forks along it, hard pixel-art edges, glowing crimson outer band, tileable left to right.
+4. SURGE ACTIVE STRIP VARIANT: same but arcs and forks in different places (animation frame two).

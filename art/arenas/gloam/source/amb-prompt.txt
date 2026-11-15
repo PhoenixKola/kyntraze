@@ -1,0 +1,3 @@
+Sprite sheet of ambience textures for a dark sci-fi machine-hall arena (game KYNTRAZE: FRACTURE RUSH): crisp look, no text. Draw on flat magenta (#ff00ff), far apart, nothing cropped:
+A) 6 DRIFTING MOTES in a row at the top, each in its own cell: tiny soft round sparks of pale teal-white light, 4-10 px, varied, with a faint 1px glow, like dust catching a cold light.
+B) 1 large SQUARE FOG TEXTURE at the bottom, big, about 400x400, filling its own region completely edge to edge (no magenta inside it): soft drifting cold haze: layered dark-teal and navy wisps of mist on a pale-grey-to-navy field, low contrast, no hard edges, no objects, it must be a flat full-square soft texture whose edges are about the same tone as its centre.

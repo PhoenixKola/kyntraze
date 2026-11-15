@@ -1,0 +1,90 @@
+{
+ "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+ "note": "software GL (SwiftShader), NOT a real GPU",
+ "res": {
+  "gloam-normal-60": {
+   "avgMs": 23.6,
+   "p95Ms": 33.4,
+   "maxMs": 66.6,
+   "enemies": 60
+  },
+  "gloam-normal-90": {
+   "avgMs": 27.4,
+   "p95Ms": 33.4,
+   "maxMs": 66.6,
+   "enemies": 90
+  },
+  "gloam-normal-115": {
+   "avgMs": 30.5,
+   "p95Ms": 33.4,
+   "maxMs": 83.4,
+   "enemies": 115
+  },
+  "gloam-elite-stress-60": {
+   "avgMs": 39.8,
+   "p95Ms": 50.1,
+   "maxMs": 83.4,
+   "enemies": 60
+  },
+  "gloam-elite-stress-90": {
+   "avgMs": 46.7,
+   "p95Ms": 66.6,
+   "maxMs": 83.4,
+   "enemies": 90
+  },
+  "gloam-elite-stress-115": {
+   "avgMs": 55.7,
+   "p95Ms": 66.7,
+   "maxMs": 100,
+   "enemies": 115
+  },
+  "gloam-realistic-caps-90": {
+   "avgMs": 30,
+   "p95Ms": 33.4,
+   "maxMs": 66.6,
+   "enemies": 90
+  },
+  "ashen-normal-60": {
+   "avgMs": 23.2,
+   "p95Ms": 33.4,
+   "maxMs": 66.7,
+   "enemies": 60
+  },
+  "ashen-normal-90": {
+   "avgMs": 26.6,
+   "p95Ms": 33.4,
+   "maxMs": 66.7,
+   "enemies": 90
+  },
+  "ashen-normal-115": {
+   "avgMs": 29.3,
+   "p95Ms": 33.4,
+   "maxMs": 66.6,
+   "enemies": 115
+  },
+  "ashen-elite-stress-60": {
+   "avgMs": 36.8,
+   "p95Ms": 50.1,
+   "maxMs": 83.4,
+   "enemies": 60
+  },
+  "ashen-elite-stress-90": {
+   "avgMs": 45.3,
+   "p95Ms": 50.1,
+   "maxMs": 66.7,
+   "enemies": 90
+  },
+  "ashen-elite-stress-115": {
+   "avgMs": 55.5,
+   "p95Ms": 66.7,
+   "maxMs": 100,
+   "enemies": 115
+  },
+  "ashen-realistic-caps-90": {
+   "avgMs": 31.7,
+   "p95Ms": 33.5,
+   "maxMs": 83.4,
+   "enemies": 90
+  }
+ }
+}

@@ -1,0 +1,238 @@
+{
+ "schema": "kyntraze.arena-props/1",
+ "arena": "gloam",
+ "props": {
+  "generator": {
+   "file": "props/generator.png",
+   "scale": 0.5,
+   "origin": [
+    125,
+    117
+   ],
+   "footprint": {
+    "w": 125,
+    "h": 55
+   },
+   "solid": true,
+   "size": [
+    250,
+    117
+   ]
+  },
+  "freight-pod": {
+   "file": "props/freight-pod.png",
+   "scale": 0.5,
+   "origin": [
+    90,
+    411
+   ],
+   "footprint": {
+    "w": 90,
+    "h": 180
+   },
+   "solid": true,
+   "size": [
+    180,
+    411
+   ]
+  },
+  "console-bank": {
+   "file": "props/console-bank.png",
+   "scale": 0.5,
+   "origin": [
+    155,
+    128
+   ],
+   "footprint": {
+    "w": 155,
+    "h": 64
+   },
+   "solid": true,
+   "size": [
+    310,
+    128
+   ]
+  },
+  "reactor-block": {
+   "file": "props/reactor-block.png",
+   "scale": 0.5,
+   "origin": [
+    165,
+    154
+   ],
+   "footprint": {
+    "w": 165,
+    "h": 70
+   },
+   "solid": true,
+   "size": [
+    330,
+    154
+   ]
+  },
+  "vent-stack": {
+   "file": "props/vent-stack.png",
+   "scale": 0.5,
+   "origin": [
+    145,
+    106
+   ],
+   "footprint": {
+    "w": 145,
+    "h": 48
+   },
+   "solid": true,
+   "size": [
+    290,
+    106
+   ]
+  },
+  "crate-stack": {
+   "file": "props/crate-stack.png",
+   "scale": 0.5,
+   "origin": [
+    120,
+    164
+   ],
+   "footprint": {
+    "w": 120,
+    "h": 80
+   },
+   "solid": true,
+   "size": [
+    240,
+    164
+   ]
+  },
+  "cable-a": {
+   "file": "props/cable-a.png",
+   "scale": 0.5,
+   "origin": [
+    200,
+    54
+   ],
+   "solid": false,
+   "size": [
+    400,
+    108
+   ]
+  },
+  "cable-b": {
+   "file": "props/cable-b.png",
+   "scale": 0.5,
+   "origin": [
+    180,
+    78
+   ],
+   "solid": false,
+   "size": [
+    360,
+    156
+   ]
+  },
+  "grate": {
+   "file": "props/grate.png",
+   "scale": 0.5,
+   "origin": [
+    96,
+    97
+   ],
+   "solid": false,
+   "size": [
+    192,
+    195
+   ]
+  },
+  "scorch-a": {
+   "file": "props/scorch-a.png",
+   "scale": 0.5,
+   "origin": [
+    130,
+    92
+   ],
+   "solid": false,
+   "size": [
+    260,
+    184
+   ]
+  },
+  "scorch-b": {
+   "file": "props/scorch-b.png",
+   "scale": 0.5,
+   "origin": [
+    130,
+    98
+   ],
+   "solid": false,
+   "size": [
+    260,
+    197
+   ]
+  },
+  "crack-a": {
+   "file": "props/crack-a.png",
+   "scale": 0.5,
+   "origin": [
+    170,
+    41
+   ],
+   "solid": false,
+   "size": [
+    340,
+    83
+   ]
+  },
+  "crack-b": {
+   "file": "props/crack-b.png",
+   "scale": 0.5,
+   "origin": [
+    150,
+    87
+   ],
+   "solid": false,
+   "size": [
+    300,
+    174
+   ]
+  },
+  "stripes": {
+   "file": "props/stripes.png",
+   "scale": 0.5,
+   "origin": [
+    192,
+    33
+   ],
+   "solid": false,
+   "size": [
+    384,
+    67
+   ]
+  },
+  "puddle": {
+   "file": "props/puddle.png",
+   "scale": 0.5,
+   "origin": [
+    120,
+    55
+   ],
+   "solid": false,
+   "size": [
+    240,
+    110
+   ]
+  },
+  "core-glyph": {
+   "file": "props/core-glyph.png",
+   "scale": 0.5,
+   "origin": [
+    471,
+    476
+   ],
+   "solid": false,
+   "size": [
+    942,
+    953
+   ]
+  }
+ }
+}

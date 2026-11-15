@@ -1,0 +1,213 @@
+{
+ "arena": "ashen",
+ "props": {
+  "pylon": {
+   "file": "props/pylon.png",
+   "scale": 0.5,
+   "origin": [
+    173,
+    229
+   ],
+   "footprint": {
+    "w": 60,
+    "h": 44
+   },
+   "solid": true,
+   "size": [
+    346,
+    233
+   ],
+   "frames": 3,
+   "frame_width": 346
+  },
+  "fallen-column": {
+   "file": "props/fallen-column.png",
+   "scale": 0.5,
+   "origin": [
+    188,
+    222
+   ],
+   "footprint": {
+    "w": 170,
+    "h": 56
+   },
+   "solid": true,
+   "size": [
+    376,
+    226
+   ]
+  },
+  "broken-statue": {
+   "file": "props/broken-statue.png",
+   "scale": 0.5,
+   "origin": [
+    96,
+    153
+   ],
+   "footprint": {
+    "w": 80,
+    "h": 70
+   },
+   "solid": true,
+   "size": [
+    192,
+    157
+   ]
+  },
+  "sarcophagus": {
+   "file": "props/sarcophagus.png",
+   "scale": 0.5,
+   "origin": [
+    146,
+    196
+   ],
+   "footprint": {
+    "w": 130,
+    "h": 60
+   },
+   "solid": true,
+   "size": [
+    292,
+    200
+   ]
+  },
+  "monolith": {
+   "file": "props/monolith.png",
+   "scale": 0.5,
+   "origin": [
+    82,
+    212
+   ],
+   "footprint": {
+    "w": 70,
+    "h": 110
+   },
+   "solid": true,
+   "size": [
+    164,
+    216
+   ]
+  },
+  "brazier": {
+   "file": "props/brazier.png",
+   "scale": 0.5,
+   "origin": [
+    60,
+    105
+   ],
+   "footprint": {
+    "w": 50,
+    "h": 50
+   },
+   "solid": true,
+   "size": [
+    120,
+    109
+   ]
+  },
+  "rubble-a": {
+   "file": "props/rubble-a.png",
+   "scale": 1,
+   "origin": [
+    52,
+    33
+   ],
+   "solid": false,
+   "size": [
+    104,
+    66
+   ]
+  },
+  "rubble-b": {
+   "file": "props/rubble-b.png",
+   "scale": 1,
+   "origin": [
+    62,
+    27
+   ],
+   "solid": false,
+   "size": [
+    124,
+    55
+   ]
+  },
+  "ash-a": {
+   "file": "props/ash-a.png",
+   "scale": 1,
+   "origin": [
+    75,
+    50
+   ],
+   "solid": false,
+   "size": [
+    150,
+    101
+   ]
+  },
+  "ash-b": {
+   "file": "props/ash-b.png",
+   "scale": 1,
+   "origin": [
+    86,
+    68
+   ],
+   "solid": false,
+   "size": [
+    172,
+    137
+   ]
+  },
+  "crack-a": {
+   "file": "props/crack-a.png",
+   "scale": 1,
+   "origin": [
+    80,
+    62
+   ],
+   "solid": false,
+   "size": [
+    160,
+    124
+   ]
+  },
+  "crack-b": {
+   "file": "props/crack-b.png",
+   "scale": 1,
+   "origin": [
+    66,
+    23
+   ],
+   "solid": false,
+   "size": [
+    132,
+    46
+   ]
+  },
+  "bones": {
+   "file": "props/bones.png",
+   "scale": 1,
+   "origin": [
+    56,
+    42
+   ],
+   "solid": false,
+   "size": [
+    112,
+    84
+   ]
+  },
+  "reliquary-sigil": {
+   "file": "props/reliquary-sigil.png",
+   "scale": 1,
+   "origin": [
+    260,
+    260
+   ],
+   "solid": false,
+   "size": [
+    520,
+    520
+   ]
+  }
+ }
+}
