@@ -91,7 +91,8 @@ if FORM == "f1":   # Form I: spikier head + a separate rear hair piece on its ow
 def rot(deg):
     a = math.radians(deg); c, s = math.cos(a), math.sin(a); return np.array([[c, s], [-s, c]])
 
-LINING_TARGET = {"lining_n": (47.0, 77.0), "lining_f": (81.0, 50.0), "lining_c": (65.0, 104.0), "lining_w": (47.0, 85.0)}    # rest canvas px (the notch between sleeve, cuff cap and wrap / cheek and fist)
+LINING_TARGET = {"lining_n": (47.0, 77.0), "lining_f": (81.0, 50.0), "lining_c": (65.0, 104.0), "lining_w": (47.0, 85.0)}
+LINING_TARGET = {k: (v[0] + PAD_LEFT, v[1] + PAD_TOP) for k, v in LINING_TARGET.items()}    # rest canvas px, shifted with the Form II pad (the notch between sleeve, cuff cap and wrap / cheek and fist)
 for _p in PARTS:
     if _p["id"] in LINING_TARGET:
         _h = BONES[_p["bone"]][1]; _t = LINING_TARGET[_p["id"]]; _c = _p["pivot"]

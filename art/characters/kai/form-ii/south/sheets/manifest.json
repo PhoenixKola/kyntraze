@@ -68,10 +68,10 @@
    "blender_action": "RunLower",
    "events": {},
    "frame_width": 66,
-   "frame_height": 106,
+   "frame_height": 96,
    "origin_px": [
     27.0,
-    94.0
+    84.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
@@ -221,10 +221,10 @@
     "recover_start": 18,
     "interruptible_from": 21
    },
-   "frame_width": 112,
+   "frame_width": 100,
    "frame_height": 177,
    "origin_px": [
-    55.0,
+    43.0,
     168.0
    ],
    "terminal": "once",
