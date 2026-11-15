@@ -42,7 +42,7 @@ def depth(p):
     return p
 UL = {s: ARM_REST[s]["u"][1] for s in "nf"}; FL = {s: ARM_REST[s]["f"][1] for s in "nf"}
 def A(s, u, f, slot=None, k=1.0): return arm(u, UL[s] * k, f, FL[s] * k, hand=0.0, slot=slot)
-BN, BF = (57.0, 171.0), (75.0, 165.0)
+BN, BF = (57.0 + a.r.PAD_LEFT, 171.0 + a.r.PAD_TOP), (75.0 + a.r.PAD_LEFT, 165.0 + a.r.PAD_TOP)
 def foot(s, dx, dy, **k): b = BN if s == "n" else BF; return dict({"sole": (b[0] + dx, b[1] + dy), "bend": -1 if s == "n" else 1}, **k)
 def fair(s, dx, dy, **k): return foot(s, dx, dy, planted=False, straight=True, slack=3.0, **k)
 sw = lambda un, fn, uf, ff: {"arm_n": A("n", -un, -fn), "arm_f": A("f", uf, ff)}
@@ -77,7 +77,7 @@ def hurt():
     return {"name": "Hurt", "fps": 20, "loop": False, "frames": [depth(p) for p in tween(keys, 8)], "events": {"impact": 0, "interruptible_from": 5}}
 
 # ------------------------------------------------------------------ Death
-GROUND = 164.0; FALL = 1; HX = 84.0
+GROUND = 164.0 + a.r.PAD_TOP; FALL = 1; HX = 84.0 + a.r.PAD_LEFT
 _W0 = a.r.fk(a.solve(stance())[0]); P0 = a.r.apply(_W0, "pelvis", a.REST["pelvis"][0]); P0x, P0y = float(P0[0]), float(P0[1])
 def soleabs(x, y, **k): return dict({"sole": (x, y), "bend": 1}, **k)
 def down(rot, hx, hy, legs, arms, **kw):

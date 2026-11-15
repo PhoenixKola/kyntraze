@@ -110,7 +110,7 @@ def idle():
 
 # ------------------------------------------------------------------ Run: 8 frames @ 14 fps (in place, toward camera)
 # Feet under the hips, legs nearly straight in stance; knee bend toward the camera shows as foreshortening, not sideways splay.
-RUN_BASE = {"n": (57.0, 171.0), "f": (75.0, 165.0)}
+RUN_BASE = {"n": (57.0 + r.PAD_LEFT, 171.0 + r.PAD_TOP), "f": (75.0 + r.PAD_LEFT, 165.0 + r.PAD_TOP)}   # canvas px: shift with the Form II pad
 LEG = [  # (dx, dy, thigh len factor, shin len factor, planted)
     (0.0, 5.0, 1.00, 1.00, True),      # 0 contact: foot reaches forward (lower on screen)
     (0.0, 2.0, 0.92, 0.96, True),      # 1 down: compression
