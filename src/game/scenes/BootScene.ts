@@ -7,13 +7,16 @@ import { ARENAS, type ArenaId } from '../../content/arenas';
 import { ENEMY_FX_NAMES, enemyFxKey, enemyFxUrl, enemyManifestKey, enemyManifestUrl, enemySheetKey, enemySheetUrl, type EnemyManifest } from '../render/enemyRenderer';
 import { BOSS_FX_NAMES, BOSS_KINDS, bossFxKey, bossFxUrl, bossManifestKey, bossManifestUrl, bossSheetKey, bossSheetUrl, type BossManifest } from '../render/bossRenderer';
 import { ENEMY_KINDS } from '../../content/enemies';
+import type { HeroId } from '../../content/heroes';
+import { HERO_FX_NAMES, heroFxKey, heroFxUrl } from '../render/heroFxView';
+import { HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroManifestUrl, heroSheetUrl, heroTextureKey } from '../../assets/heroAnimation';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
 import { B14_FX_NAMES, b14Key, b14Url } from '../render/b14fx';
 import { F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL, f3fxKey, f3fxUrl } from '../render/stillfireFx';
 import { KAI_F3_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiClipInfo, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
-  constructor(private readonly arena: ArenaId = 'gloam') { super({ key: 'BootScene' }); }
+  constructor(private readonly arena: ArenaId = 'gloam', private readonly hero: HeroId = 'kai') { super({ key: 'BootScene' }); }
   /** Two load phases (starter assets, then the ~100 Kai sheets whose frame sizes come from the manifests): report one combined 0..1 to the loading screen. */
   private report(phase: 0 | 1, v: number) { window.dispatchEvent(new CustomEvent('kyntraze-load', { detail: phase === 0 ? v * 0.2 : 0.2 + v * 0.8 })); }
   preload() {
@@ -23,6 +26,8 @@ export class BootScene extends Phaser.Scene {
     KAI_DIRS.forEach(dir => this.load.json(`kai-f1-manifest-${dir}`, kaiManifestUrl(dir, 'f1')));
     KAI_DIRS.forEach(dir => this.load.json(`kai-f2-manifest-${dir}`, kaiManifestUrl(dir, 'f2')));
     KAI_DIRS.forEach(dir => this.load.json(`kai-f3-manifest-${dir}`, kaiManifestUrl(dir, 'f3')));   // B13: optional - without them Form III falls back to the Form II art
+    if (this.hero !== 'kai' && HERO_SHEETS[this.hero].base) { const h = this.hero; KAI_DIRS.forEach(dir => { this.load.json(`hero-${h}-base-manifest-${dir}`, heroManifestUrl(h, dir, 'base')); if (HERO_SHEETS[h].f1) this.load.json(`hero-${h}-f1-manifest-${dir}`, heroManifestUrl(h, dir, 'f1')); }); if (HERO_SHEETS[h].anchors) this.load.json(HERO_ANCHORS_KEY(h), heroAnchorsUrl(h)); }   // B19: Ren / Sora sheets (same contract as Kai's); absent art falls back to the dev placeholder body
+    if (this.hero !== 'kai') HERO_FX_NAMES[this.hero].forEach(n => this.load.image(heroFxKey(this.hero, n), heroFxUrl(this.hero, n)));
     this.load.json(F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL);
     COMET_FX_NAMES.forEach(n => this.load.image(cometFxKey(n), cometFxUrl(n)));
     B14_FX_NAMES.forEach(n => this.load.image(b14Key(n), b14Url(n)));
@@ -60,6 +65,16 @@ export class BootScene extends Phaser.Scene {
         const m = f3[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue;
         this.load.spritesheet(kaiTextureKey(dir, clip, 'f3'), kaiSheetUrl(dir, a, 'f3'), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });
       }
+    }
+    if (this.hero !== 'kai' && HERO_SHEETS[this.hero].base) {
+      const h = this.hero;
+      for (const form of ['base', 'f1'] as const) {
+        if (!HERO_SHEETS[h][form]) continue;
+        const raw = KAI_DIRS.map(dir => this.cache.json.get(`hero-${h}-${form}-manifest-${dir}`)); if (!raw.every(r => r && typeof r === 'object' && (r as { direction?: string }).direction)) continue;
+        const set = {} as KaiManifests; KAI_DIRS.forEach((dir, i) => { set[dir] = parseKaiManifest(raw[i], dir, form); }); this.registry.set(HERO_REGISTRY_KEY(h, form), set);
+        for (const dir of KAI_DIRS) for (const clip of form === 'f1' ? KAI_F1_CLIPS : KAI_CLIPS) { const m = set[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo; this.load.spritesheet(heroTextureKey(h, dir, clip, form), heroSheetUrl(h, dir, a, form), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 }); }
+      }
+      this.registry.set(HERO_ANCHORS_KEY(h), this.cache.json.get(HERO_ANCHORS_KEY(h)));
     }
     const fx3 = this.cache.json.get(F3_FX_MANIFEST_KEY) as Record<string, unknown> | undefined;
     if (fx3 && typeof fx3 === 'object') for (const n of Object.keys((fx3 as { sprites?: Record<string, unknown> }).sprites ?? fx3)) if (/^[a-z0-9_]+$/.test(n)) this.load.image(f3fxKey(n), f3fxUrl(n));

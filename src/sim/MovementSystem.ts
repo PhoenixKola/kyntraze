@@ -3,6 +3,7 @@ import { normalize } from '../core/Math';
 import { slideMove } from './CollisionSystem';
 import { cancelCast, castMoveScale } from './AbilitySystem';
 import { APEX } from '../content/stillfire';
+import { ASCEND } from '../content/heroKits';
 export function movePlayer(state: GameState, input: InputState, dt: number) {
   const p = state.player;
   const direction = normalize(input.x, input.y);
@@ -13,6 +14,7 @@ export function movePlayer(state: GameState, input: InputState, dt: number) {
     state.impacts.push({ id: state.nextId++, kind: 'dash', x: p.x, y: p.y, ttl: apex ? 0.3 : 0.22, life: apex ? 0.3 : 0.22 });
     if (apex) state.abilityEvents.push({ id: state.nextId++, kind: 'form3_dash', x: p.x, y: p.y });
   }
+  const formSpeed = !p.form ? 1 : state.hero === 'ren' ? ASCEND.ren.speedMul : state.hero === 'sora' ? ASCEND.sora.speedMul : 1.16;
   const dashing = p.dashRemaining > 0; const lock = dashing ? 1 : castMoveScale(state);
   if (apex) {
     // Form III glides: velocity eases toward the input (ease-in / ease-out), the dash is a near-instant displacement (same ~175 px as before, in 0.13 s)
@@ -21,7 +23,7 @@ export function movePlayer(state: GameState, input: InputState, dt: number) {
     slideMove(p, p.vx, p.vy, dt);
   } else {
     p.vx = 0; p.vy = 0;
-    slideMove(p, (dashing ? p.dashDx * 800 : direction.x * p.speed * lock) * (p.form ? 1.16 : 1), (dashing ? p.dashDy * 800 : direction.y * p.speed * lock) * (p.form ? 1.16 : 1), dt);
+    slideMove(p, (dashing ? p.dashDx * 800 : direction.x * p.speed * lock) * formSpeed, (dashing ? p.dashDy * 800 : direction.y * p.speed * lock) * formSpeed, dt);
   }
   p.dashRemaining = Math.max(0, p.dashRemaining - dt);
   if (apex && dashing && p.dashRemaining <= 0) { p.vx = p.dashDx * p.speed * APEX.speedMul; p.vy = p.dashDy * p.speed * APEX.speedMul; }

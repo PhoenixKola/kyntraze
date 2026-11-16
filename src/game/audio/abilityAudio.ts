@@ -15,6 +15,13 @@ export const ABILITY_SOUNDS = ['beam_charge', 'beam_charge_f1', 'beam_fire', 'be
   'form3_silence', 'form3_omen', 'form3_reveal', 'form3_end', 'aura_hover', 'glide', 'form3_dash', 'rift_charge', 'rift_blink', 'rift_fire', 'rift_end', 'reversal_hit_a', 'reversal_hit_b', 'reversal_hit_c', 'reversal_end', 'evasion', 'finisher3'] as const;
 export type AbilitySound = (typeof ABILITY_SOUNDS)[number];
 export const soundUrl = (n: string) => `/audio/kai-abilities/${n}.wav`;
+/** B19 Ren / Sora (art/characters/heroes/audio/synth_b19.py): Ren is low and grounded, Sora high and crystalline. Names are unique, so the shared event kinds only differ by hero where the sim says so. */
+export const HERO_SOUNDS = ['ren_auto_a', 'ren_auto_b', 'ren_auto_fin', 'ren_q_start', 'ren_q_beat', 'ren_q_fin', 'rush_start', 'rush_hop', 'rush_strike', 'rush_end', 'bloodstar_crouch', 'bloodstar_leap', 'bloodstar_slam', 'bloodstar_ring', 'bloodstar_rebound',
+  'ren_ascend_charge', 'ren_ascend_break', 'ren_ascend_commit', 'ren_ascend_end', 'ren_aura',
+  'needle_fire', 'volley_fire', 'lance_charge', 'lance_tier', 'lance_fire', 'lance_pulse', 'lance_end', 'horizon_summon', 'horizon_converge', 'horizon_burst', 'horizon_end',
+  'sora_ascend_charge', 'sora_ascend_break', 'sora_ascend_commit', 'sora_ascend_end', 'sora_aura'] as const;
+export type HeroSound = (typeof HERO_SOUNDS)[number];
+export const heroSoundUrl = (n: string) => `/audio/hero-abilities/${n}.wav`;
 /** B07 enemy sounds (original synthesis, art/enemies/audio/synth_b07.py). Quieter than Kai's, distance-attenuated, voice-capped so a crowd cannot bury the ability mix. */
 export const ENEMY_SOUNDS = ['pursuer_wind', 'lunge', 'flanker_wind', 'slash', 'bruiser_wind', 'bruiser_slam', 'ranged_charge', 'ranged_shot', 'bolt_hit', 'death_small', 'death_heavy'] as const;
 export type EnemySound = (typeof ENEMY_SOUNDS)[number];
@@ -49,8 +56,10 @@ export const ARENA_MIX = { level: 0.62, hearRange: 1400, minGain: 0.4, ambient: 
 export const BOSS_MIX = { level: 0.78, hearRange: 1100, minGain: 0.45, maxVoices: 4, minGap: 0.045 } as const;
 export const ENEMY_MIX = { level: 0.5, hearRange: 620, minGain: 0.12, maxVoices: 6, minGap: 0.045 } as const;
 /** Voice slots: a new sound in a slot replaces the old one (no stacked charge swells, one beam body, one burst). `pulse` allows two overlapping zaps. */
-type Slot = 'ui' | 'hit' | 'hurt' | 'charge' | 'fire' | 'flight' | 'burst' | 'pulse' | 'misc' | 'enemy' | 'boss' | 'aura';
+type Slot = 'zap' | 'ui' | 'hit' | 'hurt' | 'charge' | 'fire' | 'flight' | 'burst' | 'pulse' | 'misc' | 'enemy' | 'boss' | 'aura';
 const MAX_PULSE_VOICES = 2;
+/** B19: the very frequent tiny sounds (Ren's auto punches, Sora's needles) share two voices and a minimum gap, so a fast fire rate can never become a buzz. */
+export const HERO_ZAP = { maxVoices: 2, minGap: 0.1 } as const;
 
 interface Voice { src: SourceLike; gain: GainLike; slot: Slot; name: string }
 
@@ -110,12 +119,13 @@ export class AbilityAudio {
 
   private lastEnemy = new Map<string, number>();
   private lastEnemyEvent = 0;
-  private play(name: AbilitySound | EnemySound | BossSound | ArenaSound | CombatSound | UiSound, slot: Slot, vol = 1, rate = 1) {
+  private play(name: AbilitySound | EnemySound | BossSound | ArenaSound | CombatSound | UiSound | HeroSound, slot: Slot, vol = 1, rate = 1) {
     const buf = this.buffers.get(name); if (!buf || !this.master || this.muted) return;
     if (slot === 'ui') { if ([...this.voices].filter(v => v.slot === 'ui').length >= 4) return; }
     else if (slot === 'enemy') { if ([...this.voices].filter(v => v.slot === 'enemy').length >= ENEMY_MIX.maxVoices) return; }
     else if (slot === 'boss') { if ([...this.voices].filter(v => v.slot === 'boss').length >= BOSS_MIX.maxVoices) return; }
     else if (slot === 'hit') { if ([...this.voices].filter(v => v.slot === 'hit').length >= COMBAT_MIX.maxHitVoices) return; }
+    else if (slot === 'zap') { if ([...this.voices].filter(v => v.slot === 'zap').length >= HERO_ZAP.maxVoices) return; }
     else if (slot === 'pulse') { if ([...this.voices].filter(v => v.slot === 'pulse').length >= MAX_PULSE_VOICES) return; }
     else this.stopSlot(slot, 0.03);
     const src = this.ctx.createBufferSource(), gain = this.ctx.createGain(); src.buffer = buf; src.playbackRate.value = rate; gain.gain.value = vol;
@@ -132,7 +142,8 @@ export class AbilityAudio {
   stopAll(fadeS = 0.04, keepUi = false) { for (const v of [...this.voices]) if (!(keepUi && v.slot === 'ui')) this.stopVoice(v, fadeS); }
 
   /** Apply one sim event. Sounds follow the simulation (charge / release / pulse / burst ticks), never display frame callbacks. */
-  handle(ev: AbilityEvent, form: 0 | 1 | 2 | 3) {
+  handle(ev: AbilityEvent, form: 0 | 1 | 2 | 3, hero: 'kai' | 'ren' | 'sora' = 'kai') {
+    if (hero !== 'kai' && this.handleHero(ev, hero)) return;
     const f1 = form >= 1 ? '_f1' : '';
     switch (ev.kind) {
       // B12 Form II: every voice is started and stopped by a sim event, so the sound follows the timeline exactly (and cancel / death / pause silence it through the shared slots)
@@ -169,6 +180,49 @@ export class AbilityAudio {
       case 'sphere_gather': this.play(`sphere_gather${f1}` as AbilitySound, 'charge'); break;
       case 'sphere_launch': this.stopSlot('charge', 0.06); this.play('sphere_throw', 'misc'); this.play('sphere_flight', 'flight', 0.9); break;
       case 'sphere_burst': this.stopSlot('flight', 0.03); this.play(`sphere_burst${f1}` as AbilitySound, 'burst'); break;
+    }
+  }
+
+  private zapAt = -1; private autoCycle = 0; private heroLoading: Promise<void> | null = null;
+  /** B19: Ren / Sora sounds are fetched on demand (first hero run), so Kai-only play never downloads them. Safe to call every frame. */
+  loadHeroSounds(): Promise<void> {
+    this.heroLoading ??= Promise.all(HERO_SOUNDS.map(async n => { try { this.buffers.set(n, await this.ctx.decodeAudioData(await this.fetchBuffer(heroSoundUrl(n)))); } catch { /* a missing sound must never break the game */ } })).then(() => undefined);
+    return this.heroLoading;
+  }
+  /** B19: Ren / Sora events. Every voice is started and stopped by a sim event and lives in the shared slots, so cancel / death / pause / level-up silence it exactly like Kai's. Returns false for kinds it does not own (cast_cancel stays shared). */
+  private handleHero(ev: AbilityEvent, hero: 'ren' | 'sora'): boolean {
+    const n = ev.n ?? 0, now = this.ctx.currentTime;
+    switch (ev.kind) {
+      case 'ascend_start': this.stopSlot('aura', 0.05); this.play(hero === 'ren' ? 'ren_ascend_charge' : 'sora_ascend_charge', 'charge', n ? 1 : 0.85, n ? 1.6 / 1.55 : 2.0); return true;   // n = 1: the first, long reveal; later ones are shorter
+      case 'ascend_break': this.stopSlot('charge', 0.03); this.play(hero === 'ren' ? 'ren_ascend_break' : 'sora_ascend_break', 'burst'); return true;
+      case 'ascend_commit': this.play(hero === 'ren' ? 'ren_ascend_commit' : 'sora_ascend_commit', 'fire'); return true;
+      case 'ascend_end': this.stopSlot('aura', 0.1); this.play(hero === 'ren' ? 'ren_ascend_end' : 'sora_ascend_end', 'misc', 0.8); return true;
+      case 'auto_finisher': this.play('ren_auto_fin', 'burst', 0.85); return true;
+      case 'auto_hit': if (now - this.zapAt >= HERO_ZAP.minGap) { this.zapAt = now; this.play(this.autoCycle++ % 2 ? 'ren_auto_b' : 'ren_auto_a', 'zap', 0.7, 0.96 + Math.random() * 0.08); } return true;
+      case 'needle_fire': if (now - this.zapAt >= HERO_ZAP.minGap) { this.zapAt = now; this.play('needle_fire', 'zap', 0.55, 0.94 + Math.random() * 0.12); } return true;
+      case 'hero_q': if (hero === 'ren') this.play('ren_q_start', 'misc', 0.8); return true;
+      case 'hero_q_beat': { const last = (n & 128) !== 0, beat = n >> 8; if (last) this.play('ren_q_fin', 'burst'); else this.play('ren_q_beat', 'pulse', 0.85, 1 + 0.045 * beat); return true; }
+      case 'rush_start': this.play('rush_start', 'fire', 0.85); return true;
+      case 'rush_hop': this.play('rush_hop', 'misc', 0.7, 0.92 + 0.06 * (n % 4)); return true;
+      case 'rush_strike': this.play('rush_strike', 'burst', 0.8 + 0.2 * Math.min(1, n / 3), 0.95 + Math.random() * 0.1); return true;
+      case 'rush_end': this.stopSlot('fire', 0.05); this.play('rush_end', 'misc', 0.6); return true;
+      case 'bloodstar_crouch': this.play('bloodstar_crouch', 'charge', 0.85); return true;
+      case 'bloodstar_leap': this.stopSlot('charge', 0.04); this.play('bloodstar_leap', 'fire'); return true;
+      case 'bloodstar_slam': this.stopSlot('fire', 0.03); this.play('bloodstar_slam', 'burst'); this.play('bloodstar_ring', 'misc', 0.7); this.eventDuck = { until: now + 1.4, level: 0.55 }; return true;
+      case 'bloodstar_ring': return true;   // the ring is part of the slam tail
+      case 'bloodstar_rebound': this.play('bloodstar_rebound', 'flight', 0.9); return true;
+      case 'bloodstar_end': this.stopSlot('fire', 0.05); return true;
+      case 'volley_fire': this.play('volley_fire', 'fire', 0.85, Math.max(0.85, 1 - 0.02 * (n - 7))); return true;
+      case 'lance_charge': this.play('lance_charge', 'charge', 0.8); return true;
+      case 'lance_tier': this.play('lance_tier', 'misc', 0.7, 1 + 0.12 * (n - 1)); return true;
+      case 'lance_fire': this.stopSlot('charge', 0.04); this.play('lance_fire', 'fire', 0.75 + 0.1 * n, 1.05 - 0.05 * n); return true;
+      case 'lance_pulse': this.play('lance_pulse', 'pulse', n ? 0.55 : 0.3, 0.97 + Math.random() * 0.06); return true;
+      case 'lance_end': this.stopSlot('fire', 0.1); this.stopSlot('pulse', 0.04); this.play('lance_end', 'misc', 0.7); return true;
+      case 'horizon_summon': this.play('horizon_summon', 'charge', 0.9); return true;
+      case 'horizon_converge': this.stopSlot('charge', 0.08); this.play('horizon_converge', 'flight', 0.9); return true;
+      case 'horizon_burst': this.stopSlot('flight', 0.02); this.play('horizon_burst', 'burst', n ? 0.95 : 0.6); this.eventDuck = { until: now + 1.0, level: 0.6 }; return true;
+      case 'horizon_end': this.play('horizon_end', 'misc', 0.5); return true;
+      default: return false;
     }
   }
 
@@ -258,7 +312,7 @@ export class AbilityAudio {
     } else if (s.phase === 'dead') m.setCue('defeat', 0.5); else m.setCue(boss ? boss.kind as MusicCue : s.arenaId, boss ? 0.9 : 2.4);
     if (s.time < 5) { this.finalWarned = false; this.lastBosses = s.bossesDefeated; }
     if (s.phase === 'running') {
-      if (s.player.drive >= 65 && this.lastDrive < 65 && s.player.form === 0) this.ui('drive_ready', 0.9); else if (s.player.drive >= 100 && this.lastDrive < 100) this.ui('drive_ready', 0.9, 1.25);
+      if (s.hero === 'kai' && s.player.drive >= 65 && this.lastDrive < 65 && s.player.form === 0) this.ui('drive_ready', 0.9); else if (s.player.drive >= 100 && this.lastDrive < 100) this.ui('drive_ready', 0.9, 1.25);
       this.lastDrive = s.player.drive;
       if (s.bossesDefeated > this.lastBosses && s.phase === 'running') { m.stinger('stinger_reward'); this.eventDuck = { until: this.ctx.currentTime + 2.5, level: 0.55 }; }
       this.lastBosses = s.bossesDefeated;
@@ -273,6 +327,7 @@ export class AbilityAudio {
 
   /** Per render frame: feed new sim events, follow the run phase (pause freezes sound, death silences casts). */
   sync(s: GameState) {
+    if (s.hero !== 'kai' && this.master) void this.loadHeroSounds();
     if (s.phase !== this.lastPhase) {
       // the context stays running (music + UI keep playing); sim-driven effect voices are cut so nothing from a frozen moment lingers
       void this.ctx.resume().catch(() => undefined);
@@ -284,7 +339,8 @@ export class AbilityAudio {
     }
     this.driveMusic(s);
     if (s.phase === 'running') this.ambient(s.arenaId, s.time);
-    if (s.phase === 'running' && s.player.form === 3 && !s.cinema && s.time >= this.nextHover) { this.nextHover = s.time + 1.9; this.play('aura_hover', 'aura', 0.55); }   // B13: a very soft sustained hover tone, re-armed from the sim clock so pause / death / form end silence it
+    if (s.phase === 'running' && s.hero !== 'kai' && s.player.form === 1 && !s.cinema && s.time >= this.nextHover) { this.nextHover = s.time + 1.9; this.play(s.hero === 'ren' ? 'ren_aura' : 'sora_aura', 'aura', 0.55); }   // B19: the transformed state's very soft sustained bed, re-armed from the sim clock like Kai's hover
+    if (s.phase === 'running' && s.hero === 'kai' && s.player.form === 3 && !s.cinema && s.time >= this.nextHover) { this.nextHover = s.time + 1.9; this.play('aura_hover', 'aura', 0.55); }   // B13: a very soft sustained hover tone, re-armed from the sim clock so pause / death / form end silence it
     if (s.phase === 'running' && s.player.form === 2 && !s.cinema && s.time >= this.nextCrackle) { this.nextCrackle = s.time + 2.4 + Math.random() * 3; this.play('aura_crackle', 'aura', 0.55); }   // a quiet low crackle while Form II burns
     for (const im of s.impacts) {
       if (im.id <= this.lastImpact) continue; this.lastImpact = im.id;
@@ -292,7 +348,7 @@ export class AbilityAudio {
     }
     for (const ev of s.abilityEvents) {
       if (ev.id <= this.lastEvent) continue; this.lastEvent = ev.id;
-      if (s.phase === 'running' || (s.phase === 'victory' && ev.kind === 'finisher')) this.handle(ev, s.cast?.form ?? s.sphere?.form ?? s.player.form);
+      if (s.phase === 'running' || (s.phase === 'victory' && ev.kind === 'finisher')) this.handle(ev, s.hero === 'kai' ? (s.cast?.form ?? s.sphere?.form ?? s.player.form) : (s.player.form === 1 ? 1 : 0), s.hero);
     }
     for (const ev of s.enemyEvents) {
       if (ev.id <= this.lastEnemyEvent) continue; this.lastEnemyEvent = ev.id;

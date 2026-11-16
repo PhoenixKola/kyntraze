@@ -1,8 +1,10 @@
 import type { GameState } from './GameState';
 import { damageEnemy } from './CombatSystem';
 import { distanceSquared } from '../core/Math';
+import { heroActivateQ, updateHeroAuto } from './HeroSystem';
 export function updateAutoWeapon(state: GameState, dt: number) {
   const p = state.player;
+  if (state.hero !== 'kai') { updateHeroAuto(state, dt); return; }
   if (state.cast) return;   // signature abilities own Kai's hands; the basic attack resumes afterwards
   p.attackClock -= dt;
   if (p.attackClock > 0) return;
@@ -19,6 +21,7 @@ export function updateAutoWeapon(state: GameState, dt: number) {
   }
 }
 export function activateQ(state: GameState) {
+  if (state.hero !== 'kai') return heroActivateQ(state);
   const p = state.player;
   if (p.qCooldown > 0) return false;
   p.qCooldown = 8.5;

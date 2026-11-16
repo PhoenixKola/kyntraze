@@ -8,6 +8,7 @@ import { CANNON, CARRY, DRAGON } from '../content/cometheart';
 import { isBoss } from '../content/enemies';
 import { KAI_GROUND_DY, KAI_SCALE } from '../assets/kaiAnimation';
 import { RIFT, REVERSAL } from '../content/stillfire';
+import { cancelHero, heroMoveScale, heroStartE, heroStartR, interruptHero } from './HeroSystem';
 import { startRift, startReversal, updateRift, updateReversal, trackFreeAim, freeAim } from './ApexSystem';
 
 const EVENT_CAP = 24;
@@ -26,6 +27,7 @@ const BEAM_PULSES_MAX = BEAM_PULSES + Math.round(BEAM.recover / BEAM.pulseEvery)
 
 /** Movement scale while casting (1 when free). */
 export function castMoveScale(s: GameState): number {
+  if (s.hero !== 'kai') return heroMoveScale(s);
   const c = s.cast; if (!c) return 1;
   if (c.kind === 'rift') return !c.released ? RIFT.moveScaleCharge : (c.rt ?? 0) < RIFT.fire[c.tier ?? 0] ? RIFT.moveScaleFire : RIFT.moveScaleRecover;
   if (c.kind === 'reversal') return REVERSAL.moveScale;
@@ -102,6 +104,7 @@ function pickSphereTarget(s: GameState): { x: number; y: number } {
 }
 
 export function startAbility(s: GameState, key: 'beam' | 'sphere'): boolean {
+  if (s.hero !== 'kai') return key === 'beam' ? heroStartE(s) : heroStartR(s);
   const p = s.player;
   if (s.phase !== 'running' || s.cinema || s.cast || p.dashRemaining > 0 || p.hp <= 0) return false;
   if (p.form === 3) return key === 'beam' ? startRift(s) : startReversal(s);   // B13: Silver Rift / Instinct Reversal own E / R in Stillfire Apex
@@ -122,11 +125,12 @@ export function startAbility(s: GameState, key: 'beam' | 'sphere'): boolean {
 
 /** End the cast now (dash, or a hit before release). The cooldown stays spent. */
 export function cancelCast(s: GameState) {
+  if (s.hero !== 'kai') { cancelHero(s); return; }
   if (!s.cast) return; if (s.cast.kind === 'rift' && !s.cast.released) s.player.riftCooldown = Math.max(s.player.riftCooldown, RIFT.cancelCooldown * s.mods.beamCd);   // a cancelled charge is never free
   emit(s, 'cast_cancel', s.player.x, s.player.y); s.cast = null;
 }
 /** A hit interrupts only the wind-up; once released the attack always completes. */
-export function interruptOnHit(s: GameState) { if (s.cast && !s.cast.released) cancelCast(s); }
+export function interruptOnHit(s: GameState) { if (s.hero !== 'kai') { interruptHero(s); return; } if (s.cast && !s.cast.released) cancelCast(s); }
 
 function beamPulse(s: GameState, c: Cast) {
   const o = beamOrigin(s, c); let hits = 0; const hw = BEAM.halfWidth * s.mods.beamWidth * (c.form ? BEAM.formWidth : 1); const dmg = BEAM.damage * s.mods.beamDamage * (c.form ? BEAM.formDamage * s.mods.formPower : 1);

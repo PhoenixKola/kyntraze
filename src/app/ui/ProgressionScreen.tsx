@@ -6,11 +6,13 @@ import { sharedAbilityAudio } from '../../game/audio/abilityAudio';
 import { roundedTime } from '../../core/Math';
 import { HintBar } from './Chrome';
 import { ASSET_BASE } from '../assetBase';
+import { HEROES } from '../../content/heroes';
+import { HERO_KIT } from '../../content/heroKits';
 
 export type ProgressTab = 'armory' | 'contracts' | 'archives';
 const icon = (n: string) => `${ASSET_BASE}ui/meta/${n}.png`;
 const TABS: { id: ProgressTab; label: string }[] = [{ id: 'armory', label: 'ARMORY' }, { id: 'contracts', label: 'CONTRACTS' }, { id: 'archives', label: 'ARCHIVES' }];
-interface Props { meta: MetaState; unlocks: { cometheart: boolean; stillfire: boolean }; tab: ProgressTab; onTab: (t: ProgressTab) => void; onMeta: (m: MetaState) => void; onBack: () => void; onDeploy?: () => void; backLabel?: string }
+interface Props { meta: MetaState; unlocks: { cometheart: boolean; stillfire: boolean; ren?: boolean; sora?: boolean }; tab: ProgressTab; onTab: (t: ProgressTab) => void; onMeta: (m: MetaState) => void; onBack: () => void; onDeploy?: () => void; backLabel?: string }
 
 /** Marks balance + equipped crest: always visible so the player never wonders what they can afford. */
 export function MarksBadge({ marks, crest }: { marks: number; crest?: string | null }) {
@@ -85,6 +87,8 @@ export function ProgressionScreen({ meta, unlocks, tab, onTab, onMeta, onBack, o
       {tab === 'archives' && <>
         {row('TRANSFORMATIONS', 'EARNED BY DEFEATING BOSSES')}
         <ul className="pg-forms">{[{ c: 'base', n: 'BASE', on: true, how: 'Always available' }, { c: 'f1', n: 'FLAREBOUND', on: true, how: 'Drive 65%+ → F' }, { c: 'f2', n: 'COMETHEART', on: unlocks.cometheart, how: 'Earned: Fracture Warden' }, { c: 'f3', n: 'STILLFIRE APEX', on: unlocks.stillfire, how: 'Earned: Null Seraph' }].map(f => <li key={f.c} className={f.on ? 'open' : 'sealed'}><img src={`${ASSET_BASE}ui/kit/crest-${f.c}.webp`} alt="" draggable={false}/><b>{f.on ? f.n : 'SEALED'}</b><span>{f.on ? f.how : 'Defeat a boss to discover it'}</span></li>)}</ul>
+        {row('RUNNERS', 'PER-RUNNER RECORDS')}
+        <ul className="pg-forms" data-testid="runner-records">{HEROES.map(h => { const r = meta.heroes[h.id], form = h.id === 'kai' ? 'Three transformations' : unlocks[h.id as 'ren' | 'sora'] ? `${HERO_KIT[h.id].form} unlocked` : 'Earned: Fracture Warden'; return <li key={h.id} className={h.id === 'kai' || unlocks[h.id as 'ren' | 'sora'] ? 'open' : 'sealed'}><span><b>{h.name}</b> {r.runs} RUNS · {r.wins} WINS · BEST {r.bestSeconds ? roundedTime(r.bestSeconds) : '—'}<small>{form}</small></span></li>; })}</ul>
         {row('ARENA MASTERY', 'RECORDS AND OBJECTIVES')}
         <div className="pg-arenas">{ARENA_IDS.map((a: ArenaId) => { const r = meta.arenas[a]; return <section key={a} className="pg-arena" data-testid={`arena-${a}`}>
           <header><img src={icon('arena_' + a)} alt="" draggable={false}/><div><b>{ARENAS[a].name.toUpperCase()}</b><span>{r.runs} RUNS · {r.wins} WINS</span></div></header>

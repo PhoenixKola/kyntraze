@@ -336,7 +336,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--k-teal-hi);
 .build-strip, .build-chips { overflow: visible; }
 
 /* hero card key art */
-.hero-art { position: absolute; inset: 0; background: url(/ui/kai-keyart.webp) 50% 24% / cover no-repeat; transition: transform .6s var(--ease), filter .3s; }
+.hero-art { position: absolute; inset: 0; background: var(--hero-art, url(/ui/kai-keyart.webp)) 50% 24% / cover no-repeat; transition: transform .6s var(--ease), filter .3s; }
 .hero-card.active-hero .hero-silhouette { overflow: hidden; background: #0a1117; }
 .hero-card.active-hero .hero-silhouette::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8, 13, 19, 0) 55%, rgba(8, 13, 19, .85)); pointer-events: none; }
 .hero-card.active-hero:hover .hero-art { transform: scale(1.05); filter: brightness(1.08); }
@@ -444,3 +444,28 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--k-teal-hi);
 .result-modal .score-number { font-size: calc(28 * var(--u)); margin: calc(2 * var(--u)) 0; } .result-modal h2 { font-size: calc(26 * var(--u)); }
 .rw-panel { margin-top: calc(6 * var(--u)); padding: calc(7 * var(--u)) calc(10 * var(--u)); } .rw-panel ul { grid-template-columns: repeat(3, 1fr); gap: calc(1 * var(--u)) calc(14 * var(--u)); }
 .result-scroll { -webkit-mask: linear-gradient(#000 calc(100% - 14px), transparent); mask: linear-gradient(#000 calc(100% - 14px), transparent); padding-bottom: 14px; }
+
+/* B19: hero cards are buttons (three real choices) */
+button.hero-card { font: inherit; color: inherit; text-align: left; cursor: pointer; padding: 0; appearance: none; }
+button.hero-card.idle-hero { filter: saturate(.78) brightness(.88); }
+button.hero-card.idle-hero:hover, button.hero-card.idle-hero:focus-visible { filter: none; transform: translateY(calc(-2 * var(--u))); }
+button.hero-card.picked { filter: drop-shadow(0 0 calc(8 * var(--u)) rgba(224, 162, 74, .55)); }
+button.hero-card:focus-visible { outline: 2px solid var(--accent, #e0a24a); outline-offset: 2px; }
+@media (max-height: 620px) { button.hero-card .form-row { margin-top: 2px; gap: 6px; } button.hero-card .form-row li span { display: none; } button.hero-card .form-row img { width: 24px; } button.hero-card .hero-copy small { font-size: 8px; } button.hero-card .hero-status { display: none; } }
+/* B19 fix: the title block (logo, buttons, Marks, Personal Best) is pinned between the top bar and the bottom hint bar, so nothing can run into the keycaps at any height */
+.title-content { top: calc(44 * var(--u)); bottom: calc(70 * var(--u)); transform: none; display: flex; flex-direction: column; justify-content: center; }
+.title-content .title-subtitle { margin: calc(14 * var(--u)) 0 calc(14 * var(--u)); }
+.title-content .title-marks { margin-top: calc(8 * var(--u)); }
+.title-content .best-run { margin-top: calc(8 * var(--u)); }
+@media (max-height: 620px) { .title-content .logo-mark { display: none; } .game-logo span { font-size: calc(54 * var(--u)); } .game-logo strong { font-size: calc(66 * var(--u)); } }
+.title-content { justify-content: flex-end; }
+@media (max-height: 820px) { .title-content .logo-mark { display: none; } }
+@media (max-width: 1100px) { .title-content { max-width: 64%; } .title-buttons { gap: calc(8 * var(--u)); } }
+.title-content { top: calc(72 * var(--u)); max-width: 66%; }
+.title-content .title-buttons { flex-wrap: nowrap; }
+@media (max-width: 760px) { .title-content .title-buttons { flex-wrap: wrap; } }
+/* B19 fixes: title logo keeps its proportions in the flex column; Settings group headings get breathing room under the divider */
+.title-content { align-items: flex-start; }
+.title-content .logo-mark { align-self: flex-start; width: auto; height: calc(58 * var(--u)); flex: 0 0 auto; }
+.settings-overlay .settings-cols { padding-top: calc(14 * var(--u)); margin-top: calc(10 * var(--u)); }
+.settings-cols .group-title { margin-top: 0; padding-top: calc(4 * var(--u)); }

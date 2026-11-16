@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { isHeroId } from '../../content/heroes';
+import { applyHero } from '../../sim/RunConfig';
 import { Simulation } from '../../sim/Simulation';
 import { FixedStep } from '../../sim/FixedStep';
 import { GameBridge } from '../../bridge/GameBridge';
@@ -53,6 +55,7 @@ export class ArenaScene extends Phaser.Scene {
     if (import.meta.env.DEV && qs.get('qa') === '1') {
       if (qs.get('form3') === '1') { const st = this.simulation.state; st.cometUnlocked = true; st.apexUnlocked = true; st.apexGate = 0; st.player.drive = 100; }   // QA / owner route: Cometheart + Stillfire Apex unlocked, no time gate, Drive full (F = tap the selected form, hold F to choose)
       if (qs.get('form2') === '1') { const st = this.simulation.state; st.cometUnlocked = true; st.player.drive = 100; }   // QA / owner route: Cometheart unlocked and Drive full (F awakens it)
+      { const qh = qs.get('hero'); if (isHeroId(qh)) { const st = this.simulation.state, asc = qs.get('ascend') === '1'; applyHero(st, qh, asc || st.heroFormUnlocked); if (asc) st.player.drive = 100; } }   // B19 QA / owner route: ?qa=1&hero=ren|sora[&ascend=1] (form unlocked, Drive full, F awakens it)
       if (qs.get('debug') === 'hit') this.debug = new DebugOverlay(this);
       const enc = qs.get('encounter'); if (enc) startEncounter(this.simulation.state, enc as Parameters<typeof startEncounter>[1]);
       (window as Window & { __KYNT_QA__?: { grantXp: (offers?: string[]) => void; heroPose: () => unknown; setHeroScale: (n: number) => void; sim: () => unknown; enemyStats: () => unknown; encounter: (id: string) => void; arenaHazard: () => void; scene: () => unknown; hand: () => unknown; fxOrigin: () => unknown; audio: () => unknown } }).__KYNT_QA__ = { grantXp: (offers?: string[]) => this.bridge.debugGrantXp(offers as never), heroPose: () => this.entityRenderer.debugPose(), hand: () => this.entityRenderer.handAnchor(), fxOrigin: () => this.entityRenderer.fxOrigin(), audio: () => ({ state: this.audio?.state ?? 'none', loaded: this.audio?.loaded ?? 0, active: this.audio?.activeVoices ?? 0, started: [...(this.audio?.started ?? [])], cue: this.audio?.music?.cue ?? null, musicLog: [...(this.audio?.music?.log ?? [])], volume: this.audio?.volume }), setHeroScale: (n: number) => this.entityRenderer.setHeroScale(n), sim: () => this.simulation.state, enemyStats: () => this.entityRenderer.enemyStats(), scene: () => this, arenaHazard: () => { this.simulation.state.arenaHazard.nextAt = this.simulation.state.time; }, encounter: (id: string) => startEncounter(this.simulation.state, id as Parameters<typeof startEncounter>[1]) };

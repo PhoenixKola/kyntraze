@@ -14,11 +14,11 @@ function Card({ c, i, onChoose, picked }: { c: OfferCard; i: number; onChoose: (
   const style = { '--c': cat.color, '--i': i, '--ico': upgradeIcon(c.id), '--art': `url(${base}ui/cards/${c.category}.webp)`, '--foil': `url(${base}ui/cards/epic.webp)` } as CSSProperties;
   const next = c.stack + 1;
   return <button className={`lv-card rarity-${c.rarity} ${picked ? 'picked' : ''}`} style={style} onClick={() => onChoose(c.id)} data-testid={`upgrade-${c.id}`} data-pad-default={i === 0 ? '' : undefined}
-    aria-label={`${c.name}. ${RARITY_LABEL[c.rarity]} ${cat.name} upgrade. ${c.blurb} ${c.label} ${c.before} to ${c.after}.`}>
+    aria-label={`${c.name}. ${RARITY_LABEL[c.rarity]} ${c.catName ?? cat.name} upgrade. ${c.blurb} ${c.label} ${c.before} to ${c.after}.`}>
     <span className="lv-art" aria-hidden="true"/>
     <span className="lv-key" aria-hidden="true">{i + 1}</span>
     <span className="lv-medal" aria-hidden="true"><span className="lv-ico"/></span>
-    <span className="lv-tags"><b className="lv-rarity">{RARITY_LABEL[c.rarity]}</b><em>{cat.name}</em></span>
+    <span className="lv-tags"><b className="lv-rarity">{RARITY_LABEL[c.rarity]}</b><em>{c.catName ?? cat.name}</em></span>
     <strong className="lv-name">{c.name}</strong>
     <span className="lv-blurb">{c.blurb}</span>
     <span className="lv-stat"><i>{c.label}</i><b>{c.before}<u aria-hidden="true">›</u><em>{c.after}</em></b></span>

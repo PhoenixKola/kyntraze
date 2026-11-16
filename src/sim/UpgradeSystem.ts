@@ -1,6 +1,7 @@
 import { UPGRADES, UPGRADE_BY_ID, type UpgradeCategory, type UpgradeDef, type UpgradeId } from '../content/upgrades';
 import { xpThreshold, type GameState } from './GameState';
 import type { SeededRng } from '../core/SeededRng';
+import { UPGRADE_OVERRIDES } from '../content/heroKits';
 
 /** Stacks already taken in a category. */
 export function categoryStacks(state: GameState, category: UpgradeCategory): number {
@@ -44,9 +45,11 @@ export function createOffer(state: GameState, rng: SeededRng, premium = false, a
 /** `before → after` for a card, computed by applying it to a copy of the build. */
 export function previewUpgrade(state: GameState, id: UpgradeId): { label: string; before: string; after: string } {
   const def = UPGRADE_BY_ID[id]; const sim = { player: { ...state.player }, mods: { ...state.mods } };
-  const before = def.stat.read(sim); def.apply(sim); const after = def.stat.read(sim);
-  const f = (v: number) => `${v.toFixed(def.stat.digits ?? 0)}${def.stat.unit ?? ''}`;
-  return { label: def.stat.label, before: f(before), after: f(after) };
+  const ov = state.hero === 'kai' ? undefined : UPGRADE_OVERRIDES[state.hero][id];   // B19: the card shows the number THIS runner's ability actually uses
+  const read = ov?.read ?? def.stat.read, digits = ov?.digits ?? def.stat.digits ?? 0, unit = ov?.unit ?? def.stat.unit ?? '';
+  const before = read(sim); def.apply(sim); const after = read(sim);
+  const f = (v: number) => `${v.toFixed(digits)}${unit}`;
+  return { label: ov?.label ?? def.stat.label, before: f(before), after: f(after) };
 }
 export function gainXp(state: GameState, amount: number, onLevelUp: () => void = () => {}) {
   if (!Number.isFinite(amount) || amount <= 0 || state.phase !== 'running') return;

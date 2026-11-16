@@ -14,6 +14,7 @@ import { RULES } from '../core/Rules';
 import { storeSave, type SaveV1, type GameSettings } from '../sim/SaveSystem';
 import { blankMeta, finalizeRun, contractAvailable, type RunReward, type RunResult } from '../sim/MetaSystem';
 import { NO_CONFIG, toolCharges, type RunConfig } from '../sim/RunConfig';
+import { ASCEND, HERO_KIT, REN, SORA, UPGRADE_OVERRIDES } from '../content/heroKits';
 import { categoryStacks } from '../sim/UpgradeSystem';
 import type { UpgradeCategory } from '../content/upgrades';
 export class GameBridge {
@@ -30,7 +31,8 @@ export class GameBridge {
   constructor(private readonly save: SaveV1) {
     if (!save.meta) save.meta = blankMeta();   // hand-built saves (tests, very old callers) get an empty meta
     const m = save.meta, tools = toolCharges(m.owned.includes('tool_reroll'), m.owned.includes('tool_banish'));
-    this.config = { boon: m.boon && m.owned.includes(`boon_${m.boon}`) ? m.boon : null, contract: m.contract && contractAvailable(m, m.contract) ? m.contract : null, ...tools };
+    const hero = save.hero ?? 'kai';
+    this.config = { boon: m.boon && m.owned.includes(`boon_${m.boon}`) ? m.boon : null, contract: m.contract && contractAvailable(m, m.contract) ? m.contract : null, ...tools, hero, heroForm: hero !== 'kai' && !!save.unlocks?.[hero] };
   }
   /** The loadout this run was deployed with (frozen at construction). */
   getRunConfig(): RunConfig { return this.config ?? NO_CONFIG; }
@@ -44,21 +46,22 @@ export class GameBridge {
   snapshot(): UiSnapshot { return this.current; }
   publish(force = false) {
     const s = this.sim?.state; if (!s) return;
-    const p = s.player;
+    const p = s.player, lance = s.hx?.act?.act === 'celestial_lance' && !s.hx.act.released ? s.hx.act : null;
     const phaseChanged = this.lastPhase !== s.phase;
     if (s.apexUnlockedNow) { s.apexUnlockedNow = false; this.save.unlocks = { cometheart: false, ...(this.save.unlocks ?? {}), stillfire: true }; storeSave(this.save); }
+    if (s.heroFormUnlockedNow && s.hero !== 'kai') { s.heroFormUnlockedNow = false; this.save.unlocks = { cometheart: false, ...(this.save.unlocks ?? {}), [s.hero]: true }; storeSave(this.save); }   // B19: the Warden unlocked this runner's transformation for good
     if (s.cometUnlockedNow) { s.cometUnlockedNow = false; this.save.unlocks = { ...(this.save.unlocks ?? { cometheart: false }), cometheart: true }; storeSave(this.save); }
     if (s.phase !== 'dead') this.deathShown = false;
     if (s.phase !== 'victory') this.victoryShown = false;
     this.current = { phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
-      dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form, dragonCooldown: p.dragonCooldown, cometCooldown: p.cometCooldown, cometUnlocked: s.cometUnlocked, cometReady: formChoices(s).includes(2), apexUnlocked: s.apexUnlocked, apexReady: formChoices(s).includes(3), riftCooldown: p.riftCooldown, reversalCooldown: p.reversalCooldown, evadeCooldown: p.evadeCooldown, riftCharge: s.cast?.kind === 'rift' && !s.cast.released ? Math.min(1, s.cast.t / RIFT.maxCharge) : 0, selector: { open: !!s.selector?.open, pick: selectedForm(s) ?? 0, choices: formChoices(s), left: Math.max(0, SELECTOR_MAX - (s.selector?.held ?? 0)) }, cinema: !!s.cinema,
+      dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form, dragonCooldown: p.dragonCooldown, cometCooldown: p.cometCooldown, hero: s.hero, heroFormUnlocked: s.heroFormUnlocked, heroReady: s.hero !== 'kai' && formChoices(s).includes(1), lanceCharge: lance ? lance.charge / SORA.e.maxCharge : 0, lanceTier: lance ? SORA.e.tiers.reduce((t, v, i) => (lance.charge >= v ? i : t), -1) : -1, heroAct: s.hx?.act?.act ?? '', cometUnlocked: s.cometUnlocked, cometReady: formChoices(s).includes(2), apexUnlocked: s.apexUnlocked, apexReady: formChoices(s).includes(3), riftCooldown: p.riftCooldown, reversalCooldown: p.reversalCooldown, evadeCooldown: p.evadeCooldown, riftCharge: s.cast?.kind === 'rift' && !s.cast.released ? Math.min(1, s.cast.t / RIFT.maxCharge) : 0, selector: { open: !!s.selector?.open, pick: selectedForm(s) ?? 0, choices: formChoices(s), left: Math.max(0, SELECTOR_MAX - (s.selector?.held ?? 0)) }, cinema: !!s.cinema,
       formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? s.upgradeOffers.map(id => offerCard(s, id)) : [], owned: UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] })), map: miniMap(s),
-      cdMax: { dash: 3.2 * s.mods.dashCd, beam: BEAM.cooldown * s.mods.beamCd, sphere: SPHERE.cooldown * s.mods.sphereCd, form: RULES.formCooldown * s.mods.formCd, dragon: DRAGON.cooldown * s.mods.beamCd, comet: CANNON.cooldown * s.mods.sphereCd, rift: RIFT.cooldown * s.mods.beamCd, reversal: REVERSAL.cooldown * s.mods.sphereCd, evade: EVASION.cooldown }, run: runHud(s), victoryShown: this.victoryShown, rewardPick: s.rewardPick, contract: this.config.contract, boon: this.config.boon, rerolls: s.run?.rerollsLeft ?? 0, banishes: s.run?.banishesLeft ?? 0, reward: this.reward, marks: this.save.meta.marks, crest: this.save.meta.crest, bosses: s.bossesDefeated, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
+      cdMax: { dash: 3.2 * s.mods.dashCd, beam: (s.hero === 'ren' ? REN.e.cooldown : s.hero === 'sora' ? SORA.e.cooldown : BEAM.cooldown) * s.mods.beamCd, sphere: (s.hero === 'ren' ? REN.r.cooldown : s.hero === 'sora' ? SORA.r.cooldown : SPHERE.cooldown) * s.mods.sphereCd, form: (s.hero === 'kai' ? RULES.formCooldown : ASCEND.cooldown) * s.mods.formCd, dragon: DRAGON.cooldown * s.mods.beamCd, comet: CANNON.cooldown * s.mods.sphereCd, rift: RIFT.cooldown * s.mods.beamCd, reversal: REVERSAL.cooldown * s.mods.sphereCd, evade: EVASION.cooldown }, run: runHud(s), victoryShown: this.victoryShown, rewardPick: s.rewardPick, contract: this.config.contract, boon: this.config.boon, rerolls: s.run?.rerollsLeft ?? 0, banishes: s.run?.banishesLeft ?? 0, reward: this.reward, marks: this.save.meta.marks, crest: this.save.meta.crest, bosses: s.bossesDefeated, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
     if ((s.phase === 'dead' || s.phase === 'victory') && phaseChanged) {
       const stats = this.sim!.stats();
       this.finalizeMeta(s);
-      if (!this.save.best || stats.score > this.save.best.score) { this.save.best = stats; storeSave(this.save); }
+      if (!this.save.best || stats.score > this.save.best.score) { this.save.best = { ...stats, hero: s.hero }; storeSave(this.save); }
     }
     this.lastPhase = s.phase;
     if (force || phaseChanged || this.listeners.size) this.listeners.forEach(listener => listener());
@@ -68,7 +71,7 @@ export class GameBridge {
     if (this.finalized) return; this.finalized = true;
     let maxCat = 0; for (const c of ['core', 'beam', 'sphere', 'survival', 'mobility', 'pickup', 'drive'] as UpgradeCategory[]) maxCat = Math.max(maxCat, categoryStacks(s, c));
     const won = s.phase === 'victory', warden = s.bossesDefeated >= 1 || won;
-    const result: RunResult = { runId: this.runId, arena: s.arenaId, won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, wardenKills: warden ? 1 : 0, seraphKills: won ? 1 : 0, formsUsed: [...(s.run?.formsUsed ?? [])], maxCategoryStacks: maxCat, contract: this.config.contract };
+    const result: RunResult = { hero: s.hero, runId: this.runId, arena: s.arenaId, won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, wardenKills: warden ? 1 : 0, seraphKills: won ? 1 : 0, formsUsed: [...(s.run?.formsUsed ?? [])], maxCategoryStacks: maxCat, contract: this.config.contract };
     const out = finalizeRun(this.save.meta, result);
     this.save.meta = { ...out.meta, introSeen: true }; this.reward = out.reward ? { ...out.reward, firstRun: out.reward.firstRun && !out.meta.introSeen } : null; storeSave(this.save);
   }
@@ -95,8 +98,8 @@ function bossHud(s: GameState): BossHud | null {
 }
 
 function offerCard(s: GameState, id: UpgradeId) {
-  const u = UPGRADE_BY_ID[id], pv = previewUpgrade(s, id);
-  return { id, name: u.name, blurb: u.blurb, category: u.category, rarity: u.rarity, stack: s.upgradeStacks[id] ?? 0, max: u.maxStacks, label: pv.label, before: pv.before, after: pv.after };
+  const u = UPGRADE_BY_ID[id], pv = previewUpgrade(s, id), ov = s.hero === 'kai' ? undefined : UPGRADE_OVERRIDES[s.hero][id];
+  return { id, name: ov?.name ?? u.name, blurb: ov?.blurb ?? u.blurb, catName: s.hero === 'kai' ? undefined : HERO_KIT[s.hero].catNames[u.category], category: u.category, rarity: u.rarity, stack: s.upgradeStacks[id] ?? 0, max: u.maxStacks, label: pv.label, before: pv.before, after: pv.after };
 }
 function miniMap(s: GameState): MiniMap {
   const p = s.player, foes: number[] = []; let near = 0, nearest = 9999, eliteNear = false, bossNear = false;

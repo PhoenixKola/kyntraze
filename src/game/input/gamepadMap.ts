@@ -17,11 +17,11 @@ export const NAV_REPEAT_RATE = 0.12;
 export const CONTROLLER_LAYOUT: readonly { action: string; keys: string; pad: string }[] = [
   { action: 'Move', keys: 'WASD / ARROWS', pad: 'LEFT STICK / D-PAD' },
   { action: 'Dash', keys: 'SHIFT / SPACE', pad: 'A' },
-  { action: 'Impact (Q)', keys: 'Q', pad: 'X' },
-  { action: 'Fracture Lance (beam)', keys: 'E', pad: 'RB or RT' },
-  { action: 'Nova Bloom (sphere)', keys: 'R', pad: 'LB or LT' },
-  { action: 'Transform', keys: 'F (picker: 1-2-3 / A-D, F confirms; F F = last)', pad: 'Y (D-PAD pick, Y / A confirm, B cancel)' },
-  { action: 'Aim: Lance / Nova / Rift', keys: 'MOUSE', pad: 'RIGHT STICK' },
+  { action: 'Q ability: Impact / Crimson Break / Azure Volley', keys: 'Q', pad: 'X' },
+  { action: 'E ability: Fracture Lance / Meteor Rush / Celestial Lance (hold to charge)', keys: 'E', pad: 'RB or RT' },
+  { action: 'R ability: Nova Bloom / Bloodstar Impact / Zero Horizon', keys: 'R', pad: 'LB or LT' },
+  { action: 'Transform (Kai: three forms, Ren / Sora: one)', keys: 'F (picker: 1-2-3 / A-D, F confirms; F F = last)', pad: 'Y (D-PAD pick, Y / A confirm, B cancel)' },
+  { action: 'Aim: Lance / Nova / Rift / Bloodstar / Celestial Lance', keys: 'MOUSE', pad: 'RIGHT STICK' },
   { action: 'Pause / resume', keys: 'ESC', pad: 'START' },
   { action: 'Menus: select / back', keys: 'MOUSE / TAB / ENTER', pad: 'D-PAD + A / B' },
 ];

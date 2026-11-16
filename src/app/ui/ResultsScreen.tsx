@@ -5,6 +5,7 @@ import { BuildStrip } from './BuildStrip';
 import { ASSET_BASE } from '../assetBase';
 import { CURRENCY, FEAT_BY_ID, UNLOCK_BY_ID, CONTRACT_BY_ID } from '../../content/meta';
 import { MarksBadge } from './ProgressionScreen';
+import { HERO_BY_ID } from '../../content/heroes';
 interface Props { s: UiSnapshot; onRetry: () => void; onHome: () => void; onProgress: () => void; }
 const base = ASSET_BASE;
 
@@ -16,7 +17,7 @@ export function ResultsScreen({ s, onRetry, onHome, onProgress }: Props) {
     <section className={`modal compact-modal result-modal ${won ? 'result-win' : ''}`} role="dialog" aria-modal="true" aria-labelledby="result-title">
       <div className="result-scroll">
       {won && <img className="res-crest" src={`${base}ui/victory-crest.png`} alt="" draggable={false}/>}
-      <p className="eyebrow">{won ? 'THE NULL SERAPH IS DOWN' : 'CONNECTION TO THE ZONE LOST'}</p>
+      <p className="eyebrow" data-testid="result-hero">{HERO_BY_ID[s.hero].name} · {won ? 'THE NULL SERAPH IS DOWN' : 'CONNECTION TO THE ZONE LOST'}</p>
       <h2 id="result-title">{won ? 'THE FRACTURE HOLDS' : 'RUN TERMINATED'}</h2>
       {won && <p className="res-sub">Kai sealed the rift. The zone falls quiet.</p>}
       <div className="score-number">{s.score.toLocaleString()} <span>POINTS</span></div>

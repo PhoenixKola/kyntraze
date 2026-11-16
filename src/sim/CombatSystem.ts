@@ -8,6 +8,7 @@ import { interruptOnHit } from './AbilitySystem';
 import { slideMove } from './CollisionSystem';
 import { COMET } from '../content/cometheart';
 import { tryPerfectEvasion } from './ApexSystem';
+import { ASCEND, HERO_KIT } from '../content/heroKits';
 
 /** `src` names what hurt Kai (contact, lunge, dash, ram, slam, bolt, orb, rupture, sweep, rush, prism, ...) so feedback and tests can tell a telegraphed ability from body contact. */
 export function damagePlayer(state: GameState, damage: number, src = 'contact'): boolean {
@@ -82,12 +83,16 @@ function bossDefeated(state: GameState, boss: Enemy) {
   state.hazards = state.hazards.filter(h => h.owner !== boss.id);
   state.enemyShots = state.enemyShots.filter(s => s.kind !== 'prism');
   state.bossesDefeated++; state.lastBossDefeatAt = state.time;
-  if (boss.kind === COMET.unlockBoss && !state.cometUnlocked) {   // B12: the Warden unlocks Cometheart for good; Drive is filled so Form II is playable at once (~7 min of a run remain)
+  if (state.hero !== 'kai' && boss.kind === ASCEND.unlockBoss && !state.heroFormUnlocked) {   // B19: the Warden unlocks THIS runner's transformation (Kai's Cometheart is only ever unlocked by Kai)
+    state.heroFormUnlocked = true; state.heroFormUnlockedNow = true; state.player.drive = 100;
+    state.announce = { id: 'ascend', text: `${HERO_KIT[state.hero].form.toUpperCase()} UNLOCKED`, sub: 'Full Drive + F awakens your transformation', at: state.time + 2.5 };
+  }
+  if (state.hero === 'kai' && boss.kind === COMET.unlockBoss && !state.cometUnlocked) {   // B12: the Warden unlocks Cometheart for good; Drive is filled so Form II is playable at once (~7 min of a run remain)
     state.cometUnlocked = true; state.cometUnlockedNow = true; state.player.drive = 100;
     state.announce = { id: 'cometheart', text: 'COMETHEART UNLOCKED', sub: 'Full Drive + F awakens Form II', at: state.time + 2.5 };
   }
   pushEnemyEvent(state, 'boss_defeated', boss, 0, 0, boss.kind);
-  if (boss.kind === 'seraph') { if (!state.apexUnlocked) state.apexUnlockedNow = true; if (state.phase === 'running') winRun(state); return; }   // B13: a Seraph victory unlocks Stillfire Apex for the NEXT run (never mid-run)
+  if (boss.kind === 'seraph') { if (!state.apexUnlocked && state.hero === 'kai') state.apexUnlockedNow = true; if (state.phase === 'running') winRun(state); return; }   // B13: a Seraph victory unlocks Stillfire Apex for the NEXT run (never mid-run)
   // the Warden is the mid-run payoff: a heal now, then a guaranteed Rare-or-better pick once the death animation has played
   state.player.hp = Math.min(state.player.maxHp, state.player.hp + state.player.maxHp * 0.4); state.bossReward++; state.rewardAt = state.time + def.deathT + 0.8;
   for (let i = 0; i < def.rewardOrbs && state.pickups.length < RULES.maxPickups; i++) {

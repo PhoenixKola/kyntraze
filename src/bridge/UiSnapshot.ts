@@ -3,6 +3,7 @@ import type { Rarity, UpgradeCategory, UpgradeId } from '../content/upgrades';
 import type { ArenaId } from '../content/arenas';
 import type { RunReward } from '../sim/MetaSystem';
 import type { BoonId, ContractId } from '../content/meta';
+import type { HeroId } from '../content/heroes';
 export interface UiSnapshot {
   phase: RunPhase; seed: number; hp: number; maxHp: number; xp: number; nextXp: number; level: number;
   seconds: number; kills: number; enemies: number; dashCooldown: number; qCooldown: number; beamCooldown: number; sphereCooldown: number;
@@ -16,6 +17,8 @@ export interface UiSnapshot {
   /** Active boss for the HUD bar, or null. `intro` is seconds left of the arrival warning; `flash` ticks up when it is hurt (for the bar's damage feedback). */
   boss: BossHud | null;
   arenaName: string;
+  /** B19: the runner, whether its single transformation is unlocked / startable now, Lance charge 0..1 with its tier (-1 = not charging), and the in-run Ascend cooldown */
+  hero: HeroId; heroFormUnlocked: boolean; heroReady: boolean; lanceCharge: number; lanceTier: number; heroAct: string;
   /** Rich level-up cards (same order as `offers`). */
   cards: OfferCard[];
   /** The build so far: one entry per owned card with its stack count. */
@@ -36,7 +39,7 @@ export interface UiSnapshot {
 }
 /** Run progress for the HUD: the clock, the plan's two boss times, and the next event to hint at. */
 export interface RunHud { t: number; wardenAt: number; finaleAt: number; wardenDone: boolean; finaleOut: boolean; nextLabel: string; nextIn: number; announce: { text: string; sub: string; age: number } | null }
-export interface OfferCard { id: UpgradeId; name: string; blurb: string; category: UpgradeCategory; rarity: Rarity; stack: number; max: number; label: string; before: string; after: string }
+export interface OfferCard { id: UpgradeId; name: string; blurb: string; /** hero-specific category label (Ren: RUSH / IMPACT, Sora: LANCE / HORIZON) */ catName?: string; category: UpgradeCategory; rarity: Rarity; stack: number; max: number; label: string; before: string; after: string }
 export interface OwnedUpgrade { id: UpgradeId; stacks: number }
 /** Minimap feed. `foes` is a flat [x, y, kind, ...] list: kind 0 grunt, 1 caster, 2 elite, 3 boss. Hazards carry warning progress (0..1) or `live` once they have fired. */
 export interface MapHazard { shape: 'circle' | 'rect' | 'cone' | 'sigil'; x: number; y: number; r: number; w: number; h: number; warn: number; live: boolean }
@@ -45,5 +48,5 @@ export const blankMap: MiniMap = { arena: 'gloam', px: 1100, py: 800, ax: 0, ay:
 export interface BossHud { id: 'warden' | 'seraph'; name: string; hp: number; maxHp: number; phase: 1 | 2; phases: 2; mode: string; intro: number; invuln: boolean; exposed: boolean }
 export const blankSnapshot: UiSnapshot = { phase: 'running', seed: 0, hp: 100, maxHp: 100, xp: 0, nextXp: 7,
   level: 1, seconds: 0, kills: 0, enemies: 0, dashCooldown: 0, qCooldown: 0, beamCooldown: 0, sphereCooldown: 0, drive: 0,
-  form: 0, formCooldown: 0, dragonCooldown: 0, cometCooldown: 0, apexUnlocked: false, apexReady: false, riftCooldown: 0, reversalCooldown: 0, evadeCooldown: 0, riftCharge: 0, selector: { open: false, pick: 0, choices: [], left: 4 }, cometUnlocked: false, cometReady: false, cinema: false, offers: [], score: 0, deathShown: false, boss: null, arenaName: 'THE GLOAM CIRCUIT', cards: [], owned: [], map: blankMap, cdMax: { dash: 3.2, beam: 7, sphere: 16, form: 6, dragon: 9, comet: 22, rift: 8, reversal: 14, evade: 9 }, sinceRevive: 999, revives: 0, victoryShown: false, rewardPick: false, bosses: 0,
+  form: 0, formCooldown: 0, dragonCooldown: 0, cometCooldown: 0, apexUnlocked: false, apexReady: false, riftCooldown: 0, reversalCooldown: 0, evadeCooldown: 0, riftCharge: 0, selector: { open: false, pick: 0, choices: [], left: 4 }, cometUnlocked: false, cometReady: false, hero: 'kai', heroFormUnlocked: false, heroReady: false, lanceCharge: 0, lanceTier: -1, heroAct: '', cinema: false, offers: [], score: 0, deathShown: false, boss: null, arenaName: 'THE GLOAM CIRCUIT', cards: [], owned: [], map: blankMap, cdMax: { dash: 3.2, beam: 7, sphere: 16, form: 6, dragon: 9, comet: 22, rift: 8, reversal: 14, evade: 9 }, sinceRevive: 999, revives: 0, victoryShown: false, rewardPick: false, bosses: 0,
   contract: null, boon: null, rerolls: 0, banishes: 0, reward: null, marks: 0, crest: null, run: { t: 0, wardenAt: 480, finaleAt: 900, wardenDone: false, finaleOut: false, nextLabel: 'FRACTURE WARDEN', nextIn: 480, announce: null } };

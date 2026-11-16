@@ -3,12 +3,18 @@ import { BootScene } from './scenes/BootScene';
 import { ArenaScene } from './scenes/ArenaScene';
 import type { GameBridge } from '../bridge/GameBridge';
 import type { ArenaId } from '../content/arenas';
+import { isHeroId, type HeroId } from '../content/heroes';
+/** The runner this game shows: the saved choice, or (dev server with ?qa=1 only) the ?hero= override. */
+export function resolveHero(bridge: GameBridge): HeroId {
+  try { const q = new URLSearchParams(globalThis.location?.search ?? ''), h = q.get('hero'); if (import.meta.env.DEV && q.get('qa') === '1' && isHeroId(h)) return h; } catch { /* no location */ }
+  return bridge.getRunConfig().hero ?? 'kai';
+}
 export function createGame(parent: HTMLElement, bridge: GameBridge, seed: number, arena: ArenaId = 'gloam') {
   return new Phaser.Game({
     type: Phaser.AUTO, parent, width: 960, height: 540, backgroundColor: '#101a29',
     pixelArt: true, roundPixels: true,
     // RESIZE: the canvas fills the window (no letterbox bars); ArenaScene zooms so at least 960x540 world px stay visible
     scale: { mode: Phaser.Scale.RESIZE, width: 960, height: 540 },
-    scene: [new BootScene(arena), new ArenaScene(bridge, seed, arena)],
+    scene: [new BootScene(arena, resolveHero(bridge)), new ArenaScene(bridge, seed, arena)],
   });
 }

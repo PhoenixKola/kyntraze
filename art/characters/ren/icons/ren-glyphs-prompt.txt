@@ -1,0 +1,6 @@
+HUD ability glyph sheet. Attached: six existing glyphs from the game (pure WHITE solid silhouettes on pure BLACK, chunky pixel-art edges, bold simple shapes with only small gaps, no inner shading, no grey, no outline, readable at 28 pixels). Draw FIVE NEW glyphs for the hero REN (a crimson fist brawler) in EXACTLY that style: pure white (#ffffff) flat silhouettes on pure black (#000000), chunky pixel-art edges, bold shapes with thick strokes, one solid glyph per cell, each fully inside its own cell, big and centred, far apart, in one row of 5 on a wide 16:9 canvas. No text, no numbers, no colour, no grey, no gradients.
+1. AUTO ATTACK: a clenched fist seen from the side with a curved chained trail of three smaller fist-shaped marks arcing behind it.
+2. Q Crimson Break: five fist marks fanned out in an arc like a rapid combo (one bigger fist in front and four smaller fists fanned behind).
+3. E Meteor Rush: a diagonal meteor streak passing through three round nodes (a long tapered comet streak with three circles along it, bright head at the lower right).
+4. R Bloodstar Impact: a fist slamming straight down into the ground, a jagged crater with a shockwave ring (ellipse of dashed segments) and a few debris shards.
+5. F Crimson Ascendant: a crest glyph of sharply spiked hair (five big blade-like spikes rising) above a small diamond, solid white.

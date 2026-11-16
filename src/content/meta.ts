@@ -39,7 +39,7 @@ export const CONTRACT_BY_ID = Object.fromEntries(CONTRACTS.map(c => [c.id, c])) 
 /** Run-rule numbers the sim reads (kept here so the card text and the game cannot disagree). */
 export const CONTRACT_RULES = { overrunSpawn: 0.72, glassHp: 0.6, pressureHazard: 0.7 } as const;
 
-export type FeatId = 'first_run' | 'first_win' | 'warden_down' | 'wins5' | 'gloam_win' | 'ashen_win' | 'flare' | 'comet' | 'apex' | 'specialist' | 'survivor10' | 'contract_win' | 'hunter' | 'level20';
+export type FeatId = 'first_run' | 'first_win' | 'warden_down' | 'wins5' | 'gloam_win' | 'ashen_win' | 'flare' | 'comet' | 'apex' | 'specialist' | 'survivor10' | 'contract_win' | 'hunter' | 'level20' | 'ren_ascend' | 'sora_ascend';
 export interface FeatDef { id: FeatId; name: string; blurb: string; reward: number; /** lifetime goal shown as progress when the feat counts something */ goal?: number; icon: string }
 export const FEATS: FeatDef[] = [
   { id: 'first_run', name: 'FIRST FRACTURE', blurb: 'Complete a run.', reward: 5, icon: 'ft_first_run' },
@@ -51,6 +51,8 @@ export const FEATS: FeatDef[] = [
   { id: 'flare', name: 'IGNITION', blurb: 'Awaken Flarebound.', reward: 10, icon: 'ft_flare' },
   { id: 'comet', name: 'COMETHEART', blurb: 'Awaken Cometheart.', reward: 15, icon: 'ft_comet' },
   { id: 'apex', name: 'STILLFIRE', blurb: 'Awaken Stillfire Apex.', reward: 25, icon: 'ft_apex' },
+  { id: 'ren_ascend', name: 'CRIMSON ASCENDANT', blurb: "Awaken Ren's crimson transformation.", reward: 20, icon: 'ft_flare' },
+  { id: 'sora_ascend', name: 'AZURE SOVEREIGN', blurb: "Awaken Sora's azure transformation.", reward: 20, icon: 'ft_comet' },
   { id: 'specialist', name: 'SPECIALIST', blurb: 'End a run with 8 upgrades in one category.', reward: 15, icon: 'ft_specialist' },
   { id: 'survivor10', name: 'TEN MINUTES', blurb: 'Survive 10:00.', reward: 15, icon: 'ft_survivor' },
   { id: 'level20', name: 'OVERCLOCKED', blurb: 'Reach level 20.', reward: 15, icon: 'ft_level' },

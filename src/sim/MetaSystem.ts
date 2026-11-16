@@ -1,4 +1,5 @@
 import { ARENA_IDS, type ArenaId } from '../content/arenas';
+import { HERO_IDS, isHeroId, type HeroId } from '../content/heroes';
 import { BOON_IDS, CATEGORY_FEAT_STACKS, CONTRACT_BY_ID, CONTRACTS, EARN, FEATS, FEAT_BY_ID, MASTERY, UNLOCKS, UNLOCK_BY_ID, type BoonId, type ContractId, type FeatId, type Req, type UnlockId } from '../content/meta';
 
 /** B18 persistent meta state. Pure data + pure functions: every operation returns a NEW state, so a purchase / grant is atomic with respect to the app's state model. */
@@ -9,15 +10,18 @@ export interface MetaState {
   /** feat id -> the lifetime run count when it was earned (0 = credited from a legacy save) */
   feats: Partial<Record<FeatId, number>>; mastery: Record<string, true>; counters: Counters; arenas: Record<ArenaId, ArenaRecord>;
   /** ids of runs whose reward was already granted (newest last, capped) */ granted: string[]; introSeen: boolean; legacyGift: number;
+  /** B19 (additive): per-runner record */ heroes: Record<HeroId, HeroRecord>;
 }
-export interface RunResult { runId: string; arena: ArenaId; won: boolean; seconds: number; kills: number; level: number; score: number; wardenKills: number; seraphKills: number; formsUsed: number[]; maxCategoryStacks: number; contract: ContractId | null }
+export interface HeroRecord { runs: number; wins: number; bestSeconds: number; wardenKills: number }
+export interface RunResult { /** B19: who played (omitted = Kai) */ hero?: HeroId; runId: string; arena: ArenaId; won: boolean; seconds: number; kills: number; level: number; score: number; wardenKills: number; seraphKills: number; formsUsed: number[]; maxCategoryStacks: number; contract: ContractId | null }
 export interface RewardLine { label: string; marks: number }
 export interface RunReward { lines: RewardLine[]; total: number; newFeats: FeatId[]; newMastery: string[]; unlocked: UnlockId[]; balance: number; contract: ContractId | null; contractDone: boolean; firstRun: boolean }
 
 export const MARKS_CAP = 999_999, GRANTED_KEEP = 40;
 const clampInt = (v: unknown, lo: number, hi: number, d = lo) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(lo, Math.floor(v))) : d);
 const blankRecord = (): ArenaRecord => ({ runs: 0, wins: 0, bestSeconds: 0, bestScore: 0, bestLevel: 0, wardenKills: 0, seraphKills: 0 });
-export const blankMeta = (): MetaState => ({ v: 1, marks: 0, lifetime: 0, owned: [], boon: null, contract: null, crest: null, feats: {}, mastery: {}, counters: { runs: 0, wins: 0, deaths: 0, kills: 0, wardenKills: 0, seraphKills: 0 }, arenas: { gloam: blankRecord(), ashen: blankRecord() }, granted: [], introSeen: false, legacyGift: 0 });
+export const blankMeta = (): MetaState => ({ v: 1, marks: 0, lifetime: 0, owned: [], boon: null, contract: null, crest: null, feats: {}, mastery: {}, counters: { runs: 0, wins: 0, deaths: 0, kills: 0, wardenKills: 0, seraphKills: 0 }, arenas: { gloam: blankRecord(), ashen: blankRecord() }, granted: [], introSeen: false, legacyGift: 0, heroes: blankHeroes() });
+function blankHeroes(): Record<HeroId, HeroRecord> { return { kai: { runs: 0, wins: 0, bestSeconds: 0, wardenKills: 0 }, ren: { runs: 0, wins: 0, bestSeconds: 0, wardenKills: 0 }, sora: { runs: 0, wins: 0, bestSeconds: 0, wardenKills: 0 } }; }
 
 export interface LegacyFacts { cometheart: boolean; stillfire: boolean; victory: boolean; hadRun: boolean }
 /** Idempotent. A save without `meta` is credited ONCE from what it already earned (Warden / Seraph milestones become feats and a one-time marks gift); an existing `meta` is only sanitised. Bad data falls back per field, never wholesale. */
@@ -43,6 +47,8 @@ export function migrateMeta(raw: unknown, legacy: LegacyFacts): MetaState {
   for (const k of Object.keys(m.counters) as (keyof Counters)[]) m.counters[k] = clampInt(c[k], 0, 1e9);
   const ar = (typeof r.arenas === 'object' && r.arenas ? r.arenas : {}) as Record<string, Record<string, unknown>>;
   for (const a of ARENA_IDS) for (const k of Object.keys(m.arenas[a]) as (keyof ArenaRecord)[]) m.arenas[a][k] = clampInt(ar[a]?.[k], 0, 1e9);
+  const hr = (typeof r.heroes === 'object' && r.heroes ? r.heroes : {}) as Record<string, Record<string, unknown>>;
+  for (const h of HERO_IDS) for (const k of Object.keys(m.heroes[h]) as (keyof HeroRecord)[]) m.heroes[h][k] = clampInt(hr[h]?.[k], 0, 1e9);
   m.granted = Array.isArray(r.granted) ? r.granted.filter((x): x is string => typeof x === 'string').slice(-GRANTED_KEEP) : [];
   return m;
 }
@@ -90,16 +96,17 @@ export function computeEarnings(r: RunResult): RewardLine[] {
 /** Records the run, awards marks / feats / mastery exactly once per `runId`, and returns the breakdown for the Results screen. A repeated id is a no-op (reward: null). */
 export function finalizeRun(prev: MetaState, r: RunResult): { meta: MetaState; reward: RunReward | null } {
   if (!r.runId || prev.granted.includes(r.runId)) return { meta: prev, reward: null };
-  const m: MetaState = { ...prev, owned: [...prev.owned], feats: { ...prev.feats }, mastery: { ...prev.mastery }, counters: { ...prev.counters }, arenas: { gloam: { ...prev.arenas.gloam }, ashen: { ...prev.arenas.ashen } }, granted: [...prev.granted] };
+  const m: MetaState = { ...prev, owned: [...prev.owned], feats: { ...prev.feats }, mastery: { ...prev.mastery }, counters: { ...prev.counters }, arenas: { gloam: { ...prev.arenas.gloam }, ashen: { ...prev.arenas.ashen } }, granted: [...prev.granted], heroes: { kai: { ...prev.heroes.kai }, ren: { ...prev.heroes.ren }, sora: { ...prev.heroes.sora } } };
   const before = available(prev), firstRun = prev.counters.runs === 0;
   const seconds = Math.max(0, Number.isFinite(r.seconds) ? r.seconds : 0), kills = clampInt(r.kills, 0, 1e6);
   const run: RunResult = { ...r, seconds, kills };
   const c = m.counters; c.runs++; c.kills = Math.min(1e9, c.kills + kills); if (r.won) c.wins++; else c.deaths++; c.wardenKills += r.wardenKills > 0 ? 1 : 0; c.seraphKills += r.seraphKills > 0 ? 1 : 0;
   const a = m.arenas[r.arena]; a.runs++; if (r.won) a.wins++; a.bestSeconds = Math.max(a.bestSeconds, Math.floor(seconds)); a.bestScore = Math.max(a.bestScore, clampInt(r.score, 0, 1e9)); a.bestLevel = Math.max(a.bestLevel, clampInt(r.level, 0, 1e4)); a.wardenKills += r.wardenKills > 0 ? 1 : 0; a.seraphKills += r.seraphKills > 0 ? 1 : 0;
+  { const hid: HeroId = isHeroId(r.hero) ? r.hero : 'kai', h = m.heroes[hid]; h.runs++; if (r.won) h.wins++; h.bestSeconds = Math.max(h.bestSeconds, Math.floor(seconds)); h.wardenKills += r.wardenKills > 0 ? 1 : 0; }
   const lines = computeEarnings(run), newFeats: FeatId[] = [], newMastery: string[] = [];
   const earn = (id: FeatId, ok: boolean) => { if (ok && m.feats[id] === undefined) { m.feats[id] = c.runs; newFeats.push(id); lines.push({ label: `FEAT · ${FEAT_BY_ID[id].name}`, marks: FEAT_BY_ID[id].reward }); } };
   earn('first_run', c.runs >= 1); earn('warden_down', c.wardenKills >= 1); earn('first_win', c.wins >= 1); earn('gloam_win', m.arenas.gloam.wins >= 1); earn('ashen_win', m.arenas.ashen.wins >= 1); earn('wins5', c.wins >= 5);
-  earn('flare', r.formsUsed.includes(1)); earn('comet', r.formsUsed.includes(2)); earn('apex', r.formsUsed.includes(3)); earn('specialist', r.maxCategoryStacks >= CATEGORY_FEAT_STACKS);
+  earn('flare', r.formsUsed.includes(1)); earn('comet', r.formsUsed.includes(2)); earn('apex', r.formsUsed.includes(3)); earn('ren_ascend', r.formsUsed.includes(10)); earn('sora_ascend', r.formsUsed.includes(11)); earn('specialist', r.maxCategoryStacks >= CATEGORY_FEAT_STACKS);
   earn('survivor10', seconds >= 600); earn('level20', r.level >= 20); earn('contract_win', r.won && !!r.contract); earn('hunter', c.kills >= 1000);
   for (const d of MASTERY[r.arena]) {
     const key = `${r.arena}.${d.id}`, p = masteryProgress(a, d.id);

@@ -1,0 +1,8 @@
+Game UI icon sheet for KYNTRAZE: FRACTURE RUSH (dark sci-fi anime-action, crisp cel-shaded with thick near-black outline, hard stepped edges, no blur, no text, no letters, no numbers, no shadows). Each icon is a compact emblem medallion: a dark gunmetal angular octagon badge with a thin brass rim and a small glowing CRIMSON RED inlay, a bold simple readable glyph in the centre, readable at 64 px. Flat magenta (#ff00ff) background, icons far apart, each fully inside its own cell, nothing cropped. Wide 16:9 canvas.
+Draw EXACTLY 6 items in a 3x2 grid (3 columns, 2 rows), in this order, left to right then top to bottom:
+1. AUTO ATTACK 'Ironclad Hooks': three heavy gauntleted fists in a chained cross-punch arc, red impact star.
+2. Q 'Crimson Break': a clenched fist with a rapid burst of multiple red afterimage fists fanning out.
+3. E 'Meteor Rush': a streaking red meteor comet with a fist at its head, diagonal motion trail.
+4. R 'Bloodstar Impact': a fist slamming down to the ground, a radiating crimson shockwave star and cracked ground.
+5. F 'Crimson Ascendant' form crest: a flame-like spiked crimson hair silhouette with glowing eyes, inside a ring.
+6. A crimson flame-spike emblem of Ren's name (hero crest), bold and simple.

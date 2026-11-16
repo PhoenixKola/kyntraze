@@ -13,6 +13,7 @@ import { updateDrive } from './DriveSystem';
 import { pruneDeadEntities } from './EntityRegistry';
 import type { UpgradeId } from '../content/upgrades';
 import { startAbility, updateAbilities, trackAim } from './AbilitySystem';
+import { updateHero } from './HeroSystem';
 import { gradeRun } from './GameTelemetry';
 import { updateArenaHazards } from './ArenaHazards';
 import { setActiveArena } from './CollisionSystem';
@@ -28,7 +29,7 @@ export class Simulation {
   constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false, apexUnlocked = false, config: RunConfig = NO_CONFIG) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked, apexUnlocked); applyRunConfig(this.state, config); }
   step(dt: number, input: InputState) {
     const s = this.state; if (s.phase !== 'running') return;
-    { const f = s.player.form; if (f && !s.run.formsUsed.includes(f)) s.run.formsUsed.push(f); }   // B18: feats read the forms Kai actually used
+    { const f = s.player.form, id = s.hero === 'kai' ? f : s.hero === 'ren' ? 10 : 11; if (f && !s.run.formsUsed.includes(id)) s.run.formsUsed.push(id); }   // B19: Ren / Sora log their own ids (10 / 11), never Kai's Flarebound   // B18: feats read the forms Kai actually used
     if (s.cinema) { updateCinema(s, dt); this.fHeld = !!(input.f || input.fHeld); this.qHeld = input.q; this.eHeld = !!input.beam; this.rHeld = !!input.sphere; return; }   // B12: the reveal freezes the whole run (clock, enemies, shots, hazards, cooldowns, i-frames)
     if (s.selector.open) {   // the form selector freezes the run just like the reveal; only its own input is read
       const fd = !!(input.f || input.fHeld); trackAim(s, input);
@@ -36,7 +37,7 @@ export class Simulation {
       this.fHeld = fd; this.qHeld = input.q; this.eHeld = !!input.beam || !!input.beamHeld; this.rHeld = !!input.sphere; return;
     }
     s.time += dt;
-    trackAim(s, input);
+    trackAim(s, input); s.hx.moving = input.x !== 0 || input.y !== 0;
     movePlayer(s, input, dt);
     if (input.q && !this.qHeld) activateQ(s);
     const fDown = !!(input.f || input.fHeld); formInput(s, fDown, this.fHeld);   // the press edge counts too, so a tap shorter than one tick is never lost
@@ -47,6 +48,7 @@ export class Simulation {
     if (s.mods.regen > 0) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
     updateDrive(s, dt);
     updateAbilities(s, dt);
+    if (s.hero !== 'kai') updateHero(s, dt);
     updateDirector(s, this.rng, dt);
     moveEnemies(s, dt);
     updateEnemyShots(s, dt);

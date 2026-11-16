@@ -116,7 +116,7 @@ export interface AnimFrameInput {
   /** The sim's form flag (player.form); an edge 0 -> 1 starts the transformation, 1 -> 0 the power-down. */
   form?: 0 | 1 | 2 | 3;
   /** B12 Form II reveal (sim.cinema): the whole body plays the Transform clip mapped onto this timeline. `to` = the form it ends in (B13: 3 = Stillfire Apex). */
-  cinema?: { t: number; dur: number; commitAt: number; to?: 2 | 3 } | null;
+  cinema?: { t: number; dur: number; commitAt: number; to?: 1 | 2 | 3 } | null;
   /** Seconds until the sim's automatic weapon fires, and whether an enemy is in range right now. */
   attackClock: number; hasTarget: boolean; targetDx: number; targetDy: number;
   /** Set on the render frame where the sim fired a fresh basic attack (offset to its first target). */

@@ -1,0 +1,332 @@
+{
+ "ren_auto_a": {
+  "seconds": 0.22,
+  "peak_dBFS": -9.0,
+  "rms_dBFS": -14.35,
+  "approx_LUFS_integrated": -15.6,
+  "clipped_samples": 0,
+  "dc": 0.00061,
+  "centroid_hz": 668
+ },
+ "ren_auto_b": {
+  "seconds": 0.22,
+  "peak_dBFS": -9.0,
+  "rms_dBFS": -13.9,
+  "approx_LUFS_integrated": -15.5,
+  "clipped_samples": 0,
+  "dc": -0.00053,
+  "centroid_hz": 502
+ },
+ "ren_auto_fin": {
+  "seconds": 0.5,
+  "peak_dBFS": -5.0,
+  "rms_dBFS": -10.1,
+  "approx_LUFS_integrated": -12.4,
+  "clipped_samples": 0,
+  "dc": 0.00044,
+  "centroid_hz": 1029
+ },
+ "ren_q_start": {
+  "seconds": 0.25,
+  "peak_dBFS": -14.0,
+  "rms_dBFS": -24.77,
+  "approx_LUFS_integrated": -26.6,
+  "clipped_samples": 0,
+  "dc": 0.0,
+  "centroid_hz": 922
+ },
+ "ren_q_beat": {
+  "seconds": 0.2,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -14.56,
+  "approx_LUFS_integrated": -15.6,
+  "clipped_samples": 0,
+  "dc": 0.00083,
+  "centroid_hz": 949
+ },
+ "ren_q_fin": {
+  "seconds": 0.7,
+  "peak_dBFS": -3.5,
+  "rms_dBFS": -8.98,
+  "approx_LUFS_integrated": -11.3,
+  "clipped_samples": 0,
+  "dc": 0.00093,
+  "centroid_hz": 1256
+ },
+ "rush_start": {
+  "seconds": 0.45,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -15.05,
+  "approx_LUFS_integrated": -16.0,
+  "clipped_samples": 0,
+  "dc": 3e-05,
+  "centroid_hz": 6652
+ },
+ "rush_hop": {
+  "seconds": 0.25,
+  "peak_dBFS": -9.0,
+  "rms_dBFS": -22.72,
+  "approx_LUFS_integrated": -23.0,
+  "clipped_samples": 0,
+  "dc": 0.00025,
+  "centroid_hz": 2593
+ },
+ "rush_strike": {
+  "seconds": 0.75,
+  "peak_dBFS": -4.5,
+  "rms_dBFS": -10.92,
+  "approx_LUFS_integrated": -13.0,
+  "clipped_samples": 0,
+  "dc": 0.00116,
+  "centroid_hz": 3366
+ },
+ "rush_end": {
+  "seconds": 0.4,
+  "peak_dBFS": -12.0,
+  "rms_dBFS": -29.38,
+  "approx_LUFS_integrated": -29.6,
+  "clipped_samples": 0,
+  "dc": -0.00023,
+  "centroid_hz": 3767
+ },
+ "bloodstar_crouch": {
+  "seconds": 0.45,
+  "peak_dBFS": -12.0,
+  "rms_dBFS": -17.39,
+  "approx_LUFS_integrated": -23.1,
+  "clipped_samples": 0,
+  "dc": -0.0,
+  "centroid_hz": 521
+ },
+ "bloodstar_leap": {
+  "seconds": 0.5,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -16.1,
+  "approx_LUFS_integrated": -17.4,
+  "clipped_samples": 0,
+  "dc": 0.00016,
+  "centroid_hz": 2989
+ },
+ "bloodstar_slam": {
+  "seconds": 1.7,
+  "peak_dBFS": -2.5,
+  "rms_dBFS": -8.49,
+  "approx_LUFS_integrated": -12.2,
+  "clipped_samples": 0,
+  "dc": -0.00292,
+  "centroid_hz": 3011
+ },
+ "bloodstar_ring": {
+  "seconds": 0.9,
+  "peak_dBFS": -10.0,
+  "rms_dBFS": -22.99,
+  "approx_LUFS_integrated": -26.5,
+  "clipped_samples": 0,
+  "dc": -0.00077,
+  "centroid_hz": 1268
+ },
+ "bloodstar_rebound": {
+  "seconds": 1.0,
+  "peak_dBFS": -5.0,
+  "rms_dBFS": -11.19,
+  "approx_LUFS_integrated": -14.2,
+  "clipped_samples": 0,
+  "dc": 3e-05,
+  "centroid_hz": 771
+ },
+ "ren_ascend_charge": {
+  "seconds": 1.6,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -14.61,
+  "approx_LUFS_integrated": -17.2,
+  "clipped_samples": 0,
+  "dc": 0.00164,
+  "centroid_hz": 3200
+ },
+ "ren_ascend_break": {
+  "seconds": 1.6,
+  "peak_dBFS": -2.5,
+  "rms_dBFS": -7.9,
+  "approx_LUFS_integrated": -12.6,
+  "clipped_samples": 0,
+  "dc": -0.00114,
+  "centroid_hz": 2649
+ },
+ "ren_ascend_commit": {
+  "seconds": 1.1,
+  "peak_dBFS": -5.0,
+  "rms_dBFS": -12.71,
+  "approx_LUFS_integrated": -15.4,
+  "clipped_samples": 0,
+  "dc": -0.00042,
+  "centroid_hz": 3641
+ },
+ "ren_ascend_end": {
+  "seconds": 0.7,
+  "peak_dBFS": -10.0,
+  "rms_dBFS": -26.76,
+  "approx_LUFS_integrated": -28.6,
+  "clipped_samples": 0,
+  "dc": -0.00013,
+  "centroid_hz": 3348
+ },
+ "ren_aura": {
+  "seconds": 2.0,
+  "peak_dBFS": -24.0,
+  "rms_dBFS": -32.44,
+  "approx_LUFS_integrated": -35.2,
+  "clipped_samples": 0,
+  "dc": -0.0,
+  "centroid_hz": 2296,
+  "loop_seam_step": 0.00047,
+  "max_internal_step": 0.00329,
+  "seam_ok": true
+ },
+ "needle_fire": {
+  "seconds": 0.12,
+  "peak_dBFS": -17.0,
+  "rms_dBFS": -24.16,
+  "approx_LUFS_integrated": -21.2,
+  "clipped_samples": 0,
+  "dc": 7e-05,
+  "centroid_hz": 9231
+ },
+ "volley_fire": {
+  "seconds": 0.55,
+  "peak_dBFS": -8.0,
+  "rms_dBFS": -17.24,
+  "approx_LUFS_integrated": -14.9,
+  "clipped_samples": 0,
+  "dc": -2e-05,
+  "centroid_hz": 6746
+ },
+ "lance_charge": {
+  "seconds": 1.4,
+  "peak_dBFS": -12.0,
+  "rms_dBFS": -18.68,
+  "approx_LUFS_integrated": -18.7,
+  "clipped_samples": 0,
+  "dc": 0.00011,
+  "centroid_hz": 5197
+ },
+ "lance_tier": {
+  "seconds": 0.25,
+  "peak_dBFS": -11.0,
+  "rms_dBFS": -19.35,
+  "approx_LUFS_integrated": -16.9,
+  "clipped_samples": 0,
+  "dc": 2e-05,
+  "centroid_hz": 5056
+ },
+ "lance_fire": {
+  "seconds": 1.0,
+  "peak_dBFS": -4.0,
+  "rms_dBFS": -13.24,
+  "approx_LUFS_integrated": -11.4,
+  "clipped_samples": 0,
+  "dc": -0.00069,
+  "centroid_hz": 8520
+ },
+ "lance_pulse": {
+  "seconds": 0.2,
+  "peak_dBFS": -11.0,
+  "rms_dBFS": -18.89,
+  "approx_LUFS_integrated": -15.8,
+  "clipped_samples": 0,
+  "dc": 5e-05,
+  "centroid_hz": 10355
+ },
+ "lance_end": {
+  "seconds": 0.6,
+  "peak_dBFS": -10.0,
+  "rms_dBFS": -19.35,
+  "approx_LUFS_integrated": -18.0,
+  "clipped_samples": 0,
+  "dc": -5e-05,
+  "centroid_hz": 7054
+ },
+ "horizon_summon": {
+  "seconds": 0.9,
+  "peak_dBFS": -9.0,
+  "rms_dBFS": -16.5,
+  "approx_LUFS_integrated": -15.0,
+  "clipped_samples": 0,
+  "dc": -0.00041,
+  "centroid_hz": 3627
+ },
+ "horizon_converge": {
+  "seconds": 0.65,
+  "peak_dBFS": -11.0,
+  "rms_dBFS": -21.37,
+  "approx_LUFS_integrated": -21.0,
+  "clipped_samples": 0,
+  "dc": 0.00108,
+  "centroid_hz": 6154
+ },
+ "horizon_burst": {
+  "seconds": 1.4,
+  "peak_dBFS": -3.5,
+  "rms_dBFS": -12.3,
+  "approx_LUFS_integrated": -11.5,
+  "clipped_samples": 0,
+  "dc": 0.00115,
+  "centroid_hz": 6660
+ },
+ "horizon_end": {
+  "seconds": 0.5,
+  "peak_dBFS": -13.0,
+  "rms_dBFS": -20.97,
+  "approx_LUFS_integrated": -19.8,
+  "clipped_samples": 0,
+  "dc": -2e-05,
+  "centroid_hz": 7308
+ },
+ "sora_ascend_charge": {
+  "seconds": 1.6,
+  "peak_dBFS": -10.0,
+  "rms_dBFS": -17.13,
+  "approx_LUFS_integrated": -15.5,
+  "clipped_samples": 0,
+  "dc": 5e-05,
+  "centroid_hz": 6836
+ },
+ "sora_ascend_break": {
+  "seconds": 1.5,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -13.2,
+  "approx_LUFS_integrated": -12.1,
+  "clipped_samples": 0,
+  "dc": 0.00035,
+  "centroid_hz": 7754
+ },
+ "sora_ascend_commit": {
+  "seconds": 1.3,
+  "peak_dBFS": -5.0,
+  "rms_dBFS": -12.55,
+  "approx_LUFS_integrated": -12.1,
+  "clipped_samples": 0,
+  "dc": 0.00108,
+  "centroid_hz": 3730
+ },
+ "sora_ascend_end": {
+  "seconds": 0.7,
+  "peak_dBFS": -10.0,
+  "rms_dBFS": -18.69,
+  "approx_LUFS_integrated": -18.3,
+  "clipped_samples": 0,
+  "dc": 0.00012,
+  "centroid_hz": 6198
+ },
+ "sora_aura": {
+  "seconds": 2.0,
+  "peak_dBFS": -26.0,
+  "rms_dBFS": -35.72,
+  "approx_LUFS_integrated": -36.3,
+  "clipped_samples": 0,
+  "dc": 0.0,
+  "centroid_hz": 6618,
+  "loop_seam_step": 0.0046,
+  "max_internal_step": 0.0102,
+  "seam_ok": true
+ }
+}
