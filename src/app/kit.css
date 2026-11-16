@@ -469,3 +469,16 @@ button.hero-card:focus-visible { outline: 2px solid var(--accent, #e0a24a); outl
 .title-content .logo-mark { align-self: flex-start; width: auto; height: calc(58 * var(--u)); flex: 0 0 auto; }
 .settings-overlay .settings-cols { padding-top: calc(14 * var(--u)); margin-top: calc(10 * var(--u)); }
 .settings-cols .group-title { margin-top: 0; padding-top: calc(4 * var(--u)); }
+/* B20: title actions stack (primary over the two secondaries) so the block stays left of Kai at 16:9 and wider */
+.title-content .title-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: calc(10 * var(--u)); padding-left: 0; width: calc(300 * var(--u)); max-width: 100%; }
+.title-content .title-buttons .primary-button { grid-column: 1 / -1; min-width: 0; }
+.title-content .title-buttons .outlined-button { min-width: 0; padding-left: 0; padding-right: 0; }
+.title-content .logo-mark { display: none; }
+.title-kai { right: 12%; }
+/* B20: Results at 640x320-360 - action row stays inside the plate, six stat cells show their full labels */
+.result-modal .stacked-actions { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); }
+.result-modal .stacked-actions button { min-width: 0; padding-left: calc(4 * var(--u)); padding-right: calc(4 * var(--u)); letter-spacing: .03em; overflow: hidden; }
+.result-modal .res-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.55fr) repeat(3, minmax(0, 1fr)); }
+.result-modal .res-grid > div { letter-spacing: .05em; white-space: nowrap; min-width: 0; overflow: hidden; }
+.result-modal .res-grid strong { white-space: normal; overflow: visible; }
+@media (max-height: 430px) { .result-modal .stacked-actions button { font-size: 8px; letter-spacing: .02em; } }

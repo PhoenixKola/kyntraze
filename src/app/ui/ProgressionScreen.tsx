@@ -85,10 +85,10 @@ export function ProgressionScreen({ meta, unlocks, tab, onTab, onMeta, onBack, o
         <p className="pg-note">Contracts only change the rules listed on the card. Boss times, telegraphs and the 15:00 finale never change.</p>
       </>}
       {tab === 'archives' && <>
-        {row('TRANSFORMATIONS', 'EARNED BY DEFEATING BOSSES')}
+        {row('KAI · TRANSFORMATIONS', 'EARNED BY DEFEATING BOSSES AS KAI')}
         <ul className="pg-forms">{[{ c: 'base', n: 'BASE', on: true, how: 'Always available' }, { c: 'f1', n: 'FLAREBOUND', on: true, how: 'Drive 65%+ → F' }, { c: 'f2', n: 'COMETHEART', on: unlocks.cometheart, how: 'Earned: Fracture Warden' }, { c: 'f3', n: 'STILLFIRE APEX', on: unlocks.stillfire, how: 'Earned: Null Seraph' }].map(f => <li key={f.c} className={f.on ? 'open' : 'sealed'}><img src={`${ASSET_BASE}ui/kit/crest-${f.c}.webp`} alt="" draggable={false}/><b>{f.on ? f.n : 'SEALED'}</b><span>{f.on ? f.how : 'Defeat a boss to discover it'}</span></li>)}</ul>
-        {row('RUNNERS', 'PER-RUNNER RECORDS')}
-        <ul className="pg-forms" data-testid="runner-records">{HEROES.map(h => { const r = meta.heroes[h.id], form = h.id === 'kai' ? 'Three transformations' : unlocks[h.id as 'ren' | 'sora'] ? `${HERO_KIT[h.id].form} unlocked` : 'Earned: Fracture Warden'; return <li key={h.id} className={h.id === 'kai' || unlocks[h.id as 'ren' | 'sora'] ? 'open' : 'sealed'}><span><b>{h.name}</b> {r.runs} RUNS · {r.wins} WINS · BEST {r.bestSeconds ? roundedTime(r.bestSeconds) : '—'}<small>{form}</small></span></li>; })}</ul>
+        {row('RUNNERS', 'RECORDS · REN AND SORA EARN THEIR OWN FORM')}
+        <ul className="pg-forms" data-testid="runner-records">{HEROES.map(h => { const r = meta.heroes[h.id], form = h.id === 'kai' ? 'Kai forms are listed above' : unlocks[h.id as 'ren' | 'sora'] ? `${HERO_KIT[h.id].form} unlocked` : `${HERO_KIT[h.id].form}: defeat the Fracture Warden as ${h.name}`; return <li key={h.id} className={h.id === 'kai' || unlocks[h.id as 'ren' | 'sora'] ? 'open' : 'sealed'}><span><b>{h.name}</b> {r.runs} RUNS · {r.wins} WINS · BEST {r.bestSeconds ? roundedTime(r.bestSeconds) : '—'}<small>{form}</small></span></li>; })}</ul>
         {row('ARENA MASTERY', 'RECORDS AND OBJECTIVES')}
         <div className="pg-arenas">{ARENA_IDS.map((a: ArenaId) => { const r = meta.arenas[a]; return <section key={a} className="pg-arena" data-testid={`arena-${a}`}>
           <header><img src={icon('arena_' + a)} alt="" draggable={false}/><div><b>{ARENAS[a].name.toUpperCase()}</b><span>{r.runs} RUNS · {r.wins} WINS</span></div></header>

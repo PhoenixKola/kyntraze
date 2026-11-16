@@ -1,4 +1,4 @@
-# B19 — Ren and Sora (OWNER REVIEW; verdict at the bottom; local commit, NOT pushed)
+# B19 — Ren and Sora (OWNER REVIEW; verdict at the bottom; committed 74a9a91 and pushed to origin/main — status corrected in B20)
 
 ## What a player gets
 Three runners on the hero screen: **Kai** (unchanged, three transformations), **Ren** (crimson close-range brawler, Crimson Ascendant) and **Sora** (azure ranged controller, Azure Sovereign). Selection is a real choice (mouse, keyboard, pad focus), saved, and kept by Retry. Ren and Sora each have Base + exactly ONE transformation; Kai's forms and unlocks are untouched.

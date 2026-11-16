@@ -1,3 +1,5 @@
+> **Historical (Batch 00).** This page describes the original B00 prototype. Current behaviour: three playable heroes, eight form sets, two arenas, two bosses and B18 progression. See README.md, B19-STATUS.md and B20-STATUS.md.
+
 # Batch 00 verification record · 12 November 2026
 
 **Classification: PARTIALLY VERIFIED SOURCE / NOT BROWSER-SIGNED-OFF.** This package is intended as a runnable local project, but **the complete npm dependency installation, final TS application compilation, production Vite bundle, and live Phaser browser gameplay were NOT verified** in the restricted authoring container.

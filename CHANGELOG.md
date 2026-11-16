@@ -1,5 +1,13 @@
 # Changelog
 
+## B20 · release-candidate polish (local, unpushed)
+- Title: action buttons stack under the primary button, Kai sits further right, the oversized logo mark no longer pushes the block out of the viewport. No overlap from 640x360 to 3440x1440 (`e2e/title-layout.spec.ts`).
+- Results at 640x360 and 640x320: six stat labels no longer truncate, the three-button action row stays inside the plate (`e2e/results-layout.spec.ts`, screenshots in `art/progression/review/b20/`).
+- Archives: the transformations row is explicitly Kai-focused; Ren and Sora rows say how each earns its own form.
+- Title label now reads RELEASE CANDIDATE. README, status headers and stale B00 docs corrected.
+- Added `e2e/prod-smoke.spec.ts` (production preview: no 4xx/console errors, no QA hooks, no QA save) and `src/tests/balance.bot.test.ts` (opt-in balance probe).
+- No balance, art, audio or sim changes in this pass; see B20-STATUS.md.
+
 ## Pre-B12 · Kai motion + premium UI repair
 - NORTH rear view rebuilt (arms behind the jacket, back-of-fist hands, rear-view run/idle), SOUTH run fists moved beside the torso, WEST head/shoulder layering and guard fixed; Base + Form I rebuilt in Blender. Moving auto-attack restored as a two-layer rig export (RunLower + RunPunchUpper, leg-phase matched; no pixel crop). New ImageGen HUD portraits, select backdrop, hit vignette, route/modal transitions, aligned CHANGE strip. Notes and proofs: `art/characters/kai/review/pre-b12-motion/`.
 

@@ -1,3 +1,5 @@
+> **Historical (Batch 00).** This page describes the original B00 prototype. Current behaviour: three playable heroes, eight form sets, two arenas, two bosses and B18 progression. See README.md, B19-STATUS.md and B20-STATUS.md.
+
 # Batch 00 implementation status
 
 **Implemented in source:** package scaffolding; Kai debug placeholder scenes and movement; deterministic simulation; collision; two enemies; automatic shots; Q pulse; dash; XP and 8 augments; basic Flarebound F; UI/title/selection/HUD/level/pause/death/retry/settings; seed; versioned local best/settings; unit and E2E test source.

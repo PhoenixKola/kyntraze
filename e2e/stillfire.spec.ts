@@ -22,7 +22,8 @@ test('F opens the form picker at once with the run frozen; 2 starts Cometheart, 
 });
 test('E charges while Kai glides, release blinks and fires; R runs Instinct Reversal; both keep their own cooldowns', async ({ page }) => {
   await start(page); await page.keyboard.press('f'); await page.waitForTimeout(150); await page.keyboard.press('f'); await cinemaDone(page); await page.waitForTimeout(700);
-  const x0 = (await qa(page)).x; await page.keyboard.down('d'); await page.keyboard.down('e'); await page.waitForTimeout(500);
+  const x0 = (await qa(page)).x; await page.keyboard.down('d'); await page.keyboard.down('e');
+  await page.waitForFunction(x => { const q = (window as unknown as { __KYNT_QA__: Qa }).__KYNT_QA__, v = q.sim(); return v.cast?.kind === 'rift' && v.player.x > x + 15; }, x0, { timeout: 8000, polling: 30 });   // B20: await the real condition (a loaded machine runs the sim slower than wall-clock)
   let s = await qa(page); expect(s.cast).toBe('rift'); expect(s.released).toBe(false); expect(s.x).toBeGreaterThan(x0 + 15);
   await page.keyboard.up('e'); await page.keyboard.up('d'); await page.waitForTimeout(250); s = await qa(page); expect(s.released).toBe(true); expect(s.rcd).toBeGreaterThan(5);
   await page.waitForFunction(() => (window as unknown as { __KYNT_QA__: Qa }).__KYNT_QA__.sim().cast === null, null, { timeout: 5000 });

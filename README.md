@@ -1,65 +1,63 @@
-# KYNTRAZE: FRACTURE RUSH · Batch 00 Starter
+# KYNTRAZE: FRACTURE RUSH · Release Candidate (B20)
 
-> **Provisional game title.** Standalone, original horde-survival game. This package is the **playable Batch 00 prototype**, not a finished MVP, approved hero art or trademark-cleared product.
+> **Working title.** Standalone, original horde-survival game. This is a **release candidate pending owner sign-off**, not a final release. Artistic, audio-by-ear, real-GPU and human-playtest sign-off are listed in [B20-STATUS.md](B20-STATUS.md) and [B20-RELEASE-CANDIDATE-CHECKLIST.md](B20-RELEASE-CANDIDATE-CHECKLIST.md). The title is not trademark-cleared; see [LICENSE-NOTICES.md](LICENSE-NOTICES.md).
 
-## Requirements
+## What the game is
 
-- Windows 10/11 (or Linux/macOS), Node.js **20.19+** (Node 22 LTS recommended), npm **10+**, Chrome/Edge/Firefox.
-- An internet connection for the **first dependency installation**. The built app has no backend or hotlinked game assets and works offline when served locally. (Opening `dist/index.html` directly via `file://` is unsupported; use `npm run preview`.)
-- The ZIP should contain `package.json` and `package-lock.json`. **Dependency lock metadata was authored in a registry-restricted sandbox, not verified by a full `npm ci`; see `QA-REPORT.md`.** If `npm ci` fails due to a lock-tree consistency error, use `npm install` once to regenerate the full lockfile, then `npm ci` should work on subsequent clean installations. This is an explicit Batch 00 verification caveat, not a promise of a passing install.
+A fast top-down survival run of about **15-18 minutes**. Move, auto-attack, spend Q / E / R abilities, level up with 3-card choices (25 upgrades, Common / Rare / Epic), survive escalating waves in one of **two arenas** (The Gloam Circuit, The Ashen Reliquary), beat the **Fracture Warden at ~8:00** and the **Null Seraph at ~15:00** (final warning at ~14:30). Defeating the Seraph wins the run after a staged death sequence.
 
-## Launch on Windows PowerShell
+### Heroes and transformations
+
+| Hero | Style | Transformations | How each is earned |
+|---|---|---|---|
+| **Kai** | Versatile fighter | Flarebound (Drive 65+), Cometheart, Stillfire Apex | Cometheart: defeat the Warden as Kai. Stillfire Apex: defeat the Seraph as Kai; in later runs it can be chosen only from ~10:00 with full Drive. |
+| **Ren** | Aggressive melee | Crimson Ascendant | Defeat the Fracture Warden as Ren. |
+| **Sora** | Ranged precision | Azure Sovereign | Defeat the Fracture Warden as Sora. |
+
+Unlocks are per hero: a Ren or Sora milestone never unlocks Kai's forms, and Ren and Sora never unlock each other.
+
+### Progression (local only)
+
+Fracture Marks are earned at the end of every run (once per run, never duplicated) and spent in the Armory: 5 starting boons, Reroll and Banish modules, 3 crests. 4 optional Contracts, 16 Feats and per-arena mastery objectives are tracked in the Archives. Boss timings and telegraphs never change with contracts.
+
+## Controls
+
+| Action | Keyboard / mouse | Controller |
+|---|---|---|
+| Move | WASD / arrows | Left stick / D-pad |
+| Aim | Mouse | Right stick |
+| Dash | Shift / Space | A |
+| Q ability | Q | X |
+| E ability (Sora: hold to charge, release to fire) | E | RB / RT |
+| R ability | R | LB / LT |
+| Transformation / Kai form selector (tap or hold) | F, then 1 / 2 / 3 or click | Y |
+| Level-up: pick / reroll / banish | click or 1-3; R rerolls; Shift+1-3 banishes (modules from the Armory) | D-pad + A |
+| Pause | Esc | Start |
+
+Settings (Master / Music / Effects / Interface volume, Mute, Reduced Effects, Pause on blur) are stored locally. Touch-screen play is **not** a supported input.
+
+## Requirements and running
+
+- Node.js **20.19+** (22 LTS recommended), npm 10+. Developed and automatically tested on Windows with **Chromium**; other browsers are not verified.
+- The built game has no backend, no account, no analytics and no hotlinked assets; it works offline when served (opening `dist/index.html` over `file://` is unsupported).
 
 ```powershell
-cd kyntraze-fracture-rush
-npm install
-npm run dev
-```
-
-Open **http://127.0.0.1:5173**. On a machine where a validated full lockfile has been generated, `npm ci` is preferable to `npm install`.
-
-## Tests / builds
-
-```powershell
+npm ci
+npm run dev          # http://127.0.0.1:5173
 npm run typecheck
-npm test
-npx playwright install chromium
-npm run test:e2e
+npm test             # Vitest
+npm run test:e2e     # Playwright (starts the dev server)
 npm run build
-npm run preview
+npm run preview      # production build, http://127.0.0.1:4173
 ```
 
-The browser E2E suite tests title → select → boot, pause/resume, and three-upgrade selection through a **dev-only explicit `?qa=1` hook**. E2E is not a substitute for playing a normal run with keyboard controls. For deterministic repro add `?seed=1234` to the URL; the hero-select screen also offers a seed text field. Identical seeds are repeatable under identical inputs, timing and game version.
+Progress lives in the browser's `localStorage` (key `kyntraze-b00-v1`). The `?qa=1` developer route only works on the dev server and writes a **separate** save (`kyntraze-b00-v1-qa`); production builds contain no QA hooks. Production smoke check: `PROD_URL=http://127.0.0.1:4173 npx playwright test e2e/prod-smoke.spec.ts`. Balance probe (relative evidence, not a player): `BALANCE=1 npx vitest run src/tests/balance.bot.test.ts`.
 
-## What is playable now?
+## Folder map
 
-- Title → select **Kai** (Ren/Sora explicitly unavailable) → active survival arena.
-- Keyboard **WASD / arrow** movement (8-way normalized), Shift/Space dash with invulnerability and recharge, automatic short/mid-range Comet Fists attacks, **Q** impact radial ability, **F** temporary Form I *Flarebound* at 65+ Drive. **E** *Fracture Lance* (focused beam) and **R** *Nova Bloom* (energy sphere) signature abilities (B05). Optional controller: left stick / D-pad move, **A** dash, **X** Q, **RB/RT** beam, **LB/LT** sphere, **Y** form, **START** pause (menus: D-pad + A / B).
-- Two debug enemy kinds with scaling seeded spawns, 2D obstacle collision, contact damage and death.
-- XP orbs, 3 deterministic weighted upgrade choices per level (8 distinct functional augments), HUD, pause on Esc/focus loss, retry same seed, return home.
-- Device-local settings and best-run record, both fail gracefully if `localStorage` is blocked/corrupted.
-
-### First-play tips
-
-Move toward fallen enemies' mint-colored XP crystals. When enough XP accumulates, the arena will pause for a choice. Use Q when enemies close around you and Shift to dodge through danger. The Drive meter grows from strikes and kills: use F after reaching 65 Drive to gain extra attack speed, a second target and movement. Form I drains Drive and reverts automatically.
-
-## Folder ownership
-
-- `src/sim/`: authoritative seeded game simulation and systems, independent of React/Phaser rendering.
-- `src/game/`: Phaser scene, input/controller and rendering.
-- `src/bridge/`: low-frequency immutable UI snapshot bridge. No React render each enemy frame.
-- `src/app/`: React shell and real settings/pause/upgrade/results overlays.
-- `src/content/`: declarative early hero, enemy, weapon, form and upgrade definitions.
-- `src/assets/` + `public/art/placeholders/`: explicitly **synthetic debug PNGs** and manifest.
-- `src/tests/` + `e2e/`: logic and browser regression tests.
-- `docs/`: architecture, gameplay rules, content schema, animation contract and next phases.
-
-## Art replacement and responsibility
-
-B00 placeholder PNGs were drawn programmatically from pixel geometry **only for engineering purposes**. They are not the user-approved Kai concept and were not generated with Codex image generation. Do not redistribute them as official game art. At B02/B03: approve a canonical original Kai identity, replace with four-direction original art/rigged frames, create validated animation manifests and test real game-scale locomotion. Codex generates original raster source with supported image tools; Claude Code creates/validates Blender parts, pivots, rigs, frame exports. No paid art API required for B00.
-
-## Notes / scope
-
-The planned full game includes Kai, Ren, Sora (Base + 3 sequential forms each), ~15–18-minute escalating runs, 7 enemy families, bosses, unlocks, original sound and approved animation. **Only Kai Base + temporary Form I and two placeholder enemy kinds exist in B00.** Q and F are playable but E/R, boss content, 18-minute balance, premium animation, control remapping and full production accessibility are **not implemented**.
-
-The default `?seed=` provides stable start RNG, but gameplay inputs and wall-clock timing affect exact event order. No backend, database, account, analytics service or auto-deployment. Nothing is pushed to GitHub by this package.
+- `src/sim/`: authoritative seeded simulation, independent of React/Phaser.
+- `src/game/`: Phaser scenes, rendering, input, audio. `src/bridge/`: UI snapshot bridge. `src/app/`: React shell and screens.
+- `src/content/`: heroes, kits, upgrades, enemies, arenas, meta economy.
+- `src/tests/`, `e2e/`: Vitest and Playwright suites.
+- `art/`, `art-source/`, `prompts/`: source art, rigs, reviews and generation records (not part of the shipped `dist/`). `public/`: runtime assets.
+- Batch history: `B06-STATUS.md` ... `B20-STATUS.md`; older `docs/` pages describe earlier batches and are labelled where stale.
