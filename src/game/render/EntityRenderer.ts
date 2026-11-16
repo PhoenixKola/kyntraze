@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { RULES } from '../../core/Rules';
-import { vfxKey } from './fxPool';
+import { FxPool, vfxKey } from './fxPool';
 import type { GameState, InputState } from '../../sim/GameState';
 import { FormFx } from './formFx';
 import { CometFx } from './cometFx';
@@ -53,17 +53,27 @@ export class EntityRenderer {
     this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1, this.f2, this.f3); this.cometFx = new CometFx(scene); this.apexFx = new ApexFx(scene); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = new EnemyRenderer(scene); this.bosses = new BossRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
-    for (const spr of [this.hero, this.legs]) { spr.enableFilters(); this.stroke.push(spr.filters!.internal.addGlow(0xffffff, 0, 0, 1, false, 5, 4) as unknown as StrokeCtl); spr.filters!.internal.addGlow(0xd8f6ff, 1.6, 0, 1, false, 4, 2); this.auraGlow.push(spr.filters!.internal.addGlow(0xffffff, 0, 0, 1, false, 3, 10) as unknown as StrokeCtl); }   // B06: thin pale rim keeps the silhouette separated from the arena; B20: a second, thicker glow is the transformation stroke (off = strength 0)
+    for (const spr of [this.hero, this.legs]) { spr.enableFilters(); this.stroke.push(spr.filters!.internal.addGlow(0xffffff, 0, 0, 1, false, 5, 4) as unknown as StrokeCtl); spr.filters!.internal.addGlow(0xd8f6ff, 1.6, 0, 1, false, 4, 2); this.auraGlow.push(spr.filters!.internal.addGlow(0xffffff, 0, 0, 1, false, 4, 14) as unknown as StrokeCtl); }   // B06: thin pale rim keeps the silhouette separated from the arena; B20: a second, thicker glow is the transformation stroke (off = strength 0)
   }
-  private readonly stroke: StrokeCtl[] = []; private readonly auraGlow: StrokeCtl[] = []; private readonly auraTrack = new AuraTracker();
+  private readonly stroke: StrokeCtl[] = []; private readonly auraGlow: StrokeCtl[] = []; private readonly auraTrack = new AuraTracker(); private auraMotes: FxPool | null = null; private moteClock = 0;
   /** B21.3 (revised): the transformation aura now FITS the body like the stroke: a soft, form-coloured glow filter on the sprite's own silhouette that breathes with activity (idle < moving < dash < charge < release), instead of art wings that extend past the character. */
   private updateAura(state: GameState, dt: number, reduced: boolean) {
     const p = state.player, f = p.form, st: AuraState | null = state.hero === 'kai' ? (f === 1 ? 'flare' : f === 2 ? 'comet' : f === 3 ? 'still' : null) : f >= 1 ? (state.hero as 'ren' | 'sora') : null;
     const smp = this.auraTrack.update(state, state.phase === 'running' ? dt : 0, Math.hypot(p.vx, p.vy) / Math.max(1, p.speed)), t = state.time;
     const COL: Record<AuraState, number> = { ren: 0xff5a22, sora: 0x4fd0ff, flare: 0xff9a1c, comet: 0xffd23a, still: 0xd6e4ff };
     const on = !!st && state.phase === 'running' && p.hp > 0 && !state.cinema, crowd = state.enemies.length > 45 ? 0.8 : 1;
-    let k = 0; if (on) { const flick = st === 'comet' ? 0.65 + 0.5 * Math.abs(Math.sin(Math.floor(t * 26) * 12.9898)) : st === 'still' ? 0.92 + 0.08 * Math.sin(t * 2.2) : 0.88 + 0.12 * Math.sin(t * 7.3); k = (1.5 + 3.6 * (smp.k - 0.5)) * flick * (reduced ? 0.55 : crowd) * (st === 'still' ? 0.75 : 1); }
+    let k = 0; if (on) { const flick = st === 'comet' ? 0.65 + 0.5 * Math.abs(Math.sin(Math.floor(t * 26) * 12.9898)) : st === 'still' ? 0.92 + 0.08 * Math.sin(t * 2.2) : 0.88 + 0.12 * Math.sin(t * 7.3); k = (4.5 + 9 * (smp.k - 0.5)) * flick * (reduced ? 0.55 : crowd) * (st === 'still' ? 0.75 : 1); }
     for (const c of this.auraGlow) { c.outerStrength = Math.max(0, k); c.active = k > 0.02; if (st) c.color = COL[st]; }   // inactive = the shader pass is skipped entirely, so untransformed heroes pay nothing
+    // embers/motes that rise off the silhouette itself (never wider than the body), rate follows the activity state
+    this.auraMotes ??= new FxPool(this.scene, 60);
+    if (on && !reduced && dt > 0) {
+      this.moteClock += dt; const rate = (st === 'still' ? 7 : st === 'comet' ? 16 : 12) * (0.6 + smp.k), step = 1 / rate, solar = st === 'flare' || st === 'comet' || st === 'ren';
+      while (this.moteClock > step) {
+        this.moteClock -= step; const rnd = Math.random, side = rnd() < 0.5 ? -1 : 1, h = rnd() * 74, edge = (7 + 9 * (1 - h / 80)) * side;   // x hugs the torso edge, wider near the shoulders than the feet
+        this.auraMotes.spawn({ key: vfxKey('mote' + ((rnd() * 3) | 0), solar), x: this.hero.x + edge * (0.8 + rnd() * 0.5) - smp.leanX * 6, y: this.hero.y - 6 - h, depth: 9.6, life: 0.55 + rnd() * 0.35, blend: 'add', tint: COL[st!], vx: side * 6 + (rnd() - 0.5) * 10 - smp.leanX * 30 * smp.lean, vy: -(26 + rnd() * 40), s0: 0.9, s1: 0.2, a0: 0.95, a1: 0, rot: rnd() * 6 });
+      }
+    }
+    this.auraMotes.update(state.phase === 'running' ? dt : 0);
     this.auraSample = { st, smp, on };
   }
   private auraSample: { st: AuraState | null; smp: ReturnType<AuraTracker['update']>; on: boolean } = { st: null, smp: { phase: 'idle', k: 0.55, leanX: 0, leanY: 0, lean: 0, gather: 0, pulse: 0 }, on: false };
@@ -229,5 +239,5 @@ export class EntityRenderer {
     for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies.stats(), boss: this.bosses.stats() }; }
-  destroy() { this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies.destroy(); this.bosses.destroy(); this.hero.destroy(); this.legs.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); }
+  destroy() { this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies.destroy(); this.bosses.destroy(); this.hero.destroy(); this.legs.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); }
 }
