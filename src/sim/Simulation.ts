@@ -19,6 +19,8 @@ import { updateArenaHazards } from './ArenaHazards';
 import { setActiveArena } from './CollisionSystem';
 import type { ArenaId } from '../content/arenas';
 import { applyRunConfig, NO_CONFIG, type RunConfig } from './RunConfig';
+/** Seconds a refused Q / E / R press stays armed (B20). */
+export const ABILITY_BUFFER = 0.15;
 export class Simulation {
   readonly state: GameState;
   readonly rng: SeededRng;
@@ -27,6 +29,7 @@ export class Simulation {
   private eHeld = false;
   private rHeld = false;
   constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false, apexUnlocked = false, config: RunConfig = NO_CONFIG) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked, apexUnlocked); applyRunConfig(this.state, config); }
+  private readonly buf = { q: 0, e: 0, r: 0 };
   step(dt: number, input: InputState) {
     const s = this.state; if (s.phase !== 'running') return;
     { const f = s.player.form, id = s.hero === 'kai' ? f : s.hero === 'ren' ? 10 : 11; if (f && !s.run.formsUsed.includes(id)) s.run.formsUsed.push(id); }   // B19: Ren / Sora log their own ids (10 / 11), never Kai's Flarebound   // B18: feats read the forms Kai actually used
@@ -39,10 +42,13 @@ export class Simulation {
     s.time += dt;
     trackAim(s, input); s.hx.moving = input.x !== 0 || input.y !== 0;
     movePlayer(s, input, dt);
-    if (input.q && !this.qHeld) activateQ(s);
+    // B20 input buffer: a Q / E / R press refused only because a cast or a cooldown is about to end is retried for ABILITY_BUFFER seconds, then dropped. Sora's E is a hold/release charge, so it is never buffered.
+    const bf = this.buf; bf.q = Math.max(0, bf.q - dt); bf.e = Math.max(0, bf.e - dt); bf.r = Math.max(0, bf.r - dt);
+    if (input.q && !this.qHeld) { if (!activateQ(s)) bf.q = ABILITY_BUFFER; else bf.q = 0; } else if (bf.q > 0 && activateQ(s)) bf.q = 0;
     const fDown = !!(input.f || input.fHeld); formInput(s, fDown, this.fHeld);   // the press edge counts too, so a tap shorter than one tick is never lost
-    if (input.beam && !this.eHeld) startAbility(s, 'beam');
-    if (input.sphere && !this.rHeld) startAbility(s, 'sphere');
+    const bufE = s.hero !== 'sora';
+    if (input.beam && !this.eHeld) { if (!startAbility(s, 'beam') && bufE) bf.e = ABILITY_BUFFER; else bf.e = 0; } else if (bf.e > 0 && bufE && startAbility(s, 'beam')) bf.e = 0;
+    if (input.sphere && !this.rHeld) { if (!startAbility(s, 'sphere')) bf.r = ABILITY_BUFFER; else bf.r = 0; } else if (bf.r > 0 && startAbility(s, 'sphere')) bf.r = 0;
     this.qHeld = input.q; this.fHeld = fDown; this.eHeld = !!input.beam || !!input.beamHeld; this.rHeld = !!input.sphere; s.eHeld = !!input.beamHeld;
     const p = s.player; p.qCooldown = Math.max(0, p.qCooldown - dt);
     if (s.mods.regen > 0) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);

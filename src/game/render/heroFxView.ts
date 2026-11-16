@@ -83,6 +83,7 @@ export class HeroFxView {
 
     // ---- persistent aura and motion trails
     if (aura || s.cinema) { this.auraDraw(s, foot, calmFx, aura); this.auraSprites(s, foot, calmFx, aura); }
+    else if (this.hero === 'sora' && !reduced) this.put('sm_back1', foot.x, foot.y + 6, 0.36, 0.2 + 0.04 * Math.sin(s.time * 3), { oy: 0.9, depth: 9.4 });   // B20: a faint azure backlight keeps the navy suit readable on dark floors
 
     // ---- reveal: expanding pulses, screen vignette is HTML-free; camera punch-in via cameraZoom
     const cin = s.cinema; this.zoom = 1;

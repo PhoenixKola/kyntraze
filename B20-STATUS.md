@@ -1,42 +1,33 @@
-# B20 — release-candidate polish (PARTIAL: owner sign-off required; local commit, NOT pushed)
+# B20 — release-candidate polish (PARTIAL: owner sign-off required; local commits, NOT pushed)
 
-**Baseline:** HEAD 74a9a91 (B19), clean worktree, equal to origin/main. Baseline reproduced here: `tsc -b` clean, Vitest 365/365 (30 files), Playwright 59/59, `vite build` OK, dist 59 MB.
+**Baseline:** 74a9a91 (B19, pushed). Reproduced: typecheck clean, Vitest 365, Playwright 59, build OK.
 
 ## Verdict
-**PARTIAL / OWNER SIGN-OFF REQUIRED.** This session fixed the concrete UI defects, hardened release docs and added production and balance tooling. It did **not** perform the art repair, real-time motion review, by-ear audio audition, real-GPU profiling, physical-controller test or human six-route playtest. Those are not claimed.
+**RC — OWNER SIGN-OFF REQUIRED.** Code, art and audio changes below are verified by tests and by screenshots I viewed. Nothing was heard by ear, watched at real speed, or measured on a real GPU (see "Not verified").
 
-## Changed (all verified by automated tests plus screenshots viewed)
-- Title overlap with Kai: reproduced at 640x360, 960x540, 1280x720, 1440x900, 1920x1080 (box overlap between the button row and Kai). Fixed in `src/app/kit.css` (stacked actions, `.title-kai { right: 12% }`, logo mark hidden because it overflowed above the viewport on tall screens). `e2e/title-layout.spec.ts` covers 640x360 to 3440x1440.
-- Results at 640x360 / 640x320: found by screenshot (bounds checks alone passed): "ELIMINATIO" truncation, action row overrunning the plate. Fixed in `kit.css`; `e2e/results-layout.spec.ts` covers WIN and DEFEAT; images in `art/progression/review/b20/`. The reward list still scrolls inside the body (by design) with the action/hint area pinned.
-- Archives: Kai-specific transformations row labelled "KAI"; Ren/Sora rows state the earn rule. No unlock logic touched.
-- Title build label no longer says "SURVIVAL PROTOTYPE".
-- Docs: README rewritten for the real game; B19-STATUS header (was "NOT pushed"); historical banners on B00-era pages; changelog.
-- Test fix: see the flaky-test row below.
-- Production: `e2e/prod-smoke.spec.ts` against `vite preview` for Kai/Ren/Sora: no 4xx, no console errors, `window.__KYNT_QA__` absent and no `-qa` save key even with `?qa=1`. Built JS contains none of the QA hook names.
+## What changed
+**UI** (`kit.css`, `TitleScreen`, `ProgressionScreen`): title buttons no longer overlap Kai (640x360 to 3440x1440); Results at 640x360/640x320 no longer truncate stats or overrun the plate; Archives label Kai's forms as Kai's and state Ren/Sora earn their own; title label no longer "SURVIVAL PROTOTYPE". Tests: `title-layout`, `results-layout`.
 
-## Balance investigation (no tuning applied)
-`src/tests/balance.bot.test.ts` (`BALANCE=1`): one mortal policy for all heroes, 8 seeds x 2 arenas. Average death time (minutes):
+**Hero VFX (ImageGen, `art/fx-b20/`, `public/art/fx/{sora,ren}`):** Sora lance beam, muzzle, impact cap, three-stage charge orb + vortex, needle/volley bolts, orbs, rings, aim lane, auras. Ren slashes/finisher, impacts, fist orb, Bloodstar ring, fissure, pillar, auras. The persistent auras are layered BEHIND the body with only a thin veil in front; the arrow/ribbon trails and every Graphics-drawn beam/orb/slash were removed. Base Sora gets a faint azure backlight for contrast on dark floors. Ren/Sora dash and hit effects are hero-coloured (red / blue), base and transformed; they no longer reuse Kai's orange solar set.
 
-| policy | Kai gloam / ashen | Ren | Sora |
-|---|---|---|---|
-| kite | 3.1 / 3.8 | 2.8 / 2.9 | 1.8 / 1.9 |
-| strafe | 4.5 / 5.2 | 4.4 / 4.4 | 4.3 / 3.0 |
+**Sprites:** an automated pinhole scan found Ren/Sora's enclosed-transparent pockets at Kai's own level (mean 0.7-0.9 vs 0.6 per frame; max 5 vs Kai 5), so the sheets were NOT altered (blanket filling would damage real gaps). The named arm/pose and Sora torso/neck issues need Blender re-posing and were not attempted. `scripts/b20-pinholes.py` reproduces the scan.
 
-B19's different bot reported Ren/Sora at 1.4-1.7x Kai. Two policies here give the opposite ordering for Sora, so bot results are policy-driven and are not evidence for nerfs or buffs. No numbers were changed. Owner action: the six-run human matrix below. Per-run variance is large (Ren gloam strafe 2.4-11.4 min).
+**Combat feel:** a 0.15 s Q/E/R input buffer (a press refused only by an active cast or an about-to-end cooldown is retried; never for Sora's hold-E); unit-tested (`src/tests/b20.test.ts`). Seraph phase-2 halo enlarged and made additive.
 
-## Not done / owner checks
-| Item | State | How to verify |
-|---|---|---|
-| Ren/Sora art defects (arms, pinholes, Bloodstar pose, Sora side torso/neck/contrast) | NOT STARTED | needs Blender sources in `art/`; review `art/characters/*/ART-NOTES.md` |
-| Real-time motion review, boss tells, Aegis/Cantor audit | NOT VERIFIED | play each hero on both arenas, headed browser |
-| Audio by ear | NOT VERIFIED BY EAR | listen to title, both arenas, Warden, Seraph, victory, each hero's Q/E/R, Sora brightness, Ren sub-bass |
-| Real GPU / performance | NOT MEASURED | open DevTools Performance on a 40-enemy and 60-enemy+boss scene, note GPU |
-| Physical controller | NOT VERIFIED (mocked pad tests pass) | connect a pad, run controller flow in `e2e/controller.spec.ts` by hand |
-| Six-route human playtest | NOT DONE | Kai/Ren/Sora x Gloam/Ashen, natural start to Seraph or death; record time, level, forms, what felt unfair |
-| Input buffering / hit-stop review, Reduced Effects visual review | NOT DONE | |
-| Safari/Firefox/.ogg codec support | NOT VERIFIED | |
-| LICENSE-NOTICES.md rewrite | NOT DONE (still B00-era text) | rights review before commercial claims |
-| Flaky-test investigation | DONE for one case. `stillfire.spec.ts` (E charges while Kai glides) passed in the first baseline run, then failed repeatedly on a heavily loaded machine, including on the untouched B19 code (checked with a stash). Cause: it sampled the short Silver Rift charge window after a fixed 500 ms sleep. It now waits for the real condition (cast is `rift` and Kai has moved) with 30 ms polling; assertions are unchanged. 3/3 passes after the fix. The second B19 flaky case was not reproduced. | rerun `npx playwright test e2e/stillfire.spec.ts` |
+**Balance:** Sora buffed conservatively (HP 104 to 116, auto damage 9 to 10, auto period 0.55 to 0.5 s) because both bot policies had him weakest. Mortal-bot averages (min until death, 8 seeds): kite Sora 1.8/1.9 to 2.1/2.1 (Kai 3.1/3.8, Ren 2.8/2.9); strafe Sora 4.3/3.0 to 4.6/3.9 (Kai 4.5/5.2, Ren 4.4/4.4). Bots are not players: B19's different bot had the opposite ordering. Ren and Kai untouched.
 
-## B21 handoff (not B20 bugs)
-Animation and VFX evolution per the approved B21 plan; nothing from it was started.
+**Audio (post-processing only; originals kept in `art/characters/heroes/audio/originals-b19/`):** Ren's 16 low-heavy sounds gained a harmonic punch layer (autos were 66-95% below 150 Hz, centroid 0.5-1 kHz; now 2.4-4 kHz, same peaks). Sora's 7 most repeated bright sounds were softened (55/45 blend with a 5.5 kHz low-pass). Rare level-up offers now get a softer, lower take of the epic chime. **None of this was heard by ear.**
+
+**Release docs:** README rewritten; LICENSE-NOTICES rewritten (provenance, AI-art ownership caveat, no commercial clearance); status headers and changelog corrected; checklist.
+
+**Tests:** typecheck clean, Vitest 367, Playwright full suite + 7 title + 4 results + 3 production-smoke specs. One flaky e2e (Stillfire E) was a fixed-sleep race, now awaits the real condition.
+
+## Not verified (owner)
+- Real-speed motion and audio by ear (nothing was watched or heard live).
+- Real-GPU frame pacing: the machine's Chrome reports an RTX 3070 Ti, but the automated Chrome window was occluded and throttled to 1 fps, so no valid number exists. Measure by hand: open the game with `?qa=1` in a visible window and read DevTools Performance on a 60-enemy scene.
+- Physical controller; Safari/Firefox/.ogg support; six-route human playtest.
+- Ren/Sora arm, Bloodstar pose and Sora torso/neck sprite repairs (need Blender).
+- Hit-stop / animation-fluidity review, boss and Aegis/Cantor tell audit: not done.
+
+## B21 handoff
+Animation & VFX evolution as approved; unchanged.

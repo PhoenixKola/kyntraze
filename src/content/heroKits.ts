@@ -24,7 +24,7 @@ export const REN = {
 } as const;
 
 export const SORA = {
-  base: { hp: 104, speed: 258, attackDamage: 9, attackPeriod: 0.55, attackRange: 360, targets: 1, qDamage: 34, qRadius: 132, radius: 17 },
+  base: { hp: 116, speed: 258, attackDamage: 10, attackPeriod: 0.5, attackRange: 360, targets: 1, qDamage: 34, qRadius: 132, radius: 17 },
   auto: { name: 'Azure Needle', speed: 780, radius: 7, homing: 0.045, muzzle: 22, formPierce: 1 },
   q: { name: 'Azure Volley', cooldown: 7.5, bolts: 7, formBolts: 11, spreadDeg: 56, formSpreadDeg: 40, speed: 700, ttl: 0.72, boltMul: 0.17, burst: 0.16, windup: 0.16, recover: 0.2, moveScale: 0.45, formHoming: 0.07, radius: 8 },
   e: { name: 'Celestial Lance', cooldown: 9.5, tiers: [0.3, 0.8, 1.3] as readonly number[], maxCharge: 1.3, minCharge: 0.3, halfWidth: [20, 28, 38] as readonly number[], length: [540, 640, 740] as readonly number[], damage: [24, 38, 58] as readonly number[], fire: 0.26, recover: 0.22, moveCharge: 0.22, moveFire: 0, cancelCooldown: 0.4, formTierBoost: 1, formWidth: 1.3, formArcs: 3, formArcRange: 120, formFlare: 96 },

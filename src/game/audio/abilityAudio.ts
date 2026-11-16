@@ -334,7 +334,7 @@ export class AbilityAudio {
       if (s.phase !== 'running') this.stopAll(s.phase === 'dead' ? 0.06 : 0.04, true);
       if (this.lastPhase === 'running' && s.phase === 'paused') this.ui('ui_pause');
       else if (this.lastPhase === 'paused' && s.phase === 'running') this.ui('ui_resume');
-      else if (s.phase === 'upgrade' && this.lastPhase !== 'upgrade') { this.music?.stinger('stinger_levelup', 0.8); if (s.upgradeOffers.some(id => UPGRADES.find(u => u.id === id)?.rarity === 'epic')) this.ui('lv_epic', 0.9); }
+      else if (s.phase === 'upgrade' && this.lastPhase !== 'upgrade') { this.music?.stinger('stinger_levelup', 0.8); const rar = s.upgradeOffers.map(id => UPGRADES.find(u => u.id === id)?.rarity); if (rar.includes('epic')) this.ui('lv_epic', 0.9); else if (rar.includes('rare')) this.ui('lv_epic', 0.5, 0.82); }   // B20: Rare offers get a lower, softer take of the same chime
       this.lastPhase = s.phase;
     }
     this.driveMusic(s);

@@ -159,7 +159,7 @@ export class BossRenderer {
     if (k === 'warden' && p2 && !reduced) { this.clockA += dt; if (this.clockA > 0.2) { this.clockA = 0; pool.spawn({ key: b17('core_chunk'), x: e.x + (rnd() - 0.5) * 70, y: feetY - 6, depth: spr.depth + 0.1, life: 0.9, blend: 'add', tint: CRIMSON, vy: -50 - rnd() * 30, vx: (rnd() - 0.5) * 20, s0: 0.1, s1: 0.04, a0: 0.9, a1: 0 }); } }
     if (k === 'seraph') {
       const halo = this.halo ??= this.scene.add.image(0, 0, b17('halo')), hy = Math.round(spr.y - 96 + Math.sin(t * 2.4) * 2), up = p2 && e.mode !== 'blink';
-      if (up) halo.setVisible(true).setPosition(Math.round(spr.x), hy).setScale(0.62 + 0.03 * Math.sin(t * 3)).setAlpha(0.95 * spr.alpha).setDepth(spr.depth + 0.05).setTint(0xf0e8ff); else halo.setVisible(false);
+      if (up) halo.setVisible(true).setPosition(Math.round(spr.x), hy).setScale(0.86 + 0.04 * Math.sin(t * 3)).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.95 * spr.alpha).setDepth(spr.depth + 0.05).setTint(0xf0e8ff); else halo.setVisible(false);
       for (let i = 0; i < 3; i++) {
         const o = this.orbit[i] ??= this.scene.add.image(0, 0, b17('shard_long')), a = t * 1.5 + (i / 3) * 6.283, front = Math.sin(a) > 0;
         if (up) o.setVisible(true).setPosition(Math.round(spr.x + Math.cos(a) * 50), Math.round(spr.y - 50 + Math.sin(a) * 16)).setScale(0.4).setRotation(Math.cos(a) * 0.5).setAlpha(0.95 * spr.alpha).setDepth(spr.depth + (front ? 0.06 : -0.06)); else o.setVisible(false);
