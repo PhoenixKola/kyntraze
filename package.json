@@ -1,6 +1,6 @@
 {
   "name": "kyntraze-fracture-rush",
-  "version": "0.0.1",
+  "version": "0.21.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -15,7 +15,12 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "typecheck:core": "tsc -p tsconfig.core.json --pretty false",
-    "test:smoke": "node scripts/core-smoke.cjs"
+    "test:smoke": "node scripts/core-smoke.cjs",
+    "desktop:dev": "node scripts/desktop-dev.cjs",
+    "desktop:build": "npm run build",
+    "desktop:dist:win": "npm run build && electron-builder --win nsis --x64 --publish never",
+    "desktop:pack": "npm run build && electron-builder --win dir --x64 --publish never",
+    "desktop:smoke": "node scripts/desktop-smoke.cjs"
   },
   "dependencies": {
     "phaser": "4.2.1",
@@ -28,8 +33,62 @@
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "@vitejs/plugin-react": "5.1.0",
+    "electron": "45.3.3",
+    "electron-builder": "26.18.0",
     "typescript": "5.9.3",
     "vite": "7.1.12",
     "vitest": "3.2.4"
+  },
+  "description": "KYNTRAZE: FRACTURE RUSH - original sci-fi survival action game (web + Windows desktop)",
+  "author": "KYNTRAZE",
+  "main": "electron/main.cjs",
+  "build": {
+    "appId": "com.kyntraze.fracturerush",
+    "productName": "KYNTRAZE FRACTURE RUSH",
+    "copyright": "KYNTRAZE (unsigned test build)",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**",
+      "dist/**",
+      "package.json",
+      "!**/*.map"
+    ],
+    "asar": true,
+    "compression": "normal",
+    "artifactName": "KYNTRAZE-FRACTURE-RUSH-Setup-${version}.${ext}",
+    "extraResources": [
+      {
+        "from": "LICENSE-NOTICES.md",
+        "to": "LICENSE-NOTICES.md"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icons/icon.ico",
+      "verifyUpdateCodeSignature": false,
+      "forceCodeSigning": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "KYNTRAZE FRACTURE RUSH",
+      "deleteAppDataOnUninstall": false,
+      "installerIcon": "build/icons/icon.ico",
+      "uninstallerIcon": "build/icons/icon.ico",
+      "installerHeaderIcon": "build/icons/icon.ico"
+    }
   }
 }

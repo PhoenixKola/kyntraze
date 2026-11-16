@@ -1,4 +1,4 @@
-# KYNTRAZE: FRACTURE RUSH · Release Candidate (B20)
+# KYNTRAZE: FRACTURE RUSH · Release Candidate (B21, owner review pending)
 
 > **Working title.** Standalone, original horde-survival game. This is a **release candidate pending owner sign-off**, not a final release. Artistic, audio-by-ear, real-GPU and human-playtest sign-off are listed in [B20-STATUS.md](B20-STATUS.md) and [B20-RELEASE-CANDIDATE-CHECKLIST.md](B20-RELEASE-CANDIDATE-CHECKLIST.md). The title is not trademark-cleared; see [LICENSE-NOTICES.md](LICENSE-NOTICES.md).
 
@@ -52,6 +52,20 @@ npm run preview      # production build, http://127.0.0.1:4173
 ```
 
 Progress lives in the browser's `localStorage` (key `kyntraze-b00-v1`). The `?qa=1` developer route only works on the dev server and writes a **separate** save (`kyntraze-b00-v1-qa`); production builds contain no QA hooks. Production smoke check: `PROD_URL=http://127.0.0.1:4173 npx playwright test e2e/prod-smoke.spec.ts`. Balance probe (relative evidence, not a player): `BALANCE=1 npx vitest run src/tests/balance.bot.test.ts`.
+
+### Windows desktop (Electron, B21)
+
+The same React + Phaser build runs in a locked-down Electron window (`electron/main.cjs`, no preload, no IPC, `nodeIntegration` off, `contextIsolation` and `sandbox` on, all permissions denied, navigation and window-open blocked, remote requests cancelled, CSP on every response). The packaged app serves `dist/` from a private `app://kyntraze` origin so the game's absolute `/art` and `/audio` URLs and `localStorage` behave exactly as on a web server, with one stable save profile (`%APPDATA%\KYNTRAZE FRACTURE RUSH`). The desktop save is **separate** from any browser save; there is no import/export, no updater and no network use.
+
+```powershell
+npm run desktop:dev        # Vite on 127.0.0.1:5174 + Electron window, Vite stopped on exit
+npm run desktop:build      # = npm run build (the dist/ the desktop app serves)
+npm run desktop:smoke      # run dist/ in Electron twice on a throw-away profile: zero failed requests, no Node in the page, no QA hook, save marker persists
+npm run desktop:pack       # unpacked app in release\win-unpacked
+npm run desktop:dist:win   # NSIS installer: release\KYNTRAZE-FRACTURE-RUSH-Setup-<version>.exe
+```
+
+`F11` / `Alt+Enter` toggle fullscreen; `Esc` stays the game's pause key. The installer is **unsigned** (Windows SmartScreen may warn; do not bypass it for public distribution). The game is not commercially cleared: see `LICENSE-NOTICES.md`.
 
 ## Folder map
 
