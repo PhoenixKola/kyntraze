@@ -209,7 +209,7 @@ export class CometFx {
       r.setTexture(hero.texture.key, hero.frame.name).setOrigin(hero.originX, hero.originY).setScale(hero.scaleX, hero.scaleY).setPosition(hero.x + dx, hero.y + dy).setFlipX(hero.flipX).setAlpha(Math.min(0.75, L * (i === 2 ? 0.34 : 0.27) * (1 + 0.25 * Math.sin(t * 8 + i))));
     }
     // floor light under Kai + warm back-light
-    this.ground.update(dt, x, y, show, 160 + 30 * L, charging ? 0.5 + 0.5 * Math.min(1, (c?.t ?? 0) / CANNON.gather) : ctx.dashing ? 0.6 : 0, ctx.reduced);
+    this.ground.update(dt, x, y, show, 98 + 18 * L, charging ? 0.5 + 0.5 * Math.min(1, (c?.t ?? 0) / CANNON.gather) : ctx.dashing ? 0.6 : 0, ctx.reduced);
     if (dt > 0 && active) this.ambient(ctx, L, charging);
     if (dt > 0 && !active && !s.cinema) { this.ghostClock = 0; }
     // ---- reveal flash: Kai goes white-hot for a few frames

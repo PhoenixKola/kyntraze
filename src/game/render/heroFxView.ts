@@ -82,8 +82,7 @@ export class HeroFxView {
     for (const f of this.flashes) this.flash(f, pal);
 
     // ---- persistent aura and motion trails
-    if (aura || s.cinema) { this.auraDraw(s, foot, calmFx, aura); this.auraSprites(s, foot, calmFx, aura); }
-    else if (this.hero === 'sora' && !reduced) this.put('sm_back1', foot.x, foot.y + 6, 0.36, 0.2 + 0.04 * Math.sin(s.time * 3), { oy: 0.9, depth: 9.4 });   // B20: a faint azure backlight keeps the navy suit readable on dark floors
+    if (s.cinema) { this.auraDraw(s, foot, calmFx, aura); this.auraSprites(s, foot, calmFx, aura); }   // B20: outside the reveal the transformation is shown by the body stroke only (EntityRenderer)
 
     // ---- reveal: expanding pulses, screen vignette is HTML-free; camera punch-in via cameraZoom
     const cin = s.cinema; this.zoom = 1;
@@ -177,15 +176,15 @@ export class HeroFxView {
     const t = s.time, p = s.player, boost = s.hx.act ? 1.3 : p.dashRemaining > 0 ? 1.5 : 1, k = (steady ? 1 : 0.6) * boost, br = 0.9 + 0.1 * Math.sin(t * 3.2), fl = 0.85 + 0.15 * Math.sin(t * 9.1 + 1.3);
     const bx = foot.x, by = foot.y + 6;
     if (this.hero === 'ren') {
-      this.put('ra_ground', bx, foot.y + 5, 0.2 * br, 0.8 * k, { sy: 0.9, depth: 3.7 });
-      this.put('ra_back1', bx, by, 0.4 * (1 + 0.04 * Math.sin(t * 5)), Math.min(1, 0.65 * k * fl), { oy: 0.93, sy: 0.95 + 0.1 * Math.sin(t * 6.3), depth: 9.4 });
-      this.put('ra_back2', bx, foot.y - 6, 0.42 * br, Math.min(1, 0.5 * k), { oy: 0.9, depth: 9.3, flip: Math.floor(t * 2) % 2 === 0 });
-      this.put('ra_veil', bx, foot.y - 30, 0.22, 0.2 * k * fl, { rot: Math.sin(t * 2) * 0.05, depth: 10.6 });
-      if (!calm) this.put('ra_embersring', bx, foot.y - 36 - 10 * ((t * 0.5) % 1), 0.3, 0.5 * k, { depth: 9.5 });
+      this.put('ra_ground', bx, foot.y + 5, 0.14 * br, 0.55 * k, { sy: 0.9, depth: 3.7 });
+      this.put('ra_back1', bx, by, 0.27 * (1 + 0.03 * Math.sin(t * 5)), Math.min(1, 0.4 * k * fl), { oy: 0.93, sy: 0.95 + 0.1 * Math.sin(t * 6.3), depth: 9.4 });
+      this.put('ra_back2', bx, foot.y - 8, 0.27 * br, Math.min(1, 0.26 * k), { oy: 0.9, depth: 9.3, flip: Math.floor(t * 2) % 2 === 0 });
+      this.put('ra_veil', bx, foot.y - 30, 0.15, 0.1 * k * fl, { rot: Math.sin(t * 2) * 0.05, depth: 10.6 });
+      if (!calm) this.put('ra_embersring', bx, foot.y - 36 - 10 * ((t * 0.5) % 1), 0.2, 0.35 * k, { depth: 9.5 });
     } else {
       this.put('sm_ground', bx, foot.y + 5, 0.2 * br, 0.85 * k, { sy: 0.95, depth: 3.7 });
-      this.put('sm_back1', bx, by, 0.44 * (1 + 0.04 * Math.sin(t * 5)), Math.min(1, 0.8 * k * fl), { oy: 0.9, sy: 0.95 + 0.1 * Math.sin(t * 6.3), depth: 9.4 });
-      this.put('sm_back2', bx, foot.y - 38, 0.4 * br, Math.min(1, 0.6 * k), { depth: 9.3 });
+      this.put('sm_back1', bx, by, 0.34 * (1 + 0.03 * Math.sin(t * 5)), Math.min(1, 0.5 * k * fl), { oy: 0.9, sy: 0.95 + 0.1 * Math.sin(t * 6.3), depth: 9.4 });
+      this.put('sm_back2', bx, foot.y - 38, 0.3 * br, Math.min(1, 0.4 * k), { depth: 9.3 });
       this.put('sm_arcs', bx, foot.y - 30, 0.34, (calm ? 0.2 : 0.3) * k * (Math.floor(t * 14) % 3 === 0 ? 0.3 : 1), { rot: Math.floor(t * 10) * 1.3, depth: 10.6 });
       if (!calm) this.put('sm_motes', bx, foot.y - 34 - 8 * ((t * 0.6) % 1), 0.4, 0.55 * k, { depth: 9.5 });
     }

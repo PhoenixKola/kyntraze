@@ -5,14 +5,14 @@
  "direction": "south",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/ren-south.blend",
- "frame_width": 160,
+ "frame_width": 158,
  "frame_height": 170,
  "origin_px": [
-  58.0,
+  56.0,
   158.0
  ],
  "origin_normalized": [
-  0.3625,
+  0.35443,
   0.929412
  ],
  "origin_meaning": "ground point midway between the two soles of the approved stance (near sole is 13 px lower = closer to camera)",
@@ -150,7 +150,7 @@
     "settled": 14
    },
    "frame_width": 157,
-   "frame_height": 174,
+   "frame_height": 173,
    "origin_px": [
     58.0,
     162.0

@@ -12,6 +12,7 @@ import { EnemyRenderer } from './enemyRenderer';
 import { BossRenderer } from './bossRenderer';
 import { KAI_ANCHORS_KEY, handAnchorWorld, type AnchorTable, type HandAnchor } from '../../assets/kaiAnimation';
 import { KAI_F1_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_F3_REGISTRY_KEY, KAI_GROUND_DY, KAI_REGISTRY_KEY, clipFrame, KAI_SCALE, KaiAnimator, kaiTextureKey, type AnimPose, type KaiManifests } from '../../assets/kaiAnimation';
+interface StrokeCtl { outerStrength: number; color: number }
 export class EntityRenderer {
   private hero: Phaser.GameObjects.Sprite;
   private legs: Phaser.GameObjects.Sprite;
@@ -48,7 +49,14 @@ export class EntityRenderer {
     this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1, this.f2, this.f3); this.cometFx = new CometFx(scene); this.apexFx = new ApexFx(scene); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = new EnemyRenderer(scene); this.bosses = new BossRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
-    for (const spr of [this.hero, this.legs]) { spr.enableFilters(); spr.filters!.internal.addGlow(0xd8f6ff, 1.6, 0, 1, false, 4, 2); }   // B06: thin pale rim keeps the silhouette separated from the arena
+    for (const spr of [this.hero, this.legs]) { spr.enableFilters(); this.stroke.push(spr.filters!.internal.addGlow(0xffffff, 0, 0, 1, false, 5, 4) as unknown as StrokeCtl); spr.filters!.internal.addGlow(0xd8f6ff, 1.6, 0, 1, false, 4, 2); }   // B06: thin pale rim keeps the silhouette separated from the arena; B20: a second, thicker glow is the transformation stroke (off = strength 0)
+  }
+  private readonly stroke: StrokeCtl[] = [];
+  /** B20: the transformation "stroke": a coloured outline hugging the body (Photoshop-style), part of the sprite instead of a floating aura. */
+  private updateStroke(state: GameState) {
+    const f = state.player.form, pal = state.hero === 'ren' ? 0xff2a24 : state.hero === 'sora' ? 0x3aa8ff : 0xe8f0fa, on = (state.hero === 'kai' ? f >= 2 : f >= 1) && !state.cinema, wave = 0.5 + 0.5 * Math.sin(state.time * 5.5), k = on ? 7 + 9 * wave : 0;   // B20: the stroke breathes between a steady band and a hard bright flare   // Kai: Cometheart and Stillfire only
+    const lerp = (a: number, b: number, t: number) => { const r = ((a >> 16) & 255) + ((((b >> 16) & 255) - ((a >> 16) & 255)) * t), g = ((a >> 8) & 255) + ((((b >> 8) & 255) - ((a >> 8) & 255)) * t), bl = (a & 255) + (((b & 255) - (a & 255)) * t); return (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(bl); };
+    for (const c of this.stroke) { c.outerStrength = k; if (on) c.color = lerp(pal, 0xffffff, 0.35 * wave * wave); }   // the peak of each pulse runs hotter, toward white
   }
   /** B12: camera punch-in factor of the Form II reveal, and a pending visual hit-stop (ms) the scene turns into skipped sim ticks. */
   cameraZoom() { return this.cometFx.cameraZoom() * this.apexFx.cameraZoom() * (this.heroFx?.cameraZoom() ?? 1); }
@@ -63,6 +71,7 @@ export class EntityRenderer {
   fxOrigin() { return this.abilityFx.lastOrigin; }
   debugPose() { return { ...this.pose, visualForm: this.animator.visualForm, transforming: this.animator.transforming, texture: this.hero.texture.key, frameIndex: Number(this.hero.frame.name), x: this.hero.x, y: this.hero.y, scale: this.hero.scaleX }; }
   sync(state: GameState, input: InputState, deltaMs = 0, reducedEffects = false) {
+    this.updateStroke(state);
     if (state.hero !== 'kai') { this.syncHero(state, input, deltaMs, reducedEffects); this.syncWorld(state, deltaMs, reducedEffects); return; }
     const p = state.player;
     const dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0;
