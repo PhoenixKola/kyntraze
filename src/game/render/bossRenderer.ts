@@ -43,6 +43,7 @@ export class BossRenderer {
   private lastEventId = 0;
   private phaseGlow: Phaser.GameObjects.Sprite | null = null; private exposedGlow: Phaser.GameObjects.Sprite | null = null; private halo: Phaser.GameObjects.Image | null = null; private orbit: Phaser.GameObjects.Image[] = [];
   private dmgOverlay: Phaser.GameObjects.Image | null = null; private coreCrack: Phaser.GameObjects.Image | null = null;
+  private prevMode = ''; private modeLen = 1; private strikeT = 0;
   private dmgLevel = 0; private recoil = 0; private leakClock = 0;
   private introMarks = new Set<number>(); private clockA = 0; private clockB = 0;
 
@@ -195,7 +196,7 @@ export class BossRenderer {
     const lvl = this.dmgLevel, key = b21Key('dmg', lvl >= 3 ? 'crack_l3' : lvl === 2 ? 'crack_l2' : 'crack_l1');
     if (k === 'warden' && lvl >= 1 && this.scene.textures.exists(key)) {
       this.dmgOverlay ??= this.scene.add.image(0, 0, key);
-      this.dmgOverlay.setTexture(key).setVisible(true).setOrigin(218 / 436, 351 / 439).setScale(SCALE * (this.face < 0 ? -1 : 1), SCALE).setPosition(spr.x, spr.y).setDepth(spr.depth + 0.02).setAlpha(alpha * (lvl === 1 ? 0.55 : 0.85));
+      this.dmgOverlay.setTexture(key).setVisible(true).setOrigin(218 / 436, 351 / 439).setScale(spr.scaleX * (this.face < 0 ? -1 : 1), spr.scaleY).setRotation(spr.rotation).setPosition(spr.x, spr.y).setDepth(spr.depth + 0.02).setAlpha(alpha * (lvl === 1 ? 0.55 : 0.85));
     } else this.dmgOverlay?.setVisible(false);
     const ck = b21Key('dmg', 'core_crack');
     if (k === 'seraph' && lvl >= 2 && this.scene.textures.exists(ck)) {
@@ -275,8 +276,18 @@ export class BossRenderer {
       else if (e.mode === 'windup' && atk === 'blink') alpha = 1 - 0.7 * (1 - e.modeT / SERAPH.blink.windup);
     }
     const shake = (e.mode === 'windup' && k === 'warden' ? Math.sin(this.t * 55) * (0.5 + (1 - e.modeT / Math.max(0.01, WARDEN.rupture.windup)) * 0.8) : 0) * (reduced ? 0 : 1);
+    if (e.mode !== this.prevMode) { this.prevMode = e.mode; this.modeLen = Math.max(0.05, e.modeT); this.strikeT = 0; } this.strikeT += dt;
+    const prog = e.mode === 'windup' ? 1 - e.modeT / this.modeLen : 0, fs = this.face < 0 ? -1 : 1;
+    let act = { rot: 0, dy: 0, sx: 1, sy: 1 };   // B21.4: attack-specific body acting for the Warden (weight shift, torso swing, brace), never moving the simulated body
+    if (k === 'warden' && !reduced) {
+      const rel = Math.max(0, 1 - this.strikeT / 0.22);
+      if (atk === 'rupture') act = e.mode === 'windup' ? { rot: 0, dy: -9 * prog * prog, sx: 1 - 0.03 * prog, sy: 1 + 0.04 * prog } : e.mode === 'strike' ? { rot: 0, dy: 4 * rel, sx: 1 + 0.07 * rel, sy: 1 - 0.09 * rel } : act;
+      else if (atk === 'sweep') act = e.mode === 'windup' ? { rot: -0.1 * fs * prog, dy: 0, sx: 1, sy: 1 } : e.mode === 'strike' ? { rot: 0.14 * fs * rel, dy: 0, sx: 1 + 0.03 * rel, sy: 1 } : act;
+      else act = e.mode === 'windup' ? { rot: -0.09 * fs * prog, dy: 2 * prog, sx: 1 + 0.04 * prog, sy: 1 - 0.05 * prog } : e.mode === 'strike' ? { rot: 0.1 * fs, dy: 0, sx: 1.04, sy: 0.97 } : act;
+      if (e.mode === 'recover') act = { rot: 0.03 * fs, dy: 2, sx: 1.01, sy: 0.965 };   // guard dropped: the whole body slumps
+    }
     const lean = reduced ? 0 : Math.sin((this.recoil / 0.14) * Math.PI) * 3 * (k === 'warden' ? 0.6 : 1.2) * (p.x >= e.x ? -1 : 1);
-    spr.setPosition(Math.round(e.x + shake + lean), Math.round(feetY + hover)).setDepth(6.2 + (feetY / 1600) * 1.8).setAlpha(alpha);
+    spr.setPosition(Math.round(e.x + shake + lean), Math.round(feetY + hover + act.dy)).setDepth(6.2 + (feetY / 1600) * 1.8).setAlpha(alpha).setRotation(act.rot).setScale(spr.scaleX * act.sx, spr.scaleY * act.sy);
     this.damageArt(k, spr, e, feetY + hover, alpha);
     const tints = k === 'warden' ? [0xffffff, 0xf2e6e0, 0xe0c8c4, 0xd2b0ac] : [0xffffff, 0xf4eeff, 0xe6dcf6, 0xd8c8f0];
     spr.tintMode = Phaser.TintModes.MULTIPLY; spr.setTint(tints[this.dmgLevel]);

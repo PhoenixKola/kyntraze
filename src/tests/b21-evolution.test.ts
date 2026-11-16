@@ -118,3 +118,24 @@ describe('B21 light plan', () => {
     const h = mk(); h.enemyEvents.push({ id: 1, kind: 'enemy_slam', enemy: 'bruiser', enemyId: 1, x: 0, y: 0, dirX: 0, dirY: 1 }); expect(planLights(h, 0, 0).lights[0].color).toBe(0xd0407a);
   });
 });
+import { planEvo, FRAME_COOLDOWN, evoSetFor } from '../game/render/evoPlan';
+describe('B21 evolution art + impact frames', () => {
+  const cur = () => ({ ability: 0, enemy: 0, frameClock: -9 });
+  it('baseline run draws no evolution art; earned tiers draw tier arcs only for the right hero set', () => {
+    const s = mk(); s.hero = 'ren'; s.abilityEvents.push({ id: 1, kind: 'auto_hit', x: 5, y: 5 });
+    expect(planEvo(s, cur(), false).plans).toHaveLength(0);
+    s.upgradeStacks = { impact: 5, tempo: 4 }; const r = planEvo(s, cur(), false); expect(r.plans[0].name).toBe('ren_tier3'); expect(evoSetFor(s)).toBe('ren');
+  });
+  it('mastered Nova draws the echo ring at the real blast radius; mere cooldown cards do not', () => {
+    const s = mk(); s.hero = 'sora'; s.blasts.push({ id: 1, x: 10, y: 10, radius: 120, form: 0, ttl: 1, life: 1 }); s.abilityEvents.push({ id: 1, kind: 'horizon_burst', x: 10, y: 10 });
+    s.upgradeStacks = { novacool: 3 }; expect(planEvo(s, cur(), false).plans.some(p => p.name.endsWith('echo_ring'))).toBe(false);
+    s.upgradeStacks = { bloombulk: 3, afterglow: 1, twinbloom: 1 }; const e = planEvo(s, cur(), false).plans.find(p => p.name === 'sora_echo_ring'); expect(e?.width).toBeCloseTo(252);
+  });
+  it('impact frames are rare: none in Reduced Effects, spaced by the cooldown, only on heavy events', () => {
+    const s = mk(); s.hero = 'ren'; s.time = 10; s.abilityEvents.push({ id: 1, kind: 'bloodstar_slam', x: 0, y: 0 }, { id: 2, kind: 'bloodstar_slam', x: 0, y: 0 });
+    expect(planEvo(s, cur(), true).plans.filter(p => p.frame)).toHaveLength(0);
+    const r = planEvo(s, cur(), false); expect(r.plans.filter(p => p.frame)).toHaveLength(1); expect(r.plans[0].name).toBe('impact_crimson');
+    const s2 = mk(); s2.hero = 'ren'; s2.time = 10 + FRAME_COOLDOWN - 0.1; s2.abilityEvents.push({ id: 3, kind: 'bloodstar_slam', x: 0, y: 0 }); expect(planEvo(s2, r.cur, false).plans.filter(p => p.frame)).toHaveLength(0);
+    const s3 = mk(); s3.abilityEvents.push({ id: 1, kind: 'auto_hit', x: 0, y: 0 }); expect(planEvo(s3, cur(), false).plans.filter(p => p.frame)).toHaveLength(0);
+  });
+});

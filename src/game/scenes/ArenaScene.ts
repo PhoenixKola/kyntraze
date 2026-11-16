@@ -13,6 +13,7 @@ import { Ambience, ArenaHazardView, ArenaProps, createArenaFloor } from '../rend
 import type { ArenaId } from '../../content/arenas';
 import { ArenaMarks } from '../render/arenaMarks';
 import { LightLayer } from '../render/lightLayer';
+import { EvoFx } from '../render/evoFx';
 import type { InputState } from '../../sim/GameState';
 import { DebugOverlay } from '../render/debugOverlay';
 import { startEncounter } from '../../sim/BossAiSystem';
@@ -32,7 +33,7 @@ export class ArenaScene extends Phaser.Scene {
   private disposed = false;
   private debug: DebugOverlay | null = null;
   private props: ArenaProps | null = null; private ambience: Ambience | null = null; private hazardView: ArenaHazardView | null = null;
-  private audio: AbilityAudio | null = null; private marks: ArenaMarks | null = null; private floorLights: LightLayer | null = null;
+  private audio: AbilityAudio | null = null; private marks: ArenaMarks | null = null; private floorLights: LightLayer | null = null; private evoFx: EvoFx | null = null;
   private readonly unlockAudio = () => { void this.audio?.unlock(); };
   private hitstopLeft = 0;
   private lastPtrX = NaN; private lastPtrY = NaN;
@@ -64,7 +65,7 @@ export class ArenaScene extends Phaser.Scene {
       (window as unknown as { __KYNT_QA__: Record<string, unknown> }).__KYNT_QA__.killBoss = (kind: string) => { const b = this.simulation.state.enemies.find(e => e.kind === kind && e.hp > 0); if (b) { if (b.ai) b.ai.invuln = false; damageEnemy(this.simulation.state, b, 1e9); } };
     }
   }
-  private createArena() { createArenaFloor(this, this.arena); this.props = new ArenaProps(this, this.arena); this.ambience = import.meta.env.DEV && new URLSearchParams(window.location.search).get('noamb') === '1' ? null : new Ambience(this, this.arena); this.hazardView = new ArenaHazardView(this); this.marks = new ArenaMarks(this, this.arena); this.floorLights = new LightLayer(this); this.presentation = new Presentation(this); }
+  private createArena() { createArenaFloor(this, this.arena); this.props = new ArenaProps(this, this.arena); this.ambience = import.meta.env.DEV && new URLSearchParams(window.location.search).get('noamb') === '1' ? null : new Ambience(this, this.arena); this.hazardView = new ArenaHazardView(this); this.marks = new ArenaMarks(this, this.arena); this.floorLights = new LightLayer(this); this.evoFx = new EvoFx(this); this.presentation = new Presentation(this); }
   update(_time: number, delta: number) {
     if (this.disposed || !this.simulation) return;
     // Sample action key presses per authoritative simulation tick so 120Hz displays
@@ -79,7 +80,7 @@ export class ArenaScene extends Phaser.Scene {
     this.hitstopLeft = Math.max(this.hitstopLeft, this.entityRenderer.takeHitstop());
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
     const hp = this.entityRenderer.debugPose(); this.presentation.update(s, hp.x, hp.y, hp.visualForm !== 'base', this.bridge.getSettings().reducedEffects);
-    this.props?.update(s, this.time.now / 1000); this.ambience?.update(this.time.now / 1000, this.bridge.getSettings().reducedEffects); this.hazardView?.sync(s, s.phase === 'running' ? delta / 1000 : 0); this.marks?.update(s, delta / 1000, this.bridge.getSettings().reducedEffects); this.floorLights?.update(s, delta / 1000, this.bridge.getSettings().reducedEffects);
+    this.props?.update(s, this.time.now / 1000); this.ambience?.update(this.time.now / 1000, this.bridge.getSettings().reducedEffects); this.hazardView?.sync(s, s.phase === 'running' ? delta / 1000 : 0); this.marks?.update(s, delta / 1000, this.bridge.getSettings().reducedEffects); this.floorLights?.update(s, delta / 1000, this.bridge.getSettings().reducedEffects); this.evoFx?.update(s, delta / 1000, this.bridge.getSettings().reducedEffects);
     if (s.phase === 'victory') {
       // the Seraph's death is staged for ~2.8 s (suspension, shimmer, dissolve): the gold celebration waits for the shimmer and the results screen for the end of the dissolve
       if (this.victoryClock < 0) { this.victoryClock = 0; this.celebrated = false; }
@@ -104,7 +105,7 @@ export class ArenaScene extends Phaser.Scene {
   private dispose() {
     if (this.disposed) return; this.disposed = true; this.scale.off(Phaser.Scale.Events.RESIZE);
     window.removeEventListener('keydown', this.unlockAudio); window.removeEventListener('pointerdown', this.unlockAudio); this.audio?.dispose();
-    this.controller?.destroy(); this.entityRenderer?.destroy(); this.fx?.destroy(); this.presentation?.destroy(); this.debug?.destroy(); this.props?.destroy(); this.ambience?.destroy(); this.hazardView?.destroy(); this.marks?.destroy(); this.floorLights?.destroy(); this.bridge.unbind();
+    this.controller?.destroy(); this.entityRenderer?.destroy(); this.fx?.destroy(); this.presentation?.destroy(); this.debug?.destroy(); this.props?.destroy(); this.ambience?.destroy(); this.hazardView?.destroy(); this.marks?.destroy(); this.floorLights?.destroy(); this.evoFx?.destroy(); this.bridge.unbind();
     delete (window as Window & { __KYNT_QA__?: unknown }).__KYNT_QA__;
   }
 }

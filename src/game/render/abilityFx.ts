@@ -4,7 +4,7 @@ import { BEAM, SPHERE, ABILITY_FEEL } from '../../content/abilities';
 import { beamOrigin, sphereOrigin } from '../../sim/AbilitySystem';
 import type { HandAnchor } from '../../assets/kaiAnimation';
 import { FxPool, vfxKey } from './fxPool';
-import { evolution, tierGain, tierSparks } from './buildEvolution';
+import { evolution, tierSparks } from './buildEvolution';
 
 export const ABILITY_FX_NAMES = ['beam_seg', 'muzzle', 'impact', 'orb', 'streak', 'sphere', 'trail', 'ring', 'flash', 'dome'] as const;
 export const abilityFxKey = (n: string) => `abfx-${n}`;
@@ -134,7 +134,6 @@ export class AbilityFx {
       } else if (ev.kind === 'sphere_burst') {
         if (!reduced) { cam.shake(ABILITY_FEEL.sphereBurstShake.ms, ABILITY_FEEL.sphereBurstShake.intensity); this.pause = HIT_PAUSE.burst; }
         this.detonate(ev.x, ev.y, s.blasts.find(b => Math.abs(b.x - ev.x) < 2 && Math.abs(b.y - ev.y) < 2), formVisual, reduced);
-        if (evo.r >= 2) { const bl = s.blasts.find(b => Math.abs(b.x - ev.x) < 2 && Math.abs(b.y - ev.y) < 2); const R = bl?.radius ?? SPHERE.radius * evo.radius; this.spawn('ring', 11.4, aura, { x: ev.x, y: ev.y, life: 0.45, s0: 0.2, s1: (2 * R) / 111 * tierGain(evo.r), a0: 0.55, a1: 0, delay: 0.05 }); }   // B21.2: a mastered Nova earns a second, thinner shock ring that still ends on the real blast radius
       }
     }
 
