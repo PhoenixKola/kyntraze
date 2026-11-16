@@ -23,7 +23,7 @@
 |---|---|
 | `npm run desktop:build` / `npm run build` | OK |
 | Packaged smoke (`desktop:smoke`, `dist/` and the unpacked exe) | PASS: game reached the arena, **0 failed/blocked requests, 0 console errors**, origin `app://kyntraze`, no `require`/`process` in the page, no `__KYNT_QA__`, localStorage written by launch 1 seen by launch 2 (throw-away profile in a path with spaces and non-ASCII) |
-| NSIS installer | `release\KYNTRAZE-FRACTURE-RUSH-Setup-0.21.0.exe`, **185.5 MB**, unsigned, x64, per-user, directory choosable |
+| NSIS installer | `release\KYNTRAZE-FRACTURE-RUSH-Setup-0.21.0.exe`, **197.7 MB (rebuilt in session 2 with the final art, install/smoke/uninstall re-verified)**, unsigned, x64, per-user, directory choosable |
 | Silent install into `...\KYNTRAZE Install ünï Test` | OK (installed size 518 MB), Start Menu + Desktop shortcuts created |
 | Smoke run from the **installed** exe | PASS (same checks) |
 | Exe icon | the cracked K (extracted from the exe and viewed); version info `KYNTRAZE FRACTURE RUSH 0.21.0.0` |
