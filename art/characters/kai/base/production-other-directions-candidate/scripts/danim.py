@@ -117,17 +117,24 @@ def stance():
     p = {"pelvis": (0, 0), "chest": (0, 0), "head": (0, 0), "sash": 0.0, "leg_n": {"sole": SOLES["n"]}, "leg_f": {"sole": SOLES["f"]}}
     p[f"arm_{LEAD}"] = copy.deepcopy(LEAD_GUARD); p[f"arm_{REAR}"] = copy.deepcopy(REAR_WAIST); return p
 
+import os as _os
+_MOT = _os.environ.get("KAI_MOTION", "base")   # B21: per-form motion character (base | flare | comet | still); the form build scripts set it
+_ST = {"base": dict(A=0.85, bounce=0.0, tension=0.0, arm=1.0, sash=1.0, breath=1.0, run=1.0),
+       "flare": dict(A=0.95, bounce=0.8, tension=0.0, arm=1.3, sash=1.4, breath=1.0, run=1.1),
+       "comet": dict(A=0.6, bounce=0.0, tension=1.0, arm=0.6, sash=1.2, breath=0.7, run=1.3),
+       "still": dict(A=0.5, bounce=0.0, tension=0.0, arm=1.2, sash=1.8, breath=1.5, run=1.0)}[_MOT]
 def idle():
+    """B21: weight shift over the 16-frame loop (loaded hip sinks), slow chest breath, lagging head/fists, swaying sash; feet stay planted."""
     fr = []
     for i in range(16):
-        t = 2 * math.pi * i / 16; br = math.sin(t); w = math.sin(t - 1.2); p = stance()
-        p["chest"] = (0, -1 if br > 0.35 else 0)
-        p["pelvis"] = (1 if w > 0.6 else (-1 if w < -0.6 else 0), (1 if br < -0.45 else 0))
-        p["head"] = (0, -1 if math.sin(t - 0.5) > 0.4 else 0)
+        t = 2 * math.pi * i / 16; sh = math.sin(t - 0.4); br = math.sin(t - 1.2); lag = lambda d: math.sin(t - d); p = stance()
+        p["pelvis"] = (round(1.5 * _ST["A"] * sh), round(0.9 * _ST["A"] * abs(sh) + (0.6 if br < -0.5 else 0) + _ST["bounce"] * (1 + math.sin(2 * t + 0.5)) / 2 + _ST["tension"]))
+        p["chest"] = (round(-1.0 * _ST["A"] * sh + _ST["tension"] * SX * (D != "north")), (-2 if br > 0.92 and _ST["breath"] > 1.2 else -1) if br > 0.4 / _ST["breath"] else (1 if br < -0.8 else 0))
+        p["spine_rot"] = 1.6 * lag(0.9) * SX; p["head"] = (round(0.7 * lag(1.2)), -1 if br > 0.55 else 0); p["head_rot"] = 1.4 * lag(1.5) * SX
         for s in "nf":
             a = p[f"arm_{s}"]; ph = 0.8 if s == LEAD else 1.1
-            a["u"] = (a["u"][0] + 2.0 * math.sin(t - ph), a["u"][1]); a["f"] = (a["f"][0] + 3.0 * math.sin(t - ph - 0.5), a["f"][1])
-        p["sash"] = 4.0 * math.sin(t - 1.8) * SX; fr.append(p)
+            a["u"] = (a["u"][0] + _ST["arm"] * (2.4 * math.sin(t - ph) + 0.6 * br), a["u"][1]); a["f"] = (a["f"][0] + _ST["arm"] * 3.6 * math.sin(t - ph - 0.5), a["f"][1])
+        p["sash"] = 6.0 * _ST["sash"] * lag(2.0 + (0.6 if _MOT == "still" else 0)) * SX; fr.append(p)
     return {"name": "Idle", "fps": 10, "loop": True, "frames": fr, "events": {}}
 
 # ------------------------------------------------------------------ Run
@@ -137,7 +144,7 @@ PROFILE_LEG = [(21, 0, 1.0, 1.0, True), (13, 0, 0.97, 0.97, True), (3, 0, 1.0, 1
 # back-view legs (from the SOUTH table with the depth sense reversed: the foot reaching forward is further away = higher on screen)
 BACK_LEG = [(1, -7, 0.96, 0.96, True), (1, -3, 0.95, 0.97, True), (1, 0, 1.0, 1.0, True), (1, 3, 1.03, 1.03, True),
             (0, 2, 0.95, 0.85, False), (-2, -12, 0.74, 0.86, False), (-2, -15, 0.72, 0.95, False), (0, -11, 0.88, 1.0, False)]
-HIP_DY = [1, 3, 1, -2, 1, 3, 1, -2]
+HIP_DY = [1, 3, 1, -2, 1, 3, 1, -2] if _MOT in ("base", "flare") else [2, 4, 2, -1, 2, 4, 2, -1]   # B21: Cometheart ~1 px lower (coiled)
 
 def run():
     fr = []
@@ -150,7 +157,7 @@ def run():
             p[f"leg_{s}"] = {"sole": sole, "fs_t": ft, "fs_s": fs, "planted": planted, "straight": True, "slack": 2.0 if planted else 3.0}
         p["pelvis"] = (round(1.0 * c * SX), (7 if D != "north" else 0) + HIP_DY[i]); p["chest"] = (round(-1.0 * c * SX), HIP_DY[i] // 2 + 1)
         if D == "north": p["pelvis"] = (round(2.0 * math.sin(ph + 1.57)), HIP_DY[i]); p["chest"] = (round(-1.0 * math.sin(ph + 1.57)), HIP_DY[i] // 2 + 1)   # weight shift over the planted foot
-        p["spine_rot"] = -SX * 1.0 + 2.0 * c; p["head"] = (0, 2); p["sash"] = 12.0 * math.sin(ph - 1.4) * SX
+        p["spine_rot"] = -SX * 1.0 + 2.8 * _ST["run"] * c; p["head"] = (0, 2); p["head_rot"] = -1.3 * _ST["run"] * c; p["sash"] = 12.0 * math.sin(ph - 1.4) * SX
         for s in "nf":
             fw = (1 - c) / 2 if s == "n" else (1 + c) / 2          # forwardness 0..1 of this arm
             if D == "north":

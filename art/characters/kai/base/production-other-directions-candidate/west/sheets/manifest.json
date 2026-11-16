@@ -88,7 +88,7 @@
    "frame_width": 100,
    "frame_height": 102,
    "origin_px": [
-    66.0,
+    65.0,
     151.0
    ],
    "terminal": "once",
@@ -130,7 +130,7 @@
    "frame_width": 114,
    "frame_height": 158,
    "origin_px": [
-    48.0,
+    47.0,
     158.0
    ],
    "terminal": "once",
@@ -148,10 +148,10 @@
     "ground_contact": 10,
     "settled": 14
    },
-   "frame_width": 164,
+   "frame_width": 166,
    "frame_height": 169,
    "origin_px": [
-    98.0,
+    99.0,
     158.0
    ],
    "terminal": "hold_last_frame",

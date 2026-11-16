@@ -247,10 +247,10 @@
     "pulse": 14,
     "settle": 22
    },
-   "frame_width": 70,
+   "frame_width": 68,
    "frame_height": 182,
    "origin_px": [
-    40.0,
+    39.0,
     188.0
    ],
    "terminal": "once",

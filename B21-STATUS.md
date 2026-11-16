@@ -72,6 +72,12 @@ Vitest (Phaser-free): 383 passing before the desktop work (368 baseline + 15 new
 - **Accessibility:** `prefers-reduced-motion` now also enables the reduced presentation (was Reduced Effects only).
 - **Tests:** Vitest 392 pass; Playwright 69 pass / 1 fail / 3 skipped on a loaded run; the failure (`arenas.spec.ts:90` gloam, a 30 s timeout on a ~23 s test under software GL) passes in isolation (2/2). Earlier flakes (`menus` Esc, `stillfire`, ashen boss run) are the same load-sensitivity; no spec fails deterministically.
 
+## Session 4 update (final for this pass)
+- **Authored motion now covers:** Ren (both forms, 4 dirs): Idle, Hurt, Run (+RunLower/RunPunchUpper), Dash, Death. Sora (both forms, 4 dirs): Idle, Run set. Kai (Base, Flarebound, Cometheart, Stillfire, 4 dirs): Idle, Hurt, Run (Base/Flarebound RunLower pixel-identical; Cometheart Run set rebuilt together). Notes per hero: `art/characters/{ren,sora,kai}/B21-MOTION-NOTES.md`; before/after sheets `art/review/b21/`. All frame counts, fps, loops, events, anchors unchanged; crop sizes/origins moved 1-6 px in manifests. Verified on contact sheets + in-game stills (all 8 base/transformed states load, 0 console errors), **not at real speed**.
+- **Still old (not attempted or not improved):** Sora Hurt (already authored), Sora Dash/Death, Kai Dash/Death/Beam/Sphere/BasicPunch/Transform (Base, Flarebound, Cometheart), Ren Beam/Sphere/Transform; secondary hair/sash as separate overlays (baked into sheets only); new Aegis/Cantor/Seraph body frames (damage shown by ImageGen overlays instead).
+- **Process incident:** one Blender fork ran `git checkout` on Kai paths and reverted another fork's uncommitted Kai edits; the Kai fork rebuilt from saved scripts and re-verified, so the Kai result comes from the restored scripts only.
+- **Tests:** Vitest 392; Playwright 69 pass + the ashen/gloam bosses spec, which timed out at 30 s only under parallel software-GL load; its budget is now 90 s and it passes 11/11 twice. `shield_down` is wired.
+
 ## Source map used (verified present)
 `src/sim/*`, `src/content/{upgrades,heroKits}.ts`, `src/assets/{kaiAnimation,heroAnimation}.ts`, `src/game/render/{EntityRenderer,heroFxView,abilityFx,enemyRenderer,bossRenderer,fxPool}.ts`, `src/game/scenes/ArenaScene.ts` (hit-stop = skipped sim ticks via `hitstopLeft`, unchanged contract), `art/` rigs present locally.
 

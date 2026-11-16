@@ -13,10 +13,10 @@ def sh(cmd, cwd, env, grep=None):
         if grep and any(g in line for g in grep): print(line[:260])
 def prepare(d): sh([sys.executable, os.path.join(HERE, "prepare_parts.py"), d], FORM, dict(os.environ))
 def others(d):
-    env = dict(os.environ, KAI_ROOT=FORM, KAI_FORM="f1"); cwd = os.path.join(BASE, "production-other-directions-candidate")
+    env = dict(os.environ, KAI_ROOT=FORM, KAI_FORM="f1", KAI_MOTION="flare"); cwd = os.path.join(BASE, "production-other-directions-candidate")
     sh([sys.executable, os.path.join(cwd, "scripts", "build_dir.py"), d, work], cwd, env, grep=["BUILD", "CHECKS", d + " "])
 def south():
-    env = dict(os.environ, KAI_ROOT_SOUTH=os.path.join(FORM, "south"), KAI_FORM="f1"); rig = os.path.join(BASE, "production-south-candidate", "rig"); wk = os.path.join(work, "south")
+    env = dict(os.environ, KAI_ROOT_SOUTH=os.path.join(FORM, "south"), KAI_FORM="f1", KAI_MOTION="flare"); rig = os.path.join(BASE, "production-south-candidate", "rig"); wk = os.path.join(work, "south")
     os.makedirs(wk, exist_ok=True); os.makedirs(os.path.join(FORM, "south", "rig"), exist_ok=True)
     sh([sys.executable, "-c", f"import anim; anim.export(r'{os.path.join(FORM, 'south', 'rig', 'anim-data.json')}')"], rig, env)
     sh([BLENDER, "-b", "--python", "build_blend.py"], rig, env, grep=["BUILD", "Traceback", "Error"])

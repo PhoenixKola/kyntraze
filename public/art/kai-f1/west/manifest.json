@@ -127,10 +127,10 @@
     "impact": 0,
     "interruptible_from": 5
    },
-   "frame_width": 114,
+   "frame_width": 118,
    "frame_height": 164,
    "origin_px": [
-    47.0,
+    48.0,
     164.0
    ],
    "terminal": "once",

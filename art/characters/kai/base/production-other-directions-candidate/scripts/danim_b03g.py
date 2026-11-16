@@ -83,17 +83,17 @@ def dash():
 def hurt_keys():
     if NORTH:
         fl = lambda sd, u, f: arm(O[sd] * u, LU[sd], O[sd] * f, LF[sd], 0.0, "side")
-        hit = P(pelvis=(2, 0), chest=(5, -1), head=(8, -2), head_rot=12, spine_rot=-8, sash=22, leg_n=air("n", 0, -5), leg_f=air("f", 0, -5), arm_n=fl("n", 74, 70), arm_f=fl("f", 66, 60))
-        peak = P(pelvis=(5, 0), chest=(9, -1), head=(12, -3), head_rot=18, spine_rot=-13, sash=36, leg_n=lg("n", -4, 0), leg_f=air("f", 6, -5), arm_n=fl("n", 88, 92), arm_f=fl("f", 74, 66))
-        stag = P(pelvis=(6, 5), chest=(9, 4), head=(11, 2), head_rot=14, spine_rot=-10, sash=-20, leg_n=lg("n", -4, 0), leg_f=lg("f", 6, 0), arm_n=fl("n", 66, 54), arm_f=fl("f", 50, 36))
+        hit = P(pelvis=(2, 0), chest=(5, -1), head=(8, -2), head_rot=12, spine_rot=-8, sash=22, leg_n=lg("n", 2, 0), leg_f=lg("f", 2, 0), arm_n=fl("n", 74, 70), arm_f=fl("f", 66, 60))
+        peak = P(pelvis=(5, 0), chest=(9, -1), head=(12, -3), head_rot=18, spine_rot=-13, sash=36, leg_n=lg("n", 6, 0), leg_f=lg("f", 8, 0), arm_n=fl("n", 88, 92), arm_f=fl("f", 74, 66))
+        stag = P(pelvis=(6, 5), chest=(9, 4), head=(11, 2), head_rot=14, spine_rot=-10, sash=-20, leg_n=lg("n", 8, 0), leg_f=lg("f", 10, 0), arm_n=fl("n", 66, 54), arm_f=fl("f", 50, 36))
         hunch = P(pelvis=(2, 8), chest=(3, 8), head=(3, 6), head_rot=-6, spine_rot=3, sash=8, arm_n=arm(-30, LU["n"], 40, LF["n"], 0.0, "side"), arm_f=arm(30, LU["f"], -40, LF["f"], 0.0, "side"))
         return hit, peak, stag, hunch
     hit = P(pelvis=(-3 * sx, 0), chest=(-5 * sx, -1), head=(-5 * sx, -2), head_rot=sx * 14, spine_rot=sx * 16, sash=30 * sx,
-            **{f"leg_{L}": air(L, -2 * sx, -3), f"leg_{R}": air(R, -2 * sx, -3), f"arm_{L}": arm(-sx * 18, Lu, -sx * 112, Lf, 0.0, "side"), f"arm_{R}": arm(-sx * 52, Ru, -sx * 88, Rf, 0.0, "side")})
-    peak = P(pelvis=(-4 * sx, 1), chest=(-8 * sx, 0), head=(-7 * sx, -2), head_rot=sx * 20, spine_rot=sx * 20, sash=44 * sx,
-             **{f"leg_{L}": air(L, 2 * sx, -4), f"leg_{R}": lg(R, -8 * sx, 0), f"arm_{L}": arm(-sx * 20, Lu, -sx * 104, Lf, 0.0, "side"), f"arm_{R}": arm(-sx * 40, Ru, -sx * 76, Rf, 0.0, "side")})
+            **{f"leg_{L}": lg(L, -3 * sx, 0), f"leg_{R}": lg(R, -3 * sx, 0), f"arm_{L}": arm(-sx * 18, Lu, -sx * 112, Lf, 0.0, "side"), f"arm_{R}": arm(-sx * 52, Ru, -sx * 88, Rf, 0.0, "side")})
+    peak = P(pelvis=(-4 * sx, 1), chest=(-8 * sx, 0), head=(-7 * sx, -2), head_rot=sx * 26, spine_rot=sx * 24, sash=44 * sx,
+             **{f"leg_{L}": lg(L, -6 * sx, 0), f"leg_{R}": lg(R, -9 * sx, 0), f"arm_{L}": arm(-sx * 20, Lu, -sx * 104, Lf, 0.0, "side"), f"arm_{R}": arm(-sx * 40, Ru, -sx * 76, Rf, 0.0, "side")})
     stag = P(pelvis=(-5 * sx, 5), chest=(-7 * sx, 4), head=(-6 * sx, 2), head_rot=sx * 14, spine_rot=sx * 16, sash=-24 * sx,
-             **{f"leg_{L}": lg(L, 0, 0), f"leg_{R}": lg(R, -12 * sx, 0), f"arm_{L}": arm(-sx * 12, Lu, -sx * 72, Lf, 0.0, "side"), f"arm_{R}": arm(-sx * 26, Ru, -sx * 62, Rf, 0.0, "side")})
+             **{f"leg_{L}": lg(L, -4 * sx, 0), f"leg_{R}": lg(R, -13 * sx, 0), f"arm_{L}": arm(-sx * 12, Lu, -sx * 72, Lf, 0.0, "side"), f"arm_{R}": arm(-sx * 26, Ru, -sx * 62, Rf, 0.0, "side")})
     hunch = P(pelvis=(-4 * sx, 9), chest=(2 * sx, 9), head=(3 * sx, 7), head_rot=-sx * 8, spine_rot=-sx * 12, sash=10 * sx,
               **{f"leg_{L}": lg(L, 0, 0), f"leg_{R}": lg(R, -10 * sx, 0), f"arm_{L}": arm(-sx * 20, Lu, -sx * 30, Lf, 0.0, "side"), f"arm_{R}": arm(sx * 10, Ru, sx * 100, Rf * 0.9, 0.0, "side")})
     return hit, peak, stag, hunch

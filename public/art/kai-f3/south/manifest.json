@@ -87,10 +87,10 @@
     "impact": 24
    },
    "frame_width": 126,
-   "frame_height": 118,
+   "frame_height": 119,
    "origin_px": [
     40.0,
-    168.0
+    169.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
@@ -129,10 +129,10 @@
     "interruptible_from": 5
    },
    "frame_width": 140,
-   "frame_height": 172,
+   "frame_height": 164,
    "origin_px": [
-    52.0,
-    176.0
+    46.0,
+    168.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
@@ -150,10 +150,10 @@
     "settled": 14
    },
    "frame_width": 162,
-   "frame_height": 185,
+   "frame_height": 177,
    "origin_px": [
     63.0,
-    173.0
+    165.0
    ],
    "terminal": "hold_last_frame",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
@@ -249,10 +249,10 @@
     "settle": 22
    },
    "frame_width": 84,
-   "frame_height": 170,
+   "frame_height": 168,
    "origin_px": [
-    33.0,
-    173.0
+    32.0,
+    171.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"

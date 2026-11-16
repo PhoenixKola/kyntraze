@@ -93,18 +93,26 @@ def arm(u_ang, u_len, f_ang, f_len, hand=None, slot=None, cap=None):
     return d
 
 # ------------------------------------------------------------------ Idle: 16 frames @ 10 fps
+import os as _os
+_MOT = _os.environ.get("KAI_MOTION", "base")   # B21: per-form motion character (base | flare | comet | still); the form build scripts set it
+_ST = {"base": dict(A=0.85, bounce=0.0, tension=0.0, arm=1.0, sash=1.0, breath=1.0, run=1.0),
+       "flare": dict(A=0.95, bounce=0.8, tension=0.0, arm=1.3, sash=1.4, breath=1.0, run=1.1),
+       "comet": dict(A=0.6, bounce=0.0, tension=1.0, arm=0.6, sash=1.2, breath=0.7, run=1.3),
+       "still": dict(A=0.5, bounce=0.0, tension=0.0, arm=1.2, sash=1.8, breath=1.5, run=1.0)}[_MOT]
 def idle():
+    """B21: weight shift side to side over the 16-frame loop (the loaded hip sinks, the other leg unloads), a slow chest breath, head and fists that lag the torso, a swaying sash. Feet stay planted (hips only travel down, never up)."""
     fr = []
     for i in range(16):
-        t = 2 * math.pi * i / 16; br = math.sin(t); w = math.sin(t - 1.2)
+        t = 2 * math.pi * i / 16; sh = math.sin(t - 0.4); br = math.sin(t - 1.2); lag = lambda d: math.sin(t - d)
         p = stance()
-        p["chest"] = (0, -1 if br > 0.35 else 0)
-        p["pelvis"] = (1 if w > 0.6 else (-1 if w < -0.6 else 0), 1 if br < -0.45 else 0)
-        p["head"] = (0, -1 if math.sin(t - 0.5) > 0.4 else 0)
+        p["pelvis"] = (round(1.7 * _ST["A"] * sh), round(0.9 * _ST["A"] * abs(sh) + (0.6 if br < -0.5 else 0) + _ST["bounce"] * (1 + math.sin(2 * t + 0.5)) / 2 + _ST["tension"]))
+        p["chest"] = (round(-1.1 * _ST["A"] * sh), (-2 if br > 0.92 and _ST["breath"] > 1.2 else -1) if br > 0.4 / _ST["breath"] else (1 if br < -0.8 else 0))
+        p["spine_rot"] = 1.8 * _ST["A"] * lag(0.9) + _ST["tension"] * (1.2 + 0.5 * math.sin(3 * t))
+        p["head"] = (round(0.8 * lag(1.2)), -1 if br > 0.55 else 0); p["head_rot"] = 1.6 * lag(1.5)
         un, fn = ARM_REST["n"]["u"], ARM_REST["n"]["f"]; uf, ff = ARM_REST["f"]["u"], ARM_REST["f"]["f"]
-        p["arm_n"] = arm(un[0] + 1.5 + 1.5 * math.sin(t - 0.8), un[1], fn[0] + 2.0 + 2.0 * math.sin(t - 1.3), fn[1], hand=0.0)   # sway only inward: never opens the arm/jacket slit
-        p["arm_f"] = arm(uf[0] + 2.0 * math.sin(t - 1.0), uf[1], ff[0] + 4.0 * math.sin(t - 1.6), ff[1], hand=0.0)
-        p["sash"] = 4.0 * math.sin(t - 1.8)
+        p["arm_n"] = arm(un[0] + 2.2 + _ST["arm"] * (2.0 * lag(1.0) + 0.8 * br), un[1], fn[0] + 3.0 + _ST["arm"] * 2.6 * lag(1.6), fn[1], hand=0.0)   # sway only inward: never opens the arm/jacket slit
+        p["arm_f"] = arm(uf[0] + _ST["arm"] * (2.6 * lag(1.2) + 0.8 * br), uf[1], ff[0] + _ST["arm"] * 5.0 * lag(1.9), ff[1], hand=0.0)
+        p["sash"] = 6.0 * _ST["sash"] * lag(2.0 + (0.6 if _MOT == "still" else 0))
         fr.append(p)
     return {"name": "Idle", "fps": 10, "loop": True, "frames": fr, "events": {}}
 
@@ -121,7 +129,7 @@ LEG = [  # (dx, dy, thigh len factor, shin len factor, planted)
     (-1.0, -12.0, 0.62, 1.00, False),  # 6 reach
     (0.0, 1.0, 0.88, 1.00, False),     # 7 pre-contact
 ]
-HIP_DY = [1, 3, 1, -2, 1, 3, 1, -2]
+HIP_DY = [1, 3, 1, -2, 1, 3, 1, -2] if _MOT in ("base", "flare") else [2, 4, 2, -1, 2, 4, 2, -1]   # B21: Cometheart runs ~1 px lower (coiled)
 def run():
     fr = []
     for i in range(8):
@@ -134,8 +142,8 @@ def run():
         c = math.cos(ph)                                   # +1 at i=0: near leg forward -> far arm forward, near arm back
         p["pelvis"] = (round(1.0 * c), HIP_DY[i] - 2)
         p["chest"] = (round(-1.0 * c), HIP_DY[i] // 2 + 1)
-        p["spine_rot"] = 3.0 * c
-        p["head"] = (0, 2)
+        p["spine_rot"] = 3.9 * _ST["run"] * c   # B21: shoulder-led counter-swing
+        p["head"] = (0, 2); p["head_rot"] = -1.8 * _ST["run"] * c
         fn_, ff_ = (1 - c) / 2, (1 + c) / 2                 # forwardness 0..1 of near / far arm
         # B07-pre: fists are placed by targets (reach_helper IK) so each fist travels a short near-vertical path beside the body: back phase = fist at the hip,
         # forward phase = fist pumped up to chest/chin height, elbows out and down. (The old per-angle forearm sweep of ~200 deg dragged both fists across the torso.)

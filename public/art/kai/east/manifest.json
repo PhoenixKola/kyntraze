@@ -148,10 +148,10 @@
     "ground_contact": 10,
     "settled": 14
    },
-   "frame_width": 166,
+   "frame_width": 167,
    "frame_height": 168,
    "origin_px": [
-    69.0,
+    70.0,
     159.0
    ],
    "terminal": "hold_last_frame",
