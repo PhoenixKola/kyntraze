@@ -37,6 +37,8 @@ export class ArenaScene extends Phaser.Scene {
   private readonly onCue = (name: B21Sound, vol?: number, rate?: number) => { this.audio?.cue(name, vol ?? 1, rate ?? 1); };
   private readonly unlockAudio = () => { void this.audio?.unlock(); };
   private hitstopLeft = 0;
+  /** Reduced Effects setting OR the OS-level prefers-reduced-motion request: both calm the presentation (never the simulation). */
+  private get reduced() { return this.bridge.getSettings().reducedEffects || (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
   private lastPtrX = NaN; private lastPtrY = NaN;
   private lastInput: InputState = { x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false };
   constructor(private readonly bridge: GameBridge, private readonly seed: number, private readonly arena: ArenaId = 'gloam') { super({ key: 'ArenaScene' }); }
@@ -77,11 +79,11 @@ export class ArenaScene extends Phaser.Scene {
     const s = this.simulation.state;
     this.cameras.main.setZoom(fitZoom(this.scale.width, this.scale.height) * this.entityRenderer.cameraZoom());
     followPlayer(this.cameras.main, s.player.x, s.player.y);
-    this.entityRenderer.sync(s, this.lastInput, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.bridge.getSettings().reducedEffects);
+    this.entityRenderer.sync(s, this.lastInput, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.reduced);
     this.hitstopLeft = Math.max(this.hitstopLeft, this.entityRenderer.takeHitstop());
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
-    const hp = this.entityRenderer.debugPose(); this.presentation.update(s, hp.x, hp.y, hp.visualForm !== 'base', this.bridge.getSettings().reducedEffects);
-    this.props?.update(s, this.time.now / 1000); this.ambience?.update(this.time.now / 1000, this.bridge.getSettings().reducedEffects); this.hazardView?.sync(s, s.phase === 'running' ? delta / 1000 : 0); this.marks?.update(s, delta / 1000, this.bridge.getSettings().reducedEffects); this.floorLights?.update(s, delta / 1000, this.bridge.getSettings().reducedEffects); this.evoFx?.update(s, delta / 1000, this.bridge.getSettings().reducedEffects);
+    const hp = this.entityRenderer.debugPose(); this.presentation.update(s, hp.x, hp.y, hp.visualForm !== 'base', this.reduced);
+    this.props?.update(s, this.time.now / 1000); this.ambience?.update(this.time.now / 1000, this.reduced); this.hazardView?.sync(s, s.phase === 'running' ? delta / 1000 : 0); this.marks?.update(s, delta / 1000, this.reduced); this.floorLights?.update(s, delta / 1000, this.reduced); this.evoFx?.update(s, delta / 1000, this.reduced);
     if (s.phase === 'victory') {
       // the Seraph's death is staged for ~2.8 s (suspension, shimmer, dissolve): the gold celebration waits for the shimmer and the results screen for the end of the dissolve
       if (this.victoryClock < 0) { this.victoryClock = 0; this.celebrated = false; }
@@ -89,14 +91,14 @@ export class ArenaScene extends Phaser.Scene {
       if (this.victoryClock > VICTORY_RESULTS_MS) this.bridge.markVictoryShown();
     } else this.victoryClock = -1;
     this.debug?.draw(s);
-    this.fx.render(s, this.bridge.getSettings().reducedEffects);
+    this.fx.render(s, this.reduced);
     this.audio?.setMuted(this.bridge.getSettings().mute); this.audio?.sync(s);
     this.publishClock += delta;
     if ((s.phase === 'running' && this.publishClock >= 100) || this.bridge.snapshot().phase !== s.phase) { this.publishClock = 0; this.bridge.publish(); }
   }
   /** Finale beat: a white-gold flash, a camera kick and three expanding gold shock rings from Kai (rings only with effects on). */
   private celebrate(x: number, y: number) {
-    const reduced = this.bridge.getSettings().reducedEffects; if (reduced) return;
+    const reduced = this.reduced; if (reduced) return;
     this.cameras.main.flash(600, 255, 232, 170); this.cameras.main.shake(380, 0.004);
     for (let i = 0; i < 3; i++) {
       const ring = this.add.circle(x, y + 10, 14).setStrokeStyle(4 - i, i === 1 ? 0x9ff7ff : 0xffd98a, 0.8).setFillStyle(0, 0).setDepth(30).setBlendMode(Phaser.BlendModes.ADD).setScale(0.2);

@@ -118,16 +118,17 @@ def stance():
     p[f"arm_{LEAD}"] = copy.deepcopy(LEAD_GUARD); p[f"arm_{REAR}"] = copy.deepcopy(REAR_WAIST); return p
 
 def idle():
+    """B21: weight shift over the 16-frame loop (loaded hip sinks), slow chest breath, lagging head/fists, swaying sash; feet stay planted."""
     fr = []
     for i in range(16):
-        t = 2 * math.pi * i / 16; br = math.sin(t); w = math.sin(t - 1.2); p = stance()
-        p["chest"] = (0, -1 if br > 0.35 else 0)
-        p["pelvis"] = (1 if w > 0.6 else (-1 if w < -0.6 else 0), (1 if br < -0.45 else 0))
-        p["head"] = (0, -1 if math.sin(t - 0.5) > 0.4 else 0)
+        t = 2 * math.pi * i / 16; sh = math.sin(t - 0.4); br = math.sin(t - 1.2); lag = lambda d: math.sin(t - d); p = stance()
+        p["pelvis"] = (round(1.5 * sh), round(0.9 * abs(sh) + (0.6 if br < -0.5 else 0)))
+        p["chest"] = (round(-1.0 * sh), -1 if br > 0.4 else (1 if br < -0.8 else 0))
+        p["spine_rot"] = 1.6 * lag(0.9) * SX; p["head"] = (round(0.7 * lag(1.2)), -1 if br > 0.55 else 0); p["head_rot"] = 1.4 * lag(1.5) * SX
         for s in "nf":
             a = p[f"arm_{s}"]; ph = 0.8 if s == LEAD else 1.1
-            a["u"] = (a["u"][0] + 2.0 * math.sin(t - ph), a["u"][1]); a["f"] = (a["f"][0] + 3.0 * math.sin(t - ph - 0.5), a["f"][1])
-        p["sash"] = 4.0 * math.sin(t - 1.8) * SX; fr.append(p)
+            a["u"] = (a["u"][0] + 2.4 * math.sin(t - ph) + 0.6 * br, a["u"][1]); a["f"] = (a["f"][0] + 3.6 * math.sin(t - ph - 0.5), a["f"][1])
+        p["sash"] = 6.0 * lag(2.0) * SX; fr.append(p)
     return {"name": "Idle", "fps": 10, "loop": True, "frames": fr, "events": {}}
 
 # ------------------------------------------------------------------ Run
@@ -137,7 +138,7 @@ PROFILE_LEG = [(21, 0, 1.0, 1.0, True), (13, 0, 0.97, 0.97, True), (3, 0, 1.0, 1
 # back-view legs (from the SOUTH table with the depth sense reversed: the foot reaching forward is further away = higher on screen)
 BACK_LEG = [(1, -7, 0.96, 0.96, True), (1, -3, 0.95, 0.97, True), (1, 0, 1.0, 1.0, True), (1, 3, 1.03, 1.03, True),
             (0, 2, 0.95, 0.85, False), (-2, -12, 0.74, 0.86, False), (-2, -15, 0.72, 0.95, False), (0, -11, 0.88, 1.0, False)]
-HIP_DY = [1, 3, 1, -2, 1, 3, 1, -2]
+HIP_DY = [2, 4, 2, -1, 2, 4, 2, -1]   # B21: ~1 px lower centre of mass
 
 def run():
     fr = []
@@ -150,7 +151,7 @@ def run():
             p[f"leg_{s}"] = {"sole": sole, "fs_t": ft, "fs_s": fs, "planted": planted, "straight": True, "slack": 2.0 if planted else 3.0}
         p["pelvis"] = (round(1.0 * c * SX), (7 if D != "north" else 0) + HIP_DY[i]); p["chest"] = (round(-1.0 * c * SX), HIP_DY[i] // 2 + 1)
         if D == "north": p["pelvis"] = (round(2.0 * math.sin(ph + 1.57)), HIP_DY[i]); p["chest"] = (round(-1.0 * math.sin(ph + 1.57)), HIP_DY[i] // 2 + 1)   # weight shift over the planted foot
-        p["spine_rot"] = -SX * 1.0 + 2.0 * c; p["head"] = (0, 2); p["sash"] = 12.0 * math.sin(ph - 1.4) * SX
+        p["spine_rot"] = -SX * 1.0 + 3.2 * c; p["head"] = (0, 2); p["head_rot"] = -1.4 * c; p["sash"] = 12.0 * math.sin(ph - 1.4) * SX
         for s in "nf":
             fw = (1 - c) / 2 if s == "n" else (1 + c) / 2          # forwardness 0..1 of this arm
             if D == "north":

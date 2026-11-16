@@ -94,17 +94,19 @@ def arm(u_ang, u_len, f_ang, f_len, hand=None, slot=None, cap=None):
 
 # ------------------------------------------------------------------ Idle: 16 frames @ 10 fps
 def idle():
+    """B21: weight shift side to side over the 16-frame loop (the loaded hip sinks, the other leg unloads), a slow chest breath, head and fists that lag the torso, a swaying sash. Feet stay planted (hips only travel down, never up)."""
     fr = []
     for i in range(16):
-        t = 2 * math.pi * i / 16; br = math.sin(t); w = math.sin(t - 1.2)
+        t = 2 * math.pi * i / 16; sh = math.sin(t - 0.4); br = math.sin(t - 1.2); lag = lambda d: math.sin(t - d)
         p = stance()
-        p["chest"] = (0, -1 if br > 0.35 else 0)
-        p["pelvis"] = (1 if w > 0.6 else (-1 if w < -0.6 else 0), 1 if br < -0.45 else 0)
-        p["head"] = (0, -1 if math.sin(t - 0.5) > 0.4 else 0)
+        p["pelvis"] = (round(1.7 * sh), round(0.9 * abs(sh) + (0.6 if br < -0.5 else 0)))
+        p["chest"] = (round(-1.1 * sh), -1 if br > 0.4 else (1 if br < -0.8 else 0))
+        p["spine_rot"] = 1.8 * lag(0.9)
+        p["head"] = (round(0.8 * lag(1.2)), -1 if br > 0.55 else 0); p["head_rot"] = 1.6 * lag(1.5)
         un, fn = ARM_REST["n"]["u"], ARM_REST["n"]["f"]; uf, ff = ARM_REST["f"]["u"], ARM_REST["f"]["f"]
-        p["arm_n"] = arm(un[0] + 1.5 + 1.5 * math.sin(t - 0.8), un[1], fn[0] + 2.0 + 2.0 * math.sin(t - 1.3), fn[1], hand=0.0)   # sway only inward: never opens the arm/jacket slit
-        p["arm_f"] = arm(uf[0] + 2.0 * math.sin(t - 1.0), uf[1], ff[0] + 4.0 * math.sin(t - 1.6), ff[1], hand=0.0)
-        p["sash"] = 4.0 * math.sin(t - 1.8)
+        p["arm_n"] = arm(un[0] + 2.2 + 2.0 * lag(1.0) + 0.8 * br, un[1], fn[0] + 3.0 + 2.6 * lag(1.6), fn[1], hand=0.0)   # sway only inward: never opens the arm/jacket slit
+        p["arm_f"] = arm(uf[0] + 2.6 * lag(1.2) + 0.8 * br, uf[1], ff[0] + 5.0 * lag(1.9), ff[1], hand=0.0)
+        p["sash"] = 6.0 * lag(2.0)
         fr.append(p)
     return {"name": "Idle", "fps": 10, "loop": True, "frames": fr, "events": {}}
 
@@ -121,7 +123,7 @@ LEG = [  # (dx, dy, thigh len factor, shin len factor, planted)
     (-1.0, -12.0, 0.62, 1.00, False),  # 6 reach
     (0.0, 1.0, 0.88, 1.00, False),     # 7 pre-contact
 ]
-HIP_DY = [1, 3, 1, -2, 1, 3, 1, -2]
+HIP_DY = [2, 4, 2, -1, 2, 4, 2, -1]   # B21: centre of mass ~1 px lower for Ren's planted style
 def run():
     fr = []
     for i in range(8):
@@ -134,8 +136,8 @@ def run():
         c = math.cos(ph)                                   # +1 at i=0: near leg forward -> far arm forward, near arm back
         p["pelvis"] = (round(1.0 * c), HIP_DY[i] - 2)
         p["chest"] = (round(-1.0 * c), HIP_DY[i] // 2 + 1)
-        p["spine_rot"] = 3.0 * c
-        p["head"] = (0, 2)
+        p["spine_rot"] = 4.5 * c   # B21: shoulder-led counter-swing
+        p["head"] = (0, 2); p["head_rot"] = -2.0 * c
         fn_, ff_ = (1 - c) / 2, (1 + c) / 2                 # forwardness 0..1 of near / far arm
         # B07-pre: fists are placed by targets (reach_helper IK) so each fist travels a short near-vertical path beside the body: back phase = fist at the hip,
         # forward phase = fist pumped up to chest/chin height, elbows out and down. (The old per-angle forearm sweep of ~200 deg dragged both fists across the torso.)

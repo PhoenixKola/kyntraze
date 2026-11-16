@@ -94,17 +94,23 @@ def arm(u_ang, u_len, f_ang, f_len, hand=None, slot=None, cap=None):
 
 # ------------------------------------------------------------------ Idle: 16 frames @ 10 fps
 def idle():
+    """B21: alert, light ranged stance. A slow breath (chest rises, pelvis settles on the exhale), a weight shift from foot to foot with the head counter-swaying, ready hands that float and the sash trailing the motion. Same 16 frames @ 10 fps, loop."""
     fr = []
     for i in range(16):
-        t = 2 * math.pi * i / 16; br = math.sin(t); w = math.sin(t - 1.2)
+        t = 2 * math.pi * i / 16; br = math.sin(t); w = math.sin(t - 1.2); sh = math.sin(t - 0.6)
         p = stance()
-        p["chest"] = (0, -1 if br > 0.35 else 0)
-        p["pelvis"] = (1 if w > 0.6 else (-1 if w < -0.6 else 0), 1 if br < -0.45 else 0)
-        p["head"] = (0, -1 if math.sin(t - 0.5) > 0.4 else 0)
+        p["chest"] = (round(-0.7 * sh), -1 if br > 0.25 else 0)
+        p["pelvis"] = (round(1.3 * w), 1 if br < -0.5 else 0)
+        p["head"] = (round(0.6 * sh), -1 if math.sin(t - 0.4) > 0.3 else 0)
+        p["head_rot"] = 1.6 * math.sin(t - 1.0)
+        p["spine_rot"] = 1.1 * math.sin(t - 1.3)
         un, fn = ARM_REST["n"]["u"], ARM_REST["n"]["f"]; uf, ff = ARM_REST["f"]["u"], ARM_REST["f"]["f"]
-        p["arm_n"] = arm(un[0] + 1.5 + 1.5 * math.sin(t - 0.8), un[1], fn[0] + 2.0 + 2.0 * math.sin(t - 1.3), fn[1], hand=0.0)   # sway only inward: never opens the arm/jacket slit
-        p["arm_f"] = arm(uf[0] + 2.0 * math.sin(t - 1.0), uf[1], ff[0] + 4.0 * math.sin(t - 1.6), ff[1], hand=0.0)
-        p["sash"] = 4.0 * math.sin(t - 1.8)
+        p["arm_n"] = arm(un[0] + 2.0 + 2.2 * math.sin(t - 0.9), un[1], fn[0] + 2.5 + 3.0 * math.sin(t - 1.4), fn[1], hand=0.0)   # sway only inward: never opens the arm/jacket slit
+        p["arm_f"] = arm(uf[0] + 2.6 * math.sin(t - 1.0), uf[1], ff[0] + 6.0 * math.sin(t - 1.6), ff[1], hand=0.0)   # the open caster hand floats, ready
+        p["sash"] = 7.0 * math.sin(t - 2.0)
+        if r.FORM == "f1":   # Azure Sovereign: a slower, floatier settle (feet stay on the ground line), longer sash and hair follow-through
+            p["head_rot"] *= 1.35; p["spine_rot"] *= 1.2; p["sash"] = 11.0 * math.sin(t - 2.3)
+            p["arm_f"]["f"] = (p["arm_f"]["f"][0] + 3.0 * math.sin(t - 2.0), p["arm_f"]["f"][1])
         fr.append(p)
     return {"name": "Idle", "fps": 10, "loop": True, "frames": fr, "events": {}}
 

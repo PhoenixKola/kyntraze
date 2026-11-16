@@ -1,3 +1,4 @@
+import os
 """Idle / Run / BasicPunch for Kai NORTH / EAST / WEST: the SOUTH solver generalised (world-space limb directions + lengths, screen-space leg IK).
 Angles: 0 = pointing down the screen, + = toward screen-right. EAST is authored; WEST mirrors it (left-right flipped POSES, never the art);
 NORTH has its own back-view tables. Set KAI_DIR before importing (see drig.py)."""
@@ -118,16 +119,22 @@ def stance():
     p[f"arm_{LEAD}"] = copy.deepcopy(LEAD_GUARD); p[f"arm_{REAR}"] = copy.deepcopy(REAR_WAIST); return p
 
 def idle():
+    """B21: alert, light ranged stance (same motion language as the SOUTH idle): breath, weight shift with a head counter-sway, floating ready hands, trailing sash. 16 frames @ 10 fps, loop."""
     fr = []
     for i in range(16):
-        t = 2 * math.pi * i / 16; br = math.sin(t); w = math.sin(t - 1.2); p = stance()
-        p["chest"] = (0, -1 if br > 0.35 else 0)
-        p["pelvis"] = (1 if w > 0.6 else (-1 if w < -0.6 else 0), (1 if br < -0.45 else 0))
-        p["head"] = (0, -1 if math.sin(t - 0.5) > 0.4 else 0)
+        t = 2 * math.pi * i / 16; br = math.sin(t); w = math.sin(t - 1.2); sh = math.sin(t - 0.6); p = stance()
+        p["chest"] = (round(-0.7 * sh), -1 if br > 0.25 else 0)
+        p["pelvis"] = (round(1.3 * w), (1 if br < -0.5 else 0))
+        p["head"] = (round(0.6 * sh), -1 if math.sin(t - 0.4) > 0.3 else 0)
+        p["head_rot"] = 1.6 * math.sin(t - 1.0) * SX
+        p["spine_rot"] = 1.1 * math.sin(t - 1.3) * SX
         for s in "nf":
-            a = p[f"arm_{s}"]; ph = 0.8 if s == LEAD else 1.1
-            a["u"] = (a["u"][0] + 2.0 * math.sin(t - ph), a["u"][1]); a["f"] = (a["f"][0] + 3.0 * math.sin(t - ph - 0.5), a["f"][1])
-        p["sash"] = 4.0 * math.sin(t - 1.8) * SX; fr.append(p)
+            a = p[f"arm_{s}"]; ph = 0.9 if s == LEAD else 1.1; k = 1.0 if s == LEAD else 1.0
+            a["u"] = (a["u"][0] + 2.6 * math.sin(t - ph), a["u"][1]); a["f"] = (a["f"][0] + (5.0 if s == LEAD else 3.0) * math.sin(t - ph - 0.5), a["f"][1])
+        p["sash"] = 7.0 * math.sin(t - 2.0) * SX
+        if os.environ.get("KAI_FORM") == "f1":   # Azure Sovereign: slower floatier settle, longer sash (feet stay on the ground line)
+            p["head_rot"] *= 1.35; p["spine_rot"] *= 1.2; p["sash"] = 11.0 * math.sin(t - 2.3) * SX
+        fr.append(p)
     return {"name": "Idle", "fps": 10, "loop": True, "frames": fr, "events": {}}
 
 # ------------------------------------------------------------------ Run

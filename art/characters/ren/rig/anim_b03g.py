@@ -65,15 +65,16 @@ def dash():
 
 # ------------------------------------------------------------------ Hurt: hit hop with arched body and flung arms, back-step stagger, hunch clutching the ribs, recover
 def hurt_keys():
-    hit = P(pelvis=(3, -3), chest=(6, -3), head=(9, -5), head_rot=-16, spine_rot=-11, sash=24, leg_n=air("n", 0, -5), leg_f=air("f", 0, -5), arm_n=A("n", -52, -94), arm_f=A("f", 68, 140))
-    peak = P(pelvis=(5, 0), chest=(9, -1), head=(13, -3), head_rot=-22, spine_rot=-16, sash=40, leg_n=lg("n", -4, 0), leg_f=air("f", 6, -5), arm_n=A("n", -62, -104), arm_f=A("f", 80, 150))
-    stag = P(pelvis=(6, 5), chest=(10, 4), head=(12, 2), head_rot=-16, spine_rot=-12, sash=-22, leg_n=lg("n", -5, 0), leg_f=lg("f", 6, 0), arm_n=A("n", -50, -90), arm_f=A("f", 56, 126))
-    hunch = P(pelvis=(2, 9), chest=(4, 9), head=(5, 7), head_rot=8, spine_rot=4, sash=10, leg_n=lg("n", 0, 0), leg_f=lg("f", 2, 0), arm_n=A("n", -34, -70), arm_f=A("f", 22, 100))
+    """B21: heavier hit. The torso whips first (spine and head lag), the planted feet are dragged back along the push, no hop."""
+    hit = P(pelvis=(4, 1), chest=(8, -2), head=(8, -3), head_rot=-12, spine_rot=-16, sash=26, leg_n=lg("n", 3, 0), leg_f=lg("f", 4, 0), arm_n=A("n", -52, -94), arm_f=A("f", 68, 140))
+    peak = P(pelvis=(8, 3), chest=(13, 1), head=(17, -1), head_rot=-26, spine_rot=-20, sash=44, leg_n=lg("n", 7, 0), leg_f=lg("f", 9, 0), arm_n=A("n", -64, -106), arm_f=A("f", 82, 152))
+    stag = P(pelvis=(9, 6), chest=(12, 6), head=(13, 4), head_rot=-14, spine_rot=-8, sash=-22, leg_n=lg("n", 10, 0), leg_f=lg("f", 13, 0), arm_n=A("n", -50, -90), arm_f=A("f", 56, 126))
+    hunch = P(pelvis=(5, 10), chest=(6, 10), head=(6, 8), head_rot=10, spine_rot=6, sash=12, leg_n=lg("n", 7, 0), leg_f=lg("f", 9, 0), arm_n=A("n", -34, -70), arm_f=A("f", 22, 100))
     return hit, peak, stag, hunch
 
 def hurt():
     hit, peak, stag, hunch = hurt_keys()
-    keys = [(0, hit), (1, peak), (2, stag), (3, stag), (4, hunch), (5, hunch), (6, P(pelvis=(1, 5), chest=(1, 3), head_rot=2, spine_rot=3)), (7, P())]
+    keys = [(0, hit), (1, peak), (2, stag), (3, stag), (4, hunch), (5, hunch), (6, P(pelvis=(2, 5), chest=(2, 3), head_rot=2, spine_rot=3, leg_n=lg('n', 3, 0), leg_f=lg('f', 4, 0))), (7, P())]
     return {"name": "Hurt", "fps": 20, "loop": False, "frames": [depth(p) for p in tween(keys, 8)], "events": {"impact": 0, "interruptible_from": 5}}
 
 # ------------------------------------------------------------------ Death
