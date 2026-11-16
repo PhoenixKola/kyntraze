@@ -1,0 +1,79 @@
+{
+ "impact_frame": {
+  "seconds": 0.38,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -22.47,
+  "centroid_Hz": 9264,
+  "clipped_samples": 0
+ },
+ "evo_spark": {
+  "seconds": 0.07,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -21.15,
+  "centroid_Hz": 11522,
+  "clipped_samples": 0
+ },
+ "evo_echo": {
+  "seconds": 0.6,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -19.53,
+  "centroid_Hz": 1310,
+  "clipped_samples": 0
+ },
+ "shield_shatter": {
+  "seconds": 0.55,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -21.27,
+  "centroid_Hz": 6498,
+  "clipped_samples": 0
+ },
+ "shield_down": {
+  "seconds": 0.4,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -20.0,
+  "centroid_Hz": 4251,
+  "clipped_samples": 0
+ },
+ "boss_crack": {
+  "seconds": 0.8,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -27.67,
+  "centroid_Hz": 10035,
+  "clipped_samples": 0
+ },
+ "floor_crack": {
+  "seconds": 0.7,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -24.7,
+  "centroid_Hz": 8344,
+  "clipped_samples": 0
+ },
+ "aura_surge_ren": {
+  "seconds": 0.7,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -18.44,
+  "centroid_Hz": 6989,
+  "clipped_samples": 0
+ },
+ "aura_surge_sora": {
+  "seconds": 0.6,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -15.81,
+  "centroid_Hz": 7328,
+  "clipped_samples": 0
+ },
+ "aura_surge_gold": {
+  "seconds": 0.55,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -22.4,
+  "centroid_Hz": 10610,
+  "clipped_samples": 0
+ },
+ "aura_surge_silver": {
+  "seconds": 0.9,
+  "peak_dBFS": -3.0,
+  "rms_dBFS": -18.51,
+  "centroid_Hz": 7945,
+  "clipped_samples": 0
+ }
+}

@@ -37,6 +37,11 @@ export const ARENA_SOUNDS = ['surge_warn', 'surge_fire', 'pylon_charge', 'pylon_
 export type ArenaSound = (typeof ARENA_SOUNDS)[number];
 export const arenaSoundUrl = (n: string) => `/audio/arenas/${n}.wav`;
 /** B15 combat feedback (art/combat/audio/synth_b15.py): one voice per presentation impact, coalesced so a crowd cannot turn into a buzz. */
+/** B21 accents (art/combat/audio/synth_b21.py): impact frames, evolution sparks/echoes, shield break, boss damage, floor cracks, aura surges. Own 'cue' slot with a small voice cap and a per-sound minimum gap. */
+export const B21_SOUNDS = ['impact_frame', 'evo_spark', 'evo_echo', 'shield_shatter', 'shield_down', 'boss_crack', 'floor_crack', 'aura_surge_ren', 'aura_surge_sora', 'aura_surge_gold', 'aura_surge_silver'] as const;
+export type B21Sound = (typeof B21_SOUNDS)[number];
+export const b21SoundUrl = (n: string) => `/audio/b21/${n}.wav`;
+export const B21_MIX = { maxVoices: 3, minGap: 0.09 } as const;
 export const COMBAT_SOUNDS = ['hit_light', 'hit_heavy', 'hit_boss', 'block_deflect', 'player_hurt', 'revive', 'form1_ignite'] as const;
 export type CombatSound = (typeof COMBAT_SOUNDS)[number];
 export const combatSoundUrl = (n: string) => `/audio/combat/${n}.wav`;
@@ -56,7 +61,7 @@ export const ARENA_MIX = { level: 0.62, hearRange: 1400, minGain: 0.4, ambient: 
 export const BOSS_MIX = { level: 0.78, hearRange: 1100, minGain: 0.45, maxVoices: 4, minGap: 0.045 } as const;
 export const ENEMY_MIX = { level: 0.5, hearRange: 620, minGain: 0.12, maxVoices: 6, minGap: 0.045 } as const;
 /** Voice slots: a new sound in a slot replaces the old one (no stacked charge swells, one beam body, one burst). `pulse` allows two overlapping zaps. */
-type Slot = 'zap' | 'ui' | 'hit' | 'hurt' | 'charge' | 'fire' | 'flight' | 'burst' | 'pulse' | 'misc' | 'enemy' | 'boss' | 'aura';
+type Slot = 'cue' | 'zap' | 'ui' | 'hit' | 'hurt' | 'charge' | 'fire' | 'flight' | 'burst' | 'pulse' | 'misc' | 'enemy' | 'boss' | 'aura';
 const MAX_PULSE_VOICES = 2;
 /** B19: the very frequent tiny sounds (Ren's auto punches, Sora's needles) share two voices and a minimum gap, so a fast fire rate can never become a buzz. */
 export const HERO_ZAP = { maxVoices: 2, minGap: 0.1 } as const;
@@ -96,7 +101,7 @@ export class AbilityAudio {
       void this.music.preload(['title', ...STINGERS]).then(() => { if (this.wantCue) this.music?.setCue(this.wantCue, 0.8); });
       if (this.wantCue) this.music.setCue(this.wantCue, 0.8);
     }
-    this.loading ??= Promise.all([...ABILITY_SOUNDS.map(n => [n, soundUrl(n)] as const), ...ENEMY_SOUNDS.map(n => [n, enemySoundUrl(n)] as const), ...BOSS_SOUNDS.map(n => [n, bossSoundUrl(n)] as const), ...ARENA_SOUNDS.map(n => [n, arenaSoundUrl(n)] as const), ...COMBAT_SOUNDS.map(n => [n, combatSoundUrl(n)] as const), ...UI_SOUNDS.map(n => [n, uiSoundUrl(n)] as const)].map(async ([n, url]) => { try { this.buffers.set(n, await this.ctx.decodeAudioData(await this.fetchBuffer(url))); } catch { /* a missing sound must never break the game */ } })).then(() => undefined);
+    this.loading ??= Promise.all([...ABILITY_SOUNDS.map(n => [n, soundUrl(n)] as const), ...ENEMY_SOUNDS.map(n => [n, enemySoundUrl(n)] as const), ...BOSS_SOUNDS.map(n => [n, bossSoundUrl(n)] as const), ...ARENA_SOUNDS.map(n => [n, arenaSoundUrl(n)] as const), ...COMBAT_SOUNDS.map(n => [n, combatSoundUrl(n)] as const), ...B21_SOUNDS.map(n => [n, b21SoundUrl(n)] as const), ...UI_SOUNDS.map(n => [n, uiSoundUrl(n)] as const)].map(async ([n, url]) => { try { this.buffers.set(n, await this.ctx.decodeAudioData(await this.fetchBuffer(url))); } catch { /* a missing sound must never break the game */ } })).then(() => undefined);
     return this.loading;
   }
 
@@ -117,14 +122,18 @@ export class AbilityAudio {
   /** A UI sound (hover / click / toggle ...). Honours mute and the UI slider; keeps its own tiny voice cap. */
   ui(name: UiSound, vol = 1, rate = 1) { this.play(name, 'ui', vol, rate); }
 
+  private lastCue = new Map<string, number>();
+  /** B21 accent, fired by a presentation layer exactly when its visual lands. */
+  cue(name: B21Sound, vol = 1, rate = 1) { const now = this.ctx.currentTime, last = this.lastCue.get(name) ?? -9; if (now - last < B21_MIX.minGap) return; this.lastCue.set(name, now); this.play(name, 'cue', vol, rate); }
   private lastEnemy = new Map<string, number>();
   private lastEnemyEvent = 0;
-  private play(name: AbilitySound | EnemySound | BossSound | ArenaSound | CombatSound | UiSound | HeroSound, slot: Slot, vol = 1, rate = 1) {
+  private play(name: AbilitySound | EnemySound | BossSound | ArenaSound | CombatSound | UiSound | HeroSound | B21Sound, slot: Slot, vol = 1, rate = 1) {
     const buf = this.buffers.get(name); if (!buf || !this.master || this.muted) return;
     if (slot === 'ui') { if ([...this.voices].filter(v => v.slot === 'ui').length >= 4) return; }
     else if (slot === 'enemy') { if ([...this.voices].filter(v => v.slot === 'enemy').length >= ENEMY_MIX.maxVoices) return; }
     else if (slot === 'boss') { if ([...this.voices].filter(v => v.slot === 'boss').length >= BOSS_MIX.maxVoices) return; }
     else if (slot === 'hit') { if ([...this.voices].filter(v => v.slot === 'hit').length >= COMBAT_MIX.maxHitVoices) return; }
+    else if (slot === 'cue') { if ([...this.voices].filter(v => v.slot === 'cue').length >= B21_MIX.maxVoices) return; }
     else if (slot === 'zap') { if ([...this.voices].filter(v => v.slot === 'zap').length >= HERO_ZAP.maxVoices) return; }
     else if (slot === 'pulse') { if ([...this.voices].filter(v => v.slot === 'pulse').length >= MAX_PULSE_VOICES) return; }
     else this.stopSlot(slot, 0.03);

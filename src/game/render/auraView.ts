@@ -15,7 +15,7 @@ const LOOK: Record<AuraState, { fps: number; back: number; veil: number; ground:
 
 export class AuraView {
   private readonly back: Phaser.GameObjects.Image[] = []; private readonly veil: Phaser.GameObjects.Image; private readonly ground: Phaser.GameObjects.Image; private readonly trail: Phaser.GameObjects.Image;
-  private clock = 0; private readonly ok: boolean;
+  private clock = 0; private readonly ok: boolean; private prevPulse = 0; private lastSurge = -9;
   constructor(private readonly scene: Phaser.Scene, private readonly state: AuraState) {
     const k = (n: string) => b21Key('aura', `${state}/${n}`);
     this.ok = scene.textures.exists(k('back_0'));
@@ -29,6 +29,8 @@ export class AuraView {
   /** foot = ground point between the soles; dt in seconds (0 while paused); strength scales everything (Reduced Effects / crowds pass < 1). */
   update(a: AuraSample, dt: number, foot: { x: number; y: number }, vx: number, vy: number, strength: number, calm: boolean) {
     if (!this.ok || strength <= 0.01) { this.hide(); return; }
+    if (a.pulse > 0.85 && this.prevPulse <= 0.85 && this.clock - this.lastSurge > 0.8) { this.lastSurge = this.clock; this.scene.events.emit('b21-cue', this.state === 'ren' ? 'aura_surge_ren' : this.state === 'sora' ? 'aura_surge_sora' : this.state === 'still' ? 'aura_surge_silver' : 'aura_surge_gold', 0.5); }
+    this.prevPulse = a.pulse;
     const L = LOOK[this.state], k = (n: string, f: number) => b21Key('aura', `${this.state}/${n}${f}`);
     this.clock += dt;
     const f0 = Math.floor(this.clock * L.fps) % 4, tight = 1 - 0.2 * a.gather, stretch = 1 + 0.14 * a.lean + 0.25 * a.pulse, kk = a.k * strength;

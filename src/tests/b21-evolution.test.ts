@@ -139,3 +139,14 @@ describe('B21 evolution art + impact frames', () => {
     const s3 = mk(); s3.abilityEvents.push({ id: 1, kind: 'auto_hit', x: 0, y: 0 }); expect(planEvo(s3, cur(), false).plans.filter(p => p.frame)).toHaveLength(0);
   });
 });
+import { existsSync, readFileSync } from 'node:fs';
+import { B21_SOUNDS, b21SoundUrl } from '../game/audio/abilityAudio';
+describe('B21 audio files', () => {
+  it('every B21 sound ships as a valid 16-bit mono 44.1k wav that does not clip', () => {
+    for (const n of B21_SOUNDS) {
+      const p = 'public' + b21SoundUrl(n); expect(existsSync(p), n).toBe(true);
+      const b = readFileSync(p); expect(b.toString('ascii', 0, 4)).toBe('RIFF'); expect(b.readUInt16LE(22)).toBe(1); expect(b.readUInt32LE(24)).toBe(44100); expect(b.readUInt16LE(34)).toBe(16);
+      let peak = 0; for (let i = 44; i + 1 < b.length; i += 2) peak = Math.max(peak, Math.abs(b.readInt16LE(i))); expect(peak, n).toBeLessThan(32767); expect(peak, n).toBeGreaterThan(8000);
+    }
+  });
+});

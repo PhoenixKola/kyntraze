@@ -18,7 +18,7 @@ import type { InputState } from '../../sim/GameState';
 import { DebugOverlay } from '../render/debugOverlay';
 import { startEncounter } from '../../sim/BossAiSystem';
 import { damageEnemy } from '../../sim/CombatSystem';
-import { sharedAbilityAudio, type AbilityAudio } from '../audio/abilityAudio';
+import { sharedAbilityAudio, type AbilityAudio, type B21Sound } from '../audio/abilityAudio';
 /** presentation hold after the finale boss falls (render time only; the sim is already in the victory phase) */
 const VICTORY_CELEBRATE_MS = 1800, VICTORY_RESULTS_MS = 4300;
 export class ArenaScene extends Phaser.Scene {
@@ -34,6 +34,7 @@ export class ArenaScene extends Phaser.Scene {
   private debug: DebugOverlay | null = null;
   private props: ArenaProps | null = null; private ambience: Ambience | null = null; private hazardView: ArenaHazardView | null = null;
   private audio: AbilityAudio | null = null; private marks: ArenaMarks | null = null; private floorLights: LightLayer | null = null; private evoFx: EvoFx | null = null;
+  private readonly onCue = (name: B21Sound, vol?: number, rate?: number) => { this.audio?.cue(name, vol ?? 1, rate ?? 1); };
   private readonly unlockAudio = () => { void this.audio?.unlock(); };
   private hitstopLeft = 0;
   private lastPtrX = NaN; private lastPtrY = NaN;
@@ -48,7 +49,7 @@ export class ArenaScene extends Phaser.Scene {
     this.fx = new EffectsRenderer(this);
     this.controller = new InputController(() => this.bridge.togglePause(), () => { if (this.bridge.getSettings().pauseOnBlur) this.bridge.pause(); }, () => this.bridge.pause());
     this.bridge.bind(this.simulation);
-    this.audio = sharedAbilityAudio(); this.audio?.setMuted(this.bridge.getSettings().mute);
+    this.audio = sharedAbilityAudio(); this.events.on('b21-cue', this.onCue); this.audio?.setMuted(this.bridge.getSettings().mute);
     window.addEventListener('keydown', this.unlockAudio); window.addEventListener('pointerdown', this.unlockAudio);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.dispose());
     window.dispatchEvent(new CustomEvent('kyntraze-ready'));
@@ -104,7 +105,7 @@ export class ArenaScene extends Phaser.Scene {
   }
   private dispose() {
     if (this.disposed) return; this.disposed = true; this.scale.off(Phaser.Scale.Events.RESIZE);
-    window.removeEventListener('keydown', this.unlockAudio); window.removeEventListener('pointerdown', this.unlockAudio); this.audio?.dispose();
+    this.events.off('b21-cue', this.onCue); window.removeEventListener('keydown', this.unlockAudio); window.removeEventListener('pointerdown', this.unlockAudio); this.audio?.dispose();
     this.controller?.destroy(); this.entityRenderer?.destroy(); this.fx?.destroy(); this.presentation?.destroy(); this.debug?.destroy(); this.props?.destroy(); this.ambience?.destroy(); this.hazardView?.destroy(); this.marks?.destroy(); this.floorLights?.destroy(); this.evoFx?.destroy(); this.bridge.unbind();
     delete (window as Window & { __KYNT_QA__?: unknown }).__KYNT_QA__;
   }
