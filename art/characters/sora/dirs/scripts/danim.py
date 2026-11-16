@@ -155,9 +155,11 @@ def run():
             if D == "north": o = -1 if s == "n" else 1; bx, by = RX + o * 11, RY - 2; sole = (bx + o * dx, by + dy)
             else: bx = RX + (-3 if s == "n" else 3) * SX; by = RY + (2 if s == "n" else -2); sole = (bx + SX * dx, by + dy)
             p[f"leg_{s}"] = {"sole": sole, "fs_t": ft, "fs_s": fs, "planted": planted, "straight": True, "slack": 2.0 if planted else 3.0}
-        p["pelvis"] = (round(1.0 * c * SX), (7 if D != "north" else 0) + HIP_DY[i]); p["chest"] = (round(-1.0 * c * SX), HIP_DY[i] // 2 + 1)
-        if D == "north": p["pelvis"] = (round(2.0 * math.sin(ph + 1.57)), HIP_DY[i]); p["chest"] = (round(-1.0 * math.sin(ph + 1.57)), HIP_DY[i] // 2 + 1)   # weight shift over the planted foot
-        p["spine_rot"] = -SX * 1.0 + 2.0 * c; p["head"] = (0, 2); p["sash"] = 12.0 * math.sin(ph - 1.4) * SX
+        sov = r.FORM == "f1"; hd = HIP_DY[i] // 2 if sov else HIP_DY[i]   # B21: Sovereign glides (half the foot-strike bob)
+        p["pelvis"] = (round(1.0 * c * SX), (7 if D != "north" else 0) + hd + 1); p["chest"] = (round(-1.0 * c * SX), hd // 2 + 1)   # B21: centre of mass 1 px lower
+        if D == "north": p["pelvis"] = (round(2.0 * math.sin(ph + 1.57)), hd + 1); p["chest"] = (round(-1.0 * math.sin(ph + 1.57)), hd // 2 + 1)   # weight shift over the planted foot
+        p["spine_rot"] = -SX * 2.2 + 3.4 * c; p["head"] = (0, 2); p["sash"] = (17.0 if sov else 14.0) * math.sin(ph - 1.4) * SX   # B21: more forward lean, shoulder-led counter-swing, longer sash
+        p["pelvis_rot"] = -1.8 * c; p["head_rot"] = -1.8 * c   # B21: hips and head counter the torso twist
         for s in "nf":
             fw = (1 - c) / 2 if s == "n" else (1 + c) / 2          # forwardness 0..1 of this arm
             if D == "north":

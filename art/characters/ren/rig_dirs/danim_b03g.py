@@ -51,13 +51,13 @@ def dash():
     if NORTH:
         sw = lambda sd, u, f: arm(O[sd] * u, LU[sd], O[sd] * f, LF[sd], 0.0, "side")
         k = [
-            P(pelvis=(0, 9), chest=(0, 7), head=(0, 5), sash=-6, leg_n=lg("n", 4, 0), leg_f=lg("f", -4, 0), arm_n=sw("n", 18, 10), arm_f=sw("f", 18, 10)),
+            P(pelvis=(0, 14), chest=(0, 11), head=(0, 7), sash=-6, leg_n=lg("n", 4, 0), leg_f=lg("f", -4, 0), arm_n=sw("n", 18, 10), arm_f=sw("f", 18, 10)),
             P(pelvis=(0, 6), chest=(0, 5), head=(0, 3), sash=-20, leg_n=lg("n", -4, -6), leg_f=lg("f", 6, 3), arm_n=sw("n", 38, 20), arm_f=sw("f", 38, 20)),
             P(pelvis=(0, 2), chest=(0, 1), head=(0, 0), sash=-34, leg_n=air("n", -12, -22, fs_t=0.7), leg_f=air("f", 12, -6), arm_n=sw("n", 62, 30), arm_f=sw("f", 62, 30)),
             P(pelvis=(0, 0), chest=(0, -1), head=(0, -1), sash=-44, leg_n=air("n", -16, -28, fs_t=0.65), leg_f=air("f", 16, -14), arm_n=sw("n", 78, 36), arm_f=sw("f", 78, 36)),
             P(pelvis=(0, 4), chest=(0, 3), head=(0, 2), sash=-28, leg_n=air("n", 12, -24, fs_t=0.6), leg_f=air("f", -12, -18, fs_t=0.7), arm_n=sw("n", 58, 40), arm_f=sw("f", 58, 40)),
             P(pelvis=(0, 10), chest=(0, 8), head=(0, 6), sash=-8, leg_n=lg("n", 8, 4), leg_f=air("f", -10, -10), arm_n=sw("n", 40, 22), arm_f=sw("f", 40, 22)),
-            P(pelvis=(0, 13), chest=(0, 11), head=(0, 8), sash=14, leg_n=lg("n", 12, 6), leg_f=lg("f", -6, 4), arm_n=sw("n", 30, 16), arm_f=sw("f", 30, 16)),
+            P(pelvis=(0, 18), chest=(0, 15), head=(0, 11), sash=14, leg_n=lg("n", 12, 6), leg_f=lg("f", -6, 4), arm_n=sw("n", 30, 16), arm_f=sw("f", 30, 16)),
             P(pelvis=(0, 10), chest=(0, 8), head=(0, 5), sash=16, leg_n=lg("n", 8, 3), leg_f=lg("f", -3, 2), arm_n=sw("n", 24, 14), arm_f=sw("f", 24, 14)),
             P(pelvis=(0, 5), chest=(0, 3), head=(0, 3), sash=6, leg_n=lg("n", 3, 1), leg_f=lg("f", -1, 1)),
             P(pelvis=(0, 2), chest=(0, 1), sash=2),
@@ -66,14 +66,14 @@ def dash():
     lean = lambda v: -sx * v
     def bk(u1, f1, u2, f2): return {f"arm_{L}": arm(-sx * u1, Lu, -sx * f1, Lf, 0.0, "side"), f"arm_{R}": arm(-sx * u2, Ru, -sx * f2, Rf, 0.0, "side")}
     k = [
-        P(pelvis=(-4 * sx, 9), chest=(-6 * sx, 7), head=(-2 * sx, 5), spine_rot=sx * 8, sash=8 * sx, **{f"leg_{L}": lg(L, -3 * sx, 0), f"leg_{R}": lg(R, -3 * sx, 0), f"arm_{L}": arm(sx * 24, Lu * 0.85, -sx * 150, Lf * 0.8, 0.0, "guard"), f"arm_{R}": arm(-sx * 20, Ru, -sx * 5, Rf * 0.8, 0.0, "side")}),
-        P(pelvis=(3 * sx, 10), chest=(6 * sx, 9), head=(4 * sx, 6), spine_rot=lean(14), sash=-18 * sx, **{f"leg_{L}": lg(L, 4 * sx, 0), f"leg_{R}": air(R, -12 * sx, -6)}, **bk(44, 76, 56, 84)),
-        P(pelvis=(11 * sx, 8), chest=(15 * sx, 8), head=(11 * sx, 5), spine_rot=lean(26), sash=-34 * sx, **{f"leg_{L}": air(L, 22 * sx, -4), f"leg_{R}": air(R, -26 * sx, -16, fs_t=0.95, fs_s=0.85)}, **bk(70, 98, 82, 106)),
-        P(pelvis=(16 * sx, 6), chest=(21 * sx, 6), head=(16 * sx, 3), spine_rot=lean(34), sash=-44 * sx, **{f"leg_{L}": air(L, 32 * sx, -12), f"leg_{R}": air(R, -36 * sx, -22, fs_t=0.95, fs_s=0.8)}, **bk(80, 108, 92, 112)),
+        P(pelvis=(-5 * sx, 14), chest=(-8 * sx, 11), head=(-3 * sx, 7), spine_rot=sx * 11, sash=8 * sx, **{f"leg_{L}": lg(L, -3 * sx, 0), f"leg_{R}": lg(R, -3 * sx, 0), f"arm_{L}": arm(sx * 24, Lu * 0.85, -sx * 150, Lf * 0.8, 0.0, "guard"), f"arm_{R}": arm(-sx * 20, Ru, -sx * 5, Rf * 0.8, 0.0, "side")}),
+        P(pelvis=(3 * sx, 13), chest=(6 * sx, 11), head=(4 * sx, 7), spine_rot=lean(16), sash=-18 * sx, **{f"leg_{L}": lg(L, 4 * sx, 0), f"leg_{R}": air(R, -12 * sx, -6)}, **bk(44, 76, 56, 84)),
+        P(pelvis=(11 * sx, 8), chest=(15 * sx, 8), head=(11 * sx, 5), spine_rot=lean(30), sash=-34 * sx, **{f"leg_{L}": air(L, 22 * sx, -4), f"leg_{R}": air(R, -26 * sx, -16, fs_t=0.95, fs_s=0.85)}, **bk(70, 98, 82, 106)),
+        P(pelvis=(16 * sx, 6), chest=(21 * sx, 6), head=(16 * sx, 3), spine_rot=lean(40), sash=-44 * sx, **{f"leg_{L}": air(L, 32 * sx, -12), f"leg_{R}": air(R, -36 * sx, -22, fs_t=0.95, fs_s=0.8)}, **bk(80, 108, 92, 112)),
         P(pelvis=(14 * sx, 8), chest=(18 * sx, 7), head=(14 * sx, 4), spine_rot=lean(29), sash=-30 * sx, **{f"leg_{L}": air(L, -12 * sx, -14, fs_t=0.95), f"leg_{R}": air(R, 18 * sx, -28, fs_t=0.55, fs_s=0.9)}, **{f"arm_{L}": arm(-sx * 20, Lu, sx * 18, Lf, 0.0, "side"), f"arm_{R}": arm(-sx * 84, Ru, -sx * 112, Rf, 0.0, "side")}),
         P(pelvis=(11 * sx, 10), chest=(13 * sx, 9), head=(11 * sx, 6), spine_rot=lean(21), sash=-14 * sx, **{f"leg_{L}": air(L, -22 * sx, -8), f"leg_{R}": lg(R, 26 * sx, -2)}, **{f"arm_{L}": arm(-sx * 30, Lu, -sx * 40, Lf, 0.0, "side"), f"arm_{R}": arm(sx * 20, Ru, sx * 70, Rf, 0.0, "side")}),
-        P(pelvis=(8 * sx, 12), chest=(9 * sx, 10), head=(8 * sx, 7), spine_rot=lean(12), sash=12 * sx, **{f"leg_{L}": lg(L, -2 * sx, 0), f"leg_{R}": lg(R, 24 * sx, 0)}, **{f"arm_{L}": arm(sx * 14, Lu * 0.9, -sx * 120, Lf * 0.85, 0.0, "guard"), f"arm_{R}": arm(-sx * 30, Ru, sx * 30, Rf, 0.0, "side")}),
-        P(pelvis=(5 * sx, 11), chest=(5 * sx, 9), head=(4 * sx, 6), spine_rot=lean(7), sash=18 * sx, **{f"leg_{L}": lg(L, 6 * sx, 0), f"leg_{R}": lg(R, 8 * sx, 0)}, **{f"arm_{L}": arm(sx * 22, Lu * 0.9, -sx * 140, Lf * 0.8, 0.0, "guard"), f"arm_{R}": arm(-sx * 40, Ru, sx * 20, Rf, 0.0, "side")}),
+        P(pelvis=(8 * sx, 17), chest=(9 * sx, 14), head=(8 * sx, 9), spine_rot=lean(14), sash=12 * sx, **{f"leg_{L}": lg(L, -2 * sx, 0), f"leg_{R}": lg(R, 24 * sx, 0)}, **{f"arm_{L}": arm(sx * 14, Lu * 0.9, -sx * 120, Lf * 0.85, 0.0, "guard"), f"arm_{R}": arm(-sx * 30, Ru, sx * 30, Rf, 0.0, "side")}),
+        P(pelvis=(5 * sx, 14), chest=(5 * sx, 11), head=(4 * sx, 7), spine_rot=lean(8), sash=18 * sx, **{f"leg_{L}": lg(L, 6 * sx, 0), f"leg_{R}": lg(R, 8 * sx, 0)}, **{f"arm_{L}": arm(sx * 22, Lu * 0.9, -sx * 140, Lf * 0.8, 0.0, "guard"), f"arm_{R}": arm(-sx * 40, Ru, sx * 20, Rf, 0.0, "side")}),
         P(pelvis=(2 * sx, 6), chest=(2 * sx, 4), spine_rot=lean(3), sash=6 * sx, **{f"leg_{L}": lg(L, 6 * sx, 0)}),
         P(pelvis=(1 * sx, 3), chest=(1 * sx, 2), sash=2 * sx, **{f"leg_{L}": lg(L, 4 * sx, 0)}),
     ]
@@ -122,10 +122,10 @@ def death():
     fin = lambda ex=0: {f"leg_{R}": soleabs(HX + FALL * (40 + ex), GROUND, dir="up", planted=False), f"leg_{L}": soleabs(HX + FALL * (60 + ex), GROUND - 2, dir="up", planted=False, straight=True, slack=6.0)}
     lifting = {f"leg_{R}": soleabs(HX + FALL * 24, GROUND - 24, dir="up", planted=False), f"leg_{L}": soleabs(HX + FALL * 44, GROUND - 40, dir="up", planted=False)}
     tipping = {f"leg_{s}": soleabs(SOLES[s][0] + FALL * 6, SOLES[s][1] - 12, dir="up", planted=False) for s in "nf"}
-    kneel = P(root_rot=0.0, hip_target=(P0x + FALL * 0, P0y + 32), spine_rot=FALL * 20, head_rot=FALL * 18, head=(-FALL * 8, -3), sash=FALL * 30, **stand, **out)
+    kneel = P(root_rot=0.0, hip_target=(P0x + FALL * 0, P0y + 38), spine_rot=FALL * 20, head_rot=FALL * 18, head=(-FALL * 8, -3), sash=FALL * 30, **stand, **out)
     stag2 = P(root_rot=0.0, hip_target=(P0x - FALL * 4, P0y + 10), spine_rot=FALL * 20, head_rot=FALL * 14, head=(-FALL * 8, -3), sash=-FALL * 20, **stand, **out)
     keys = [
-        (0, hit), (1, peak), (2, stag2), (4, kneel),
+        (0, hit), (1, peak), (2, stag2), (3, P(root_rot=0.0, hip_target=(P0x - FALL * 2, P0y + 22), spine_rot=FALL * 12, head_rot=FALL * 16, head=(-FALL * 6, -3), sash=-FALL * 6, **stand, **out)), (4, kneel),
         (6, down(30, P0x + FALL * 6, P0y + 36, tipping, up, spine_rot=FALL * 8, head_rot=FALL * 16, sash=FALL * 40)),
         (8, down(66, HX - FALL * 4, GROUND - 40, lifting, up, head_rot=FALL * 14, sash=FALL * 48)),
         (10, down(90, HX, GROUND - 17 - HG, fin(-8), flung, head_rot=FALL * 4, sash=FALL * 30)),

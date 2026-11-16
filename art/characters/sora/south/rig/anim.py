@@ -138,9 +138,13 @@ def run():
                              "bend": -1 if s == "n" else 1, "straight": True, "slack": 2.0 if planted else 3.0}
         p["far_leg_front"] = p["leg_f"]["sole"][1] > p["leg_n"]["sole"][1]
         c = math.cos(ph)                                   # +1 at i=0: near leg forward -> far arm forward, near arm back
-        p["pelvis"] = (round(1.0 * c), HIP_DY[i] - 2)
-        p["chest"] = (round(-1.0 * c), HIP_DY[i] // 2 + 1)
-        p["spine_rot"] = 3.0 * c
+        sov = r.FORM == "f1"                                # B21: Sovereign glides (half the foot-strike bob), base Sora is light and quick on the toes
+        hd = HIP_DY[i] // 2 if sov else HIP_DY[i]
+        p["pelvis"] = (round(1.0 * c), hd - 2 + 1)          # B21: centre of mass 1 px lower
+        p["pelvis_rot"] = -2.0 * c                          # B21: hips counter-rotate against the shoulders
+        p["chest"] = (round(-1.0 * c), hd // 2 + 1)
+        p["spine_rot"] = 4.2 * c                            # B21: shoulder-led counter-swing
+        p["head_rot"] = -2.0 * c                            # B21: head stays level against the torso twist
         p["head"] = (0, 2)
         fn_, ff_ = (1 - c) / 2, (1 + c) / 2                 # forwardness 0..1 of near / far arm
         # B07-pre: fists are placed by targets (reach_helper IK) so each fist travels a short near-vertical path beside the body: back phase = fist at the hip,
@@ -148,7 +152,7 @@ def run():
         import anim_b05 as _b
         CXr = 9.0; tn = (CXr - lerp(30, 24, fn_), lerp(-50, -78, fn_)); tf = (CXr + lerp(30, 24, ff_), lerp(-50, -78, ff_))   # pre-B12: wider path, beside the torso edges, so the fists no longer cross the sash / belly
         p.update(_b.reach(p, {"n": tn, "f": tf}, {"n": None, "f": None}, "out"))
-        p["sash"] = 14.0 * math.sin(ph - 1.4)
+        p["sash"] = (19.0 if sov else 16.0) * math.sin(ph - 1.4)
         fr.append(p)
     return {"name": "Run", "fps": 14, "loop": True, "frames": fr, "events": {"foot_contact_near": 0, "foot_contact_far": 4}}
 

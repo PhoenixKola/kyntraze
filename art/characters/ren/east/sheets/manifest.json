@@ -107,10 +107,10 @@
     "travel_end": 6,
     "recover_start": 7
    },
-   "frame_width": 162,
+   "frame_width": 164,
    "frame_height": 157,
    "origin_px": [
-    61.0,
+    62.0,
     157.0
    ],
    "terminal": "once",

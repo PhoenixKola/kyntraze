@@ -50,14 +50,14 @@ sw = lambda un, fn, uf, ff: {"arm_n": A("n", -un, -fn), "arm_f": A("f", uf, ff)}
 # ------------------------------------------------------------------ Dash: coil, push-off, launch, peak speed, scissor, touchdown, skid, recover
 def dash():
     k = [
-        P(pelvis=(0, 9), chest=(0, 7), head=(0, 5), sash=-6, leg_n=foot("n", 3, 0), leg_f=foot("f", -3, 0), **sw(18, 24, 22, 30)),
-        P(pelvis=(0, 6), chest=(1, 5), head=(0, 3), sash=-22, spine_rot=-3, leg_n=fair("n", -6, -8), leg_f=foot("f", 6, 4), **sw(30, 44, 44, 60)),
-        P(pelvis=(0, 2), chest=(2, 1), head=(0, 0), sash=-36, spine_rot=-6, leg_n=fair("n", -12, -22, fs_t=0.7), leg_f=fair("f", 10, -6), **sw(38, 54, 66, 90)),
-        P(pelvis=(0, 0), chest=(2, -1), head=(0, -1), sash=-46, spine_rot=-8, leg_n=fair("n", -16, -28, fs_t=0.65), leg_f=fair("f", 14, -16), **sw(44, 62, 84, 112)),
+        P(pelvis=(0, 14), chest=(0, 11), head=(0, 7), spine_rot=2, sash=-6, leg_n=foot("n", 5, 0), leg_f=foot("f", -5, 0), **sw(18, 24, 22, 30)),
+        P(pelvis=(0, 10), chest=(1, 7), head=(0, 4), sash=-22, spine_rot=-5, leg_n=fair("n", -6, -8), leg_f=foot("f", 6, 4), **sw(30, 44, 44, 60)),
+        P(pelvis=(0, 2), chest=(2, 1), head=(0, 0), sash=-36, spine_rot=-9, leg_n=fair("n", -12, -22, fs_t=0.7), leg_f=fair("f", 10, -6), **sw(38, 54, 66, 90)),
+        P(pelvis=(0, 0), chest=(2, -1), head=(0, -1), sash=-46, spine_rot=-12, leg_n=fair("n", -16, -28, fs_t=0.65), leg_f=fair("f", 14, -16), **sw(44, 62, 84, 112)),
         P(pelvis=(0, 4), chest=(1, 3), head=(0, 2), sash=-30, spine_rot=-5, leg_n=fair("n", 10, -26, fs_t=0.6), leg_f=fair("f", -12, -18, fs_t=0.7), **sw(36, 52, 58, 86)),
-        P(pelvis=(0, 11), chest=(0, 9), head=(0, 6), sash=-8, spine_rot=-2, leg_n=foot("n", 6, -1), leg_f=fair("f", -8, -10), **sw(28, 40, 38, 54)),
-        P(pelvis=(0, 14), chest=(0, 12), head=(0, 8), sash=14, leg_n=foot("n", 10, 0), leg_f=foot("f", -6, 3), **sw(26, 34, 30, 38)),
-        P(pelvis=(0, 10), chest=(0, 8), head=(0, 5), sash=16, leg_n=foot("n", 7, 0), leg_f=foot("f", -3, 2), **sw(22, 28, 26, 30)),
+        P(pelvis=(0, 15), chest=(0, 12), head=(0, 8), sash=-8, spine_rot=-2, leg_n=foot("n", 6, -1), leg_f=fair("f", -8, -10), **sw(28, 40, 38, 54)),
+        P(pelvis=(0, 19), chest=(0, 16), head=(0, 11), spine_rot=3, sash=14, leg_n=foot("n", 10, 0), leg_f=foot("f", -6, 3), **sw(26, 34, 30, 38)),
+        P(pelvis=(0, 13), chest=(0, 10), head=(0, 7), sash=16, leg_n=foot("n", 7, 0), leg_f=foot("f", -3, 2), **sw(22, 28, 26, 30)),
         P(pelvis=(0, 5), chest=(0, 3), head=(0, 3), sash=6, leg_n=foot("n", 3, 1), leg_f=foot("f", -1, 1)),
         P(pelvis=(0, 2), chest=(0, 1), sash=2),
     ]
@@ -93,10 +93,10 @@ def death():
     flung = {"arm_f": A("f", 232, 210), "arm_n": A("n", 150, 172)}
     fin = lambda ex=0: {"leg_n": soleabs(HX + 40 + ex, GROUND, planted=False), "leg_f": soleabs(HX + 60 + ex, GROUND - 2, planted=False, straight=True, slack=6.0)}
     lifting = {"leg_n": soleabs(HX + 24, GROUND - 24, planted=False), "leg_f": soleabs(HX + 44, GROUND - 40, planted=False)}
-    kneel = P(root_rot=0.0, hip_target=(P0x, P0y + 32), spine_rot=8, head_rot=12, head=(-3, -2), sash=30, **stand, **out)
+    kneel = P(root_rot=0.0, hip_target=(P0x, P0y + 38), spine_rot=8, head_rot=12, head=(-3, -2), sash=30, **stand, **out)
     stag2 = P(root_rot=0.0, hip_target=(P0x - 4, P0y + 10), spine_rot=8, head_rot=10, head=(-3, -2), sash=-20, **stand, **out)
     keys = [
-        (0, hit), (1, peak), (2, stag2), (4, kneel),
+        (0, hit), (1, peak), (2, stag2), (3, P(root_rot=0.0, hip_target=(P0x - 2, P0y + 22), spine_rot=10, head_rot=14, head=(-3, -2), sash=-6, **stand, **out)), (4, kneel),
         (6, down(34, P0x + 6, P0y + 42, stand, up, spine_rot=8, head_rot=16, sash=40)),
         (8, down(66, HX - 4, GROUND - 40, lifting, up, head_rot=14, sash=48)),
         (10, down(90, HX, GROUND - 22, fin(-8), flung, head_rot=4, sash=30)),
