@@ -10,7 +10,7 @@
 
 **Hero VFX (ImageGen, `art/fx-b20/`, `public/art/fx/{sora,ren}`):** Sora lance beam, muzzle, impact cap, three-stage charge orb + vortex, needle/volley bolts, orbs, rings, aim lane, auras. Ren slashes/finisher, impacts, fist orb, Bloodstar ring, fissure, pillar, auras. The persistent auras are layered BEHIND the body with only a thin veil in front; the arrow/ribbon trails and every Graphics-drawn beam/orb/slash were removed. Base Sora gets a faint azure backlight for contrast on dark floors. Ren/Sora dash and hit effects are hero-coloured (red / blue), base and transformed; they no longer reuse Kai's orange solar set.
 
-**Sprites:** an automated pinhole scan found Ren/Sora's enclosed-transparent pockets at Kai's own level (mean 0.7-0.9 vs 0.6 per frame; max 5 vs Kai 5), so the sheets were NOT altered (blanket filling would damage real gaps). The named arm/pose and Sora torso/neck issues need Blender re-posing and were not attempted. `scripts/b20-pinholes.py` reproduces the scan.
+**Sprites (Blender, rebuilt):** Ren's Bloodstar Impact was re-posed in `rig/anim_b05.py` and `rig_dirs/danim_b05.py` (deeper crouch, higher launch and apex, tighter leg tuck, harder lunging slam) and rebuilt for base + Crimson Ascendant in all four directions; the shipped Sphere sheets, manifest entries and `ren-anchors.json` were updated (release frame and sim timing unchanged). `HeroAnimator` now plays the leap with a fast launch, a short hang at the apex and an accelerating drop (`leapCurve`, unit-tested). Sora's West neck (a flat bright-skin rectangle) was shaded to the face's shadow tone (`dirs/west/parts/neck.png`, `dirs-f1`, originals kept as `neck.b19.png`) and West base + Sovereign sheets rebuilt and shipped. A pinhole scan found Ren/Sora's enclosed pockets at Kai's own level (mean 0.7-0.9 vs 0.6 per frame), so no sheet-wide hole filling was done. NOT changed: Ren's bare upper-arm shapes (need new ImageGen parts), Sora's baggy short shins (Kai's leg canvases), Sora's busy East/West torsos.
 
 **Combat feel:** a 0.15 s Q/E/R input buffer (a press refused only by an active cast or an about-to-end cooldown is retried; never for Sora's hold-E); unit-tested (`src/tests/b20.test.ts`). Seraph phase-2 halo enlarged and made additive.
 
@@ -20,13 +20,13 @@
 
 **Release docs:** README rewritten; LICENSE-NOTICES rewritten (provenance, AI-art ownership caveat, no commercial clearance); status headers and changelog corrected; checklist.
 
-**Tests:** typecheck clean, Vitest 367, Playwright full suite + 7 title + 4 results + 3 production-smoke specs. One flaky e2e (Stillfire E) was a fixed-sleep race, now awaits the real condition.
+**Tests:** typecheck clean, Vitest 367, Playwright 72 specs (3 production-smoke skipped without PROD_URL). Two load-sensitive e2e tests (Stillfire E charge, Warden keyboard dodge) used wall-clock sleeps; both now wait on the real condition / sim time with unchanged assertions.
 
 ## Not verified (owner)
 - Real-speed motion and audio by ear (nothing was watched or heard live).
 - Real-GPU frame pacing: the machine's Chrome reports an RTX 3070 Ti, but the automated Chrome window was occluded and throttled to 1 fps, so no valid number exists. Measure by hand: open the game with `?qa=1` in a visible window and read DevTools Performance on a 60-enemy scene.
 - Physical controller; Safari/Firefox/.ogg support; six-route human playtest.
-- Ren/Sora arm, Bloodstar pose and Sora torso/neck sprite repairs (need Blender).
+- Ren upper-arm shapes, Sora shins and East/West torsos (need new ImageGen parts); the new Bloodstar poses and West neck were checked on contact sheets only, not in motion.
 - Hit-stop / animation-fluidity review, boss and Aegis/Cantor tell audit: not done.
 
 ## B21 handoff

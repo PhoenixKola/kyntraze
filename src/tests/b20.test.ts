@@ -19,3 +19,11 @@ describe('B20 ability input buffer', () => {
     for (let i = 0; i < 12; i++) so.step(DT, idle()); expect(so.state.hx.act).toBeNull();
   });
 });
+
+import { leapCurve } from '../assets/heroAnimation';
+describe('B20 Bloodstar leap curve', () => {
+  it('is monotonic, starts at 0, reaches the release frame exactly, and the crouch keeps its constant rate', () => {
+    let prev = -1; for (let i = 0; i <= 200; i++) { const v = leapCurve(i / 200, 16, 0.41); expect(v).toBeGreaterThanOrEqual(prev - 1e-9); prev = v; }
+    expect(leapCurve(0, 16, 0.41)).toBe(0); expect(leapCurve(1, 16, 0.41)).toBeCloseTo(1, 6); expect(leapCurve(0.41, 16, 0.41)).toBeCloseTo(7 / 16, 6);
+  });
+});

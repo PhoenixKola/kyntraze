@@ -51,11 +51,13 @@ test('pausing mid-telegraph freezes the encounter and resuming continues it', as
   await page.keyboard.press('Escape'); await page.waitForFunction(t => (window as unknown as W).__KYNT_QA__!.sim().time > (t as number) + 0.2, a.t, { timeout: 4000 }); expect(errors).toEqual([]);
 });
 
+/** B20: wait for SIM seconds, not wall-clock, so a loaded machine (slower sim) cannot change what the test measures. */
+const simWait = async (page: Page, sec: number) => { const t0 = await page.evaluate(() => (window as unknown as W).__KYNT_QA__!.sim().time); await page.waitForFunction(([t, d]) => (window as unknown as W).__KYNT_QA__!.sim().time >= t + d, [t0, sec] as const, { timeout: 20000, polling: 30 }); };
 test('keyboard dodge: sidestepping a Warden sweep after its telegraph appears avoids the hit; standing still does not', async ({ page }) => {
   const errors = await start(page, 'warden'); await skipIntro(page);
   const trial = async (dodge: boolean) => { await page.evaluate(() => { (window as unknown as W).__KYNT_QA__!.sim().player.hp = 100; (window as unknown as W).__KYNT_QA__!.sim().player.invulnerable = 0; }); await force(page, 0, 120);
     await page.waitForFunction(() => (window as unknown as W).__KYNT_QA__!.sim().enemies[0].mode === 'windup', null, { timeout: 4000 });
-    if (dodge) { await page.keyboard.down('s'); await page.waitForTimeout(800); await page.keyboard.up('s'); } await page.waitForTimeout(1500); return (await sim(page)).hp; };
+    if (dodge) { await page.keyboard.down('s'); await simWait(page, 0.8); await page.keyboard.up('s'); } await simWait(page, 1.5); return (await sim(page)).hp; };
   expect(await trial(false)).toBeLessThan(100); await page.waitForTimeout(2500); expect(await trial(true)).toBe(100); expect(errors).toEqual([]);
 });
 

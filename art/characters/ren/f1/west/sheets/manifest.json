@@ -220,10 +220,10 @@
     "recover_start": 18,
     "interruptible_from": 21
    },
-   "frame_width": 112,
+   "frame_width": 118,
    "frame_height": 192,
    "origin_px": [
-    66.0,
+    72.0,
     192.0
    ],
    "terminal": "once",

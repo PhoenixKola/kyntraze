@@ -48,16 +48,16 @@ def beam():
 def sphere():
     """Bloodstar Impact: crouch (0-6), leap (7-15: launch, tucked apex with both fists overhead, descent), RELEASE frame 16 = slam landing (fist driven to the ground, other arm back), recover 17-23."""
     low = dict(leg_n=foot("n", -3, 0), leg_f=foot("f", 3, 0))
-    tuck = dict(leg_n=foot("n", 3, -22, planted=False, straight=True, slack=3.0), leg_f=foot("f", -3, -24, planted=False, straight=True, slack=3.0))
+    tuck = dict(leg_n=foot("n", 4, -36, planted=False, straight=True, slack=3.0), leg_f=foot("f", -4, -38, planted=False, straight=True, slack=3.0))
     land = dict(leg_n=foot("n", -9, 0), leg_f=foot("f", 9, 0))
     K = [P(),
-         hands2(P(pelvis=(0, 6), chest=(0, 3), sash=-6, **low), (CX - 15, -46), (CX + 15, -48), "side", "side"),
-         hands2(P(pelvis=(0, 11), chest=(0, 6), sash=10, **low), (CX - 17, -40), (CX + 17, -42), "side", "side"),
-         hands2(P(pelvis=(0, -8), chest=(0, -2), sash=-14, leg_n=foot("n", 0, -10, planted=False, straight=True, slack=3.0), leg_f=foot("f", 0, -10, planted=False, straight=True, slack=3.0)), (CX - 8, -110), (CX + 8, -112), "angle", "angle", "out"),          # launch
-         hands2(P(pelvis=(0, -22), chest=(0, -6), sash=20, **tuck), (CX - 6, -158), (CX + 6, -160), "angle", "angle", "out"),                                                         # apex: tucked, fists together overhead
+         hands2(P(pelvis=(0, 9), chest=(0, 5), sash=-6, **low), (CX - 15, -44), (CX + 15, -48), "side", "side"),
+         hands2(P(pelvis=(0, 17), chest=(0, 10), sash=10, **low), (CX - 17, -36), (CX + 17, -42), "side", "side"),
+         hands2(P(pelvis=(0, -16), chest=(0, -4), sash=-14, leg_n=foot("n", 0, -16, planted=False, straight=True, slack=3.0), leg_f=foot("f", 0, -16, planted=False, straight=True, slack=3.0)), (CX - 8, -110), (CX + 8, -112), "angle", "angle", "out"),          # launch
+         hands2(P(pelvis=(0, -32), chest=(0, -9), sash=20, **tuck), (CX - 6, -158), (CX + 6, -160), "angle", "angle", "out"),                                                         # apex: tucked, fists together overhead
          hands2(P(pelvis=(0, -12), chest=(0, -3), sash=-10, leg_n=foot("n", -2, -12, planted=False, straight=True, slack=3.0), leg_f=foot("f", 2, -12, planted=False, straight=True, slack=3.0)), (CX - 6, -138), (CX + 6, -140), "front", "front", "out"),         # descent
-         hands2(P(pelvis=(0, 25), chest=(0, 14), spine_rot=5, sash=-26, **land), (CX - 2, -30), (CX + 26, -80), "front", "guard", "out"),                                              # RELEASE: slam, fist into the ground
-         hands2(P(pelvis=(0, 23), chest=(0, 12), spine_rot=4, sash=-16, **land), (CX - 2, -32), (CX + 24, -78), "front", "guard", "out"),
+         hands2(P(pelvis=(0, 31), chest=(0, 18), spine_rot=7, sash=-30, **land), (CX - 2, -30), (CX + 26, -80), "front", "guard", "out"),                                              # RELEASE: slam, fist into the ground
+         hands2(P(pelvis=(0, 28), chest=(0, 15), spine_rot=5, sash=-18, **land), (CX - 2, -32), (CX + 24, -78), "front", "guard", "out"),
          hands2(P(pelvis=(0, 6), chest=(0, 3), sash=-6, **low), (CX - 10, -50), (CX + 10, -52), "side", "guard"),
          P(pelvis=(0, 2), chest=(0, 1), sash=4), P()]
     keys = [(0, K[0]), (3, K[1]), (6, K[2]), (8, K[3]), (12, K[4]), (15, K[5]), (16, K[6]), (18, K[7]), (21, K[8]), (22, K[9]), (23, K[10])]

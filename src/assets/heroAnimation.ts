@@ -25,6 +25,13 @@ export interface HeroAnimInput {
 const FACING_DWELL = 0.12, DEATH_HOLD = 0.35, DASH_REC = 0.12;
 const frameAt = (a: KaiClipInfo, u: number, lo = 0, hi = a.frames - 1) => Math.max(lo, Math.min(hi, lo + Math.floor(Math.min(0.999999, Math.max(0, u)) * (hi - lo + 1))));
 
+/** B20: pose progress (0..1 of the pre-release frames) over the pre-release time (0..1). Crouch runs at constant rate, the leap launches fast, hangs briefly at the apex and accelerates into the slam; ends exactly at the release frame. */
+export function leapCurve(u: number, rel: number, crouchShare: number): number {
+  const cs = Math.min(0.6, Math.max(0.1, crouchShare)), crouchFrames = 7 / rel;
+  if (u <= cs) return (u / cs) * crouchFrames;
+  const w = (u - cs) / (1 - cs), apex = 0.55, f = w < 0.45 ? apex * (1 - (1 - w / 0.45) ** 2) : w < 0.72 ? apex + 0.07 * ((w - 0.45) / 0.27) : apex + 0.07 + (1 - apex - 0.07) * ((w - 0.72) / 0.28) ** 1.8;
+  return crouchFrames + (1 - crouchFrames) * Math.min(1, f);
+}
 export class HeroAnimator {
   facing: Facing = 'south'; clip: KaiClip = 'Idle'; visualForm: 'base' | 'f1' = 'base';
   private time = 0; private runTime = 0; private sinceTurn = 1; private hurtT = -1; private deathT = -1; private dashRec = -1; private dashWas = false; private dashProg = 0;
@@ -97,7 +104,7 @@ export class HeroAnimator {
       const step = frameAt(a, u, lo, hi); frame = this.clip === 'RunPunchUpper' ? step * RUN_PHASES + this.leg() : step;
     } else if (this.clip === 'Sphere' && v) {
       const rel = a.events.release ?? Math.floor(a.frames / 2), tr = v.act === 'bloodstar' ? REN.r.windup + REN.r.flight : SORA.r.summon;
-      frame = v.t < tr ? Math.min(rel - 1, Math.floor(v.t / tr * rel)) : Math.min(a.frames - 1, rel + Math.floor(Math.min(0.999999, (v.t - tr) / Math.max(0.05, v.dur - tr)) * (a.frames - rel)));
+      frame = v.t < tr ? Math.min(rel - 1, Math.floor(leapCurve(v.t / tr, rel, v.act === 'bloodstar' ? REN.r.windup / tr : 0.4) * rel)) : Math.min(a.frames - 1, rel + Math.floor(Math.min(0.999999, (v.t - tr) / Math.max(0.05, v.dur - tr)) * (a.frames - rel)));
     } else if (this.clip === 'Beam' && v) {
       const hs = a.events.hold_start ?? 3, he = Math.max(hs, a.events.hold_end ?? hs + 3), rel = a.events.release ?? he + 1;
       if (!v.released) frame = v.charge < SORA.e.minCharge ? Math.min(hs - 1, Math.floor(v.charge / SORA.e.minCharge * hs)) : hs + Math.floor((v.charge - SORA.e.minCharge) * Math.max(8, a.fps)) % (he - hs + 1);

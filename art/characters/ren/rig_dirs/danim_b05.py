@@ -63,28 +63,28 @@ def sphere():
     """Bloodstar Impact: crouch (0-6), leap (7-15: launch, tucked apex with both fists overhead, descent), RELEASE 16 = slam landing (fist driven to the ground, other arm back), recover 17-23."""
     if NORTH:
         low = dict(leg_n=lg("n", -2, 0), leg_f=lg("f", 2, 0)); land = dict(leg_n=lg("n", -8, 0), leg_f=lg("f", 8, 0))
-        tuck = dict(leg_n=g.air("n", 3, -22), leg_f=g.air("f", -3, -24))
+        tuck = dict(leg_n=g.air("n", 4, -36), leg_f=g.air("f", -4, -38))
         K = [P(),
-             hands2(P(pelvis=(0, 6), chest=(0, 3), sash=-6, **low), (-16, -50), (16, -52), "side", "side", "outdown"),
-             hands2(P(pelvis=(0, 11), chest=(0, 6), sash=10, **low), (-18, -44), (18, -46), "side", "side", "outdown"),
-             hands2(P(pelvis=(0, -8), chest=(0, -2), sash=-14, leg_n=g.air("n", 0, -10), leg_f=g.air("f", 0, -10)), (-9, -112), (9, -114), "guard", "guard", "out"),
-             hands2(P(pelvis=(0, -22), chest=(0, -6), sash=20, **tuck), (-7, -160), (7, -162), "guard", "guard", "out"),
+             hands2(P(pelvis=(0, 9), chest=(0, 5), sash=-6, **low), (-16, -48), (16, -52), "side", "side", "outdown"),
+             hands2(P(pelvis=(0, 17), chest=(0, 10), sash=10, **low), (-18, -40), (18, -46), "side", "side", "outdown"),
+             hands2(P(pelvis=(0, -16), chest=(0, -4), sash=-14, leg_n=g.air("n", 0, -16), leg_f=g.air("f", 0, -16)), (-9, -112), (9, -114), "guard", "guard", "out"),
+             hands2(P(pelvis=(0, -32), chest=(0, -9), sash=20, **tuck), (-7, -160), (7, -162), "guard", "guard", "out"),
              hands2(P(pelvis=(0, -12), chest=(0, -3), sash=-10, leg_n=g.air("n", -2, -12), leg_f=g.air("f", 2, -12)), (-7, -140), (7, -142), "guard", "guard", "out"),
-             hands2(P(pelvis=(0, 25), chest=(0, 14), sash=-26, **land), (-8, -40), (22, -84), "guard", "side", "out"),                                                               # RELEASE: slam
-             hands2(P(pelvis=(0, 23), chest=(0, 12), sash=-16, **land), (-8, -42), (22, -82), "guard", "side", "out"),
+             hands2(P(pelvis=(0, 31), chest=(0, 18), sash=-30, **land), (-8, -40), (22, -84), "guard", "side", "out"),                                                               # RELEASE: slam
+             hands2(P(pelvis=(0, 28), chest=(0, 15), sash=-18, **land), (-8, -42), (22, -82), "guard", "side", "out"),
              hands2(P(pelvis=(0, 6), chest=(0, 3), sash=-6, **low), (-12, -60), (12, -62), "guard", "guard", "out"),
              P(pelvis=(0, 2), chest=(0, 1), sash=4), P()]
     else:
         low = {f"leg_{L}": lg(L, 3 * sx, 0), f"leg_{R}": lg(R, -4 * sx, 0)}; land = {f"leg_{L}": lg(L, 9 * sx, 0), f"leg_{R}": lg(R, -9 * sx, 0)}
-        tuck = {f"leg_{L}": g.air(L, 4 * sx, -22), f"leg_{R}": g.air(R, -4 * sx, -24)}
+        tuck = {f"leg_{L}": g.air(L, 5 * sx, -36), f"leg_{R}": g.air(R, -5 * sx, -38)}
         K = [P(),
-             hands2(P(pelvis=(-1 * sx, 8), chest=(-2 * sx, 5), head=(0, 0), sash=-6 * sx, **low), (24, -54), (6, -50), "guard", "side", "down"),
-             hands2(P(pelvis=(-2 * sx, 12), chest=(-3 * sx, 7), head=(0, 0), sash=10 * sx, **low), (20, -46), (2, -44), "guard", "side", "down"),
-             hands2(P(pelvis=(0, -8), chest=(0, -2), head=(0, 0), sash=-14 * sx, **{f"leg_{L}": g.air(L, 3 * sx, -10), f"leg_{R}": g.air(R, -3 * sx, -10)}), (16, -118), (4, -120), "guard", "guard", "back"),
-             hands2(P(pelvis=(0, -22), chest=(-1 * sx, -6), head=(0, 0), sash=20 * sx, spine_rot=-sx * 3, **tuck), (8, -164), (-2, -164), "guard", "guard", "back"),                   # apex: tucked, fists together overhead
+             hands2(P(pelvis=(-2 * sx, 11), chest=(-3 * sx, 7), head=(0, 0), sash=-6 * sx, **low), (24, -52), (6, -50), "guard", "side", "down"),
+             hands2(P(pelvis=(-3 * sx, 18), chest=(-4 * sx, 11), head=(0, 0), sash=10 * sx, **low), (20, -42), (2, -44), "guard", "side", "down"),
+             hands2(P(pelvis=(0, -16), chest=(0, -4), head=(0, 0), sash=-14 * sx, **{f"leg_{L}": g.air(L, 3 * sx, -16), f"leg_{R}": g.air(R, -3 * sx, -16)}), (16, -118), (4, -120), "guard", "guard", "back"),
+             hands2(P(pelvis=(0, -32), chest=(-1 * sx, -9), head=(0, 0), sash=20 * sx, spine_rot=-sx * 3, **tuck), (8, -164), (-2, -164), "guard", "guard", "back"),                   # apex: tucked, fists together overhead
              hands2(P(pelvis=(2 * sx, -12), chest=(3 * sx, -3), head=(0, 0), sash=-10 * sx, spine_rot=-sx * 6, **{f"leg_{L}": g.air(L, 3 * sx, -12), f"leg_{R}": g.air(R, -3 * sx, -12)}), (26, -128), (14, -130), "side", "side", "down"),
-             hands2(P(pelvis=(8 * sx, 25), chest=(11 * sx, 14), head=(5 * sx, 4), spine_rot=-sx * 14, sash=-26 * sx, **land), (44, -28), (-10, -86), "side", "guard", "down"),       # RELEASE: slam, lead fist into the ground ahead, rear arm back
-             hands2(P(pelvis=(7 * sx, 23), chest=(10 * sx, 12), head=(4 * sx, 3), spine_rot=-sx * 12, sash=-16 * sx, **land), (44, -30), (-10, -84), "side", "guard", "down"),
+             hands2(P(pelvis=(9 * sx, 31), chest=(13 * sx, 18), head=(6 * sx, 5), spine_rot=-sx * 17, sash=-30 * sx, **land), (44, -28), (-10, -86), "side", "guard", "down"),       # RELEASE: slam, lead fist into the ground ahead, rear arm back
+             hands2(P(pelvis=(8 * sx, 28), chest=(11 * sx, 15), head=(5 * sx, 4), spine_rot=-sx * 14, sash=-18 * sx, **land), (44, -30), (-10, -84), "side", "guard", "down"),
              hands2(P(pelvis=(2 * sx, 6), chest=(2 * sx, 3), sash=-6 * sx, **low), (30, -62), (10, -60), "guard", "guard", "down"),
              P(pelvis=(1 * sx, 2), chest=(1 * sx, 1), sash=4 * sx), P()]
     keys = [(0, K[0]), (3, K[1]), (6, K[2]), (8, K[3]), (12, K[4]), (15, K[5]), (16, K[6]), (18, K[7]), (21, K[8]), (22, K[9]), (23, K[10])]
