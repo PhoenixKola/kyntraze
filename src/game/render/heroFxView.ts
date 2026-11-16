@@ -8,8 +8,8 @@ import { KAI_GROUND_DY } from '../../assets/kaiAnimation';
 
 /** ImageGen VFX sprites (public/art/fx/<hero>/): additive, used for the aura and the big moments; the Graphics layers keep the geometry (rings, beams, bolts). */
 export const HERO_FX_NAMES: Record<'ren' | 'sora', readonly string[]> = {
-  ren: ['afterimage_streak', 'aura_wisp_a', 'aura_wisp_b', 'dust_puff', 'embers', 'fist_orb', 'ground_crack', 'ground_ring', 'impact_burst', 'light_pillar', 'speed_streak', 'supernova_ring'],
-  sora: Array.from({ length: 20 }, (_, i) => `vfx_${String(i).padStart(2, '0')}`),
+  ren: ['rs_slash1', 'rs_slash2', 'rs_finisher', 'rs_rush', 'rs_dashlines', 'rs_dashslash', 'rs_meteor', 'rs_impact', 'rs_ring', 'rs_fissure', 'rs_afterimage', 'rs_fist', 'ra_back1', 'ra_back2', 'ra_veil', 'ra_embersring', 'ra_ground', 'ra_pillar', 'ra_nova', 'ra_embers', 'afterimage_streak', 'aura_wisp_a', 'aura_wisp_b', 'dust_puff', 'embers', 'fist_orb', 'ground_crack', 'ground_ring', 'impact_burst', 'light_pillar', 'speed_streak', 'supernova_ring'],
+  sora: [...Array.from({ length: 20 }, (_, i) => `vfx_${String(i).padStart(2, '0')}`), 'sl_beam', 'sl_beam2', 'sl_muzzle', 'sl_cap', 'sl_orb1', 'sl_orb2', 'sl_orb3', 'sl_vortex', 'sm_needle', 'sm_volley', 'sm_dashlines', 'sm_dashslash', 'sm_back1', 'sm_back2', 'sm_arcs', 'sm_ground', 'sm_motes', 'sm_afterimage', 'sm_ring', 'sm_hit'],
 };
 export const heroFxKey = (hero: string, n: string) => `hfx-${hero}-${n}`;
 export const heroFxUrl = (hero: string, n: string) => `/art/fx/${hero}/${n}.png`;
@@ -18,7 +18,6 @@ const PAL = {
   sora: { core: 0xffffff, hot: 0xcfeeff, mid: 0x4db8ff, deep: 0x1c5fd6, dark: 0x081840, ember: 0x9fe8ff },
 };
 interface Flash { x: number; y: number; t: number; dur: number; r: number; kind: 'slash' | 'burst' | 'flare' | 'dust' | 'crack' | 'pillar'; ang: number; big: boolean }
-const fillQuad = (g: Phaser.GameObjects.Graphics, q: { x: number; y: number }[]) => { g.fillTriangle(q[0].x, q[0].y, q[1].x, q[1].y, q[2].x, q[2].y); g.fillTriangle(q[0].x, q[0].y, q[2].x, q[2].y, q[3].x, q[3].y); };
 const hash = (n: number) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
 const ease = (u: number) => 1 - (1 - Math.min(1, Math.max(0, u))) ** 3;
 
@@ -29,10 +28,10 @@ export class HeroFxView {
   private flashes: Flash[] = [];
   private readonly imgs: Phaser.GameObjects.Image[] = []; private used = 0;
   /** Pooled additive image: the sprite layer of the aura and the big moments (hidden again every frame unless re-placed). */
-  private put(name: string, x: number, y: number, scale: number, alpha: number, o: { rot?: number; sy?: number; oy?: number; depth?: number; flip?: boolean } = {}) {
+  private put(name: string, x: number, y: number, scale: number, alpha: number, o: { rot?: number; sy?: number; ox?: number; oy?: number; depth?: number; flip?: boolean } = {}) {
     const key = heroFxKey(this.hero, name); if (!this.scene.textures.exists(key) || alpha <= 0.01) return;
-    let im = this.imgs[this.used]; if (!im) { if (this.imgs.length >= 64) return; im = this.scene.add.image(0, 0, key).setBlendMode(Phaser.BlendModes.ADD); this.imgs.push(im); }
-    this.used++; im.setTexture(key).setVisible(true).setPosition(Math.round(x), Math.round(y)).setScale(scale * (o.flip ? -1 : 1), scale * (o.sy ?? 1)).setAlpha(Math.min(1, alpha)).setRotation(o.rot ?? 0).setOrigin(0.5, o.oy ?? 0.5).setDepth(o.depth ?? 11.3);
+    let im = this.imgs[this.used]; if (!im) { if (this.imgs.length >= 110) return; im = this.scene.add.image(0, 0, key).setBlendMode(Phaser.BlendModes.ADD); this.imgs.push(im); }
+    this.used++; im.setTexture(key).setVisible(true).setPosition(Math.round(x), Math.round(y)).setScale(scale * (o.flip ? -1 : 1), scale * (o.sy ?? 1)).setAlpha(Math.min(1, alpha)).setRotation(o.rot ?? 0).setOrigin(o.ox ?? 0.5, o.oy ?? 0.5).setDepth(o.depth ?? 11.3);
   }
   private lastEvent = 0;
   private zoom = 1; private shake = 0;
@@ -63,8 +62,8 @@ export class HeroFxView {
     for (const r of h.rings) {
       const u = r.t / r.dur, rad = r.r * ease(u), a = 1 - u;
       const col = r.kind === 'rebound' ? pal.hot : r.kind === 'horizon' ? pal.mid : pal.mid;
-      this.ground.lineStyle(Math.max(2, 7 * a), col, 0.85 * a); this.ground.strokeEllipse(r.x, r.y + 6, rad * 2, rad * 1.1);
-      this.glow.lineStyle(Math.max(1, 3 * a), pal.core, 0.7 * a).strokeEllipse(r.x, r.y + 6, rad * 2 * 0.97, rad * 1.1 * 0.97);
+      if (rad > 4) this.put(this.hero === 'ren' ? (r.kind === 'rebound' ? 'ra_nova' : 'rs_ring') : 'sm_ring', r.x, r.y + 6, (rad * 2) / (this.hero === 'ren' && r.kind === 'rebound' ? 424 : this.hero === 'ren' ? 394 : 365), 0.95 * a, { sy: this.hero === 'ren' && r.kind === 'rebound' ? 0.5 : 1.15, depth: 3.7 });
+      void col;
       if (r.kind === 'slam' && u < 0.5) { this.ground.fillStyle(pal.dark, 0.35 * (1 - u * 2)).fillEllipse(r.x, r.y + 6, rad * 1.5, rad * 0.8); }
     }
     for (const q of h.pending) { const u = Math.max(0, 1 - (q.at - h.t) / 0.5); if (q.radius > 0) this.ground.lineStyle(2, pal.mid, 0.25 + 0.4 * u).strokeEllipse(q.x, q.y + 6, q.radius * 2, q.radius * 1.1); }
@@ -84,7 +83,6 @@ export class HeroFxView {
 
     // ---- persistent aura and motion trails
     if (aura || s.cinema) { this.auraDraw(s, foot, calmFx, aura); this.auraSprites(s, foot, calmFx, aura); }
-    if (p.dashRemaining > 0 && p.form === 1) { const n = calmFx ? 2 : 4; for (let i = 1; i <= n; i++) this.glow.fillStyle(pal.mid, 0.28 / i).fillEllipse(foot.x - p.dashDx * 22 * i, foot.y - 18 - p.dashDy * 12 * i, 22, 36); }
 
     // ---- reveal: expanding pulses, screen vignette is HTML-free; camera punch-in via cameraZoom
     const cin = s.cinema; this.zoom = 1;
@@ -123,36 +121,35 @@ export class HeroFxView {
     if (c.t >= fl0) this.ground.fillStyle(0x000000, 0.25).fillEllipse(s.player.x, c.ty + 10, 36, 14);
   }
   private aimLine(c: HeroCast, hw: number, s: GameState) {
-    const pal = PAL.sora, o = hand(s, c.dirX, c.dirY, 26, 'lance'), len = 300 + 380 * Math.min(1, c.charge / SORA.e.maxCharge), nx = -c.dirY, ny = c.dirX, a = 0.14 + 0.2 * Math.min(1, c.charge / 0.8);
-    fillQuad(this.ground.fillStyle(pal.mid, a), [{ x: o.x + nx * hw * 0.6, y: o.y + ny * hw * 0.6 }, { x: o.x + c.dirX * len + nx * hw * 0.6, y: o.y + c.dirY * len + ny * hw * 0.6 }, { x: o.x + c.dirX * len - nx * hw * 0.6, y: o.y + c.dirY * len - ny * hw * 0.6 }, { x: o.x - nx * hw * 0.6, y: o.y - ny * hw * 0.6 }]);
+    const o = hand(s, c.dirX, c.dirY, 26, 'lance'), len = 300 + 380 * Math.min(1, c.charge / SORA.e.maxCharge), a = 0.16 + 0.3 * Math.min(1, c.charge / 0.8);
+    this.put('sl_beam2', o.x, o.y, len / 1572, a, { rot: Math.atan2(c.dirY, c.dirX), ox: 0, sy: (hw * 1.5) / 40, depth: 3.9 });   // the damage lane, drawn as faint beam art on the floor
   }
   private bolt(x: number, y: number, vx: number, vy: number, k: number, form: boolean) {
-    const pal = PAL.sora, sp = Math.hypot(vx, vy) || 1, ux = vx / sp, uy = vy / sp, L = 22 * k;
-    this.glow.lineStyle(7 * k, pal.mid, 0.28).lineBetween(x - ux * L * 1.4, y - uy * L * 1.4, x + ux * 4, y + uy * 4);
-    this.g.lineStyle(3.2 * k, form ? pal.core : pal.hot, 1).lineBetween(x - ux * L, y - uy * L, x, y);
-    this.g.fillStyle(pal.core, 1).fillCircle(x, y, 2.6 * k);
+    const ang = Math.atan2(vy, vx); this.put(k > 1 ? 'sm_volley' : 'sm_needle', x, y, (k > 1 ? 64 : 54) / (k > 1 ? 371 : 359) * (form ? 1.15 : 1), 1, { rot: ang, ox: 1, depth: 11.2 });
+    if (form) this.put('sm_afterimage', x, y, 46 / 392, 0.45, { rot: ang, ox: 1, depth: 11.1 });
   }
   private orb(x: number, y: number, k: number, hot: boolean, s: GameState, tx: number, ty: number) {
-    const pal = PAL.sora, pulse = 0.85 + 0.15 * Math.sin(s.time * 20 + x);
-    this.glow.fillStyle(pal.mid, 0.22).fillCircle(x, y, 20 * k * pulse); this.glow.fillStyle(pal.hot, 0.45).fillCircle(x, y, 11 * k);
-    this.g.fillStyle(pal.core, 1).fillCircle(x, y, 5 * k); this.g.lineStyle(2, pal.deep, 0.9).strokeCircle(x, y, 9.5 * k);
-    if (hot) { this.glow.lineStyle(1.5, pal.hot, 0.35).lineBetween(x, y, tx, ty); this.ground.lineStyle(1, pal.core, 0.6).strokeEllipse(tx, ty + 6, 26, 14); }
+    const pulse = 0.9 + 0.1 * Math.sin(s.time * 20 + x);
+    this.put('sl_orb2', x, y, (hot ? 38 : 30) * k * pulse / 335, 1, { rot: s.time * 3 + x, depth: 11.3 });
+    if (hot) { this.glow.lineStyle(1.5, PAL.sora.hot, 0.35).lineBetween(x, y, tx, ty); this.ground.lineStyle(1, PAL.sora.core, 0.6).strokeEllipse(tx, ty + 6, 26, 14); }
   }
   private lance(c: HeroCast, s: GameState, calm: boolean) {
-    const pal = PAL.sora;
-    if (!c.released) {   // gather: motes streaming into the hands, a growing core and tier rings
-      const o = hand(s, c.dirX, c.dirY, 24, 'lance'), u = Math.min(1, c.charge / SORA.e.maxCharge), n = calm ? 4 : 8;
-      for (let i = 0; i < n; i++) { const ph = (s.time * 1.6 + i / n) % 1, a = (i / n) * Math.PI * 2 + s.time * 3, r = (1 - ph) * (40 + 30 * u); this.glow.fillStyle(pal.hot, 0.8 * ph).fillCircle(o.x + Math.cos(a) * r, o.y + Math.sin(a) * r * 0.7, 1.6 + 1.4 * ph); }
-      this.glow.fillStyle(pal.mid, 0.3 + 0.3 * u).fillCircle(o.x, o.y, 8 + 14 * u); this.g.fillStyle(pal.core, 1).fillCircle(o.x, o.y, 3 + 6 * u);
-      SORA.e.tiers.forEach((t, i) => { if (c.charge >= t) this.glow.lineStyle(2, pal.core, 0.7).strokeCircle(o.x, o.y, 14 + i * 7 + 3 * Math.sin(s.time * 24)); });
+    if (!c.released) {   // gather: an orb that grows through three ImageGen stages, with a vortex pulling light into the hands
+      const o = hand(s, c.dirX, c.dirY, 24, 'lance'), u = Math.min(1, c.charge / SORA.e.maxCharge), pulse = 0.92 + 0.08 * Math.sin(s.time * 26);
+      const stage = c.charge >= SORA.e.tiers[1] ? 'sl_orb3' : c.charge >= SORA.e.tiers[0] ? 'sl_orb2' : 'sl_orb1', px = 22 + 52 * u, w = stage === 'sl_orb3' ? 530 : stage === 'sl_orb2' ? 335 : 161;
+      this.put('sl_vortex', o.x, o.y, (px * 2.1) / 407, (0.25 + 0.55 * u) * (calm ? 0.7 : 1), { rot: -s.time * 5, depth: 11.25 });
+      this.put(stage, o.x, o.y, px * pulse / w, 1, { rot: stage === 'sl_orb3' ? 0 : s.time * 4, depth: 11.3 });
+      if (c.charge >= SORA.e.tiers[0]) this.put('sl_muzzle', o.x, o.y, (px * 1.7) / 404, 0.35 + 0.3 * u, { rot: Math.atan2(c.dirY, c.dirX), depth: 11.28 });
       return;
     }
     const tf = c.t - SORA.e.maxCharge, life = SORA.e.fire + 0.14; if (tf > life) return;
-    const a = 1 - Math.max(0, tf) / life, hw = lanceHalfWidth(s, c.tier, c.form === 1), nx = -c.dirY, ny = c.dirX, L = c.len, x0 = c.sx, y0 = c.sy, x1 = x0 + c.dirX * L, y1 = y0 + c.dirY * L;
-    const band = (w: number, col: number, al: number, layer: Phaser.GameObjects.Graphics) => fillQuad(layer.fillStyle(col, al), [{ x: x0 + nx * w, y: y0 + ny * w }, { x: x1 + nx * w * 0.8, y: y1 + ny * w * 0.8 }, { x: x1 - nx * w * 0.8, y: y1 - ny * w * 0.8 }, { x: x0 - nx * w, y: y0 - ny * w }]);
-    band(hw * 1.7, pal.deep, 0.22 * a, this.glow); band(hw * 1.15, pal.mid, 0.55 * a, this.glow); band(hw * 0.62, pal.hot, 0.9 * a, this.g); band(hw * 0.28, pal.core, 1 * a, this.g);
-    this.glow.fillStyle(pal.core, 0.8 * a).fillCircle(x0, y0, hw * 1.3); this.glow.fillStyle(pal.hot, 0.6 * a).fillCircle(x1, y1, hw * 1.1);
-    if (c.form === 1) this.jag(x0, y0, x1, y1, calm ? 5 : 9, pal.core, pal.mid, a, Math.floor(s.time * 30), hw * 0.9);
+    const a = 1 - Math.max(0, tf) / life, hw = lanceHalfWidth(s, c.tier, c.form === 1), L = c.len, x0 = c.sx, y0 = c.sy, x1 = x0 + c.dirX * L, y1 = y0 + c.dirY * L, ang = Math.atan2(c.dirY, c.dirX);
+    const open = Math.min(1, 0.55 + Math.max(0, tf) / 0.05), wob = 1 + 0.05 * Math.sin(s.time * 70);   // snaps open, then thins as it fades
+    const sy = (hw * 2.2 / 52) * open * wob * (0.55 + 0.45 * a);
+    this.put('sl_beam', x0, y0, (L * 1.03) / 1618, Math.min(1, 1.15 * a + 0.2), { rot: ang, ox: 0, sy, depth: 11.25 });
+    if (c.tier >= 1 || c.form === 1) this.put('sl_beam2', x0, y0, (L * 1.03) / 1572, Math.min(1, a), { rot: ang, ox: 0, sy: sy * (c.form === 1 ? 1.5 : 1.15), depth: 11.26 });
+    this.put('sl_muzzle', x0, y0, (hw * 5.5) / 404, a, { rot: ang, depth: 11.35 });
+    this.put('sl_cap', x1, y1, (hw * 5) / 292, 0.9 * a, { rot: ang, depth: 11.3 });
   }
   private jag(x0: number, y0: number, x1: number, y1: number, segs: number, core: number, edge: number, a: number, seed: number, amp = 8) {
     const nx = -(y1 - y0), ny = x1 - x0, nl = Math.hypot(nx, ny) || 1; let px = x0, py = y0;
@@ -162,64 +159,37 @@ export class HeroFxView {
     }
   }
   private flash(f: Flash, pal: typeof PAL.ren) {
-    const u = f.t / f.dur, a = 1 - u, r = f.r * ease(u * 1.4), ren = this.hero === 'ren';
-    if (f.kind === 'burst') this.put(ren ? 'impact_burst' : 'vfx_15', f.x, f.y, f.r * (ren ? 2.4 / 256 : 2.4 / 481) * (0.6 + 0.6 * ease(u * 1.5)), 0.95 * a, { rot: f.x });
-    else if (f.kind === 'flare') this.put(ren ? 'fist_orb' : 'vfx_13', f.x, f.y, f.r * (ren ? 2 / 256 : 2 / 356) * (0.7 + 0.5 * u), a);
+    const u = f.t / f.dur, a = 1 - u, ren = this.hero === 'ren', ang = f.ang;
+    void pal;
+    if (f.kind === 'burst') this.put(ren ? 'rs_impact' : 'sm_hit', f.x, f.y, f.r * 2.4 / (ren ? 396 : 325) * (0.6 + 0.6 * ease(u * 1.5)), 0.95 * a, { rot: ren ? 0 : f.x });
+    else if (f.kind === 'flare') this.put(ren ? 'rs_fist' : 'sl_muzzle', f.x, f.y, f.r * (ren ? 2.2 / 309 : 2.6 / 404) * (0.7 + 0.5 * u), a, { rot: ren ? 0 : f.x });
     else if (f.kind === 'dust') this.put(ren ? 'dust_puff' : 'vfx_08', f.x, f.y + 8, f.r * 2.4 / 256 * (0.5 + 0.8 * ease(u)), 0.5 * a, { sy: 0.6, depth: 3.8 });
-    else if (f.kind === 'crack') this.put('ground_crack', f.x, f.y + 6, f.r * 2.1 / 256, Math.min(1, 1.6 * a), { sy: 0.55, depth: 3.7 });
-    else if (f.kind === 'pillar') this.put(ren ? 'light_pillar' : 'vfx_16', f.x, f.y + 4, (ren ? 0.95 : 0.85) * (0.8 + 0.3 * ease(u)), 0.9 * a, { oy: 0.95, sy: 1.35, depth: 11.5 });
-    if (f.kind === 'slash') {   // a crescent of energy swept across the target
-      const w = Math.PI * 0.62; this.glow.lineStyle(f.big ? 9 : 6, pal.mid, 0.7 * a).beginPath().arc(f.x, f.y, r, f.ang - w / 2, f.ang + w / 2).strokePath();
-      this.g.lineStyle(f.big ? 4 : 2.6, pal.core, a).beginPath().arc(f.x, f.y, r * 0.95, f.ang - w / 2 + 0.12, f.ang + w / 2 - 0.12).strokePath();
-    } else if (f.kind === 'burst') {
-      this.glow.fillStyle(pal.hot, 0.55 * a).fillCircle(f.x, f.y, r * 0.55); this.glow.lineStyle(f.big ? 6 : 3, pal.mid, 0.8 * a).strokeCircle(f.x, f.y, r);
-      for (let i = 0; i < 10; i++) { const an = (i / 10) * Math.PI * 2 + f.x, l0 = r * 0.5, l1 = r * (0.9 + 0.5 * hash(i + f.x)); this.g.lineStyle(2.4, i % 2 ? pal.core : pal.hot, a).lineBetween(f.x + Math.cos(an) * l0, f.y + Math.sin(an) * l0 * 0.7, f.x + Math.cos(an) * l1, f.y + Math.sin(an) * l1 * 0.7); }
-    } else if (f.kind === 'flare') {
-      this.glow.fillStyle(pal.core, 0.85 * a).fillCircle(f.x, f.y, r * 0.3 * (1 - u * 0.5)); this.glow.fillStyle(pal.mid, 0.5 * a).fillCircle(f.x, f.y, r * (0.5 + 0.5 * u));
-      this.glow.lineStyle(2, pal.core, 0.8 * a).lineBetween(f.x - r * 1.4 * ease(u), f.y, f.x + r * 1.4 * ease(u), f.y);
-    } else {   // dust: low grey-warm puffs on the ground plane
-      for (let i = 0; i < 7; i++) { const an = (i / 7) * Math.PI * 2 + hash(f.x + i), d = r * ease(u) * (0.6 + 0.5 * hash(i)); this.ground.fillStyle(0x6b5a56, 0.32 * a).fillCircle(f.x + Math.cos(an) * d, f.y + 10 + Math.sin(an) * d * 0.45, 6 + 8 * u); }
+    else if (f.kind === 'crack') this.put(ren ? 'rs_fissure' : 'ground_crack', f.x, f.y + 6, f.r * 2.1 / (ren ? 353 : 256), Math.min(1, 1.6 * a), { sy: 0.55, depth: 3.7 });
+    else if (f.kind === 'pillar') this.put(ren ? 'ra_pillar' : 'vfx_16', f.x, f.y + 4, (ren ? 0.8 : 0.85) * (0.8 + 0.3 * ease(u)), 0.9 * a, { oy: 0.95, sy: 1.35, depth: 11.5 });
+    else if (f.kind === 'slash') {   // ImageGen crescent thrown toward the target; the finisher is the heavy double crescent
+      const key = ren ? (f.big ? 'rs_finisher' : hash(f.x + f.y) > 0.5 ? 'rs_slash1' : 'rs_slash2') : 'sm_dashslash', w = ren ? (f.big ? 398 : 300) : 275;
+      this.put(key, f.x - Math.cos(ang) * f.r * 0.5, f.y - Math.sin(ang) * f.r * 0.5, f.r * 2.3 / w * (0.75 + 0.35 * ease(u * 1.6)), 0.95 * a, { rot: ang, ox: 0.35 });
     }
   }
+  /** The aura is ImageGen art in layers: a big halo and flame/lightning wings BEHIND the body (depth below the sprite), a thin veil in front, a ground sigil and rising motes. Nothing is drawn as an arrow or ribbon. */
   private auraDraw(s: GameState, foot: { x: number; y: number }, calm: boolean, steady: boolean) {
-    const pal = PAL[this.hero], t = s.time, p = s.player, moving = s.hx.moving && !s.cinema, boost = s.hx.act ? 1.5 : p.dashRemaining > 0 ? 1.7 : 1;
-    const k = steady ? 1 : 0.6, n = calm ? 6 : 14;
-    // ground corona: a breathing ellipse, never a screen-filling disc
-    const breathe = 0.85 + 0.15 * Math.sin(t * 3.2);
-    this.ground.fillStyle(pal.deep, 0.22 * k * boost).fillEllipse(foot.x, foot.y + 4, 62 * breathe, 24 * breathe);
-    this.glow.lineStyle(2, pal.mid, 0.45 * k * boost).strokeEllipse(foot.x, foot.y + 4, 56 * breathe, 21 * breathe);
+    const t = s.time, p = s.player, boost = s.hx.act ? 1.3 : p.dashRemaining > 0 ? 1.5 : 1, k = (steady ? 1 : 0.6) * boost, br = 0.9 + 0.1 * Math.sin(t * 3.2), fl = 0.85 + 0.15 * Math.sin(t * 9.1 + 1.3);
+    const bx = foot.x, by = foot.y + 6;
     if (this.hero === 'ren') {
-      for (let i = 0; i < n; i++) { const ph = (t * (moving ? 0.9 : 0.55) + i / n) % 1, x = foot.x + (hash(i * 3.1) - 0.5) * 34 * (0.4 + ph), y = foot.y - 6 - ph * (moving ? 74 : 62); this.glow.fillStyle(i % 3 ? pal.ember : pal.hot, 0.9 * (1 - ph) * k).fillCircle(x, y, 2.2 * (1 - ph * 0.6)); }
-      for (let i = 0; i < (calm ? 2 : 4); i++) { const ph = (t * 1.3 + i / 4) % 1, x = foot.x + (hash(i + 9.3) - 0.5) * 30, y = foot.y - 8 - ph * 54; this.glow.lineStyle(2, pal.mid, 0.5 * (1 - ph) * k).lineBetween(x, y, x + (hash(i) - 0.5) * 4, y - 12 * (1 - ph)); }   // light streaks / heat licks
-      if (moving) for (let i = 1; i <= (calm ? 2 : 4); i++) this.glow.lineStyle(3, pal.mid, 0.3 / i).lineBetween(foot.x - p.aimX * 14 * i, foot.y - 22, foot.x - p.aimX * (14 * i + 18), foot.y - 22 - p.aimY * 6 * i);
+      this.put('ra_ground', bx, foot.y + 5, 0.2 * br, 0.8 * k, { sy: 0.9, depth: 3.7 });
+      this.put('ra_back1', bx, by, 0.4 * (1 + 0.04 * Math.sin(t * 5)), Math.min(1, 0.65 * k * fl), { oy: 0.93, sy: 0.95 + 0.1 * Math.sin(t * 6.3), depth: 9.4 });
+      this.put('ra_back2', bx, foot.y - 6, 0.42 * br, Math.min(1, 0.5 * k), { oy: 0.9, depth: 9.3, flip: Math.floor(t * 2) % 2 === 0 });
+      this.put('ra_veil', bx, foot.y - 30, 0.22, 0.2 * k * fl, { rot: Math.sin(t * 2) * 0.05, depth: 10.6 });
+      if (!calm) this.put('ra_embersring', bx, foot.y - 36 - 10 * ((t * 0.5) % 1), 0.3, 0.5 * k, { depth: 9.5 });
     } else {
-      for (let i = 0; i < n; i++) { const a = t * (moving ? 2.2 : 1.1) + (i / n) * Math.PI * 2, r = 22 + 10 * hash(i * 5.7), x = foot.x + Math.cos(a) * r, y = foot.y - 28 + Math.sin(a) * r * 0.9; this.glow.fillStyle(i % 2 ? pal.core : pal.hot, 0.8 * k).fillCircle(x, y, 1.7); }
-      const bucket = Math.floor(t * (moving ? 14 : 8)), segs = calm ? 1 : 2;   // soft electric arcs flick around the body
-      for (let j = 0; j < segs; j++) { const a0 = hash(bucket + j * 13) * Math.PI * 2, r0 = 14 + 6 * hash(bucket * 3 + j), x0 = foot.x + Math.cos(a0) * r0, y0 = foot.y - 28 + Math.sin(a0) * r0 * 0.9; this.jag(x0, y0, x0 + Math.cos(a0 + 0.8) * 26, y0 + Math.sin(a0 + 0.8) * 22, 4, pal.core, pal.mid, 0.9 * k, bucket + j, 5); }
-      if (moving) for (let i = 1; i <= (calm ? 2 : 4); i++) this.glow.lineStyle(2, pal.hot, 0.34 / i).lineBetween(foot.x - p.aimX * 12 * i, foot.y - 24 + i, foot.x - p.aimX * (12 * i + 22), foot.y - 24 + i);   // thin ribbons
+      this.put('sm_ground', bx, foot.y + 5, 0.2 * br, 0.85 * k, { sy: 0.95, depth: 3.7 });
+      this.put('sm_back1', bx, by, 0.44 * (1 + 0.04 * Math.sin(t * 5)), Math.min(1, 0.8 * k * fl), { oy: 0.9, sy: 0.95 + 0.1 * Math.sin(t * 6.3), depth: 9.4 });
+      this.put('sm_back2', bx, foot.y - 38, 0.4 * br, Math.min(1, 0.6 * k), { depth: 9.3 });
+      this.put('sm_arcs', bx, foot.y - 30, 0.34, (calm ? 0.2 : 0.3) * k * (Math.floor(t * 14) % 3 === 0 ? 0.3 : 1), { rot: Math.floor(t * 10) * 1.3, depth: 10.6 });
+      if (!calm) this.put('sm_motes', bx, foot.y - 34 - 8 * ((t * 0.6) % 1), 0.4, 0.55 * k, { depth: 9.5 });
     }
   }
-  /** Sprite layer of the persistent aura: flame tongues + embers (Ren) / lightning + ribbons + motes (Sora), anchored to the body, reacting to idle / moving / casting / dash. */
-  private auraSprites(s: GameState, foot: { x: number; y: number }, calm: boolean, steady: boolean) {
-    const t = s.time, p = s.player, moving = s.hx.moving && !s.cinema, boost = s.hx.act ? 1.35 : p.dashRemaining > 0 ? 1.6 : 1, k = (steady ? 1 : 0.65) * boost;
-    if (this.hero === 'ren') {
-      this.put('ground_ring', foot.x, foot.y + 5, 0.2 * (0.95 + 0.05 * Math.sin(t * 5)), 0.7 * k, { sy: 0.45, depth: 3.7 });
-      const n = calm ? 3 : 5;
-      for (let i = 0; i < n; i++) {   // flame tongues licking up around the silhouette, some behind and some in front of the body
-        const side = i % 2 ? 1 : -1, ph = (t * 1.5 + i * 0.37) % 1, x = foot.x + side * (11 + 8 * hash(i * 2.3)) - (moving ? p.aimX * 5 : 0), y = foot.y - 4 - 14 * hash(i + 5);
-        this.put(i % 2 ? 'aura_wisp_a' : 'aura_wisp_b', x, y, 0.12 + 0.045 * hash(i), (0.32 + 0.22 * Math.sin(t * 9 + i * 1.7)) * Math.min(1.25, k), { oy: 0.95, sy: 0.85 + 0.35 * ph, flip: side > 0, depth: i < 3 ? 9.4 : 11.3 });
-      }
-      this.put('embers', foot.x, foot.y - 34 - 10 * ((t * 0.5) % 1), 0.3 * (calm ? 0.8 : 1), 0.55 * Math.min(1.25, k) * (0.7 + 0.3 * Math.sin(t * 7)), { depth: 11.4 });
-      if (moving) this.put('speed_streak', foot.x - p.aimX * 30, foot.y - 24 - p.aimY * 8, 0.3, 0.55 * k, { rot: Math.atan2(-p.aimY, -p.aimX) + (p.aimX < 0 ? Math.PI : 0), depth: 9.3 });
-    } else {
-      this.put('vfx_19', foot.x, foot.y + 5, 0.2 * (0.95 + 0.05 * Math.sin(t * 4)), 0.8 * k, { sy: 0.5, depth: 3.7 });
-      const bucket = Math.floor(t * (moving ? 12 : 7)), n = calm ? 1 : 2;
-      for (let j = 0; j < n; j++) { const a = hash(bucket * 3 + j) * Math.PI * 2, r = 12 + 10 * hash(bucket + j * 7); this.put(`vfx_0${Math.floor(hash(bucket + j * 11) * 3)}`, foot.x + Math.cos(a) * r, foot.y - 26 + Math.sin(a) * r * 0.8, 0.22, (0.5 + 0.5 * hash(bucket * 7 + j)) * k, { rot: a, depth: 11.3 }); }   // lightning flicks
-      for (let i = 0; i < 2; i++) { const a = t * (moving ? 1.8 : 0.9) + i * Math.PI; this.put(i ? 'vfx_03' : 'vfx_04', foot.x + Math.cos(a) * 20, foot.y - 24 + Math.sin(a) * 14, 0.15, 0.6 * k, { rot: a, depth: i ? 9.4 : 11.3 }); }   // energy ribbons orbiting
-      for (let i = 0; i < (calm ? 2 : 4); i++) { const ph = (t * 0.7 + i / 4) % 1; this.put(`vfx_0${5 + (i % 5)}`, foot.x + (hash(i * 3.3) - 0.5) * 34, foot.y - 10 - ph * 58, 0.14, 0.9 * (1 - ph) * k, { depth: 11.4 }); }   // rising motes
-      if (moving) this.put('vfx_10', foot.x - p.aimX * 28, foot.y - 24 - p.aimY * 6, 0.3, 0.6 * k, { rot: Math.atan2(p.aimY, p.aimX), depth: 9.3 });
-    }
-  }
+  private auraSprites(_s: GameState, _foot: { x: number; y: number }, _calm: boolean, _steady: boolean) { /* merged into auraDraw */ }
   private reveal(cin: NonNullable<GameState['cinema']>, s: GameState, foot: { x: number; y: number }, calm: boolean, reduced: boolean) {
     const pal = PAL[this.hero], t = cin.t, u = Math.min(1, t / cin.dur), commit = Math.min(1, t / cin.commitAt);
     this.zoom = reduced ? 1 : 1 + 0.2 * Math.sin(Math.min(1, t / (cin.dur * 0.8)) * Math.PI * 0.5) * (t < cin.commitAt + 0.5 ? 1 : 1 - Math.min(1, (t - cin.commitAt - 0.5) / 0.6));

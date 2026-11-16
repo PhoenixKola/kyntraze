@@ -1,0 +1,2 @@
+# B20 hero VFX provenance
+Sheets generated with Codex ImageGen (gpt-6.1-sol) via scripts/gen-image.py on pure black, prompts beside each sheet (art/fx-b20/<hero>/*-prompt.txt, logs in PROVENANCE.md). Cut with scripts/b20-extract-fx.py into public/art/fx/<hero>/ (sl_/sm_ Sora, rs_/ra_ Ren). Replaces the Graphics-drawn lance, charge orb, bolts, orbs, rings, slashes, aura and ribbon trails; Ren/Sora dash and hit effects no longer reuse Kai's orange solar set.

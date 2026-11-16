@@ -1,0 +1,14 @@
+VFX sprite sheet for a 2D top-down pixel-art-style action game: celestial azure energy effects for the hero Sora (electric blue, white-hot cores, deep sapphire falloff; a elegant, precise, ranged-fighter look, NOT fire). Pure BLACK background (#000000) so every effect works with additive blending; self-luminous, painterly cel-shaded with crisp stepped shapes and hand-placed pixel highlights, no text, no characters, no ground, no UI. Wide 16:9 canvas. Effects well separated, none cropped, none touching the edges.
+Draw EXACTLY these 8 items:
+Row 1 (full-width, each its own wide horizontal band, stacked): 
+1. a long horizontal LANCE BEAM body filling the whole canvas width, perfectly horizontal and straight, left and right ends fade to black evenly so it can be stretched: white-hot thin core, bright cyan inner band, electric blue outer band, thin jagged lightning arcs hugging the edges, tiny sparks;
+2. a second long horizontal beam body, thinner and more intense, with a spiralling braided-energy look inside.
+Row 2 (left to right, four items):
+3. a beam MUZZLE flare: a radiant starburst/lens flare of azure light with a hot white centre, symmetric,
+4. a beam IMPACT end-cap: a circular burst of blue-white energy with radial shards,
+5. a small CHARGE orb: a compact glowing azure sphere with a bright core and a thin ring,
+6. a LARGER charge orb: sphere of swirling blue energy with two orbiting thin rings and radiating crackle.
+Row 3 (left to right, two items):
+7. a fully charged orb: huge radiant star-sphere with four-point cross flare and a halo ring, white-hot centre,
+8. a ring of inward-spiralling light motes and tiny arcs (a circular gathering-energy vortex seen flat), centre empty.
+Consistent palette across all items. Keep shapes crisp, readable at 64 pixels.

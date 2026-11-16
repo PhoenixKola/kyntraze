@@ -1,0 +1,15 @@
+VFX sprite sheet for a 2D top-down pixel-art-style action game: celestial azure energy effects for the hero Sora (electric blue, white-hot cores, deep sapphire falloff; elegant, precise, NOT fire, NOT orange). Pure BLACK background (#000000) for additive blending; self-luminous, painterly cel-shaded with crisp stepped shapes, no text, no characters, no ground, no UI. Wide 16:9 canvas, effects well separated, none cropped, none touching the edges.
+Draw EXACTLY 12 items in a 4x3 grid, left to right, top to bottom:
+1. an azure NEEDLE bolt: a slender horizontal dart of light, bright white-blue head on the RIGHT, tapering streak tail to the left,
+2. a heavier VOLLEY bolt: a thicker horizontal energy lance-head, head on the RIGHT, glowing tail to the left with small sparks,
+3. a DASH speed-line bundle: five thin horizontal blue-white streaks of varied length converging to a bright point on the RIGHT,
+4. a DASH slash: a sharp crescent arc of blue-white light, opening to the left,
+5. a tall BACK-AURA: a vertical oval halo of swirling azure mist and faint lightning, the centre darker/hollow so a character can stand inside it, soft edges,
+6. a second BACK-AURA: electric blue lightning-wing shapes rising upward and outward like a crackling crown behind a figure, symmetric,
+7. a ring of three short crackling lightning arcs arranged in a circle (to hug a body), hollow centre,
+8. a flat tilted-ellipse GROUND sigil: an azure ring with fine rune ticks and an inner glow ring, seen from a three-quarter top-down angle,
+9. a cluster of rising blue-white light motes and tiny sparkles,
+10. a horizontal AFTERIMAGE smear: a ghosted blue-white streak with ragged trailing edge, head on the RIGHT,
+11. a flat ground shockwave ring in azure, tilted ellipse, crisp bright edge,
+12. a crackling electric spark-burst for a hit: radial blue-white shards and jagged forks around a white core.
+Consistent palette. Shapes crisp and readable at 64 pixels.

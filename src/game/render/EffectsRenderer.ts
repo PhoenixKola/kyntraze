@@ -4,6 +4,7 @@ import { KAI_GROUND_DY } from '../../assets/kaiAnimation';
 import { FxPool, vfxKey } from './fxPool';
 import { b14Key } from './b14fx';
 import { kick } from './cameraKick';
+import { heroFxKey } from './heroFxView';
 
 /** Basic-attack bolt, hit bursts, dash and Q (Impact) visuals: ImageGen sprites (cyan Base / solar Form I colour ramps), all pooled. Driven by the sim's `impacts` list; each impact is consumed once. */
 const MAX_HIT_BURSTS_PER_FRAME = 8;
@@ -16,7 +17,8 @@ export class EffectsRenderer {
   constructor(private readonly scene: Phaser.Scene) { this.pool = new FxPool(scene, 150); }
 
   render(state: GameState, reduced = false) {
-    const p = state.player, solar = p.form >= 1 && p.form !== 3;   // B13: Stillfire Apex keeps the cool cyan/silver effect set
+    const p = state.player, hero = state.hero, mine = hero !== 'kai', solar = !mine && p.form >= 1 && p.form !== 3;   // B20: Ren / Sora never borrow Kai's orange solar set; they have their own ImageGen dash and hit art
+    const hk = (n: string) => heroFxKey(hero === 'ren' ? 'ren' : 'sora', n), hcol = hero === 'ren' ? 0xff4a3a : 0x9fe8ff;   // B13: Stillfire Apex keeps the cool cyan/silver effect set
     const k = (n: string) => vfxKey(n, solar);
     const running = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory';
     const dt = running ? Math.min(0.05, this.scene.game.loop.delta / 1000) : 0;   // frozen with the sim while paused / choosing an upgrade
@@ -46,6 +48,7 @@ export class EffectsRenderer {
       } else if (e.kind === 'hit') {
         if (bursts++ < MAX_HIT_BURSTS_PER_FRAME) {
           const s = (0.5 + rnd() * 0.1) * (e.boss ? 0.8 : e.heavy ? 1.25 : 1);   // bosses keep their silhouette: smaller, no debris
+          if (mine) { const sc = (e.boss ? 0.8 : e.heavy ? 1.3 : 1) * (p.form ? 1.15 : 1); this.pool.spawn({ key: hk(hero === 'ren' ? 'rs_impact' : 'sm_hit'), x: e.x, y: e.y - 8, depth: 11, life: 0.2, blend: 'add', s0: sc * (hero === 'ren' ? 0.12 : 0.13), s1: sc * (hero === 'ren' ? 0.26 : 0.27), a0: 1, a1: 0, rot: rnd() * 6.28 }); if (e.heavy || e.kill) { kick(this.scene.cameras.main, e.boss ? 120 : 80, e.boss ? 0.003 : 0.0018, reduced); if (e.heavy && !e.boss) this.pool.spawn({ key: b14Key('shock_ring'), x: e.x, y: e.y + 10, depth: 3.9, life: 0.26, blend: 'add', tint: hcol, s0: 0.2, s1: 0.7, a0: 0.7, a1: 0 }); } continue; }
           if (bursts <= 3) this.hitFx(p.form, e.x, e.y - 8, Math.atan2(e.y - p.y, e.x - p.x), reduced);
           this.pool.spawn({ key: k('hit'), x: e.x, y: e.y - 8, depth: 11, life: 0.18, blend: 'normal', s0: s * 0.5, s1: s * (solar ? 1.4 : 1.2), a0: 1, a1: 0, rot: rnd() * 6.28 });
           if (!reduced && !e.boss && bursts <= 3) for (let i = 0, n = e.heavy ? 4 : 2; i < n; i++) { const a = rnd() * 6.28, v = 90 + rnd() * 90; this.pool.spawn({ key: vfxKey('debris' + ((rnd() * 4) | 0), solar), x: e.x, y: e.y - 8, depth: 11, life: 0.28, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, ay: 380, s0: 0.45, s1: 0.2, a0: 1, a1: 0, rot: rnd() * 6, spin: 8 }); }
@@ -60,7 +63,7 @@ export class EffectsRenderer {
       } else if (e.kind === 'pulse') {
         if (p.form === 3) this.spawnApexImpact(e.x, e.y, p.qRadius * 1.25, reduced); else this.spawnImpact(e.x, e.y, p.qRadius * (solar ? 1.25 : 1), solar, reduced);
       } else if (e.kind === 'dash') {
-        this.spawnDashStart(e.x, e.y, p.dashDx, p.dashDy, solar, reduced);
+        if (mine) this.spawnHeroDash(e.x, e.y, p.dashDx, p.dashDy, hk, p.form >= 1, reduced); else this.spawnDashStart(e.x, e.y, p.dashDx, p.dashDy, solar, reduced);
       }
     }
     // dash: a streak/afterimage ribbon is laid behind Kai while he moves
@@ -70,6 +73,7 @@ export class EffectsRenderer {
         this.trailClock -= DASH_TRAIL_STEP;
         const len = Math.hypot(p.dashDx, p.dashDy) || 1, ux = p.dashDx / len, uy = p.dashDy / len, ang = Math.atan2(uy, ux), side = (rnd() - 0.5) * 22;
         const cx = p.x - uy * side, cy = p.y - 6 + ux * side;
+        if (mine) { this.pool.spawn({ key: hk(hero === 'ren' ? 'rs_dashlines' : 'sm_dashlines'), x: cx, y: cy, depth: 9.2, life: 0.22, blend: 'add', ox: 1, oy: 0.5, rot: ang, s0: p.form ? 0.2 : 0.16, s1: p.form ? 0.13 : 0.1, a0: 0.9, a1: 0 }); if (p.form && !reduced) this.pool.spawn({ key: hk(hero === 'ren' ? 'rs_afterimage' : 'sm_afterimage'), x: cx, y: cy, depth: 9.15, life: 0.26, blend: 'add', ox: 1, oy: 0.5, rot: ang, s0: 0.17, s1: 0.1, a0: 0.8, a1: 0 }); continue; }
         this.pool.spawn({ key: k('dash_lines'), x: cx, y: cy, depth: 9.2, life: 0.2, blend: 'normal', ox: 1, oy: 0.5, rot: ang, s0: solar ? 0.78 : 0.62, s1: solar ? 0.5 : 0.4, a0: 0.9, a1: 0 });
         if (solar) this.pool.spawn({ key: vfxKey('mote' + ((rnd() * 3) | 0), true), x: cx, y: cy, depth: 9.1, life: 0.3, blend: 'add', ox: 1, oy: 0.5, rot: ang + (rnd() - 0.5) * 0.6, vx: -ux * 60, vy: -uy * 60 - 20, s0: 0.9, s1: 0.4, a0: 1, a1: 0 });
       }
@@ -122,6 +126,14 @@ export class EffectsRenderer {
     }
   }
 
+  /** Ren / Sora dash start: hero-coloured crescent, speed lines and ground dust; transformed dashes are larger and add the ring/afterimage layer. */
+  private spawnHeroDash(x: number, y: number, dx: number, dy: number, hk: (n: string) => string, form: boolean, reduced: boolean) {
+    const len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, ang = Math.atan2(uy, ux), fy = y + KAI_GROUND_DY - 4, ren = hk('x').includes('-ren-');
+    this.pool.spawn({ key: vfxKey('dust', false), x: x - ux * 8, y: fy, depth: 5.8, life: 0.4, blend: 'normal', tint: ren ? 0xb8504a : 0x8fb4e0, s0: 0.32, s1: 0.58, a0: 0.8, a1: 0, vy: -16, vx: -ux * 20 });
+    if (reduced) return;
+    this.pool.spawn({ key: hk(ren ? 'rs_dashslash' : 'sm_dashslash'), x: x + ux * 8, y: y - 8 + uy * 8, depth: 9.3, life: 0.22, blend: 'add', rot: ang + Math.PI, s0: form ? 0.2 : 0.15, s1: form ? 0.3 : 0.22, a0: 1, a1: 0, vx: ux * 90, vy: uy * 90 });
+    if (form) this.pool.spawn({ key: hk(ren ? 'rs_ring' : 'sm_ring'), x, y: fy, depth: 5.5, life: 0.3, blend: 'add', s0: 0.08, s1: 0.28, sy: 1, a0: 0.9, a1: 0 });
+  }
   private spawnDashStart(x: number, y: number, dx: number, dy: number, solar: boolean, reduced: boolean) {
     const len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, ang = Math.atan2(uy, ux), fy = y + KAI_GROUND_DY - 4, rnd = Math.random;
     const dust = (ox: number, oy: number, s: number, delay: number) => this.pool.spawn({ key: vfxKey('dust', solar), x: ox, y: oy, depth: 5.8, life: 0.4, blend: 'normal', s0: s * 0.55, s1: s, a0: 0.85, a1: 0, vy: -16, vx: -ux * 20, delay, flipX: rnd() > 0.5 });

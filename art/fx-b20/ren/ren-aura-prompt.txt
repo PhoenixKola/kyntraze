@@ -1,0 +1,11 @@
+VFX sprite sheet for a 2D top-down pixel-art-style action game: crimson transformation-aura effects for the hero Ren Crimson Ascendant (blood red, molten, hot white-yellow cores, dark red falloff; powerful rage-aura look like a flaring warrior power-up). Pure BLACK background (#000000) for additive blending; self-luminous, painterly cel-shaded with crisp stepped flame shapes, no text, no characters, no ground, no UI. Wide 16:9 canvas, items well separated, none cropped, none touching the edges.
+Draw EXACTLY 8 items in a 4x2 grid, left to right, top to bottom:
+1. a tall BACK-AURA: a large vertical flame halo, roaring crimson flames rising and swirling around an EMPTY dark centre so a character can stand inside it, soft ragged edges, symmetric,
+2. a second BACK-AURA: spiky flame-wings and jagged rising flame tongues fanning outward and upward like a blazing crown behind a figure, symmetric,
+3. a FRONT-AURA: a thin flickering flame veil, a few short licking flame tongues and sparks around an empty centre, much less dense than items 1-2,
+4. a ring of rising embers and red sparks (hollow centre),
+5. a flat tilted-ellipse GROUND sigil: crimson ring with angular rune ticks and an inner glow ring, three-quarter top-down angle,
+6. a vertical crimson LIGHT PILLAR column with ember sparks, bright core, for a power-up eruption,
+7. a huge SUPERNOVA shockwave ring: bright white-yellow core flash with a thick expanding red ring and radial rays,
+8. a cluster of floating embers of varied size, bright dots with short glow.
+Consistent palette. Shapes crisp and readable at 64 pixels.
