@@ -87,7 +87,7 @@ for (const arena of ['gloam', 'ashen'] as const) for (const [w, h] of VIEWPORTS)
 }
 
 for (const arena of ['gloam', 'ashen'] as const) {
-  test(`${arena}: both bosses and an elite wave, beam and sphere in Base and Form I, no errors`, async ({ page }) => {
+  test(`${arena}: both bosses and an elite wave, beam and sphere in Base and Form I, no errors`, async ({ page }) => { test.setTimeout(90_000);   // two boss runs + elite wave + both forms: ~25 s alone, longer under parallel software-GL load
     const problems = await prep(page, 960, 540);
     for (const boss of ['warden', 'seraph']) { await run(page, arena, `&encounter=${boss}`); await expect(page.getByTestId('boss-bar')).toBeVisible(); await page.waitForFunction(() => (window as unknown as W).__KYNT_QA__!.sim().enemies[0].mode !== 'intro', null, { timeout: 8000 });
       await page.evaluate(() => { const s = (window as unknown as W).__KYNT_QA__!.sim(), b = s.enemies[0]; b.mode = 'move'; b.attackCd = 0; b.ai.pat = 1; s.player.hp = 1e6; s.player.x = b.x + 200; s.player.y = b.y; });
