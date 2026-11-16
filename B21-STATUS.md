@@ -32,7 +32,7 @@
 | Security | `nodeIntegration:false`, `contextIsolation:true`, `sandbox:true`, `webSecurity`, no preload/IPC, permissions denied, navigation and `window.open` blocked, CSP header on every `app://` response, DevTools off when packaged, path-traversal guarded `app://` handler, single-instance lock, no menu (Alt+F4 intact), F11 / Alt+Enter fullscreen, min size 640x360. |
 
 ## Tests
-Vitest (Phaser-free): 383 passing before the desktop work (368 baseline + 15 new in `src/tests/b21-evolution.test.ts` covering the evolution mapper, aura state machine, impact director, arena mark planning/material correctness, body reactions and boss damage levels). Typecheck clean. Playwright result: see the line at the bottom of this file.
+Vitest (Phaser-free): 383 passing before the desktop work (368 baseline + 15 new in `src/tests/b21-evolution.test.ts` covering the evolution mapper, aura state machine, impact director, arena mark planning/material correctness, body reactions and boss damage levels). Typecheck clean. Playwright: full run 67 passed / 3 failed / 3 skipped (5.8 min, run while the desktop build was also using the machine); the 3 failures (`arenas` ashen boss run, `menus` Esc on hero select, `stillfire` E charge) all **passed on an isolated re-run (4/4, 1 worker)**, the same load-sensitivity B20 documented. Not a clean full-suite green: re-run on an idle machine before sign-off.
 
 ## Observed vs not observed (state of the evidence)
 - **IMPLEMENTED:** everything marked DONE/PARTIAL above.
