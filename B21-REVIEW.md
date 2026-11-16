@@ -17,8 +17,8 @@ Forms/mods in the clips are set through the QA state hook (never presented as a 
 ## Before / after (8 high-impact items)
 | # | Item | Before (B20) | After (B21) | Where |
 |---|---|---|---|---|
-| 1 | Ren/Sora transformed look | thick body stroke only | stroke kept as rim + layered ImageGen flipbook aura that leans, tightens on charge, flares on release, ribbon wake when moving | `auraView.ts`, `public/art/fx/b21/aura/` |
-| 2 | Kai forms | form effects only | same living-aura layer in gold flame / gold crawling lightning / silver mist (restrained) | `EntityRenderer.kaiForm` |
+| 1 | Ren/Sora transformed look | thick body stroke only | stroke kept as rim + a body-fitting aura: a soft form-coloured glow on the character's own silhouette that breathes with idle/move/dash/charge/release (no wings or ribbons extending past the body), plus a small ground sigil | `EntityRenderer.updateAura`, `auraView.ts` |
+| 2 | Kai forms | form effects only | same body-fitting glow in flame orange / crackling gold (flickers) / restrained silver | `EntityRenderer.updateAura` |
 | 3 | Body weight (all 8 states, all facings) | sprite slides with clip | spring lean into the run, start/stop squash, dash stretch, cast recoil, hurt stagger, breathing; per-state signatures (Cometheart hardest lean, Stillfire floats) | `bodyMotion.ts` |
 | 4 | Upgraded abilities | same art at every build | tier arcs, pierce sparks, afterburn trail, echo ring at the real blast radius, only for earned stacks | `buildEvolution.ts`, `evoPlan.ts` |
 | 5 | Heavy moments | none | rare anime impact frame (<=1 per 1.4 s, none in Reduced Effects) + budgeted hit-stop + coloured floor light | `evoPlan.ts`, `impactDirector.ts`, `lightPlan.ts` |

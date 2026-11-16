@@ -78,6 +78,9 @@ Vitest (Phaser-free): 383 passing before the desktop work (368 baseline + 15 new
 - **Process incident:** one Blender fork ran `git checkout` on Kai paths and reverted another fork's uncommitted Kai edits; the Kai fork rebuilt from saved scripts and re-verified, so the Kai result comes from the restored scripts only.
 - **Tests:** Vitest 392; Playwright 69 pass + the ashen/gloam bosses spec, which timed out at 30 s only under parallel software-GL load; its budget is now 90 s and it passes 11/11 twice. `shield_down` is wired.
 
+## Aura revision (owner feedback)
+The large ImageGen wing/arch auras felt cheap and extended past the characters. They are no longer drawn. Every transformed state now uses a body-fitting aura: a third glow filter on the hero sprites (same technique as the B20 stroke), form-coloured (Ren ember-red, Sora cyan, Flarebound orange, Cometheart flickering gold, Stillfire soft silver), driven by the idle/move/dash/charge/release state and skipped entirely (`active=false`) when untransformed. A small ground sigil and the release-surge sound remain. The flipbook art in `public/art/fx/b21/aura/` is kept but unused. Checked in-game stills for all five forms; not watched at real speed. e2e: `controller.spec` 960x540 failed on this machine while another project's dev server loaded the CPU, and also failed when the change was stashed, so it is load-related, not caused by the aura.
+
 ## Source map used (verified present)
 `src/sim/*`, `src/content/{upgrades,heroKits}.ts`, `src/assets/{kaiAnimation,heroAnimation}.ts`, `src/game/render/{EntityRenderer,heroFxView,abilityFx,enemyRenderer,bossRenderer,fxPool}.ts`, `src/game/scenes/ArenaScene.ts` (hit-stop = skipped sim ticks via `hitstopLeft`, unchanged contract), `art/` rigs present locally.
 

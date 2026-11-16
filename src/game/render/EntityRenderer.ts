@@ -15,7 +15,7 @@ import { EnemyRenderer } from './enemyRenderer';
 import { BossRenderer } from './bossRenderer';
 import { KAI_ANCHORS_KEY, handAnchorWorld, type AnchorTable, type HandAnchor } from '../../assets/kaiAnimation';
 import { KAI_F1_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_F3_REGISTRY_KEY, KAI_GROUND_DY, KAI_REGISTRY_KEY, clipFrame, KAI_SCALE, KaiAnimator, kaiTextureKey, type AnimPose, type KaiManifests } from '../../assets/kaiAnimation';
-interface StrokeCtl { outerStrength: number; color: number }
+interface StrokeCtl { outerStrength: number; color: number; active?: boolean }
 export class EntityRenderer {
   private hero: Phaser.GameObjects.Sprite;
   private legs: Phaser.GameObjects.Sprite;
@@ -38,7 +38,7 @@ export class EntityRenderer {
   private lastX = NaN;
   private lastY = NaN;
   private moveHold = 0;
-  private kaiAura: AuraView | null = null; private kaiAuraState: AuraState | null = null; private readonly kaiAuraTrack = new AuraTracker();
+  private kaiAura: AuraView | null = null; private kaiAuraState: AuraState | null = null;
   private flash = 0; private readonly motion = new BodyMotion(); private baseScale = KAI_SCALE;
   private ghosts: { spr: Phaser.GameObjects.Sprite; life: number }[] = []; private ghostClock = 0;
   private heroDeadT = 0; private heroAnim: HeroAnimator | null | undefined; private heroAnchors: AnchorTable | undefined;
@@ -53,9 +53,20 @@ export class EntityRenderer {
     this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1, this.f2, this.f3); this.cometFx = new CometFx(scene); this.apexFx = new ApexFx(scene); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = new EnemyRenderer(scene); this.bosses = new BossRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
-    for (const spr of [this.hero, this.legs]) { spr.enableFilters(); this.stroke.push(spr.filters!.internal.addGlow(0xffffff, 0, 0, 1, false, 5, 4) as unknown as StrokeCtl); spr.filters!.internal.addGlow(0xd8f6ff, 1.6, 0, 1, false, 4, 2); }   // B06: thin pale rim keeps the silhouette separated from the arena; B20: a second, thicker glow is the transformation stroke (off = strength 0)
+    for (const spr of [this.hero, this.legs]) { spr.enableFilters(); this.stroke.push(spr.filters!.internal.addGlow(0xffffff, 0, 0, 1, false, 5, 4) as unknown as StrokeCtl); spr.filters!.internal.addGlow(0xd8f6ff, 1.6, 0, 1, false, 4, 2); this.auraGlow.push(spr.filters!.internal.addGlow(0xffffff, 0, 0, 1, false, 3, 10) as unknown as StrokeCtl); }   // B06: thin pale rim keeps the silhouette separated from the arena; B20: a second, thicker glow is the transformation stroke (off = strength 0)
   }
-  private readonly stroke: StrokeCtl[] = [];
+  private readonly stroke: StrokeCtl[] = []; private readonly auraGlow: StrokeCtl[] = []; private readonly auraTrack = new AuraTracker();
+  /** B21.3 (revised): the transformation aura now FITS the body like the stroke: a soft, form-coloured glow filter on the sprite's own silhouette that breathes with activity (idle < moving < dash < charge < release), instead of art wings that extend past the character. */
+  private updateAura(state: GameState, dt: number, reduced: boolean) {
+    const p = state.player, f = p.form, st: AuraState | null = state.hero === 'kai' ? (f === 1 ? 'flare' : f === 2 ? 'comet' : f === 3 ? 'still' : null) : f >= 1 ? (state.hero as 'ren' | 'sora') : null;
+    const smp = this.auraTrack.update(state, state.phase === 'running' ? dt : 0, Math.hypot(p.vx, p.vy) / Math.max(1, p.speed)), t = state.time;
+    const COL: Record<AuraState, number> = { ren: 0xff5a22, sora: 0x4fd0ff, flare: 0xff9a1c, comet: 0xffd23a, still: 0xd6e4ff };
+    const on = !!st && state.phase === 'running' && p.hp > 0 && !state.cinema, crowd = state.enemies.length > 45 ? 0.8 : 1;
+    let k = 0; if (on) { const flick = st === 'comet' ? 0.65 + 0.5 * Math.abs(Math.sin(Math.floor(t * 26) * 12.9898)) : st === 'still' ? 0.92 + 0.08 * Math.sin(t * 2.2) : 0.88 + 0.12 * Math.sin(t * 7.3); k = (1.5 + 3.6 * (smp.k - 0.5)) * flick * (reduced ? 0.55 : crowd) * (st === 'still' ? 0.75 : 1); }
+    for (const c of this.auraGlow) { c.outerStrength = Math.max(0, k); c.active = k > 0.02; if (st) c.color = COL[st]; }   // inactive = the shader pass is skipped entirely, so untransformed heroes pay nothing
+    this.auraSample = { st, smp, on };
+  }
+  private auraSample: { st: AuraState | null; smp: ReturnType<AuraTracker['update']>; on: boolean } = { st: null, smp: { phase: 'idle', k: 0.55, leanX: 0, leanY: 0, lean: 0, gather: 0, pulse: 0 }, on: false };
   /** B20: the transformation "stroke": a coloured outline hugging the body (Photoshop-style), part of the sprite instead of a floating aura. */
   private updateStroke(state: GameState) {
     const f = state.player.form, pal = state.hero === 'ren' ? 0xff2a24 : state.hero === 'sora' ? 0x3aa8ff : 0xe8f0fa, on = (state.hero === 'kai' ? f >= 2 : f >= 1) && !state.cinema, wave = 0.5 + 0.5 * Math.sin(state.time * 5.5), k = on ? 7 + 9 * wave : 0;   // B20: the stroke breathes between a steady band and a hard bright flare   // Kai: Cometheart and Stillfire only
@@ -71,10 +82,9 @@ export class EntityRenderer {
   setHeroScale(scale: number) { this.baseScale = scale; this.hero.setScale(scale); this.legs.setScale(scale); }
   /** B21.3: Kai's three forms get the same living aura (gold flame, gold lightning, silver mist) layered behind the existing form effects. */
   private kaiForm(state: GameState, dt: number, dead: boolean, reduced: boolean) {
-    const p = state.player, want: AuraState | null = p.form === 1 ? 'flare' : p.form === 2 ? 'comet' : p.form === 3 ? 'still' : null;
+    const p = state.player, want = this.auraSample.st && state.hero === 'kai' ? this.auraSample.st : null;
     if (want !== this.kaiAuraState) { this.kaiAura?.destroy(); this.kaiAura = want ? new AuraView(this.scene, want) : null; this.kaiAuraState = want; }
-    const smp = this.kaiAuraTrack.update(state, state.phase === 'running' ? dt : 0, Math.hypot(p.vx, p.vy) / Math.max(1, p.speed));
-    if (this.kaiAura && state.phase === 'running' && !dead && !state.cinema) this.kaiAura.update(smp, dt, { x: this.hero.x, y: Math.round(p.y + KAI_GROUND_DY) }, p.vx, p.vy, reduced ? 0.5 : state.enemies.length > 45 ? 0.7 : 1, reduced || state.enemies.length > 45); else this.kaiAura?.hide();
+    if (this.kaiAura && state.phase === 'running' && !dead && !state.cinema) this.kaiAura.update(this.auraSample.smp, dt, { x: this.hero.x, y: Math.round(p.y + KAI_GROUND_DY) }, p.vx, p.vy, reduced ? 0.5 : 1, true); else this.kaiAura?.hide();
   }
   /** B21.1: spring lean / squash / bob around the feet for the current hero state (identity while dead, in a reveal or frozen). */
   private applyMotion(state: GameState, dt: number, hero: 'kai' | 'ren' | 'sora', reduced: boolean, hurt: boolean, dashing: boolean, clip: string, facing: string) {
@@ -89,7 +99,7 @@ export class EntityRenderer {
   fxOrigin() { return this.abilityFx.lastOrigin; }
   debugPose() { return { ...this.pose, visualForm: this.animator.visualForm, transforming: this.animator.transforming, texture: this.hero.texture.key, frameIndex: Number(this.hero.frame.name), x: this.hero.x, y: this.hero.y, scale: this.baseScale }; }
   sync(state: GameState, input: InputState, deltaMs = 0, reducedEffects = false) {
-    this.updateStroke(state);
+    this.updateStroke(state); this.updateAura(state, Math.min(0.1, deltaMs / 1000), reducedEffects);
     if (state.hero !== 'kai') { this.syncHero(state, input, deltaMs, reducedEffects); this.syncWorld(state, deltaMs, reducedEffects); return; }
     const p = state.player;
     const dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0;
