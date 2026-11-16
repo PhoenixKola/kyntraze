@@ -1,0 +1,154 @@
+{
+ "crack_l1": {
+  "width": 436,
+  "height": 439
+ },
+ "crack_l2": {
+  "width": 436,
+  "height": 439
+ },
+ "crack_l3": {
+  "width": 436,
+  "height": 439
+ },
+ "slab_a": {
+  "width": 160,
+  "height": 126
+ },
+ "slab_b": {
+  "width": 160,
+  "height": 147
+ },
+ "slab_c": {
+  "width": 160,
+  "height": 136
+ },
+ "slab_d": {
+  "width": 160,
+  "height": 145
+ },
+ "halo_shard_a": {
+  "width": 180,
+  "height": 149
+ },
+ "halo_shard_b": {
+  "width": 180,
+  "height": 129
+ },
+ "crystal_shard_a": {
+  "width": 143,
+  "height": 180
+ },
+ "crystal_shard_b": {
+  "width": 180,
+  "height": 162
+ },
+ "core_crack": {
+  "width": 180,
+  "height": 165
+ },
+ "shield_crack": {
+  "width": 153,
+  "height": 200
+ },
+ "shield_down": {
+  "width": 200,
+  "height": 197
+ },
+ "buff_glyph": {
+  "width": 179,
+  "height": 200
+ },
+ "g_scratch_a": {
+  "width": 256,
+  "height": 210
+ },
+ "g_crack_a": {
+  "width": 256,
+  "height": 210
+ },
+ "g_crack_b": {
+  "width": 256,
+  "height": 201
+ },
+ "g_scratch_b": {
+  "width": 256,
+  "height": 229
+ },
+ "g_seam_a": {
+  "width": 256,
+  "height": 97
+ },
+ "g_seam_b": {
+  "width": 256,
+  "height": 106
+ },
+ "g_conduit_a": {
+  "width": 256,
+  "height": 67
+ },
+ "g_conduit_b": {
+  "width": 256,
+  "height": 78
+ },
+ "g_crack_c": {
+  "width": 256,
+  "height": 225
+ },
+ "g_crack_d": {
+  "width": 256,
+  "height": 197
+ },
+ "g_beam_lane": {
+  "width": 512,
+  "height": 82
+ },
+ "a_crack_a": {
+  "width": 256,
+  "height": 207
+ },
+ "a_crack_b": {
+  "width": 256,
+  "height": 173
+ },
+ "a_crack_c": {
+  "width": 242,
+  "height": 256
+ },
+ "a_crack_d": {
+  "width": 256,
+  "height": 166
+ },
+ "a_ash_a": {
+  "width": 256,
+  "height": 188
+ },
+ "a_ash_b": {
+  "width": 256,
+  "height": 174
+ },
+ "a_crack_e": {
+  "width": 256,
+  "height": 204
+ },
+ "a_rubble": {
+  "width": 256,
+  "height": 166
+ },
+ "a_verdigris_a": {
+  "width": 256,
+  "height": 248
+ },
+ "a_verdigris_b": {
+  "width": 256,
+  "height": 239
+ },
+ "a_verdigris_c": {
+  "width": 256,
+  "height": 249
+ },
+ "a_beam_lane": {
+  "width": 459,
+  "height": 126
+ }
+}

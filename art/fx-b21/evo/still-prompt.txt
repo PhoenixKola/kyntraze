@@ -1,0 +1,8 @@
+VFX sprite sheet for a 2D top-down pixel-art-style action game (Kai Stillfire Apex form: silver-white restrained quiet power, thin fine flowing energy, pale blue-white cores, subtle distortion shimmer; no gold, no loud sparks). Pure BLACK background (#000000) for additive blending; self-luminous, painterly cel-shaded with crisp stepped shapes, bold readable silhouettes at 64 pixels, no text, no characters, no ground, no UI. Wide 16:9 canvas, items well separated in a clear grid, none cropped, none touching each other or the edges. Original design.
+Draw EXACTLY 6 items in a 3x2 grid, left to right, top to bottom:
+1. TIER-2 EDGE ARC: a sharp thin crescent slash arc opening to the left, hot white core line, coloured glow edge, a few tiny spark chips,
+2. TIER-3 EDGE ARC: a heavier DOUBLE crescent (two nested arcs, outer one fractured) with a burst of sparks and shards at its centre, mastered-power look,
+3. PIERCE SPARK: a small bright radial burst with 8 sharp spikes and a hot white centre, for where a beam pierces an enemy,
+4. ECHO RING: a thin DOUBLE concentric ring (flat circle seen head-on) with small fracture ticks and tiny cracks around it, hollow centre, delicate,
+5. AFTERBURN TRAIL: a horizontal ember streak, bright head on the RIGHT, ragged tapering ember tail to the left with sparks,
+6. SILVER BLINK SLASH: a long thin precise silver-white diagonal slash line with a sharp tapered ends and a soft ghost afterimage double beside it, elegant and quiet.

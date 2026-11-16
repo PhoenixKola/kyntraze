@@ -13,6 +13,7 @@ import { HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroM
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
 import { B14_FX_NAMES, b14Key, b14Url } from '../render/b14fx';
+import { B21_GROUPS, b21Key, b21ManifestKey, b21ManifestUrl, b21Names, b21Url } from '../render/b21Assets';
 import { F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL, f3fxKey, f3fxUrl } from '../render/stillfireFx';
 import { KAI_F3_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiClipInfo, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
@@ -29,6 +30,7 @@ export class BootScene extends Phaser.Scene {
     if (this.hero !== 'kai' && HERO_SHEETS[this.hero].base) { const h = this.hero; KAI_DIRS.forEach(dir => { this.load.json(`hero-${h}-base-manifest-${dir}`, heroManifestUrl(h, dir, 'base')); if (HERO_SHEETS[h].f1) this.load.json(`hero-${h}-f1-manifest-${dir}`, heroManifestUrl(h, dir, 'f1')); }); if (HERO_SHEETS[h].anchors) this.load.json(HERO_ANCHORS_KEY(h), heroAnchorsUrl(h)); }   // B19: Ren / Sora sheets (same contract as Kai's); absent art falls back to the dev placeholder body
     if (this.hero !== 'kai') HERO_FX_NAMES[this.hero].forEach(n => this.load.image(heroFxKey(this.hero, n), heroFxUrl(this.hero, n)));
     this.load.json(F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL);
+    B21_GROUPS.forEach(g => this.load.json(b21ManifestKey(g), b21ManifestUrl(g)));   // B21: optional art groups, a missing manifest is ignored
     COMET_FX_NAMES.forEach(n => this.load.image(cometFxKey(n), cometFxUrl(n)));
     B14_FX_NAMES.forEach(n => this.load.image(b14Key(n), b14Url(n)));
     FORM_FX_NAMES.forEach(n => this.load.image(formFxKey(n), formFxUrl(n)));
@@ -76,6 +78,7 @@ export class BootScene extends Phaser.Scene {
       }
       this.registry.set(HERO_ANCHORS_KEY(h), this.cache.json.get(HERO_ANCHORS_KEY(h)));
     }
+    for (const g of B21_GROUPS) for (const n of b21Names(this.cache.json.get(b21ManifestKey(g)))) this.load.image(b21Key(g, n), b21Url(g, n));
     const fx3 = this.cache.json.get(F3_FX_MANIFEST_KEY) as Record<string, unknown> | undefined;
     if (fx3 && typeof fx3 === 'object') for (const n of Object.keys((fx3 as { sprites?: Record<string, unknown> }).sprites ?? fx3)) if (/^[a-z0-9_]+$/.test(n)) this.load.image(f3fxKey(n), f3fxUrl(n));
     for (const dir of KAI_DIRS) for (const clip of KAI_F1_CLIPS) {

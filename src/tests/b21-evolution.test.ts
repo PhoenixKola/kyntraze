@@ -87,3 +87,34 @@ describe('B21 body reactions', () => {
     expect([bossDamageLevel(1, 1), bossDamageLevel(0.6, 1), bossDamageLevel(0.3, 1), bossDamageLevel(0.9, 2), bossDamageLevel(0.2, 2)]).toEqual([0, 1, 2, 2, 3]);
   });
 });
+import { BodyMotion, SIGNATURE, styleFor, type MotionIn } from '../game/render/bodyMotion';
+const mi = (o: Partial<MotionIn> = {}): MotionIn => ({ dt: 0.016, style: 'kai', vx: 0, vy: 0, maxSpeed: 250, dashing: false, dashDx: 0, dashDy: 0, casting: false, released: false, hurt: false, hurtDir: 1, alive: true, frozen: false, reduced: false, ...o });
+describe('B21 body motion', () => {
+  it('leans into the run, springs back at rest, and is identity when frozen or dead', () => {
+    const m = new BodyMotion(); let o = m.update(mi());
+    for (let i = 0; i < 40; i++) o = m.update(mi({ vx: 250 })); expect(o.rot).toBeGreaterThan(0.02);
+    for (let i = 0; i < 120; i++) o = m.update(mi()); expect(Math.abs(o.rot)).toBeLessThan(0.002);
+    expect(m.update(mi({ frozen: true }))).toEqual({ rot: 0, sx: 1, sy: 1, dy: 0 }); expect(m.update(mi({ alive: false })).rot).toBe(0);
+  });
+  it('dash stretches, hurt staggers, squash settles to rest', () => {
+    const m = new BodyMotion(); const d = m.update(mi({ dashing: true, vx: 500 })); expect(d.sx).toBeGreaterThan(1.0);
+    const h = new BodyMotion(); let o = h.update(mi({ hurt: true })); let peak = Math.abs(o.rot); for (let i = 0; i < 10; i++) { o = h.update(mi()); peak = Math.max(peak, Math.abs(o.rot)); } expect(peak).toBeGreaterThan(0.005);
+    for (let i = 0; i < 200; i++) o = h.update(mi()); expect(Math.abs(o.sy - 1)).toBeLessThan(0.02);
+  });
+  it('eight states have distinct signatures: Cometheart leans hardest, Stillfire glides', () => {
+    expect(SIGNATURE.comet.lean).toBeGreaterThan(SIGNATURE.kai.lean); expect(SIGNATURE.still.lean).toBeLessThan(SIGNATURE.kai.lean);
+    expect(SIGNATURE.ren_asc.lean).toBeGreaterThan(SIGNATURE.ren.lean); expect(styleFor('sora', 1)).toBe('sora_sov'); expect(styleFor('kai', 3)).toBe('still');
+  });
+});
+import { planLights } from '../game/render/lightPlan';
+describe('B21 light plan', () => {
+  it('lights come only from real events, each id once, capped', () => {
+    const s = mk(); s.hero = 'sora'; expect(planLights(s, 0, 0).lights).toHaveLength(0);
+    for (let i = 1; i <= 20; i++) s.abilityEvents.push({ id: i, kind: 'horizon_burst', x: i, y: 0 });
+    const r = planLights(s, 0, 0); expect(r.lights.length).toBeLessThanOrEqual(8); expect(r.ability).toBe(20); expect(planLights(s, r.ability, 0).lights).toHaveLength(0);
+  });
+  it('is hero coloured and hostile slams are magenta, not friendly', () => {
+    const s = mk(); s.hero = 'ren'; s.abilityEvents.push({ id: 1, kind: 'bloodstar_slam', x: 0, y: 0 }); expect(planLights(s, 0, 0).lights[0].color).toBe(0xff3a2a);
+    const h = mk(); h.enemyEvents.push({ id: 1, kind: 'enemy_slam', enemy: 'bruiser', enemyId: 1, x: 0, y: 0, dirX: 0, dirY: 1 }); expect(planLights(h, 0, 0).lights[0].color).toBe(0xd0407a);
+  });
+});

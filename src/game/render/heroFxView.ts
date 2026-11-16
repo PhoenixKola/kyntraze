@@ -7,6 +7,7 @@ import { ASCEND, REN, SORA } from '../../content/heroKits';
 import { KAI_GROUND_DY } from '../../assets/kaiAnimation';
 import { ImpactDirector } from './impactDirector';
 import { AuraTracker, type AuraSample } from './auraState';
+import { AuraView } from './auraView';
 import { evolution, tierGain, tierSparks, type Evolution } from './buildEvolution';
 
 /** ImageGen VFX sprites (public/art/fx/<hero>/): additive, used for the aura and the big moments; the Graphics layers keep the geometry (rings, beams, bolts). */
@@ -36,16 +37,17 @@ export class HeroFxView {
     let im = this.imgs[this.used]; if (!im) { if (this.imgs.length >= 110) return; im = this.scene.add.image(0, 0, key).setBlendMode(Phaser.BlendModes.ADD); this.imgs.push(im); }
     this.used++; im.setTexture(key).setVisible(true).setPosition(Math.round(x), Math.round(y)).setScale(scale * (o.flip ? -1 : 1), scale * (o.sy ?? 1)).setAlpha(Math.min(1, alpha)).setRotation(o.rot ?? 0).setOrigin(o.ox ?? 0.5, o.oy ?? 0.5).setDepth(o.depth ?? 11.3);
   }
-  private lastEvent = 0; private readonly auraTrack = new AuraTracker(); private readonly director = new ImpactDirector();
+  private lastEvent = 0; private readonly auraTrack = new AuraTracker(); private readonly director = new ImpactDirector(); private readonly auraView: AuraView;
   private zoom = 1; private shake = 0; private evo: Evolution | null = null;
   constructor(private readonly scene: Phaser.Scene, private readonly hero: 'ren' | 'sora') {
     this.ground = scene.add.graphics().setDepth(3.6);
     this.g = scene.add.graphics().setDepth(11);
     this.glow = scene.add.graphics().setDepth(11.2).setBlendMode(Phaser.BlendModes.ADD);
+    this.auraView = new AuraView(scene, hero);
   }
   /** Camera punch-in of the reveal (the scene multiplies it into its fit zoom). */
   cameraZoom() { return this.zoom; }
-  destroy() { for (const i of this.imgs) i.destroy(); this.ground.destroy(); this.g.destroy(); this.glow.destroy(); }
+  destroy() { this.auraView.destroy(); for (const i of this.imgs) i.destroy(); this.ground.destroy(); this.g.destroy(); this.glow.destroy(); }
 
   update(s: GameState, dt: number, reduced: boolean, crowded: boolean, wx: number, wy: number) {
     const pal = PAL[this.hero], p = s.player, h = s.hx;
@@ -87,7 +89,9 @@ export class HeroFxView {
 
     // ---- persistent aura and motion trails
     const smp = this.auraTrack.update(s, s.phase === 'running' ? dt : 0, Math.hypot(p.vx, p.vy) / Math.max(1, p.speed));
-    if (aura && s.phase === 'running' && p.hp > 0) this.auraDraw(s, foot, calmFx, smp);   // B21.3: persistent, activity-responsive aura (the B20 stroke stays as the silhouette rim)
+    const live = aura && s.phase === 'running' && p.hp > 0;
+    if (live && this.auraView.available) this.auraView.update(smp, dt, foot, p.vx, p.vy, reduced ? 0.55 : crowded ? 0.75 : 1, calmFx); else this.auraView.hide();
+    if (live && !this.auraView.available) this.auraDraw(s, foot, calmFx, smp);   // B21.3: persistent, activity-responsive aura (the B20 stroke stays as the silhouette rim)
     else if (s.cinema) this.auraDraw(s, foot, calmFx, { ...smp, k: 0.6 });
 
     // ---- reveal: expanding pulses, screen vignette is HTML-free; camera punch-in via cameraZoom

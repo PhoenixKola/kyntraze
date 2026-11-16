@@ -1,0 +1,4 @@
+VFX sprite sheet for a 2D top-down pixel-art-style action game (Aegis shield shatter, cool white-blue energy glass). Pure BLACK background (#000000) for additive blending; self-luminous, painterly cel-shaded with crisp stepped shapes, bold readable silhouettes at 64 pixels, no text, no characters, no ground, no UI. Wide 16:9 canvas, items well separated in a clear grid, none cropped, none touching each other or the edges. Original design.
+Draw EXACTLY 7 items in a 4x2 grid, left to right, top to bottom:
+1-6. SIX different SHARD variants: angular broken pieces of a glowing white-blue energy shield (different sizes and shapes, triangular, long splinter, chunky wedge, curved plate fragment, small chip, forked shard), bright white edges, pale blue translucent faces,
+7. a thin shockwave RING (flat circle head-on) with cracked fracture gaps and bright white-blue edge.

@@ -1,0 +1,239 @@
+{
+ "sheets": "art/fx-b21/evo",
+ "sprites": [
+  {
+   "name": "comet_afterburn_trail",
+   "file": "comet_afterburn_trail.png",
+   "width": 613,
+   "height": 186
+  },
+  {
+   "name": "comet_echo_ring",
+   "file": "comet_echo_ring.png",
+   "width": 406,
+   "height": 409
+  },
+  {
+   "name": "comet_pierce_spark",
+   "file": "comet_pierce_spark.png",
+   "width": 491,
+   "height": 359
+  },
+  {
+   "name": "comet_tier2",
+   "file": "comet_tier2.png",
+   "width": 391,
+   "height": 318
+  },
+  {
+   "name": "comet_tier3",
+   "file": "comet_tier3.png",
+   "width": 579,
+   "height": 427
+  },
+  {
+   "name": "dragon_body_seg",
+   "file": "dragon_body_seg.png",
+   "width": 937,
+   "height": 257
+  },
+  {
+   "name": "dragon_head",
+   "file": "dragon_head.png",
+   "width": 658,
+   "height": 419
+  },
+  {
+   "name": "impact_azure",
+   "file": "impact_azure.png",
+   "width": 600,
+   "height": 449
+  },
+  {
+   "name": "impact_crimson",
+   "file": "impact_crimson.png",
+   "width": 605,
+   "height": 457
+  },
+  {
+   "name": "impact_gold",
+   "file": "impact_gold.png",
+   "width": 607,
+   "height": 462
+  },
+  {
+   "name": "impact_silver",
+   "file": "impact_silver.png",
+   "width": 595,
+   "height": 446
+  },
+  {
+   "name": "kai_afterburn_trail",
+   "file": "kai_afterburn_trail.png",
+   "width": 563,
+   "height": 159
+  },
+  {
+   "name": "kai_echo_ring",
+   "file": "kai_echo_ring.png",
+   "width": 394,
+   "height": 392
+  },
+  {
+   "name": "kai_pierce_spark",
+   "file": "kai_pierce_spark.png",
+   "width": 419,
+   "height": 408
+  },
+  {
+   "name": "kai_tier2",
+   "file": "kai_tier2.png",
+   "width": 352,
+   "height": 369
+  },
+  {
+   "name": "kai_tier3",
+   "file": "kai_tier3.png",
+   "width": 521,
+   "height": 448
+  },
+  {
+   "name": "ren_afterburn_trail",
+   "file": "ren_afterburn_trail.png",
+   "width": 530,
+   "height": 156
+  },
+  {
+   "name": "ren_echo_ring",
+   "file": "ren_echo_ring.png",
+   "width": 382,
+   "height": 364
+  },
+  {
+   "name": "ren_pierce_spark",
+   "file": "ren_pierce_spark.png",
+   "width": 277,
+   "height": 268
+  },
+  {
+   "name": "ren_tier2",
+   "file": "ren_tier2.png",
+   "width": 319,
+   "height": 339
+  },
+  {
+   "name": "ren_tier3",
+   "file": "ren_tier3.png",
+   "width": 511,
+   "height": 425
+  },
+  {
+   "name": "shield_ring",
+   "file": "shield_ring.png",
+   "width": 375,
+   "height": 374
+  },
+  {
+   "name": "shield_shard1",
+   "file": "shield_shard1.png",
+   "width": 329,
+   "height": 356
+  },
+  {
+   "name": "shield_shard2",
+   "file": "shield_shard2.png",
+   "width": 285,
+   "height": 266
+  },
+  {
+   "name": "shield_shard3",
+   "file": "shield_shard3.png",
+   "width": 319,
+   "height": 303
+  },
+  {
+   "name": "shield_shard4",
+   "file": "shield_shard4.png",
+   "width": 338,
+   "height": 322
+  },
+  {
+   "name": "shield_shard5",
+   "file": "shield_shard5.png",
+   "width": 137,
+   "height": 146
+  },
+  {
+   "name": "shield_shard6",
+   "file": "shield_shard6.png",
+   "width": 277,
+   "height": 300
+  },
+  {
+   "name": "sora_afterburn_trail",
+   "file": "sora_afterburn_trail.png",
+   "width": 536,
+   "height": 162
+  },
+  {
+   "name": "sora_echo_ring",
+   "file": "sora_echo_ring.png",
+   "width": 390,
+   "height": 380
+  },
+  {
+   "name": "sora_pierce_spark",
+   "file": "sora_pierce_spark.png",
+   "width": 347,
+   "height": 359
+  },
+  {
+   "name": "sora_tier2",
+   "file": "sora_tier2.png",
+   "width": 398,
+   "height": 313
+  },
+  {
+   "name": "sora_tier3",
+   "file": "sora_tier3.png",
+   "width": 511,
+   "height": 410
+  },
+  {
+   "name": "still_afterburn_trail",
+   "file": "still_afterburn_trail.png",
+   "width": 538,
+   "height": 140
+  },
+  {
+   "name": "still_blink_slash",
+   "file": "still_blink_slash.png",
+   "width": 441,
+   "height": 317
+  },
+  {
+   "name": "still_echo_ring",
+   "file": "still_echo_ring.png",
+   "width": 374,
+   "height": 351
+  },
+  {
+   "name": "still_pierce_spark",
+   "file": "still_pierce_spark.png",
+   "width": 368,
+   "height": 392
+  },
+  {
+   "name": "still_tier2",
+   "file": "still_tier2.png",
+   "width": 406,
+   "height": 367
+  },
+  {
+   "name": "still_tier3",
+   "file": "still_tier3.png",
+   "width": 482,
+   "height": 408
+  }
+ ]
+}

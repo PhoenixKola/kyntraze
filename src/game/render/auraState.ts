@@ -18,7 +18,8 @@ export class AuraTracker {
   private pulse = 0; private settle = 0; private lastAct = false; private lastRelease = false;
   /** dt is render dt in seconds (0 while paused). */
   update(s: GameState, dt: number, speedNorm: number): AuraSample {
-    const p = s.player, act = s.hx.act, charging = !!act && !act.released && (act.act === 'celestial_lance' || act.act === 'bloodstar' || act.t < 0.25), released = !!act && act.released;
+    const p = s.player, h = s.hx.act, c = s.cast, act = h ? { act: h.act as string, released: h.released, t: h.t, charge: h.charge } : c ? { act: c.kind as string, released: c.released, t: c.t, charge: c.charge ?? c.t } : null;
+    const charging = !!act && !act.released && (act.act === 'celestial_lance' || act.act === 'bloodstar' || act.act === 'beam' || act.act === 'sphere' || act.act === 'rift' || act.t < 0.25), released = !!act && act.released;
     if (released && !this.lastRelease) this.pulse = 1;
     this.lastRelease = released;
     const wasAct = this.lastAct; this.lastAct = !!act; if (wasAct && !act) this.settle = 0.5;
@@ -27,6 +28,6 @@ export class AuraTracker {
     const phase: AuraPhase = dashing ? 'dash' : charging ? 'charge' : released ? 'release' : this.settle > 0 ? 'settle' : moving ? 'moving' : 'idle';
     const kBase = { idle: 0.55, moving: 0.75, dash: 1.1, charge: 0.9, release: 1.15, settle: 0.7 }[phase];
     const sp = Math.hypot(p.vx, p.vy) || 1;
-    return { phase, k: kBase + 0.25 * this.pulse, leanX: moving || dashing ? -p.vx / sp : 0, leanY: moving || dashing ? -p.vy / sp : 0, lean: Math.min(1, speedNorm), gather: charging ? Math.min(1, (act?.charge ?? act?.t ?? 0) / 1.2) : 0, pulse: this.pulse };
+    return { phase, k: kBase + 0.25 * this.pulse, leanX: moving || dashing ? -p.vx / sp : 0, leanY: moving || dashing ? -p.vy / sp : 0, lean: Math.min(1, speedNorm), gather: charging ? Math.min(1, (act?.charge || act?.t || 0) / 1.2) : 0, pulse: this.pulse };
   }
 }

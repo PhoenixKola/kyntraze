@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { bossDamageLevel } from './bodyReaction';
+import { b21Key } from './b21Assets';
 import { kick } from './cameraKick';
 import type { Enemy, GameState } from '../../sim/GameState';
 import { BOSSES, SERAPH, WARDEN } from '../../content/bosses';
@@ -41,6 +42,7 @@ export class BossRenderer {
   private craters: { img: Phaser.GameObjects.Image; age: number }[] = [];
   private lastEventId = 0;
   private phaseGlow: Phaser.GameObjects.Sprite | null = null; private exposedGlow: Phaser.GameObjects.Sprite | null = null; private halo: Phaser.GameObjects.Image | null = null; private orbit: Phaser.GameObjects.Image[] = [];
+  private dmgOverlay: Phaser.GameObjects.Image | null = null; private coreCrack: Phaser.GameObjects.Image | null = null;
   private dmgLevel = 0; private recoil = 0; private leakClock = 0;
   private introMarks = new Set<number>(); private clockA = 0; private clockB = 0;
 
@@ -188,6 +190,19 @@ export class BossRenderer {
     void state;
   }
 
+  /** B21.4: ImageGen crack overlay fitted to the Warden's frame (drawn with the sprite's own origin and scale) and the Seraph's glowing core crack; level comes from the real HP/phase. */
+  private damageArt(k: BossKind, spr: Phaser.GameObjects.Sprite, e: Enemy, y: number, alpha: number) {
+    const lvl = this.dmgLevel, key = b21Key('dmg', lvl >= 3 ? 'crack_l3' : lvl === 2 ? 'crack_l2' : 'crack_l1');
+    if (k === 'warden' && lvl >= 1 && this.scene.textures.exists(key)) {
+      this.dmgOverlay ??= this.scene.add.image(0, 0, key);
+      this.dmgOverlay.setTexture(key).setVisible(true).setOrigin(218 / 436, 351 / 439).setScale(SCALE * (this.face < 0 ? -1 : 1), SCALE).setPosition(spr.x, spr.y).setDepth(spr.depth + 0.02).setAlpha(alpha * (lvl === 1 ? 0.55 : 0.85));
+    } else this.dmgOverlay?.setVisible(false);
+    const ck = b21Key('dmg', 'core_crack');
+    if (k === 'seraph' && lvl >= 2 && this.scene.textures.exists(ck)) {
+      this.coreCrack ??= this.scene.add.image(0, 0, ck).setBlendMode(Phaser.BlendModes.ADD);
+      this.coreCrack.setVisible(true).setPosition(e.x, y - 42).setScale(0.55 + 0.05 * Math.sin(this.t * 6)).setDepth(spr.depth + 0.02).setAlpha(alpha * (lvl === 3 ? 0.85 : 0.5));
+    } else this.coreCrack?.setVisible(false);
+  }
   private addCrater(x: number, y: number, s: number) {
     if (this.craters.length >= 14) { const o = this.craters.shift()!; o.img.destroy(); }
     this.craters.push({ img: this.scene.add.image(Math.round(x), Math.round(y), bossFxKey('rupture-crater')).setScale(s).setDepth(2.5).setAlpha(0.75), age: 0 });
@@ -235,7 +250,7 @@ export class BossRenderer {
     const spr = this.sprite; this.t += dt;
     if (e.hp < this.hp) { this.flash = 0.05; this.recoil = 0.14; } this.hp = e.hp; this.flash = Math.max(0, this.flash - dt); this.recoil = Math.max(0, this.recoil - dt);
     const lvl = bossDamageLevel(e.hp / e.maxHp, ai.phase === 2 ? 2 : 1);   // B21.4: the body wears its real HP/phase: darker scorched plates, then heat leaking from the cracks
-    if (lvl > this.dmgLevel) { this.dmgLevel = lvl; if (!reduced) { this.pool.spawn({ key: b17('core_flash'), x: e.x, y: e.y - 30, depth: 10.6, life: 0.4, blend: 'add', tint: k === 'warden' ? CRIMSON : PURPLE, s0: 0.4, s1: 1.4, a0: 0.8, a1: 0 }); for (let i = 0; i < 5; i++) { const a = Math.random() * 6.28; this.pool.spawn({ key: vfxKey('debris' + (i % 4), false), x: e.x, y: e.y - 20, depth: 10.2, life: 0.6, vx: Math.cos(a) * 130, vy: Math.sin(a) * 90 - 110, ay: 420, s0: 1.2, s1: 0.5, a0: 1, a1: 0, rot: a, spin: 8 }); } } }
+    if (lvl > this.dmgLevel) { this.dmgLevel = lvl; if (!reduced) { this.pool.spawn({ key: b17('core_flash'), x: e.x, y: e.y - 30, depth: 10.6, life: 0.4, blend: 'add', tint: k === 'warden' ? CRIMSON : PURPLE, s0: 0.4, s1: 1.4, a0: 0.8, a1: 0 }); for (let i = 0; i < 5; i++) { const a = Math.random() * 6.28; const piece = k === 'warden' ? b21Key('dmg', 'slab_' + 'abcd'[i % 4]) : b21Key('dmg', ['halo_shard_a', 'halo_shard_b', 'crystal_shard_a', 'crystal_shard_b'][i % 4]); this.pool.spawn({ key: this.scene.textures.exists(piece) ? piece : vfxKey('debris' + (i % 4), false), x: e.x, y: e.y - 20, depth: 10.2, life: 0.6, vx: Math.cos(a) * 130, vy: Math.sin(a) * 90 - 110, ay: 420, s0: this.scene.textures.exists(piece) ? 0.32 : 1.2, s1: this.scene.textures.exists(piece) ? 0.18 : 0.5, a0: 1, a1: 0, rot: a, spin: 8 }); } } }
     const fx = e.mode === 'move' || e.mode === 'recover' || e.mode === 'intro' || e.mode === 'phase' ? p.x - e.x : e.aimX;
     if (Math.abs(fx) > (e.mode === 'move' ? 14 : 0.15)) this.face = fx >= 0 ? 1 : -1;
     const walk = this.frameIdx(k, 'move', Math.floor(this.t * m.fps * (k === 'warden' ? 1 : 1.4)) % 4);
@@ -262,6 +277,7 @@ export class BossRenderer {
     const shake = (e.mode === 'windup' && k === 'warden' ? Math.sin(this.t * 55) * (0.5 + (1 - e.modeT / Math.max(0.01, WARDEN.rupture.windup)) * 0.8) : 0) * (reduced ? 0 : 1);
     const lean = reduced ? 0 : Math.sin((this.recoil / 0.14) * Math.PI) * 3 * (k === 'warden' ? 0.6 : 1.2) * (p.x >= e.x ? -1 : 1);
     spr.setPosition(Math.round(e.x + shake + lean), Math.round(feetY + hover)).setDepth(6.2 + (feetY / 1600) * 1.8).setAlpha(alpha);
+    this.damageArt(k, spr, e, feetY + hover, alpha);
     const tints = k === 'warden' ? [0xffffff, 0xf2e6e0, 0xe0c8c4, 0xd2b0ac] : [0xffffff, 0xf4eeff, 0xe6dcf6, 0xd8c8f0];
     spr.tintMode = Phaser.TintModes.MULTIPLY; spr.setTint(tints[this.dmgLevel]);
     if (this.dmgLevel >= 2 && !reduced && dt > 0 && e.mode !== 'blink') { this.leakClock += dt; if (this.leakClock > (this.dmgLevel === 3 ? 0.28 : 0.5)) { this.leakClock = 0; this.pool.spawn({ key: b17('core_flash'), x: e.x + (Math.random() - 0.5) * e.radius, y: feetY - 30 - Math.random() * 40, depth: 10.5, life: 0.35, blend: 'add', tint: k === 'warden' ? CRIMSON : PURPLE, s0: 0.12, s1: 0.3, a0: 0.7, a1: 0, vy: -26 }); } }
@@ -320,7 +336,7 @@ export class BossRenderer {
     }
   }
 
-  private clearExtras() { for (const o of [this.phaseGlow, this.exposedGlow, this.halo, ...this.orbit]) o?.destroy(); this.phaseGlow = this.exposedGlow = null; this.halo = null; this.orbit = []; this.introMarks.clear(); }
+  private clearExtras() { for (const o of [this.phaseGlow, this.exposedGlow, this.halo, this.dmgOverlay, this.coreCrack, ...this.orbit]) o?.destroy(); this.dmgOverlay = this.coreCrack = null; this.phaseGlow = this.exposedGlow = null; this.halo = null; this.orbit = []; this.introMarks.clear(); }
   destroy() {
     this.clearExtras();
     this.sprite?.destroy(); this.glow?.destroy(); this.ghost?.spr.destroy(); for (const i of this.imgs) i.destroy(); for (const c of this.craters) c.img.destroy();

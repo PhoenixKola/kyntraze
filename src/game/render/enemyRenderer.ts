@@ -4,6 +4,7 @@ import type { Enemy, GameState } from '../../sim/GameState';
 import { ENEMIES, ENEMY_KINDS, AIM_LOCK_FRACTION, groundDy, isBoss, type MobKind as EnemyKind } from '../../content/enemies';
 import { FxPool, vfxKey } from './fxPool';
 import { b14Key } from './b14fx';
+import { b21Key } from './b21Assets';
 import { reactionFor, reactionPose, type ReactKind, type Reaction } from './bodyReaction';
 
 /** B07 enemy art: ImageGen sheets (8 frames: move x4, windup, release, hurt, death; east-facing, mirrored for west) cut by scripts/build-enemy-art.py. */
@@ -33,7 +34,7 @@ const GHOST_CAP = 24;
 
 const BOLT_LOOK = { bolt: { key: 'bolt', w: 51 }, orb: { key: 'orb-bolt', w: 30 }, prism: { key: 'prism-bolt', w: 34 } } as const;
 const boltKey = (k: keyof typeof BOLT_LOOK) => (k === 'bolt' ? enemyFxKey('bolt') : `boss-fx-${BOLT_LOOK[k].key}`);
-interface Track { t: number; face: 1 | -1; hp: number; hurt: number; flash: number; tele: Phaser.GameObjects.Image | null; tele2: Phaser.GameObjects.Image | null; recoverT: number; fan: Phaser.GameObjects.Image[]; aura: Phaser.GameObjects.Image | null; react: Reaction | null; reactT: number; rx: number; ry: number; prevMode: string }
+interface Track { t: number; face: 1 | -1; hp: number; hurt: number; flash: number; tele: Phaser.GameObjects.Image | null; tele2: Phaser.GameObjects.Image | null; recoverT: number; fan: Phaser.GameObjects.Image[]; aura: Phaser.GameObjects.Image | null; glyph: Phaser.GameObjects.Image | null; react: Reaction | null; reactT: number; rx: number; ry: number; prevMode: string }
 interface Ghost { spr: Phaser.GameObjects.Sprite; age: number; baseY: number }
 
 export class EnemyRenderer {
@@ -91,6 +92,9 @@ export class EnemyRenderer {
   private shieldState(e: Enemy, face: 1 | -1, open: boolean, reduced: boolean) {
     const x = e.x + face * 26, y = e.y - 12;
     this.pool.spawn({ key: b14Key('glint'), x, y, depth: 10.4, life: open ? 0.4 : 0.22, blend: 'add', tint: open ? 0xffffff : 0xb8d0ff, s0: 0.2, s1: open ? 1.1 : 0.6, a0: 1, a1: 0 });
+    const ck = b21Key('dmg', 'shield_crack'), dk = b21Key('dmg', 'shield_down');
+    if (open && this.scene.textures.exists(ck)) this.pool.spawn({ key: ck, x, y, depth: 10.5, life: 0.55, blend: 'add', s0: 0.28, s1: 0.5, a0: 1, a1: 0, flipX: face < 0, rot: face * 0.12 });   // the guard cracks: ImageGen shield-break art at the exact moment the sim opens the punish window
+    if (open && this.scene.textures.exists(dk)) this.pool.spawn({ key: dk, x: e.x, y: e.y - 44, depth: 10.6, life: 0.7, blend: 'add', s0: 0.22, s1: 0.26, a0: 0.9, a1: 0, vy: -10 });
     if (open && !reduced) { this.pool.spawn({ key: b14Key('shatter'), x, y, depth: 10.3, life: 0.4, blend: 'add', tint: 0xcfe0ff, s0: 0.25, s1: 0.8, a0: 0.8, a1: 0, rot: e.id }); }
   }
 
@@ -124,7 +128,7 @@ export class EnemyRenderer {
       if (e.hp <= 0 || isBoss(e.kind)) continue; live.add(e.id);
       const def = ENEMIES[e.kind as EnemyKind], m = this.manifests[e.kind as EnemyKind];
       let spr = this.sprites.get(e.id), tr = this.tracks.get(e.id);
-      if (!spr || !tr) { spr = this.newSprite(e.kind as EnemyKind); this.sprites.set(e.id, spr); tr = { t: e.id * 0.137, face: p.x >= e.x ? 1 : -1, hp: e.hp, hurt: 0, flash: 0, tele: null, tele2: null, recoverT: 0, fan: [], aura: null, react: null, reactT: 9, rx: 0, ry: 0, prevMode: e.mode }; this.tracks.set(e.id, tr); }
+      if (!spr || !tr) { spr = this.newSprite(e.kind as EnemyKind); this.sprites.set(e.id, spr); tr = { t: e.id * 0.137, face: p.x >= e.x ? 1 : -1, hp: e.hp, hurt: 0, flash: 0, tele: null, tele2: null, recoverT: 0, fan: [], aura: null, glyph: null, react: null, reactT: 9, rx: 0, ry: 0, prevMode: e.mode }; this.tracks.set(e.id, tr); }
       tr.t += dt;
       const pm = this.prevMode.get(e.id); if (pm === undefined) this.arrive(e, def, reduced); else if (pm !== e.mode && def.shield) this.shieldState(e, tr.face, e.mode === 'recover', reduced); this.prevMode.set(e.id, e.mode);
       if (e.hp < tr.hp) {
@@ -157,7 +161,7 @@ export class EnemyRenderer {
       this.telegraph(e, tr, prog, feetY);
       this.aura(e, tr, feetY, def);
     }
-    for (const [id, spr] of this.sprites) if (!live.has(id)) { spr.destroy(); this.sprites.delete(id); const t = this.tracks.get(id); if (t) { this.freeTele(t); t.aura?.destroy(); } this.tracks.delete(id); this.prevMode.delete(id); }
+    for (const [id, spr] of this.sprites) if (!live.has(id)) { spr.destroy(); this.sprites.delete(id); const t = this.tracks.get(id); if (t) { this.freeTele(t); t.aura?.destroy(); t.glyph?.destroy(); } this.tracks.delete(id); this.prevMode.delete(id); }
     // lingering death frame, separate from the sim: it cannot collide or damage
     for (let i = this.ghosts.length - 1; i >= 0; i--) {
       const g = this.ghosts[i]; g.age += dt; const u = g.age / DEATH_LIFE;
@@ -208,6 +212,8 @@ export class EnemyRenderer {
     const key = 'boss-fx-aura-ring', w = this.scene.textures.get(key).getSourceImage().width;
     tr.aura ??= this.scene.add.image(0, 0, key).setDepth(2.6);
     tr.aura.setVisible(true).setPosition(Math.round(e.x), Math.round(feetY)).setScale((def.aura.radius * 2) / w).setAlpha(0.5);
+    const gk = b21Key('dmg', 'buff_glyph');
+    if (this.scene.textures.exists(gk)) { tr.glyph ??= this.scene.add.image(0, 0, gk).setBlendMode(Phaser.BlendModes.ADD).setDepth(10.7); tr.glyph.setVisible(true).setPosition(Math.round(e.x), Math.round(feetY - 62 + Math.sin(tr.t * 3) * 2)).setScale(0.2).setAlpha(0.8); }   // the Cantor's buff is read on the caster itself
   }
 
   destroy() {

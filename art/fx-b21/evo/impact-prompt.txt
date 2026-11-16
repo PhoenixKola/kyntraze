@@ -1,0 +1,6 @@
+VFX sprite sheet for a 2D top-down pixel-art-style action game (anime hit-impact frames). Pure BLACK background (#000000) for additive blending; self-luminous, painterly cel-shaded with crisp stepped shapes, bold readable silhouettes at 64 pixels, no text, no characters, no ground, no UI. Wide 16:9 canvas, items well separated in a clear grid, none cropped, none touching each other or the edges. Original design.
+Draw EXACTLY 4 items in a 2x2 grid, left to right, top to bottom. Each is a bold anime-style IMPACT FRAME flash: a high-contrast radial starburst with long razor speed lines radiating from a blinding white centre, jagged spiky outer silhouette, roughly circular overall, about 512px, instantly readable:
+1. GOLD (gold-orange with white core),
+2. CRIMSON (blood red with white-yellow core),
+3. AZURE (sapphire blue with white core),
+4. SILVER (white-silver with pale blue edge, cleaner thinner lines).

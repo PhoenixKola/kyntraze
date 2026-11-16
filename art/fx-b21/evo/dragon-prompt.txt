@@ -1,0 +1,4 @@
+VFX sprite sheet for a 2D top-down pixel-art-style action game (Kai Cometheart golden dragon energy finisher). Pure BLACK background (#000000) for additive blending; self-luminous, painterly cel-shaded with crisp stepped shapes, bold readable silhouettes at 64 pixels, no text, no characters, no ground, no UI. Wide 16:9 canvas, items well separated in a clear grid, none cropped, none touching each other or the edges. Original design.
+Draw EXACTLY 2 items side by side in one row:
+1. DRAGON HEAD: a stylised dragon head made purely of golden lightning-energy, seen from the side facing RIGHT, open jaws, horns, flowing mane of gold flame, white-hot eye, dynamic and fierce,
+2. DRAGON BODY SEGMENT: a horizontal segment of a spiralling golden dragon body made of coiled energy with scale-like arcs and crackling gold lightning along it, tileable-feeling, body runs left to right.
