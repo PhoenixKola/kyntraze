@@ -1,0 +1,134 @@
+[
+ {
+  "clip": "ren_ascendant_gloam",
+  "size_kb": 1858,
+  "rafFpsPerSecond": [
+   36,
+   42,
+   42,
+   42,
+   38,
+   38,
+   38,
+   34,
+   36
+  ],
+  "ffmpeg": 0
+ },
+ {
+  "clip": "sora_sovereign_ashen",
+  "size_kb": 1811,
+  "rafFpsPerSecond": [
+   38,
+   44,
+   43,
+   42,
+   39,
+   42,
+   35,
+   42,
+   44,
+   40
+  ],
+  "ffmpeg": 0
+ },
+ {
+  "clip": "kai_cometheart_gloam",
+  "size_kb": 1825,
+  "rafFpsPerSecond": [
+   33,
+   37,
+   38,
+   39,
+   36,
+   35,
+   36,
+   40,
+   34,
+   39
+  ],
+  "ffmpeg": 0
+ },
+ {
+  "clip": "kai_stillfire_ashen",
+  "size_kb": 1694,
+  "rafFpsPerSecond": [
+   32,
+   41,
+   40,
+   40,
+   38,
+   39,
+   35,
+   34,
+   40
+  ],
+  "ffmpeg": 0
+ },
+ {
+  "clip": "kai_flarebound_gloam",
+  "size_kb": 1697,
+  "rafFpsPerSecond": [
+   34,
+   40,
+   39,
+   41,
+   36,
+   37,
+   38,
+   35,
+   36
+  ],
+  "ffmpeg": 0
+ },
+ {
+  "clip": "ren_base_ashen",
+  "size_kb": 1690,
+  "rafFpsPerSecond": [
+   40,
+   45,
+   43,
+   45,
+   42,
+   39,
+   43,
+   36,
+   41,
+   39
+  ],
+  "ffmpeg": 0
+ },
+ {
+  "clip": "ren_evolved_late_build_ashen",
+  "size_kb": 1966,
+  "rafFpsPerSecond": [
+   36,
+   42,
+   43,
+   41,
+   40,
+   35,
+   37,
+   31,
+   31
+  ],
+  "ffmpeg": 0
+ },
+ {
+  "clip": "sora_reduced_effects_gloam",
+  "size_kb": 1665,
+  "rafFpsPerSecond": [
+   41,
+   53,
+   52,
+   51,
+   50,
+   53,
+   44,
+   51,
+   55,
+   49
+  ],
+  "ffmpeg": 0
+ }
+]

@@ -1,4 +1,4 @@
-# B21 — Combat Evolution + Windows desktop (PARTIAL: first session; owner review required; local commits, NOT pushed)
+# B21 — Combat Evolution + Windows desktop (PARTIAL: two sessions; owner review required; local commits, NOT pushed)
 
 **Baseline:** B20 `08c6eb3`, clean tree. Reproduced before editing: typecheck clean, Vitest 368 pass / 1 skipped, build OK.
 **Scope honesty:** the brief is a multi-session production batch. This session delivered the code-side of the six pillars, the branding and the Electron build. It did **not** deliver new authored sprite poses, new ImageGen VFX families, boss damage sheets, audio changes or any normal-speed video. Those are listed as INCOMPLETE below, not as passed.
@@ -53,6 +53,18 @@ Vitest (Phaser-free): 383 passing before the desktop work (368 baseline + 15 new
 6. B21.6 impact frames, dynamic light, camera choreography review, SFX alignment/audition montage.
 7. B21.7 evidence directory (`art/review/b21/`), `B21-REVIEW.md` with before/after table, profiling, six-route checklist.
 8. Desktop: real network-disconnected run, upgrade-in-place with the same profile, corrupt-save backup check on desktop, controller/fullscreen/Sora hold-E check.
+
+## Session 2 update (supersedes the stage rows above where they differ)
+- **B21.1 motion:** `bodyMotion.ts` springs (lean, start/stop squash, dash stretch, cast recoil, hurt stagger, breathing) applied to every hero state/facing, with eight distinct signatures. **Still no new authored poses/rig edits** (Blender rigs untouched): authored turn bridges, new run cycles, hair/sash secondary motion remain INCOMPLETE.
+- **B21.2:** ImageGen evolution families (`public/art/fx/b21/evo/`, 39 PNGs) wired through one central `EvoFx` (tier arcs, pierce sparks, afterburn trail, echo rings at the real radius, still blink slash). Not done: per-ability bespoke silhouettes beyond these families, Dragonfang head art (existing sliced dragon kept).
+- **B21.3:** ImageGen flipbook auras for all five states (`public/art/fx/b21/aura/`) via `AuraView`, including Kai's three forms. Not done: authored dash/stop/revert aura clips.
+- **B21.4:** ImageGen Warden crack levels, slabs, Seraph shards/core crack, Aegis shield crack/shatter/guard-down, Cantor buff glyph; Warden Rupture/Sweep/Rush acting. Not done: new Aegis/Cantor/Seraph body frames.
+- **B21.5:** ImageGen floor decals per arena wired into the marks.
+- **B21.6:** impact frames (ImageGen), floor lights, budgeted hit-stop. Not done: camera choreography beyond existing kicks, SFX alignment (no audio touched).
+- **Evidence:** `art/review/b21/video/` (8 clips) + `B21-REVIEW.md`; scripts `b21-capture`, `b21-boss-capture`, `b21-video`, `b21-stress`.
+- **Stress (software GL, counts not FPS):** 70 mobs + spammed abilities, scene display list plateaus (Ren ~480, Sora ~500, Cometheart ~800 objects, all pools capped); no console errors.
+- **Visually observed (stills):** all eight transformed/base captures of the five auras at 960x540 on Gloam, evolved Ren/Sora/Kai(Cometheart) abilities on Ashen, Warden damage levels 100/60/30% and phase 2, Seraph phase 2 halo/core, one frame extracted from a recorded clip. **Still nothing watched at normal speed.**
+- **Tests:** Vitest 391 pass (1 skipped); typecheck clean; build OK; `desktop:smoke` PASS with the new art manifests (0 failed requests). Playwright full run on an otherwise idle machine: **69 passed, 1 failed, 3 skipped**; the failure is `menus.spec.ts:36` (Esc on hero select), which passes 3/3 in isolation and also failed once in session 1 (pre-existing flake in the title menu, unrelated to B21 code).
 
 ## Source map used (verified present)
 `src/sim/*`, `src/content/{upgrades,heroKits}.ts`, `src/assets/{kaiAnimation,heroAnimation}.ts`, `src/game/render/{EntityRenderer,heroFxView,abilityFx,enemyRenderer,bossRenderer,fxPool}.ts`, `src/game/scenes/ArenaScene.ts` (hit-stop = skipped sim ticks via `hitstopLeft`, unchanged contract), `art/` rigs present locally.
