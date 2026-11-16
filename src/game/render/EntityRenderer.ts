@@ -60,7 +60,7 @@ export class EntityRenderer {
   }
   /** B12: camera punch-in factor of the Form II reveal, and a pending visual hit-stop (ms) the scene turns into skipped sim ticks. */
   cameraZoom() { return this.cometFx.cameraZoom() * this.apexFx.cameraZoom() * (this.heroFx?.cameraZoom() ?? 1); }
-  takeHitstop() { return Math.max(this.cometFx.takeHitstop(), this.apexFx.takeHitstop()); }
+  takeHitstop() { return Math.max(this.cometFx.takeHitstop(), this.apexFx.takeHitstop(), this.heroFx?.takeHitstop() ?? 0); }
   /** Hero animation state, for the dev-only QA hook. */
   deathPresented() { return this.heroFx ? (this.heroAnim ? this.heroAnim.deathPresented() : this.heroDeadT > 1) : this.animator.deathPresented(); }
   /** QA-only size comparison; the shipped default stays KAI_SCALE. */

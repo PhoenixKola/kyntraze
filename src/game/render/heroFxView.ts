@@ -5,6 +5,9 @@ import type { GameState, HeroCast } from '../../sim/GameState';
 import { hand, lanceHalfWidth } from '../../sim/HeroSystem';
 import { ASCEND, REN, SORA } from '../../content/heroKits';
 import { KAI_GROUND_DY } from '../../assets/kaiAnimation';
+import { ImpactDirector } from './impactDirector';
+import { AuraTracker, type AuraSample } from './auraState';
+import { evolution, tierGain, tierSparks, type Evolution } from './buildEvolution';
 
 /** ImageGen VFX sprites (public/art/fx/<hero>/): additive, used for the aura and the big moments; the Graphics layers keep the geometry (rings, beams, bolts). */
 export const HERO_FX_NAMES: Record<'ren' | 'sora', readonly string[]> = {
@@ -33,8 +36,8 @@ export class HeroFxView {
     let im = this.imgs[this.used]; if (!im) { if (this.imgs.length >= 110) return; im = this.scene.add.image(0, 0, key).setBlendMode(Phaser.BlendModes.ADD); this.imgs.push(im); }
     this.used++; im.setTexture(key).setVisible(true).setPosition(Math.round(x), Math.round(y)).setScale(scale * (o.flip ? -1 : 1), scale * (o.sy ?? 1)).setAlpha(Math.min(1, alpha)).setRotation(o.rot ?? 0).setOrigin(o.ox ?? 0.5, o.oy ?? 0.5).setDepth(o.depth ?? 11.3);
   }
-  private lastEvent = 0;
-  private zoom = 1; private shake = 0;
+  private lastEvent = 0; private readonly auraTrack = new AuraTracker(); private readonly director = new ImpactDirector();
+  private zoom = 1; private shake = 0; private evo: Evolution | null = null;
   constructor(private readonly scene: Phaser.Scene, private readonly hero: 'ren' | 'sora') {
     this.ground = scene.add.graphics().setDepth(3.6);
     this.g = scene.add.graphics().setDepth(11);
@@ -47,6 +50,7 @@ export class HeroFxView {
   update(s: GameState, dt: number, reduced: boolean, crowded: boolean, wx: number, wy: number) {
     const pal = PAL[this.hero], p = s.player, h = s.hx;
     this.ground.clear(); this.g.clear(); this.glow.clear(); this.used = 0;
+    this.evo = evolution(s, this.hero === 'ren' ? 2 : 1); this.director.tick(s.phase === 'running' ? dt : 0);
     for (const e of s.abilityEvents) if (e.id > this.lastEvent) { this.lastEvent = e.id; this.onEvent(e.kind, e.x, e.y, e.n ?? 0, s, reduced); }
     this.flashes = this.flashes.filter(f => (f.t += dt) < f.dur);
     const foot = { x: wx, y: wy };   // ground point between the soles
@@ -82,7 +86,9 @@ export class HeroFxView {
     for (const f of this.flashes) this.flash(f, pal);
 
     // ---- persistent aura and motion trails
-    if (s.cinema) { this.auraDraw(s, foot, calmFx, aura); this.auraSprites(s, foot, calmFx, aura); }   // B20: outside the reveal the transformation is shown by the body stroke only (EntityRenderer)
+    const smp = this.auraTrack.update(s, s.phase === 'running' ? dt : 0, Math.hypot(p.vx, p.vy) / Math.max(1, p.speed));
+    if (aura && s.phase === 'running' && p.hp > 0) this.auraDraw(s, foot, calmFx, smp);   // B21.3: persistent, activity-responsive aura (the B20 stroke stays as the silhouette rim)
+    else if (s.cinema) this.auraDraw(s, foot, calmFx, { ...smp, k: 0.6 });
 
     // ---- reveal: expanding pulses, screen vignette is HTML-free; camera punch-in via cameraZoom
     const cin = s.cinema; this.zoom = 1;
@@ -92,24 +98,28 @@ export class HeroFxView {
 
   private onEvent(kind: string, x: number, y: number, n: number, s: GameState, reduced: boolean) {
     const pal = this.hero === 'ren';
-    const add = (f: Partial<Flash> & { kind: Flash['kind'] }) => { if (this.flashes.length < 40) this.flashes.push({ x, y, t: 0, dur: 0.22, r: 46, ang: 0, big: false, ...f }); };
+    const ev = this.evo, tg = (k: 'auto' | 'q' | 'e' | 'r') => (ev ? tierGain(ev[k]) : 1);
+    const add = (f: Partial<Flash> & { kind: Flash['kind'] }, k: 'auto' | 'q' | 'e' | 'r' = 'auto') => { if (this.flashes.length < 40) this.flashes.push({ x, y, t: 0, dur: 0.22, r: 46, ang: 0, big: false, ...f, ...(f.r !== undefined ? { r: f.r * tg(k) } : {}) }); };
+    const sparks = (k: 'auto' | 'q' | 'e' | 'r', r: number) => { if (!ev) return; for (let i = 0; i < tierSparks(ev[k], reduced); i++) add({ kind: 'flare', dur: 0.14 + 0.03 * i, r: r * (0.5 + 0.25 * i), ang: i * 2.1 }, k); };
     switch (kind) {
-      case 'auto_hit': add({ kind: 'slash', ang: Math.atan2(s.hx.strike.y, s.hx.strike.x), dur: 0.16, r: 40 }); break;
+      case 'auto_hit': add({ kind: 'slash', ang: Math.atan2(s.hx.strike.y, s.hx.strike.x), dur: 0.16, r: 40 }, 'auto'); sparks('auto', 20); break;
       case 'auto_finisher': add({ kind: 'slash', ang: Math.atan2(s.hx.strike.y, s.hx.strike.x), dur: 0.22, r: 58, big: true }); add({ kind: 'dust', dur: 0.3, r: 30 }); break;
-      case 'hero_q_beat': { const last = (n & 128) !== 0; add({ kind: 'slash', ang: Math.atan2(s.hx.act?.dirY ?? 0, s.hx.act?.dirX ?? 1) + ((n >> 8) % 2 ? 0.5 : -0.5), dur: last ? 0.26 : 0.14, r: last ? 78 : 52, big: last }); if (last) add({ kind: 'burst', dur: 0.26, r: 70, big: true }); if (!reduced) this.shake = Math.max(this.shake, last ? 0.0032 : 0.0014); break; }
-      case 'rush_strike': add({ kind: 'burst', dur: 0.3, r: 64, big: true }); add({ kind: 'dust', dur: 0.32, r: 40 }); if (!reduced) this.shake = Math.max(this.shake, 0.0024); break;
-      case 'bloodstar_slam': add({ kind: 'crack', dur: 1.1, r: 150 }); add({ kind: 'burst', dur: 0.4, r: 120, big: true }); add({ kind: 'dust', dur: 0.5, r: 90 }); if (!reduced) this.shake = Math.max(this.shake, 0.0058); break;
-      case 'bloodstar_rebound': add({ kind: 'burst', dur: 0.4, r: 150, big: true }); if (!reduced) this.shake = Math.max(this.shake, 0.0045); break;
-      case 'lance_fire': add({ kind: 'flare', dur: 0.3, r: 40 + 16 * n }); if (!reduced) this.shake = Math.max(this.shake, 0.0016 + 0.0008 * n); break;
-      case 'lance_pulse': add({ kind: 'flare', dur: 0.2, r: 30 + 10 * n }); break;
-      case 'horizon_burst': add({ kind: 'flare', dur: 0.4, r: 80, big: true }); if (!reduced) this.shake = Math.max(this.shake, 0.004); break;
+      case 'hero_q_beat': { const last = (n & 128) !== 0; if (last) this.director.request('heavy', reduced); add({ kind: 'slash', ang: Math.atan2(s.hx.act?.dirY ?? 0, s.hx.act?.dirX ?? 1) + ((n >> 8) % 2 ? 0.5 : -0.5), dur: last ? 0.26 : 0.14, r: last ? 78 : 52, big: last }, 'q'); if (last) sparks('q', 30); if (last) add({ kind: 'burst', dur: 0.26, r: 70, big: true }); if (!reduced) this.shake = Math.max(this.shake, last ? 0.0032 : 0.0014); break; }
+      case 'rush_strike': add({ kind: 'burst', dur: 0.3, r: 64, big: true }, 'e'); sparks('e', 34); add({ kind: 'dust', dur: 0.32, r: 40 }); if (!reduced) this.shake = Math.max(this.shake, 0.0024); break;
+      case 'bloodstar_slam': this.director.request('finisher', reduced); add({ kind: 'crack', dur: 1.1, r: 150 }); add({ kind: 'burst', dur: 0.4, r: 120, big: true }); add({ kind: 'dust', dur: 0.5, r: 90 }); if (!reduced) this.shake = Math.max(this.shake, 0.0058); break;
+      case 'bloodstar_rebound': this.director.request('heavy', reduced); add({ kind: 'burst', dur: 0.4, r: 150, big: true }); if (!reduced) this.shake = Math.max(this.shake, 0.0045); break;
+      case 'lance_fire': if (n >= 2) this.director.request('heavy', reduced); add({ kind: 'flare', dur: 0.3, r: 40 + 16 * n }); if (!reduced) this.shake = Math.max(this.shake, 0.0016 + 0.0008 * n); break;
+      case 'lance_pulse': add({ kind: 'flare', dur: 0.2, r: 30 + 10 * n }, 'e'); sparks('e', 26); break;
+      case 'horizon_burst': add({ kind: 'flare', dur: 0.4, r: 80, big: true }, 'r'); sparks('r', 40); if (!reduced) this.shake = Math.max(this.shake, 0.004); break;
       case 'volley_fire': case 'needle_fire': add({ kind: 'flare', dur: 0.1, r: 16 }); break;
-      case 'ascend_break': add({ kind: 'pillar', dur: 0.9, r: 200, big: true }); add({ kind: 'burst', dur: 0.6, r: 220, big: true }); add({ kind: 'dust', dur: 0.7, r: 160 }); if (!reduced) this.shake = Math.max(this.shake, 0.007); break;
+      case 'ascend_break': this.director.request('finisher', reduced); add({ kind: 'pillar', dur: 0.9, r: 200, big: true }); add({ kind: 'burst', dur: 0.6, r: 220, big: true }); add({ kind: 'dust', dur: 0.7, r: 160 }); if (!reduced) this.shake = Math.max(this.shake, 0.007); break;
       default: break;
     }
     void pal;
   }
   /** Camera shake the scene applies (0 = none), consumed once. */
+  /** Hit-stop (ms) the scene turns into skipped sim ticks: heavy Ren/Sora moments only, budgeted by the ImpactDirector. */
+  takeHitstop() { return this.director.take(); }
   takeShake() { const v = this.shake; this.shake = 0; return v; }
 
   private reticle(c: HeroCast, s: GameState) {
@@ -171,25 +181,27 @@ export class HeroFxView {
       this.put(key, f.x - Math.cos(ang) * f.r * 0.5, f.y - Math.sin(ang) * f.r * 0.5, f.r * 2.3 / w * (0.75 + 0.35 * ease(u * 1.6)), 0.95 * a, { rot: ang, ox: 0.35 });
     }
   }
-  /** The aura is ImageGen art in layers: a big halo and flame/lightning wings BEHIND the body (depth below the sprite), a thin veil in front, a ground sigil and rising motes. Nothing is drawn as an arrow or ribbon. */
-  private auraDraw(s: GameState, foot: { x: number; y: number }, calm: boolean, steady: boolean) {
-    const t = s.time, p = s.player, boost = s.hx.act ? 1.3 : p.dashRemaining > 0 ? 1.5 : 1, k = (steady ? 1 : 0.6) * boost, br = 0.9 + 0.1 * Math.sin(t * 3.2), fl = 0.85 + 0.15 * Math.sin(t * 9.1 + 1.3);
+  /** B21.3: the aura is ImageGen art in layers (halo + flame/lightning wings BEHIND the body, a thin veil in front, a ground sigil, rising motes). It leans away from travel, tightens while charging, flares on release and settles afterwards. */
+  private auraDraw(s: GameState, foot: { x: number; y: number }, calm: boolean, a: AuraSample) {
+    const t = s.time, br = 0.9 + 0.1 * Math.sin(t * 3.2), fl = 0.85 + 0.15 * Math.sin(t * 9.1 + 1.3), ev = evolution(s, this.hero === 'ren' ? 2 : 1);
+    const k = a.k * (0.9 + 0.2 * ev.build), tight = 1 - 0.18 * a.gather, lx = a.leanX * 16 * a.lean, ly = a.leanY * 8 * a.lean, stretch = 1 + 0.12 * a.lean + 0.2 * a.pulse;
     const bx = foot.x, by = foot.y + 6;
     if (this.hero === 'ren') {
-      this.put('ra_ground', bx, foot.y + 5, 0.14 * br, 0.55 * k, { sy: 0.9, depth: 3.7 });
-      this.put('ra_back1', bx, by, 0.27 * (1 + 0.03 * Math.sin(t * 5)), Math.min(1, 0.4 * k * fl), { oy: 0.93, sy: 0.95 + 0.1 * Math.sin(t * 6.3), depth: 9.4 });
-      this.put('ra_back2', bx, foot.y - 8, 0.27 * br, Math.min(1, 0.26 * k), { oy: 0.9, depth: 9.3, flip: Math.floor(t * 2) % 2 === 0 });
-      this.put('ra_veil', bx, foot.y - 30, 0.15, 0.1 * k * fl, { rot: Math.sin(t * 2) * 0.05, depth: 10.6 });
-      if (!calm) this.put('ra_embersring', bx, foot.y - 36 - 10 * ((t * 0.5) % 1), 0.2, 0.35 * k, { depth: 9.5 });
+      this.put('ra_ground', bx, foot.y + 5, 0.16 * br * (1 + 0.25 * a.pulse), 0.8 * k, { sy: 0.9, depth: 3.7 });
+      this.put('ra_back1', bx + lx, by + ly, 0.31 * tight * (1 + 0.03 * Math.sin(t * 5)), Math.min(1, 0.72 * k * fl), { oy: 0.93, sy: (0.95 + 0.1 * Math.sin(t * 6.3)) * stretch, depth: 9.4, rot: a.leanX * 0.12 * a.lean });
+      this.put('ra_back2', bx + lx * 1.6, foot.y - 8 + ly, 0.31 * br * tight, Math.min(1, 0.5 * k), { oy: 0.9, depth: 9.3, flip: Math.floor(t * 2) % 2 === 0 });
+      this.put('ra_veil', bx, foot.y - 30, 0.17, Math.min(0.25, 0.14 * k * fl), { rot: Math.sin(t * 2) * 0.05, depth: 10.6 });
+      if (!calm) this.put('ra_embersring', bx, foot.y - 36 - 10 * ((t * (0.5 + 0.8 * a.lean)) % 1), 0.2, 0.35 * k, { depth: 9.5 });
+      if (a.pulse > 0.05 && !calm) this.put('rs_ring', bx, foot.y + 4, 0.2 * (1.3 - a.pulse), 0.6 * a.pulse, { sy: 0.5, depth: 3.75 });
     } else {
-      this.put('sm_ground', bx, foot.y + 5, 0.2 * br, 0.85 * k, { sy: 0.95, depth: 3.7 });
-      this.put('sm_back1', bx, by, 0.34 * (1 + 0.03 * Math.sin(t * 5)), Math.min(1, 0.5 * k * fl), { oy: 0.9, sy: 0.95 + 0.1 * Math.sin(t * 6.3), depth: 9.4 });
-      this.put('sm_back2', bx, foot.y - 38, 0.3 * br, Math.min(1, 0.4 * k), { depth: 9.3 });
-      this.put('sm_arcs', bx, foot.y - 30, 0.34, (calm ? 0.2 : 0.3) * k * (Math.floor(t * 14) % 3 === 0 ? 0.3 : 1), { rot: Math.floor(t * 10) * 1.3, depth: 10.6 });
-      if (!calm) this.put('sm_motes', bx, foot.y - 34 - 8 * ((t * 0.6) % 1), 0.4, 0.55 * k, { depth: 9.5 });
+      this.put('sm_ground', bx, foot.y + 5, 0.2 * br * (1 + 0.25 * a.pulse), 0.8 * k, { sy: 0.95, depth: 3.7 });
+      this.put('sm_back1', bx + lx, by + ly, 0.34 * tight * (1 + 0.03 * Math.sin(t * 5)), Math.min(1, 0.5 * k * fl), { oy: 0.9, sy: (0.95 + 0.1 * Math.sin(t * 6.3)) * stretch, depth: 9.4, rot: a.leanX * 0.1 * a.lean });
+      this.put('sm_back2', bx + lx * 1.5, foot.y - 38 + ly, 0.3 * br * tight, Math.min(1, 0.4 * k), { depth: 9.3 });
+      this.put('sm_arcs', bx, foot.y - 30, 0.34 * tight, (calm ? 0.2 : 0.3) * k * (a.phase === 'charge' ? 1.4 : 1) * (Math.floor(t * 14) % 3 === 0 ? 0.3 : 1), { rot: Math.floor(t * 10) * 1.3, depth: 10.6 });
+      if (!calm) this.put('sm_motes', bx, foot.y - 34 - 8 * ((t * (0.6 + 0.8 * a.lean)) % 1), 0.4 * tierGain(ev.e), 0.55 * k, { depth: 9.5 });
+      if (a.pulse > 0.05 && !calm) this.put('sm_ring', bx, foot.y + 4, 0.2 * (1.3 - a.pulse), 0.6 * a.pulse, { sy: 0.5, depth: 3.75 });
     }
   }
-  private auraSprites(_s: GameState, _foot: { x: number; y: number }, _calm: boolean, _steady: boolean) { /* merged into auraDraw */ }
   private reveal(cin: NonNullable<GameState['cinema']>, s: GameState, foot: { x: number; y: number }, calm: boolean, reduced: boolean) {
     const pal = PAL[this.hero], t = cin.t, u = Math.min(1, t / cin.dur), commit = Math.min(1, t / cin.commitAt);
     this.zoom = reduced ? 1 : 1 + 0.2 * Math.sin(Math.min(1, t / (cin.dur * 0.8)) * Math.PI * 0.5) * (t < cin.commitAt + 0.5 ? 1 : 1 - Math.min(1, (t - cin.commitAt - 0.5) / 0.6));

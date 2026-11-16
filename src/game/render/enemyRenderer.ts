@@ -4,6 +4,7 @@ import type { Enemy, GameState } from '../../sim/GameState';
 import { ENEMIES, ENEMY_KINDS, AIM_LOCK_FRACTION, groundDy, isBoss, type MobKind as EnemyKind } from '../../content/enemies';
 import { FxPool, vfxKey } from './fxPool';
 import { b14Key } from './b14fx';
+import { reactionFor, reactionPose, type ReactKind, type Reaction } from './bodyReaction';
 
 /** B07 enemy art: ImageGen sheets (8 frames: move x4, windup, release, hurt, death; east-facing, mirrored for west) cut by scripts/build-enemy-art.py. */
 export const ENEMY_FX_NAMES = ['aimline', 'chevron', 'bolt', 'bolt-hit', 'death-burst', 'hit-spark', 'circle-warn', 'circle-slam'] as const;
@@ -32,7 +33,7 @@ const GHOST_CAP = 24;
 
 const BOLT_LOOK = { bolt: { key: 'bolt', w: 51 }, orb: { key: 'orb-bolt', w: 30 }, prism: { key: 'prism-bolt', w: 34 } } as const;
 const boltKey = (k: keyof typeof BOLT_LOOK) => (k === 'bolt' ? enemyFxKey('bolt') : `boss-fx-${BOLT_LOOK[k].key}`);
-interface Track { t: number; face: 1 | -1; hp: number; hurt: number; flash: number; tele: Phaser.GameObjects.Image | null; tele2: Phaser.GameObjects.Image | null; recoverT: number; fan: Phaser.GameObjects.Image[]; aura: Phaser.GameObjects.Image | null }
+interface Track { t: number; face: 1 | -1; hp: number; hurt: number; flash: number; tele: Phaser.GameObjects.Image | null; tele2: Phaser.GameObjects.Image | null; recoverT: number; fan: Phaser.GameObjects.Image[]; aura: Phaser.GameObjects.Image | null; react: Reaction | null; reactT: number; rx: number; ry: number; prevMode: string }
 interface Ghost { spr: Phaser.GameObjects.Sprite; age: number; baseY: number }
 
 export class EnemyRenderer {
@@ -68,7 +69,7 @@ export class EnemyRenderer {
     for (const ev of state.enemyEvents) {
       if (ev.id <= this.lastEventId) continue; this.lastEventId = ev.id;
       if (ev.kind === 'enemy_death') { if (ev.tag !== 'boss') this.spawnGhost(ev.enemy as EnemyKind, ev.x, ev.y, ev.id, ev.enemyId, reduced); }
-      else if (ev.kind === 'enemy_block') this.pool.spawn({ key: 'boss-fx-shield-block', x: ev.x + ev.dirX * 30, y: ev.y - 14, depth: 10.4, life: 0.18, s0: 0.5, s1: 0.8, a0: 1, a1: 0, flipX: ev.dirX < 0 });
+      else if (ev.kind === 'enemy_block') { const tr = this.tracks.get(ev.enemyId); if (tr) { tr.react = reactionFor('aegis', 0, { blocked: true }); tr.reactT = 0; tr.rx = ev.dirX; tr.ry = ev.dirY; } this.pool.spawn({ key: 'boss-fx-shield-block', x: ev.x + ev.dirX * 30, y: ev.y - 14, depth: 10.4, life: 0.18, s0: 0.5, s1: 0.8, a0: 1, a1: 0, flipX: ev.dirX < 0 }); }
       else if (ev.kind === 'enemy_shot_hit') this.pool.spawn({ key: ev.tag === 'prism' ? 'boss-fx-prism-hit' : enemyFxKey('bolt-hit'), x: ev.x, y: ev.y, depth: 10.4, life: 0.22, s0: ev.tag === 'prism' ? 0.4 : 0.35, s1: ev.tag === 'prism' ? 0.9 : 0.8, a0: 1, a1: 0, rot: Math.atan2(ev.dirY, ev.dirX) });
       else if (ev.kind === 'enemy_slam') {
         const R = ENEMIES.bruiser.attack.radius, tex = this.scene.textures.get(enemyFxKey('circle-slam')).getSourceImage().width;
@@ -123,10 +124,16 @@ export class EnemyRenderer {
       if (e.hp <= 0 || isBoss(e.kind)) continue; live.add(e.id);
       const def = ENEMIES[e.kind as EnemyKind], m = this.manifests[e.kind as EnemyKind];
       let spr = this.sprites.get(e.id), tr = this.tracks.get(e.id);
-      if (!spr || !tr) { spr = this.newSprite(e.kind as EnemyKind); this.sprites.set(e.id, spr); tr = { t: e.id * 0.137, face: p.x >= e.x ? 1 : -1, hp: e.hp, hurt: 0, flash: 0, tele: null, tele2: null, recoverT: 0, fan: [], aura: null }; this.tracks.set(e.id, tr); }
+      if (!spr || !tr) { spr = this.newSprite(e.kind as EnemyKind); this.sprites.set(e.id, spr); tr = { t: e.id * 0.137, face: p.x >= e.x ? 1 : -1, hp: e.hp, hurt: 0, flash: 0, tele: null, tele2: null, recoverT: 0, fan: [], aura: null, react: null, reactT: 9, rx: 0, ry: 0, prevMode: e.mode }; this.tracks.set(e.id, tr); }
       tr.t += dt;
       const pm = this.prevMode.get(e.id); if (pm === undefined) this.arrive(e, def, reduced); else if (pm !== e.mode && def.shield) this.shieldState(e, tr.face, e.mode === 'recover', reduced); this.prevMode.set(e.id, e.mode);
-      if (e.hp < tr.hp) { tr.hurt = HURT_POSE; tr.flash = FLASH; } tr.hp = e.hp;
+      if (e.hp < tr.hp) {
+        tr.hurt = HURT_POSE; tr.flash = FLASH;
+        const away = Math.hypot(e.x - p.x, e.y - p.y) || 1, broke = !!def.shield && e.mode === 'recover' && tr.prevMode !== 'recover';
+        tr.react = reactionFor(e.kind as ReactKind, (tr.hp - e.hp) / e.maxHp, { heavy: (tr.hp - e.hp) / e.maxHp > 0.18, broke }); tr.reactT = 0; tr.rx = (e.x - p.x) / away; tr.ry = (e.y - p.y) / away;
+      }
+      tr.hp = e.hp; tr.prevMode = e.mode; tr.reactT += dt;
+      const pose = tr.react ? reactionPose(tr.react, tr.reactT) : { off: 0, tilt: 0, sq: 0 };
       tr.hurt = Math.max(0, tr.hurt - dt); tr.flash = Math.max(0, tr.flash - dt);
       // facing follows the target horizontally (aim while attacking), with a dead zone so a head-on enemy does not flicker
       const fx = def.shield && e.mode === 'move' ? e.aimX : e.mode === 'move' || e.mode === 'recover' ? p.x - e.x : e.aimX;
@@ -144,7 +151,8 @@ export class EnemyRenderer {
       const shake = e.mode === 'windup' && e.kind === 'bruiser' ? Math.sin(tr.t * 60) * (0.8 + prog * 1.6) : 0;
       const lean = e.mode === 'windup' && e.kind !== 'bruiser' ? prog * 2 : 0;
       const feetY = e.y + groundDy(def.radius);
-      spr.setPosition(Math.round(e.x + shake - tr.face * lean), Math.round(feetY + hover)).setDepth(6 + (feetY / 1600) * 1.8);
+      spr.setPosition(Math.round(e.x + shake - tr.face * lean + tr.rx * pose.off), Math.round(feetY + hover + tr.ry * pose.off * 0.6)).setDepth(6 + (feetY / 1600) * 1.8);
+      spr.setRotation(pose.tilt * (tr.rx >= 0 ? 1 : -1)).setScale(SCALE * (1 + pose.sq * 0.5), SCALE * (1 - pose.sq));
       if (tr.flash > 0) { spr.setTint(0xffe6ee); spr.tintMode = Phaser.TintModes.FILL; } else { spr.clearTint(); spr.tintMode = Phaser.TintModes.MULTIPLY; }
       this.telegraph(e, tr, prog, feetY);
       this.aura(e, tr, feetY, def);

@@ -4,6 +4,7 @@ import { BEAM, SPHERE, ABILITY_FEEL } from '../../content/abilities';
 import { beamOrigin, sphereOrigin } from '../../sim/AbilitySystem';
 import type { HandAnchor } from '../../assets/kaiAnimation';
 import { FxPool, vfxKey } from './fxPool';
+import { evolution, tierGain, tierSparks } from './buildEvolution';
 
 export const ABILITY_FX_NAMES = ['beam_seg', 'muzzle', 'impact', 'orb', 'streak', 'sphere', 'trail', 'ring', 'flash', 'dome'] as const;
 export const abilityFxKey = (n: string) => `abfx-${n}`;
@@ -103,7 +104,7 @@ export class AbilityFx {
     const p = s.player; const rnd = Math.random; const cam = this.scene.cameras.main;
     const dt = realDt * (this.pause > 0 ? HIT_PAUSE.scale : 1); this.pause = Math.max(0, this.pause - realDt);
     this.clock += dt; this.g.clear();
-    const c = s.cast;
+    const c = s.cast; const evo = evolution(s);
 
     for (const ev of s.abilityEvents) {
       if (ev.id <= this.lastEvent) continue; this.lastEvent = ev.id;
@@ -122,7 +123,7 @@ export class AbilityFx {
         }
         this.spawn('impact', 11, core, { x: ev.x, y: ev.y, life: 0.2, s0: 0.5 * K, s1: (ev.n ? 1.25 : 0.8) * K, a0: 1, a1: 0, rot: rnd() * 6.28 });
         if (!reduced) {
-          const n = ev.n ? 6 : 3; for (let i = 0; i < n; i++) { const a = rnd() * 6.28, v = 90 + rnd() * 160; this.spawn('streak', 11, i % 2 ? aura : core, { x: ev.x, y: ev.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.3, s0: 0.7, s1: 0.2, a0: 1, a1: 0, rot: a }); }
+          const n = (ev.n ? 6 : 3) + (ev.n ? tierSparks(evo.e, reduced) : 0); for (let i = 0; i < n; i++) { const a = rnd() * 6.28, v = 90 + rnd() * 160; this.spawn('streak', 11, i % 2 ? aura : core, { x: ev.x, y: ev.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.3, s0: 0.7, s1: 0.2, a0: 1, a1: 0, rot: a }); }
           if (ev.n && !this.hitCast) { this.hitCast = 1; this.pause = HIT_PAUSE.pulse; }
         }
       } else if (ev.kind === 'sphere_launch') {
@@ -133,6 +134,7 @@ export class AbilityFx {
       } else if (ev.kind === 'sphere_burst') {
         if (!reduced) { cam.shake(ABILITY_FEEL.sphereBurstShake.ms, ABILITY_FEEL.sphereBurstShake.intensity); this.pause = HIT_PAUSE.burst; }
         this.detonate(ev.x, ev.y, s.blasts.find(b => Math.abs(b.x - ev.x) < 2 && Math.abs(b.y - ev.y) < 2), formVisual, reduced);
+        if (evo.r >= 2) { const bl = s.blasts.find(b => Math.abs(b.x - ev.x) < 2 && Math.abs(b.y - ev.y) < 2); const R = bl?.radius ?? SPHERE.radius * evo.radius; this.spawn('ring', 11.4, aura, { x: ev.x, y: ev.y, life: 0.45, s0: 0.2, s1: (2 * R) / 111 * tierGain(evo.r), a0: 0.55, a1: 0, delay: 0.05 }); }   // B21.2: a mastered Nova earns a second, thinner shock ring that still ends on the real blast radius
       }
     }
 

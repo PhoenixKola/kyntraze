@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { bossDamageLevel } from './bodyReaction';
 import { kick } from './cameraKick';
 import type { Enemy, GameState } from '../../sim/GameState';
 import { BOSSES, SERAPH, WARDEN } from '../../content/bosses';
@@ -40,6 +41,7 @@ export class BossRenderer {
   private craters: { img: Phaser.GameObjects.Image; age: number }[] = [];
   private lastEventId = 0;
   private phaseGlow: Phaser.GameObjects.Sprite | null = null; private exposedGlow: Phaser.GameObjects.Sprite | null = null; private halo: Phaser.GameObjects.Image | null = null; private orbit: Phaser.GameObjects.Image[] = [];
+  private dmgLevel = 0; private recoil = 0; private leakClock = 0;
   private introMarks = new Set<number>(); private clockA = 0; private clockB = 0;
 
   constructor(private readonly scene: Phaser.Scene) {
@@ -229,9 +231,11 @@ export class BossRenderer {
 
   private drawBoss(state: GameState, e: Enemy, dt: number, reduced: boolean) {
     const k = e.kind as BossKind, ai = e.ai!, def = BOSSES[k], m = this.manifests[k], p = state.player;
-    if (!this.sprite || this.spriteKind !== k || this.bossId !== e.id) { this.sprite?.destroy(); this.glow?.destroy(); this.clearExtras(); this.sprite = this.sheetSprite(k); this.glow = this.sheetSprite(k).setBlendMode(Phaser.BlendModes.ADD).setVisible(false); this.spriteKind = k; this.bossId = e.id; this.hp = e.hp; this.t = 0; this.face = p.x >= e.x ? 1 : -1; }
+    if (!this.sprite || this.spriteKind !== k || this.bossId !== e.id) { this.sprite?.destroy(); this.glow?.destroy(); this.clearExtras(); this.sprite = this.sheetSprite(k); this.glow = this.sheetSprite(k).setBlendMode(Phaser.BlendModes.ADD).setVisible(false); this.spriteKind = k; this.bossId = e.id; this.hp = e.hp; this.dmgLevel = 0; this.t = 0; this.face = p.x >= e.x ? 1 : -1; }
     const spr = this.sprite; this.t += dt;
-    if (e.hp < this.hp) this.flash = 0.05; this.hp = e.hp; this.flash = Math.max(0, this.flash - dt);
+    if (e.hp < this.hp) { this.flash = 0.05; this.recoil = 0.14; } this.hp = e.hp; this.flash = Math.max(0, this.flash - dt); this.recoil = Math.max(0, this.recoil - dt);
+    const lvl = bossDamageLevel(e.hp / e.maxHp, ai.phase === 2 ? 2 : 1);   // B21.4: the body wears its real HP/phase: darker scorched plates, then heat leaking from the cracks
+    if (lvl > this.dmgLevel) { this.dmgLevel = lvl; if (!reduced) { this.pool.spawn({ key: b17('core_flash'), x: e.x, y: e.y - 30, depth: 10.6, life: 0.4, blend: 'add', tint: k === 'warden' ? CRIMSON : PURPLE, s0: 0.4, s1: 1.4, a0: 0.8, a1: 0 }); for (let i = 0; i < 5; i++) { const a = Math.random() * 6.28; this.pool.spawn({ key: vfxKey('debris' + (i % 4), false), x: e.x, y: e.y - 20, depth: 10.2, life: 0.6, vx: Math.cos(a) * 130, vy: Math.sin(a) * 90 - 110, ay: 420, s0: 1.2, s1: 0.5, a0: 1, a1: 0, rot: a, spin: 8 }); } } }
     const fx = e.mode === 'move' || e.mode === 'recover' || e.mode === 'intro' || e.mode === 'phase' ? p.x - e.x : e.aimX;
     if (Math.abs(fx) > (e.mode === 'move' ? 14 : 0.15)) this.face = fx >= 0 ? 1 : -1;
     const walk = this.frameIdx(k, 'move', Math.floor(this.t * m.fps * (k === 'warden' ? 1 : 1.4)) % 4);
@@ -256,7 +260,11 @@ export class BossRenderer {
       else if (e.mode === 'windup' && atk === 'blink') alpha = 1 - 0.7 * (1 - e.modeT / SERAPH.blink.windup);
     }
     const shake = (e.mode === 'windup' && k === 'warden' ? Math.sin(this.t * 55) * (0.5 + (1 - e.modeT / Math.max(0.01, WARDEN.rupture.windup)) * 0.8) : 0) * (reduced ? 0 : 1);
-    spr.setPosition(Math.round(e.x + shake), Math.round(feetY + hover)).setDepth(6.2 + (feetY / 1600) * 1.8).setAlpha(alpha);
+    const lean = reduced ? 0 : Math.sin((this.recoil / 0.14) * Math.PI) * 3 * (k === 'warden' ? 0.6 : 1.2) * (p.x >= e.x ? -1 : 1);
+    spr.setPosition(Math.round(e.x + shake + lean), Math.round(feetY + hover)).setDepth(6.2 + (feetY / 1600) * 1.8).setAlpha(alpha);
+    const tints = k === 'warden' ? [0xffffff, 0xf2e6e0, 0xe0c8c4, 0xd2b0ac] : [0xffffff, 0xf4eeff, 0xe6dcf6, 0xd8c8f0];
+    spr.tintMode = Phaser.TintModes.MULTIPLY; spr.setTint(tints[this.dmgLevel]);
+    if (this.dmgLevel >= 2 && !reduced && dt > 0 && e.mode !== 'blink') { this.leakClock += dt; if (this.leakClock > (this.dmgLevel === 3 ? 0.28 : 0.5)) { this.leakClock = 0; this.pool.spawn({ key: b17('core_flash'), x: e.x + (Math.random() - 0.5) * e.radius, y: feetY - 30 - Math.random() * 40, depth: 10.5, life: 0.35, blend: 'add', tint: k === 'warden' ? CRIMSON : PURPLE, s0: 0.12, s1: 0.3, a0: 0.7, a1: 0, vy: -26 }); } }
     // hit feedback on a large body: a short additive brighten over the same frame (a full white fill would erase the silhouette and the telegraph pose)
     if (this.glow) this.glow.setVisible(this.flash > 0 && !reduced).setFrame(frame).setFlipX(this.face < 0).setPosition(spr.x, spr.y).setDepth(spr.depth + 0.01).setAlpha(0.28);
     this.drawStates(state, e, spr, frame, dt, reduced, feetY, hover);
