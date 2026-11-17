@@ -1,8 +1,9 @@
 import type { Enemy, GameState, Hazard } from './GameState';
 import { normalize } from '../core/Math';
 import { slideMove, blocked } from './CollisionSystem';
-import { AIM_LOCK_FRACTION, ENEMIES, RANGED_BAND, groundDy, isBoss, type MobKind } from '../content/enemies';
-import { feetInCircle, feetInCone, feetInRect } from './Ground';
+import { AIM_LOCK_FRACTION, ENEMIES, RANGED_BAND, groundDy, isBoss, isRealmKind, type MobKind } from '../content/enemies';
+import { cleanupRealm, onDodgedHazard, updateDecoy, updateRealmEnemy, wellFactor } from './RealmEnemies';
+import { feetInCircle, feetInCone, feetInLane, feetInRect } from './Ground';
 import { damagePlayer } from './CombatSystem';
 import { pushEnemyEvent } from './EntityRegistry';
 import { updateBoss } from './BossAiSystem';
@@ -38,11 +39,12 @@ function release(state: GameState, e: Enemy) {
 }
 
 export function moveEnemies(state: GameState, dt: number) {
-  const p = state.player;
+  const p = state.player; cleanupRealm(state);
   const cantors = state.enemies.filter(c => c.kind === 'cantor' && c.hp > 0);
   for (const e of state.enemies) {
     if (e.hp <= 0) continue;
-    if (isBoss(e.kind)) { updateBoss(state, e, dt); continue; }
+    if (isBoss(e.kind)) { if (!e.part || e.part.role === 'decoy') { if (!e.part) updateBoss(state, e, dt); else updateDecoy(state, e, dt); } continue; }
+    if (isRealmKind(e.kind)) { updateRealmEnemy(state, e, dt); continue; }
     const def = ENEMIES[e.kind as MobKind], a = def.attack;
     // Rift Cantor rally: non-boss, non-cantor enemies inside its aura move faster and recover attacks sooner
     let rally = false;
@@ -106,17 +108,17 @@ function separate(state: GameState, dt: number) {
       pushX[i] -= ux * push * wa; pushY[i] -= uy * push * wa; pushX[j] += ux * push * wb; pushY[j] += uy * push * wb;
     }
   }
-  for (let i = 0; i < n; i++) { const e = list[i]; if ((pushX[i] !== 0 || pushY[i] !== 0) && e.mode !== 'strike' && !isBoss(e.kind)) slideMove(e, pushX[i], pushY[i], dt); }
+  for (let i = 0; i < n; i++) { const e = list[i]; if ((pushX[i] !== 0 || pushY[i] !== 0) && e.mode !== 'strike' && !isBoss(e.kind) && e.kind !== 'halo_sigil') slideMove(e, pushX[i], pushY[i], dt); }
 }
 
 export function updateEnemyShots(state: GameState, dt: number) {
   const p = state.player, keep = [];
   for (const s of state.enemyShots) {
-    s.x += s.vx * dt; s.y += s.vy * dt; s.ttl -= dt;
+    const k = wellFactor(state, s); s.k = k; s.x += s.vx * dt * k; s.y += s.vy * dt * k; s.ttl -= dt;
     const hitWall = s.ttl <= 0 || blockedAt(s.x, s.y);
     // dash and hit invulnerability let a bolt pass through, so a well-timed dash is a real dodge
     if (!hitWall && p.invulnerable <= 0 && Math.hypot(p.x - s.x, p.y - s.y) < p.radius + s.radius - 2) {
-      damagePlayer(state, s.damage, s.kind ?? 'bolt');
+      damagePlayer(state, s.damage, s.kind ?? 'bolt', s, s.owner ?? 1);
       state.enemyEvents.push({ id: state.nextId++, kind: 'enemy_shot_hit', enemy: 'ranged', enemyId: 0, x: s.x, y: s.y, dirX: s.vx, dirY: s.vy, tag: s.kind }); capEvents(state);
       continue;
     }
@@ -127,21 +129,38 @@ export function updateEnemyShots(state: GameState, dt: number) {
 }
 
 /** Timed ground hazards (boss ruptures, cones, arena lanes and pylons): they warn for `delay`, are active for `active` seconds (0 = a single instant check), then linger only visually. Active hazards check Kai's feet every tick; i-frames stop stacked hits. */
-const hazardHit = (state: GameState, h: Hazard) => h.shape === 'cone' ? feetInCone(state, h) : h.shape === 'rect' ? feetInRect(state, { x: h.x, y: h.y, w: h.w ?? 0, h: h.h ?? 0 }) : feetInCircle(state, h.x, h.y, h.r);
+const hazardHit = (state: GameState, h: Hazard) => h.shape === 'lane' ? feetInLane(state, h) : h.shape === 'cone' ? feetInCone(state, h) : h.shape === 'rect' ? feetInRect(state, { x: h.x, y: h.y, w: h.w ?? 0, h: h.h ?? 0 }) : feetInCircle(state, h.x, h.y, h.r);
 export function updateHazards(state: GameState, dt: number) {
   if (!state.hazards.length) return;
   for (const h of state.hazards) {
     if (h.fired) {
       h.ttl -= dt;
-      if ((h.activeLeft ?? 0) > 0) { h.activeLeft = Math.max(0, (h.activeLeft ?? 0) - dt); if (h.shape !== 'sigil' && h.damage > 0 && hazardHit(state, h)) damagePlayer(state, h.damage, h.tag); }
+      if ((h.activeLeft ?? 0) > 0) {
+        h.activeLeft = Math.max(0, (h.activeLeft ?? 0) - dt);
+        if (h.pull && h.shape === 'circle' && feetInCircle(state, h.x, h.y, h.r)) pullPlayer(state, h, dt);
+        if (h.shape !== 'sigil' && h.damage > 0 && hazardHit(state, h)) strike(state, h);
+      }
       continue;
     }
     h.delay -= dt; if (h.delay > 0) continue;
     h.fired = true; h.activeLeft = h.active ?? 0; h.ttl = Math.max(0.4, (h.active ?? 0) + 0.45);
-    if (h.shape !== 'sigil' && h.damage > 0 && hazardHit(state, h)) damagePlayer(state, h.damage, h.tag);
+    if (h.shape !== 'sigil' && h.damage > 0 && hazardHit(state, h)) strike(state, h);
     state.enemyEvents.push({ id: state.nextId++, kind: 'hazard_fire', enemy: 'warden', enemyId: h.owner, x: h.x, y: h.y, dirX: Math.cos(h.ang), dirY: Math.sin(h.ang), tag: h.tag }); capEvents(state);
   }
   state.hazards = state.hazards.filter(h => !h.fired || h.ttl > 0);
+}
+/** A hazard hit lands (or is honestly dodged: dash i-frames through it, or a parry). The owner's boss behaviour hears about a dodge so a rival can be punished fairly. */
+function strike(state: GameState, h: Hazard) {
+  const p = state.player;
+  state.lastHazardOwner = h.owner;
+  if (p.invulnerable > 0 && p.dashRemaining > 0 && !h.dodged && h.owner > 0) { h.dodged = true; onDodgedHazard(state, h); }
+  damagePlayer(state, h.damage, h.tag, { x: h.x, y: h.y }, h.owner);
+}
+/** Singularity pull: bounded force and bounded total displacement per well, so an escape route always exists and control is never lost. */
+function pullPlayer(state: GameState, h: Hazard, dt: number) {
+  const p = state.player, f = { x: p.x, y: p.y + 24 }, d = Math.hypot(h.x - f.x, h.y - f.y); if (d < 8 || (h.pulled ?? 0) >= 170) return;
+  const step = Math.min(h.pull! * dt, 170 - (h.pulled ?? 0)); h.pulled = (h.pulled ?? 0) + step;
+  slideMove(p, (h.x - f.x) / d * (step / dt), (h.y - f.y) / d * (step / dt), dt);
 }
 const blockedAt = (x: number, y: number) => blocked(x, y, 3);
 function capEvents(state: GameState) { if (state.enemyEvents.length > 64) state.enemyEvents.splice(0, state.enemyEvents.length - 64); }

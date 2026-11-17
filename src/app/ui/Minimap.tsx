@@ -14,7 +14,9 @@ export function mapStatus(m: MiniMap, boss: boolean): { text: string; tone: 'cal
   if (m.near >= 1) return { text: 'CONTACT', tone: 'warn' };
   return { text: 'CLEAR', tone: 'calm' };
 }
-const PAL = {
+const PAL: Record<string, { bg0: string; bg1: string; solid: string; lane: string; laneRing: string; rim: string }> = {
+  aetherfall: { bg0: '#2a2616', bg1: '#0b0a05', solid: 'rgba(240,215,138,.42)', lane: 'rgba(244,215,138,.12)', laneRing: 'rgba(244,215,138,.32)', rim: 'rgba(244,215,138,.35)' },
+  paradox: { bg0: '#1a1238', bg1: '#05030f', solid: 'rgba(143,128,230,.42)', lane: 'rgba(111,227,225,.12)', laneRing: 'rgba(111,227,225,.32)', rim: 'rgba(111,227,225,.35)' },
   gloam: { bg0: '#0c1f2b', bg1: '#050c14', solid: 'rgba(120,170,190,.42)', lane: 'rgba(95,216,220,.13)', laneRing: 'rgba(95,216,220,.30)', rim: 'rgba(95,216,220,.35)' },
   ashen: { bg0: '#22180f', bg1: '#0a0705', solid: 'rgba(190,150,110,.42)', lane: 'rgba(241,182,111,.10)', laneRing: 'rgba(241,182,111,.30)', rim: 'rgba(241,182,111,.35)' },
 };

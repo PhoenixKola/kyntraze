@@ -1,7 +1,7 @@
 import type { GainLike, SourceLike, CtxLike } from './abilityAudio';
 
 /** B16 score: seamless loops cross-fade, stingers sit on top, `duck` dips the whole score for transformations / boss warnings / pause. One director per audio context. */
-export const MUSIC_CUES = ['title', 'gloam', 'ashen', 'warden', 'seraph', 'victory', 'defeat'] as const;
+export const MUSIC_CUES = ['title', 'gloam', 'ashen', 'warden', 'seraph', 'victory', 'defeat', 'aetherfall', 'paradox', 'castellan', 'regent', 'oathkeeper', 'mirror_tyrant', 'chronophage', 'hollow_choir', 'sovereign', 'coop_stinger'] as const;
 export type MusicCue = (typeof MUSIC_CUES)[number];
 export const STINGERS = ['stinger_boss', 'stinger_final_warning', 'stinger_reward', 'stinger_levelup'] as const;
 export type Stinger = (typeof STINGERS)[number];

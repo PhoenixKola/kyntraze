@@ -32,7 +32,7 @@ export class Simulation {
   private readonly buf = { q: 0, e: 0, r: 0 };
   step(dt: number, input: InputState) {
     const s = this.state; if (s.phase !== 'running') return;
-    { const f = s.player.form, id = s.hero === 'kai' ? f : s.hero === 'ren' ? 10 : 11; if (f && !s.run.formsUsed.includes(id)) s.run.formsUsed.push(id); }   // B19: Ren / Sora log their own ids (10 / 11), never Kai's Flarebound   // B18: feats read the forms Kai actually used
+    { const f = s.player.form, id = s.hero === 'kai' ? f : s.hero === 'ren' ? 10 : s.hero === 'sora' ? 11 : 11 + f; if (f && !s.run.formsUsed.includes(id)) s.run.formsUsed.push(id); }   // B19: Ren / Sora log their own ids (10 / 11), never Kai's Flarebound   // B18: feats read the forms Kai actually used
     if (s.cinema) { updateCinema(s, dt); this.fHeld = !!(input.f || input.fHeld); this.qHeld = input.q; this.eHeld = !!input.beam; this.rHeld = !!input.sphere; return; }   // B12: the reveal freezes the whole run (clock, enemies, shots, hazards, cooldowns, i-frames)
     if (s.selector.open) {   // the form selector freezes the run just like the reveal; only its own input is read
       const fd = !!(input.f || input.fHeld); trackAim(s, input);

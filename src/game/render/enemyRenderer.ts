@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { kick } from './cameraKick';
 import type { Enemy, GameState } from '../../sim/GameState';
-import { ENEMIES, ENEMY_KINDS, AIM_LOCK_FRACTION, groundDy, isBoss, type MobKind as EnemyKind } from '../../content/enemies';
+import { ENEMIES, ENEMY_KINDS, AIM_LOCK_FRACTION, groundDy, isBoss, isRealmKind, type MobKind as EnemyKind } from '../../content/enemies';
 import { FxPool, vfxKey } from './fxPool';
 import { b14Key } from './b14fx';
 import { b21Key } from './b21Assets';
@@ -18,7 +18,7 @@ export const enemyFxUrl = (n: string) => `/art/enemies/fx/${n}.png`;
 export interface EnemyManifest { frame_width: number; frame_height: number; origin_px: [number, number]; frames: number; fps: number; clips: Record<string, number[]> }
 const SCALE = 0.5;                     // sheets are authored at 2x, like Kai
 /** Per-class death payoff: a distinct fragment burst per enemy (crystal shards, fast slash-dissolve, heavy armour slabs, energy collapse). Capped by the shared 70-sprite enemy pool. */
-const DEATH_LOOK: Record<EnemyKind, { key: string; tint: number; n: number; v: number; lift: number; g: number; size: number; life: number; grow: number; ring: boolean }> = {
+const DEATH_LOOK: Record<Exclude<EnemyKind, 'sky_lancer' | 'halo_scribe' | 'citadel_bulwark' | 'rift_mimic' | 'phase_harrier' | 'singularity_husk' | 'halo_sigil'>, { key: string; tint: number; n: number; v: number; lift: number; g: number; size: number; life: number; grow: number; ring: boolean }> = {
   pursuer: { key: 'shatter', tint: 0xc9a8ff, n: 5, v: 150, lift: 50, g: 420, size: 0.5, life: 0.34, grow: 0.7, ring: false },
   flanker: { key: 'slash', tint: 0xff9fd0, n: 3, v: 210, lift: 20, g: 200, size: 0.4, life: 0.26, grow: 0.9, ring: false },
   bruiser: { key: 'shatter', tint: 0xffb066, n: 8, v: 170, lift: 70, g: 520, size: 0.75, life: 0.5, grow: 1.1, ring: true },
@@ -69,7 +69,7 @@ export class EnemyRenderer {
   private events(state: GameState, reduced: boolean) {
     for (const ev of state.enemyEvents) {
       if (ev.id <= this.lastEventId) continue; this.lastEventId = ev.id;
-      if (ev.kind === 'enemy_death') { if (ev.tag !== 'boss') this.spawnGhost(ev.enemy as EnemyKind, ev.x, ev.y, ev.id, ev.enemyId, reduced); }
+      if (ev.kind === 'enemy_death') { if (ev.tag !== 'boss' && ev.tag !== 'part' && ENEMY_KINDS.includes(ev.enemy as EnemyKind)) this.spawnGhost(ev.enemy as EnemyKind, ev.x, ev.y, ev.id, ev.enemyId, reduced); }
       else if (ev.kind === 'enemy_block') { const tr = this.tracks.get(ev.enemyId); if (tr) { tr.react = reactionFor('aegis', 0, { blocked: true }); tr.reactT = 0; tr.rx = ev.dirX; tr.ry = ev.dirY; } this.pool.spawn({ key: 'boss-fx-shield-block', x: ev.x + ev.dirX * 30, y: ev.y - 14, depth: 10.4, life: 0.18, s0: 0.5, s1: 0.8, a0: 1, a1: 0, flipX: ev.dirX < 0 }); }
       else if (ev.kind === 'enemy_shot_hit') this.pool.spawn({ key: ev.tag === 'prism' ? 'boss-fx-prism-hit' : enemyFxKey('bolt-hit'), x: ev.x, y: ev.y, depth: 10.4, life: 0.22, s0: ev.tag === 'prism' ? 0.4 : 0.35, s1: ev.tag === 'prism' ? 0.9 : 0.8, a0: 1, a1: 0, rot: Math.atan2(ev.dirY, ev.dirX) });
       else if (ev.kind === 'enemy_slam') {
@@ -110,7 +110,7 @@ export class EnemyRenderer {
     spr.tintMode = Phaser.TintModes.MULTIPLY;
     this.ghosts.push({ spr, age: 0, baseY: feetY });
     this.lastFace.delete(enemyId);
-    const big = kind === 'bruiser' || kind === 'aegis' ? 1.5 : 1, look = DEATH_LOOK[kind], rnd = Math.random;
+    const big = kind === 'bruiser' || kind === 'aegis' ? 1.5 : 1, look = DEATH_LOOK[kind as keyof typeof DEATH_LOOK], rnd = Math.random;
     this.pool.spawn({ key: enemyFxKey('death-burst'), x, y: y - 10, depth: 10.3, life: 0.3, blend: 'normal', s0: 0.22 * big, s1: 0.5 * big, a0: 0.85, a1: 0, rot: (enemyId % 7) * 0.9 });
     if (!reduced) {
       this.pool.spawn({ key: enemyFxKey('hit-spark'), x, y: y - 10, depth: 10.5, life: 0.12, blend: 'add', s0: 0.4 * big, s1: 1.4 * big, a0: 0.9, a1: 0, rot: 0.3 });
@@ -127,7 +127,7 @@ export class EnemyRenderer {
     this.events(state, reduced);
     const p = state.player, live = new Set<number>();
     for (const e of state.enemies) {
-      if (e.hp <= 0 || isBoss(e.kind)) continue; live.add(e.id);
+      if (e.hp <= 0 || isBoss(e.kind) || isRealmKind(e.kind)) continue; live.add(e.id);
       const def = ENEMIES[e.kind as EnemyKind], m = this.manifests[e.kind as EnemyKind];
       let spr = this.sprites.get(e.id), tr = this.tracks.get(e.id);
       if (!spr || !tr) { spr = this.newSprite(e.kind as EnemyKind); this.sprites.set(e.id, spr); tr = { t: e.id * 0.137, face: p.x >= e.x ? 1 : -1, hp: e.hp, hurt: 0, flash: 0, tele: null, tele2: null, recoverT: 0, fan: [], aura: null, glyph: null, react: null, reactT: 9, rx: 0, ry: 0, prevMode: e.mode }; this.tracks.set(e.id, tr); }
@@ -175,7 +175,7 @@ export class EnemyRenderer {
     const liveBolts = new Set<number>();
     for (const s of state.enemyShots) {
       liveBolts.add(s.id);
-      let b = this.bolts.get(s.id); if (!b) { const kk = s.kind ?? 'bolt', look = BOLT_LOOK[kk], key = boltKey(kk); b = this.scene.add.image(s.x, s.y, key).setOrigin(kk === 'orb' ? 0.5 : 0.8, 0.5).setScale(look.w / this.scene.textures.get(key).getSourceImage().width).setDepth(10.2); this.bolts.set(s.id, b); }
+      let b = this.bolts.get(s.id); if (!b) { const kk = (s.kind === 'bolt' || s.kind === 'orb' || s.kind === 'prism' ? s.kind : 'prism') as keyof typeof BOLT_LOOK, look = BOLT_LOOK[kk], key = boltKey(kk); b = this.scene.add.image(s.x, s.y, key).setOrigin(kk === 'orb' ? 0.5 : 0.8, 0.5).setScale(look.w / this.scene.textures.get(key).getSourceImage().width).setDepth(10.2); this.bolts.set(s.id, b); }
       b.setPosition(Math.round(s.x), Math.round(s.y - 10)).setRotation(Math.atan2(s.vy, s.vx));
     }
     for (const [id, b] of this.bolts) if (!liveBolts.has(id)) { b.destroy(); this.bolts.delete(id); }

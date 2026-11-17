@@ -12,7 +12,7 @@ export const arenaFxKey = (n: string) => `arena-fx-${n}`;
 export const FLOOR_TILE_COUNT = 8;
 export const floorTileKey = (i: number) => `arena-floor-${i}`;
 export const floorTileUrl = (id: ArenaId, i: number) => `${ARENAS[id].floorDir}/floor-${i}.png`;
-export const HAZARD_FX: Record<ArenaId, string[]> = { gloam: ['surge-warn', 'surge-active', 'surge-warn-b', 'surge-active-b'], ashen: ['pulse-ring', 'pylon-glow'] };
+export const HAZARD_FX: Record<ArenaId, string[]> = { gloam: ['surge-warn', 'surge-active', 'surge-warn-b', 'surge-active-b'], ashen: ['pulse-ring', 'pylon-glow'], aetherfall: [], paradox: [] };
 export interface PropManifestEntry { file: string; scale?: number; origin: [number, number]; footprint: { w: number; h: number }; solid: boolean; frames?: number; frame?: { w: number; h: number } }
 export type PropManifest = Record<string, PropManifestEntry>;
 export const parsePropManifest = (raw: unknown): PropManifest => { const o = raw as { props?: PropManifest }; return (o && typeof o === 'object' && o.props ? o.props : (raw as PropManifest)) ?? {}; };
@@ -27,6 +27,7 @@ const WEIGHTS: Record<ArenaId, number[]> = {
   gloam: [0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 6, 7, 7, 7, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 3],
   // ashen: 0-2 plain, 3 cracked, 4 rubble-light, 7 worn; inlay (5,6) only on the lanes
   ashen: [0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 7, 7, 7, 0, 1, 2, 3, 4, 7, 0, 1, 2, 0, 3],
+  aetherfall: [0], paradox: [0],
 };
 
 function drawImage(ctx: CanvasRenderingContext2D, img: CanvasImageSource, cx: number, cy: number, w: number, h: number, rot = 0, flip = false) {

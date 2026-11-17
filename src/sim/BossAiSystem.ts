@@ -1,16 +1,19 @@
 import type { BossAi, Enemy, GameState } from './GameState';
 import { BOSSES, SERAPH, WARDEN } from '../content/bosses';
-import { groundDy, type BossKind } from '../content/enemies';
+import { groundDy, isBoss, type BossKind } from '../content/enemies';
 import { normalize } from '../core/Math';
 import { RULES } from '../core/Rules';
 import { blocked, slideMove } from './CollisionSystem';
 import { addEnemy, pushEnemyEvent } from './EntityRegistry';
 import { feetInCircle } from './Ground';
 import { damagePlayer } from './CombatSystem';
+import { behaviorOf, isB22Boss, updateB22Boss } from './bosses/runner';
+import type { EncounterStep } from '../b22/plan';
+import { COOP_BALANCE } from '../b22/pairs';
 
 const MAX_SHOTS = SERAPH.maxShots;
 const newAi = (): BossAi => ({ phase: 1, pat: 0, atk: '', step: 0, t: 0, acc: 0, exposed: false, invuln: false, side: 1, destX: 0, destY: 0, gap: 0, push: 0 });
-export const bossAlive = (state: GameState) => state.enemies.some(e => (e.kind === 'warden' || e.kind === 'seraph') && e.hp > 0);
+export const bossAlive = (state: GameState) => state.enemies.some(e => isBoss(e.kind) && !e.part && e.hp > 0);
 
 function hazard(state: GameState, h: { shape: 'circle' | 'cone' | 'sigil'; x: number; y: number; r: number; ang: number; arc: number; delay: number; damage: number; owner: number; tag: string; lane?: number }) {
   if (state.hazards.length >= 24) return;
@@ -23,14 +26,20 @@ function shot(state: GameState, x: number, y: number, ang: number, speed: number
 const clearOwn = (state: GameState, e: Enemy) => { state.hazards = state.hazards.filter(h => h.owner !== e.id); if (e.kind === 'seraph') state.enemyShots = state.enemyShots.filter(s => s.kind !== 'prism'); };
 
 /** Place a boss in the arena (outside Kai's reach, never inside an obstacle) in its intro state. Deterministic: first free angle from a seed-derived start. */
-export function spawnBoss(state: GameState, kind: BossKind): Enemy | null {
-  const def = BOSSES[kind], p = state.player, dist = kind === 'warden' ? 520 : 330;
+export function spawnBoss(state: GameState, kind: BossKind, step?: EncounterStep): Enemy | null {
+  const def = BOSSES[kind], p = state.player, beh = behaviorOf(kind), dist = kind === 'warden' ? 520 : kind === 'seraph' ? 330 : kind === 'castellan' ? 460 : 380;
+  const id = step?.id ?? kind, hp = Math.round(def.hp * (step?.hpMul ?? 1) * (state.b22.party ? COOP_BALANCE.bossHp : 1));
+  if (beh?.spawnAt) {
+    const at = beh.spawnAt(state), n = normalize(p.x - at.x, p.y - at.y);
+    const e = addEnemy(state, { kind, x: at.x, y: at.y, hp, maxHp: hp, radius: def.radius, speed: def.speed, damage: def.contact, touchCooldown: 0, mode: 'intro', modeT: def.intro, attackCd: 1, aimX: n.x, aimY: n.y, ai: { ...newAi(), invuln: true }, stepId: id });
+    state.encounter.spawned[id] = true; state.b22.bossHurt = false; beh.onSpawn?.(state, e); pushEnemyEvent(state, 'enemy_intro', e, n.x, n.y, kind); return e;
+  }
   for (let i = 0; i < 24; i++) {
     const a = ((state.seed % 12) / 12) * Math.PI * 2 + (i * Math.PI) / 12 * (i % 2 ? 1 : -1), x = p.x + Math.cos(a) * dist, y = p.y + Math.sin(a) * dist;
     if (blocked(x, y, def.radius + 6) || x < 80 || y < 80 || x > RULES.worldWidth - 80 || y > RULES.worldHeight - 80) continue;
     const n = normalize(p.x - x, p.y - y);
-    const e = addEnemy(state, { kind, x, y, hp: def.hp, maxHp: def.hp, radius: def.radius, speed: def.speed, damage: def.contact, touchCooldown: 0, mode: 'intro', modeT: def.intro, attackCd: 1, aimX: n.x, aimY: n.y, ai: { ...newAi(), invuln: true } });
-    state.encounter.spawned[kind] = true;
+    const e = addEnemy(state, { kind, x, y, hp, maxHp: hp, radius: def.radius, speed: def.speed, damage: def.contact, touchCooldown: 0, mode: 'intro', modeT: def.intro, attackCd: 1, aimX: n.x, aimY: n.y, ai: { ...newAi(), invuln: true }, stepId: id });
+    state.encounter.spawned[id] = true; state.b22.bossHurt = false; beh?.onSpawn?.(state, e);
     pushEnemyEvent(state, 'enemy_intro', e, n.x, n.y, kind);
     return e;
   }
@@ -47,6 +56,7 @@ function startPhase(state: GameState, e: Enemy, ai: BossAi) {
 }
 
 export function updateBoss(state: GameState, e: Enemy, dt: number) {
+  if (isB22Boss(e.kind)) { updateB22Boss(state, e, dt); return; }
   const ai = (e.ai ??= newAi()), def = BOSSES[e.kind as BossKind], p = state.player;
   e.touchCooldown = Math.max(0, e.touchCooldown - dt); e.attackCd = Math.max(0, e.attackCd - dt);
   const dx = p.x - e.x, dy = p.y - e.y, dist = Math.hypot(dx, dy), v = normalize(dx, dy), ph = ai.phase - 1, ws = def.windupScale[ph];
@@ -212,13 +222,13 @@ function afterStrike(state: GameState, e: Enemy, ai: BossAi, ph: number, ws: num
 }
 
 /** QA / director entry: jump straight into an encounter without touching saves or settings. */
-export function startEncounter(state: GameState, id: 'warden' | 'seraph' | 'aegis' | 'cantor' | 'mixed') {
+export function startEncounter(state: GameState, id: BossKind | 'aegis' | 'cantor' | 'mixed') {
   state.enemies.length = 0; state.enemyShots.length = 0; state.hazards.length = 0; state.encounter.forced = true; state.spawnTimer = 1e9; state.nextFlanker = 1e9;
   const p = state.player;
   const mobs = (kind: 'pursuer' | 'flanker' | 'ranged' | 'aegis' | 'cantor', n: number, r: number) => {
     for (let i = 0; i < n; i++) { const a = 0.6 + i * 2.1, x = p.x + Math.cos(a) * r, y = p.y + Math.sin(a) * r * 0.8; if (blocked(x, y, 20)) continue; spawnMob(state, kind, x, y); }
   };
-  if (id === 'warden' || id === 'seraph') spawnBoss(state, id);
+  if (id !== 'aegis' && id !== 'cantor' && id !== 'mixed') spawnBoss(state, id);
   else if (id === 'aegis') { mobs('aegis', 1, 260); mobs('pursuer', 3, 360); }
   else if (id === 'cantor') { mobs('cantor', 1, 300); mobs('pursuer', 4, 240); mobs('flanker', 1, 260); }
   else { spawnBoss(state, 'warden'); mobs('pursuer', 8, 360); mobs('flanker', 3, 420); mobs('ranged', 2, 400); }

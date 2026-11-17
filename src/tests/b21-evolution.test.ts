@@ -17,6 +17,12 @@ describe('B21 build evolution mapper', () => {
     s.upgradeStacks = { widelance: 3, hardlight: 4, afterburn: 2 };
     expect(evolution(s).e).toBe(3);
   });
+  it('B22 audit: lancecool and novacool alone never raise the E / R visual tier', () => {
+    const s = mk(); s.upgradeStacks = { lancecool: 3, novacool: 3 };
+    const e = evolution(s); expect(e.e).toBe(0); expect(e.r).toBe(0); expect(e.build).toBe(0);
+    s.upgradeStacks = { lancecool: 3, novacool: 3, widelance: 1, bloombulk: 1 };
+    const f = evolution(s); expect(f.e).toBe(1); expect(f.r).toBe(1);
+  });
   it('mirrors real mechanics: echo, afterburn, width', () => {
     const s = mk(); s.mods = { ...baseMods(), beamLinger: 2, sphereEcho: 2, beamWidth: 1.44 };
     const e = evolution(s); expect(e.afterburn).toBe(2); expect(e.echo).toBe(2); expect(e.beamWidth).toBeCloseTo(1.44);

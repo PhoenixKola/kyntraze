@@ -16,6 +16,7 @@ function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: nu
 export function formChoices(state: GameState): (1 | 2 | 3)[] {
   const p = state.player; const r: (1 | 2 | 3)[] = [];
   if (state.phase !== 'running' || state.cinema || p.formCooldown > 0 || p.hp <= 0) return r;
+  if (state.hero === 'vex') { const f = state.b22.vex.forms; if (p.form === 0 && p.drive >= ASCEND.charge - 1e-6) { if (f[0]) r.push(1); if (f[1]) r.push(2); } return r; }   // B22: Vex has Riftbound and Voidheart Exile
   if (state.hero !== 'kai') { if (state.heroFormUnlocked && p.form === 0 && p.drive >= ASCEND.charge - 1e-6) r.push(1); return r; }   // B19: Ren / Sora have Base + ONE transformation
   if (p.form === 0 && p.drive >= RULES.formCharge) r.push(1);
   if (state.cometUnlocked && p.form < 2 && p.drive >= COMET.charge - 1e-6) r.push(2);

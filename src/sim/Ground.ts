@@ -10,6 +10,12 @@ export function feetInCone(state: GameState, h: Pick<Hazard, 'x' | 'y' | 'r' | '
   let da = Math.atan2(dy, dx) - h.ang; da = Math.atan2(Math.sin(da), Math.cos(da));
   return Math.abs(da) <= h.arc / 2 + Math.asin(Math.min(1, FOOT_RADIUS / d));
 }
+/** B22: an oriented lane on the ground (origin x,y; direction ang; length r; width w). Hit when the feet disc touches the lane rectangle. */
+export function feetInLane(state: GameState, h: Pick<Hazard, 'x' | 'y' | 'r' | 'ang' | 'w'>): boolean {
+  const f = playerFeet(state), dx = f.x - h.x, dy = f.y - h.y, c = Math.cos(h.ang), s = Math.sin(h.ang);
+  const along = dx * c + dy * s, across = -dx * s + dy * c;
+  return along >= -FOOT_RADIUS && along <= h.r + FOOT_RADIUS && Math.abs(across) <= (h.w ?? 40) / 2 + FOOT_RADIUS;
+}
 /** Axis-aligned rect on the ground plane (centre x,y, size w,h): hit when the feet disc touches it. */
 export function feetInRect(state: GameState, h: { x: number; y: number; w: number; h: number }): boolean {
   const f = playerFeet(state), dx = Math.max(Math.abs(f.x - h.x) - h.w / 2, 0), dy = Math.max(Math.abs(f.y - h.y) - h.h / 2, 0);

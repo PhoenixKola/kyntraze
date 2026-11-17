@@ -9,7 +9,7 @@ import { BOSS_FX_NAMES, BOSS_KINDS, bossFxKey, bossFxUrl, bossManifestKey, bossM
 import { ENEMY_KINDS } from '../../content/enemies';
 import type { HeroId } from '../../content/heroes';
 import { HERO_FX_NAMES, heroFxKey, heroFxUrl } from '../render/heroFxView';
-import { HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroManifestUrl, heroSheetUrl, heroTextureKey } from '../../assets/heroAnimation';
+import { artHero, HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroManifestUrl, heroSheetUrl, heroTextureKey } from '../../assets/heroAnimation';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
 import { B14_FX_NAMES, b14Key, b14Url } from '../render/b14fx';
@@ -27,8 +27,8 @@ export class BootScene extends Phaser.Scene {
     KAI_DIRS.forEach(dir => this.load.json(`kai-f1-manifest-${dir}`, kaiManifestUrl(dir, 'f1')));
     KAI_DIRS.forEach(dir => this.load.json(`kai-f2-manifest-${dir}`, kaiManifestUrl(dir, 'f2')));
     KAI_DIRS.forEach(dir => this.load.json(`kai-f3-manifest-${dir}`, kaiManifestUrl(dir, 'f3')));   // B13: optional - without them Form III falls back to the Form II art
-    if (this.hero !== 'kai' && HERO_SHEETS[this.hero].base) { const h = this.hero; KAI_DIRS.forEach(dir => { this.load.json(`hero-${h}-base-manifest-${dir}`, heroManifestUrl(h, dir, 'base')); if (HERO_SHEETS[h].f1) this.load.json(`hero-${h}-f1-manifest-${dir}`, heroManifestUrl(h, dir, 'f1')); }); if (HERO_SHEETS[h].anchors) this.load.json(HERO_ANCHORS_KEY(h), heroAnchorsUrl(h)); }   // B19: Ren / Sora sheets (same contract as Kai's); absent art falls back to the dev placeholder body
-    if (this.hero !== 'kai') HERO_FX_NAMES[this.hero].forEach(n => this.load.image(heroFxKey(this.hero, n), heroFxUrl(this.hero, n)));
+    if (this.hero !== 'kai' && HERO_SHEETS[artHero(this.hero)].base) { const h = artHero(this.hero); KAI_DIRS.forEach(dir => { this.load.json(`hero-${h}-base-manifest-${dir}`, heroManifestUrl(h, dir, 'base')); if (HERO_SHEETS[h].f1) this.load.json(`hero-${h}-f1-manifest-${dir}`, heroManifestUrl(h, dir, 'f1')); }); if (HERO_SHEETS[h].anchors) this.load.json(HERO_ANCHORS_KEY(h), heroAnchorsUrl(h)); }   // B19: Ren / Sora sheets (same contract as Kai's); absent art falls back to the dev placeholder body
+    if (this.hero !== 'kai') HERO_FX_NAMES[artHero(this.hero)].forEach((n: string) => this.load.image(heroFxKey(artHero(this.hero), n), heroFxUrl(artHero(this.hero), n)));
     this.load.json(F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL);
     B21_GROUPS.forEach(g => this.load.json(b21ManifestKey(g), b21ManifestUrl(g)));   // B21: optional art groups, a missing manifest is ignored
     COMET_FX_NAMES.forEach(n => this.load.image(cometFxKey(n), cometFxUrl(n)));
@@ -68,8 +68,8 @@ export class BootScene extends Phaser.Scene {
         this.load.spritesheet(kaiTextureKey(dir, clip, 'f3'), kaiSheetUrl(dir, a, 'f3'), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });
       }
     }
-    if (this.hero !== 'kai' && HERO_SHEETS[this.hero].base) {
-      const h = this.hero;
+    if (this.hero !== 'kai' && HERO_SHEETS[artHero(this.hero)].base) {
+      const h = artHero(this.hero);
       for (const form of ['base', 'f1'] as const) {
         if (!HERO_SHEETS[h][form]) continue;
         const raw = KAI_DIRS.map(dir => this.cache.json.get(`hero-${h}-${form}-manifest-${dir}`)); if (!raw.every(r => r && typeof r === 'object' && (r as { direction?: string }).direction)) continue;

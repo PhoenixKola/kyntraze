@@ -9,9 +9,10 @@ import { ASCEND, REN, SORA, type HeroAct } from '../content/heroKits';
 import { freeAim } from './ApexSystem';
 import { HERO_ANCHORS } from '../content/heroAnchors';
 import { KAI_GROUND_DY, KAI_SCALE } from '../assets/kaiAnimation';
+import { updateVexAct, updateVexMarks, vexAuto, vexE, vexMoveScale, vexQ, vexR } from './VexSystem';
 
 const EVENT_CAP = 24, BOLT_CAP = 90;
-function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number) {
+export function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number) {
   s.abilityEvents.push({ id: s.nextId++, kind, x, y, n });
   if (s.abilityEvents.length > EVENT_CAP) s.abilityEvents.splice(0, s.abilityEvents.length - EVENT_CAP);
 }
@@ -19,35 +20,35 @@ const faceOf = (dx: number, dy: number): Face => (Math.abs(dx) >= Math.abs(dy) ?
 const easeOut = (u: number) => 1 - (1 - clamp(u, 0, 1)) ** 3;
 const easeIn = (u: number) => clamp(u, 0, 1) ** 2;
 const alive = (e: Enemy) => e.hp > 0;
-const inForm = (s: GameState) => s.player.form === 1;
+const inForm = (s: GameState) => s.player.form >= 1;
 /** Damage multiplier of the transformed state (Ascendant / Sovereign). */
 const formMul = (s: GameState, base: number) => (inForm(s) ? base * s.mods.formPower : 1);
-const nearest = (s: GameState, range: number): Enemy | null => {
+export const nearest = (s: GameState, range: number): Enemy | null => {
   const p = s.player; let best: Enemy | null = null, bd = range * range;
   for (const e of s.enemies) { if (!alive(e)) continue; const d = (e.x - p.x) ** 2 + (e.y - p.y) ** 2; if (d <= bd) { bd = d; best = e; } }
   return best;
 };
 /** Free aim (pointer / right stick) wins; otherwise the nearest enemy in `range`; otherwise the facing. */
-function aimDir(s: GameState, range: number): { x: number; y: number } {
+export function aimDir(s: GameState, range: number): { x: number; y: number } {
   const fa = freeAim(s); if (fa) return { x: fa.x, y: fa.y };
   const p = s.player, e = nearest(s, range);
   if (e) { const d = normalize(e.x - p.x, e.y - p.y); if (d.x || d.y) return d; }
   return normalize(p.aimX, p.aimY);
 }
 /** Is the straight path between two points free of walls (sampled at the player's body radius)? */
-function pathClear(x0: number, y0: number, x1: number, y1: number, r: number): boolean {
+export function pathClear(x0: number, y0: number, x1: number, y1: number, r: number): boolean {
   const d = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.ceil(d / 12));
   for (let i = 1; i <= n; i++) { const u = i / n; if (blocked(x0 + (x1 - x0) * u, y0 + (y1 - y0) * u, r)) return false; }
   return true;
 }
-const driveGain = (s: GameState, amount: number) => { if (s.player.form === 0) s.player.drive = Math.min(100, s.player.drive + amount * s.mods.driveGain); };
+export const driveGain = (s: GameState, amount: number) => { if (s.player.form === 0) s.player.drive = Math.min(100, s.player.drive + amount * s.mods.driveGain); };
 const feedConductor = (s: GameState) => { if (s.mods.beamDrive > 0) driveGain(s, s.mods.beamDrive); };
-const push = (_s: GameState, e: Enemy, dx: number, dy: number, dist: number, stagger = 0) => {
+export const push = (_s: GameState, e: Enemy, dx: number, dy: number, dist: number, stagger = 0) => {
   if (isBoss(e.kind) || e.hp <= 0) return;
   const d = Math.hypot(dx, dy) || 1; for (let i = 0; i < 4; i++) slideMove(e, dx / d * dist * 4, dy / d * dist * 4, 0.0625);   // 4 x 0.0625 s x (dist * 4 px/s) = dist px
   if (stagger > 0) e.stagger = Math.max(e.stagger, stagger);
 };
-function newCast(s: GameState, act: HeroAct, dir: { x: number; y: number }, dur: number): HeroCast {
+export function newCast(s: GameState, act: HeroAct, dir: { x: number; y: number }, dur: number): HeroCast {
   const p = s.player;
   return { id: s.nextId++, act, t: 0, dirX: dir.x, dirY: dir.y, face: faceOf(dir.x, dir.y), form: p.form, released: false, dur, moving: s.hx.moving, beats: 0, hop: 0, hopT: 0, hops: [], sx: p.x, sy: p.y, tx: p.x, ty: p.y, charge: 0, tier: 0, len: 0, pulses: 0, hits: [] };
 }
@@ -74,7 +75,7 @@ function aimFromMuzzle(s: GameState, ox: number, oy: number, range: number, fall
 export function updateHeroAuto(s: GameState, dt: number) {
   const p = s.player; if (s.hx.act || s.cinema) return;
   p.attackClock -= dt; if (p.attackClock > 0) return;
-  if (s.hero === 'ren') renAuto(s); else soraAuto(s);
+  if (s.hero === 'ren') renAuto(s); else if (s.hero === 'vex') vexAuto(s); else soraAuto(s);
 }
 function renAuto(s: GameState) {
   const p = s.player, form = inForm(s), period = Math.max(0.16, p.attackPeriod * (form ? 0.78 : 1));
@@ -111,6 +112,7 @@ function spawnBolt(s: GameState, o: { x: number; y: number; dirX: number; dirY: 
 export function heroActivateQ(s: GameState): boolean {
   const p = s.player; if (p.qCooldown > 0 || s.hx.act || s.cinema || p.dashRemaining > 0 || p.hp <= 0) return false;
   const form = inForm(s);
+  if (s.hero === 'vex') return vexQ(s);
   if (s.hero === 'ren') {
     const dir = aimDir(s, 190); const beats = form ? REN.q.formBeats : REN.q.beats, gap = form ? REN.q.formGap : REN.q.gap;
     p.qCooldown = REN.q.cooldown; s.hx.act = newCast(s, 'crimson_break', dir, 0.06 + beats * gap + REN.q.recover);
@@ -159,11 +161,12 @@ function updateAzureVolley(s: GameState, c: HeroCast) {
 /* ------------------------------------------------------------------ E */
 export function heroStartE(s: GameState): boolean {
   const p = s.player; if (p.beamCooldown > 0 || s.hx.act || s.cinema || p.dashRemaining > 0 || p.hp <= 0 || s.phase !== 'running') return false;
-  return s.hero === 'ren' ? startRush(s) : startLance(s);
+  return s.hero === 'ren' ? startRush(s) : s.hero === 'vex' ? vexE(s) : startLance(s);
 }
 export function heroStartR(s: GameState): boolean {
-  const p = s.player; if (p.sphereCooldown > 0 || s.hx.act || s.cinema || p.dashRemaining > 0 || p.hp <= 0 || s.phase !== 'running') return false;
-  return s.hero === 'ren' ? startBloodstar(s) : startHorizon(s);
+  const p = s.player;
+  if (s.hero === 'vex' && s.b22.marks.some(m => m.src === 'seal') && s.phase === 'running' && !s.cinema && p.hp > 0) return vexR(s);   // R again: detonate the Seal early if (p.sphereCooldown > 0 || s.hx.act || s.cinema || p.dashRemaining > 0 || p.hp <= 0 || s.phase !== 'running') return false;
+  return s.hero === 'ren' ? startBloodstar(s) : s.hero === 'vex' ? vexR(s) : startHorizon(s);
 }
 /** Meteor Rush plan: chain of nearest unvisited enemies, each reachable by a wall-free straight line. Fixed at the press, so the route is predictable. */
 function planRush(s: GameState, count: number): { x: number; y: number; id: number }[] {
@@ -365,6 +368,7 @@ function updateOrbs(s: GameState, dt: number) {
 /* ------------------------------------------------------------------ per-tick update */
 export function updateHero(s: GameState, dt: number) {
   const h = s.hx; h.t += dt;
+  if (s.hero === 'vex') updateVexMarks(s, dt);
   for (const r of h.rings) r.t += dt; h.rings = h.rings.filter(r => r.t < r.dur);
   for (const a of h.arcs) a.t += dt; h.arcs = h.arcs.filter(a => a.t < a.dur);
   const due = h.pending.filter(q => q.at <= h.t); h.pending = h.pending.filter(q => q.at > h.t);
@@ -391,6 +395,8 @@ export function updateHero(s: GameState, dt: number) {
     case 'azure_volley': updateAzureVolley(s, c); break;
     case 'celestial_lance': updateLance(s, c, dt); if (c.released && before < SORA.e.maxCharge + SORA.e.fire && c.t >= SORA.e.maxCharge + SORA.e.fire) emit(s, 'lance_end', s.player.x, s.player.y); break;
     case 'zero_horizon': break;
+    case 'parry_halo': case 'rift_reversal': case 'oathbreaker_seal': updateVexAct(s, c, dt, before); break;
+    case 'ultimate': break;
   }
   if (h.act === c && (c.act === 'celestial_lance' ? c.released && c.t >= c.dur - 1e-9 : c.act === 'meteor_rush' ? c.hop >= c.hops.length && c.t >= c.len - 1e-9 : c.t >= c.dur - 1e-9)) h.act = null;
 }
@@ -427,6 +433,8 @@ export function heroMoveScale(s: GameState): number {
     case 'azure_volley': return SORA.q.moveScale;
     case 'celestial_lance': return !c.released ? SORA.e.moveCharge : c.t < SORA.e.maxCharge + SORA.e.fire ? SORA.e.moveFire : 0.6;
     case 'zero_horizon': return c.t < SORA.r.summon ? SORA.r.moveScale : 0.7;
+    case 'parry_halo': case 'rift_reversal': case 'oathbreaker_seal': return vexMoveScale(c);
+    case 'ultimate': return 0.2;
   }
 }
 /** Dash (or the form reveal) ends the move now. A cancelled Lance charge is never free; a dash does not cancel the orbs already summoned. */

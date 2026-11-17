@@ -43,21 +43,22 @@ export function planMarks(s: GameState, afterAbility: number, afterEnemy: number
 export const DECALS = { gloam: { crack: ['g_crack_a', 'g_crack_b', 'g_crack_c', 'g_crack_d', 'g_scratch_a', 'g_scratch_b'], lane: 'g_beam_lane', under: ['g_seam_a', 'g_seam_b'] }, ashen: { crack: ['a_crack_a', 'a_crack_b', 'a_crack_c', 'a_crack_d', 'a_crack_e'], lane: 'a_beam_lane', under: ['a_ash_a', 'a_ash_b'] } } as const;
 export const decalKey = (n: string) => `b21-dmg-${n}`;
 /** `art` maps a decal name to its pixel width when the ImageGen decal is loaded (absent = fall back to the generic crack/scorch art). */
+const markArena = (a: ArenaId): 'gloam' | 'ashen' => (a === 'gloam' || a === 'ashen' ? a : a === 'aetherfall' ? 'ashen' : 'gloam');
 export function markSpawns(m: MarkPlan, arena: ArenaId, reduced: boolean, art?: (name: string) => number | undefined): FxSpawn[] {
-  const mat = MATERIAL[arena], glow = arena === 'ashen' && m.hero !== 'ren' && m.hero !== 'sora' ? VERDIGRIS : HERO_GLOW[m.hero], out: FxSpawn[] = [];
+  const mat = MATERIAL[markArena(arena)], glow = arena === 'ashen' && m.hero !== 'ren' && m.hero !== 'sora' ? VERDIGRIS : HERO_GLOW[m.hero], out: FxSpawn[] = [];
   const wide = (r: number) => (2 * r) / 279;
   const pick = (list: readonly string[]) => list[Math.abs(Math.floor(m.rot * 977 + m.x)) % list.length];
-  if (m.kind === 'lane' && art?.(DECALS[arena].lane)) {
-    const n = DECALS[arena].lane, w = art(n)!, cx = m.x + Math.cos(m.rot) * m.radius * 0.5, cy = m.y + Math.sin(m.rot) * m.radius * 0.5;
+  if (m.kind === 'lane' && art?.(DECALS[markArena(arena)].lane)) {
+    const n = DECALS[markArena(arena)].lane, w = art(n)!, cx = m.x + Math.cos(m.rot) * m.radius * 0.5, cy = m.y + Math.sin(m.rot) * m.radius * 0.5;
     out.push({ key: decalKey(n), x: cx, y: cy, depth: 2.82, life: m.life, blend: 'normal', s0: m.radius / w, s1: m.radius / w, sy: 0.5, a0: 0.8, a1: 0, rot: m.rot, fadeIn: 0.05 });
     if (!reduced) out.push({ key: vfxKey('scorch', false), x: cx, y: cy, depth: 2.83, life: Math.min(1.4, m.life), blend: 'add', tint: glow, s0: m.radius / 329, s1: m.radius / 329, sy: 0.12, a0: 0.5, a1: 0, rot: m.rot });
     return out;
   }
   if (m.kind === 'crack' && art) {
-    const cn = pick(DECALS[arena].crack), w = art(cn);
+    const cn = pick(DECALS[markArena(arena)].crack), w = art(cn);
     if (w) {
       const k = (2 * m.radius) / w;
-      if (m.strong) { const un = pick(DECALS[arena].under), uw = art(un); if (uw) out.push({ key: decalKey(un), x: m.x, y: m.y, depth: 2.81, life: m.life, blend: 'normal', s0: (2.1 * m.radius) / uw, s1: (2.1 * m.radius) / uw, sy: 0.6, a0: 0.55, a1: 0, rot: m.rot * 0.3, fadeIn: 0.03 }); }
+      if (m.strong) { const un = pick(DECALS[markArena(arena)].under), uw = art(un); if (uw) out.push({ key: decalKey(un), x: m.x, y: m.y, depth: 2.81, life: m.life, blend: 'normal', s0: (2.1 * m.radius) / uw, s1: (2.1 * m.radius) / uw, sy: 0.6, a0: 0.55, a1: 0, rot: m.rot * 0.3, fadeIn: 0.03 }); }
       out.push({ key: decalKey(cn), x: m.x, y: m.y, depth: 2.84, life: m.life, blend: 'normal', s0: k, s1: k, sy: 0.7, a0: 0.95, a1: 0, rot: 0, fadeIn: 0.03 });
       if (!reduced) out.push({ key: vfxKey('circ_crack', false), x: m.x, y: m.y, depth: 2.85, life: m.strong ? 3.2 : 1.8, blend: 'add', tint: glow, s0: (2 * m.radius) / 279, s1: (2 * m.radius) / 279, sy: 0.55, a0: 0.6, a1: 0, rot: m.rot });
       return out;

@@ -20,8 +20,9 @@ export interface RunReward { lines: RewardLine[]; total: number; newFeats: FeatI
 export const MARKS_CAP = 999_999, GRANTED_KEEP = 40;
 const clampInt = (v: unknown, lo: number, hi: number, d = lo) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(lo, Math.floor(v))) : d);
 const blankRecord = (): ArenaRecord => ({ runs: 0, wins: 0, bestSeconds: 0, bestScore: 0, bestLevel: 0, wardenKills: 0, seraphKills: 0 });
-export const blankMeta = (): MetaState => ({ v: 1, marks: 0, lifetime: 0, owned: [], boon: null, contract: null, crest: null, feats: {}, mastery: {}, counters: { runs: 0, wins: 0, deaths: 0, kills: 0, wardenKills: 0, seraphKills: 0 }, arenas: { gloam: blankRecord(), ashen: blankRecord() }, granted: [], introSeen: false, legacyGift: 0, heroes: blankHeroes() });
-function blankHeroes(): Record<HeroId, HeroRecord> { return { kai: { runs: 0, wins: 0, bestSeconds: 0, wardenKills: 0 }, ren: { runs: 0, wins: 0, bestSeconds: 0, wardenKills: 0 }, sora: { runs: 0, wins: 0, bestSeconds: 0, wardenKills: 0 } }; }
+export const blankMeta = (): MetaState => ({ v: 1, marks: 0, lifetime: 0, owned: [], boon: null, contract: null, crest: null, feats: {}, mastery: {}, counters: { runs: 0, wins: 0, deaths: 0, kills: 0, wardenKills: 0, seraphKills: 0 }, arenas: blankArenas(), granted: [], introSeen: false, legacyGift: 0, heroes: blankHeroes() });
+function blankHeroes(): Record<HeroId, HeroRecord> { return Object.fromEntries(HERO_IDS.map(h => [h, { runs: 0, wins: 0, bestSeconds: 0, wardenKills: 0 }])) as Record<HeroId, HeroRecord>; }
+function blankArenas(): Record<ArenaId, ArenaRecord> { return Object.fromEntries(ARENA_IDS.map(a => [a, blankRecord()])) as Record<ArenaId, ArenaRecord>; }
 
 export interface LegacyFacts { cometheart: boolean; stillfire: boolean; victory: boolean; hadRun: boolean }
 /** Idempotent. A save without `meta` is credited ONCE from what it already earned (Warden / Seraph milestones become feats and a one-time marks gift); an existing `meta` is only sanitised. Bad data falls back per field, never wholesale. */
@@ -96,7 +97,7 @@ export function computeEarnings(r: RunResult): RewardLine[] {
 /** Records the run, awards marks / feats / mastery exactly once per `runId`, and returns the breakdown for the Results screen. A repeated id is a no-op (reward: null). */
 export function finalizeRun(prev: MetaState, r: RunResult): { meta: MetaState; reward: RunReward | null } {
   if (!r.runId || prev.granted.includes(r.runId)) return { meta: prev, reward: null };
-  const m: MetaState = { ...prev, owned: [...prev.owned], feats: { ...prev.feats }, mastery: { ...prev.mastery }, counters: { ...prev.counters }, arenas: { gloam: { ...prev.arenas.gloam }, ashen: { ...prev.arenas.ashen } }, granted: [...prev.granted], heroes: { kai: { ...prev.heroes.kai }, ren: { ...prev.heroes.ren }, sora: { ...prev.heroes.sora } } };
+  const m: MetaState = { ...prev, owned: [...prev.owned], feats: { ...prev.feats }, mastery: { ...prev.mastery }, counters: { ...prev.counters }, arenas: Object.fromEntries(ARENA_IDS.map(a => [a, { ...prev.arenas[a] }])) as Record<ArenaId, ArenaRecord>, granted: [...prev.granted], heroes: Object.fromEntries(HERO_IDS.map(h => [h, { ...prev.heroes[h] }])) as Record<HeroId, HeroRecord> };
   const before = available(prev), firstRun = prev.counters.runs === 0;
   const seconds = Math.max(0, Number.isFinite(r.seconds) ? r.seconds : 0), kills = clampInt(r.kills, 0, 1e6);
   const run: RunResult = { ...r, seconds, kills };

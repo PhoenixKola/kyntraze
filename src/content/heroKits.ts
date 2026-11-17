@@ -2,7 +2,7 @@
 import type { HeroId } from './heroes';
 import type { UpgradeCategory, UpgradeId } from './upgrades';
 
-export type HeroAct = 'crimson_break' | 'meteor_rush' | 'bloodstar' | 'azure_volley' | 'celestial_lance' | 'zero_horizon';
+export type HeroAct = 'crimson_break' | 'meteor_rush' | 'bloodstar' | 'azure_volley' | 'celestial_lance' | 'zero_horizon' | 'parry_halo' | 'rift_reversal' | 'oathbreaker_seal' | 'ultimate';
 
 /** Both new heroes have exactly one transformation (form id 1). The unlock is the same milestone for each, earned by playing that hero. */
 export const ASCEND = {
@@ -13,6 +13,8 @@ export const ASCEND = {
   knockRadius: 260, knockPush: 150, stagger: 0.9,
   ren: { drain: 3.4, speedMul: 1.1, autoMul: 1.3 },
   sora: { drain: 3.4, speedMul: 1.12, autoMul: 1.25 },
+  /** Vex has two transformations: Riftbound (form 1) and Voidheart Exile (form 2) */
+  vex: { drain: [3.4, 3.0], speedMul: [1.1, 1.14], autoMul: [1.25, 1.4], unlock: ['vex_trial_2', 'vex_trial_3'] },
 } as const;
 
 export const REN = {
@@ -21,6 +23,15 @@ export const REN = {
   q: { name: 'Crimson Break', cooldown: 7.5, beats: 5, gap: 0.115, formBeats: 7, formGap: 0.082, beatMul: 0.2, finisherMul: 1.6, arcDeg: 75, step: 14, moveScale: 0.62, recover: 0.2, formReach: 1.2 },
   e: { name: 'Meteor Rush', cooldown: 9, hops: 3, formHops: 5, seek: 340, chain: 270, hopTime: 0.15, strikeTime: 0.09, blast: 72, damage: 23, fallback: 230, fallbackBlast: 84, fallbackDamage: 20, recover: 0.16, formBlast: 1.35, arrival: 6 },
   r: { name: 'Bloodstar Impact', cooldown: 18, windup: 0.32, flight: 0.46, recover: 0.38, range: 380, defaultRange: 280, radius: 205, damage: 62, edgeFalloff: 0.55, push: 220, stagger: 0.7, ring: 1.32, ringDamage: 0.5, ringAt: 0.2, formRebound: 1.5, reboundAt: 0.55, reboundDamage: 0.6, formDamage: 1.2 },
+} as const;
+
+/** B22 The Fallen Vanguard: Vex, the counter hero. Everything he does is a read-and-answer: parry, riposte, mark. */
+export const VEX = {
+  base: { hp: 124, speed: 248, attackDamage: 14, attackPeriod: 0.5, attackRange: 118, targets: 2, qDamage: 36, qRadius: 120, radius: 17 },
+  auto: { name: 'Null Blade', arcDeg: 80, step: 3, finisherMul: 1.8, finisherPush: 90, lunge: 8, markMul: 1.35 },
+  q: { name: 'Parry Halo', cooldown: 8, perfect: 0.34, guard: 0.62, recover: 0.3, arcDeg: 150, reduce: 0.55, riposteMul: 2.4, riposteReach: 190, riposteArc: 100, stun: 0.9, refund: 0.4, drive: 12, gap: 0.6, moveScale: 0.5, formPerfect: 1.5 },
+  e: { name: 'Rift Reversal', cooldown: 9, distance: 230, iframes: 0.36, riposteMul: 2.0, strikeReach: 170, windup: 0.1, recover: 0.2, perfectWindow: 0.35, formCool: 0.75, formDistance: 1.4 },
+  r: { name: 'Oathbreaker Seal', cooldown: 18, marks: 5, bossMarks: 1, range: 360, windup: 0.4, fuse: 2.2, damage: 1.4, power: 0.12, wave: 150, recover: 0.3, moveScale: 0.5 },
 } as const;
 
 export const SORA = {
@@ -32,8 +43,8 @@ export const SORA = {
 } as const;
 
 /** Display metadata the HUD, hero select and results read. */
-export interface HeroKitInfo { act: { q: string; e: string; r: string }; auto: string; form: string; formShort: string; quote: string; roleLine: string; blurbs: { auto: string; q: string; e: string; r: string; form: string }; catNames: Partial<Record<UpgradeCategory, string>> }
-export const HERO_KIT: Record<'ren' | 'sora', HeroKitInfo> = {
+export interface HeroKitInfo { act: { q: string; e: string; r: string }; auto: string; form: string; /** a second transformation (Vex) */ form2?: string; formShort: string; quote: string; roleLine: string; blurbs: { auto: string; q: string; e: string; r: string; form: string }; catNames: Partial<Record<UpgradeCategory, string>> }
+export const HERO_KIT: Record<'ren' | 'sora' | 'vex', HeroKitInfo> = {
   ren: {
     act: { q: REN.q.name, e: REN.e.name, r: REN.r.name }, auto: REN.auto.name, form: 'Crimson Ascendant', formShort: 'ASCENDANT',
     quote: 'Pressure is the only plan.', roleLine: 'Close-range brawler · risk and momentum',
@@ -46,12 +57,24 @@ export const HERO_KIT: Record<'ren' | 'sora', HeroKitInfo> = {
     blurbs: { auto: 'Fast homing blue needles fire at the nearest enemies from a safe distance.', q: 'A quick fan of blue energy bolts for lane control. Works while moving.', e: 'Hold E to gather a piercing beam, release to fire. Longer charge means wider, longer and harder.', r: 'Summon orbiting spheres, then send them to converge on enemies and detonate together.', form: 'Full Drive and F: electric blue hair, a blue-white aura, finer Volley, a brighter Lance and a wider Horizon.' },
     catNames: { core: 'CORE', beam: 'LANCE', sphere: 'HORIZON', survival: 'SURVIVAL', mobility: 'MOBILITY', pickup: 'SALVAGE', drive: 'SOVEREIGN' },
   },
+  vex: {
+    act: { q: VEX.q.name, e: VEX.e.name, r: VEX.r.name }, auto: VEX.auto.name, form: 'Riftbound', form2: 'Voidheart Exile', formShort: 'RIFTBOUND',
+    quote: 'Every blow tells me where to strike.', roleLine: 'Counter specialist · timing and marks',
+    blurbs: {
+      auto: 'Angular Null Blade sweeps in a three-beat rhythm; the third strike lands hard. Marked foes take extra.',
+      q: 'Raise a guard in front of you. A hit in the first moments is PARRIED: refused, answered by a stunning riposte. A late hit is only softened.',
+      e: 'Shift through a short safe path. If a foe is in reach you riposte at the other end; with none, you just reposition.',
+      r: 'Mark up to five foes (one boss), then detonate them after a short fuse or press R again. Damage dealt while marked adds to the blast.',
+      form: 'Riftbound: wider parry timing, faster cooldowns and violet afterimage pressure. Voidheart Exile: silver-black precision, marks spread on a parry, the shift leaves a fracture line.',
+    },
+    catNames: { core: 'CORE', beam: 'RIFT', sphere: 'SEAL', survival: 'SURVIVAL', mobility: 'MOBILITY', pickup: 'SALVAGE', drive: 'OATH' },
+  },
 };
 
 export interface UpgradeOverride { name?: string; blurb?: string; label?: string; /** replaces the card's number (the actual stat of THIS hero's ability) */ read?: (s: { player: { attackDamage: number; attackPeriod: number; attackRange: number; targets: number; qDamage: number; qRadius: number }; mods: { beamWidth: number; beamDamage: number; beamCd: number; beamLinger: number; sphereRadius: number; sphereDamage: number; sphereCd: number; sphereEcho: number; formDrain: number; formPower: number } }) => number; unit?: string; digits?: number }
-const RS = { ren: REN, sora: SORA };
+const RS = { ren: REN, sora: SORA, vex: VEX };
 /** Hero-specific wording and the number each card actually changes. Cards not listed keep Kai's wording (they are hero-neutral: health, speed, pickup, XP, dash, regen...). */
-export const UPGRADE_OVERRIDES: Record<'ren' | 'sora', Partial<Record<UpgradeId, UpgradeOverride>>> = {
+export const UPGRADE_OVERRIDES: Record<'ren' | 'sora' | 'vex', Partial<Record<UpgradeId, UpgradeOverride>>> = {
   ren: {
     impact: { name: 'HEAVY HAND', blurb: 'Hammer Chain punches hit harder.', label: 'Punch damage' },
     tempo: { name: 'QUICKEN', blurb: 'Hammer Chain strikes faster.', label: 'Chains / sec' },
@@ -89,6 +112,26 @@ export const UPGRADE_OVERRIDES: Record<'ren' | 'sora', Partial<Record<UpgradeId,
     flareheart: { name: 'SOVEREIGN HEART', blurb: 'Azure Sovereign lasts longer before it fades.', label: 'Sovereign drain' },
     embercore: { name: 'ZENITH CORE', blurb: 'Azure Sovereign hits much harder and returns twice as fast.', label: 'Sovereign power' },
   },
+  vex: {
+    impact: { name: 'KEEN EDGE', blurb: 'Null Blade strikes hit harder.', label: 'Blade damage' },
+    tempo: { name: 'QUICKEN', blurb: 'Null Blade strikes faster.', label: 'Strikes / sec' },
+    reach: { name: 'LONG EDGE', blurb: 'Null Blade reaches further.', label: 'Blade range' },
+    echo: { name: 'TWIN EDGE', blurb: 'Null Blade hits one more enemy per sweep.', label: 'Targets / sweep' },
+    pulse: { name: 'HALO ENGINE', blurb: 'Parry Halo ripostes hit harder and reach wider.', label: 'Riposte damage', read: s => s.player.qDamage * VEX.q.riposteMul },
+    widelance: { name: 'LONG SHIFT', blurb: 'Rift Reversal shifts further and its riposte reaches wider.', label: 'Shift distance', read: s => VEX.e.distance * s.mods.beamWidth },
+    hardlight: { name: 'KEEN RIPOSTE', blurb: 'Rift Reversal ripostes hit harder.', label: 'Riposte damage', read: s => s.player.qDamage * VEX.e.riposteMul * s.mods.beamDamage },
+    lancecool: { name: 'REVERSAL COOLING', blurb: 'Rift Reversal recharges sooner.', label: 'Reversal cooldown', read: s => VEX.e.cooldown * s.mods.beamCd, unit: 's', digits: 1 },
+    afterburn: { name: 'FRACTURE TRAIL', blurb: 'Rift Reversal ripostes one more foe.', label: 'Riposte targets', read: s => 1 + s.mods.beamLinger },
+    conductor: { name: 'OATH CONDUCTOR', blurb: 'Every riposte and perfect parry feeds your Drive.', label: 'Drive per riposte' },
+    bloombulk: { name: 'WIDE SEAL', blurb: 'Oathbreaker Seal detonations hit harder and wider.', label: 'Seal wave', read: s => VEX.r.wave * s.mods.sphereRadius },
+    novacool: { name: 'SEAL COOLING', blurb: 'Oathbreaker Seal recharges sooner.', label: 'Seal cooldown', read: s => VEX.r.cooldown * s.mods.sphereCd, unit: 's', digits: 1 },
+    afterglow: { name: 'OATH ECHO', blurb: 'The Seal detonates a second time at half strength.', label: 'Second detonation' },
+    twinbloom: { name: 'TWIN OATH', blurb: 'The Oath Echo lands at full strength.', label: 'Second detonation' },
+    flareheart: { name: 'RIFT HEART', blurb: 'Riftbound and Voidheart last longer before they fade.', label: 'Form drain' },
+    embercore: { name: 'EXILE CORE', blurb: 'Your transformation hits much harder and returns twice as fast.', label: 'Form power' },
+    surgecell: { blurb: 'Build Drive faster from strikes, parries and kills.' },
+    plating: { blurb: 'Take less damage from everything; a late guard softens even more.' },
+  },
 };
 export const heroKit = (hero: HeroId) => (hero === 'kai' ? null : HERO_KIT[hero]);
-export const heroBase = (hero: 'ren' | 'sora') => RS[hero].base;
+export const heroBase = (hero: 'ren' | 'sora' | 'vex') => RS[hero].base;

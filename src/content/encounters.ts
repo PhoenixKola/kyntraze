@@ -14,7 +14,7 @@ export const BOSS_MOB_CAP = 40;
 /** While a boss lives the live-threat budget is halved and clamped to this: adds, not a second fight. */
 export const BOSS_THREAT_CAP = 22;
 /** Threat points per living enemy; the director keeps the live total under the time-banded budget instead of spawning on a fixed clock. */
-export const THREAT_COST: Record<MobKind, number> = { pursuer: 1, flanker: 1.5, ranged: 2, bruiser: 5, cantor: 6, aegis: 7 };
+export const THREAT_COST: Record<MobKind, number> = { pursuer: 1, flanker: 1.5, ranged: 2, bruiser: 5, cantor: 6, aegis: 7, sky_lancer: 3, halo_scribe: 3.5, citadel_bulwark: 7, rift_mimic: 3, phase_harrier: 2.5, singularity_husk: 4.5, halo_sigil: 0 };
 /** Budget (threat points) over run time in seconds, linearly interpolated. */
 export const THREAT_CURVE: readonly (readonly [number, number])[] = [[0, 3], [45, 7], [120, 14], [240, 24], [360, 32], [480, 42], [600, 46], [720, 54], [870, 66], [900, 66]];
 /** Rhythm: a brief dip every BREATHER.every seconds (after the opening) so waves have crests and troughs instead of a constant press. */
@@ -25,10 +25,10 @@ export function threatBudget(t: number): number {
   return c[c.length - 1][1];
 }
 /** Final multiplier on the budget: breathers, the pre-finale quiet, and recovery after a boss. */
-export function budgetScale(t: number, lastBossDefeatAt: number): number {
+export function budgetScale(t: number, lastBossDefeatAt: number, opts: { breathers?: boolean; quietFrom?: number | null } = {}): number {
   let s = 1;
-  if (t >= BREATHER.start && (t - BREATHER.start) % BREATHER.every < BREATHER.length) s = Math.min(s, BREATHER.scale);
-  if (t >= FINALE_QUIET.from) s = Math.min(s, FINALE_QUIET.scale);
+  if ((opts.breathers ?? true) && t >= BREATHER.start && (t - BREATHER.start) % BREATHER.every < BREATHER.length) s = Math.min(s, BREATHER.scale);
+  if (t >= (opts.quietFrom === undefined ? FINALE_QUIET.from : opts.quietFrom ?? Infinity)) s = Math.min(s, FINALE_QUIET.scale);
   if (lastBossDefeatAt >= 0 && t - lastBossDefeatAt < BOSS_RECOVERY.seconds) s = Math.min(s, BOSS_RECOVERY.scale);
   return s;
 }

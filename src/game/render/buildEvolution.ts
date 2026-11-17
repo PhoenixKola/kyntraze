@@ -11,6 +11,7 @@ export interface Evolution {
   build: number;
 }
 
+/** Cooldown-only cards (lancecool, novacool, dashcool) never feed a tier: a faster recharge is not a new silhouette. */
 const stacks = (s: Pick<GameState, 'upgradeStacks'>, ...ids: string[]) => ids.reduce((n, id) => n + (s.upgradeStacks[id] ?? 0), 0);
 const tierOf = (score: number, cuts: readonly [number, number, number]): Tier => (score >= cuts[2] ? 3 : score >= cuts[1] ? 2 : score >= cuts[0] ? 1 : 0);
 
@@ -18,8 +19,8 @@ export function evolution(s: Pick<GameState, 'upgradeStacks' | 'mods' | 'player'
   const u = s.upgradeStacks, m = s.mods;
   const auto = tierOf(stacks(s, 'impact', 'tempo', 'reach') + 2 * (u.echo ?? 0), [1, 4, 8]);
   const q = Math.min(3, u.pulse ?? 0) as Tier;
-  const e = tierOf(stacks(s, 'widelance', 'hardlight', 'lancecool') + 2 * (u.afterburn ?? 0) + 3 * (u.conductor ?? 0), [1, 4, 8]);
-  const r = tierOf(stacks(s, 'bloombulk', 'novacool') + 3 * (u.afterglow ?? 0) + 3 * (u.twinbloom ?? 0), [1, 4, 8]);
+  const e = tierOf(stacks(s, 'widelance', 'hardlight') + 2 * (u.afterburn ?? 0) + 3 * (u.conductor ?? 0), [1, 4, 8]);
+  const r = tierOf(stacks(s, 'bloombulk') + 3 * (u.afterglow ?? 0) + 3 * (u.twinbloom ?? 0), [1, 4, 8]);
   const build = Math.min(1, (auto + q + e + r) / 8);
   return { auto, q, e, r, beamWidth: m.beamWidth, afterburn: m.beamLinger, echo: m.sphereEcho, radius: m.sphereRadius, extraTargets: Math.max(0, s.player.targets - baseTargets), reachBonus: Math.max(0, s.player.attackRange - 0), build };
 }

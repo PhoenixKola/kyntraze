@@ -6,6 +6,9 @@ import { REN, SORA } from '../content/heroKits';
 
 /** Which hero sheet sets are complete (all four facings, every clip) and may be loaded. Flip to true only when public/art/<hero>[-f1]/ is fully built; until then the hero draws the clearly-marked dev placeholder body instead of half a rig. */
 export const HERO_SHEETS: Record<'ren' | 'sora', { base: boolean; f1: boolean; anchors: boolean }> = { ren: { base: true, f1: true, anchors: true }, sora: { base: true, f1: true, anchors: true } };
+/** B22 INTERIM ART: Vex has no ImageGen sprite set yet, so he is drawn from Ren's rig (the nearest melee silhouette) with a violet-black tint and his own effects. Replace by shipping public/art/vex (all four facings) and setting HERO_SHEETS.vex. */
+export const artHero = (h: string): 'ren' | 'sora' => (h === 'vex' ? 'ren' : (h as 'ren' | 'sora'));
+export const VEX_TINT = 0x8a6cc8;
 export const HERO_REGISTRY_KEY = (hero: string, form: 'base' | 'f1') => `hero-${hero}-${form}-manifests`;
 export const HERO_ANCHORS_KEY = (hero: string) => `hero-${hero}-anchors`;
 export const heroRoot = (hero: string, form: 'base' | 'f1') => `/art/${hero}${form === 'f1' ? '-f1' : ''}`;
@@ -85,6 +88,9 @@ export class HeroAnimator {
       case 'meteor_rush': return a.hop < a.hops && a.hopT <= REN.e.hopTime ? 'Dash' : a.hop >= a.hops ? 'Dash' : 'BasicPunch';
       case 'bloodstar': case 'zero_horizon': return 'Sphere';
       case 'celestial_lance': return 'Beam';
+      case 'parry_halo': return 'BasicPunch';
+      case 'rift_reversal': return 'Dash';
+      case 'oathbreaker_seal': case 'ultimate': return 'Sphere';
     }
   }
   pose(events: AnimPose['events'] = []): AnimPose {

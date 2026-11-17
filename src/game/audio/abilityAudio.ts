@@ -1,3 +1,4 @@
+import { isBoss } from '../../content/enemies';
 import type { AbilityEvent, EnemyEvent, GameState, Impact } from '../../sim/GameState';
 import { MusicDirector, STINGERS, type MusicCue } from './music';
 import { UPGRADES } from '../../content/upgrades';
@@ -151,8 +152,8 @@ export class AbilityAudio {
   stopAll(fadeS = 0.04, keepUi = false) { for (const v of [...this.voices]) if (!(keepUi && v.slot === 'ui')) this.stopVoice(v, fadeS); }
 
   /** Apply one sim event. Sounds follow the simulation (charge / release / pulse / burst ticks), never display frame callbacks. */
-  handle(ev: AbilityEvent, form: 0 | 1 | 2 | 3, hero: 'kai' | 'ren' | 'sora' = 'kai') {
-    if (hero !== 'kai' && this.handleHero(ev, hero)) return;
+  handle(ev: AbilityEvent, form: 0 | 1 | 2 | 3, hero: 'kai' | 'ren' | 'sora' | 'vex' = 'kai') {
+    if (hero !== 'kai' && this.handleHero(ev, hero === 'vex' ? 'ren' : hero)) return;
     const f1 = form >= 1 ? '_f1' : '';
     switch (ev.kind) {
       // B12 Form II: every voice is started and stopped by a sim event, so the sound follows the timeline exactly (and cancel / death / pause silence it through the shared slots)
@@ -301,7 +302,8 @@ export class AbilityAudio {
   private nextAmbient = 0;
   private nextCrackle = 0;
   /** A rare, quiet distant accent for the arena (not a soundtrack): one of two sounds every ~14-30 s of running time. Render-side randomness only; the sim never sees it. */
-  ambient(arena: 'gloam' | 'ashen', time: number) {
+  ambient(arena: 'gloam' | 'ashen' | 'aetherfall' | 'paradox', time: number) {
+    if (arena === 'aetherfall' || arena === 'paradox') return;   // realm ambience is part of the realm score (b22 audio)
     if (this.nextAmbient === 0) { this.nextAmbient = time + 10 + Math.random() * 10; return; }
     if (time < this.nextAmbient) return;
     this.nextAmbient = time + ARENA_MIX.ambientMin + Math.random() * (ARENA_MIX.ambientMax - ARENA_MIX.ambientMin);
@@ -314,7 +316,7 @@ export class AbilityAudio {
   private driveMusic(s: GameState) {
     const m = this.music; if (!m) return;
     if (this.preloaded !== s.arenaId) { this.preloaded = s.arenaId; void m.preload([s.arenaId, 'warden', 'seraph', 'victory', 'defeat']); }
-    const boss = s.enemies.find(e => e.hp > 0 && (e.kind === 'warden' || e.kind === 'seraph'));
+    const boss = s.enemies.find(e => e.hp > 0 && isBoss(e.kind) && !e.part);
     if (s.phase === 'victory') {   // B17: the Seraph's death is staged for ~2 s; the score drops to a near-silent beat, then the victory theme enters on the shimmer
       if (this.victorySeen < 0) this.victorySeen = this.ctx.currentTime;
       if (this.ctx.currentTime - this.victorySeen < VICTORY_BEAT_S) m.setCue(null, 0.5); else m.setCue('victory', 0.15);

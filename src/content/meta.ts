@@ -73,6 +73,16 @@ export const MASTERY: Record<ArenaId, MasteryDef[]> = {
     { id: 'long', name: 'Ash Walker', blurb: 'Survive 10:00 here.', reward: 12 },
     { id: 'warden', name: 'Ritual Breaker', blurb: 'Defeat the Warden here.', reward: 12 },
   ],
+  aetherfall: [
+    { id: 'clear', name: 'Reclaim the Citadel', blurb: 'Defeat the Crownless Castellan here.', reward: 15 },
+    { id: 'long', name: 'Skywalker', blurb: 'Survive 10:00 here.', reward: 12 },
+    { id: 'warden', name: 'Fallen Crown', blurb: 'Defeat the Castellan in a run that lasted 10:00 or more.', reward: 12 },
+  ],
+  paradox: [
+    { id: 'clear', name: 'Unfold the Expanse', blurb: 'Defeat the Paradox Regent here.', reward: 15 },
+    { id: 'long', name: 'Echo Walker', blurb: 'Survive 10:00 here.', reward: 12 },
+    { id: 'warden', name: 'Shattered Reflection', blurb: 'Defeat the Regent in a run that lasted 10:00 or more.', reward: 12 },
+  ],
 };
 
 /** Mark earnings for one completed run. */

@@ -16,10 +16,10 @@ const placeFeet = (s: Q['s'], x: number, y: number) => { s.player.x = x; s.playe
 const pending = (s: Q['s']) => s.hazards.filter(h => h.owner === 0 && !h.fired);
 
 describe('B09 arena content', () => {
-  it('has two unlocked arenas with their own hazard and solids', () => {
-    expect(ARENA_IDS).toEqual(['gloam', 'ashen']);
+  it('has four unlocked arenas (B22 adds the two realms) with their own hazard and solids', () => {
+    expect(ARENA_IDS).toEqual(['gloam', 'ashen', 'aetherfall', 'paradox']);
     for (const id of ARENA_IDS) { const a = ARENAS[id]; expect(a.unlocked).toBe(true); expect(a.solids.length).toBeGreaterThanOrEqual(6); expect(a.blurb.length).toBeGreaterThan(40); expect(a.hazard.warn).toBeGreaterThanOrEqual(1.4); }
-    expect(ARENAS.gloam.hazard.id).toBe('lane-surge'); expect(ARENAS.ashen.hazard.id).toBe('pylon-pulse');
+    expect(ARENAS.gloam.hazard.id).toBe('lane-surge'); expect(ARENAS.ashen.hazard.id).toBe('pylon-pulse'); expect(ARENAS.aetherfall.hazard.id).toBe('shatterfall'); expect(ARENAS.paradox.hazard.id).toBe('reality-fold');
     expect(ARENAS.ashen.solids.filter(s => s.prop === 'pylon').length).toBe(4);
   });
   it('the Gloam Circuit keeps its original obstacle layout exactly (no regression)', () => {

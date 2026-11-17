@@ -2,7 +2,7 @@ import type { Simulation } from '../sim/Simulation';
 import { blankSnapshot, type MiniMap, type RunHud, type UiSnapshot } from './UiSnapshot';
 import { UPGRADES, UPGRADE_BY_ID, type UpgradeId } from '../content/upgrades';
 import { previewUpgrade } from '../sim/UpgradeSystem';
-import { ENEMIES, isBoss } from '../content/enemies';
+import { ENEMIES, isBoss, type BossKind } from '../content/enemies';
 import { BOSSES } from '../content/bosses';
 import { ARENAS } from '../content/arenas';
 import { BEAM, SPHERE } from '../content/abilities';
@@ -32,7 +32,7 @@ export class GameBridge {
     if (!save.meta) save.meta = blankMeta();   // hand-built saves (tests, very old callers) get an empty meta
     const m = save.meta, tools = toolCharges(m.owned.includes('tool_reroll'), m.owned.includes('tool_banish'));
     const hero = save.hero ?? 'kai';
-    this.config = { boon: m.boon && m.owned.includes(`boon_${m.boon}`) ? m.boon : null, contract: m.contract && contractAvailable(m, m.contract) ? m.contract : null, ...tools, hero, heroForm: hero !== 'kai' && !!save.unlocks?.[hero] };
+    this.config = { boon: m.boon && m.owned.includes(`boon_${m.boon}`) ? m.boon : null, contract: m.contract && contractAvailable(m, m.contract) ? m.contract : null, ...tools, hero, heroForm: hero !== 'kai' && !!save.unlocks?.[hero as 'ren' | 'sora'] };
   }
   /** The loadout this run was deployed with (frozen at construction). */
   getRunConfig(): RunConfig { return this.config ?? NO_CONFIG; }
@@ -92,9 +92,9 @@ export class GameBridge {
 import type { GameState } from '../sim/GameState';
 import type { BossHud } from './UiSnapshot';
 function bossHud(s: GameState): BossHud | null {
-  const b = s.enemies.find(e => (e.kind === 'warden' || e.kind === 'seraph') && e.hp > 0); if (!b || !b.ai) return null;
-  const def = BOSSES[b.kind as 'warden' | 'seraph'];
-  return { id: def.id, name: def.name, hp: b.hp, maxHp: b.maxHp, phase: b.ai.phase, phases: 2, mode: b.mode, intro: b.mode === 'intro' ? b.modeT : 0, invuln: b.ai.invuln, exposed: b.ai.exposed };
+  const b = s.enemies.find(e => isBoss(e.kind) && !e.part && e.hp > 0); if (!b || !b.ai) return null;
+  const def = BOSSES[b.kind as BossKind], parts = s.enemies.filter(p => p.part?.of === b.id && p.part.role !== 'decoy' && p.hp > 0).map(p => ({ role: p.part!.role, hp: p.hp, maxHp: p.maxHp, id: p.id }));
+  return { id: def.id, name: def.name, hp: b.hp, maxHp: b.maxHp, phase: b.ai.phase, phases: def.phaseAt2 !== undefined || def.id === 'sovereign' ? 3 : 2, mode: b.mode, intro: b.mode === 'intro' ? b.modeT : 0, invuln: b.ai.invuln, exposed: b.ai.exposed, parts, shielded: (b.ex?.shield ?? 0) > 0 };
 }
 
 function offerCard(s: GameState, id: UpgradeId) {

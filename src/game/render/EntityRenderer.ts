@@ -10,7 +10,7 @@ import { HeroFxView } from './heroFxView';
 import { BodyMotion, styleFor } from './bodyMotion';
 import { AuraView, type AuraState } from './auraView';
 import { AuraTracker } from './auraState';
-import { HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, HeroAnimator, heroTextureKey, type HeroActView } from '../../assets/heroAnimation';
+import { artHero, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, HeroAnimator, heroTextureKey, type HeroActView } from '../../assets/heroAnimation';
 import { EnemyRenderer } from './enemyRenderer';
 import { BossRenderer } from './bossRenderer';
 import { KAI_ANCHORS_KEY, handAnchorWorld, type AnchorTable, type HandAnchor } from '../../assets/kaiAnimation';
@@ -191,7 +191,7 @@ export class EntityRenderer {
   }
   /** B19: Ren / Sora. The character sprite is drawn from the hero sheets when they exist (HeroAnimator over the same sheet contract as Kai); a flat dev body stands in only while a hero has no sheets. The effects layer is always the sim projection in heroFxView. */
   private syncHero(state: GameState, input: InputState, deltaMs: number, reduced: boolean) {
-    const p = state.player, dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0, hero = state.hero as 'ren' | 'sora';
+    const p = state.player, dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0, hero = artHero(state.hero);
     const hurt = !Number.isNaN(this.lastHp) && p.hp < this.lastHp && p.hp > 0; this.lastHp = p.hp;
     if (Number.isNaN(this.lastX)) { this.lastX = p.x; this.lastY = p.y; }
     if (Math.hypot(p.x - this.lastX, p.y - this.lastY) > 0.05) this.moveHold = 0.1; else this.moveHold = Math.max(0, this.moveHold - dt);
