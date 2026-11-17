@@ -1,3 +1,4 @@
+import { resolvePick } from './b22util';
 import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import { SeededRng } from '../core/SeededRng';
@@ -74,7 +75,7 @@ describe('pacing', () => {
     while (t < 330) {
       a += 0.01; sim.step(1 / 60, { x: Math.cos(a), y: Math.sin(a), dash: false, q: Math.floor(t * 10) % 85 === 0, f: s.player.drive >= 70, beam: Math.floor(t * 10) % 70 === 3, sphere: Math.floor(t * 10) % 160 === 5 });
       t += 1 / 60; s.player.hp = s.player.maxHp = 1e7;
-      if (s.phase === 'upgrade') sim.chooseUpgrade(s.upgradeOffers[0]);
+      if (s.phase === 'upgrade') resolvePick(sim);
     }
     expect(s.levelUpAt[0]).toBeLessThan(45); expect(s.levelUpAt.filter(x => x < 150).length + 1).toBeGreaterThanOrEqual(5); expect(s.player.level).toBeGreaterThanOrEqual(9);
     expect(Math.max(...s.levelUpAt.map((x, i) => x - (s.levelUpAt[i - 1] ?? 0)))).toBeLessThan(75);

@@ -1,3 +1,4 @@
+import { resolvePick } from './b22util';
 import { describe, it } from 'vitest';
 import { Simulation } from '../sim/Simulation';
 import { NO_CONFIG } from '../sim/RunConfig';
@@ -14,7 +15,7 @@ function play(hero: HeroId, arena: ArenaId, seed: number, formUnlocked: boolean,
   const sim = new Simulation(seed, arena, false, false, { ...NO_CONFIG, hero, heroForm: formUnlocked }), s = sim.state, pick = new SeededRng(seed ^ 0x9e37);
   let heldFor = 0, form = 0, dmgTaken = 0, prevHp = s.player.hp, lastDash = -9;
   for (let i = 0; i < 60 * 1100 && s.phase !== 'victory' && s.phase !== 'dead' && s.player.hp > 0; i++) {
-    if (s.phase === 'upgrade') { sim.chooseUpgrade(s.upgradeOffers[Math.floor(pick.next() * s.upgradeOffers.length)]); continue; }
+    if (s.phase === 'upgrade') { if (s.b22.branchOffer || s.b22.relicOffer || !s.upgradeOffers.length) resolvePick(sim); else sim.chooseUpgrade(s.upgradeOffers[Math.floor(pick.next() * s.upgradeOffers.length)]); continue; }
     const p = s.player; let fx = 0, fy = 0, near = 1e9, nx = 0, ny = 0, close = 0, mid = 0;
     for (const e of s.enemies) { if (e.hp <= 0) continue; const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < near) { near = d; nx = dx / d; ny = dy / d; } if (d < 150) { close++; fx -= dx / d * (150 - d) / 150; fy -= dy / d * (150 - d) / 150; } if (d < 320) mid++; }
     const want = Math.max(60, p.attackRange * 0.8); let mx = 0, my = 0;

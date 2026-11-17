@@ -16,3 +16,10 @@ export function quiet(opts: { arena?: ArenaId; hero?: HeroId; seed?: number; pla
 }
 export const run = (sim: Simulation, sec: number, input: InputState = idle, each?: (s: GameState) => void) => { for (let i = 0; i < Math.round(sec / DT); i++) { sim.step(DT, input); each?.(sim.state); } };
 export const hazardsOf = (s: GameState, tag: string) => s.hazards.filter(h => h.tag === tag);
+/** Resolves whatever the pause is asking for (branch, relic or a normal card), the way the real UI does. */
+export function resolvePick(sim: Simulation) {
+  const s = sim.state; if (s.phase !== 'upgrade') return;
+  if (s.b22.branchOffer) { sim.chooseBranch(s.b22.branchOffer.a); return; }
+  if (s.b22.relicOffer) { sim.chooseRelic(s.b22.relicOffer[0]); return; }
+  if (s.upgradeOffers.length) sim.chooseUpgrade(s.upgradeOffers[0]);
+}
