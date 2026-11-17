@@ -488,3 +488,15 @@ button.hero-card:focus-visible { outline: 2px solid var(--accent, #e0a24a); outl
 .run-stats > div::after { content: ""; position: absolute; right: 0; top: 0; width: calc(14 * var(--u)); height: 1px; background: var(--k-brass); opacity: .7; }
 .run-stats strong { display: block; margin-top: calc(5 * var(--u)); font-size: max(16px, calc(24 * var(--u))); line-height: 1; word-break: normal; white-space: nowrap; letter-spacing: .02em; }
 .run-stats > div:last-child strong { font-size: max(13px, calc(19 * var(--u))); letter-spacing: .06em; color: #cfd8de; }
+
+/* B22 owner note: the contract line sits INSIDE the clock panel (it used to float over the next-boss text) */
+.hud-clock { display: flex; flex-direction: column; align-items: center; }
+.clock-contract { display: block; margin-top: calc(3 * var(--u)); padding: 1px calc(8 * var(--u)); font-size: max(7px, calc(8 * var(--u))); letter-spacing: .14em; font-weight: 900; color: var(--k-brass-hi); background: rgba(10, 17, 24, .6); border: 1px solid #5a4a2a; white-space: nowrap; pointer-events: none; }
+/* B22 owner note: ability tiles show their name, key, description and real numbers on hover / focus and can be clicked */
+.hud-slots .slot { cursor: pointer; pointer-events: auto; } .hud-slots .slot:hover::after, .hud-slots .slot:focus-visible::after { filter: brightness(1.25); }
+.slot-tip { position: absolute; z-index: 50; left: 50%; bottom: calc(100% + 10px); transform: translate(-50%, 4px); width: max-content; max-width: min(260px, 70vw); padding: 8px 10px; display: flex; flex-direction: column; gap: 3px; text-align: left; font-size: max(10px, calc(11 * var(--u))); line-height: 1.35; font-weight: 500; letter-spacing: 0; color: #cfdde2; background: #0b1218; border: 1px solid #b08a3e; box-shadow: 0 6px 14px rgba(0, 0, 0, .6); opacity: 0; pointer-events: none; transition: opacity .12s, transform .12s; }
+.slot-tip strong { font-size: max(11px, calc(13 * var(--u))); color: #fff; } .slot-tip em { font-style: normal; font-size: max(8px, calc(9 * var(--u))); letter-spacing: .14em; font-weight: 900; color: #e9c27a; }
+.slot-tip .tip-stats { display: grid; grid-template-columns: auto auto; gap: 1px 12px; margin-top: 2px; } .slot-tip .tip-stats span { display: contents; } .slot-tip .tip-stats b { color: #8fb4bf; font-weight: 700; } .slot-tip small { margin-top: 3px; font-size: max(7px, calc(8 * var(--u))); letter-spacing: .16em; color: #6f8791; }
+.slot:hover .slot-tip, .slot:focus-visible .slot-tip { opacity: 1; transform: translate(-50%, 0); }
+.hud-slots .slot:first-child .slot-tip { left: 0; transform: translate(0, 4px); } .hud-slots .slot:first-child:hover .slot-tip, .hud-slots .slot:first-child:focus-visible .slot-tip { transform: none; }
+@media (prefers-reduced-motion: reduce) { .slot-tip { transition: none; } }

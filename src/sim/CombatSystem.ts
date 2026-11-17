@@ -50,7 +50,7 @@ export function shieldFaces(state: GameState, e: Enemy, arcDeg: number): boolean
 
 /** Kills are worth more as the run goes on: the late game thins out (boss mob caps, tougher enemies) but the level-up cadence holds. */
 export const xpTimeScale = (t: number) => 1 + t / 400;
-export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts?: { area?: boolean; proj?: boolean }): boolean {
+export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts?: { area?: boolean; proj?: boolean; fx?: boolean }): boolean {
   if (enemy.hp <= 0) return false;
   if (enemy.ai?.invuln) return false;
   let dmg = Math.max(0, damage), blocked = false;
@@ -64,7 +64,7 @@ export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts
     }
   } else {
     const sh = ENEMIES[enemy.kind as keyof typeof ENEMIES].shield;
-    if (sh && !opts?.area && shieldUp(enemy) && shieldFaces(state, enemy, sh.arc)) {
+    if (sh && !opts?.area && shieldUp(enemy) && !((enemy.ex?.broken ?? 0) > 0) && shieldFaces(state, enemy, sh.arc)) {
       dmg *= 1 - sh.reduction; blocked = true;
       if (state.time - (enemy.blockT ?? -1) > 0.12) { enemy.blockT = state.time; pushEnemyEvent(state, 'enemy_block', enemy, enemy.aimX >= 0 ? 1 : -1, 0); }
     }

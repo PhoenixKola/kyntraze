@@ -18,7 +18,7 @@ export interface B22State {
   branches: BranchId[]; casts: Record<Slot, number>; branchOffer: { slot: Slot; a: BranchId; b: BranchId } | null; branchDone: Slot[];
   legendary: LegendaryId[]; legendOffer: LegendaryId | null; legendCd: Record<string, number>; legendMisc: Record<string, number>;
   fx: ScheduledFx[]; zones: Zone[]; marks: Mark[];
-  hits: { id: number; dmg: number; slot: Slot | null; x: number; y: number }[];
+  hits: { id: number; dmg: number; slot: Slot | null; x: number; y: number }[]; castHits: number[]; castId?: number; ctxSlot: Slot | null; evCursor: number; timeUp: boolean;
   ult: { unlocked: boolean; charge: number; cd: number; act: UltAct | null };
   /** per-run mastery counters (judged and persisted once at the end of the run) */ m: Record<string, number>;
   ev: B22Event[]; evId: number;
@@ -35,8 +35,8 @@ export interface PartyState { pair: string | null; resonance: number; resonanceT
 export const makeB22 = (): B22State => ({
   relics: [], relicOffer: null, relicCd: {}, prismCount: 0, prismAt: -9, dawnT: 0, sigilCharge: 0, sigilAt: -9, featherArmed: 0, featherBoost: 0, hourT: 0, lastDashLen: 0, dashStart: null, bearings: [], heading: { a: 0, held: 0, dist: 0, set: false },
   branches: [], casts: { q: 0, e: 0, r: 0 }, branchOffer: null, branchDone: [], legendary: [], legendOffer: null, legendCd: {}, legendMisc: {},
-  fx: [], zones: [], marks: [], hits: [], ult: { unlocked: false, charge: 0, cd: 0, act: null }, m: {}, ev: [], evId: 1, modifiers: [], momentumT: 0, relicGrants: [], endless: null, bossHurt: false, announced: {},
-  vex: { forms: [false, false], parryT: 0, parryLeft: 0, parryCd: 0, guardDir: { x: 0, y: 1 }, counterReady: 0, riposteT: 0, requiem: 0, nullWaltz: 0, waltzAt: 0, markIds: [] }, endStep: null, relicWanted: false, party: null,
+  fx: [], zones: [], marks: [], hits: [], castHits: [], ctxSlot: null, evCursor: 0, timeUp: false, ult: { unlocked: false, charge: 0, cd: 0, act: null }, m: {}, ev: [], evId: 1, modifiers: [], momentumT: 0, relicGrants: [], endless: null, bossHurt: false, announced: {},
+  vex: { forms: [false, false], parryT: 0, parryLeft: 0, parryCd: -99, guardDir: { x: 0, y: 1 }, counterReady: 0, riposteT: -99, requiem: 0, nullWaltz: 0, waltzAt: 0, markIds: [] }, endStep: null, relicWanted: false, party: null,
 });
 export const b22Emit = (b: B22State, kind: string, x: number, y: number, extra: Partial<B22Event> = {}) => { b.ev.push({ id: b.evId++, kind, x, y, ...extra }); if (b.ev.length > 40) b.ev.splice(0, b.ev.length - 40); };
 export const bump = (b: B22State, key: string, n = 1) => { b.m[key] = (b.m[key] ?? 0) + n; };

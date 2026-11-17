@@ -50,7 +50,7 @@ export class ArenaScene extends Phaser.Scene {
     this.entityRenderer = new EntityRenderer(this);
     this.fx = new EffectsRenderer(this);
     this.controller = new InputController(() => this.bridge.togglePause(), () => { if (this.bridge.getSettings().pauseOnBlur) this.bridge.pause(); }, () => this.bridge.pause());
-    this.bridge.bind(this.simulation);
+    this.bridge.bind(this.simulation); this.bridge.setInjector(code => this.controller?.inject(code));
     this.audio = sharedAbilityAudio(); this.events.on('b21-cue', this.onCue); this.audio?.setMuted(this.bridge.getSettings().mute);
     window.addEventListener('keydown', this.unlockAudio); window.addEventListener('pointerdown', this.unlockAudio);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.dispose());

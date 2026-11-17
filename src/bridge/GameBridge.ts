@@ -1,4 +1,5 @@
 import type { Simulation } from '../sim/Simulation';
+import { abilityTips } from './abilityTips';
 import { blankSnapshot, type MiniMap, type RunHud, type UiSnapshot } from './UiSnapshot';
 import { UPGRADES, UPGRADE_BY_ID, type UpgradeId } from '../content/upgrades';
 import { previewUpgrade } from '../sim/UpgradeSystem';
@@ -53,7 +54,7 @@ export class GameBridge {
     if (s.cometUnlockedNow) { s.cometUnlockedNow = false; this.save.unlocks = { ...(this.save.unlocks ?? { cometheart: false }), cometheart: true }; storeSave(this.save); }
     if (s.phase !== 'dead') this.deathShown = false;
     if (s.phase !== 'victory') this.victoryShown = false;
-    this.current = { phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
+    this.current = { tips: abilityTips(s), phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
       dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form, dragonCooldown: p.dragonCooldown, cometCooldown: p.cometCooldown, hero: s.hero, heroFormUnlocked: s.heroFormUnlocked, heroReady: s.hero !== 'kai' && formChoices(s).includes(1), lanceCharge: lance ? lance.charge / SORA.e.maxCharge : 0, lanceTier: lance ? SORA.e.tiers.reduce((t, v, i) => (lance.charge >= v ? i : t), -1) : -1, heroAct: s.hx?.act?.act ?? '', cometUnlocked: s.cometUnlocked, cometReady: formChoices(s).includes(2), apexUnlocked: s.apexUnlocked, apexReady: formChoices(s).includes(3), riftCooldown: p.riftCooldown, reversalCooldown: p.reversalCooldown, evadeCooldown: p.evadeCooldown, riftCharge: s.cast?.kind === 'rift' && !s.cast.released ? Math.min(1, s.cast.t / RIFT.maxCharge) : 0, selector: { open: !!s.selector?.open, pick: selectedForm(s) ?? 0, choices: formChoices(s), left: Math.max(0, SELECTOR_MAX - (s.selector?.held ?? 0)) }, cinema: !!s.cinema,
       formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? s.upgradeOffers.map(id => offerCard(s, id)) : [], owned: UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] })), map: miniMap(s),
@@ -81,6 +82,10 @@ export class GameBridge {
   markVictoryShown() { if (this.sim?.state.phase !== 'victory' || this.victoryShown) return; this.victoryShown = true; this.publish(true); }
   pause() { this.sim?.forcePause(); this.publish(true); }
   togglePause() { this.sim?.togglePause(); this.publish(true); }
+  /** B22: a clicked ability tile feeds the same input path as its key / button (so cooldowns, buffering and Sora's charge all behave identically). */
+  private injector: ((code: string) => void) | null = null;
+  setInjector(fn: ((code: string) => void) | null) { this.injector = fn; }
+  pressKey(code: string) { if (this.sim?.state.phase === 'running') this.injector?.(code); }
   /** Form selector, from the pointer: hover highlights a card, a click starts it. */
   pickForm(f: 1 | 2 | 3, confirm: boolean) { const s = this.sim?.state; if (!s?.selector.open || !formChoices(s).includes(f)) return; s.selector.pick = f; if (confirm) activateForm(s, f); this.publish(true); }
   reroll() { if (this.sim?.reroll()) this.publish(true); }

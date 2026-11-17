@@ -9,22 +9,25 @@ import type { RunHud } from '../../bridge/UiSnapshot';
 import { ASSET_BASE } from '../assetBase';
 import { CONTRACT_BY_ID } from '../../content/meta';
 import { HERO_KIT, REN, SORA } from '../../content/heroKits';
+import type { AbilityTip } from '../../bridge/abilityTips';
 
-interface Props { s: UiSnapshot; pad: boolean; onPause: () => void; reduced?: boolean; onForm?: (f: 1 | 2 | 3, confirm: boolean) => void; }
+interface Props { s: UiSnapshot; pad: boolean; onPause: () => void; reduced?: boolean; onForm?: (f: 1 | 2 | 3, confirm: boolean) => void; onKey?: (code: string) => void; }
+const SLOT_KEY: Record<string, string> = { shift: 'ShiftLeft', q: 'KeyQ', e: 'KeyE', r: 'KeyR', f: 'KeyF' };
 
 const icon = (name: string) => `url(${ASSET_BASE}ui/icons/${name}.png)`;
 const pct = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
 
-interface SlotProps { id: string; name: string; ico: string; keyLabel: string; padLabel: string; pad: boolean; seconds: number; max: number; state?: 'active' | 'locked' | 'ready'; tone?: string; text?: string; /** 0..1 Silver Rift charge, drawn as a thin bar inside the tile */ charge?: number }
+interface SlotProps { id: string; name: string; ico: string; keyLabel: string; padLabel: string; pad: boolean; seconds: number; max: number; state?: 'active' | 'locked' | 'ready'; tone?: string; text?: string; /** 0..1 Silver Rift charge, drawn as a thin bar inside the tile */ charge?: number; tip?: AbilityTip; onUse?: (code: string) => void }
 /** One ability tile: silhouette icon, a clockwise dark sweep that shrinks as the cooldown ends (readable without reading the number), a seconds readout and the key / pad glyph. */
-function Slot({ id, name, ico, keyLabel, padLabel, pad, seconds, max, state, tone, text, charge }: SlotProps) {
+function Slot({ id, name, ico, keyLabel, padLabel, pad, seconds, max, state, tone, text, charge, tip, onUse }: SlotProps) {
   const cooling = seconds > 0 && state !== 'active';
   const cls = state === 'active' ? 'active' : state === 'locked' ? 'locked' : cooling ? 'cooling' : 'ready';
   const style = { '--ico': icon(ico), '--p': `${Math.min(1, seconds / max) * 360}deg` } as CSSProperties;
-  return <div className={`slot ${cls} ${tone ?? ''}`} data-ico={ico} style={style} data-testid={`cd-${id}`} aria-label={`${name}: ${text ?? (cooling ? `${seconds.toFixed(1)} seconds` : 'ready')}`} title={name}>
+  return <div className={`slot ${cls} ${tone ?? ''}`} data-ico={ico} style={style} data-testid={`cd-${id}`} role="button" tabIndex={0} aria-label={`${tip?.name ?? name}: ${text ?? (cooling ? `${seconds.toFixed(1)} seconds` : 'ready')}. Click to use.`} onClick={() => onUse?.(SLOT_KEY[id] ?? 'KeyQ')} onKeyDown={e => { if (e.key === 'Enter') onUse?.(SLOT_KEY[id] ?? 'KeyQ'); }}>
     <span className="slot-ico" aria-hidden="true"/>{!!charge && <i className="slot-charge" style={{ width: pct(charge * 100) }} aria-hidden="true"/>}{cooling && <span className="slot-sweep" aria-hidden="true"/>}
     {cooling && <b className="slot-num">{seconds >= 10 ? Math.ceil(seconds) : seconds.toFixed(1)}</b>}{!cooling && text && <b className="slot-tag">{text}</b>}
     <kbd className={pad ? 'pad-key' : ''}>{pad ? padLabel : keyLabel}</kbd>
+    <span className="slot-tip" role="tooltip" data-testid={`tip-${id}`}><strong>{tip?.name ?? name}</strong><em>{pad ? (tip?.pad ?? padLabel) : (tip?.key ?? keyLabel)}{cooling ? ` · READY IN ${seconds.toFixed(1)}s` : ''}</em>{tip && <span className="tip-blurb">{tip.blurb}</span>}{tip && <span className="tip-stats">{tip.stats.map(([k, v]) => <span key={k}><b>{k}</b>{v}</span>)}</span>}<small>CLICK TO USE</small></span>
   </div>;
 }
 
@@ -60,7 +63,8 @@ function useHitVignette(s: UiSnapshot) {
   return hit;
 }
 
-export function Hud({ s, pad, onPause, reduced, onForm }: Props) {
+export function Hud({ s, pad, onPause, reduced, onForm, onKey }: Props) {
+  const T = s.tips;
   const hit = useHitVignette(s);
   const hpFrac = s.hp / s.maxHp, low = hpFrac <= 0.3;
   const hk = s.hero !== 'kai' ? HERO_KIT[s.hero] : null, H = s.hero;
@@ -86,18 +90,17 @@ export function Hud({ s, pad, onPause, reduced, onForm }: Props) {
     <FormSelector open={s.selector.open} pick={s.selector.pick} choices={s.selector.choices} left={s.selector.left} pad={pad} onHover={f => onForm?.(f, false)} onChoose={f => onForm?.(f, true)}/>
     {s.boss && <BossBar b={s.boss}/>}
     <Minimap map={s.map} boss={!!s.boss}/>
-    {s.contract && <div className="hud-contract" data-testid="hud-contract">CONTRACT · {CONTRACT_BY_ID[s.contract].name}</div>}
-    <div className="hud-panel hud-clock"><span className="clock-label">{s.arenaName}</span><b>{roundedTime(s.seconds)}</b><span className="clock-kills"><i/> {s.kills}{s.run.nextLabel && <em className={`clock-next ${s.run.nextIn < 30 && s.run.nextIn > 0 ? 'soon' : ''}`}>{s.run.nextIn > 0 ? `${s.run.nextLabel} ${mmss(s.run.nextIn)}` : s.run.nextLabel}</em>}</span><RunTrack r={s.run}/></div>
+    <div className="hud-panel hud-clock"><span className="clock-label">{s.arenaName}</span><b>{roundedTime(s.seconds)}</b><span className="clock-kills"><i/> {s.kills}{s.run.nextLabel && <em className={`clock-next ${s.run.nextIn < 30 && s.run.nextIn > 0 ? 'soon' : ''}`}>{s.run.nextIn > 0 ? `${s.run.nextLabel} ${mmss(s.run.nextIn)}` : s.run.nextLabel}</em>}</span><RunTrack r={s.run}/>{s.contract && <span className="clock-contract" data-testid="hud-contract">CONTRACT · {CONTRACT_BY_ID[s.contract].name}</span>}</div>
     {s.run.announce && !s.boss && <div className="finale-banner" data-testid="finale-banner" role="alert"><b>{s.run.announce.text}</b><span>{s.run.announce.sub}</span></div>}
     {s.phase === 'victory' && !s.victoryShown && <div className="victory-banner" data-testid="victory-banner" role="status"><b>THE FRACTURE HOLDS</b><span>NULL SERAPH DEFEATED</span></div>}
     <button className="hud-panel hud-pause" onClick={onPause} aria-label="Pause game"><span className="pause-bars"/><kbd className={pad ? 'pad-key' : ''}>{pad ? 'START' : 'ESC'}</kbd></button>
     <div className="hud-slots" role="group" aria-label="Abilities">
-      <Slot id="shift" name="Dash" ico="dash" keyLabel="SHIFT" padLabel="A" pad={pad} seconds={s.dashCooldown} max={s.cdMax.dash}/>
-      <Slot id="q" name={hk ? hk.act.q : 'Impact'} ico={hk ? `${H}_q` : 'impact'} keyLabel="Q" padLabel="X" pad={pad} seconds={s.qCooldown} max={hk ? (H === 'ren' ? REN.q.cooldown : SORA.q.cooldown) : 8.5}/>
-      {hk ? <Slot id="e" name={`${hk.act.e} - ${hk.blurbs.e}`} ico={`${H}_e`} keyLabel="E" padLabel="RB" pad={pad} seconds={s.beamCooldown} max={s.cdMax.beam} charge={H === 'sora' ? s.lanceCharge : 0} state={H === 'sora' && s.lanceCharge > 0 ? 'active' : undefined} text={H === 'sora' && s.lanceCharge > 0 ? `T${s.lanceTier + 1}` : undefined}/> : f3 ? <Slot id="e" name="Silver Rift - Lance cards apply: damage, width, cooldown, beam time, Drive per hit" ico="rift" keyLabel="E" padLabel="RB" pad={pad} seconds={s.riftCooldown} max={s.cdMax.rift} charge={s.riftCharge} state={s.riftCharge > 0 ? 'active' : undefined} text={s.riftCharge > 0 ? 'HOLD' : undefined}/> : f2 ? <Slot id="e" name="Dragonfang Rush" ico="dragon" keyLabel="E" padLabel="RB" pad={pad} seconds={s.dragonCooldown} max={s.cdMax.dragon}/> : <Slot id="e" name="Fracture Lance" ico="lance" keyLabel="E" padLabel="RB" pad={pad} seconds={s.beamCooldown} max={s.cdMax.beam}/>}
-      {hk ? <Slot id="r" name={`${hk.act.r} - ${hk.blurbs.r}`} ico={`${H}_r`} keyLabel="R" padLabel="LB" pad={pad} seconds={s.sphereCooldown} max={s.cdMax.sphere}/> : f3 ? <Slot id="r" name="Instinct Reversal - Nova cards apply: damage, reach, cooldown, extra strikes (Afterglow +1, Twin Bloom +2)" ico="reversal" keyLabel="R" padLabel="LB" pad={pad} seconds={s.reversalCooldown} max={s.cdMax.reversal}/> : f2 ? <Slot id="r" name="Cometbreaker Cannon" ico="comet" keyLabel="R" padLabel="LB" pad={pad} seconds={s.cometCooldown} max={s.cdMax.comet}/> : <Slot id="r" name="Nova Bloom" ico="nova" keyLabel="R" padLabel="LB" pad={pad} seconds={s.sphereCooldown} max={s.cdMax.sphere}/>}
+      <Slot id="shift" tip={T?.dash} onUse={onKey} name="Dash" ico="dash" keyLabel="SHIFT" padLabel="A" pad={pad} seconds={s.dashCooldown} max={s.cdMax.dash}/>
+      <Slot id="q" tip={T?.q} onUse={onKey} name={hk ? hk.act.q : 'Impact'} ico={hk ? `${H}_q` : 'impact'} keyLabel="Q" padLabel="X" pad={pad} seconds={s.qCooldown} max={hk ? (H === 'ren' ? REN.q.cooldown : SORA.q.cooldown) : 8.5}/>
+      {hk ? <Slot id="e" tip={T?.e} onUse={onKey} name={`${hk.act.e} - ${hk.blurbs.e}`} ico={`${H}_e`} keyLabel="E" padLabel="RB" pad={pad} seconds={s.beamCooldown} max={s.cdMax.beam} charge={H === 'sora' ? s.lanceCharge : 0} state={H === 'sora' && s.lanceCharge > 0 ? 'active' : undefined} text={H === 'sora' && s.lanceCharge > 0 ? `T${s.lanceTier + 1}` : undefined}/> : f3 ? <Slot id="e" tip={T?.e} onUse={onKey} name="Silver Rift - Lance cards apply: damage, width, cooldown, beam time, Drive per hit" ico="rift" keyLabel="E" padLabel="RB" pad={pad} seconds={s.riftCooldown} max={s.cdMax.rift} charge={s.riftCharge} state={s.riftCharge > 0 ? 'active' : undefined} text={s.riftCharge > 0 ? 'HOLD' : undefined}/> : f2 ? <Slot id="e" tip={T?.e} onUse={onKey} name="Dragonfang Rush" ico="dragon" keyLabel="E" padLabel="RB" pad={pad} seconds={s.dragonCooldown} max={s.cdMax.dragon}/> : <Slot id="e" tip={T?.e} onUse={onKey} name="Fracture Lance" ico="lance" keyLabel="E" padLabel="RB" pad={pad} seconds={s.beamCooldown} max={s.cdMax.beam}/>}
+      {hk ? <Slot id="r" tip={T?.r} onUse={onKey} name={`${hk.act.r} - ${hk.blurbs.r}`} ico={`${H}_r`} keyLabel="R" padLabel="LB" pad={pad} seconds={s.sphereCooldown} max={s.cdMax.sphere}/> : f3 ? <Slot id="r" tip={T?.r} onUse={onKey} name="Instinct Reversal - Nova cards apply: damage, reach, cooldown, extra strikes (Afterglow +1, Twin Bloom +2)" ico="reversal" keyLabel="R" padLabel="LB" pad={pad} seconds={s.reversalCooldown} max={s.cdMax.reversal}/> : f2 ? <Slot id="r" tip={T?.r} onUse={onKey} name="Cometbreaker Cannon" ico="comet" keyLabel="R" padLabel="LB" pad={pad} seconds={s.cometCooldown} max={s.cdMax.comet}/> : <Slot id="r" tip={T?.r} onUse={onKey} name="Nova Bloom" ico="nova" keyLabel="R" padLabel="LB" pad={pad} seconds={s.sphereCooldown} max={s.cdMax.sphere}/>}
       {f3 && <Slot id="evade" name="Perfect Evasion - automatic sidestep, one hit refused, 9 s recharge" ico="evasion" keyLabel="AUTO" padLabel="AUTO" pad={pad} seconds={s.evadeCooldown} max={s.cdMax.evade} state={s.evadeCooldown > 0 ? undefined : 'ready'} text={s.evadeCooldown > 0 ? undefined : 'READY'}/>}
-      {hk ? <Slot id="f" tone="tone-f1" name={`${hk.form} - ${hk.blurbs.form}`} ico={`${H}_f`} keyLabel="F" padLabel="Y" pad={pad} seconds={s.form ? 0 : s.formCooldown} max={s.cdMax.form} state={s.form ? 'active' : s.heroReady ? 'ready' : s.formCooldown > 0 ? undefined : 'locked'} text={s.form ? 'ON' : s.heroReady ? 'GO' : s.formCooldown > 0 ? undefined : !s.heroFormUnlocked ? 'SEALED' : `${Math.floor(s.drive)}%`}/> : <Slot id="f" tone={f3 || apex ? 'tone-f3' : f2 || comet ? 'tone-f2' : s.form ? 'tone-f1' : undefined} name={f3 ? 'Stillfire Apex form' : apex ? 'Stillfire Apex ready' : f2 || comet ? 'Cometheart form' : 'Flarebound form'} ico={f3 || apex ? 'form3' : f2 || comet || (s.cometUnlocked && !s.form) ? 'form2' : 'form'} keyLabel="F" padLabel="Y" pad={pad} seconds={s.form ? 0 : s.formCooldown} max={s.cdMax.form}
+      {hk ? <Slot id="f" tip={T?.f} onUse={onKey} tone="tone-f1" name={`${hk.form} - ${hk.blurbs.form}`} ico={`${H}_f`} keyLabel="F" padLabel="Y" pad={pad} seconds={s.form ? 0 : s.formCooldown} max={s.cdMax.form} state={s.form ? 'active' : s.heroReady ? 'ready' : s.formCooldown > 0 ? undefined : 'locked'} text={s.form ? 'ON' : s.heroReady ? 'GO' : s.formCooldown > 0 ? undefined : !s.heroFormUnlocked ? 'SEALED' : `${Math.floor(s.drive)}%`}/> : <Slot id="f" tip={T?.f} onUse={onKey} tone={f3 || apex ? 'tone-f3' : f2 || comet ? 'tone-f2' : s.form ? 'tone-f1' : undefined} name={f3 ? 'Stillfire Apex form' : apex ? 'Stillfire Apex ready' : f2 || comet ? 'Cometheart form' : 'Flarebound form'} ico={f3 || apex ? 'form3' : f2 || comet || (s.cometUnlocked && !s.form) ? 'form2' : 'form'} keyLabel="F" padLabel="Y" pad={pad} seconds={s.form ? 0 : s.formCooldown} max={s.cdMax.form}
         state={s.form >= 2 ? 'active' : comet || apex ? 'ready' : s.form ? 'active' : canForm ? 'ready' : s.formCooldown > 0 ? undefined : 'locked'} text={s.form ? 'ON' : apex ? 'III' : comet ? 'II' : canForm ? 'GO' : s.formCooldown > 0 ? undefined : `${Math.floor(s.drive)}%`}/>}
     </div>
   </div>;

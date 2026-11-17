@@ -25,6 +25,8 @@ export class InputController {
     this.pad = new PadTracker(getPads);
     window.addEventListener('keydown', this.onDown); window.addEventListener('keyup', this.onUp); window.addEventListener('blur', this.onBlur);
   }
+  /** A click on an HUD ability tile acts like pressing its key once (held briefly so a charge-type E registers as a tap). */
+  inject(code: string) { this.pressed.add(code); this.keys.add(code); window.setTimeout(() => this.keys.delete(code), 90); }
   read(): InputState {
     const key = (a: string, b?: string) => this.keys.has(a) || (b ? this.keys.has(b) : false);
     const consume = (...codes: string[]) => { const active = codes.some(code => this.pressed.has(code)); codes.forEach(code => this.pressed.delete(code)); return active; };

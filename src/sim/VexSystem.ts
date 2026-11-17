@@ -60,7 +60,7 @@ export function vexIntercept(s: GameState, dmg: number, from: { x: number; y: nu
   v.parryCd = s.time; riposte(s, from, owner); return { dmg: 0, parried: true };
 }
 function riposte(s: GameState, from: { x: number; y: number } | undefined, owner: number | undefined) {
-  const p = s.player, v = s.b22.vex, c = s.hx.act!, f = form(s);
+  const p = s.player, v = s.b22.vex, c = s.hx.act!, f = form(s), hadCharge = v.requiem > 0;
   const dir = v.guardDir, reach = VEX.q.riposteReach * (s.b22.branches.includes('reversal_guard') ? 0.9 : 1), arc = (VEX.q.riposteArc * Math.PI) / 180 / 2;
   const mirror = s.b22.branches.includes('mirror_counter'), dmg = p.qDamage * VEX.q.riposteMul * formMul(s, f ? 1.15 : 1) * (mirror ? 1.9 : s.b22.branches.includes('reversal_guard') ? 0.85 : 1) * (v.requiem > 0 ? 1.4 : 1);
   let hits = 0; const hit: Enemy[] = [];
@@ -75,7 +75,7 @@ function riposte(s: GameState, from: { x: number; y: number } | undefined, owner
   s.b22.m['parry.perfect'] = (s.b22.m['parry.perfect'] ?? 0) + 1; if (f) bump(s.b22, 'parry.perfect.form');
   if (s.b22.branches.length >= 0) { p.qCooldown = Math.max(0, p.qCooldown * (1 - VEX.q.refund)); }
   if (s.mods.beamDrive > 0) driveGain(s, s.mods.beamDrive * 2); driveGain(s, VEX.q.drive);
-  if (s.b22.legendary.includes('shard_requiem')) v.requiem = 1;
+  v.requiem = hadCharge ? 0 : s.b22.legendary.includes('shard_requiem') ? 1 : 0;   // a parry stores ONE charge; spending it is not refunded
   if (f === 2) markNearby(s, 260, 4);
   c.t = Math.max(c.t, c.dur - 0.16);   // a successful parry ends the guard; no chaining
   s.impacts.push({ id: s.nextId++, kind: 'block', x: p.x + dir.x * 30, y: p.y + dir.y * 30, ttl: 0.25, life: 0.25, heavy: true });
@@ -189,8 +189,7 @@ export function updateVexMarks(s: GameState, dt: number) {
   const marks = s.b22.marks; if (!marks.length) return;
   let fuse = false;
   for (const m of marks) { m.t -= dt; if (m.src === 'seal' && m.t <= 0) fuse = true; }
-  s.b22.marks = marks.filter(m => m.t > 0 || m.src === 'seal');
-  s.b22.marks = s.b22.marks.filter(m => s.enemies.some(e => e.id === m.enemy && e.hp > 0) || m.src === 'seal' && false);
+  s.b22.marks = marks.filter(m => (m.t > 0 || m.src === 'seal') && s.enemies.some(e => e.id === m.enemy && e.hp > 0));
   if (fuse && s.b22.marks.some(m => m.src === 'seal')) detonateSeal(s);
 }
 export const vexMoveScale = (c: HeroCast): number => (c.act === 'parry_halo' ? VEX.q.moveScale : c.act === 'rift_reversal' ? 0 : VEX.r.moveScale);

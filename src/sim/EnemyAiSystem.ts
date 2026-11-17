@@ -7,6 +7,7 @@ import { feetInCircle, feetInCone, feetInLane, feetInRect } from './Ground';
 import { damagePlayer } from './CombatSystem';
 import { pushEnemyEvent } from './EntityRegistry';
 import { updateBoss } from './BossAiSystem';
+import { onPerfectDodge } from './B22Tick';
 
 const STAGGER_SLOW = 0.45;
 const SHOT_TTL = 2.6;
@@ -117,6 +118,7 @@ export function updateEnemyShots(state: GameState, dt: number) {
     const k = wellFactor(state, s); s.k = k; s.x += s.vx * dt * k; s.y += s.vy * dt * k; s.ttl -= dt;
     const hitWall = s.ttl <= 0 || blockedAt(s.x, s.y);
     // dash and hit invulnerability let a bolt pass through, so a well-timed dash is a real dodge
+    if (!hitWall && p.invulnerable > 0 && p.dashRemaining > 0 && !s.dodged && Math.hypot(p.x - s.x, p.y - s.y) < p.radius + s.radius - 2) { s.dodged = true; onPerfectDodge(state); }   // a dash through a shot is a perfect dodge
     if (!hitWall && p.invulnerable <= 0 && Math.hypot(p.x - s.x, p.y - s.y) < p.radius + s.radius - 2) {
       damagePlayer(state, s.damage, s.kind ?? 'bolt', s, s.owner ?? 1);
       state.enemyEvents.push({ id: state.nextId++, kind: 'enemy_shot_hit', enemy: 'ranged', enemyId: 0, x: s.x, y: s.y, dirX: s.vx, dirY: s.vy, tag: s.kind }); capEvents(state);

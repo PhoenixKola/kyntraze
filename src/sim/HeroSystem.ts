@@ -9,6 +9,7 @@ import { ASCEND, REN, SORA, type HeroAct } from '../content/heroKits';
 import { freeAim } from './ApexSystem';
 import { HERO_ANCHORS } from '../content/heroAnchors';
 import { KAI_GROUND_DY, KAI_SCALE } from '../assets/kaiAnimation';
+import { densestOrbTarget } from './BranchSystem';
 import { updateVexAct, updateVexMarks, vexAuto, vexE, vexMoveScale, vexQ, vexR } from './VexSystem';
 
 const EVENT_CAP = 24, BOLT_CAP = 90;
@@ -335,6 +336,11 @@ function assignOrbTargets(s: GameState) {
 }
 function detonateOrbs(s: GameState, scale: number) {
   const h = s.hx, R = h.orbRadius; let hits = 0; const cx = h.orbs.reduce((a, o) => a + o.tx, 0) / Math.max(1, h.orbs.length), cy = h.orbs.reduce((a, o) => a + o.ty, 0) / Math.max(1, h.orbs.length);
+  if (s.b22.legendary.includes('zero_convergence') && h.orbs.length) {   // B22 Zero Convergence: one precision blast at the densest convergence point instead of scattered bursts
+    const { cx: bx, cy: by } = densestOrbTarget(s);
+    for (const e of s.enemies) { if (!alive(e)) continue; const d = Math.hypot(e.x - bx, e.y - by); if (d > R * 1.3 + e.radius) continue; damageEnemy(s, e, h.orbDamage * Math.min(4, h.orbs.length * 0.6) * scale * (1 - 0.3 * clamp(d / (R * 1.3), 0, 1)), { area: true }); hits++; }
+    ring(s, 'horizon', bx, by, R * 1.3, 0.5); emit(s, 'horizon_burst', bx, by, hits); return { cx: bx, cy: by };
+  }
   for (const o of h.orbs) {
     for (const e of s.enemies) {
       if (!alive(e)) continue; const dx = e.x - o.tx, dy = e.y - o.ty, d = Math.hypot(dx, dy); if (d > R + e.radius) continue;
@@ -414,7 +420,7 @@ function updateBolts(s: GameState, dt: number) {
     let dead = false;
     for (const e of s.enemies) {
       if (!alive(e) || b.hits.includes(e.id)) continue; if ((e.x - b.x) ** 2 + (e.y - b.y) ** 2 > (e.radius + b.radius) ** 2) continue;
-      damageEnemy(s, e, b.damage); b.hits.push(e.id); if (b.kind === 'needle') driveGain(s, 1.1);
+      damageEnemy(s, e, b.damage, { proj: true }); b.hits.push(e.id); if (b.kind === 'needle') driveGain(s, 1.1);
       if (b.pierce <= 0) { dead = true; break; } b.pierce--;
     }
     if (!dead) keep.push(b);

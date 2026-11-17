@@ -19,6 +19,14 @@ import { updateArenaHazards } from './ArenaHazards';
 import { setActiveArena } from './CollisionSystem';
 import type { ArenaId } from '../content/arenas';
 import { applyRunConfig, NO_CONFIG, type RunConfig } from './RunConfig';
+import { updateB22 } from './B22Tick';
+import { chooseBranch, chooseLegendary, dueBranch, offerBranch, offerLegendary, onCast } from './BranchSystem';
+import { startUltimate, ultReady } from './UltimateSystem';
+import { chooseRelic, offerRelic } from './B22Encounters';
+import type { BranchId } from '../b22/branches';
+import type { LegendaryId } from '../b22/legendary';
+import type { RelicId } from '../b22/relics';
+import { beginEndlessLeg, continueEndless, extractNow } from './B22Tick';
 /** Seconds a refused Q / E / R press stays armed (B20). */
 export const ABILITY_BUFFER = 0.15;
 export class Simulation {
@@ -28,7 +36,7 @@ export class Simulation {
   private fHeld = false;
   private eHeld = false;
   private rHeld = false;
-  constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false, apexUnlocked = false, config: RunConfig = NO_CONFIG) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked, apexUnlocked); applyRunConfig(this.state, config); }
+  constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false, apexUnlocked = false, config: RunConfig = NO_CONFIG) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked, apexUnlocked); applyRunConfig(this.state, config); if (this.state.plan.cycle > 0) this.state.b22.endless = { fromT: 0, cycle: 0, bossAt: 120, offered: false, extracted: false }; }
   private readonly buf = { q: 0, e: 0, r: 0 };
   step(dt: number, input: InputState) {
     const s = this.state; if (s.phase !== 'running') return;
@@ -44,11 +52,15 @@ export class Simulation {
     movePlayer(s, input, dt);
     // B20 input buffer: a Q / E / R press refused only because a cast or a cooldown is about to end is retried for ABILITY_BUFFER seconds, then dropped. Sora's E is a hold/release charge, so it is never buffered.
     const bf = this.buf; bf.q = Math.max(0, bf.q - dt); bf.e = Math.max(0, bf.e - dt); bf.r = Math.max(0, bf.r - dt);
-    if (input.q && !this.qHeld) { if (!activateQ(s)) bf.q = ABILITY_BUFFER; else bf.q = 0; } else if (bf.q > 0 && activateQ(s)) bf.q = 0;
+    const ult = !!s.b22.ult.act;   // B22: the ultimate owns the fighter's hands until it ends
+    const castQ = () => { s.b22.ctxSlot = 'q'; const ok = !ult && activateQ(s); s.b22.ctxSlot = null; if (ok) onCast(s, 'q'); return ok; };
+    if (input.q && !this.qHeld) { if (!castQ()) bf.q = ABILITY_BUFFER; else bf.q = 0; } else if (bf.q > 0 && castQ()) bf.q = 0;
     const fDown = !!(input.f || input.fHeld); formInput(s, fDown, this.fHeld);   // the press edge counts too, so a tap shorter than one tick is never lost
     const bufE = s.hero !== 'sora';
-    if (input.beam && !this.eHeld) { if (!startAbility(s, 'beam') && bufE) bf.e = ABILITY_BUFFER; else bf.e = 0; } else if (bf.e > 0 && bufE && startAbility(s, 'beam')) bf.e = 0;
-    if (input.sphere && !this.rHeld) { if (!startAbility(s, 'sphere')) bf.r = ABILITY_BUFFER; else bf.r = 0; } else if (bf.r > 0 && startAbility(s, 'sphere')) bf.r = 0;
+    const castE = () => { const ok = !ult && startAbility(s, 'beam'); if (ok) onCast(s, 'e'); return ok; };
+    const castR = () => { if (ult) return false; if (ultReady(s) && startUltimate(s)) return true; const ok = startAbility(s, 'sphere'); if (ok) onCast(s, 'r'); return ok; };
+    if (input.beam && !this.eHeld) { if (!castE() && bufE) bf.e = ABILITY_BUFFER; else bf.e = 0; } else if (bf.e > 0 && bufE && castE()) bf.e = 0;
+    if (input.sphere && !this.rHeld) { if (!castR()) bf.r = ABILITY_BUFFER; else bf.r = 0; } else if (bf.r > 0 && castR()) bf.r = 0;
     this.qHeld = input.q; this.fHeld = fDown; this.eHeld = !!input.beam || !!input.beamHeld; this.rHeld = !!input.sphere; s.eHeld = !!input.beamHeld;
     const p = s.player; p.qCooldown = Math.max(0, p.qCooldown - dt);
     if (s.mods.regen > 0) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
@@ -60,23 +72,38 @@ export class Simulation {
     updateEnemyShots(s, dt);
     updateArenaHazards(s);
     updateHazards(s, dt);
-    updateAutoWeapon(s, dt);
+    if (!s.b22.ult.act) updateAutoWeapon(s, dt);
+    updateB22(s, dt, input, this.rng);
     updateContactDamage(s);
     if (s.phase !== 'running') return;
-    collectPickups(s, dt, () => { s.upgradeOffers = createOffer(s, this.rng); });
-    if (s.phase === 'running' && s.bossReward > 0 && s.time >= s.rewardAt) { s.bossReward--; s.phase = 'upgrade'; s.rewardPick = true; s.upgradeOffers = createOffer(s, this.rng, true); }
+    collectPickups(s, dt, () => { s.upgradeOffers = createOffer(s, this.rng); offerLegendary(s); });
+    if (s.phase === 'running' && s.bossReward > 0 && s.time >= s.rewardAt) { s.bossReward--; s.phase = 'upgrade'; s.rewardPick = true; s.upgradeOffers = createOffer(s, this.rng, true); offerLegendary(s); }
     pruneDeadEntities(s);
     for (const fx of s.impacts) fx.ttl -= dt;
     s.impacts = s.impacts.filter(effect => effect.ttl > 0).slice(-RULES.maxFx);
   }
   chooseUpgrade(id: UpgradeId) {
     const applied = applyUpgrade(this.state, id);
-    if (applied && this.state.player.xp >= this.state.player.nextXp) {
+    if (applied) this.afterPick();
+    if (applied && this.state.phase === 'running' && this.state.player.xp >= this.state.player.nextXp) {
       // Carry over surplus XP; schedule another legit choice rather than lose earned XP.
       gainXp(this.state, 0.000001, () => { this.state.upgradeOffers = createOffer(this.state, this.rng); });
     }
     return applied;
   }
+  /** B22: a normal pick may be followed by an earned branch choice or a boss-paid relic offer; either keeps the pause open. */
+  private afterPick() {
+    const s = this.state;
+    if (dueBranch(s) && offerBranch(s)) { s.phase = 'upgrade'; s.upgradeOffers = []; return; }
+    if (s.b22.relicWanted) { s.b22.relicWanted = false; offerRelic(s, this.rng); }
+  }
+  chooseBranch(id: BranchId) { const ok = chooseBranch(this.state, id); if (ok && this.state.player.xp >= this.state.player.nextXp) gainXp(this.state, 0.000001, () => { this.state.upgradeOffers = createOffer(this.state, this.rng); offerLegendary(this.state); }); return ok; }
+  chooseLegendary(id: LegendaryId) { return chooseLegendary(this.state, id); }
+  chooseRelic(id: RelicId) { return chooseRelic(this.state, id); }
+  /** B22 Endless: opt in after a Classic victory, extract at a cycle milestone, or push on. */
+  continueEndless() { return beginEndlessLeg(this.state); }
+  extract() { return extractNow(this.state); }
+  pushOn() { return continueEndless(this.state); }
   /** QA / tests: the next level-up, exactly as a real XP pickup would trigger it. */
   debugLevelUp() { const s = this.state; if (s.phase !== 'running') return; gainXp(s, (s.player.nextXp - s.player.xp) / s.mods.xp, () => { s.upgradeOffers = createOffer(s, this.rng); }); }
   /** B18 Reroll Module: redraw the current offer (never the same three when the pool allows). Only on the level-up screen, bounded by the run's charges. */

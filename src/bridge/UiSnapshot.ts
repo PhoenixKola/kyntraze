@@ -4,6 +4,7 @@ import type { ArenaId } from '../content/arenas';
 import type { RunReward } from '../sim/MetaSystem';
 import type { BoonId, ContractId } from '../content/meta';
 import type { HeroId } from '../content/heroes';
+import type { AbilityTip, TipSlot } from './abilityTips';
 export interface UiSnapshot {
   phase: RunPhase; seed: number; hp: number; maxHp: number; xp: number; nextXp: number; level: number;
   seconds: number; kills: number; enemies: number; dashCooldown: number; qCooldown: number; beamCooldown: number; sphereCooldown: number;
@@ -29,6 +30,7 @@ export interface UiSnapshot {
   /** Seconds since Second Wind fired (drives a short HUD flash), or a large number. */
   sinceRevive: number; revives: number;
   run: RunHud;
+  /** B22: hover tooltips for the ability tiles (real numbers for this build) */ tips: Record<TipSlot, AbilityTip> | null;
   /** True once the finale beat has played and the Victory results may show (render-driven, like deathShown). */
   victoryShown: boolean;
   /** The level-up screen is a boss reward pick, not a level. */
@@ -50,4 +52,4 @@ export interface BossHud { id: string; name: string; hp: number; maxHp: number; 
 export const blankSnapshot: UiSnapshot = { phase: 'running', seed: 0, hp: 100, maxHp: 100, xp: 0, nextXp: 7,
   level: 1, seconds: 0, kills: 0, enemies: 0, dashCooldown: 0, qCooldown: 0, beamCooldown: 0, sphereCooldown: 0, drive: 0,
   form: 0, formCooldown: 0, dragonCooldown: 0, cometCooldown: 0, apexUnlocked: false, apexReady: false, riftCooldown: 0, reversalCooldown: 0, evadeCooldown: 0, riftCharge: 0, selector: { open: false, pick: 0, choices: [], left: 4 }, cometUnlocked: false, cometReady: false, hero: 'kai', heroFormUnlocked: false, heroReady: false, lanceCharge: 0, lanceTier: -1, heroAct: '', cinema: false, offers: [], score: 0, deathShown: false, boss: null, arenaName: 'THE GLOAM CIRCUIT', cards: [], owned: [], map: blankMap, cdMax: { dash: 3.2, beam: 7, sphere: 16, form: 6, dragon: 9, comet: 22, rift: 8, reversal: 14, evade: 9 }, sinceRevive: 999, revives: 0, victoryShown: false, rewardPick: false, bosses: 0,
-  contract: null, boon: null, rerolls: 0, banishes: 0, reward: null, marks: 0, crest: null, run: { t: 0, wardenAt: 480, finaleAt: 900, wardenDone: false, finaleOut: false, nextLabel: 'FRACTURE WARDEN', nextIn: 480, announce: null } };
+  tips: null, contract: null, boon: null, rerolls: 0, banishes: 0, reward: null, marks: 0, crest: null, run: { t: 0, wardenAt: 480, finaleAt: 900, wardenDone: false, finaleOut: false, nextLabel: 'FRACTURE WARDEN', nextIn: 480, announce: null } };

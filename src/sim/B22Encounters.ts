@@ -18,7 +18,7 @@ export function relicPool(state: GameState): RelicId[] {
 }
 export function offerRelic(state: GameState, rng: SeededRng) {
   const pool = relicPool(state).slice(); if (!pool.length || state.phase !== 'running') return false;
-  const offer: RelicId[] = []; while (offer.length < Math.min(3, pool.length)) offer.push(pool.splice(rng.int(pool.length), 1)[0]);
+  const offer: RelicId[] = [], want = Math.min(3, pool.length); while (offer.length < want) offer.push(pool.splice(rng.int(pool.length), 1)[0]);
   state.b22.relicOffer = offer; state.phase = 'upgrade'; state.upgradeOffers = []; return true;
 }
 export function grantRelic(state: GameState, id: RelicId): boolean {

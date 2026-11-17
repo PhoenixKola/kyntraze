@@ -16,7 +16,7 @@ export interface Behavior {
   locomote(c: Ctx): void;
   spawnAt?(s: GameState): { x: number; y: number };
   onSpawn?(s: GameState, e: Enemy): void; onPhase?(c: Ctx): void; onTick?(c: Ctx, dt: number): void;
-  /** returns the damage that actually reaches the boss (may route to parts, reflect, or null for none) */ onDamage?(s: GameState, e: Enemy, dmg: number, opts?: { area?: boolean; proj?: boolean }): number;
+  /** returns the damage that actually reaches the boss (may route to parts, reflect, or null for none) */ onDamage?(s: GameState, e: Enemy, dmg: number, opts?: { area?: boolean; proj?: boolean; fx?: boolean }): number;
   onEvade?(s: GameState, e: Enemy): void; onDeath?(s: GameState, e: Enemy): void;
   /** multi-part bosses: a part took damage / was destroyed (the core is `core`) */ onPartHit?(s: GameState, core: Enemy, part: Enemy, dmg: number): void; onPartDeath?(s: GameState, core: Enemy, part: Enemy): void;
 }
