@@ -15,12 +15,12 @@ export function TitleScreen({ onArchives, onPlay, onSettings, onProgress, save }
       <p className="title-subtitle">MOVE FAST. BREAK THE HORDE. CHARGE THE FRACTURE.</p>
       <div className="title-buttons">
         <button className="primary-button" onClick={onPlay} data-testid="play-button" data-pad-default data-pad-start>ENTER THE FRACTURE <span aria-hidden="true">↗</span></button>
-        <button className="outlined-button" onClick={onProgress} data-testid="archives-button">ARCHIVES</button>{onArchives && <button className="outlined-button" onClick={onArchives} data-testid="horizons-button">HORIZONS</button>}
+        <button className="outlined-button" onClick={onProgress} data-testid="archives-button">ARCHIVES</button>
         <button className="outlined-button" onClick={onSettings}>SETTINGS</button>
       </div>
       <div className="title-marks"><MarksBadge marks={save.meta.marks} crest={save.meta.crest}/></div>
       <div className="best-run">{save.best ? <>PERSONAL BEST <b>{save.best.score.toLocaleString()} PTS</b> · {save.best.kills} KILLS</> : 'NO RECORDED RUNS · YOUR FIRST FRACTURE AWAITS'}</div>
     </div>
-    <div className="bottom-chrome"><HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'TAB', pad: 'D-PAD', label: 'NAVIGATE' }]}/><span className="chrome-note">ONE LIFE · INFINITE PRESSURE</span></div>
+    <div className="bottom-chrome"><HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'TAB', pad: 'D-PAD', label: 'NAVIGATE' }]}/>{onArchives && <button className="text-button" onClick={onArchives} data-testid="horizons-button">SHATTERED HORIZONS ›</button>}<span className="chrome-note">ONE LIFE · INFINITE PRESSURE</span></div>
   </main>;
 }

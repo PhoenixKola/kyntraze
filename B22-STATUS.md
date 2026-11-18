@@ -8,11 +8,11 @@ Legend: **VERIFIED** = automated test + (where marked) a real-browser run by me.
 * I did not play any run as a human. "Verified" means tests and short scripted browser runs.
 * No physical controller was available; pad paths are code + unit-level only.
 * Online co-op was verified between two real browser contexts and a local server. Public hosting, outside-network latency, and an Electron client joining are **not** verified.
-* The Electron installer was not rebuilt or smoke-tested after the B22 changes.
+* `npm run build` and `npm run desktop:smoke` pass after the B22 changes (two launches, saved profile persisted). The NSIS installer was not rebuilt, and an Electron client joining an online room was not tested.
 
 ## Test evidence (run by me, this session)
 * `npx tsc -b` clean. `npx vitest run`: 540+ tests, all green except none failing at last run (music-file test fixed by the synth). New suites: `b22-core`, `b22-enemies`, `b22-bosses`, `b22-ascension`, `b22-vex-modes`, `b22-save`, `b22-coop`, `b22-server`.
-* Playwright (own config on port 5199 because 5173 serves a different project on this machine): `b22-hud`, `b22-modes`, `b22-coop`, `b22-online` pass; full pre-existing e2e suite result is in the final report below.
+* Playwright (own config on port 5199 because 5173 serves a different project on this machine): `b22-hud`, `b22-modes`, `b22-coop`, `b22-online` pass; full existing e2e suite: 72/79 passed on the first run; of the 4 failures one was a real layout regression I fixed (title buttons on ultra-wide), two were load-flaky and pass alone, and 3 prod-smoke tests are skipped by design (need a production server).
 
 ## The 32 items
 | # | Item | State | Notes |

@@ -2,7 +2,8 @@
 - [x] typecheck, unit tests, targeted e2e (HUD, modes, local co-op, online co-op)
 - [x] additive save migration with fixtures; ledger idempotency
 - [x] server hardening tests (version, malformed, rate limit, full room, reconnect, verified result once)
-- [ ] `npm run build` + `npm run desktop:smoke` + `desktop:dist:win` after B22 (NOT RUN)
+- [x] `npm run build` and `npm run desktop:smoke` pass after B22 (preload + CSP changes included)
+- [ ] `desktop:dist:win` installer rebuild (NOT RUN)
 - [ ] Electron: set a wss server in the Online lobby, confirm CSP/request filter allow only that origin (NOT RUN)
 - [ ] ImageGen/Blender art for arenas, enemies, bosses, Vex, outfits (NOT DONE)
 - [ ] listen to every new music cue and SFX (NOT DONE)
