@@ -72,5 +72,67 @@
   "brB_9",
   "brB_10",
   "brB_11"
- ]
+ ],
+ "cycles": {
+  "sky_lancer": [
+   "sky_lancer_f0",
+   "sky_lancer_f1",
+   "sky_lancer_f2",
+   "sky_lancer_f3",
+   "sky_lancer_f4",
+   "sky_lancer_f5",
+   "sky_lancer_f6",
+   "sky_lancer_f7"
+  ],
+  "halo_scribe": [
+   "halo_scribe_f0",
+   "halo_scribe_f1",
+   "halo_scribe_f2",
+   "halo_scribe_f3",
+   "halo_scribe_f4",
+   "halo_scribe_f5",
+   "halo_scribe_f6",
+   "halo_scribe_f7"
+  ],
+  "citadel_bulwark": [
+   "citadel_bulwark_f0",
+   "citadel_bulwark_f1",
+   "citadel_bulwark_f2",
+   "citadel_bulwark_f3",
+   "citadel_bulwark_f4",
+   "citadel_bulwark_f5",
+   "citadel_bulwark_f6",
+   "citadel_bulwark_f7"
+  ],
+  "rift_mimic": [
+   "rift_mimic_f0",
+   "rift_mimic_f1",
+   "rift_mimic_f2",
+   "rift_mimic_f3",
+   "rift_mimic_f4",
+   "rift_mimic_f5",
+   "rift_mimic_f6",
+   "rift_mimic_f7"
+  ],
+  "phase_harrier": [
+   "phase_harrier_f0",
+   "phase_harrier_f1",
+   "phase_harrier_f2",
+   "phase_harrier_f3",
+   "phase_harrier_f4",
+   "phase_harrier_f5",
+   "phase_harrier_f6",
+   "phase_harrier_f7"
+  ],
+  "singularity_husk": [
+   "singularity_husk_f0",
+   "singularity_husk_f1",
+   "singularity_husk_f2",
+   "singularity_husk_f3",
+   "singularity_husk_f4",
+   "singularity_husk_f5",
+   "singularity_husk_f6",
+   "singularity_husk_f7"
+  ]
+ }
 }

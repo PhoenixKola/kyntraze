@@ -1,0 +1,1 @@
+Pixel-art game weapon sprite: a short pale silver-lilac counter-blade (dagger-sword) with a dark indigo grip and a small violet crossguard, drawn horizontally pointing RIGHT, centred, chunky pixel blocks, clean dark outline, 3-tone cel shading, three-quarter top-down view. Flat pure green (#00ff00) background, no text, no hand, no green in the blade.

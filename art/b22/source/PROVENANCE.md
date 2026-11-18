@@ -644,3 +644,115 @@ Prompt:
 Original 2D game story illustration for KYNTRAZE: FRACTURE RUSH. Wide 16:9 cinematic scene in chunky pixel-art style: visible pixel blocks, clean dark outlines, cel-shaded 3-4 tone shading, limited moody palette, no text, no letters, no UI, no watermark, no characters in the foreground (a tiny distant silhouette is fine). Scene: the Oathkeeper's hall between two ticks of a clock: a vast empty circular hall of dark violet stone, a giant cracked clock-face halo hanging above, a long pale blade stuck point-down in the floor, two silhouettes facing each other far apart (a hooded knight with a long blade, and a young exile in a coat), lilac light shafts, drifting dust.
 ```
 
+## 2026-11-18T09:23:34.005Z - fx_vexblade.png
+
+- File: fx_vexblade.png (2172x724)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1edf7-82df-7e21-988c-143a81d3d74d
+- Reference images: none
+- Seconds: 30.7
+
+Prompt:
+
+```text
+Pixel-art game weapon sprite: a short pale silver-lilac counter-blade (dagger-sword) with a dark indigo grip and a small violet crossguard, drawn horizontally pointing RIGHT, centred, chunky pixel blocks, clean dark outline, 3-tone cel shading, three-quarter top-down view. Flat pure green (#00ff00) background, no text, no hand, no green in the blade.
+```
+
+## 2026-11-18T09:23:50.628Z - c_citadel_bulwark.png
+
+- File: c_citadel_bulwark.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1edf7-6085-7832-9a6e-efa84dacf834
+- Reference images: e_citadel_bulwark.png
+- Seconds: 56.2
+
+Prompt:
+
+```text
+Original 2D game enemy sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact enemy. Redraw the SAME creature (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, feet/contact on one common ground line per row, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the creature. Enemy: Citadel Bulwark. ROW 1 (cells 1-4): a looping 4-frame movement cycle (walk/hover/glide) with clear differences between frames. ROW 2: cell 5 = WIND-UP (clear anticipation pose, body coiling or raising its weapon/power, glowing brighter), cell 6 = STRIKE (the attack released, stretched, weapon/power extended forward), cell 7 = HURT (flinching back, flash-edge), cell 8 = DEATH (breaking apart, collapsing, fading).
+```
+
+## 2026-11-18T09:23:53.250Z - fx_ult.png
+
+- File: fx_ult.png (1312x1199)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1edf7-82b4-75e3-951a-46a48acb6689
+- Reference images: none
+- Seconds: 50
+
+Prompt:
+
+```text
+Four separate game VFX plates in a 2x2 grid, chunky pixel-art style with crisp hard edges, top-down ground-impact effects, each centred in its cell, each a radial burst filling most of its cell, on a flat pure black (#000000) background with wide black gutters, no text, no labels, no characters. 1: golden kinetic CRATER SHOCKWAVE (cracked ground rings, golden dust, white-gold core). 2: crimson-orange FURNACE CRUCIBLE burst (molten ring, rising flames, embers). 3: blue-white CONSTELLATION NOVA (linked stars and lines radiating, cold glow). 4: violet JUDGMENT SLASH (a huge pale-lilac blade-slash crack through a rift, violet shards).
+```
+
+## 2026-11-18T09:24:09.202Z - c_sky_lancer.png
+
+- File: c_sky_lancer.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1edf7-606c-7e60-9521-ab640150cf47
+- Reference images: e_sky_lancer.png
+- Seconds: 74.8
+
+Prompt:
+
+```text
+Original 2D game enemy sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact enemy. Redraw the SAME creature (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, feet/contact on one common ground line per row, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the creature. Enemy: Sky Lancer. ROW 1 (cells 1-4): a looping 4-frame movement cycle (walk/hover/glide) with clear differences between frames. ROW 2: cell 5 = WIND-UP (clear anticipation pose, body coiling or raising its weapon/power, glowing brighter), cell 6 = STRIKE (the attack released, stretched, weapon/power extended forward), cell 7 = HURT (flinching back, flash-edge), cell 8 = DEATH (breaking apart, collapsing, fading).
+```
+
+## 2026-11-18T09:24:13.951Z - c_halo_scribe.png
+
+- File: c_halo_scribe.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1edf7-6084-72f0-b22e-addceccc9e3c
+- Reference images: e_halo_scribe.png
+- Seconds: 79.5
+
+Prompt:
+
+```text
+Original 2D game enemy sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact enemy. Redraw the SAME creature (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, feet/contact on one common ground line per row, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the creature. Enemy: Halo Scribe. ROW 1 (cells 1-4): a looping 4-frame movement cycle (walk/hover/glide) with clear differences between frames. ROW 2: cell 5 = WIND-UP (clear anticipation pose, body coiling or raising its weapon/power, glowing brighter), cell 6 = STRIKE (the attack released, stretched, weapon/power extended forward), cell 7 = HURT (flinching back, flash-edge), cell 8 = DEATH (breaking apart, collapsing, fading).
+```
+
+## 2026-11-18T09:25:12.743Z - c_phase_harrier.png
+
+- File: c_phase_harrier.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1edf8-98a5-7a83-aa25-474327654743
+- Reference images: e_phase_harrier.png
+- Seconds: 58.4
+
+Prompt:
+
+```text
+Original 2D game enemy sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact enemy. Redraw the SAME creature (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, feet/contact on one common ground line per row, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the creature. Enemy: Phase Harrier. ROW 1 (cells 1-4): a looping 4-frame movement cycle (walk/hover/glide) with clear differences between frames. ROW 2: cell 5 = WIND-UP (clear anticipation pose, body coiling or raising its weapon/power, glowing brighter), cell 6 = STRIKE (the attack released, stretched, weapon/power extended forward), cell 7 = HURT (flinching back, flash-edge), cell 8 = DEATH (breaking apart, collapsing, fading).
+```
+
+## 2026-11-18T09:25:15.014Z - c_rift_mimic.png
+
+- File: c_rift_mimic.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1edf8-98b9-7743-b1cc-61aeebdd8bd0
+- Reference images: e_rift_mimic.png
+- Seconds: 60.7
+
+Prompt:
+
+```text
+Original 2D game enemy sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact enemy. Redraw the SAME creature (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, feet/contact on one common ground line per row, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the creature. Enemy: Rift Mimic. ROW 1 (cells 1-4): a looping 4-frame movement cycle (walk/hover/glide) with clear differences between frames. ROW 2: cell 5 = WIND-UP (clear anticipation pose, body coiling or raising its weapon/power, glowing brighter), cell 6 = STRIKE (the attack released, stretched, weapon/power extended forward), cell 7 = HURT (flinching back, flash-edge), cell 8 = DEATH (breaking apart, collapsing, fading).
+```
+
+## 2026-11-18T09:25:34.523Z - c_singularity_husk.png
+
+- File: c_singularity_husk.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1edf8-98bd-7021-bdc4-5669e8618d35
+- Reference images: e_singularity_husk.png
+- Seconds: 80.2
+
+Prompt:
+
+```text
+Original 2D game enemy sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact enemy. Redraw the SAME creature (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, feet/contact on one common ground line per row, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the creature. Enemy: Singularity Husk. ROW 1 (cells 1-4): a looping 4-frame movement cycle (walk/hover/glide) with clear differences between frames. ROW 2: cell 5 = WIND-UP (clear anticipation pose, body coiling or raising its weapon/power, glowing brighter), cell 6 = STRIKE (the attack released, stretched, weapon/power extended forward), cell 7 = HURT (flinching back, flash-edge), cell 8 = DEATH (breaking apart, collapsing, fading).
+```
+

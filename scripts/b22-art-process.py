@@ -27,6 +27,16 @@ def fit(im, h):
 def single(name, out, h):
     im = crop(key(Image.open(os.path.join(SRC, name + ".png")))); fit(im, h).save(os.path.join(DST, out + ".png")); return out
 
+def slice_sheet_black(name, prefix, n):
+    """2x2 black-background VFX sheet -> four additive plates (luminance becomes alpha), split on the grid."""
+    im = Image.open(os.path.join(SRC, name + ".png")).convert("RGB"); W, H = im.size; names = []
+    for j in range(4):
+        c = im.crop(((j % 2) * W // 2, (j // 2) * H // 2, (j % 2 + 1) * W // 2, (j // 2 + 1) * H // 2)); a = np.array(c).astype(np.int16); alpha = np.clip((a.max(-1) - 14) * 5, 0, 255).astype(np.uint8)
+        r = Image.fromarray(np.dstack([np.array(c), alpha]), "RGBA"); bb = r.getchannel("A").getbbox()
+        if bb: r = r.crop(bb)
+        s = max(r.size); sq = Image.new("RGBA", (s, s), (0, 0, 0, 0)); sq.paste(r, ((s - r.width) // 2, (s - r.height) // 2)); sq.resize((256, 256), Image.LANCZOS).save(os.path.join(DST, f"{prefix}{j}.png")); names.append(f"{prefix}{j}")
+    return names
+
 def slice_sheet(name, prefix, n, h, rows=None):
     im = key(Image.open(os.path.join(SRC, name + ".png"))); al = np.array(im.getchannel("A")) > 0
     al = ndi.binary_dilation(al, iterations=14); lab, k = ndi.label(al)
@@ -43,6 +53,29 @@ def slice_sheet(name, prefix, n, h, rows=None):
     for j, (y0, y1, x0, x1, _) in enumerate(boxes):
         c = crop(im.crop((x0, y0, x1, y1)), 2); nm = f"{prefix}{j}"; fit(c, h).save(os.path.join(DST, nm + ".png")); names.append(nm)
     return names
+
+
+def cycles():
+    """Animation sheets c_<kind>.png (8 cells: move x4, windup, strike, hurt, death) -> public/art/b22/<kind>_f0..7.png, all frames scaled by ONE factor and bottom-centre aligned on a shared canvas so they do not jitter."""
+    out = {}
+    for k, h in H.items():
+        f = os.path.join(SRC, "c_" + k + ".png")
+        if not os.path.exists(f): continue
+        im = key(Image.open(f)); al = np.array(im.getchannel("A")) > 0; al = ndi.binary_dilation(al, iterations=10); lab, n = ndi.label(al)
+        boxes = []
+        for i, sl in enumerate(ndi.find_objects(lab)):
+            if sl is not None and (lab[sl] == i + 1).sum() > 2500: boxes.append((sl[0].start, sl[0].stop, sl[1].start, sl[1].stop, (lab[sl] == i + 1).sum()))
+        boxes = sorted(boxes, key=lambda b: -b[4])[:8]
+        if len(boxes) < 8: print("cycle", k, "found", len(boxes), "cells, skipped"); continue
+        boxes.sort(key=lambda b: ((b[0] + b[1]) // 2 // (im.height // 2), b[2]))
+        frames = [crop(im.crop((x0, y0, x1, y1)), 2) for (y0, y1, x0, x1, _) in boxes]
+        sc = h / max(fr.height for fr in frames[:4]); cw = max(round(fr.width * sc) for fr in frames) + 4; ch = max(round(fr.height * sc) for fr in frames) + 4
+        names = []
+        for i, fr in enumerate(frames):
+            r = fr.resize((max(1, round(fr.width * sc)), max(1, round(fr.height * sc))), Image.LANCZOS); cv = Image.new("RGBA", (cw, ch), (0, 0, 0, 0)); cv.paste(r, ((cw - r.width) // 2, ch - r.height - 2), r)
+            nm = f"{k}_f{i}"; cv.save(os.path.join(DST, nm + ".png")); names.append(nm)
+        out[k] = names
+    return out
 
 if __name__ == "__main__":
     man = {}
@@ -65,4 +98,8 @@ if __name__ == "__main__":
     for n, o in [("a_aetherfall_floor", "floor_aetherfall"), ("a_paradox_floor", "floor_paradox")]:
         if ex(n):
             im = Image.open(os.path.join(SRC, n + ".png")).convert("RGB"); s = min(im.size); im = im.crop(((im.width - s) // 2, (im.height - s) // 2, (im.width + s) // 2, (im.height + s) // 2)).resize((256, 256), Image.LANCZOS); im.save(os.path.join(DST, o + ".png"))
+    man["cycles"] = cycles()
+    if ex("fx_vexblade"): single("fx_vexblade", "vexblade", 40)
+    if ex("fx_ult"):
+        for j, nm in enumerate(slice_sheet_black("fx_ult", "fx_ult", 4)): pass
     json.dump(man, open(os.path.join(DST, "manifest.json"), "w"), indent=1); print(sorted(os.listdir(DST)))
