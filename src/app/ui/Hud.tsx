@@ -44,6 +44,7 @@ function BossBar({ b }: { b: BossHud }) {
         <img className="boss-emblem" src={bossArt(`emblem-${b.id}`)} alt="" draggable={false}/>
         <div className="boss-track"><i className="trail" style={{ width: pct(frac * 100) }}/><i className="fill" style={{ width: pct(frac * 100) }}/><span className="tick" style={{ left: '50%' }}/></div>
       </div>
+      {b.parts.length > 0 && <div className="boss-parts" data-testid="boss-parts">{b.parts.map(p => <span key={p.id} className={`bp bp-${p.role}`} title={p.role}><em>{p.role.toUpperCase()}</em><i style={{ width: pct(p.hp / p.maxHp * 100) }}/></span>)}{b.shielded && <u>CORE SHIELDED</u>}</div>}
     </div>
   </>;
 }
@@ -99,6 +100,8 @@ export function Hud({ s, pad, onPause, reduced, onForm, onKey }: Props) {
     {s.run.announce && !s.boss && <div className="finale-banner" data-testid="finale-banner" role="alert"><b>{s.run.announce.text}</b><span>{s.run.announce.sub}</span></div>}
     {s.phase === 'victory' && !s.victoryShown && <div className="victory-banner" data-testid="victory-banner" role="status"><b>THE FRACTURE HOLDS</b><span>NULL SERAPH DEFEATED</span></div>}
     <button className="hud-panel hud-pause" onClick={onPause} aria-label="Pause game"><span className="pause-bars"/><kbd className={pad ? 'pad-key' : ''}>{pad ? 'START' : 'ESC'}</kbd></button>
+    {s.asc?.ult && <div className={`hud-ult ${s.asc.ult.ready ? 'ready' : ''}`} data-testid="hud-ult" aria-label={`Ultimate ${s.asc.ult.name}`}><b>{s.asc.ult.name.toUpperCase()}</b><span><i style={{ width: pct(s.asc.ult.charge) }}/></span><em>{s.asc.ult.active ? 'ACTIVE' : s.asc.ult.cd > 0 ? `${Math.ceil(s.asc.ult.cd)}s` : s.asc.ult.ready ? (pad ? 'PRESS LB' : 'PRESS R') : `${Math.floor(s.asc.ult.charge)}%`}</em></div>}
+    {s.asc && s.asc.recipes.length > 0 && <div className="hud-recipes" data-testid="hud-recipes">{s.asc.recipes.slice(0, 3).map(r => <span key={r.id} title={r.needs} className={r.met === r.total ? 'met' : ''}>{r.name} {r.met}/{r.total}</span>)}</div>}
     <div className="hud-slots" role="group" aria-label="Abilities">
       <Slot id="shift" tip={T?.dash} onUse={onKey} name="Dash" ico="dash" keyLabel="SHIFT" padLabel="A" pad={pad} seconds={s.dashCooldown} max={s.cdMax.dash}/>
       <Slot id="q" tip={T?.q} onUse={onKey} name={hk ? hk.act.q : 'Impact'} ico={hk ? `${H}_q` : 'impact'} keyLabel="Q" padLabel="X" pad={pad} seconds={s.qCooldown} max={hk ? (H === 'ren' ? REN.q.cooldown : SORA.q.cooldown) : 8.5}/>

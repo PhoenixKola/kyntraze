@@ -58,6 +58,9 @@ export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts
   const boss = isBoss(enemy.kind);
   if (boss) {
     const def = BOSSES[enemy.kind as BossKind];
+    if (enemy.part && state.party && enemy.part.role === 'anchor') {   // B22.6 co-op rule A: a Sovereign anchor is LINKED: one fighter can deal at most 60% of its health, the rest must come from the partner
+      const k = `d${state.party.cur}`, ex = (enemy.ex ??= {}), room = Math.max(0, enemy.maxHp * 0.6 - (ex[k] ?? 0)); dmg = Math.min(dmg, room); ex[k] = (ex[k] ?? 0) + dmg; if (dmg <= 0) return false;
+    }
     if (!enemy.part) {
       const beh = behaviorOf(enemy.kind); if (beh?.onDamage) dmg = beh.onDamage(state, enemy, dmg, opts);   // B22 bosses route / refuse / reflect here
       if (dmg <= 0) return false;

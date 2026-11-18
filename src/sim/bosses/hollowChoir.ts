@@ -41,7 +41,9 @@ export const hollowChoir: Behavior = {
   },
   onPartHit: (s, core, part, dmg) => {
     const px = ex(part); px.recent = (px.recent ?? 0) + dmg; px.rt = STAGGER.window;
-    if (px.recent >= part.maxHp * STAGGER.frac && s.time - (ex(core).staggerAt ?? -9) > 3) {   // enough focused damage interrupts the harmony
+    if (s.party) { const k = `by${s.party.cur}`; px[k] = (px[k] ?? 0) + dmg; }   // co-op rule B: the harmony only breaks when BOTH fighters have pressed the same voice
+    const both = !s.party || ((px.by0 ?? 0) >= part.maxHp * 0.05 && (px.by1 ?? 0) >= part.maxHp * 0.05);
+    if (both && px.recent >= part.maxHp * STAGGER.frac && s.time - (ex(core).staggerAt ?? -9) > 3) {   // enough focused damage interrupts the harmony
       ex(core).staggerAt = s.time; px.recent = 0; clearOwn(s, part.id); ex(core).open = Math.max(ex(core).open ?? 0, 3); ev(s, 'enemy_strike', core, 0, 0, 'harmony_break');
     }
   },

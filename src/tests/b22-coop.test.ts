@@ -98,3 +98,17 @@ describe('B22.6 pair combination attacks (six pairings, real events from both fi
     const h0 = e.hp; damageEnemy(s, e, 100); expect(h0 - e.hp).toBeGreaterThan(115); step(sim, 60 * 7); expect(s.party!.shared.resonanceT).toBe(0);
   });
 });
+
+describe('B22.6 co-op boss rules (partner-dependent, not just more HP)', () => {
+  it('Sovereign anchors are linked: one fighter alone can never destroy an anchor; the partner must contribute', async () => {
+    const { sovParts } = await import('../sim/bosses/sovereign');
+    const { sim, s } = duo('kai', 'sora'); startEncounter(s, 'sovereign'); const core = s.enemies.find(e => e.kind === 'sovereign' && !e.part)!; for (let i = 0; i < 700 && core.mode === 'intro'; i++) sim.step(DT, idle, idle);
+    const a = sovParts(s, core, 'anchor')[0]; for (let i = 0; i < 20; i++) damageEnemy(s, a, 1000); expect(a.hp).toBeGreaterThan(0); expect(a.hp).toBeCloseTo(a.maxHp * 0.4, 0);
+    inSlot(s, 1, () => { for (let i = 0; i < 20; i++) damageEnemy(s, a, 1000); }); expect(a.hp).toBe(0);
+  });
+  it('Hollow Choir: focus from only ONE fighter does not break the harmony', async () => {
+    const { choirParts } = await import('../sim/bosses/hollowChoir');
+    const { sim, s } = duo('kai', 'ren'); startEncounter(s, 'hollow_choir'); const core = s.enemies.find(e => e.kind === 'hollow_choir' && !e.part)!; for (let i = 0; i < 700 && core.mode === 'intro'; i++) sim.step(DT, idle, idle);
+    const p = choirParts(s, core)[0]; damageEnemy(s, p, p.maxHp * 0.3); expect(core.ex?.open ?? 0).toBe(0); inSlot(s, 1, () => damageEnemy(s, p, p.maxHp * 0.1)); expect(core.ex?.open ?? 0).toBeGreaterThan(0);
+  });
+});

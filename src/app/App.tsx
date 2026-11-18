@@ -14,6 +14,7 @@ import { PauseMenu } from './ui/PauseMenu';
 import { AscensionPicker } from './ui/AscensionPicker';
 import { ModeSelect, type ModeChoice } from './ui/ModeSelect';
 import { OnlineLobby } from './ui/OnlineLobby';
+import { ArchivesScreen } from './ui/ArchivesScreen';
 import type { NetClient } from '../net/RemoteSimulation';
 import { migrateB22 } from '../b22/save';
 import { CLASSIC_ARENAS, REALM_ARENAS } from '../content/arenas';
@@ -54,11 +55,11 @@ function GameStage({ bridge, seed, arena, pad, onHome, onProgress, onSettings }:
 }
 export default function App() {
   const pad = useControllerNav();
-  const [view, setView] = useState<'title' | 'select' | 'arena' | 'progress' | 'game' | 'mode' | 'online'>('title');
+  const [view, setView] = useState<'title' | 'select' | 'arena' | 'progress' | 'game' | 'mode' | 'online' | 'archives'>('title');
   const [mode, setMode] = useState<ModeChoice>({ id: 'classic' });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [leaving, setLeaving] = useState(false);
-  type View = 'title' | 'select' | 'arena' | 'progress' | 'game' | 'mode' | 'online';
+  type View = 'title' | 'select' | 'arena' | 'progress' | 'game' | 'mode' | 'online' | 'archives';
   /** Menu route change: the current screen eases out (~110 ms) and the next eases in. Input is never blocked after the swap; a second press during the exit is ignored. */
   const go = (to: View) => { if (leaving) return; if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { setView(to); return; } setLeaving(true); window.setTimeout(() => { setView(to); setLeaving(false); }, 110); };
   const [save, setSave] = useState(initialSave);
@@ -93,8 +94,9 @@ export default function App() {
   const home = () => { setView('title'); setSettingsOpen(false); setSave(loadSave()); };
   return <PadContext.Provider value={pad.connected}><div className="app">
     {pad.connected && <ControllerBadge/>}
-    {view === 'title' && <div className={`screen ${leaving ? 'leaving' : ''}`}><TitleScreen onPlay={() => go('select')} onSettings={() => setSettingsOpen(true)} onProgress={() => openProgress('title')} save={save}/></div>}
+    {view === 'title' && <div className={`screen ${leaving ? 'leaving' : ''}`}><TitleScreen onArchives={() => go('archives')} onPlay={() => go('select')} onSettings={() => setSettingsOpen(true)} onProgress={() => openProgress('title')} save={save}/></div>}
     {view === 'mode' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ModeSelect choice={mode} onChoose={c => { setMode(c); if (c.id === 'fracture_expedition' && !REALM_ARENAS.includes(arena)) chooseArena(REALM_ARENAS[0]); if (c.id === 'classic' && !CLASSIC_ARENAS.includes(arena)) chooseArena(CLASSIC_ARENAS[0]); }} onBack={() => go('select')} onOnline={() => go('online')} save={save}/></div>}
+    {view === 'archives' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ArchivesScreen save={save} onBack={() => go('title')} onSave={b => { const u = { ...save, b22: b }; setSave(u); storeSave(u); }}/></div>}
     {view === 'online' && <div className={`screen ${leaving ? 'leaving' : ''}`}><OnlineLobby savedUrl={save.b22?.server.url ?? ''} savedName={save.b22?.server.name ?? ''} hero={save.hero ?? 'kai'} onSaveServer={(url, name) => { const b = migrateB22(save.b22); const u = { ...save, b22: { ...b, server: { url, name } } }; setSave(u); storeSave(u); }} onBack={() => go('mode')} onStart={net => { setRun(r => ({ seed: 1, serial: r.serial + 1, arena: (net.room?.arena as ArenaId) ?? 'gloam', setup: { plan: null, net } })); setView('game'); }}/></div>}
     {view === 'select' && <div className={`screen ${leaving ? 'leaving' : ''}`}><HeroSelect modeName={modeName} onMode={() => go('mode')} locked={lockedHero ? 'HERO LOCKED: VEX' : mode.id === 'daily_challenge' || mode.id === 'weekly_challenge' ? 'ARENA / SEED SET BY THE CHALLENGE' : null} hero={save.hero ?? 'kai'} onHero={chooseHero} onBack={() => go('title')} onStart={() => start()} seed={seedInput} onSeed={setSeedInput} arena={arena} onArena={() => go('arena')} onProgress={tab => openProgress('select', tab)} save={save}/></div>}
     {view === 'progress' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ProgressionScreen meta={save.meta} unlocks={{ cometheart: !!save.unlocks?.cometheart, stillfire: !!save.unlocks?.stillfire, ren: !!save.unlocks?.ren, sora: !!save.unlocks?.sora }} tab={progTab} onTab={setProgTab} onMeta={updateMeta} onBack={() => go(progFrom)} onDeploy={progFrom === 'select' ? () => start() : undefined}/></div>}

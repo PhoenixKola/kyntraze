@@ -1,8 +1,8 @@
 import type { SaveV1 } from '../../sim/SaveSystem';
 import { HintBar } from './Chrome';
 import { MarksBadge } from './ProgressionScreen';
-interface Props { onPlay: () => void; onSettings: () => void; onProgress: () => void; save: SaveV1 }
-export function TitleScreen({ onPlay, onSettings, onProgress, save }: Props) {
+interface Props { onArchives?: () => void; onPlay: () => void; onSettings: () => void; onProgress: () => void; save: SaveV1 }
+export function TitleScreen({ onArchives, onPlay, onSettings, onProgress, save }: Props) {
   return <main className="title-layout" data-testid="title-screen">
     <div className="title-art" aria-hidden="true"/>
     <div className="title-shade" aria-hidden="true"/>
@@ -15,7 +15,7 @@ export function TitleScreen({ onPlay, onSettings, onProgress, save }: Props) {
       <p className="title-subtitle">MOVE FAST. BREAK THE HORDE. CHARGE THE FRACTURE.</p>
       <div className="title-buttons">
         <button className="primary-button" onClick={onPlay} data-testid="play-button" data-pad-default data-pad-start>ENTER THE FRACTURE <span aria-hidden="true">↗</span></button>
-        <button className="outlined-button" onClick={onProgress} data-testid="archives-button">ARCHIVES</button>
+        <button className="outlined-button" onClick={onProgress} data-testid="archives-button">ARCHIVES</button>{onArchives && <button className="outlined-button" onClick={onArchives} data-testid="horizons-button">HORIZONS</button>}
         <button className="outlined-button" onClick={onSettings}>SETTINGS</button>
       </div>
       <div className="title-marks"><MarksBadge marks={save.meta.marks} crest={save.meta.crest}/></div>

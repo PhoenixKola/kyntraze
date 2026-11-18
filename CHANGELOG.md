@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.22.0 (B22 Shattered Horizons, local, unpushed)
+Run plans and 7 modes, 2 realm arenas, 6 realm enemies, 7 new bosses, Vex (interim art), Ascension (24 branches, 12 legendaries, 4 ultimates, 8 relics, mastery), local + online co-op (dependency-free server), Archives, Mode Select, ability tooltips + click, contract overlap fix. See B22-STATUS.md for what is interim or not done.
+
+
 ## B20 · release-candidate polish (local, unpushed)
 - Title: action buttons stack under the primary button, Kai sits further right, the oversized logo mark no longer pushes the block out of the viewport. No overlap from 640x360 to 3440x1440 (`e2e/title-layout.spec.ts`).
 - Results at 640x360 and 640x320: six stat labels no longer truncate, the three-button action row stays inside the plate (`e2e/results-layout.spec.ts`, screenshots in `art/progression/review/b20/`).
