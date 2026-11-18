@@ -1,3 +1,7 @@
+import type { NetClient } from '../net/RemoteSimulation';
+import { slotPlayer } from '../sim/CoopSystem';
+import { slotHero } from '../sim/CoopCombos';
+import { REVIVE } from '../b22/pairs';
 import { applyB22Result, migrateB22, type B22Grant, type B22RunResult } from '../b22/save';
 import type { RunPlan } from '../b22/plan';
 import type { RelicId } from '../b22/relics';
@@ -43,6 +47,12 @@ export class GameBridge {
   /** B22: deploy into a mode (Endless, Expedition, Boss Rush, Daily / Weekly, Vex Trial); frozen into the run config before the sim is built. */
   setMode(plan: RunPlan, opts: { startRelic?: RelicId | null; challengeId?: string; hero?: HeroId } = {}) { this.config = { ...this.config, plan, startRelic: opts.startRelic ?? null, ...(opts.hero ? { hero: opts.hero } : {}) }; this.challengeId = opts.challengeId; }
   getB22Grant() { return this.b22Grant; }
+  /** B22.6 local couch co-op: the partner's hero (a fresh loadout; no saved unlocks are shared). */
+  private partner: HeroId | null = null;
+  setCoop(hero2: HeroId | null) { this.partner = hero2; }
+  /** B22.6 online: the run is owned by the server (no local sim, no local rewards: only the server's verified result counts). */
+  private net: NetClient | null = null; setNet(n: NetClient | null) { this.net = n; } getNet() { return this.net; }
+  getPartner() { return this.partner; }
   /** The loadout this run was deployed with (frozen at construction). */
   getRunConfig(): RunConfig { return this.config ?? NO_CONFIG; }
   bind(sim: Simulation) { this.sim = sim; this.publish(true); }
@@ -62,7 +72,7 @@ export class GameBridge {
     if (s.cometUnlockedNow) { s.cometUnlockedNow = false; this.save.unlocks = { ...(this.save.unlocks ?? { cometheart: false }), cometheart: true }; storeSave(this.save); }
     if (s.phase !== 'dead') this.deathShown = false;
     if (s.phase !== 'victory') this.victoryShown = false;
-    this.current = { asc: (() => { try { return ascView(s); } catch { return null; } })(), tips: (() => { try { return abilityTips(s); } catch { return null; } })(), phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
+    this.current = { partner: (() => { const P = s.party; const np = (s as unknown as { partner?: { player: { hp: number; maxHp: number; form: number; drive: number; level: number }; hero: HeroId; down: { downed: boolean; out: boolean; hold: number } } }).partner; if (!P && np) return { name: 'P2', hero: np.hero, hp: np.player.hp, maxHp: np.player.maxHp, form: np.player.form, drive: np.player.drive, down: np.down.downed, out: np.down.out, revive: np.down.hold / REVIVE.hold, level: np.player.level }; if (!P) return null; const q = slotPlayer(s, 1), d = P.slots[1].down; return { name: P.names[1], hero: slotHero(s, 1), hp: q.hp, maxHp: q.maxHp, form: q.form, drive: q.drive, down: d.downed, out: d.out, revive: d.hold / REVIVE.hold, level: q.level }; })(), party: s.party ? { resonance: s.party.shared.resonance, resonanceT: s.party.shared.resonanceT, pair: s.party.shared.pair, chooser: s.party.chooser } : null, asc: (() => { try { return ascView(s); } catch { return null; } })(), tips: (() => { try { return abilityTips(s); } catch { return null; } })(), phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
       dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form, dragonCooldown: p.dragonCooldown, cometCooldown: p.cometCooldown, hero: s.hero, heroFormUnlocked: s.heroFormUnlocked, heroReady: s.hero !== 'kai' && formChoices(s).includes(1), lanceCharge: lance ? lance.charge / SORA.e.maxCharge : 0, lanceTier: lance ? SORA.e.tiers.reduce((t, v, i) => (lance.charge >= v ? i : t), -1) : -1, heroAct: s.hx?.act?.act ?? '', cometUnlocked: s.cometUnlocked, cometReady: formChoices(s).includes(2), apexUnlocked: s.apexUnlocked, apexReady: formChoices(s).includes(3), riftCooldown: p.riftCooldown, reversalCooldown: p.reversalCooldown, evadeCooldown: p.evadeCooldown, riftCharge: s.cast?.kind === 'rift' && !s.cast.released ? Math.min(1, s.cast.t / RIFT.maxCharge) : 0, selector: { open: !!s.selector?.open, pick: selectedForm(s) ?? 0, choices: formChoices(s), left: Math.max(0, SELECTOR_MAX - (s.selector?.held ?? 0)) }, cinema: !!s.cinema,
       formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? s.upgradeOffers.map(id => offerCard(s, id)) : [], owned: UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] })), map: miniMap(s),
@@ -77,7 +87,7 @@ export class GameBridge {
   }
   /** Records the finished run in the meta state exactly once (guarded by the run id and the saved ledger) and stores it before any Results button can be pressed. */
   private finalizeMeta(s: GameState) {
-    if (this.finalized) return; this.finalized = true; if (this.endlessLeg) { this.recordB22(s, true); return; }   // the Classic result was recorded at the victory; the Endless leg never repeats Classic rewards
+    if (this.finalized) return; this.finalized = true; if (this.net) return; if (this.endlessLeg) { this.recordB22(s, true); return; }   // the Classic result was recorded at the victory; the Endless leg never repeats Classic rewards
     let maxCat = 0; for (const c of ['core', 'beam', 'sphere', 'survival', 'mobility', 'pickup', 'drive'] as UpgradeCategory[]) maxCat = Math.max(maxCat, categoryStacks(s, c));
     const won = s.phase === 'victory', warden = s.bossesDefeated >= 1 || won;
     const classic = (s.plan?.mode ?? 'classic') === 'classic', practice = !!s.plan?.practice;

@@ -3,7 +3,9 @@ import { PadTracker, browserPads, type PadLike } from './gamepadMap';
 export class InputController {
   private keys = new Set<string>();
   private pressed = new Set<string>();
-  private readonly pad: PadTracker;
+  private readonly pad: PadTracker; private readonly pad2: PadTracker;
+  /** B22 local couch co-op: with two pads P1 = pad 1, P2 = pad 2; with one pad P1 = keyboard + mouse, P2 = the pad (or the arrow-key set when no pad is connected). */
+  coop = false;
   private lastDevice: 'kb' | 'pad' = 'kb';
   /** B13: the scene feeds the pointer's world direction from Kai (unit vector) every frame; it counts as aiming for a short while after the mouse moved. */
   private pointerAim: { x: number; y: number; d?: number } | null = null; private pointerAt = -1e9;
@@ -22,11 +24,21 @@ export class InputController {
   private readonly onBlur = () => { this.keys.clear(); this.pressed.clear(); this.pad.reset(); this.onFocusLost(); };
   /** `getPads` is injectable for tests; `onPadLost` fires once when a controller that was in use disappears mid-run. */
   constructor(private readonly onPause: () => void, private readonly onFocusLost: () => void, private readonly onPadLost: () => void = () => undefined, getPads: () => ArrayLike<PadLike | null> = browserPads) {
-    this.pad = new PadTracker(getPads);
+    const live = () => Array.from(getPads()).filter((p): p is PadLike => !!p && p.connected);
+    this.pad = new PadTracker(() => (this.coop ? (live().length >= 2 ? [live()[0]] : []) : getPads()));
+    this.pad2 = new PadTracker(() => { const l = live(); return l.length >= 2 ? [l[1]] : l.length === 1 ? [l[0]] : []; });
     window.addEventListener('keydown', this.onDown); window.addEventListener('keyup', this.onUp); window.addEventListener('blur', this.onBlur);
   }
   /** A click on an HUD ability tile acts like pressing its key once (held briefly so a charge-type E registers as a tap). */
   inject(code: string) { this.pressed.add(code); this.keys.add(code); window.setTimeout(() => this.keys.delete(code), 90); }
+  /** Player 2 (co-op only): pad 2 / the single pad, else arrows + Enter (dash) + , . / ; (Q E R F). */
+  readP2(): InputState {
+    const s = this.pad2.sample(performance.now() / 1000), k = (c: string) => this.keys.has(c), had = s.held.size > 0 || s.move.x !== 0 || s.move.y !== 0;
+    const tap = (c: string) => { const a = this.pressed.has(c); this.pressed.delete(c); return a; }, p = (...b: Array<'A' | 'X' | 'Y' | 'LB' | 'RB' | 'LT' | 'RT'>) => b.some(n => s.pressed.has(n));
+    const kx = Number(k('ArrowRight')) - Number(k('ArrowLeft')), ky = Number(k('ArrowDown')) - Number(k('ArrowUp')), usePad = kx === 0 && ky === 0 && had;
+    const stick = s.aim.x !== 0 || s.aim.y !== 0;
+    return { x: usePad ? s.move.x : kx, y: usePad ? s.move.y : ky, dash: tap('Enter') || p('A'), q: tap('Comma') || p('X'), f: tap('Semicolon') || p('Y'), beam: tap('Period') || p('RB', 'RT'), sphere: tap('Slash') || p('LB', 'LT'), beamHeld: k('Period') || s.held.has('RB') || s.held.has('RT'), fHeld: k('Semicolon') || s.held.has('Y'), ...(stick ? { aimX: s.aim.x, aimY: s.aim.y, aimSrc: 'stick' as const } : {}) };
+  }
   read(): InputState {
     const key = (a: string, b?: string) => this.keys.has(a) || (b ? this.keys.has(b) : false);
     const consume = (...codes: string[]) => { const active = codes.some(code => this.pressed.has(code)); codes.forEach(code => this.pressed.delete(code)); return active; };
@@ -36,7 +48,7 @@ export class InputController {
     if (s.pressed.size || s.move.x || s.move.y) this.lastDevice = 'pad';
     if (s.pressed.has('START')) this.onPause();
     const selCancel = this.cancelReq || (this.selectorOpen && s.pressed.has('B')); this.cancelReq = false;
-    const kx = Number(key('KeyD', 'ArrowRight')) - Number(key('KeyA', 'ArrowLeft')), ky = Number(key('KeyS', 'ArrowDown')) - Number(key('KeyW', 'ArrowUp'));
+    const kx = Number(this.coop ? key('KeyD') : key('KeyD', 'ArrowRight')) - Number(this.coop ? key('KeyA') : key('KeyA', 'ArrowLeft')), ky = Number(this.coop ? key('KeyS') : key('KeyS', 'ArrowDown')) - Number(this.coop ? key('KeyW') : key('KeyW', 'ArrowUp'));
     const usePad = kx === 0 && ky === 0;
     const p = (...b: Array<'A' | 'X' | 'Y' | 'LB' | 'RB' | 'LT' | 'RT'>) => b.some(n => s.pressed.has(n));
     const selConfirm = this.pressed.has('Space') || consume('Enter', 'NumpadEnter') || p('A');

@@ -10,6 +10,9 @@ import { EffectsRenderer } from '../render/EffectsRenderer';
 import { followPlayer, fitZoom } from '../render/CameraController';
 import { Presentation } from '../render/arenaArt';
 import { Ambience, ArenaHazardView, ArenaProps, createArenaFloor } from '../render/arenaWorld';
+import { NO_CONFIG } from '../../sim/RunConfig';
+import { RemoteSimulation } from '../../net/RemoteSimulation';
+import { slotPlayer } from '../../sim/CoopSystem';
 import { B22Overlay, RealmProps, createRealmFloor } from '../render/realmWorld';
 import { ARENAS as ARENA_DEFS } from '../../content/arenas';
 import type { ArenaId } from '../../content/arenas';
@@ -45,13 +48,15 @@ export class ArenaScene extends Phaser.Scene {
   private lastInput: InputState = { x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false };
   constructor(private readonly bridge: GameBridge, private readonly seed: number, private readonly arena: ArenaId = 'gloam') { super({ key: 'ArenaScene' }); }
   create() {
-    this.simulation = new Simulation(this.seed, this.arena, this.bridge.getUnlocks().cometheart, !!this.bridge.getUnlocks().stillfire, this.bridge.getRunConfig());
+    const net = this.bridge.getNet();
+    this.simulation = net ? new RemoteSimulation(net, this.seed, this.arena) as unknown as Simulation : new Simulation(this.seed, this.arena, this.bridge.getUnlocks().cometheart, !!this.bridge.getUnlocks().stillfire, this.bridge.getRunConfig());
     const applyZoom = () => this.cameras.main.setZoom(fitZoom(this.scale.width, this.scale.height));
     applyZoom(); this.scale.on(Phaser.Scale.Events.RESIZE, applyZoom);
     this.createArena();
     this.entityRenderer = new EntityRenderer(this);
     this.fx = new EffectsRenderer(this);
     this.controller = new InputController(() => this.bridge.togglePause(), () => { if (this.bridge.getSettings().pauseOnBlur) this.bridge.pause(); }, () => this.bridge.pause());
+    { const hp = this.bridge.getPartner(); if (hp) { this.simulation.joinPartner({ ...NO_CONFIG, hero: hp }, 'local', ['P1', 'P2']); this.controller.coop = true; } }
     this.bridge.bind(this.simulation); this.bridge.setInjector(code => this.controller?.inject(code));
     this.audio = sharedAbilityAudio(); this.events.on('b21-cue', this.onCue); this.audio?.setMuted(this.bridge.getSettings().mute);
     window.addEventListener('keydown', this.unlockAudio); window.addEventListener('pointerdown', this.unlockAudio);
@@ -78,10 +83,10 @@ export class ArenaScene extends Phaser.Scene {
     // cannot swallow a dash/Q/F press on a frame without a fixed step.
     { const ptr = this.input.activePointer, w = this.cameras.main.getWorldPoint(ptr.x, ptr.y), pl = this.simulation.state.player, dx = w.x - pl.x, dy = w.y - (pl.y + 6), d = Math.hypot(dx, dy), moved = ptr.x !== this.lastPtrX || ptr.y !== this.lastPtrY || ptr.isDown; this.lastPtrX = ptr.x; this.lastPtrY = ptr.y; this.controller.setPointerAim(d > 14 ? { x: dx / d, y: dy / d, d } : null, moved); this.controller.selectorOpen = pl && this.simulation.state.selector.open; }   // B13: Silver Rift aim
     let simDelta = delta; if (this.hitstopLeft > 0) { this.hitstopLeft -= delta; simDelta = 0; }   // B12: a visual hit-stop is just skipped sim ticks (the sim itself is never slowed or edited)
-    this.fixed.tick(simDelta, dt => { this.lastInput = this.controller.read(); this.simulation.step(dt, this.lastInput); });
+    this.fixed.tick(simDelta, dt => { this.lastInput = this.controller.read(); if (this.simulation.state.party) this.simulation.step(dt, this.lastInput, this.controller.readP2()); else this.simulation.step(dt, this.lastInput); });
     const s = this.simulation.state;
     this.cameras.main.setZoom(fitZoom(this.scale.width, this.scale.height) * this.entityRenderer.cameraZoom());
-    followPlayer(this.cameras.main, s.player.x, s.player.y);
+    { const P = s.party; if (P) { const o = slotPlayer(s, 1), mx = (s.player.x + o.x) / 2, my = (s.player.y + o.y) / 2, d = Math.hypot(s.player.x - o.x, s.player.y - o.y); followPlayer(this.cameras.main, mx, my); this.cameras.main.setZoom(fitZoom(this.scale.width, this.scale.height) * this.entityRenderer.cameraZoom() * Math.max(0.55, Math.min(1, 760 / Math.max(760, d + 320)))); } else followPlayer(this.cameras.main, s.player.x, s.player.y); }
     this.entityRenderer.sync(s, this.lastInput, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.reduced);
     this.hitstopLeft = Math.max(this.hitstopLeft, this.entityRenderer.takeHitstop());
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();

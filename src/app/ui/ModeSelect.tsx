@@ -6,8 +6,9 @@ import { ARENAS } from '../../content/arenas';
 import { HintBar } from './Chrome';
 import { recordKey } from '../../b22/save';
 
-export interface ModeChoice { id: RunModeId; track?: BossRushTrack; chapter?: 1 | 2 | 3; practice?: boolean }
-interface Props { choice: ModeChoice; onChoose: (c: ModeChoice) => void; onBack: () => void; save: SaveV1; now?: number }
+import { HERO_IDS, type HeroId } from '../../content/heroes';
+export interface ModeChoice { id: RunModeId; track?: BossRushTrack; chapter?: 1 | 2 | 3; practice?: boolean; /** B22.6 local couch co-op: the partner's hero (undefined = solo) */ coop?: HeroId }
+interface Props { onOnline?: () => void; choice: ModeChoice; onChoose: (c: ModeChoice) => void; onBack: () => void; save: SaveV1; now?: number }
 const fmt = (s: number) => `${Math.floor(s / 3600)}h ${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}m`;
 const MODES: { id: RunModeId; name: string; blurb: string; length: string; ranked: string }[] = [
   { id: 'classic', name: 'CLASSIC', blurb: 'The original campaign: the Fracture Warden at 8:00, the Null Seraph at 15:00.', length: '15–18 min', ranked: 'Records · Marks · unlocks' },
@@ -18,7 +19,7 @@ const MODES: { id: RunModeId; name: string; blurb: string; length: string; ranke
   { id: 'weekly_challenge', name: 'WEEKLY CHALLENGE', blurb: 'A longer seeded run with two modifiers, fixed for the UTC week.', length: '≈ 15 min', ranked: 'LOCAL record · not server-verified' },
   { id: 'vex_trial', name: 'TRIAL OF THE OATHBROKEN', blurb: "Vex's three-chapter story: the Broken Oath, the Fractured Accord, Judgment of the Exile.", length: '3 chapters', ranked: 'Unlocks Riftbound and Voidheart Exile' },
 ];
-export function ModeSelect({ choice, onChoose, onBack, save, now }: Props) {
+export function ModeSelect({ onOnline, choice, onChoose, onBack, save, now }: Props) {
   const [t] = useState(() => now ?? Date.now());
   useEffect(() => { const h = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); onBack(); } }; window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h); }, [onBack]);
   const b22 = save.b22, daily = dailyChallenge(t), weekly = weeklyChallenge(t), done = b22?.story.done ?? [];
@@ -29,10 +30,16 @@ export function ModeSelect({ choice, onChoose, onBack, save, now }: Props) {
     <div className="screen-header"><button className="text-button" onClick={onBack} data-pad-cancel>← BACK</button><span>00 / MODE SELECTION</span></div>
     <p className="eyebrow">CHOOSE THE RUN</p><h2 className="large-heading">HOW DOES THE FRACTURE END?</h2>
     <div className="mode-grid" role="radiogroup" aria-label="Mode">
-      {MODES.map((m, i) => { const on = choice.id === m.id, locked = false; return <button key={m.id} role="radio" aria-checked={on} className={`mode-card ${on ? 'selected' : ''}`} data-testid={`mode-${m.id}`} data-pad-default={on ? '' : undefined} onClick={() => onChoose({ id: m.id, track: m.id === 'boss_rush' ? (choice.track ?? 'initiation') : undefined, chapter: m.id === 'vex_trial' ? (choice.chapter ?? 1) : undefined })} disabled={locked}>
+      {MODES.map((m, i) => { const on = choice.id === m.id, locked = false; return <button key={m.id} role="radio" aria-checked={on} className={`mode-card ${on ? 'selected' : ''}`} data-testid={`mode-${m.id}`} data-pad-default={on ? '' : undefined} onClick={() => onChoose({ coop: m.id === 'vex_trial' || m.id === 'daily_challenge' || m.id === 'weekly_challenge' ? undefined : choice.coop, id: m.id, track: m.id === 'boss_rush' ? (choice.track ?? 'initiation') : undefined, chapter: m.id === 'vex_trial' ? (choice.chapter ?? 1) : undefined })} disabled={locked}>
         <span className="mode-index">0{i + 1}</span><b>{m.name}</b><span className="mode-blurb">{m.blurb}</span><span className="mode-meta"><i>{m.length}</i><i>{m.ranked}</i>{best(m.id) > 0 && <i>BEST {best(m.id).toLocaleString()}</i>}</span>
       </button>; })}
     </div>
+    <section className="mode-coop" data-testid="coop-options" aria-label="Fracture Alliance">
+      <b>FRACTURE ALLIANCE · 2 PLAYERS</b>
+      <button className={`outlined-button ${!choice.coop ? 'on' : ''}`} data-testid="coop-off" onClick={() => onChoose({ ...choice, coop: undefined })}>SOLO</button>
+      {HERO_IDS.map(h => <button key={h} className={`outlined-button ${choice.coop === h ? 'on' : ''}`} data-testid={`coop-${h}`} disabled={['vex_trial', 'daily_challenge', 'weekly_challenge'].includes(choice.id)} onClick={() => onChoose({ ...choice, coop: h })}>P2: {h.toUpperCase()}</button>)}
+      {onOnline && <button className="outlined-button" data-testid="coop-online" onClick={onOnline}>ONLINE CO-OP…</button>}
+      <small>{choice.coop ? 'Local couch co-op. P1: WASD + mouse or pad 1. P2: pad 2 (or your only pad) or Arrows + Enter (dash) + , . / ; (Q E R F). Revive by standing near a downed partner.' : 'Pick a partner hero for local couch co-op. Online co-op needs a server (Settings → Online).'}</small></section>
     <section className="mode-detail" data-testid="mode-detail" aria-live="polite">
       {choice.id === 'boss_rush' && <div className="mode-opts">{(Object.keys(BOSS_RUSH_TRACKS) as BossRushTrack[]).map(k => <button key={k} className={`outlined-button ${choice.track === k ? 'on' : ''}`} data-testid={`track-${k}`} onClick={() => onChoose({ ...choice, track: k })}>{BOSS_RUSH_TRACKS[k].name.toUpperCase()} · {BOSS_RUSH_TRACKS[k].bosses.length} BOSSES</button>)}<button className={`outlined-button ${choice.practice ? 'on' : ''}`} data-testid="practice-toggle" onClick={() => onChoose({ ...choice, practice: !choice.practice })}>PRACTICE (UNRANKED, NO REWARDS): {choice.practice ? 'ON' : 'OFF'}</button></div>}
       {choice.id === 'vex_trial' && <div className="mode-opts">{([1, 2, 3] as const).map(c => { const open = c === 1 || done.includes((c - 1) as 1 | 2); return <button key={c} disabled={!open} className={`outlined-button ${choice.chapter === c ? 'on' : ''}`} data-testid={`chapter-${c}`} onClick={() => onChoose({ ...choice, chapter: c })}>{['I · THE BROKEN OATH', 'II · THE FRACTURED ACCORD', 'III · JUDGMENT OF THE EXILE'][c - 1]} {done.includes(c) ? '✓' : open ? '' : '🔒'}</button>; })}</div>}

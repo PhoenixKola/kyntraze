@@ -25,9 +25,7 @@ export function toSnapshot(s: GameState, tick: number, slot: number): Snap {
 export function applySnapshot(state: GameState, n: Snap): void {
   const me = n.me as ReturnType<typeof fighter>, st = state as unknown as Record<string, unknown>;
   state.time = n.time; state.phase = n.phase as GameState['phase']; state.kills = n.kills; state.announce = n.announce; state.plan = { ...CLASSIC_PLAN, ...n.plan } as GameState['plan'];
-  const lerp = (a: number, b: number, k: number) => a + (b - a) * k, was = { x: state.player.x, y: state.player.y };
-  Object.assign(state.player, me.player); const dx = was.x - state.player.x, dy = was.y - state.player.y;
-  if (Math.hypot(dx, dy) < 60) { state.player.x = lerp(state.player.x, was.x, 0.0); state.player.y = state.player.y; }   // interpolation target; see RemoteSimulation.smooth
+  Object.assign(state.player, me.player);
   state.hero = me.hero; Object.assign(state.hx, me.hx); state.cast = me.cast as GameState['cast']; state.sphere = me.sphere as GameState['sphere']; Object.assign(state.mods, me.mods); Object.assign(state.aim, me.aim); state.heroFormUnlocked = me.heroFormUnlocked;
   Object.assign(state.b22, me.b22); state.upgradeOffers = n.offers as GameState['upgradeOffers']; state.upgradeStacks = n.stacks;
   state.enemies = n.enemies as GameState['enemies']; state.enemyShots = n.shots as GameState['enemyShots']; state.hazards = n.hazards as GameState['hazards']; state.pickups = n.pickups as GameState['pickups']; state.impacts = n.impacts as GameState['impacts'];

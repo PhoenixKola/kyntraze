@@ -5,6 +5,8 @@ import { RULES } from '../../core/Rules';
 import type { Enemy, GameState, Hazard } from '../../sim/GameState';
 import { BOSSES } from '../../content/bosses';
 import { isBoss, isRealmKind, type BossKind } from '../../content/enemies';
+import { slotPlayer } from '../../sim/CoopSystem';
+import { slotHero as slotHeroOf } from '../../sim/CoopCombos';
 
 const hash = (x: number, y: number) => { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 const col = (hex: string) => Phaser.Display.Color.HexStringToColor(hex).color;
@@ -105,6 +107,27 @@ export class B22Overlay {
     for (const ev of s.b22.ev) { if (ev.id <= this.evCur) continue; this.evCur = ev.id; const warm = /dawn|sigil|prism|feather|hourglass|bearing/.test(ev.kind) ? 0xffe08a : /rift|parry|mark|seal|waltz|judge|vex/.test(ev.kind) ? 0xa070ff : /ult|collapse|nova|crater|crucible|cone|area|line|chain|relay|arc|fan/.test(ev.kind) ? 0xffb347 : 0x9fe6e0; this.bursts.push({ x: ev.x, y: ev.y, t: 0, dur: ev.x2 !== undefined ? 0.25 : 0.4, r: Math.max(24, Math.min(260, ev.n ?? 70)), c: warm, x2: ev.x2, y2: ev.y2 }); }
     for (const ev of s.enemyEvents) { if (ev.id <= this.enemyCur) continue; this.enemyCur = ev.id; if (ev.kind === 'enemy_death' && (isRealmKind(ev.enemy) || isBoss(ev.enemy as BossKind))) this.bursts.push({ x: ev.x, y: ev.y, t: 0, dur: ev.tag === 'boss' ? 1.2 : 0.4, r: ev.tag === 'boss' ? 180 : 50, c: 0xffe9a8 }); }
     const keep: Burst[] = []; for (const b of this.bursts) { b.t += dt; if (b.t >= b.dur) continue; keep.push(b); const u = b.t / b.dur; fg.lineStyle(4 * (1 - u) + 1, b.c, 1 - u); if (b.x2 !== undefined) fg.beginPath().moveTo(b.x, b.y).lineTo(b.x2, b.y2!).strokePath(); else { fg.strokeCircle(b.x, b.y, b.r * (0.25 + 0.75 * u)); if (!reduced) { fg.fillStyle(b.c, 0.25 * (1 - u)); fg.fillCircle(b.x, b.y, b.r * u * 0.7); } } } this.bursts = keep.slice(-40);
+    // ---- B22.6 co-op: a ring under P1, the whole P2 figure (interim procedural body), downed / revive state
+    if (s.party) {
+      const HEX: Record<string, number> = { kai: 0xeeb56c, ren: 0xff4a3d, sora: 0x59b8ff, vex: 0xa070ff };
+      for (let i = 0; i < 2; i++) {
+        const q = slotPlayer(s, i), d = s.party.slots[i].down, hero = slotHeroOf(s, i), c = HEX[hero] ?? 0xffffff; const x = q.x, y = q.y + 24;
+        ag.lineStyle(3, i === 0 ? 0xffffff : c, d.downed ? 0.35 : 0.9); ag.strokeEllipse(x, y, 46, 18);
+        if (i === 1) {
+          const al = d.downed ? 0.45 : 1; ag.fillStyle(0x000000, 0.4); ag.fillEllipse(x, y, 40, 14); ag.fillStyle(d.downed ? 0x555566 : c, al); ag.fillRoundedRect(x - 11, y - (d.downed ? 22 : 56), 22, d.downed ? 20 : 44, 6); ag.fillStyle(0xf2d8c0, al); ag.fillCircle(x, y - (d.downed ? 26 : 64), 9);
+          const aim = Math.atan2(q.aimY, q.aimX); ag.lineStyle(3, 0xffffff, 0.7 * al); ag.beginPath().moveTo(x, y - 34).lineTo(x + Math.cos(aim) * 26, y - 34 + Math.sin(aim) * 26).strokePath();
+          if (q.form > 0) { ag.lineStyle(2, c, 0.8); ag.strokeCircle(x, y - 34, 26 + 3 * Math.sin(this.clock * 8)); }
+        }
+        if (d.downed) { ag.lineStyle(4, 0x7fffd4, 0.9); ag.beginPath().arc(x, y - 28, 24, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, d.hold / 2.2)).strokePath(); }
+      }
+    }
+    // ---- online client: the partner arrives in the snapshot (no local party object)
+    const np = (s as unknown as { partner?: { player: { x: number; y: number; aimX: number; aimY: number; form: number }; hero: string; down: { downed: boolean; hold: number } } }).partner;
+    if (!s.party && np) {
+      const HEX2: Record<string, number> = { kai: 0xeeb56c, ren: 0xff4a3d, sora: 0x59b8ff, vex: 0xa070ff }, c = HEX2[np.hero] ?? 0xffffff, q = np.player, x = q.x, y = q.y + 24, dn = np.down.downed;
+      ag.lineStyle(3, c, 0.9); ag.strokeEllipse(x, y, 46, 18); ag.fillStyle(dn ? 0x555566 : c, dn ? 0.45 : 1); ag.fillRoundedRect(x - 11, y - (dn ? 22 : 56), 22, dn ? 20 : 44, 6); ag.fillStyle(0xf2d8c0, dn ? 0.45 : 1); ag.fillCircle(x, y - (dn ? 26 : 64), 9);
+      if (dn) { ag.lineStyle(4, 0x7fffd4, 0.9); ag.beginPath().arc(x, y - 28, 24, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, np.down.hold / 2.2)).strokePath(); }
+    }
     // ---- actors
     const seen = new Set<number>();
     for (const e of s.enemies) { if (e.hp <= 0) continue; if (!isRealmKind(e.kind) && !(isBoss(e.kind) && e.kind !== 'warden' && e.kind !== 'seraph')) continue; seen.add(e.id); this.actor(ag, e, s); }

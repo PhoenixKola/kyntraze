@@ -519,3 +519,13 @@ button.hero-card:focus-visible { outline: 2px solid var(--accent, #e0a24a); outl
 
 /* B22: four runners in one row; Vex's interim card art is Ren's, shifted violet */
 .hero-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: calc(10 * var(--u)) !important; } .hero-card.is-vex .hero-art { filter: hue-rotate(255deg) saturate(.8) brightness(.9); } .hero-copy small { overflow-wrap: anywhere; }
+
+/* B22.6 partner panel */
+.hud-partner { position: absolute; top: calc(112 * var(--u)); left: calc(10 * var(--u)); width: calc(190 * var(--u)); padding: calc(5 * var(--u)) calc(8 * var(--u)); display: flex; flex-direction: column; gap: calc(3 * var(--u)); font-size: max(8px, calc(10 * var(--u))); z-index: 3; } .hud-partner b { letter-spacing: .12em; color: #e9c27a; } .hud-partner.down { filter: saturate(.4); border-color: #7fffd4; } .hud-partner .bar-hp { height: calc(10 * var(--u)); } .hud-partner small { color: var(--k-dim); }
+.res-bar { display: block; height: 3px; background: #0b1620; } .res-bar i { display: block; height: 100%; background: linear-gradient(90deg, #59b8ff, #ff4a3d); } .res-bar.live i { background: #fff; box-shadow: 0 0 6px #fff; }
+
+.mode-coop { width: min(100%, calc(900 * var(--u))); margin: calc(6 * var(--u)) auto; display: flex; flex-wrap: wrap; align-items: center; gap: calc(6 * var(--u)); font-size: max(8px, calc(10 * var(--u))); } .mode-coop b { letter-spacing: .12em; color: #e9c27a; margin-right: calc(8 * var(--u)); } .mode-coop .on { border-color: #e9c27a; color: #fff; } .mode-coop small { flex-basis: 100%; color: var(--k-dim); }
+
+.hud-partner .bar-hp { position: relative; background: #1a0f14; } .hud-partner .bar-hp .fill { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #c63a4a, #ff6b78); }
+.online-form { width: min(100%, calc(560 * var(--u))); margin: calc(8 * var(--u)) auto; display: flex; flex-direction: column; gap: calc(8 * var(--u)); } .online-form label { display: flex; flex-direction: column; gap: 3px; font-size: max(8px, calc(10 * var(--u))); letter-spacing: .12em; color: #8fb4bf; } .online-form input { background: #0b1218; border: 1px solid #34505f; color: #fff; padding: calc(6 * var(--u)); font-size: max(11px, calc(13 * var(--u))); } .online-form ul { padding-left: 1em; }
+.partner-hp { height: calc(9 * var(--u)); min-height: 6px; background: #1a0f14; border: 1px solid #5a2a34; } .partner-hp i { display: block; height: 100%; background: linear-gradient(90deg, #c63a4a, #ff6b78); }

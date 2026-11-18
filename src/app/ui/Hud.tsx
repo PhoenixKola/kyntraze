@@ -88,6 +88,10 @@ export function Hud({ s, pad, onPause, reduced, onForm, onKey }: Props) {
         </div>
       </div>
     </div>
+    {s.partner && <div className={`hud-panel hud-partner ${s.partner.down ? 'down' : ''}`} data-testid="hud-partner" aria-label="Player 2"><b>P2 · {s.partner.hero.toUpperCase()}</b>
+      <div className="partner-hp" role="progressbar" aria-label="Partner health" aria-valuenow={Math.ceil(s.partner.hp)} aria-valuemax={Math.ceil(s.partner.maxHp)}><i style={{ width: pct(s.partner.hp / s.partner.maxHp * 100) }}/></div>
+      <small>{s.partner.out ? 'OUT' : s.partner.down ? `DOWN · stand near to revive ${Math.round(s.partner.revive * 100)}%` : s.partner.form ? 'TRANSFORMED' : `LV ${s.partner.level}`}</small>
+      {s.party && <u className={`res-bar ${s.party.resonanceT > 0 ? 'live' : ''}`} title="Resonance: earned by fighting together"><i style={{ width: pct(s.party.resonance) }}/></u>}</div>}
     <FormSelector open={s.selector.open} pick={s.selector.pick} choices={s.selector.choices} left={s.selector.left} pad={pad} onHover={f => onForm?.(f, false)} onChoose={f => onForm?.(f, true)}/>
     {s.boss && <BossBar b={s.boss}/>}
     <Minimap map={s.map} boss={!!s.boss}/>
