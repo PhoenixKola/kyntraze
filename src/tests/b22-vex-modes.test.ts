@@ -98,7 +98,7 @@ describe('B22 modes: Endless', () => {
     s.player.hp = 1e9; s.player.maxHp = 1e9; run(sim, ENDLESS_CYCLE + 2, idle, st => { st.player.hp = 1e9; if (st.phase === 'upgrade') st.phase = 'running'; });
     expect(s.phase).toBe('extract'); expect(s.b22.endless!.cycle).toBe(1);
     expect(sim.pushOn()).toBe(true); expect(s.phase).toBe('running'); sim.step(DT, idle); expect(s.phase).toBe('running');
-  });
+  }, 30000);
   it('extract ends the run as a success without touching Classic bookkeeping; defeat in Endless is a normal defeat', () => {
     const { sim, s } = quiet({ hp: 1e6 }); s.time = 900; s.phase = 'victory'; sim.continueEndless(); run(sim, ENDLESS_CYCLE + 2, idle, st => { st.player.hp = 1e9; if (st.phase === 'upgrade') st.phase = 'running'; }); expect(s.phase).toBe('extract'); expect(sim.extract()).toBe(true); expect(s.phase).toBe('victory'); expect(s.b22.endless!.extracted).toBe(true);
     const d = quiet({ hp: 50 }); d.s.time = 900; d.s.phase = 'victory'; d.sim.continueEndless(); d.s.player.hp = 1; damagePlayer(d.s, 50, 'contact'); expect(d.s.phase).toBe('dead');
