@@ -8,7 +8,6 @@ import { behaviorOf } from './bosses/runner';
 import { RULES } from '../core/Rules';
 import { MODIFIER_RULES } from '../b22/challenges';
 import { RELIC_RULES } from '../b22/relics';
-import { bump } from '../b22/state';
 import { onPerfectDodge } from './B22Tick';
 
 const REALM_TAGS = new Set(['lance', 'lance_land', 'arrival', 'blink_strike', 'husk_well', 'husk_preview', 'mimic_echo', 'sigil_pulse', 'bulwark_shove']);
@@ -27,7 +26,7 @@ export function wellFactor(state: GameState, s: EnemyShot): number {
 /** A boss hazard was dodged with dash i-frames: the boss behaviour may open (Oathkeeper), mastery counts a perfect evade. */
 export function onDodgedHazard(state: GameState, h: Hazard) {
   const e = state.enemies.find(x => x.id === h.owner && x.hp > 0); if (e) behaviorOf(e.kind)?.onEvade?.(state, e);
-  bump(state.b22, 'evade.count'); state.b22.m['dodge.hazard'] = (state.b22.m['dodge.hazard'] ?? 0) + 1; onPerfectDodge(state);
+  state.b22.m['dodge.hazard'] = (state.b22.m['dodge.hazard'] ?? 0) + 1; onPerfectDodge(state);   // (Stillfire's own 'evade.count' only comes from its Perfect Evasion event)
 }
 /** Removes telegraphs whose owner died before release (a dead Lancer must not strike) and the Husk's well when it dies or is staggered. */
 export function cleanupRealm(state: GameState) {

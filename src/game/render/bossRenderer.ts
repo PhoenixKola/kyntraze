@@ -1,3 +1,4 @@
+import { drawnByClassic } from './realmWorld';
 import Phaser from 'phaser';
 import { bossDamageLevel } from './bodyReaction';
 import { b21Key } from './b21Assets';
@@ -330,7 +331,7 @@ export class BossRenderer {
   /** Every pending boss hazard: circle = ring that fills to its edge exactly when it fires; cone = sector filling from the apex; sigil = marker. Edge of the drawing == edge of the hit test (R, plus Kai's foot disc). */
   private drawHazards(state: GameState) {
     for (const h of state.hazards) {
-      if (h.fired) continue;
+      if (h.fired || !drawnByClassic(state, h)) continue;   // B22 hazards (lanes, realm arenas, new bosses) are drawn by the B22 overlay
       const prog = Math.max(0, Math.min(1, 1 - h.delay / h.total)), late = h.delay < 0.3;
       if (h.shape === 'circle') {
         const w = this.texW(enemyFxKey('circle-warn'));

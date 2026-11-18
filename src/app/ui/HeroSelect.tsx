@@ -15,7 +15,7 @@ function FormRow({ save, hero }: { save: SaveV1; hero: HeroId }) {
 }
 import type { ProgressTab } from './ProgressionScreen';
 import { CONTRACT_BY_ID, UNLOCK_BY_ID, type UnlockId } from '../../content/meta';
-const kit_ = (hero: HeroId, which: 'base' | 'form') => `${ASSET_BASE}ui/heroes/${hero}-crest-${which}.webp`;
+const kit_ = (hero: HeroId, which: 'base' | 'form') => `${ASSET_BASE}ui/heroes/${hero === 'vex' ? 'ren' : hero}-crest-${which}.webp`;   // Vex: interim stand-in art
 interface Props { hero: HeroId; onHero: (h: HeroId) => void; onProgress: (tab: ProgressTab) => void; onBack: () => void; onStart: () => void; seed: string; onSeed: (value: string) => void; arena: ArenaId; onArena: () => void; save: SaveV1; }
 export function HeroSelect({ hero, onHero, onProgress, onBack, onStart, seed, onSeed, arena, onArena, save }: Props) {
   useEffect(() => { const h = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); onBack(); } }; window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h); }, [onBack]);

@@ -1,5 +1,10 @@
+import { applyB22Result, migrateB22, type B22Grant, type B22RunResult } from '../b22/save';
+import type { RunPlan } from '../b22/plan';
+import type { RelicId } from '../b22/relics';
+import type { HeroId } from '../content/heroes';
 import type { Simulation } from '../sim/Simulation';
 import { abilityTips } from './abilityTips';
+import { ascView } from './ascView';
 import { blankSnapshot, type MiniMap, type RunHud, type UiSnapshot } from './UiSnapshot';
 import { UPGRADES, UPGRADE_BY_ID, type UpgradeId } from '../content/upgrades';
 import { previewUpgrade } from '../sim/UpgradeSystem';
@@ -28,13 +33,16 @@ export class GameBridge {
   /** B18: one identity per run (never derived from the seed, so retrying the same seed is a new run); its reward is granted at most once. */
   readonly runId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   private reward: RunReward | null = null; private finalized = false;
-  private readonly config: RunConfig;
+  private config: RunConfig; private challengeId: string | undefined; private b22Grant: B22Grant | null = null;
   constructor(private readonly save: SaveV1) {
     if (!save.meta) save.meta = blankMeta();   // hand-built saves (tests, very old callers) get an empty meta
     const m = save.meta, tools = toolCharges(m.owned.includes('tool_reroll'), m.owned.includes('tool_banish'));
     const hero = save.hero ?? 'kai';
-    this.config = { boon: m.boon && m.owned.includes(`boon_${m.boon}`) ? m.boon : null, contract: m.contract && contractAvailable(m, m.contract) ? m.contract : null, ...tools, hero, heroForm: hero !== 'kai' && !!save.unlocks?.[hero as 'ren' | 'sora'] };
+    this.config = { boon: m.boon && m.owned.includes(`boon_${m.boon}`) ? m.boon : null, contract: m.contract && contractAvailable(m, m.contract) ? m.contract : null, ...tools, hero, heroForm: hero !== 'kai' && !!save.unlocks?.[hero as 'ren' | 'sora'], vexForms: save.b22?.vexForms };
   }
+  /** B22: deploy into a mode (Endless, Expedition, Boss Rush, Daily / Weekly, Vex Trial); frozen into the run config before the sim is built. */
+  setMode(plan: RunPlan, opts: { startRelic?: RelicId | null; challengeId?: string; hero?: HeroId } = {}) { this.config = { ...this.config, plan, startRelic: opts.startRelic ?? null, ...(opts.hero ? { hero: opts.hero } : {}) }; this.challengeId = opts.challengeId; }
+  getB22Grant() { return this.b22Grant; }
   /** The loadout this run was deployed with (frozen at construction). */
   getRunConfig(): RunConfig { return this.config ?? NO_CONFIG; }
   bind(sim: Simulation) { this.sim = sim; this.publish(true); }
@@ -54,7 +62,7 @@ export class GameBridge {
     if (s.cometUnlockedNow) { s.cometUnlockedNow = false; this.save.unlocks = { ...(this.save.unlocks ?? { cometheart: false }), cometheart: true }; storeSave(this.save); }
     if (s.phase !== 'dead') this.deathShown = false;
     if (s.phase !== 'victory') this.victoryShown = false;
-    this.current = { tips: (() => { try { return abilityTips(s); } catch { return null; } })(), phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
+    this.current = { asc: (() => { try { return ascView(s); } catch { return null; } })(), tips: (() => { try { return abilityTips(s); } catch { return null; } })(), phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
       dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form, dragonCooldown: p.dragonCooldown, cometCooldown: p.cometCooldown, hero: s.hero, heroFormUnlocked: s.heroFormUnlocked, heroReady: s.hero !== 'kai' && formChoices(s).includes(1), lanceCharge: lance ? lance.charge / SORA.e.maxCharge : 0, lanceTier: lance ? SORA.e.tiers.reduce((t, v, i) => (lance.charge >= v ? i : t), -1) : -1, heroAct: s.hx?.act?.act ?? '', cometUnlocked: s.cometUnlocked, cometReady: formChoices(s).includes(2), apexUnlocked: s.apexUnlocked, apexReady: formChoices(s).includes(3), riftCooldown: p.riftCooldown, reversalCooldown: p.reversalCooldown, evadeCooldown: p.evadeCooldown, riftCharge: s.cast?.kind === 'rift' && !s.cast.released ? Math.min(1, s.cast.t / RIFT.maxCharge) : 0, selector: { open: !!s.selector?.open, pick: selectedForm(s) ?? 0, choices: formChoices(s), left: Math.max(0, SELECTOR_MAX - (s.selector?.held ?? 0)) }, cinema: !!s.cinema,
       formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? s.upgradeOffers.map(id => offerCard(s, id)) : [], owned: UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] })), map: miniMap(s),
@@ -69,12 +77,21 @@ export class GameBridge {
   }
   /** Records the finished run in the meta state exactly once (guarded by the run id and the saved ledger) and stores it before any Results button can be pressed. */
   private finalizeMeta(s: GameState) {
-    if (this.finalized) return; this.finalized = true;
+    if (this.finalized) return; this.finalized = true; if (this.endlessLeg) { this.recordB22(s, true); return; }   // the Classic result was recorded at the victory; the Endless leg never repeats Classic rewards
     let maxCat = 0; for (const c of ['core', 'beam', 'sphere', 'survival', 'mobility', 'pickup', 'drive'] as UpgradeCategory[]) maxCat = Math.max(maxCat, categoryStacks(s, c));
     const won = s.phase === 'victory', warden = s.bossesDefeated >= 1 || won;
-    const result: RunResult = { hero: s.hero, runId: this.runId, arena: s.arenaId, won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, wardenKills: warden ? 1 : 0, seraphKills: won ? 1 : 0, formsUsed: [...(s.run?.formsUsed ?? [])], maxCategoryStacks: maxCat, contract: this.config.contract };
-    const out = finalizeRun(this.save.meta, result);
+    const classic = s.plan.mode === 'classic', practice = s.plan.practice;
+    const result: RunResult = { hero: s.hero, runId: this.runId, arena: s.arenaId, won: classic && won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, wardenKills: classic && warden ? 1 : 0, seraphKills: classic && won ? 1 : 0, formsUsed: [...(s.run?.formsUsed ?? [])], maxCategoryStacks: maxCat, contract: this.config.contract };
+    const out = practice ? { meta: this.save.meta, reward: null } : finalizeRun(this.save.meta, result);
+    this.recordB22(s, false);
     this.save.meta = { ...out.meta, introSeen: true }; this.reward = out.reward ? { ...out.reward, firstRun: out.reward.firstRun && !out.meta.introSeen } : null; storeSave(this.save);
+  }
+  /** B22 records / mastery / cosmetics, applied at most once per run id (the ledger inside the save). Offline numbers stay LOCAL records. */
+  private recordB22(s: GameState, endlessLeg: boolean) {
+    const won = s.phase === 'victory', mode = endlessLeg ? 'endless' as const : s.plan.mode, cyc = s.b22.endless?.cycle ?? 0;
+    const chapter = mode === 'vex_trial' ? Number(s.plan.id.slice(-1)) as 1 | 2 | 3 : undefined;
+    const res: B22RunResult = { runId: endlessLeg ? `${this.runId}:endless` : this.runId, mode, hero: s.hero, arena: s.arenaId, party: s.b22.party ? 2 : 1, won: endlessLeg ? !!s.b22.endless?.extracted : won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, cycle: cyc, counters: s.b22.m, relics: s.b22.relics, branches: s.b22.branches, legends: s.b22.legendary, bosses: s.plan.steps.filter(st => st.kind === 'boss' && s.encounter.doneAt[st.id] !== undefined).map(st => st.boss!).concat(s.bossesDefeated > 0 && s.plan.mode === 'classic' ? ['warden'] : []), challengeId: this.challengeId, storyChapter: chapter, extracted: s.b22.endless?.extracted, practice: s.plan.practice };
+    const out = applyB22Result(migrateB22(this.save.b22), res); this.save.b22 = out.save; this.b22Grant = out.grant; storeSave(this.save);
   }
   /** Called by the renderer when the Death clip has finished and held. Ignored unless the sim is actually dead, so it can never show Results early. */
   markDeathShown() { if (this.sim?.state.phase !== 'dead' || this.deathShown) return; this.deathShown = true; this.publish(true); }
@@ -88,6 +105,14 @@ export class GameBridge {
   pressKey(code: string) { if (this.sim?.state.phase === 'running') this.injector?.(code); }
   /** Form selector, from the pointer: hover highlights a card, a click starts it. */
   pickForm(f: 1 | 2 | 3, confirm: boolean) { const s = this.sim?.state; if (!s?.selector.open || !formChoices(s).includes(f)) return; s.selector.pick = f; if (confirm) activateForm(s, f); this.publish(true); }
+  chooseBranch(id: string) { if (this.sim?.chooseBranch(id as never)) this.publish(true); }
+  chooseRelic(id: string) { if (this.sim?.chooseRelic(id as never)) this.publish(true); }
+  chooseLegendary(id: string) { if (this.sim?.chooseLegendary(id as never)) this.publish(true); }
+  /** Endless: the Classic victory is already recorded (once); the endless leg writes its own records and never re-awards Classic rewards. */
+  continueEndless() { if (this.sim?.continueEndless()) { this.endlessLeg = true; this.victoryShown = false; this.publish(true); } }
+  extract() { if (this.sim?.extract()) this.publish(true); }
+  pushOn() { if (this.sim?.pushOn()) this.publish(true); }
+  private endlessLeg = false;
   reroll() { if (this.sim?.reroll()) this.publish(true); }
   banish(id: UpgradeId) { if (this.sim?.banish(id)) this.publish(true); }
   choose(id: UpgradeId) { this.sim?.chooseUpgrade(id); this.publish(true); }

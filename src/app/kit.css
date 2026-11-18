@@ -500,3 +500,11 @@ button.hero-card:focus-visible { outline: 2px solid var(--accent, #e0a24a); outl
 .slot:hover .slot-tip, .slot:focus-visible .slot-tip { opacity: 1; transform: translate(-50%, 0); }
 .hud-slots .slot:first-child .slot-tip { left: 0; transform: translate(0, 4px); } .hud-slots .slot:first-child:hover .slot-tip, .hud-slots .slot:first-child:focus-visible .slot-tip { transform: none; }
 @media (prefers-reduced-motion: reduce) { .slot-tip { transition: none; } }
+
+/* B22 Ascension pickers */
+.asc-list { display: flex; gap: calc(12 * var(--u)); justify-content: center; flex-wrap: wrap; } .asc-card { min-height: calc(190 * var(--u)); max-width: calc(300 * var(--u)); text-align: left; gap: calc(6 * var(--u)); padding: calc(14 * var(--u)); border: 1px solid var(--c); }
+.asc-line { display: block; } .asc-line.gain { color: #9be6b8; } .asc-line.cost { color: #ff9aa0; } .asc-note { text-align: center; color: var(--k-dim); font-size: max(9px, calc(11 * var(--u))); margin: calc(8 * var(--u)) auto; max-width: 60ch; }
+.legend-offer { margin: calc(10 * var(--u)) auto 0; display: block; width: min(100%, calc(560 * var(--u))); box-shadow: 0 0 calc(14 * var(--u)) rgba(255, 211, 106, .45); }
+
+/* B22 interim: Vex shares Ren's UI art, shifted toward violet-black */
+.hud.hero-vex .portrait img, .hud.hero-vex .slot-ico { filter: hue-rotate(255deg) saturate(.85) brightness(.95); }

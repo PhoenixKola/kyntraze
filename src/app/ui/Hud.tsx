@@ -31,7 +31,8 @@ function Slot({ id, name, ico, keyLabel, padLabel, pad, seconds, max, state, ton
   </div>;
 }
 
-const bossArt = (n: string) => `${ASSET_BASE}art/bosses/fx/${n}.png`;
+const CLASSIC_BOSS = new Set(['warden', 'seraph']);
+const bossArt = (n: string) => `${ASSET_BASE}art/bosses/fx/${n.startsWith('emblem-') && !CLASSIC_BOSS.has(n.slice(7)) ? 'emblem-warden' : n}.png`;
 /** Boss nameplate + health bar, top-centre under the clock (never over Kai, the ability tiles or the floor warnings). Phase tick sits at the phase-change threshold. */
 function BossBar({ b }: { b: BossHud }) {
   const frac = b.hp / b.maxHp, intro = b.intro > 0;
@@ -67,10 +68,10 @@ export function Hud({ s, pad, onPause, reduced, onForm, onKey }: Props) {
   const T = s.tips;
   const hit = useHitVignette(s);
   const hpFrac = s.hp / s.maxHp, low = hpFrac <= 0.3;
-  const hk = s.hero !== 'kai' ? HERO_KIT[s.hero] : null, H = s.hero;
+  const hk = s.hero !== 'kai' ? HERO_KIT[s.hero] : null, H = s.hero === 'vex' ? 'ren' : s.hero;   // B22 interim: Vex borrows Ren's UI art (hue-shifted in CSS)
   const canForm = hk ? s.heroReady : !s.form && s.drive >= RULES.formCharge && s.formCooldown <= 0;
   const f2 = s.form === 2, f3 = s.form === 3, comet = s.cometReady && !s.cinema, apex = s.apexReady && !s.cinema, fullName = hk ? (s.form ? hk.form.toUpperCase() : s.heroReady ? `${hk.formShort} READY` : s.heroFormUnlocked ? 'DRIVE' : 'DRIVE · SEALED') : f3 ? 'STILLFIRE APEX' : f2 ? 'COMETHEART' : apex ? 'STILLFIRE READY' : s.form ? 'FLAREBOUND' : comet ? 'COMETHEART READY' : canForm ? 'FORM READY' : 'DRIVE';
-  return <div className="hud" data-testid="hud">
+  return <div className={`hud ${s.hero === 'vex' ? 'hero-vex' : ''}`} data-testid="hud">
     {hit.n > 0 && <div key={hit.n} className={`hit-vignette ${reduced ? 'calm' : ''}`} data-testid="hit-vignette" style={{ '--k': hit.k } as CSSProperties} aria-hidden="true"/>}
     {s.sinceRevive < 1 && <div className="revive-flash" aria-hidden="true"/>}
     <div className="hud-panel hud-health">

@@ -11,6 +11,7 @@ import { ARENAS, DEFAULT_ARENA, isArenaId, type ArenaId } from '../content/arena
 import { Hud } from './ui/Hud';
 import { LevelUpScreen } from './ui/LevelUpScreen';
 import { PauseMenu } from './ui/PauseMenu';
+import { AscensionPicker } from './ui/AscensionPicker';
 import { ResultsScreen } from './ui/ResultsScreen';
 import { SettingsPanel } from './ui/SettingsPanel';
 import { ProgressionScreen, type ProgressTab } from './ui/ProgressionScreen';
@@ -36,9 +37,10 @@ function GameStage({ bridge, seed, arena, pad, onHome, onProgress, onSettings }:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [host, bridge, seed, arena]);
   return <div className="game-shell" data-testid="game-shell"><div className="arena-viewport" ref={setHost} aria-label="Playable Kyntraze arena"/>{ready && <Hud s={snapshot} pad={pad} onPause={() => bridge.togglePause()} reduced={bridge.getSettings().reducedEffects} onForm={(f, go) => bridge.pickForm(f, go)} onKey={code => bridge.pressKey(code)}/>}{!ready && <LoadingScreen progress={progress} arena={ARENAS[arena].name.toUpperCase()}/>}
-    {snapshot.phase === 'upgrade' && <LevelUpScreen level={snapshot.level} reward={snapshot.rewardPick} cards={snapshot.cards} owned={snapshot.owned} onChoose={id => bridge.choose(id)} rerolls={snapshot.rerolls} banishes={snapshot.banishes} onReroll={() => bridge.reroll()} onBanish={id => bridge.banish(id)} />}
+    {(snapshot.phase === 'upgrade' || snapshot.phase === 'extract') && snapshot.asc && (snapshot.asc.branch || snapshot.asc.relics || snapshot.asc.extract) && <AscensionPicker asc={snapshot.asc} onBranch={id => bridge.chooseBranch(id)} onRelic={id => bridge.chooseRelic(id)} onExtract={() => bridge.extract()} onPushOn={() => bridge.pushOn()}/>}
+    {snapshot.phase === 'upgrade' && !(snapshot.asc?.branch || snapshot.asc?.relics) && <LevelUpScreen legend={snapshot.asc?.legend ?? null} onLegend={id => bridge.chooseLegendary(id)} level={snapshot.level} reward={snapshot.rewardPick} cards={snapshot.cards} owned={snapshot.owned} onChoose={id => bridge.choose(id)} rerolls={snapshot.rerolls} banishes={snapshot.banishes} onReroll={() => bridge.reroll()} onBanish={id => bridge.banish(id)} />}
     {snapshot.phase === 'paused' && <PauseMenu s={snapshot} onResume={() => bridge.togglePause()} onHome={onHome} onSettings={onSettings}/>}
-    {((snapshot.phase === 'dead' && snapshot.deathShown) || (snapshot.phase === 'victory' && snapshot.victoryShown)) && <ResultsScreen s={snapshot} onRetry={() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))} onHome={onHome} onProgress={onProgress}/>}
+    {((snapshot.phase === 'dead' && snapshot.deathShown) || (snapshot.phase === 'victory' && snapshot.victoryShown)) && <ResultsScreen s={snapshot} onRetry={() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))} onHome={onHome} onProgress={onProgress} onEndless={() => bridge.continueEndless()}/>}
   </div>;
 }
 export default function App() {

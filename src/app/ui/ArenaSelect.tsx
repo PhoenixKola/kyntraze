@@ -15,7 +15,7 @@ export function ArenaSelect({ selected, onSelect, onBack }: Props) {
     <div className="arena-grid" role="radiogroup" aria-label="Arena">
       {ARENA_IDS.map((id, i) => { const a = ARENAS[id], on = id === selected;
         return <button key={id} role="radio" aria-checked={on} disabled={!a.unlocked} data-testid={`arena-card-${id}`} data-pad-default={on ? '' : undefined}
-          className={`arena-card ${on ? 'selected' : ''} ${a.unlocked ? '' : 'locked'}`} style={{ '--card': `url(${arenaCardUrl(id)})` } as CSSProperties}
+          className={`arena-card ${on ? 'selected' : ''} ${a.unlocked ? '' : 'locked'}`} style={{ '--card': a.procedural ? `linear-gradient(160deg, ${a.palette!.sky}, ${a.palette!.floorB} 55%, ${a.palette!.accent})` : `url(${arenaCardUrl(id)})` } as CSSProperties}
           onClick={() => onSelect(id)} onDoubleClick={() => { onSelect(id); onBack(); }}>
           <span className="arena-art" aria-hidden="true"/>
           <span className="arena-index">0{i + 1}</span>

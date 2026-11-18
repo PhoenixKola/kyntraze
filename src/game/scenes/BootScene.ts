@@ -35,8 +35,7 @@ export class BootScene extends Phaser.Scene {
     B14_FX_NAMES.forEach(n => this.load.image(b14Key(n), b14Url(n)));
     FORM_FX_NAMES.forEach(n => this.load.image(formFxKey(n), formFxUrl(n)));
     VFX_NAMES.forEach(n => { this.load.image(vfxKey(n, false), vfxUrl(n, false)); this.load.image(vfxKey(n, true), vfxUrl(n, true)); });
-    for (let i = 0; i < FLOOR_TILE_COUNT; i++) this.load.image(floorTileKey(i), floorTileUrl(this.arena, i));
-    this.load.json(PROPS_KEY(this.arena), arenaAssetUrl(this.arena, 'props.json'));
+    if (!ARENAS[this.arena].procedural) { for (let i = 0; i < FLOOR_TILE_COUNT; i++) this.load.image(floorTileKey(i), floorTileUrl(this.arena, i)); this.load.json(PROPS_KEY(this.arena), arenaAssetUrl(this.arena, 'props.json')); }   // B22 realms are drawn procedurally
     ENEMY_KINDS.forEach(k => this.load.json(enemyManifestKey(k), enemyManifestUrl(k)));
     ENEMY_FX_NAMES.forEach(n => this.load.image(enemyFxKey(n), enemyFxUrl(n)));
     BOSS_KINDS.forEach(k => this.load.json(bossManifestKey(k), bossManifestUrl(k)));
@@ -86,12 +85,14 @@ export class BootScene extends Phaser.Scene {
       this.load.spritesheet(kaiTextureKey(dir, clip, 'f2'), kaiSheetUrl(dir, a, 'f2'), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });
     }
     for (const k of ENEMY_KINDS) { const m = this.cache.json.get(enemyManifestKey(k)) as EnemyManifest; this.load.spritesheet(enemySheetKey(k), enemySheetUrl(k), { frameWidth: m.frame_width, frameHeight: m.frame_height, endFrame: m.frames - 1 }); }
+    if (!ARENAS[this.arena].procedural) {
     // arena art (selected arena only): props/decor named by the arena data, rim, corner, ambience and hazard fx
     const man = parsePropManifest(this.cache.json.get(PROPS_KEY(this.arena)));
     for (const n of arenaPropNames(this.arena)) { const e = man[n]; if (e) this.load.image(propKey(n), arenaAssetUrl(this.arena, e.file)); }
     this.load.image(arenaFxKey('rim'), arenaAssetUrl(this.arena, 'rim.png')); this.load.image(arenaFxKey('corner'), arenaAssetUrl(this.arena, 'corner.png'));
     if (ARENAS[this.arena].rimMode === 'strips') { this.load.image(arenaFxKey('rim-bottom'), arenaAssetUrl(this.arena, 'rim-bottom.png')); this.load.image(arenaFxKey('rim-side'), arenaAssetUrl(this.arena, 'rim-side.png')); }
     for (const n of [...ARENA_FX, ...HAZARD_FX[this.arena]]) this.load.image(arenaFxKey(n), arenaAssetUrl(this.arena, `fx/${n}.png`));
+    }
     for (const k of BOSS_KINDS) { const m = this.cache.json.get(bossManifestKey(k)) as BossManifest; this.load.spritesheet(bossSheetKey(k), bossSheetUrl(k), { frameWidth: m.frame_width, frameHeight: m.frame_height, endFrame: m.frames - 1 }); }
     for (const dir of KAI_DIRS) for (const clip of KAI_F1_CLIPS) {
       const m = f1[dir], a = m.animations[clip]!;
