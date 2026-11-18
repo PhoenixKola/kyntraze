@@ -539,3 +539,15 @@ button.hero-card:focus-visible { outline: 2px solid var(--accent, #e0a24a); outl
 .arc-tabs { display: flex; flex-wrap: wrap; gap: calc(6 * var(--u)); margin-bottom: calc(8 * var(--u)); } .arc-tabs .on { border-color: #e9c27a; color: #fff; } .arc-body { flex: 1 1 0; min-height: 0; overflow-y: auto; width: min(100%, calc(980 * var(--u))); margin: 0 auto; }
 .arc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(260 * var(--u)), 1fr)); gap: calc(8 * var(--u)); } .arc-card { padding: calc(10 * var(--u)); background: linear-gradient(180deg, #14212b, #0b121a); border: 1px solid #2c4252; font-size: max(9px, calc(11 * var(--u))); line-height: 1.4; } .arc-card.wide { grid-column: 1 / -1; } .arc-card h3 { font-size: max(11px, calc(13 * var(--u))); letter-spacing: .08em; margin: 0 0 6px; color: #fff; } .arc-card h3 small { color: #8fb4bf; margin-left: 6px; }
 .arc-card p { margin: 0 0 6px; } .arc-card .done { color: #9be6b8; } .arc-card .dim, .arc-card.locked { color: #6f8791; } .arc-card em { color: #e9c27a; font-style: normal; } .swatches { display: flex; gap: 4px; margin: 4px 0; } .swatches i { width: 22px; height: 12px; border: 1px solid #000; }
+
+/* B22 story panel */
+.story-panel{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;justify-content:flex-end;gap:1.2rem;padding:clamp(1rem,4vw,4rem);background:radial-gradient(ellipse at 50% 30%,#2a1850,#07050f 75%) #07050f;color:#eee;cursor:pointer;opacity:1;animation:storyIn .4s ease-out}
+.story-head h2{margin:0;letter-spacing:.2em;font-size:clamp(1.2rem,3vw,2rem);color:#c9a6ff}
+.story-head small{opacity:.7;letter-spacing:.1em}
+.story-line{min-height:7rem;max-width:56rem}
+.story-line b{letter-spacing:.2em;color:#9ee;font-size:.85rem}
+.story-line p{margin:.4rem 0 0;font-size:clamp(1.05rem,2vw,1.5rem);line-height:1.5}
+.story-actions{display:flex;gap:.8rem;align-items:center;justify-content:flex-end}
+.story-actions span{margin-right:auto;opacity:.6}
+@media (prefers-reduced-motion:reduce){.story-panel{animation:none}}
+@keyframes storyIn{from{opacity:0}to{opacity:1}}

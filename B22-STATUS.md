@@ -26,7 +26,7 @@ Legend: **VERIFIED** = automated test + (where marked) a real-browser run by me.
 |07| Vex hero | **INTERIM** | full kit in sim; art = Ren rig tinted violet; no ImageGen/Blender sprites, portraits or anchors |
 |08| Vex kit | **VERIFIED** (unit) | parry/riposte/shift/seal/forms tested |
 |09| Two Vex forms | **IMPLEMENTED** | mechanics + unlock path tested; no distinct form art/aura/reveal |
-|10| Vex story + Oathkeeper | **IMPLEMENTED** | 3 chapter plans + boss + unlock grants tested; **no story panels, dialogue, subtitles or skip/replay UI** (NOT DONE) |
+|10| Vex story + Oathkeeper | **IMPLEMENTED** | 3 chapter plans + boss + unlock grants tested; story panels added (`b22/story.ts`, `StoryPanel`): text-only intro before each chapter and outro on victory, skippable (Esc/pad B), replayable from Archives > STORY; browser-verified. **No voice, portraits or illustrated panels** (art NOT DONE) |
 |11| Three Void bosses | **VERIFIED** sim / **INTERIM** art | Mirror Tyrant, Chronophage, Hollow Choir |
 |12| Sovereign | **VERIFIED** sim / **INTERIM** art | parts, shield dependency, 3 phases, collapse pulse; no cinematic |
 |13| Boss Rush | **VERIFIED** | 3 tracks, intermission, practice mode, Mode Select; no per-track art |
@@ -55,4 +55,4 @@ Legend: **VERIFIED** = automated test + (where marked) a real-browser run by me.
 * Ability tiles: hover/focus tooltip (name, key, description, real numbers) and click-to-use.
 
 ## Remaining work (needs you or hardware)
-ImageGen + Blender art for everything INTERIM; human playtests for balance and feel; listening review of music/SFX; a real 20-min Expedition and a 30-min Endless soak; story panels; controller testing (two pads); hosting + outside-network test; Electron installer rebuild + smoke; code signing (installer is unsigned).
+ImageGen + Blender art for everything INTERIM; human playtests for balance and feel; listening review of music/SFX; a real 20-min Expedition and a 30-min Endless soak; illustrated story art; controller testing (two pads); hosting + outside-network test; Electron installer rebuild + smoke; code signing (installer is unsigned).

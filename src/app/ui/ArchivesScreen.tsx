@@ -12,13 +12,15 @@ import { HERO_IDS } from '../../content/heroes';
 import { UPGRADE_BY_ID } from '../../content/upgrades';
 import { blankB22, equipOutfit, outfitUnlocked, type B22Save } from '../../b22/save';
 import { HintBar } from './Chrome';
+import { StoryPanel } from './StoryPanel';
+import { STORY, type StoryBeat } from '../../b22/story';
 
-type Tab = 'mastery' | 'cosmetics' | 'codex' | 'records' | 'boards';
+type Tab = 'story' | 'mastery' | 'cosmetics' | 'codex' | 'records' | 'boards';
 interface Props { save: SaveV1; onBack: () => void; onSave: (b: B22Save) => void }
-const TABS: [Tab, string][] = [['mastery', 'MASTERY'], ['cosmetics', 'OUTFITS & CRESTS'], ['codex', 'CODEX'], ['records', 'RECORDS'], ['boards', 'BOARDS']];
+const TABS: [Tab, string][] = [['story', 'STORY'], ['mastery', 'MASTERY'], ['cosmetics', 'OUTFITS & CRESTS'], ['codex', 'CODEX'], ['records', 'RECORDS'], ['boards', 'BOARDS']];
 /** Archives: everything B22 adds that is not a run: seven mastery paths (21 milestones), outfits with real unlock conditions, a codex of relics / branches / recipes / bosses / pair attacks, local records by mode, and the leaderboard status (LOCAL unless a server verified it). */
 export function ArchivesScreen({ save, onBack, onSave }: Props) {
-  const [tab, setTab] = useState<Tab>('mastery'); const b22 = save.b22 ?? blankB22();
+  const [tab, setTab] = useState<Tab>('mastery'); const [replay, setReplay] = useState<StoryBeat | null>(null); const b22 = save.b22 ?? blankB22();
   const heroWins = useMemo(() => Object.fromEntries(HERO_IDS.map(h => [h, save.meta.heroes[h]?.wins ?? 0])), [save]);
   useEffect(() => { const k = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); onBack(); } }; window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k); }, [onBack]);
   const have = (id: string) => b22.owned.includes(id);
@@ -26,6 +28,7 @@ export function ArchivesScreen({ save, onBack, onSave }: Props) {
     <div className="screen-header"><button className="text-button" onClick={onBack} data-pad-cancel>← BACK</button><span>ARCHIVES · SHATTERED HORIZONS</span></div>
     <div className="arc-tabs" role="tablist">{TABS.map(([k, n]) => <button key={k} role="tab" aria-selected={tab === k} className={`outlined-button ${tab === k ? 'on' : ''}`} data-testid={`arc-${k}`} onClick={() => setTab(k)}>{n}</button>)}</div>
     <section className="arc-body">
+      {tab === 'story' && <article className="arc-card wide"><h3>TRIAL OF THE OATHBROKEN</h3>{STORY.map(c => { const open = c.n === 1 || (b22.story.done as number[]).includes(c.n - 1), done = (b22.story.done as number[]).includes(c.n); return <p key={c.n} className={done ? 'done' : open ? '' : 'dim'}><b>{done ? '✓' : open ? '○' : '🔒'} {c.name}</b><br/>{open ? <><button className="outlined-button" data-testid={`replay-intro-${c.n}`} onClick={() => setReplay(c.intro)}>REPLAY OPENING</button> <button className="outlined-button" disabled={!done} data-testid={`replay-outro-${c.n}`} onClick={() => setReplay(c.outro)}>REPLAY ENDING</button></> : 'Finish the previous chapter to unlock.'}</p>; })}</article>}
       {tab === 'mastery' && <div className="arc-grid">{FORM_KEYS.map(f => <article key={f} className="arc-card" style={{ borderColor: FORM_INFO[f].accent }}><h3>{FORM_INFO[f].name.toUpperCase()} <small>{FORM_INFO[f].hero.toUpperCase()}</small></h3>
         {MILESTONES.filter(m => m.form === f).map(m => { const done = !!b22.mastery[m.id]; return <p key={m.id} className={done ? 'done' : ''} data-testid={`ms-${m.id}`}><b>{done ? '✓' : '○'} {m.tier.toUpperCase()} · {m.name}</b><br/>{m.blurb}<br/><em>Reward: {m.reward.label}{done ? ' (owned)' : ''}</em></p>; })}</article>)}</div>}
       {tab === 'cosmetics' && <div className="arc-grid">{OUTFITS.map(o => { const ok = outfitUnlocked(o, { heroWins, b22 }), on = b22.equipped.outfit[o.hero] === o.id; return <article key={o.id} className={`arc-card ${ok ? '' : 'locked'}`} style={{ borderColor: o.palette.secondary }}><h3>{o.name.toUpperCase()} <small>{o.hero.toUpperCase()}</small></h3><p>{o.blurb}</p><p className="dim">{o.silhouette}</p><p className="dim">{ok ? 'Unlocked' : 'Locked: ' + describeUnlock(o.unlock)}</p>
@@ -45,6 +48,7 @@ export function ArchivesScreen({ save, onBack, onSave }: Props) {
         {Object.keys(b22.challenges).length === 0 && <p className="dim">No challenge attempts yet.</p>}
         <p className="dim">LOCAL = measured on this device only. A score is SERVER-VERIFIED only when a game server simulated the run: {b22.server.url ? `configured server: ${b22.server.url}` : 'no server configured. Friends filters need an account service that is not connected.'}</p></article>}
     </section>
+    {replay && <StoryPanel beat={replay} onDone={() => setReplay(null)}/>}
     <HintBar hints={[{ key: 'ESC', pad: 'B', label: 'BACK' }]}/>
   </main>;
 }
