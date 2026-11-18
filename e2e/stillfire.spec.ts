@@ -20,7 +20,7 @@ test('F opens the form picker at once with the run frozen; 2 starts Cometheart, 
   expect(s.to).toBe(3); expect(s.clip).toBe('Transform'); const tf = (await qa(page)).time; await page.waitForTimeout(500); expect(Math.abs((await qa(page)).time - tf)).toBeLessThan(0.02); expect(tf - t0).toBeLessThan(0.6);   // the run clock is frozen during the reveal
   await cinemaDone(page); s = await qa(page); expect(s.form).toBe(3); expect(s.vis).toBe('f3'); expect(s.seen).toBe(1);
 });
-test('E charges while Kai glides, release blinks and fires; R runs Instinct Reversal; both keep their own cooldowns', async ({ page }) => {
+test('E charges while Kai glides and fires on release (no pre-fire blink); R runs the sustained Instinct Reversal; both keep their own cooldowns', async ({ page }) => {
   await start(page); await page.keyboard.press('f'); await page.waitForTimeout(150); await page.keyboard.press('f'); await cinemaDone(page); await page.waitForTimeout(700);
   const x0 = (await qa(page)).x; await page.keyboard.down('d'); await page.keyboard.down('e');
   await page.waitForFunction(x => { const q = (window as unknown as { __KYNT_QA__: Qa }).__KYNT_QA__, v = q.sim(); return v.cast?.kind === 'rift' && v.player.x > x + 15; }, x0, { timeout: 8000, polling: 30 });   // B20: await the real condition (a loaded machine runs the sim slower than wall-clock)

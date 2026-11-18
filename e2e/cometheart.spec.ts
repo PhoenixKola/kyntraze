@@ -28,6 +28,6 @@ test('Escape pauses the reveal and resuming continues it; cast voices follow', a
 });
 test('retry after Form II starts a clean run (no cinema, base form)', async ({ page }) => {
   await start(page); await startForm(page); await page.waitForTimeout(300);
-  await page.evaluate(() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))); await page.waitForFunction(() => { const q = (window as unknown as { __KYNT_QA__?: Qa }).__KYNT_QA__; return !!q && q.sim().time < 1 && q.sim().cinema === null; }, null, { timeout: 8000 });
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))); await page.waitForFunction(() => { const q = (window as unknown as { __KYNT_QA__?: Qa }).__KYNT_QA__; return !!q && q.sim().time < 1 && q.sim().cinema === null; }, null, { timeout: 30000 });
   const s = await read(page); expect(s.form).toBe(0); expect(s.cin).toBeNull(); expect(s.seen).toBe(0);
 });

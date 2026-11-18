@@ -95,8 +95,8 @@ for (const arena of ['gloam', 'ashen'] as const) {
     await run(page, arena, '&encounter=cantor'); await page.evaluate(() => { (window as unknown as W).__KYNT_QA__!.sim().player.hp = 1e6; });
     for (const form of [0, 1]) {
       if (form === 1) { await page.evaluate(() => { const s = (window as unknown as W).__KYNT_QA__!.sim(); s.player.drive = 100; }); await page.keyboard.press('f'); await page.waitForFunction(() => (window as unknown as W).__KYNT_QA__!.sim().player.form === 1, null, { timeout: 3000 }); await page.waitForTimeout(1600); }
-      await page.keyboard.press('e'); await page.waitForFunction(() => (window as unknown as W).__KYNT_QA__!.sim().cast?.kind === 'beam', null, { timeout: 3000 }); await page.waitForFunction(() => !(window as unknown as W).__KYNT_QA__!.sim().cast, null, { timeout: 6000 });
-      await page.keyboard.press('r'); await page.waitForFunction(() => (window as unknown as W).__KYNT_QA__!.sim().cast?.kind === 'sphere', null, { timeout: 3000 }); await page.waitForFunction(() => !(window as unknown as W).__KYNT_QA__!.sim().cast, null, { timeout: 6000 });
+      await page.keyboard.press('e'); await page.waitForFunction(k => (window as unknown as W).__KYNT_QA__!.sim().cast?.kind === k, form === 1 ? 'flare' : 'beam', { timeout: 3000 }); await page.waitForFunction(() => !(window as unknown as W).__KYNT_QA__!.sim().cast, null, { timeout: 6000 });
+      await page.keyboard.press('r'); await page.waitForFunction(k => (window as unknown as W).__KYNT_QA__!.sim().cast?.kind === k, form === 1 ? 'crucible' : 'sphere', { timeout: 3000 }); await page.waitForFunction(() => !(window as unknown as W).__KYNT_QA__!.sim().cast, null, { timeout: 6000 });
       await page.evaluate(() => { const s = (window as unknown as W).__KYNT_QA__!.sim(); s.player.beamCooldown = 0; s.player.sphereCooldown = 0; });
     }
     expect(problems).toEqual([]);

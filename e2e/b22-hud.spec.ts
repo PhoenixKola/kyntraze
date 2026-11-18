@@ -10,7 +10,7 @@ for (const [w, h] of [[640, 360], [960, 540]] as const) test(`B22 HUD: contract 
   expect(ct.y).toBeGreaterThanOrEqual(k.y); expect(ct.y + ct.h).toBeLessThanOrEqual(k.y + k.h + 1); expect(ct.x).toBeGreaterThanOrEqual(k.x - 1); expect(ct.x + ct.w).toBeLessThanOrEqual(k.x + k.w + 1);
   if (c.kills) expect(ct.y).toBeGreaterThanOrEqual(c.kills.y + c.kills.h - 2);
   await page.getByTestId('cd-q').hover(); await page.waitForTimeout(250);
-  await expect(page.getByTestId('tip-q')).toBeVisible(); await expect(page.getByTestId('tip-q')).toContainText('Impact Pulse'); await expect(page.getByTestId('tip-q')).toContainText('Damage');
+  await expect(page.getByTestId('tip-q')).toBeVisible(); await expect(page.getByTestId('tip-q')).toContainText('Surge Step'); await expect(page.getByTestId('tip-q')).toContainText('Speed');
   await page.screenshot({ path: `test-results/b22-hud-${w}x${h}.png` });
   const before = await page.evaluate(() => (window as unknown as { __KYNT_QA__: { sim: () => { player: { qCooldown: number } } } }).__KYNT_QA__.sim().player.qCooldown);
   await page.getByTestId('cd-q').click(); await page.waitForTimeout(300);
