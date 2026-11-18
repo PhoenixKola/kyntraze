@@ -80,7 +80,7 @@ export class GameBridge {
     if (this.finalized) return; this.finalized = true; if (this.endlessLeg) { this.recordB22(s, true); return; }   // the Classic result was recorded at the victory; the Endless leg never repeats Classic rewards
     let maxCat = 0; for (const c of ['core', 'beam', 'sphere', 'survival', 'mobility', 'pickup', 'drive'] as UpgradeCategory[]) maxCat = Math.max(maxCat, categoryStacks(s, c));
     const won = s.phase === 'victory', warden = s.bossesDefeated >= 1 || won;
-    const classic = s.plan.mode === 'classic', practice = s.plan.practice;
+    const classic = (s.plan?.mode ?? 'classic') === 'classic', practice = !!s.plan?.practice;
     const result: RunResult = { hero: s.hero, runId: this.runId, arena: s.arenaId, won: classic && won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, wardenKills: classic && warden ? 1 : 0, seraphKills: classic && won ? 1 : 0, formsUsed: [...(s.run?.formsUsed ?? [])], maxCategoryStacks: maxCat, contract: this.config.contract };
     const out = practice ? { meta: this.save.meta, reward: null } : finalizeRun(this.save.meta, result);
     this.recordB22(s, false);
@@ -88,6 +88,7 @@ export class GameBridge {
   }
   /** B22 records / mastery / cosmetics, applied at most once per run id (the ledger inside the save). Offline numbers stay LOCAL records. */
   private recordB22(s: GameState, endlessLeg: boolean) {
+    if (!s.plan || !s.b22) return;   // hand-built states (tests) carry no B22 block
     const won = s.phase === 'victory', mode = endlessLeg ? 'endless' as const : s.plan.mode, cyc = s.b22.endless?.cycle ?? 0;
     const chapter = mode === 'vex_trial' ? Number(s.plan.id.slice(-1)) as 1 | 2 | 3 : undefined;
     const res: B22RunResult = { runId: endlessLeg ? `${this.runId}:endless` : this.runId, mode, hero: s.hero, arena: s.arenaId, party: s.b22.party ? 2 : 1, won: endlessLeg ? !!s.b22.endless?.extracted : won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, cycle: cyc, counters: s.b22.m, relics: s.b22.relics, branches: s.b22.branches, legends: s.b22.legendary, bosses: s.plan.steps.filter(st => st.kind === 'boss' && s.encounter.doneAt[st.id] !== undefined).map(st => st.boss!).concat(s.bossesDefeated > 0 && s.plan.mode === 'classic' ? ['warden'] : []), challengeId: this.challengeId, storyChapter: chapter, extracted: s.b22.endless?.extracted, practice: s.plan.practice };

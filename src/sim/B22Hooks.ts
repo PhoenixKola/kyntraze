@@ -18,6 +18,7 @@ export function b22PreDamage(s: GameState, e: Enemy, dmg: number, o?: HitOpts): 
     if (b.bearings.length) m *= 1 + RELIC_RULES.compass.dmg * b.bearings.length;
   }
   if (b.momentumT > 0) m *= 1.15;
+  if (b.party && b.party.resonanceT > 0) m *= 1.2;   // team Resonance (both fighters transformed together)
   if (b.marks.length && b.marks.some(k => k.enemy === e.id && k.src === 'vuln')) m *= 1.3;
   return dmg * m;
 }

@@ -1,3 +1,4 @@
+import { B22Sfx, B22_EVENT_SFX, EVENT_SFX } from './b22Sfx';
 import { isBoss } from '../../content/enemies';
 import type { AbilityEvent, EnemyEvent, GameState, Impact } from '../../sim/GameState';
 import { MusicDirector, STINGERS, type MusicCue } from './music';
@@ -363,11 +364,31 @@ export class AbilityAudio {
     }
     for (const ev of s.enemyEvents) {
       if (ev.id <= this.lastEnemyEvent) continue; this.lastEnemyEvent = ev.id;
-      if (s.phase === 'running') this.handleEnemy(ev, s.player.x, s.player.y);
+      if (s.phase === 'running') { this.handleEnemy(ev, s.player.x, s.player.y); this.b22Enemy(ev); }
     }
+    this.b22Sync(s);
+  }
+  /** B22 sounds: runtime-synthesised recipes (see b22Sfx.ts), one per B22 sim event; only while the run is live, each id once. */
+  private readonly b22sfx = new B22Sfx(); private b22Cur = 0; private b22Ab = 0; private b22Last = new Map<string, number>();
+  private b22Play(name: string, gain = 1) {
+    const ctx = this.ctx as unknown as AudioContext; if (!this.busSfx || typeof ctx.createBuffer !== 'function') return;
+    const now = this.ctx.currentTime; if (now - (this.b22Last.get(name) ?? -9) < 0.06) return; this.b22Last.set(name, now);
+    const buf = this.b22sfx.buffer(ctx, name); if (!buf) return; const src = this.ctx.createBufferSource(), g = this.ctx.createGain(); (src as unknown as { buffer: AudioBuffer }).buffer = buf; g.gain.value = gain * 0.8; src.connect(g as never); g.connect(this.busSfx as never); src.start(0);
+  }
+  private b22Enemy(ev: { kind: string; enemy: string; tag?: string }) {
+    const realm = ['sky_lancer', 'halo_scribe', 'citadel_bulwark', 'rift_mimic', 'phase_harrier', 'singularity_husk', 'halo_sigil'].includes(ev.enemy);
+    if (ev.kind === 'enemy_phase') this.b22Play('boss_phase');
+    else if (ev.kind === 'enemy_strike' && ev.tag && /open|fold_open|mirror_open|harmony_break|evade_open|_down/.test(ev.tag)) this.b22Play(ev.tag.includes('down') ? 'boss_break' : 'boss_open');
+    else if (realm && ev.kind === 'enemy_strike') this.b22Play(ev.enemy === 'phase_harrier' ? 'phase_blink' : 'lance_strike', 0.7);
+    else if (ev.kind === 'enemy_block' && ev.tag === 'mirror_break') this.b22Play('boss_break');
+  }
+  private b22Sync(s: GameState) {
+    if (!s.b22 || s.phase !== 'running') return;
+    for (const ev of s.b22.ev) { if (ev.id <= this.b22Cur) continue; this.b22Cur = ev.id; const r = B22_EVENT_SFX[ev.kind]; if (r) this.b22Play(r); }
+    for (const ev of s.abilityEvents) { if (ev.id <= this.b22Ab) continue; this.b22Ab = ev.id; const r = EVENT_SFX[ev.kind]; if (r) this.b22Play(r); }
   }
   /** Scene teardown (retry / home): reset per-run counters and cut effect voices. The context, buses and score survive so the next scene (or the menu) continues the music. */
-  dispose() { this.nextHover = 0; this.nextAmbient = 0; this.nextCrackle = 0; this.lastEvent = 0; this.lastImpact = 0; this.lastHitAt.clear(); this.lastEnemyEvent = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.lastBosses = 0; this.victorySeen = -1; this.lastDrive = 0; this.finalWarned = false; this.eventDuck = { until: 0, level: 1 }; this.lastDuck = -1; this.preloaded = ''; this.music?.setDuck(1, 0.3); this.stopAll(0.01, true); }
+  dispose() { this.nextHover = 0; this.nextAmbient = 0; this.nextCrackle = 0; this.lastEvent = 0; this.lastImpact = 0; this.lastHitAt.clear(); this.lastEnemyEvent = 0; this.b22Cur = 0; this.b22Ab = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.lastBosses = 0; this.victorySeen = -1; this.lastDrive = 0; this.finalWarned = false; this.eventDuck = { until: 0, level: 1 }; this.lastDuck = -1; this.preloaded = ''; this.music?.setDuck(1, 0.3); this.stopAll(0.01, true); }
 }
 
 let shared: AbilityAudio | null = null;

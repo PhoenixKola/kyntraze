@@ -1,3 +1,4 @@
+import { coopGainXp } from './CoopSystem';
 import { UPGRADES, UPGRADE_BY_ID, type UpgradeCategory, type UpgradeDef, type UpgradeId } from '../content/upgrades';
 import { xpThreshold, type GameState } from './GameState';
 import type { SeededRng } from '../core/SeededRng';
@@ -53,6 +54,7 @@ export function previewUpgrade(state: GameState, id: UpgradeId): { label: string
 }
 export function gainXp(state: GameState, amount: number, onLevelUp: () => void = () => {}) {
   if (!Number.isFinite(amount) || amount <= 0 || state.phase !== 'running') return;
+  if (state.party) { coopGainXp(state, amount); return; }   // B22.6: shared XP, each fighter's own queued choice
   const p = state.player; p.xp += amount * state.mods.xp;
   if (p.xp >= p.nextXp) {
     p.xp -= p.nextXp; p.level++; p.nextXp = xpThreshold(p.level); state.levelUpAt.push(state.time);

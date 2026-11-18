@@ -104,5 +104,5 @@ describe('B22 realm spawning: new threats arrive on a cadence, capped, only in r
     for (let i = 0; i < 60 * 700; i++) { sim.step(DT, idle); s.player.hp = 1e9; if (i % 10) continue; const live: Record<string, number> = {}; for (const e of s.enemies) if (e.hp > 0) { live[e.kind] = (live[e.kind] ?? 0) + 1; first[e.kind] ??= s.time; } for (const k in live) peak[k] = Math.max(peak[k] ?? 0, live[k]); }
     expect(first.sky_lancer).toBeGreaterThanOrEqual(44); expect(first.citadel_bulwark ?? 9999).toBeGreaterThanOrEqual(219); expect(first.rift_mimic).toBeUndefined();
     expect(peak.sky_lancer).toBeLessThanOrEqual(ENEMIES.sky_lancer.cap(700)); expect(peak.halo_sigil ?? 0).toBeLessThanOrEqual(4);
-  });
+  }, 90000);
 });

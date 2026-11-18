@@ -8,6 +8,7 @@ import { damagePlayer } from './CombatSystem';
 import { pushEnemyEvent } from './EntityRegistry';
 import { updateBoss } from './BossAiSystem';
 import { onPerfectDodge } from './B22Tick';
+import { eachTarget, pickTarget, swapTo } from './CoopSystem';
 
 const STAGGER_SLOW = 0.45;
 const SHOT_TTL = 2.6;
@@ -40,10 +41,11 @@ function release(state: GameState, e: Enemy) {
 }
 
 export function moveEnemies(state: GameState, dt: number) {
-  const p = state.player; cleanupRealm(state);
+  let p = state.player; cleanupRealm(state);
   const cantors = state.enemies.filter(c => c.kind === 'cantor' && c.hp > 0);
   for (const e of state.enemies) {
     if (e.hp <= 0) continue;
+    if (state.party) { pickTarget(state, e); p = state.player; }   // B22.6: each enemy hunts the nearest standing fighter
     if (isBoss(e.kind)) { if (!e.part || e.part.role === 'decoy') { if (!e.part) updateBoss(state, e, dt); else updateDecoy(state, e, dt); } continue; }
     if (isRealmKind(e.kind)) { updateRealmEnemy(state, e, dt); continue; }
     const def = ENEMIES[e.kind as MobKind], a = def.attack;
@@ -89,6 +91,7 @@ export function moveEnemies(state: GameState, dt: number) {
       if (e.modeT <= 0) { e.mode = 'move'; e.modeT = 0; e.attackCd = a.cooldown * (0.85 + (e.id % 5) * 0.075); }
     }
   }
+  if (state.party) swapTo(state, 0);
   separate(state, dt);
 }
 
@@ -113,17 +116,20 @@ function separate(state: GameState, dt: number) {
 }
 
 export function updateEnemyShots(state: GameState, dt: number) {
-  const p = state.player, keep = [];
+  const keep = [];
   for (const s of state.enemyShots) {
     const k = wellFactor(state, s); s.k = k; s.x += s.vx * dt * k; s.y += s.vy * dt * k; s.ttl -= dt;
-    const hitWall = s.ttl <= 0 || blockedAt(s.x, s.y);
-    // dash and hit invulnerability let a bolt pass through, so a well-timed dash is a real dodge
-    if (!hitWall && p.invulnerable > 0 && p.dashRemaining > 0 && !s.dodged && Math.hypot(p.x - s.x, p.y - s.y) < p.radius + s.radius - 2) { s.dodged = true; onPerfectDodge(state); }   // a dash through a shot is a perfect dodge
-    if (!hitWall && p.invulnerable <= 0 && Math.hypot(p.x - s.x, p.y - s.y) < p.radius + s.radius - 2) {
-      damagePlayer(state, s.damage, s.kind ?? 'bolt', s, s.owner ?? 1);
-      state.enemyEvents.push({ id: state.nextId++, kind: 'enemy_shot_hit', enemy: 'ranged', enemyId: 0, x: s.x, y: s.y, dirX: s.vx, dirY: s.vy, tag: s.kind }); capEvents(state);
-      continue;
-    }
+    const hitWall = s.ttl <= 0 || blockedAt(s.x, s.y); let consumed = false;
+    // dash and hit invulnerability let a bolt pass through, so a well-timed dash is a real dodge; in co-op every standing fighter is tested
+    if (!hitWall) eachTarget(state, () => {
+      const p = state.player;
+      if (p.invulnerable > 0 && p.dashRemaining > 0 && !s.dodged && Math.hypot(p.x - s.x, p.y - s.y) < p.radius + s.radius - 2) { s.dodged = true; onPerfectDodge(state); }   // a dash through a shot is a perfect dodge
+      if (p.invulnerable <= 0 && Math.hypot(p.x - s.x, p.y - s.y) < p.radius + s.radius - 2) {
+        damagePlayer(state, s.damage, s.kind ?? 'bolt', s, s.owner ?? 1);
+        state.enemyEvents.push({ id: state.nextId++, kind: 'enemy_shot_hit', enemy: 'ranged', enemyId: 0, x: s.x, y: s.y, dirX: s.vx, dirY: s.vy, tag: s.kind }); capEvents(state); consumed = true; return true;
+      }
+    });
+    if (consumed) continue;
     if (hitWall) { state.enemyEvents.push({ id: state.nextId++, kind: 'enemy_shot_hit', enemy: 'ranged', enemyId: 0, x: s.x, y: s.y, dirX: s.vx, dirY: s.vy, tag: s.kind }); capEvents(state); continue; }
     keep.push(s);
   }
@@ -139,14 +145,14 @@ export function updateHazards(state: GameState, dt: number) {
       h.ttl -= dt;
       if ((h.activeLeft ?? 0) > 0) {
         h.activeLeft = Math.max(0, (h.activeLeft ?? 0) - dt);
-        if (h.pull && h.shape === 'circle' && feetInCircle(state, h.x, h.y, h.r)) pullPlayer(state, h, dt);
-        if (h.shape !== 'sigil' && h.damage > 0 && hazardHit(state, h)) strike(state, h);
+        if (h.pull && h.shape === 'circle') eachTarget(state, () => { if (feetInCircle(state, h.x, h.y, h.r)) pullPlayer(state, h, dt); });
+        if (h.shape !== 'sigil' && h.damage > 0) eachTarget(state, () => { if (hazardHit(state, h)) strike(state, h); });
       }
       continue;
     }
     h.delay -= dt; if (h.delay > 0) continue;
     h.fired = true; h.activeLeft = h.active ?? 0; h.ttl = Math.max(0.4, (h.active ?? 0) + 0.45);
-    if (h.shape !== 'sigil' && h.damage > 0 && hazardHit(state, h)) strike(state, h);
+    if (h.shape !== 'sigil' && h.damage > 0) eachTarget(state, () => { if (hazardHit(state, h)) strike(state, h); });
     state.enemyEvents.push({ id: state.nextId++, kind: 'hazard_fire', enemy: 'warden', enemyId: h.owner, x: h.x, y: h.y, dirX: Math.cos(h.ang), dirY: Math.sin(h.ang), tag: h.tag }); capEvents(state);
   }
   state.hazards = state.hazards.filter(h => !h.fired || h.ttl > 0);

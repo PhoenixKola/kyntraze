@@ -77,7 +77,8 @@ export function updateB22(s: GameState, dt: number, input: InputState, rng: Seed
   }
   updateUltimateUnlock(s); updateUltimate(s, dt);
 
-  /* ---- plan bookkeeping */
+  /* ---- plan bookkeeping (once per tick: only from the first fighter's pass) */
+  if (s.party && s.party.cur !== 0) { b.hits.length = 0; return; }
   updateEncounters(s, rng); gambleRelics(s, rng);
   b.hits.length = 0;
   const form = activeForm(s); if (form) bump(b, `time.${form}`, dt);

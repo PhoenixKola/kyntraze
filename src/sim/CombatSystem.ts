@@ -15,11 +15,12 @@ import { MODIFIER_RULES } from '../b22/challenges';
 import { b22PostDamage, b22PreDamage } from './B22Hooks';
 import { noteBossKill } from './B22Mastery';
 import { vexIntercept } from './VexSystem';
+import { downFighter } from './CoopSystem';
 
 /** `src` names what hurt Kai (contact, lunge, dash, ram, slam, bolt, orb, rupture, sweep, rush, prism, ...) so feedback and tests can tell a telegraphed ability from body contact. */
 export function damagePlayer(state: GameState, damage: number, src = 'contact', from?: { x: number; y: number }, owner?: number): boolean {
   const p = state.player;
-  if (p.invulnerable > 0 || state.phase !== 'running') return false;
+  if (p.invulnerable > 0 || state.phase !== 'running' || (state.party && p.hp <= 0)) return false;
   if (state.hero === 'vex') {   // B22: Parry Halo. A hit in the perfect window is refused and answered; a late hit is only softened. Arena hazards (owner 0) are never parryable.
     const g = vexIntercept(state, damage, from, owner ?? state.lastHazardOwner); if (g) { if (g.parried) { p.invulnerable = Math.max(p.invulnerable, 0.25); return false; } damage = g.dmg; }
   }
@@ -36,7 +37,7 @@ export function damagePlayer(state: GameState, damage: number, src = 'contact', 
     state.impacts.push({ id: state.nextId++, kind: 'revive', x: p.x, y: p.y, ttl: 0.6, life: 0.6 });
     for (const e of state.enemies) if (e.hp > 0 && !isBoss(e.kind) && distanceSquared(p.x, p.y, e.x, e.y) < 220 ** 2) { const d = Math.hypot(e.x - p.x, e.y - p.y) || 1; slideMove(e, (e.x - p.x) / d * 900, (e.y - p.y) / d * 900, 0.2); }
   }
-  if (p.hp <= 0) state.phase = 'dead'; return true;
+  if (p.hp <= 0) { if (state.party) downFighter(state); else state.phase = 'dead'; } return true;
 }
 
 /** The shield is up while the carrier walks, braces and rams; it drops during recovery (the punish window). */
