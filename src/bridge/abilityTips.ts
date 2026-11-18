@@ -31,7 +31,7 @@ export function abilityTips(s: GameState): Record<TipSlot, AbilityTip> {
     rt = { name: VEX.r.name, key: 'R', pad: 'LB', blurb: hk!.blurbs.r + ult, stats: [['Damage / mark', n(q * VEX.r.damage * m.sphereDamage)], ['Marks', `${VEX.r.marks} (1 boss)`], ['Cooldown', cd(VEX.r.cooldown * m.sphereCd)]] };
   }
   const formName = s.hero === 'kai' ? (f === 3 ? 'Stillfire Apex' : f === 2 ? 'Cometheart' : 'Flarebound') : f === 2 && hk?.form2 ? hk.form2 : hk?.form ?? 'Flarebound';
-  ft = { name: s.hero === 'kai' ? 'Transform' : `${hk!.form}${hk!.form2 ? ' / ' + hk!.form2 : ''}`, key: 'F', pad: 'Y', blurb: hk ? hk.blurbs.form : 'Spend Drive to transform. Flarebound at 65% Drive; Cometheart and Stillfire Apex need a full gauge once unlocked. F opens a pick when several are ready.', stats: [['Drive', `${Math.floor(p.drive)}%`], ['Now', f ? formName : 'Base']] };
+  ft = { name: s.hero === 'kai' ? 'Transform' : `${hk!.form}${hk!.form2 ? ' / ' + hk!.form2 : ''}`, key: 'F', pad: 'Y', blurb: hk ? hk.blurbs.form : 'Spend Drive to transform. Flarebound at 65% Drive; Cometheart and Stillfire Apex need a full gauge once unlocked. F opens a pick when several are ready.', stats: [['Drive', `${Math.floor(p.drive)}%`], ['Now', f ? formName : 'Base'], ...(s.hero === 'vex' ? [['Riftbound', s.b22.vex.forms[0] ? 'unlocked' : 'beat the Warden or Trial ch. 2'], ['Voidheart', s.b22.vex.forms[1] ? 'unlocked' : 'beat the Oathkeeper (Trial ch. 3)']] as [string, string][] : [])] };
   if (s.b22.ult.unlocked) rt.stats.push(['Ultimate', s.b22.ult.cd > 0 ? `cooling ${n(s.b22.ult.cd)}s` : `${Math.floor(s.b22.ult.charge)}% charged`]);
   return { dash, q: qt, e: et, r: rt, f: ft };
 }

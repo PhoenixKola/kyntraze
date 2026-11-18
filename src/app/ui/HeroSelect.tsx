@@ -9,9 +9,15 @@ import { ASSET_BASE } from '../assetBase';
 const kit = (n: string) => `${ASSET_BASE}ui/kit/${n}.webp`;
 /** Form progression row: unlocked forms show their crest and name; locked ones stay unnamed (no spoilers) and are plainly not selectable. */
 function FormRow({ save, hero }: { save: SaveV1; hero: HeroId }) {
-  if (hero !== 'kai') { const kit = HERO_KIT[hero], on = !!save.unlocks?.[hero as 'ren' | 'sora']; return <ul className="form-row" aria-label={`${hero} forms`}><li className="open"><img src={kit_(hero, 'base')} alt="" draggable={false}/><span>BASE</span></li><li className={on ? 'open' : 'sealed'}><img src={kit_(hero, 'form')} alt="" draggable={false}/><span>{on ? kit.formShort : 'SEALED'}</span></li></ul>; }
+  if (hero !== 'kai') {
+    const kit = HERO_KIT[hero], vf = save.b22?.vexForms ?? [false, false];
+    const forms = hero === 'vex'
+      ? [{ k: 'b', n: 'BASE', on: true, img: kit_(hero, 'base') }, { k: 'f1', n: 'RIFTBOUND', on: vf[0], img: kit_(hero, 'form') }, { k: 'f2', n: 'VOIDHEART', on: vf[1], img: kit_(hero, 'form'), cls: 'void' }]
+      : [{ k: 'b', n: 'BASE', on: true, img: kit_(hero, 'base') }, { k: 'f1', n: kit.formShort.toUpperCase(), on: !!save.unlocks?.[hero as 'ren' | 'sora'], img: kit_(hero, 'form') }];
+    return <ul className="form-row" aria-label={`${hero} forms`}>{forms.map(f => <li key={f.k} className={`${f.on ? 'open' : 'sealed'} ${f.cls ?? ''}`} title={f.on ? f.n : `${f.n}: sealed`}><img src={f.img} alt="" draggable={false}/><span>{f.n}</span>{!f.on && <em aria-hidden="true">LOCKED</em>}</li>)}</ul>;
+  }
   const rows = [{ c: 'base', n: 'BASE', on: true, how: 'Always available' }, { c: 'f1', n: 'FLAREBOUND', on: true, how: 'Build Drive to 65%, then press F' }, { c: 'f2', n: 'COMETHEART', on: !!save.unlocks?.cometheart, how: 'Needs a FULL Drive gauge, then F' }, { c: 'f3', n: 'STILLFIRE', on: !!save.unlocks?.stillfire, how: 'Unlocked. In a run it starts after 10:00 with a FULL Drive gauge, then F' }];
-  return <ul className="form-row" aria-label="Kai forms">{rows.map(r => <li key={r.c} className={r.on ? 'open' : 'sealed'} title={r.on ? r.how : 'Sealed: earned by defeating a boss'}><img src={kit(`crest-${r.c}`)} alt="" draggable={false}/><span>{r.on ? r.n : 'SEALED'}{r.on && r.c === 'f3' ? ' · 10:00' : ''}</span></li>)}</ul>;
+  return <ul className="form-row" aria-label="Kai forms">{rows.map(r => <li key={r.c} className={r.on ? 'open' : 'sealed'} title={r.on ? r.how : 'Sealed: earned by defeating a boss'}><img src={kit(`crest-${r.c}`)} alt="" draggable={false}/><span>{r.c === 'f3' ? 'APEX' : r.n}</span>{!r.on && <em aria-hidden="true">LOCKED</em>}</li>)}</ul>;
 }
 import type { ProgressTab } from './ProgressionScreen';
 import { CONTRACT_BY_ID, UNLOCK_BY_ID, type UnlockId } from '../../content/meta';
@@ -23,7 +29,7 @@ export function HeroSelect({ modeName, onMode, locked, hero, onHero, onProgress,
     <div className="screen-header"><button className="text-button" onClick={onBack} data-pad-cancel>← BACK</button><span>01 / RUNNER SELECTION</span></div>
     <p className="eyebrow">SELECT YOUR RUNNER</p><h2 className="large-heading">WHO FACES THE FRACTURE?</h2>
     <div className="hero-grid">
-      {HEROES.map((h, i) => <button type="button" key={h.id} onClick={() => onHero(h.id)} aria-pressed={hero === h.id} data-testid={`hero-card-${h.id}`} className={`hero-card ${hero === h.id ? 'active-hero picked' : 'idle-hero'} has-art ${h.id === 'vex' ? 'is-vex' : ''}`} style={{ '--accent': h.accent, ...(h.id === 'kai' ? {} : { '--hero-art': h.id === 'vex' ? `url(${ASSET_BASE}art/b22/vex_base.png)` : `url(${ASSET_BASE}ui/heroes/${h.id}-card.webp)` }) } as CSSProperties}><span className="hero-art" aria-hidden="true"/>
+      {HEROES.map((h, i) => <button type="button" key={h.id} onClick={() => onHero(h.id)} aria-pressed={hero === h.id} data-testid={`hero-card-${h.id}`} className={`hero-card ${hero === h.id ? 'active-hero picked' : 'idle-hero'} has-art ${h.id === 'vex' ? 'is-vex' : ''}`} style={{ '--accent': h.accent, ...(h.id === 'kai' ? {} : { '--hero-art': `url(${ASSET_BASE}ui/heroes/${h.id}-card.webp)` }) } as CSSProperties}><span className="hero-art" aria-hidden="true"/>
         <div className="hero-card-index">0{i + 1} / {h.title}</div>
         <div className={`hero-silhouette hero-${h.id}`} aria-hidden="true"/>
         <div className="hero-copy"><h3>{h.name}</h3><p>{h.role}</p><small>AUTO · {h.weapon.toUpperCase()}</small><FormRow save={save} hero={h.id}/></div>

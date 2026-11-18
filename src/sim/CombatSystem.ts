@@ -123,6 +123,10 @@ function bossDefeated(state: GameState, boss: Enemy) {
     state.heroFormUnlocked = true; state.heroFormUnlockedNow = true; state.player.drive = 100;
     state.announce = { id: 'ascend', text: `${HERO_KIT[state.hero as 'ren' | 'sora'].form.toUpperCase()} UNLOCKED`, sub: 'Full Drive + F awakens your transformation', at: state.time + 2.5 };
   }
+  if (plan.unlocks && state.hero === 'vex' && boss.kind === ASCEND.unlockBoss && !state.b22.vex.forms[0]) {   // B22: the Warden also unlocks Riftbound for Vex (the Trial chapters unlock it too)
+    state.b22.vex.forms[0] = true; state.heroFormUnlocked = true; state.heroFormUnlockedNow = true; state.player.drive = 100;
+    state.announce = { id: 'ascend', text: 'RIFTBOUND UNLOCKED', sub: 'Full Drive + F awakens your transformation', at: state.time + 2.5 };
+  }
   if (plan.unlocks && state.hero === 'kai' && boss.kind === COMET.unlockBoss && !state.cometUnlocked) {   // B12: the Warden unlocks Cometheart for good; Drive is filled so Form II is playable at once (~7 min of a run remain)
     state.cometUnlocked = true; state.cometUnlockedNow = true; state.player.drive = 100;
     state.announce = { id: 'cometheart', text: 'COMETHEART UNLOCKED', sub: 'Full Drive + F awakens Form II', at: state.time + 2.5 };

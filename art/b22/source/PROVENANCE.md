@@ -1092,3 +1092,87 @@ Prompt:
 Pixel-art character bust portrait for a 2D game HUD. Attached: (1) the approved Kai HUD bust portrait defining the framing, size, chunky pixel-block style, thin dark outline and 3-4 tone cel shading; (2) the approved full-body design of VEX. Draw VEX as a head-and-shoulders bust in EXACTLY that Kai portrait framing and pixel style, facing slightly right, on a flat pure green (#00ff00) background, square canvas, no text, no frame, no green in the character. VEX: young exile, dark swept hair with a few sharp spikes, violet scarf, dark-indigo coat collar with silver trim, calm guarded eyes. Base form: dark indigo-black hair, violet eyes, plain calm expression.
 ```
 
+## 2026-11-18T10:59:55.372Z - ui_close.png
+
+- File: ui_close.png (1920x819)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee4f-a523-7ed1-8187-5fcc6c354f9d
+- Reference images: none
+- Seconds: 36.6
+
+Prompt:
+
+```text
+Two game UI close-button icons side by side (left = normal, right = hover/pressed), chunky pixel-art-meets-metal style matching an ornate brass-and-steel sci-fi frame: a small square beveled steel button with a brass rim and four tiny corner rivets, a bold crisp X glyph in pale cream on the left, and on the right the same button with a glowing orange-brass X and a brighter rim. Each fully inside its cell, on a flat pure green (#00ff00) background with a wide gutter, no text, no green in the buttons.
+```
+
+## 2026-11-18T11:00:23.089Z - ui_modes.png
+
+- File: ui_modes.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee4f-a523-7721-a162-1970956386cb
+- Reference images: none
+- Seconds: 64.3
+
+Prompt:
+
+```text
+Seven square game menu emblem icons in a grid (4 columns, 2 rows, the 8th cell left empty), chunky pixel-art style, thin dark outline, 3-tone cel shading, each a glowing emblem on a dark rounded-square plate with a thin brass rim, each fully inside its cell, on a flat pure green (#00ff00) background with wide gutters, no text, no labels, no green in the icons. Reading order: 1 CLASSIC (a cracked teal ring with a crossed warden blade and seraph wing); 2 ENDLESS (a golden infinity loop of circuitry with cycle ticks); 3 FRACTURE EXPEDITION (a compass over a fractured violet-gold horizon with two path markers); 4 BOSS RUSH (a skull-crowned boss helm with three small boss pips); 5 DAILY CHALLENGE (a sun disc with a calendar tick and a flame); 6 WEEKLY CHALLENGE (a seven-pointed star calendar wheel with a crown); 7 TRIAL OF THE OATHBROKEN (a broken oath-sword stuck in a cracked violet seal).
+```
+
+## 2026-11-18T11:00:39.415Z - card_vex.png
+
+- File: card_vex.png (1086x1448)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee4f-a523-7be1-924d-eac01b8e565b
+- Reference images: ref-kai-card.png, ref-ren-card.png, ref-vex.png
+- Seconds: 80.6
+
+Prompt:
+
+```text
+Hero-select card key art, portrait orientation 3:4. Attached: (1) the existing KAI hero-select key art and (2) the existing REN key art (composition, finish, lighting and framing reference), (3) VEX's approved pixel-art full-body design (identity). Create the equivalent key art for VEX, the Fallen Vanguard, in the same finish and framing: a dramatic hero pose of Vex in a guarded counter stance, short pale counter-blade held low in one hand and a bandaged fist raised in the other, three-quarter view, dark swept spiky hair, violet scarf, torn dark-indigo vanguard coat with silver trim and a cracked order-crest, baggy dark trousers, chunky boots. Keep the pixel-art-meets-painted language of the Kai and Ren key art (chunky pixel character, painted atmospheric background): a dark moody background of a shattered violet-lit rift sky over ruined steel arches, deep violet and cold teal light, floating rift shards and a faint cracked-ground violet glow at his feet. Character fills the card, feet and blade inside the frame. No text, no logo, no watermark.
+```
+
+## 2026-11-18T11:04:12.515Z - card_paradox.png
+
+- File: card_paradox.png (1672x941)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee53-392e-7d21-94ad-e0a589873017
+- Reference images: ref-gloam-card.png, ref-ashen-card.png
+- Seconds: 58.9
+
+Prompt:
+
+```text
+Arena selection card art, 16:9 landscape, matching the attached Gloam Circuit and Ashen Reliquary cards in finish, framing and chunky pixel-art-meets-painted style (a slightly raised three-quarter view of the arena floor with its signature structures, moody lighting, no characters, no text, no UI, no watermark). Arena: PARADOX EXPANSE, a folded-dimension void arena: dark indigo glass floor tiles with teal-cyan fracture lines, floating violet crystal spires, folded glass prism blocks whose reflections do not match, tiles offset as if folded, violet and teal light, deep starless void beyond the rim.
+```
+
+## 2026-11-18T11:04:24.517Z - card_aetherfall.png
+
+- File: card_aetherfall.png (1672x941)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee53-393a-7c50-9b9c-e773e2ba5e83
+- Reference images: ref-gloam-card.png, ref-ashen-card.png
+- Seconds: 70.9
+
+Prompt:
+
+```text
+Arena selection card art, 16:9 landscape, matching the attached Gloam Circuit and Ashen Reliquary cards in finish, framing and chunky pixel-art-meets-painted style (a slightly raised three-quarter view of the arena floor with its signature structures, moody lighting, no characters, no text, no UI, no watermark). Arena: AETHERFALL CITADEL, a ruined celestial citadel courtyard: cream and sandstone flagstones with gold inlay seams and cracked tiles, broken halo-crowned pillars and a shattered winged statue plinth, golden shafts of light through a torn sky, drifting gold dust, warm ivory and sun-gold palette with deep amber shadows.
+```
+
+## 2026-11-18T11:04:42.528Z - fx_vexe.png
+
+- File: fx_vexe.png (1536x1024)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee53-dae7-7ac1-b4c3-21f8c5b96b3b
+- Reference images: none
+- Seconds: 47.4
+
+Prompt:
+
+```text
+Four separate game VFX plates in a 2x2 grid for the ability RIFT REVERSAL (a violet blink-shift), chunky pixel-art style with crisp hard edges, glowing additive effects, each centred in its cell, on a flat pure black (#000000) background with wide black gutters, no text, no labels, no characters. 1: ENTRY RIFT TEAR - a top-down ground ellipse where a vertical violet-white rift crack splits open, jagged edges, floating violet shards, a dark core. 2: BLINK STREAK - a long horizontal streak pointing right, made of fading violet and white afterimage slashes and speed shards, tapered at the left, filling the full width of its cell, thin. 3: EXIT BURST - a top-down violet-white shard burst ring with cracked ground, radiating crystal fragments and a bright core. 4: RIPOSTE SLASH - a bright crescent blade-slash arc in pale lilac and white with violet sparks.
+```
+

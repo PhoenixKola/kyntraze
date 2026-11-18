@@ -1,6 +1,6 @@
 import type { UiSnapshot } from '../../bridge/UiSnapshot';
 import { roundedTime } from '../../core/Math';
-import { HintBar } from './Chrome';
+import { HintBar, ModalX } from './Chrome';
 import { BuildStrip } from './BuildStrip';
 import { ASSET_BASE } from '../assetBase';
 import { CURRENCY, FEAT_BY_ID, UNLOCK_BY_ID, CONTRACT_BY_ID } from '../../content/meta';
@@ -15,6 +15,7 @@ export function ResultsScreen({ s, onRetry, onHome, onProgress, onEndless }: Pro
   return <div className={`overlay results-overlay ${won ? 'won' : 'lost'}`} data-testid="results-screen" data-outcome={won ? 'victory' : 'defeat'}>
     {won && <div className="res-art" style={{ backgroundImage: `url(${base}ui/victory-key.webp)` }} aria-hidden="true"/>}
     <section className={`modal compact-modal result-modal ${won ? 'result-win' : ''}`} role="dialog" aria-modal="true" aria-labelledby="result-title">
+      <ModalX onClose={onHome} label="Back to title"/>
       <div className="result-scroll">
       {won && <img className="res-crest" src={`${base}ui/victory-crest.png`} alt="" draggable={false}/>}
       <p className="eyebrow" data-testid="result-hero">{HERO_BY_ID[s.hero].name} · {won ? 'THE NULL SERAPH IS DOWN' : 'CONNECTION TO THE ZONE LOST'}</p>

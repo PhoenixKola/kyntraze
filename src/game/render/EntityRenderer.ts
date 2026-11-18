@@ -68,7 +68,7 @@ export class EntityRenderer {
     const COL: Record<AuraState, number> = { ren: 0xff3a1a, sora: 0x2a9dff, flare: 0xff7a10, comet: 0xffb21a, still: 0x9fc4ff };   // deep hues: a pale glow colour saturates to white on the bright forms
     const on = !!st && state.phase === 'running' && p.hp > 0 && !state.cinema, crowd = state.enemies.length > 45 ? 0.8 : 1;
     let k = 0; if (on) { const flick = st === 'comet' ? 0.65 + 0.5 * Math.abs(Math.sin(Math.floor(t * 26) * 12.9898)) : st === 'still' ? 0.92 + 0.08 * Math.sin(t * 2.2) : 0.88 + 0.12 * Math.sin(t * 7.3); const WEIGHT: Record<AuraState, number> = { ren: 1, sora: 1, flare: 0.9, comet: 0.55, still: 0.5 }; k = Math.min(5, (2.4 + 3.6 * (smp.k - 0.5)) * WEIGHT[st!]) * flick * (reduced ? 0.55 : crowd); }   // per-form weight: bright gold forms need far less glow or the character washes out
-    for (const c of this.auraGlow) { c.outerStrength = Math.max(0, k); c.active = k > 0.02; if (st) c.color = COL[st]; }
+    for (const c of this.auraGlow) { c.outerStrength = Math.max(0, k); c.active = k > 0.02; if (st) c.color = (state.hero === 'vex' ? 0x8f5cff : COL[st]); }
     this.auraBody.setVisible(k > 0.02);   // inactive = the shader pass is skipped entirely, so untransformed heroes pay nothing
     // embers/motes that rise off the silhouette itself (never wider than the body), rate follows the activity state
     this.auraMotes ??= new FxPool(this.scene, 60);
@@ -85,7 +85,7 @@ export class EntityRenderer {
   private auraSample: { st: AuraState | null; smp: ReturnType<AuraTracker['update']>; on: boolean } = { st: null, smp: { phase: 'idle', k: 0.55, leanX: 0, leanY: 0, lean: 0, gather: 0, pulse: 0 }, on: false };
   /** B20: the transformation "stroke": a coloured outline hugging the body (Photoshop-style), part of the sprite instead of a floating aura. */
   private updateStroke(state: GameState) {
-    const f = state.player.form, pal = state.hero === 'ren' ? 0xff2a24 : state.hero === 'sora' ? 0x3aa8ff : 0xe8f0fa, on = (state.hero === 'kai' ? f >= 2 : f >= 1) && !state.cinema, wave = 0.5 + 0.5 * Math.sin(state.time * 5.5), k = on ? 7 + 9 * wave : 0;   // B20: the stroke breathes between a steady band and a hard bright flare   // Kai: Cometheart and Stillfire only
+    const f = state.player.form, pal = state.hero === 'vex' ? 0x9a6bff : state.hero === 'ren' ? 0xff2a24 : state.hero === 'sora' ? 0x3aa8ff : 0xe8f0fa, on = (state.hero === 'kai' ? f >= 2 : f >= 1) && !state.cinema, wave = 0.5 + 0.5 * Math.sin(state.time * 5.5), k = on ? 7 + 9 * wave : 0;   // B20: the stroke breathes between a steady band and a hard bright flare   // Kai: Cometheart and Stillfire only
     const lerp = (a: number, b: number, t: number) => { const r = ((a >> 16) & 255) + ((((b >> 16) & 255) - ((a >> 16) & 255)) * t), g = ((a >> 8) & 255) + ((((b >> 8) & 255) - ((a >> 8) & 255)) * t), bl = (a & 255) + (((b & 255) - (a & 255)) * t); return (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(bl); };
     const split = this.legs.visible; for (const c of this.rim) c.outerStrength = split ? 0 : 1.6;
     for (const c of this.stroke) { c.outerStrength = split ? 0 : k; if (on) c.color = lerp(pal, 0xffffff, 0.35 * wave * wave); }   // the peak of each pulse runs hotter, toward white
@@ -235,7 +235,7 @@ export class EntityRenderer {
     if (fast && this.ghostClock <= 0 && this.hero.visible) {
       this.ghostClock = p.form ? 0.028 : 0.04;
       let g = this.ghosts.find(q => q.life <= 0); if (!g && this.ghosts.length < cap) { g = { spr: this.scene.add.sprite(0, 0, this.hero.texture.key, 0).setScale(this.hero.scaleX).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.2), life: 0 }; this.ghosts.push(g); }
-      if (g) { g.life = 0.28; g.spr.setTexture(this.hero.texture.key, this.hero.frame.name).setOrigin(this.hero.originX, this.hero.originY).setPosition(x, y).setTint(hero === 'ren' ? 0xff3a2e : 0x6fc8ff); g.spr.tintMode = Phaser.TintModes.FILL; }
+      if (g) { g.life = 0.28; g.spr.setTexture(this.hero.texture.key, this.hero.frame.name).setOrigin(this.hero.originX, this.hero.originY).setPosition(x, y).setTint(state.hero === 'vex' ? 0x9a6bff : hero === 'ren' ? 0xff3a2e : 0x6fc8ff); g.spr.tintMode = Phaser.TintModes.FILL; }
     }
     for (const g of this.ghosts) { if (g.life > 0) { g.life -= dt; g.spr.setVisible(g.life > 0).setAlpha(Math.max(0, g.life / 0.28) * (p.form ? 0.55 : 0.4)); } else g.spr.setVisible(false); }
   }

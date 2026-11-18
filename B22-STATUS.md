@@ -57,5 +57,11 @@ Legend: **VERIFIED** = automated test + (where marked) a real-browser run by me.
 * Contract text no longer overlaps the clock panel (moved inside it).
 * Ability tiles: hover/focus tooltip (name, key, description, real numbers) and click-to-use.
 
+## UI/gameplay fixes from owner testing (this pass)
+Vex transformations now unlock (Warden kill or Trial ch. 2 / 3, and `?qa=1&hero=vex&ascend=1` unlocks both) with a Vex-specific transform picker, form portraits and violet frames; Mode Select rebuilt to fit the screen (icons, detail panel, co-op row, CONFIRM always visible); all four arenas shown (non-fitting ones tagged and switchable; Aetherfall/Paradox have generated cards); keyboard hint chips are clickable; modal X on pause / settings / results / story; Runners panel redesigned; ability tooltip redesigned and no longer sticks; pause stats fit; Vex card is generated art; Vex Rift Reversal has its own sprite VFX; Vex dash ghost and aura are violet; hero form rows name every form.
+
+## How to play co-op
+Local: Play > MODE chip > pick a mode (not Daily/Weekly/Vex Trial) > in the FRACTURE ALLIANCE panel choose P2: <hero> > CONFIRM MODE > Deploy. P1 WASD + mouse or pad 1; P2 arrows, Enter (dash), `, . / ;` (Q E R F) or pad 2. Revive by standing next to a downed partner. Online: `npm run server`, then ONLINE... in the same panel with `ws://127.0.0.1:2567`.
+
 ## Remaining work
-Nothing left that I can build or verify from this machine. Needs hardware / a host / a certificate: two-controller testing, hosting the server + outside-network test, an Electron client joining an online room, code signing.
+Needs hardware / a host / a certificate: two-controller testing, hosting the server + outside-network test, an Electron client joining an online room, code signing.

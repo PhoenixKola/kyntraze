@@ -69,6 +69,7 @@ export function applyB22Result(prev: B22Save, r: B22RunResult): { save: B22Save;
   for (const id of r.legends) if (!s.seen.legends.includes(id) && LEGENDARIES.some(l => l.id === id)) s.seen.legends.push(id);
   for (const id of r.bosses) if (!s.seen.bosses.includes(id) && (BOSS_KINDS as readonly string[]).includes(id)) s.seen.bosses.push(id);
   if (r.challengeId && /^[DW]-\d{8}$/.test(r.challengeId)) { const c = s.challenges[r.challengeId] ?? { best: 0, attempts: 0, done: false, status: 'local' as const }; s.challenges[r.challengeId] = { best: Math.max(c.best, Math.floor(r.score)), attempts: c.attempts + 1, done: c.done || r.won, status: 'local' }; }
+  if (r.hero === 'vex' && r.bosses.includes('warden') && !s.vexForms[0]) { s.vexForms[0] = true; grant.vexForms.push(1); }   // Riftbound: defeat the Fracture Warden as Vex
   if (r.mode === 'vex_trial' && r.won && r.storyChapter) {
     if (!s.story.done.includes(r.storyChapter)) { s.story.done = [...s.story.done, r.storyChapter].sort() as (1 | 2 | 3)[]; grant.story.push(r.storyChapter); }
     if (r.storyChapter >= 2 && !s.vexForms[0]) { s.vexForms[0] = true; grant.vexForms.push(1); }   // Riftbound: finish chapter 2

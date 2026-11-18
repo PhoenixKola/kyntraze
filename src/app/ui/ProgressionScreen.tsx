@@ -12,14 +12,14 @@ import { HERO_KIT } from '../../content/heroKits';
 export type ProgressTab = 'armory' | 'contracts' | 'archives';
 const icon = (n: string) => `${ASSET_BASE}ui/meta/${n}.png`;
 const TABS: { id: ProgressTab; label: string }[] = [{ id: 'armory', label: 'ARMORY' }, { id: 'contracts', label: 'CONTRACTS' }, { id: 'archives', label: 'ARCHIVES' }];
-interface Props { meta: MetaState; unlocks: { cometheart: boolean; stillfire: boolean; ren?: boolean; sora?: boolean }; tab: ProgressTab; onTab: (t: ProgressTab) => void; onMeta: (m: MetaState) => void; onBack: () => void; onDeploy?: () => void; backLabel?: string }
+interface Props { vexForms?: [boolean, boolean]; meta: MetaState; unlocks: { cometheart: boolean; stillfire: boolean; ren?: boolean; sora?: boolean }; tab: ProgressTab; onTab: (t: ProgressTab) => void; onMeta: (m: MetaState) => void; onBack: () => void; onDeploy?: () => void; backLabel?: string }
 
 /** Marks balance + equipped crest: always visible so the player never wonders what they can afford. */
 export function MarksBadge({ marks, crest }: { marks: number; crest?: string | null }) {
   return <span className="pg-marks" data-testid="marks-balance" aria-label={`${marks} ${CURRENCY.name}`}>{crest && UNLOCK_BY_ID[crest as UnlockId] && <img className="pg-crest-mini" src={icon(UNLOCK_BY_ID[crest as UnlockId].icon)} alt="" draggable={false}/>}<img src={icon('mark')} alt="" draggable={false}/><b>{marks.toLocaleString()}</b><em>{CURRENCY.short}</em></span>;
 }
 
-export function ProgressionScreen({ meta, unlocks, tab, onTab, onMeta, onBack, onDeploy, backLabel = '← BACK' }: Props) {
+export function ProgressionScreen({ vexForms = [false, false], meta, unlocks, tab, onTab, onMeta, onBack, onDeploy, backLabel = '← BACK' }: Props) {
   const [pending, setPending] = useState<UnlockId | null>(null);
   const [fresh, setFresh] = useState<UnlockId | null>(null);
   const [note, setNote] = useState('');
@@ -87,8 +87,18 @@ export function ProgressionScreen({ meta, unlocks, tab, onTab, onMeta, onBack, o
       {tab === 'archives' && <>
         {row('KAI · TRANSFORMATIONS', 'EARNED BY DEFEATING BOSSES AS KAI')}
         <ul className="pg-forms">{[{ c: 'base', n: 'BASE', on: true, how: 'Always available' }, { c: 'f1', n: 'FLAREBOUND', on: true, how: 'Drive 65%+ → F' }, { c: 'f2', n: 'COMETHEART', on: unlocks.cometheart, how: 'Earned: Fracture Warden' }, { c: 'f3', n: 'STILLFIRE APEX', on: unlocks.stillfire, how: 'Earned: Null Seraph' }].map(f => <li key={f.c} className={f.on ? 'open' : 'sealed'}><img src={`${ASSET_BASE}ui/kit/crest-${f.c}.webp`} alt="" draggable={false}/><b>{f.on ? f.n : 'SEALED'}</b><span>{f.on ? f.how : 'Defeat a boss to discover it'}</span></li>)}</ul>
-        {row('RUNNERS', 'RECORDS · REN AND SORA EARN THEIR OWN FORM')}
-        <ul className="pg-forms" data-testid="runner-records">{HEROES.map(h => { const r = meta.heroes[h.id], form = h.id === 'kai' ? 'Kai forms are listed above' : unlocks[h.id as 'ren' | 'sora'] ? `${HERO_KIT[h.id].form} unlocked` : `${HERO_KIT[h.id].form}: defeat the Fracture Warden as ${h.name}`; return <li key={h.id} className={h.id === 'kai' || unlocks[h.id as 'ren' | 'sora'] ? 'open' : 'sealed'}><span><b>{h.name}</b> {r.runs} RUNS · {r.wins} WINS · BEST {r.bestSeconds ? roundedTime(r.bestSeconds) : '—'}<small>{form}</small></span></li>; })}</ul>
+        {row('RUNNERS', 'RECORDS AND TRANSFORMATIONS')}
+        <div className="pg-runners" data-testid="runner-records">{HEROES.map(h => {
+          const r = meta.heroes[h.id], forms: { n: string; on: boolean; how: string }[] = h.id === 'kai'
+            ? [{ n: 'FLAREBOUND', on: true, how: 'Drive 65% + F' }, { n: 'COMETHEART', on: unlocks.cometheart, how: 'Defeat the Fracture Warden' }, { n: 'STILLFIRE APEX', on: unlocks.stillfire, how: 'Defeat the Null Seraph' }]
+            : h.id === 'vex'
+              ? [{ n: 'RIFTBOUND', on: vexForms[0], how: 'Beat the Warden or Trial ch. 2' }, { n: 'VOIDHEART EXILE', on: vexForms[1], how: 'Beat the Oathkeeper (Trial ch. 3)' }]
+              : [{ n: HERO_KIT[h.id].form.toUpperCase(), on: !!unlocks[h.id as 'ren' | 'sora'], how: `Defeat the Fracture Warden as ${h.name}` }];
+          return <article key={h.id} className="pg-runner" style={{ '--accent': h.accent } as CSSProperties}>
+            <header><img src={h.id === 'kai' ? `${ASSET_BASE}ui/kai-portrait-base.png` : `${ASSET_BASE}ui/heroes/${h.id}-portrait-base.webp`} alt="" draggable={false}/><div><b>{h.name}</b><small>{h.title}</small></div></header>
+            <dl><div><dt>RUNS</dt><dd>{r.runs}</dd></div><div><dt>WINS</dt><dd>{r.wins}</dd></div><div><dt>BEST</dt><dd>{r.bestSeconds ? roundedTime(r.bestSeconds) : '—'}</dd></div></dl>
+            <ul>{forms.map(f => <li key={f.n} className={f.on ? 'open' : 'sealed'}><i aria-hidden="true">{f.on ? '✦' : '🔒'}</i><span><b>{f.n}</b><small>{f.on ? 'Unlocked' : f.how}</small></span></li>)}</ul>
+          </article>; })}</div>
         {row('ARENA MASTERY', 'RECORDS AND OBJECTIVES')}
         <div className="pg-arenas">{ARENA_IDS.map((a: ArenaId) => { const r = meta.arenas[a]; return <section key={a} className="pg-arena" data-testid={`arena-${a}`}>
           <header><img src={icon('arena_' + a)} alt="" draggable={false}/><div><b>{ARENAS[a].name.toUpperCase()}</b><span>{r.runs} RUNS · {r.wins} WINS</span></div></header>

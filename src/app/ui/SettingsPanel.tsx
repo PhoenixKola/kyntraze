@@ -1,7 +1,7 @@
 import { useEffect, type CSSProperties } from 'react';
 import type { GameSettings, VolumeKey } from '../../sim/SaveSystem';
 import { ControllerMap } from './ControllerBadge';
-import { HintBar } from './Chrome';
+import { HintBar, ModalX } from './Chrome';
 interface Props { settings: GameSettings; onChange: (settings: GameSettings) => void; onClose: () => void; }
 export function SettingsPanel({ settings, onChange, onClose }: Props) {
   // capture phase + stopPropagation: Esc closes Settings only; it must not also reach the game's pause toggle underneath
@@ -11,6 +11,7 @@ export function SettingsPanel({ settings, onChange, onClose }: Props) {
     <input type="range" className="vol-slider" min={0} max={100} step={5} value={Math.round(settings[id] * 100)} aria-label={`${name} volume`} style={{ '--p': `${Math.round(settings[id] * 100)}%` } as CSSProperties} onChange={e => onChange({ ...settings, [id]: Number(e.target.value) / 100 })}/></label>;
   const row = (id: 'mute' | 'reducedEffects' | 'pauseOnBlur', name: string, note: string) => <label><span>{name}<small>{note}</small></span><em className={`sw-state ${settings[id] ? 'sw-on' : ''}`} aria-hidden="true">{settings[id] ? 'ON' : 'OFF'}</em><input type="checkbox" role="switch" checked={settings[id]} onChange={() => toggle(id)}/></label>;
   return <div className="overlay settings-overlay" data-testid="settings-menu"><section className="modal compact-modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <ModalX onClose={onClose}/>
     <p className="eyebrow">LOCAL PLAYER CONFIGURATION</p><h2 id="settings-title">SETTINGS</h2>
     <div className="settings-cols">
       <div><h3 className="group-title">GAME</h3><div className="setting-options">

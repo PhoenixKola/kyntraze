@@ -24,11 +24,13 @@ function Slot({ id, name, ico, keyLabel, padLabel, pad, seconds, max, state, ton
   const cooling = seconds > 0 && state !== 'active';
   const cls = state === 'active' ? 'active' : state === 'locked' ? 'locked' : cooling ? 'cooling' : 'ready';
   const style = { '--ico': icon(ico), '--p': `${Math.min(1, seconds / max) * 360}deg` } as CSSProperties;
-  return <div className={`slot ${cls} ${tone ?? ''}`} data-ico={ico} style={style} data-testid={`cd-${id}`} role="button" tabIndex={0} aria-label={`${tip?.name ?? name}: ${text ?? (cooling ? `${seconds.toFixed(1)} seconds` : 'ready')}. Click to use.`} onClick={() => onUse?.(SLOT_KEY[id] ?? 'KeyQ')} onKeyDown={e => { if (e.key === 'Enter') onUse?.(SLOT_KEY[id] ?? 'KeyQ'); }}>
+  return <div className={`slot ${cls} ${tone ?? ''}`} data-ico={ico} style={style} data-testid={`cd-${id}`} role="button" tabIndex={0} aria-label={`${tip?.name ?? name}: ${text ?? (cooling ? `${seconds.toFixed(1)} seconds` : 'ready')}. Click to use.`} onMouseDown={e => e.preventDefault()} onClick={e => { onUse?.(SLOT_KEY[id] ?? 'KeyQ'); e.currentTarget.blur(); }} onMouseLeave={e => e.currentTarget.blur()} onKeyDown={e => { if (e.key === 'Enter') onUse?.(SLOT_KEY[id] ?? 'KeyQ'); }}>
     <span className="slot-ico" aria-hidden="true"/>{!!charge && <i className="slot-charge" style={{ width: pct(charge * 100) }} aria-hidden="true"/>}{cooling && <span className="slot-sweep" aria-hidden="true"/>}
     {cooling && <b className="slot-num">{seconds >= 10 ? Math.ceil(seconds) : seconds.toFixed(1)}</b>}{!cooling && text && <b className="slot-tag">{text}</b>}
     <kbd className={pad ? 'pad-key' : ''}>{pad ? padLabel : keyLabel}</kbd>
-    <span className="slot-tip" role="tooltip" data-testid={`tip-${id}`}><strong>{tip?.name ?? name}</strong><em>{pad ? (tip?.pad ?? padLabel) : (tip?.key ?? keyLabel)}{cooling ? ` · READY IN ${seconds.toFixed(1)}s` : ''}</em>{tip && <span className="tip-blurb">{tip.blurb}</span>}{tip && <span className="tip-stats">{tip.stats.map(([k, v]) => <span key={k}><b>{k}</b>{v}</span>)}</span>}<small>CLICK TO USE</small></span>
+    <span className="slot-tip" role="tooltip" data-testid={`tip-${id}`}>
+      <span className="tip-head"><span className="tip-ico" aria-hidden="true"/><span className="tip-title"><strong>{tip?.name ?? name}</strong>{cooling && <em>READY IN {seconds.toFixed(1)}s</em>}</span><kbd className={`tip-key ${pad ? 'pad-key' : ''}`}>{pad ? (tip?.pad ?? padLabel) : (tip?.key ?? keyLabel)}</kbd></span>
+      {tip && <span className="tip-blurb">{tip.blurb}</span>}{tip && <span className="tip-stats">{tip.stats.map(([k, v]) => <span key={k}><b>{k}</b><i>{v}</i></span>)}</span>}<small>CLICK OR PRESS TO USE</small></span>
   </div>;
 }
 
@@ -94,7 +96,7 @@ export function Hud({ s, pad, onPause, reduced, onForm, onKey }: Props) {
       <div className="partner-hp" role="progressbar" aria-label="Partner health" aria-valuenow={Math.ceil(s.partner.hp)} aria-valuemax={Math.ceil(s.partner.maxHp)}><i style={{ width: pct(s.partner.hp / s.partner.maxHp * 100) }}/></div>
       <small>{s.partner.out ? 'OUT' : s.partner.down ? `DOWN · stand near to revive ${Math.round(s.partner.revive * 100)}%` : s.partner.form ? 'TRANSFORMED' : `LV ${s.partner.level}`}</small>
       {s.party && <u className={`res-bar ${s.party.resonanceT > 0 ? 'live' : ''}`} title="Resonance: earned by fighting together"><i style={{ width: pct(s.party.resonance) }}/></u>}</div>}
-    <FormSelector open={s.selector.open} pick={s.selector.pick} choices={s.selector.choices} left={s.selector.left} pad={pad} onHover={f => onForm?.(f, false)} onChoose={f => onForm?.(f, true)}/>
+    <FormSelector hero={s.hero} open={s.selector.open} pick={s.selector.pick} choices={s.selector.choices} left={s.selector.left} pad={pad} onHover={f => onForm?.(f, false)} onChoose={f => onForm?.(f, true)}/>
     {s.boss && <BossBar b={s.boss}/>}
     <Minimap map={s.map} boss={!!s.boss}/>
     <div className="hud-panel hud-clock"><span className="clock-label">{s.arenaName}</span><b>{roundedTime(s.seconds)}</b><span className="clock-kills"><i/> {s.kills}{s.run.nextLabel && <em className={`clock-next ${s.run.nextIn < 30 && s.run.nextIn > 0 ? 'soon' : ''}`}>{s.run.nextIn > 0 ? `${s.run.nextLabel} ${mmss(s.run.nextIn)}` : s.run.nextLabel}</em>}</span><RunTrack r={s.run}/>{s.contract && <span className="clock-contract" data-testid="hud-contract">CONTRACT · {CONTRACT_BY_ID[s.contract].name}</span>}</div>
