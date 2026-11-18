@@ -109,3 +109,10 @@ describe('Kai auto attack presentation contract', () => {
     const { handOffset } = await import('../sim/Strike'); const o = fistWorld(s, 0, face), ho = handOffset(face, s.hx.strike.hand!); for (const sh of shots) { expect(sh.x).toBeCloseTo(o.x + ho.x, 5); expect(sh.y).toBeCloseTo(o.y + ho.y, 5); } expect(s.hx.strike.t).toBeCloseTo(s.time, 1);
   });
 });
+
+describe('Kai kit audio', () => {
+  it('every sim event of the new kit maps to a defined recipe', async () => {
+    const { EVENT_SFX, SFX } = await import('../game/audio/b22Sfx');
+    for (const k of ['surge_start', 'scatter_fire', 'scatter_blast', 'meteor_beat', 'flare_start', 'flare_pillar', 'crucible_cast', 'crucible_pulse', 'crucible_final', 'clone_spawn', 'clone_end', 'rift_hop']) { expect(EVENT_SFX[k], k).toBeTruthy(); expect(SFX[EVENT_SFX[k]], k).toBeTruthy(); }
+  });
+});
