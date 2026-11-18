@@ -5,13 +5,15 @@ import { CANNON, DRAGON } from '../content/cometheart';
 import { RIFT } from '../content/stillfire';
 export type Facing = 'south' | 'north' | 'east' | 'west';
 /** RunLower + RunPunchUpper are the two LAYERS of the moving attack (legs+hips of the Run cycle, and an upper body whose frames are `step * 8 + leg phase`); the runtime draws the lower one first. */
-export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere' | 'RunLower' | 'RunPunchUpper';
+export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere' | 'RunLower' | 'RunPunchUpper' | 'Lunge' | 'Uppercut' | 'Slam';
 /** Transform exists only in the Form I sheets. */
 export type KaiClip = KaiBaseClip | 'Transform' | 'IdleSpecial';
 /** Which art set is shown: the approved base Kai, or the separately authored Form I sheets (never a tinted base). */
 export type KaiForm = 'base' | 'f1' | 'f2' | 'f3';
 export const KAI_DIRS: readonly Facing[] = ['south', 'north', 'east', 'west'];
 export const KAI_CLIPS: readonly KaiBaseClip[] = ['Idle', 'Run', 'BasicPunch', 'Dash', 'Hurt', 'Death', 'Beam', 'Sphere', 'RunLower', 'RunPunchUpper'];
+/** B22 Kai-only clips (Surge Step / Meteor Drive Lunge, Rising Flare Uppercut, Sunfall Crucible Slam); Ren / Sora sheets do not have them. */
+export const KAI_KIT_CLIPS = ['Lunge', 'Uppercut', 'Slam'] as const;
 /** Leg phases per strike step in RunPunchUpper. */
 export const RUN_PHASES = 8;
 export const KAI_F1_CLIPS: readonly KaiClip[] = [...KAI_CLIPS, 'Transform'];
@@ -123,6 +125,8 @@ export interface AnimFrameInput {
   /** Set on the render frame where the sim fired a fresh basic attack (offset to its first target). */
   shot: { dx: number; dy: number } | null;
   /** The sim's active signature ability (player.cast): its clock drives the Beam / Sphere clip so the release frame lands on the sim's release tick. */
+  /** One-frame trigger: Surge Step started (plays the Lunge clip once). */
+  lunge?: boolean;
   cast?: { id: number; kind: CastKind; face: Facing; t: number; dur?: number; dirX: number; dirY: number; released?: boolean; rt?: number } | null;
 }
 /** `legs` is the RunLower frame drawn under the hero sprite while the attack plays during movement (null = the whole body is the clip frame). */
@@ -144,7 +148,7 @@ export type KaiAnimEvent = 'form_start' | 'form_commit' | 'form_end';
 /** Clip frame for a cast at sim time t: frames before the clip's `release` event are spread over the sim's wind-up, the rest over what is left, so the release frame lands on the release tick whatever the clip's fps. */
 export type CastKind = 'beam' | 'sphere' | 'dragon' | 'comet' | 'rift' | 'reversal' | 'scatter' | 'meteor' | 'flare' | 'crucible';
 /** The sheet clip each cast plays: Dragonfang Rush is a body-driven BasicPunch (its `impact` frame is the release), Cometbreaker the Beam clip. */
-export const CAST_CLIP: Record<CastKind, 'Beam' | 'Sphere' | 'BasicPunch'> = { beam: 'Beam', sphere: 'Sphere', dragon: 'BasicPunch', comet: 'Beam', rift: 'Beam', reversal: 'Sphere', scatter: 'BasicPunch', meteor: 'BasicPunch', flare: 'Beam', crucible: 'Sphere' };
+export const CAST_CLIP: Record<CastKind, 'Beam' | 'Sphere' | 'BasicPunch' | 'Lunge' | 'Uppercut' | 'Slam'> = { beam: 'Beam', sphere: 'Sphere', dragon: 'BasicPunch', comet: 'Beam', rift: 'Beam', reversal: 'Sphere', scatter: 'BasicPunch', meteor: 'Lunge', flare: 'Uppercut', crucible: 'Slam' };
 /** Silver Rift: anticipation, a seamless looping charge hold (events hold_start..hold_end) for as long as E is held, then the release tail. Instinct Reversal spreads the whole Sphere clip over the string of strikes. */
 function riftFrame(a: KaiClipInfo, t: number, dur: number | undefined, released: boolean, rt: number): number {
   const hs = a.events.hold_start ?? 3, he = Math.max(hs, a.events.hold_end ?? hs + 3), rel = a.events.release ?? he + 1;
@@ -155,7 +159,7 @@ export function castFrame(a: KaiClipInfo, kind: CastKind, t: number, dur?: numbe
   if (kind === 'rift') return riftFrame(a, t, dur, released, rt);
   if (kind === 'reversal') return Math.min(a.frames - 1, Math.floor(((t * 5) % 1) * Math.min(a.frames, 10)) + (released ? 0 : 0));   // a sustained string of strikes loops a quick strike motion
   if (kind === 'scatter') { const imp = a.events.impact ?? Math.floor(a.frames / 2), lo = Math.max(0, imp - 3), hi = Math.min(a.frames - 1, imp + 2); return lo + Math.floor(((t / 0.14) % 1) * (hi - lo + 1)); }
-  if (kind === 'meteor') { const imp = a.events.impact ?? Math.floor(a.frames / 2), lo = Math.max(0, imp - 3), hi = Math.min(a.frames - 1, imp + 2); return t < 0.12 ? Math.max(0, Math.floor(t / 0.12 * lo)) : lo + Math.floor((((t - 0.12) / 0.17) % 1) * (hi - lo + 1)); }
+  if (kind === 'meteor') { const imp = a.events.impact ?? a.events.release ?? Math.floor(a.frames / 2), lo = Math.max(0, imp - 3), hi = Math.min(a.frames - 1, imp + 2); return t < 0.12 ? Math.max(0, Math.floor(t / 0.12 * lo)) : lo + Math.floor((((t - 0.12) / 0.17) % 1) * (hi - lo + 1)); }
   if (kind === 'flare' || kind === 'crucible') { const rel = a.events.release ?? Math.floor(a.frames / 2), tr = kind === 'flare' ? 0.2 : 0.55; if (t < tr) return Math.min(rel - 1, Math.max(0, Math.floor(t / tr * rel))); return Math.min(a.frames - 1, rel + Math.floor(Math.min(0.999999, (t - tr) / Math.max(0.1, (dur ?? tr + 0.5) - tr)) * (a.frames - rel))); }
   const rel = (kind === 'dragon' ? a.events.impact : a.events.release) ?? Math.floor(a.frames / 2);
   const tr = kind === 'beam' ? BEAM.charge : kind === 'sphere' ? SPHERE.gather : kind === 'dragon' ? DRAGON.windup : CANNON.gather;
@@ -176,7 +180,7 @@ export class KaiAnimator {
   private runTime = 0;
   private sinceTurn = 1;
   private movingNow = false;
-  private hurtTime = -1;
+  private hurtTime = -1; private lungeTime = -1;
   private deathTime = -1;
   private dashRec = -1;
   private dashProg = 0;
@@ -264,6 +268,7 @@ export class KaiAnimator {
     else if (simForm === 0 && this.simFormPrev >= 1) { this.transformTime = -1; this.punchTime = -1; this.runPunchTime = -1; this.visualForm = 'base'; this.revertTime = 0; this.events.push('form_end'); }
     this.simFormPrev = simForm;
 
+    if (i.hurt) this.lungeTime = -1;
     if (i.hurt) { this.commitNow(simForm); this.punchTime = -1; this.runPunchTime = -1; this.dashRec = -1; this.revertTime = -1; this.hurtTime = 0; }
     if (i.dashing) {
       if (!this.dashWas) { this.commitNow(simForm); this.punchTime = -1; this.runPunchTime = -1; this.hurtTime = -1; this.revertTime = -1; this.turn(facingFromInput(this.facing, i.dashX, i.dashY), true); }
@@ -322,7 +327,8 @@ export class KaiAnimator {
     const calm = !!sp && !i.moving && !busy && !casting && !this.punching;
     if (calm) { this.idleFor += i.dt; if (this.special < 0 && this.idleFor >= 9) { this.special = 0; this.idleFor = 0; } } else { this.idleFor = 0; this.special = -1; }
     if (this.special >= 0 && sp) { this.special += i.dt; if (this.special >= sp.frames / sp.fps) this.special = -1; }
-    const want: KaiClip = this.special >= 0 ? 'IdleSpecial' : this.hurtTime >= 0 ? 'Hurt' : (i.dashing || this.dashRec >= 0) ? 'Dash' : (this.transformTime >= 0 || this.revertTime >= 0) ? 'Transform' : casting ? CAST_CLIP[i.cast!.kind] : this.punching ? 'BasicPunch' : this.runPunching && i.moving ? 'RunPunchUpper' : i.moving ? 'Run' : 'Idle';
+    if (i.lunge && !i.dashing && !casting && this.hurtTime < 0) this.lungeTime = 0; else if (this.lungeTime >= 0) { this.lungeTime += i.dt; if (this.lungeTime > 0.58 || casting || i.dashing) this.lungeTime = -1; }
+    const want: KaiClip = this.special >= 0 ? 'IdleSpecial' : this.hurtTime >= 0 ? 'Hurt' : (i.dashing || this.dashRec >= 0) ? 'Dash' : this.lungeTime >= 0 ? 'Lunge' : (this.transformTime >= 0 || this.revertTime >= 0) ? 'Transform' : casting ? CAST_CLIP[i.cast!.kind] : this.punching ? 'BasicPunch' : this.runPunching && i.moving ? 'RunPunchUpper' : i.moving ? 'Run' : 'Idle';
     if (want !== this.clip) { this.clip = want; this.time = 0; }
     const runStep = i.dt * Math.min(18, Math.max(10, 14 * i.runSpeed / 250)) / 14;
     if (this.movingNow) this.runTime += runStep; else this.runTime = 0;
@@ -350,10 +356,10 @@ export class KaiAnimator {
       frame = this.transformTime >= 0 ? Math.min(a.frames - 1, Math.floor(this.transformTime * a.fps + 1e-6)) : Math.max(0, commit - 1 - Math.floor(Math.min(0.999, this.revertTime / FORM_REVERT_SECONDS) * commit));
     } else if (this.clip === 'RunPunchUpper') {
       frame = Math.min(a.frames / RUN_PHASES - 1, Math.floor(Math.max(0, this.runPunchTime) * a.fps + 1e-6)) * RUN_PHASES + this.legPhase();
-    } else if (this.casting && (this.clip === 'Beam' || this.clip === 'Sphere' || this.clip === 'BasicPunch')) {
+    } else if (this.casting && (this.clip === 'Beam' || this.clip === 'Sphere' || this.clip === 'BasicPunch' || this.clip === 'Lunge' || this.clip === 'Uppercut' || this.clip === 'Slam')) {
       frame = castFrame(a, this.castKind, this.castT, this.castDur, this.castReleased, this.castRt);
     } else {
-      const t = this.clip === 'BasicPunch' ? Math.max(0, this.punchTime) : this.clip === 'Hurt' ? Math.max(0, this.hurtTime) : this.clip === 'Death' ? Math.max(0, this.deathTime) : this.time;
+      const t = this.clip === 'Lunge' ? Math.max(0, this.lungeTime) : this.clip === 'BasicPunch' ? Math.max(0, this.punchTime) : this.clip === 'Hurt' ? Math.max(0, this.hurtTime) : this.clip === 'Death' ? Math.max(0, this.deathTime) : this.time;
       const raw = Math.floor(t * a.fps + 1e-6);
       frame = a.loop ? raw % a.frames : Math.min(a.frames - 1, raw);
     }

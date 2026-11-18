@@ -25,4 +25,6 @@ Voidheart Exile redesign (own ImageGen design, rig, animations); normal-speed mo
 ## Follow-up pass
 Voidheart south head rebuilt (stale head pivot in `form_geometry.json` floated it above the collar). Ground ring / halo now follow the form contour colour; Voidheart effects (zones, marks, bursts, ability art desaturated at runtime) are gray; Surge Step contour, ring and trail are blue. Local co-op draws the second fighter with a real hero renderer (`EntityRenderer(scene, true)`) instead of the placeholder body. Kai Q orb/burst/comet/pillar/sbeam/sigil art stripped of neighbour-cell fragments. Loadout chips have icons. Added ember trails, meteor descent streak, flare embers and Surge afterimages.
 
-Still open: dedicated Blender poses for the new Kai abilities (existing clips reused); by-ear audio, controller and normal-speed motion review; Windows installer not rebuilt.
+Authored Blender poses: new Lunge (Surge Step, Meteor Drive), Uppercut (Rising Flare) and Slam (Sunfall Crucible) clips, built through the existing rig pipeline for base / Flarebound / Cometheart / Stillfire in all four directions (`anim_kk.py`, `danim_kk.py`, published with `scripts/b22-kai-clips-publish.py`, existing clips untouched).
+
+Still open: by-ear audio, controller and normal-speed motion review; Windows installer not rebuilt.

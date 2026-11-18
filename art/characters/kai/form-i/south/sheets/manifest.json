@@ -229,6 +229,73 @@
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Lunge": {
+   "sheet": "sheets/kai_south_lunge.png",
+   "frames": 14,
+   "fps": 24,
+   "loop": false,
+   "duration_s": 0.5833,
+   "blender_action": "Lunge",
+   "events": {
+    "coil": 2,
+    "release": 3,
+    "recover_start": 8,
+    "interruptible_from": 10
+   },
+   "frame_width": 100,
+   "frame_height": 172,
+   "origin_px": [
+    42.0,
+    163.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Uppercut": {
+   "sheet": "sheets/kai_south_uppercut.png",
+   "frames": 18,
+   "fps": 24,
+   "loop": false,
+   "duration_s": 0.75,
+   "blender_action": "Uppercut",
+   "events": {
+    "coil": 3,
+    "release": 6,
+    "recover_start": 10,
+    "interruptible_from": 13
+   },
+   "frame_width": 100,
+   "frame_height": 173,
+   "origin_px": [
+    42.0,
+    164.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Slam": {
+   "sheet": "sheets/kai_south_slam.png",
+   "frames": 26,
+   "fps": 20,
+   "loop": false,
+   "duration_s": 1.3,
+   "blender_action": "Slam",
+   "events": {
+    "gather_start": 0,
+    "hold": 7,
+    "release": 11,
+    "recover_start": 14,
+    "interruptible_from": 20
+   },
+   "frame_width": 102,
+   "frame_height": 173,
+   "origin_px": [
+    42.0,
+    164.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
   }
  }
 }

@@ -37,7 +37,7 @@ export class EntityRenderer {
   private readonly bosses: BossRenderer | null;
   private readonly animator: KaiAnimator;
   private pose: AnimPose = { facing: 'south', clip: 'Idle', frame: 0, legs: null, form: 'base', events: [] };
-  private lastShotId = 0;
+  private lastShotId = 0; private lastSurgeEv = 0;
   private lastHp = NaN;
   private lastX = NaN;
   private lastY = NaN;
@@ -154,10 +154,11 @@ export class EntityRenderer {
     for (const fx of state.impacts) if (fx.kind === 'shot' && fx.id > this.lastShotId) {
       this.lastShotId = fx.id; if (!shot) shot = { dx: (fx.targetX ?? p.x) - p.x, dy: (fx.targetY ?? p.y) - p.y };
     }
+    let lunge = false; for (const ev of state.abilityEvents) if (ev.id > this.lastSurgeEv && ev.kind === 'surge_start') lunge = true; for (const ev of state.abilityEvents) this.lastSurgeEv = Math.max(this.lastSurgeEv, ev.id);
     const period = Math.max(0.16, p.attackPeriod * (p.form ? 0.75 : 1));
     this.pose = this.animator.update({
       dt, alive: state.phase !== 'dead' && p.hp > 0, moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, inputX: input.x, inputY: input.y,
-      runSpeed: p.speed * (p.form === 3 ? 1.2 : p.form ? 1.16 : 1), dashing: p.dashRemaining > 0, dashX: p.dashDx, dashY: p.dashDy, dashRemaining: p.dashRemaining, hurt, form: p.form, cinema: state.cinema ? { t: state.cinema.t, dur: state.cinema.dur, commitAt: state.cinema.commitAt, to: state.cinema.to } : null,
+      runSpeed: p.speed * (p.form === 3 ? 1.2 : p.form ? 1.16 : 1), lunge, dashing: p.dashRemaining > 0, dashX: p.dashDx, dashY: p.dashDy, dashRemaining: p.dashRemaining, hurt, form: p.form, cinema: state.cinema ? { t: state.cinema.t, dur: state.cinema.dur, commitAt: state.cinema.commitAt, to: state.cinema.to } : null,
       cast: state.cast ? { id: state.cast.id, kind: state.cast.kind, face: state.cast.face, t: state.cast.t, dur: state.cast.dur, dirX: state.cast.dirX, dirY: state.cast.dirY, released: state.cast.released, rt: state.cast.rt } : null, attackClock: p.attackClock, hasTarget: target !== null, targetDx: target?.dx ?? 0, targetDy: target?.dy ?? 0, shot,
     }, period);
     const set = this.pose.form === 'f3' && this.f3 ? this.f3 : this.pose.form === 'f3' && this.f2 ? this.f2 : this.pose.form === 'f2' && this.f2 ? this.f2 : this.pose.form === 'f1' && this.f1 ? this.f1 : this.manifests;

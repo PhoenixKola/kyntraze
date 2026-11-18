@@ -116,3 +116,16 @@ describe('Kai kit audio', () => {
     for (const k of ['surge_start', 'scatter_fire', 'scatter_blast', 'meteor_beat', 'flare_start', 'flare_pillar', 'crucible_cast', 'crucible_pulse', 'crucible_final', 'clone_spawn', 'clone_end', 'rift_hop']) { expect(EVENT_SFX[k], k).toBeTruthy(); expect(SFX[EVENT_SFX[k]], k).toBeTruthy(); }
   });
 });
+
+describe('B22 authored Kai clips', async () => {
+  const fs = await import('node:fs'), path = await import('node:path');
+  const { KAI_KIT_CLIPS, CAST_CLIP } = await import('../assets/kaiAnimation');
+  const SPEC: Record<string, [number, number]> = { Lunge: [14, 3], Uppercut: [18, 6], Slam: [26, 11] };
+  it('every form and direction ships Lunge / Uppercut / Slam sheets with the agreed frame counts and release frames', () => {
+    for (const set of ['kai', 'kai-f1', 'kai-f2', 'kai-f3']) for (const d of ['south', 'north', 'east', 'west']) {
+      const root = path.resolve('public/art', set, d), m = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
+      for (const c of KAI_KIT_CLIPS) { const a = m.animations[c]; expect(a, `${set}/${d}/${c}`).toBeTruthy(); expect([a.frames, a.events.release]).toEqual(SPEC[c]); expect(fs.existsSync(path.join(root, a.sheet))).toBe(true); }
+    }
+  });
+  it('Meteor Drive, Rising Flare and Sunfall Crucible play their own clips', () => { expect([CAST_CLIP.meteor, CAST_CLIP.flare, CAST_CLIP.crucible]).toEqual(['Lunge', 'Uppercut', 'Slam']); });
+});

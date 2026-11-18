@@ -17,7 +17,7 @@ import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
 import { B14_FX_NAMES, b14Key, b14Url } from '../render/b14fx';
 import { B21_GROUPS, b21Key, b21ManifestKey, b21ManifestUrl, b21Names, b21Url } from '../render/b21Assets';
 import { F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL, f3fxKey, f3fxUrl } from '../render/stillfireFx';
-import { KAI_F3_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiClipInfo, type KaiManifests } from '../../assets/kaiAnimation';
+import { KAI_F3_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_KIT_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiClipInfo, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
   constructor(private readonly arena: ArenaId = 'gloam', private readonly hero: HeroId = 'kai') { super({ key: 'BootScene' }); setVexSkin(hero === 'vex'); }
   /** Two load phases (starter assets, then the ~100 Kai sheets whose frame sizes come from the manifests): report one combined 0..1 to the loading screen. */
@@ -67,7 +67,7 @@ export class BootScene extends Phaser.Scene {
       const f3 = {} as KaiManifests;
       KAI_DIRS.forEach((dir, i) => { f3[dir] = parseKaiManifest(f3Raw[i], dir, 'f3'); });
       this.registry.set(KAI_F3_REGISTRY_KEY, f3);
-      for (const dir of KAI_DIRS) for (const clip of [...KAI_F1_CLIPS, 'IdleSpecial'] as const) {
+      for (const dir of KAI_DIRS) for (const clip of [...KAI_F1_CLIPS, ...KAI_KIT_CLIPS, 'IdleSpecial'] as const) {
         const m = f3[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue;
         this.load.spritesheet(kaiTextureKey(dir, clip, 'f3'), kaiSheetUrl(dir, a, 'f3'), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });
       }
@@ -86,8 +86,8 @@ export class BootScene extends Phaser.Scene {
     for (const g of B21_GROUPS) for (const n of b21Names(this.cache.json.get(b21ManifestKey(g)))) this.load.image(b21Key(g, n), b21Url(g, n));
     const fx3 = this.cache.json.get(F3_FX_MANIFEST_KEY) as Record<string, unknown> | undefined;
     if (fx3 && typeof fx3 === 'object') for (const n of Object.keys((fx3 as { sprites?: Record<string, unknown> }).sprites ?? fx3)) if (/^[a-z0-9_]+$/.test(n)) this.load.image(f3fxKey(n), f3fxUrl(n));
-    for (const dir of KAI_DIRS) for (const clip of KAI_F1_CLIPS) {
-      const m = f2[dir], a = m.animations[clip]!;
+    for (const dir of KAI_DIRS) for (const clip of [...KAI_F1_CLIPS, ...KAI_KIT_CLIPS] as const) {
+      const m = f2[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue;
       this.load.spritesheet(kaiTextureKey(dir, clip, 'f2'), kaiSheetUrl(dir, a, 'f2'), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });
     }
     for (const k of ENEMY_KINDS) { const m = this.cache.json.get(enemyManifestKey(k)) as EnemyManifest; this.load.spritesheet(enemySheetKey(k), enemySheetUrl(k), { frameWidth: m.frame_width, frameHeight: m.frame_height, endFrame: m.frames - 1 }); }
@@ -100,12 +100,12 @@ export class BootScene extends Phaser.Scene {
     for (const n of [...ARENA_FX, ...HAZARD_FX[this.arena]]) this.load.image(arenaFxKey(n), arenaAssetUrl(this.arena, `fx/${n}.png`));
     }
     for (const k of BOSS_KINDS) { const m = this.cache.json.get(bossManifestKey(k)) as BossManifest; this.load.spritesheet(bossSheetKey(k), bossSheetUrl(k), { frameWidth: m.frame_width, frameHeight: m.frame_height, endFrame: m.frames - 1 }); }
-    for (const dir of KAI_DIRS) for (const clip of KAI_F1_CLIPS) {
-      const m = f1[dir], a = m.animations[clip]!;
+    for (const dir of KAI_DIRS) for (const clip of [...KAI_F1_CLIPS, ...KAI_KIT_CLIPS] as const) {
+      const m = f1[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue;
       this.load.spritesheet(kaiTextureKey(dir, clip, 'f1'), kaiSheetUrl(dir, a, 'f1'), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });
     }
-    for (const dir of KAI_DIRS) for (const clip of KAI_CLIPS) {
-      const m = manifests[dir], a = m.animations[clip];
+    for (const dir of KAI_DIRS) for (const clip of [...KAI_CLIPS, ...KAI_KIT_CLIPS] as const) {
+      const m = manifests[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue;
       this.load.spritesheet(kaiTextureKey(dir, clip), kaiSheetUrl(dir, a), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });
     }
     this.load.off(Phaser.Loader.Events.PROGRESS); this.load.on(Phaser.Loader.Events.PROGRESS, (v: number) => this.report(1, v));
