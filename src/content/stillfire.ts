@@ -17,7 +17,7 @@ export const APEX = {
   selectHold: 0.32, selectStep: 0.55,
 } as const;
 
-/** E in Form III: hold to charge while moving, aim 360 degrees, release = a short safe blink then a piercing silver beam. */
+/** E in Form III: hold to charge while moving, aim 360 degrees, release = a piercing silver beam; if it damages something Kai teleports (see CHAIN in kaiKit.ts) and fires up to five follow-up beams. */
 export const RIFT = {
   name: 'Silver Rift', key: 'E',
   minCharge: 0.16, maxCharge: 1.5, tier1At: 0.5, tier2At: 1.15,
@@ -45,5 +45,5 @@ export const EVASION = { cooldown: 9, sidestep: 78, iframes: 0.35, tries: 6 } as
 
 /** Carry-forward of the B10 builds into Form III (shown in the level-up preview + Form III tooltip):
  *  Lance cards -> Silver Rift: Hard Light = damage, Wide Lance = width, Lance Cooling = cooldown, Afterburn (pulses) = +0.08 s of beam per stack, Conductor = Drive per Rift hit.
- *  Nova cards -> Instinct Reversal: Nova power = damage, Bloom Bulk = reach + finishing-flash radius, Nova Cooling = cooldown, Afterglow / Twin Bloom = +1 / +2 extra targets. */
+ *  Nova cards -> Instinct Reversal: Nova power = damage, Bloom Bulk = reach + finishing-flash radius, Nova Cooling = cooldown, Afterglow / Twin Bloom = a larger finishing flash and strike radius (no target cap: the chain runs while enemies remain in radius). */
 export const APEX_CARRY = { lingerSeconds: 0.08, echoTargets: 1 } as const;

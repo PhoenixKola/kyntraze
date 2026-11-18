@@ -1,3 +1,4 @@
+import { PASSIVE_AURA } from './fxPolicy';
 import Phaser from 'phaser';
 import type { GameState } from '../../sim/GameState';
 import { RIFT } from '../../content/stillfire';
@@ -102,7 +103,7 @@ export class ApexFx {
     if (c.dt > 0) this.clock += dt;
     const k = hero.scaleX / 0.5, bodyY = c.y - 40 * k;
     const reduced = c.reduced, thin = reduced ? 0.4 : c.crowded ? 0.55 : 1;
-    this.ground.update(dt, c.x, c.y, c.f3 && s.phase !== 'dead' && !cin, 100 * k, c.dashing ? 0.6 : 0, reduced);
+    this.ground.update(dt, c.x, c.y, PASSIVE_AURA && c.f3 && s.phase !== 'dead' && !cin, 100 * k, c.dashing ? 0.6 : 0, reduced);
     // ---- events raised by the sim since the last frame
     for (const ev of s.abilityEvents) {
       if (ev.id <= this.lastEvent) continue; this.lastEvent = ev.id;
@@ -189,7 +190,7 @@ export class ApexFx {
     const target = !show ? 0 : dashing ? 1 : charging ? 0.55 + 0.45 * clamp01((cast?.t ?? 0) / RIFT.maxCharge) : releasing ? 0.85 : moving ? 0.42 + 0.22 * clamp01(c.speed / 300) : 0.26;
     this.level += (target - this.level) * Math.min(1, dt * (target > this.level ? 8 : 2.2));
     const L = this.level;
-    if (this.halo && this.halo2) {
+    if (PASSIVE_AURA && this.halo && this.halo2) {
       this.auraClock += dt * (1 + 1.6 * L);   // the flow speeds up with the action level
       const a = this.auraClock, hs = (150 * k) / this.halo.height;
       const b1 = 0.9 + 0.1 * Math.sin(a * 1.7) + 0.04 * Math.sin(a * 4.3), b2 = 0.9 + 0.1 * Math.sin(a * 1.1 + 1.9) + 0.05 * Math.sin(a * 3.1 + 0.7);
@@ -211,7 +212,7 @@ export class ApexFx {
     const dxi = s.player.vx, dyi = s.player.vy, sp = Math.hypot(dxi, dyi);
     if (sp > 20) { const tx = dxi / sp, ty = dyi / sp; this.dirX += (tx - this.dirX) * Math.min(1, dt * 9); this.dirY += (ty - this.dirY) * Math.min(1, dt * 9); } else { this.dirX *= 1 - Math.min(1, dt * 6); this.dirY *= 1 - Math.min(1, dt * 6); }
     const dm = Math.hypot(this.dirX, this.dirY);
-    if (show && dt > 0) {
+    if (PASSIVE_AURA && show && dt > 0) {
       this.wispClock -= dt;
       if ((moving || dashing) && dm > 0.2 && this.wispClock <= 0) {
         this.wispClock = (dashing ? 0.018 : 0.06) / thin; const nx = this.dirX / dm, ny = this.dirY / dm;

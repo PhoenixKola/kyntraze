@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { STARTER_TEXTURES } from '../../assets/atlasRegistry';
 import { ABILITY_FX_NAMES, abilityFxKey, abilityFxUrl } from '../render/abilityFx';
+import { KK_FX, kkKey, kkUrl } from '../render/kaiKitFx';
 import { VFX_NAMES, vfxKey, vfxUrl } from '../render/fxPool';
 import { ARENA_FX, FLOOR_TILE_COUNT, HAZARD_FX, PROPS_KEY, arenaAssetUrl, arenaFxKey, arenaPropNames, floorTileKey, floorTileUrl, parsePropManifest, propKey } from '../render/arenaWorld';
 import { B22_ART } from '../render/realmArt';
@@ -44,6 +45,7 @@ export class BootScene extends Phaser.Scene {
     BOSS_FX_NAMES.forEach(n => this.load.image(bossFxKey(n), bossFxUrl(n)));
     this.load.json(KAI_ANCHORS_KEY, KAI_ANCHORS_URL);
     ABILITY_FX_NAMES.forEach(n => this.load.image(abilityFxKey(n), abilityFxUrl(n)));
+    KK_FX.forEach(n => this.load.image(kkKey(n), kkUrl(n)));
     for (let i = 0; i < 4; i++) this.load.image(`xpgem${i}`, `/art/fx/xp/gem${i}.png`);
     this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => console.error(`[boot] failed to load ${file.key} (${file.url})`));
   }

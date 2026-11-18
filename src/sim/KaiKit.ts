@@ -20,7 +20,7 @@ const emit = (s: GameState, kind: AbilityEventKind, x: number, y: number, n?: nu
 const clearLine = (x0: number, y0: number, x1: number, y1: number) => { const d = Math.hypot(x1 - x0, y1 - y0); for (let t = 12; t < d; t += 12) if (blocked(x0 + (x1 - x0) * t / d, y0 + (y1 - y0) * t / d, 0)) return false; return true; };
 
 /** Buff multipliers computed from timed state (never written into the base stats). */
-export const surgeActive = (s: GameState) => { const k = s.hx.kk; return !!k && k.surge > 0 && s.player.form === 0; };
+export const surgeActive = (s: GameState) => { const k = s.hx?.kk; return !!k && k.surge > 0 && s.player.form === 0; };
 export const surgeSpeedMul = (s: GameState) => (surgeActive(s) ? SURGE.speedMul : 1);
 export const surgeAutoMul = (s: GameState) => (surgeActive(s) ? SURGE.autoMul : 1);
 
@@ -186,7 +186,6 @@ function castCrucible(s: GameState, c: Cast) {
   if (!c.released && c.t >= CRUCIBLE.windup - 1e-9) {
     c.released = true; const echo = Math.min(2, s.mods.sphereEcho), r = CRUCIBLE.radius * s.mods.sphereRadius;
     k.crucible = { id: s.nextId++, x: c.tx, y: c.ty, t: 0, life: CRUCIBLE.life, r, pulse: 0, pulses: CRUCIBLE.pulses + echo, dmg: CRUCIBLE.pulseDamage * s.mods.sphereDamage * s.mods.formPower, finalDmg: CRUCIBLE.finalDamage * s.mods.sphereDamage * s.mods.formPower * (1 + 0.15 * echo), finalR: r * CRUCIBLE.finalRadiusMul, done: false };
-    emit(s, 'sphere_launch', c.tx, c.ty);
   }
   if (c.t >= c.dur - 1e-9) { void p; s.cast = null; }
 }
@@ -230,3 +229,8 @@ export function decoyFor(s: GameState, e: { x: number; y: number }): { x: number
   return dc <= ECHO.decoyRange && dc < Math.hypot(p.x - e.x, p.y - e.y) ? c : null;
 }
 export function endKaiKit(s: GameState) { const k = s.hx.kk; if (!k) return; k.shots = []; k.pillars = []; k.crucible = null; if (k.clone) { emit(s, 'clone_end', k.clone.x, k.clone.y); k.clone = null; } k.surge = 0; }
+
+export function kitSnap(s: GameState): { surge: number; cloneHp: number; cloneLife: number; crucible: boolean; chain: 'none' | 'rift' | 'reversal' } {
+  const k = s.hx?.kk, c = s.cast, ch = c?.kind === 'reversal' && !c.released && c.dur > 1e8 ? 'reversal' : c?.kind === 'rift' && c.chain && c.chain.state !== 'done' && c.chain.state !== 'main' ? 'rift' : 'none';
+  return { surge: surgeActive(s) ? k!.surge : 0, cloneHp: k?.clone ? k.clone.hp / k.clone.maxHp : 0, cloneLife: k?.clone ? k.clone.life : 0, crucible: !!k?.crucible, chain: ch };
+}

@@ -6,6 +6,9 @@ import { FormFx } from './formFx';
 import { CometFx } from './cometFx';
 import { ApexFx } from './stillfireFx';
 import { AbilityFx } from './abilityFx';
+import { KaiKitFx } from './kaiKitFx';
+import { PASSIVE_AURA } from './fxPolicy';
+import { CONTOUR, ContourController, registerContourFilter } from './contourFilter';
 import { HeroFxView } from './heroFxView';
 import { BodyMotion, styleFor } from './bodyMotion';
 import { AuraView, type AuraState } from './auraView';
@@ -26,7 +29,7 @@ export class EntityRenderer {
   private readonly apexFx: ApexFx;
   private readonly cometFx: CometFx;
   private readonly formFx: FormFx;
-  private readonly abilityFx: AbilityFx;
+  private readonly abilityFx: AbilityFx; private readonly kitFx: KaiKitFx;
   private readonly anchors: AnchorTable | undefined;
   private hand: HandAnchor | null = null;
   private readonly enemies: EnemyRenderer;
@@ -50,17 +53,18 @@ export class EntityRenderer {
     this.f1 = scene.registry.get(KAI_F1_REGISTRY_KEY) as KaiManifests | undefined;
     this.f2 = scene.registry.get(KAI_F2_REGISTRY_KEY) as KaiManifests | undefined;
     this.f3 = scene.registry.get(KAI_F3_REGISTRY_KEY) as KaiManifests | undefined;
-    this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1, this.f2, this.f3); this.cometFx = new CometFx(scene); this.apexFx = new ApexFx(scene); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = new EnemyRenderer(scene); this.bosses = new BossRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
+    this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1, this.f2, this.f3); this.cometFx = new CometFx(scene); this.kitFx = new KaiKitFx(scene, this.f3); this.apexFx = new ApexFx(scene); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = new EnemyRenderer(scene); this.bosses = new BossRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
     // Rim + stroke run per sprite (as in B20). While the two layers are split (moving cast) they are switched off, because each layer's open waist edge would get its own glow; the aura layer below carries the glow of the UNION silhouette instead.
-    for (const spr of [this.hero, this.legs]) { spr.enableFilters(); this.stroke.push(spr.filters!.internal.addGlow(0xffffff, 0, 0, 1, false, 5, 4) as unknown as StrokeCtl); this.rim.push(spr.filters!.internal.addGlow(0xd8f6ff, 1.6, 0, 1, false, 4, 2) as unknown as StrokeCtl); }
+    registerContourFilter(scene.game);
+    for (const spr of [this.hero, this.legs]) { spr.enableFilters(); const ctl = new ContourController((spr.filters!.internal as unknown as { camera: unknown }).camera); (spr.filters!.internal as unknown as { add: (c: unknown) => void }).add(ctl); this.contour.push(ctl); this.rim.push(spr.filters!.internal.addGlow(0xd8f6ff, 1.6, 0, 1, false, 4, 2) as unknown as StrokeCtl); }
     // B21 aura: a mirrored copy of the body on its OWN layer BEHIND the character, filtered with a knockout glow (only the halo is drawn, never the body), so the aura can never tint or wash out the character's own colours.
     this.auraCopyHero = scene.add.sprite(0, 0, kaiTextureKey('south', 'Idle'), 0); this.auraCopyLegs = scene.add.sprite(0, 0, kaiTextureKey('south', 'Run'), 0).setVisible(false);
     this.auraBody = scene.add.container(0, 0, [this.auraCopyLegs, this.auraCopyHero]).setDepth(9.7).setVisible(false); this.auraBody.enableFilters();
     this.auraGlow.push(this.auraBody.filters!.internal.addGlow(0xffffff, 0, 0, 1, true, 4, 10) as unknown as StrokeCtl);
   }
-  private readonly stroke: StrokeCtl[] = []; private readonly rim: StrokeCtl[] = []; private readonly auraGlow: StrokeCtl[] = []; private readonly auraTrack = new AuraTracker(); private auraMotes: FxPool | null = null; private moteClock = 0;
+  private readonly contour: ContourController[] = []; private contourT = 0; private readonly rim: StrokeCtl[] = []; private readonly auraGlow: StrokeCtl[] = []; private readonly auraTrack = new AuraTracker(); private auraMotes: FxPool | null = null; private moteClock = 0;
   /** B21.3 (revised): the transformation aura now FITS the body like the stroke: a soft, form-coloured glow filter on the sprite's own silhouette that breathes with activity (idle < moving < dash < charge < release), instead of art wings that extend past the character. */
   private updateAura(state: GameState, dt: number, reduced: boolean) {
     const p = state.player, f = p.form, st: AuraState | null = state.hero === 'kai' ? (f === 1 ? 'flare' : f === 2 ? 'comet' : f === 3 ? 'still' : null) : f >= 1 ? (state.hero as 'ren' | 'sora') : null;
@@ -68,11 +72,12 @@ export class EntityRenderer {
     const COL: Record<AuraState, number> = { ren: 0xff3a1a, sora: 0x2a9dff, flare: 0xff7a10, comet: 0xffb21a, still: 0x9fc4ff };   // deep hues: a pale glow colour saturates to white on the bright forms
     const on = !!st && state.phase === 'running' && p.hp > 0 && !state.cinema, crowd = state.enemies.length > 45 ? 0.8 : 1;
     let k = 0; if (on) { const flick = st === 'comet' ? 0.65 + 0.5 * Math.abs(Math.sin(Math.floor(t * 26) * 12.9898)) : st === 'still' ? 0.92 + 0.08 * Math.sin(t * 2.2) : 0.88 + 0.12 * Math.sin(t * 7.3); const WEIGHT: Record<AuraState, number> = { ren: 1, sora: 1, flare: 0.9, comet: 0.55, still: 0.5 }; k = Math.min(5, (2.4 + 3.6 * (smp.k - 0.5)) * WEIGHT[st!]) * flick * (reduced ? 0.55 : crowd); }   // per-form weight: bright gold forms need far less glow or the character washes out
+    if (!PASSIVE_AURA) k = 0;
     for (const c of this.auraGlow) { c.outerStrength = Math.max(0, k); c.active = k > 0.02; if (st) c.color = (state.hero === 'vex' ? 0x8f5cff : COL[st]); }
     this.auraBody.setVisible(k > 0.02);   // inactive = the shader pass is skipped entirely, so untransformed heroes pay nothing
     // embers/motes that rise off the silhouette itself (never wider than the body), rate follows the activity state
     this.auraMotes ??= new FxPool(this.scene, 60);
-    if (on && !reduced && dt > 0) {
+    if (PASSIVE_AURA && on && !reduced && dt > 0) {
       this.moteClock += dt; const rate = (st === 'still' ? 7 : st === 'comet' ? 16 : 12) * (0.6 + smp.k), step = 1 / rate, solar = st === 'flare' || st === 'comet' || st === 'ren';
       while (this.moteClock > step) {
         this.moteClock -= step; const rnd = Math.random, side = rnd() < 0.5 ? -1 : 1, h = rnd() * 74, edge = (7 + 9 * (1 - h / 80)) * side;   // x hugs the torso edge, wider near the shoulders than the feet
@@ -84,11 +89,15 @@ export class EntityRenderer {
   }
   private auraSample: { st: AuraState | null; smp: ReturnType<AuraTracker['update']>; on: boolean } = { st: null, smp: { phase: 'idle', k: 0.55, leanX: 0, leanY: 0, lean: 0, gather: 0, pulse: 0 }, on: false };
   /** B20: the transformation "stroke": a coloured outline hugging the body (Photoshop-style), part of the sprite instead of a floating aura. */
-  private updateStroke(state: GameState) {
-    const f = state.player.form, pal = state.hero === 'vex' ? 0x9a6bff : state.hero === 'ren' ? 0xff2a24 : state.hero === 'sora' ? 0x3aa8ff : 0xe8f0fa, on = (state.hero === 'kai' ? f >= 2 : f >= 1) && !state.cinema, wave = 0.5 + 0.5 * Math.sin(state.time * 5.5), k = on ? 7 + 9 * wave : 0;   // B20: the stroke breathes between a steady band and a hard bright flare   // Kai: Cometheart and Stillfire only
-    const lerp = (a: number, b: number, t: number) => { const r = ((a >> 16) & 255) + ((((b >> 16) & 255) - ((a >> 16) & 255)) * t), g = ((a >> 8) & 255) + ((((b >> 8) & 255) - ((a >> 8) & 255)) * t), bl = (a & 255) + (((b & 255) - (a & 255)) * t); return (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(bl); };
-    const split = this.legs.visible; for (const c of this.rim) c.outerStrength = split ? 0 : 1.6;
-    for (const c of this.stroke) { c.outerStrength = split ? 0 : k; if (on) c.color = lerp(pal, 0xffffff, 0.35 * wave * wave); }   // the peak of each pulse runs hotter, toward white
+  private updateStroke(state: GameState, dt: number, reduced: boolean) {
+    const f = state.player.form, h = state.hero;
+    const key = h === 'kai' ? (f === 1 ? 'flare' : f === 2 ? 'comet' : f === 3 ? 'still' : null) : h === 'vex' ? (f === 1 ? 'vex1' : f === 2 ? 'vex2' : null) : f >= 1 ? (h === 'ren' ? 'ren' : 'sora') : null;
+    const surge = h === 'kai' && f === 0 && (state.hx.kk?.surge ?? 0) > 0;
+    const pal = key ? CONTOUR[key] : surge ? CONTOUR.surge : null, on = !!pal && !state.cinema && state.phase !== 'dead';
+    if (state.phase === 'running') this.contourT += dt; const split = this.legs.visible;
+    const power = on ? (surge ? 0.7 : 1) * (reduced ? 0.6 : 1) : 0;
+    for (const c of this.contour) { c.time = this.contourT; c.power = power; if (pal) c.pal = pal; c.active = on; }
+    for (const c of this.rim) c.outerStrength = on || split ? 0 : 1.6;   // the thin pale readability rim is for untransformed runners only
   }
   /** B12: camera punch-in factor of the Form II reveal, and a pending visual hit-stop (ms) the scene turns into skipped sim ticks. */
   cameraZoom() { return this.cometFx.cameraZoom() * this.apexFx.cameraZoom() * (this.heroFx?.cameraZoom() ?? 1); }
@@ -101,7 +110,7 @@ export class EntityRenderer {
   private kaiForm(state: GameState, dt: number, dead: boolean, reduced: boolean) {
     const p = state.player, want = this.auraSample.st && state.hero === 'kai' ? this.auraSample.st : null;
     if (want !== this.kaiAuraState) { this.kaiAura?.destroy(); this.kaiAura = want ? new AuraView(this.scene, want) : null; this.kaiAuraState = want; }
-    if (this.kaiAura && state.phase === 'running' && !dead && !state.cinema) this.kaiAura.update(this.auraSample.smp, dt, { x: this.hero.x, y: Math.round(p.y + KAI_GROUND_DY) }, p.vx, p.vy, reduced ? 0.5 : 1, true); else this.kaiAura?.hide();
+    if (PASSIVE_AURA && this.kaiAura && state.phase === 'running' && !dead && !state.cinema) this.kaiAura.update(this.auraSample.smp, dt, { x: this.hero.x, y: Math.round(p.y + KAI_GROUND_DY) }, p.vx, p.vy, reduced ? 0.5 : 1, true); else this.kaiAura?.hide();
   }
   /** Copies the exact frame, origin, transform and visibility of both body layers onto the aura layer (called once the pose for this frame is final). */
   private mirrorAura() {
@@ -112,15 +121,8 @@ export class EntityRenderer {
     }
   }
   /** Voidheart Exile: the runner levitates over a dark void disc, a broken crimson halo turns behind the head and shards orbit the body. */
-  private voidAura(g: Phaser.GameObjects.Graphics, t: number, x: number, y: number, reduced: boolean) {
-    g.fillStyle(0x12020a, 0.55).fillEllipse(x, y + 2, 64, 20); g.lineStyle(2, 0xff3a52, 0.75).strokeEllipse(x, y + 2, 64 + Math.sin(t * 3) * 4, 20);
-    g.lineStyle(1, 0xffc766, 0.6).strokeEllipse(x, y + 2, 40, 12);
-    const cx = x, cy = y + this.hoverY - 54, spin = t * 1.1;
-    for (let k = 0; k < 6; k++) { const a0 = spin + k * (Math.PI / 3), a1 = a0 + 0.55; g.lineStyle(3, k % 2 ? 0xff3a52 : 0xffc766, 0.85); g.beginPath(); g.arc(cx, cy, 36, a0, a1); g.strokePath(); }
-    if (reduced) return;
-    for (let k = 0; k < 5; k++) { const a = -spin * 1.6 + k * (Math.PI * 2 / 5), ox = Math.cos(a) * 34, oy = Math.sin(a) * 12 + this.hoverY * 0.5 - 30 + Math.sin(t * 2 + k) * 6, back = Math.sin(a) < 0;
-      g.fillStyle(back ? 0x7a1228 : 0xff6a5a, 0.9).fillTriangle(x + ox, y + oy - 7, x + ox - 3, y + oy, x + ox, y + oy + 7).fillTriangle(x + ox, y + oy - 7, x + ox + 3, y + oy, x + ox, y + oy + 7); }
-  }
+  /** Voidheart Exile levitates over a dark void disc (the halo and shards were code-drawn placeholders and are gone; the contour energy carries the form's identity). */
+  private voidAura(g: Phaser.GameObjects.Graphics, _t: number, x: number, y: number, _reduced: boolean) { g.fillStyle(0x12020a, 0.55).fillEllipse(x, y + 2, 60, 18); }
   /** B21.1: spring lean / squash / bob around the feet for the current hero state (identity while dead, in a reveal or frozen). */
   private applyMotion(state: GameState, dt: number, hero: 'kai' | 'ren' | 'sora', reduced: boolean, hurt: boolean, dashing: boolean, clip: string, facing: string) {
     const p = state.player, frozen = !!state.cinema || clip === 'Transform' || state.phase !== 'running', cast = state.cast ?? state.hx.act;
@@ -136,7 +138,7 @@ export class EntityRenderer {
   fxOrigin() { return this.abilityFx.lastOrigin; }
   debugPose() { return { ...this.pose, visualForm: this.animator.visualForm, transforming: this.animator.transforming, texture: this.hero.texture.key, frameIndex: Number(this.hero.frame.name), x: this.hero.x, y: this.hero.y, scale: this.baseScale }; }
   sync(state: GameState, input: InputState, deltaMs = 0, reducedEffects = false) {
-    this.updateStroke(state); this.updateAura(state, Math.min(0.1, deltaMs / 1000), reducedEffects);
+    this.updateStroke(state, Math.min(0.1, deltaMs / 1000), reducedEffects); this.updateAura(state, Math.min(0.1, deltaMs / 1000), reducedEffects);
     if (state.hero !== 'kai') { this.syncHero(state, input, deltaMs, reducedEffects); this.syncWorld(state, deltaMs, reducedEffects); return; }
     const p = state.player;
     const dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0;
@@ -193,7 +195,7 @@ export class EntityRenderer {
     this.formFx.update(dt, this.hero.x, this.hero.y, this.baseScale / KAI_SCALE, this.animator.visualForm === 'f1', !dead, this.pose.events, reducedEffects, emphasis, state.enemies.length > 45, this.hero);
     const dead2 = dead;
     this.hand = this.anchors ? handAnchorWorld(this.anchors, this.pose.form, this.pose.facing, this.pose.clip, this.pose.frame, this.hero.x, this.hero.y, this.baseScale) : null;
-    this.abilityFx.update(dt, state, reducedEffects, this.animator.visualForm !== 'base', this.hand);
+    this.abilityFx.update(dt, state, reducedEffects, this.animator.visualForm !== 'base', this.hand); if (state.hero === 'kai') this.kitFx.update(dt, state, reducedEffects, this.baseScale);
     this.apexFx.update({ dt, state, hero: this.hero, x: this.hero.x, y: this.hero.y, facing: this.pose.facing, reduced: reducedEffects, crowded: state.enemies.length > 45, f3: this.animator.visualForm === 'f3' && !dead2,
       moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, speed: Math.hypot(p.vx, p.vy), dashing: p.dashRemaining > 0, hand: this.hand, events: this.pose.events });
     this.cometFx.update({ dt, state, hero: this.hero, x: this.hero.x, y: this.hero.y, facing: this.pose.facing, reduced: reducedEffects, crowded: state.enemies.length > 45, f2: this.animator.visualForm === 'f2' && !dead2 && p.form !== 3 && state.cinema?.to !== 3,
@@ -279,5 +281,5 @@ export class EntityRenderer {
     for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies.stats(), boss: this.bosses.stats() }; }
-  destroy() { this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies.destroy(); this.bosses.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); }
+  destroy() { this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies.destroy(); this.bosses.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); }
 }

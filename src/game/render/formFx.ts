@@ -1,3 +1,4 @@
+import { PASSIVE_AURA } from './fxPolicy';
 import Phaser from 'phaser';
 import { FORM_LOOKS, FORM_I_LOOK } from '../../assets/formLooks';
 import type { KaiAnimEvent } from '../../assets/kaiAnimation';
@@ -60,7 +61,7 @@ export class FormFx {
       }
       if (e === 'form_end') { this.spawn('ring', 3.6, this.look.aura, { x, y: y - 2, life: 0.3, s0: 2.6 * k, s1: 0.5 * k, a0: 0.0, a1: 0.9 }); }
     }
-    this.persistent = visualForm && alive;
+    this.persistent = visualForm && alive && PASSIVE_AURA;
     this.glowLevel += ((this.persistent ? 1 : 0) - this.glowLevel) * Math.min(1, dt * (this.persistent ? 6 : 9));
     this.pulse = Math.max(0, this.pulse - dt);
     this.ground.update(dt, x, y, this.persistent, 112 * k, emphasis, reduced);

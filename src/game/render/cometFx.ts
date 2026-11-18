@@ -1,3 +1,4 @@
+import { PASSIVE_AURA } from './fxPolicy';
 import Phaser from 'phaser';
 import type { GameState } from '../../sim/GameState';
 import { CANNON, COMET, DRAGON } from '../../content/cometheart';
@@ -200,7 +201,7 @@ export class CometFx {
     let target = 0.55; if (ctx.moving) target = 0.8 + 0.2 * Math.min(1, ctx.speed / 300); if (ctx.dashing) target = 1.05; if (charging) target = 1.0 + (c!.kind === 'comet' ? 0.3 * Math.min(1, c!.t / CANNON.gather) : 0.1);
     if (!ctx.f2) target = s.cinema ? this.level : 0;
     this.level += (target - this.level) * Math.min(1, dt * (target > this.level ? 9 : 1.8));
-    const L = this.level, show = L > 0.03 && ctx.f2 && !s.cinema || (!!s.cinema && L > 0.03);
+    const L = this.level, show = PASSIVE_AURA && (L > 0.03 && ctx.f2 && !s.cinema || (!!s.cinema && L > 0.03));
     const t = this.clock;
     // body-hugging golden rim (4 offset copies of the hero frame behind him), breathing at rest, flaring with intensity
     for (let i = 0; i < 4; i++) {
@@ -224,27 +225,8 @@ export class CometFx {
   get flashing() { return this.flashLeft > 0; }
 
   private ambient(ctx: CometCtx, L: number, charging: boolean) {
-    const { dt, x, y, reduced, crowded, hero } = ctx, k = hero.scaleX / 0.5, thin = crowded ? 2.2 : 1, quiet = reduced ? 3 : 1;
-    // idle crackle: small arcs across shoulders and fists; very occasionally a fist-clench arc
-    this.bolt -= dt * (0.7 + L); if (this.bolt <= 0 && !reduced) { this.bolt = (0.35 + rnd() * 0.6) * thin; this.bolts(x, y - 36 * k, 1 + (L > 0.9 ? 1 : 0), 24 * k + 8 * L, HOT, 0.14); }
-    this.idleArc -= dt; if (this.idleArc <= 0 && !ctx.moving && !reduced) { this.idleArc = 6 + rnd() * 5; for (const sd of [-1, 1]) this.spawn(pick(['bolt_h0', 'bolt_h1']), x + sd * 15 * k, y - 38 * k, { depth: 11.3, life: 0.3, tint: WHITE, s0: 0.9, s1: 1.2, a0: 1, a1: 0, sy: sd, rot: sd * 0.6, delay: sd > 0 ? 0.06 : 0 }); this.spawn('flash', x, y - 38 * k, { depth: 11.2, life: 0.25, tint: HOT, s0: 0.2, s1: 0.7, a0: 0.8, a1: 0 }); }
-    // wisps rise with the aura; while running they are blown backwards (trailing lightning)
-    this.sparkClock += dt; const every = 0.06 * thin * quiet / (0.6 + L);
-    const vx = ctx.moving ? -(hero.flipX ? -1 : 1) * 0 : 0; void vx;
-    const back = ctx.moving ? this.backward(ctx) : { x: 0, y: 0 };
-    while (this.sparkClock > every) {
-      this.sparkClock -= every; const side = rnd() < 0.5 ? -1 : 1;
-      this.spawn(pick(['aura_a', 'aura_b']), x + side * (8 + rnd() * 9) * k, y - (6 + rnd() * 40) * k, { depth: 9.6, life: 0.4 + rnd() * 0.25, tint: GOLD, vx: side * 3 + back.x * 70 * L, vy: -(26 + rnd() * 26) + back.y * 60 * L, s0: (0.55 + rnd() * 0.25) * k, s1: 0.3 * k, a0: 0.8, a1: 0, sy: 1 });
-    }
-    if (ctx.moving) {
-      this.glint -= dt; if (this.glint <= 0 && !reduced) { this.glint = 0.25 + rnd() * 0.3; this.spawn('star', x + (rnd() - 0.5) * 16 * k, y - (58 + rnd() * 12) * k, { depth: 11.4, life: 0.2, tint: WHITE, s0: 0.1, s1: 0.3, a0: 1, a1: 0, rot: rnd() }); }
-      if (!reduced && L > 0.85) { this.bolt -= dt * 2; if (this.bolt <= 0) { this.bolt = 0.2; this.spawn(pick(['bolt_h0', 'bolt_h1', 'bolt_h2', 'bolt_h3']), x + back.x * 26 * k, y - 28 * k + back.y * 14, { depth: 9.5, life: 0.16, tint: HOT, s0: 0.9, s1: 1.1, a0: 0.9, a1: 0, rot: Math.atan2(back.y, back.x), sy: rnd() < 0.5 ? 1 : -1 }); } }
-      // speed afterimages: bold on dash, light when running
-      this.ghostClock += dt; const gi = ctx.dashing ? 0.04 : 0.11 * (reduced ? 2 : 1); if (this.ghostClock >= gi && (ctx.dashing || L > 0.9)) { this.ghostClock = 0; this.ghost(hero, ctx.dashing ? 0.28 : 0.18, ctx.dashing ? 0.55 : 0.3); }
-      // heavy footfalls / dash takeoff: an occasional bright fissure, never every step
-      this.foot += dt * (ctx.dashing ? 4 : 1.6 * L); if (this.foot > 1) { this.foot = 0; if (rnd() < (ctx.dashing ? 0.8 : 0.4)) { this.crack(x + back.x * 14, y + 4, ctx.dashing ? 1.2 : 0.7, 1.4, reduced); this.dustPuff(x, y, back, k); } }
-    } else this.foot = 0;
-    if (charging) { this.dustClock += dt; if (this.dustClock > 0.07 && !reduced) { this.dustClock = 0; const a = rnd() * 6.283; this.spawn('halo', x + Math.cos(a) * 60, y - 20 + Math.sin(a) * 38, { depth: 11, life: 0.24, tint: HOT, vx: -Math.cos(a) * 250, vy: -Math.sin(a) * 150, s0: 0.06, s1: 0.01, a0: 0.9, a1: 0 }); } }
+    void charging; void L; void this.idleArc; void this.foot; void this.dustClock; void this.glint; void this.backward; void this.dustPuff;   // passive blazes are retired (fxPolicy.ts); only the deliberate dash afterimage remains
+    if (ctx.moving && ctx.dashing) { this.ghostClock += ctx.dt; if (this.ghostClock >= 0.04) { this.ghostClock = 0; this.ghost(ctx.hero, 0.28, 0.55); } }
   }
   private backward(ctx: CometCtx) { const f = ctx.facing; return f === 'east' ? { x: -1, y: 0 } : f === 'west' ? { x: 1, y: 0 } : f === 'south' ? { x: 0, y: -1 } : { x: 0, y: 1 }; }
   private dustPuff(x: number, y: number, back: { x: number; y: number }, k: number) { for (let i = 0; i < 2; i++) this.spawn('halo', x + back.x * 10, y, { depth: 4.2, life: 0.6, blend: 'normal', tint: DUST, vx: back.x * 30 + (rnd() - 0.5) * 30, vy: -16, s0: 0.1 * k, s1: 0.24 * k, a0: 0.2, a1: 0 }); }

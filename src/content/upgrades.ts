@@ -59,8 +59,8 @@ export const UPGRADES: readonly UpgradeDef[] = [
     stat: { label: 'Fist range', read: s => s.player.attackRange }, apply: s => { s.player.attackRange += 40; } },
   { id: 'echo', name: 'TWIN IMPACT', category: 'core', rarity: 'rare', blurb: 'Comet Fists strike one more enemy at once.', maxStacks: 2, weight: 3, minLevel: 3,
     stat: { label: 'Targets', read: s => s.player.targets }, apply: s => { s.player.targets = Math.min(5, s.player.targets + 1); } },
-  { id: 'pulse', name: 'PULSE ENGINE', category: 'core', rarity: 'rare', blurb: 'Impact Line hits harder and wider.', maxStacks: 3, weight: 3, minLevel: 3,
-    stat: { label: 'Impact damage', read: s => s.player.qDamage }, apply: s => { s.player.qDamage += 18; s.player.qRadius += 25; } },
+  { id: 'pulse', name: 'PULSE ENGINE', category: 'core', rarity: 'rare', blurb: 'Q hits harder and wider: blasts, strikes and the Echo clone.', maxStacks: 3, weight: 3, minLevel: 3,
+    stat: { label: 'Q damage', read: s => s.player.qDamage }, apply: s => { s.player.qDamage += 18; s.player.qRadius += 25; } },
 
   { id: 'widelance', name: 'WIDE LANCE', category: 'beam', rarity: 'common', blurb: 'Fracture Lance becomes a wider blade of light.', maxStacks: 3, weight: 5, minLevel: 2,
     stat: { label: 'Lance width', read: s => s.mods.beamWidth * 100, unit: '%' }, apply: mul('beamWidth', 1.2) },
