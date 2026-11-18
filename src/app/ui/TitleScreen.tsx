@@ -1,3 +1,4 @@
+import { ASSET_BASE } from '../assetBase';
 import type { SaveV1 } from '../../sim/SaveSystem';
 import { HintBar } from './Chrome';
 import { MarksBadge } from './ProgressionScreen';
@@ -21,6 +22,6 @@ export function TitleScreen({ onArchives, onPlay, onSettings, onProgress, save }
       <div className="title-marks"><MarksBadge marks={save.meta.marks} crest={save.meta.crest}/></div>
       <div className="best-run">{save.best ? <>PERSONAL BEST <b>{save.best.score.toLocaleString()} PTS</b> · {save.best.kills} KILLS</> : 'NO RECORDED RUNS · YOUR FIRST FRACTURE AWAITS'}</div>
     </div>
-    <div className="bottom-chrome"><HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'TAB', pad: 'D-PAD', label: 'NAVIGATE' }]}/>{onArchives && <button className="text-button" onClick={onArchives} data-testid="horizons-button">SHATTERED HORIZONS ›</button>}<span className="chrome-note">ONE LIFE · INFINITE PRESSURE</span></div>
+    <div className="bottom-chrome"><HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'TAB', pad: 'D-PAD', label: 'NAVIGATE' }]}/>{onArchives && <button className="outlined-button horizons-btn" onClick={onArchives} data-testid="horizons-button"><img className="tab-ico" src={`${ASSET_BASE}ui/icons/tab_codex.png`} alt="" draggable={false}/>SHATTERED HORIZONS ›</button>}<span className="chrome-note">ONE LIFE · INFINITE PRESSURE</span></div>
   </main>;
 }

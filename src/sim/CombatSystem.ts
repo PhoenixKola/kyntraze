@@ -28,7 +28,7 @@ export function damagePlayer(state: GameState, damage: number, src = 'contact', 
     let from: { x: number; y: number } | undefined, best = Infinity; for (const e of state.enemies) { if (e.hp <= 0) continue; const d = (e.x - p.x) ** 2 + (e.y - p.y) ** 2; if (d < best) { best = d; from = e; } }
     if (tryPerfectEvasion(state, from)) return false;
   }
-  p.hp = Math.max(0, p.hp - Math.max(0, damage) * state.mods.armor * (state.b22.dawnT > 0 ? 0.65 : 1)); p.invulnerable = RULES.contactInvulnerability; state.b22.bossHurt = true;
+  p.hp = Math.max(0, p.hp - Math.max(0, damage) * state.mods.armor * state.run.damageTakenMult * (state.b22.dawnT > 0 ? 0.65 : 1)); p.invulnerable = RULES.contactInvulnerability; state.b22.bossHurt = true;
   state.lastHit = { src, t: state.time };
   state.impacts.push({ id: state.nextId++, kind: 'hurt', x: p.x, y: p.y, ttl: 0.4, life: 0.4, heavy: damage >= 20 });
   interruptOnHit(state);

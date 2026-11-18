@@ -672,3 +672,18 @@ main[data-testid="hero-select"] .arena-strip { display: grid; grid-template-colu
 main[data-testid="hero-select"] .arena-strip-copy { min-width: 0; } main[data-testid="hero-select"] .arena-strip-copy b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 main[data-testid="hero-select"] .arena-strip-go { position: static; white-space: nowrap; }
 .loadout-strip .mode-strip { margin-right: 0; }
+
+/* B22 UI pass 3: tab icons, Shattered Horizons button, mastery pictures, loading hero */
+.tab-ico { width: calc(22 * var(--u)); min-width: 16px; height: auto; margin-right: calc(8 * var(--u)); vertical-align: middle; opacity: .92; image-rendering: auto; filter: drop-shadow(0 1px 0 rgba(0,0,0,.6)); }
+.arc-tabs .outlined-button { display: inline-flex; align-items: center; }
+.horizons-btn { display: inline-flex; align-items: center; white-space: nowrap; min-width: max-content; }
+.arc-pic { display: block; width: 100%; max-height: calc(120 * var(--u)); min-height: 64px; object-fit: contain; object-position: center; margin: 0 auto calc(8 * var(--u)); }
+.loading-hero { position: absolute; z-index: 2; right: clamp(60px, 17vw, 330px); bottom: 26%; width: 0; height: 0; pointer-events: none; }
+.lh-sprite { position: absolute; left: 0; bottom: 0; transform: translate(-50%, 0) scale(2.1); transform-origin: 50% 100%; image-rendering: pixelated; background-repeat: no-repeat; animation-name: lh-run; animation-timing-function: steps(var(--n)); animation-iteration-count: infinite; }
+@keyframes lh-run { from { background-position: 0 0; } to { background-position: calc(var(--n) * var(--w) * -1) 0; } }
+.lh-ring { position: absolute; left: -110px; bottom: -18px; width: 220px; height: 54px; border-radius: 50%; border: 2px solid rgba(233,194,122,.55); background: radial-gradient(closest-side, rgba(233,194,122,.18), transparent); animation: lh-pulse 1.6s ease-in-out infinite; }
+.lh-streaks i { position: absolute; height: 3px; right: 90px; background: linear-gradient(90deg, transparent, rgba(160,220,230,.8)); animation: lh-streak .7s linear infinite; }
+.lh-streaks i:nth-child(1) { bottom: 150px; width: 160px; } .lh-streaks i:nth-child(2) { bottom: 90px; width: 220px; animation-delay: .25s; } .lh-streaks i:nth-child(3) { bottom: 30px; width: 140px; animation-delay: .5s; }
+@keyframes lh-streak { from { transform: translateX(80px); opacity: 0; } 30% { opacity: 1; } to { transform: translateX(-200px); opacity: 0; } }
+@keyframes lh-pulse { 50% { transform: scale(1.08); opacity: .7; } }
+@media (prefers-reduced-motion: reduce) { .lh-ring, .lh-streaks i { animation: none; } }

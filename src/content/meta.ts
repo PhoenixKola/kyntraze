@@ -5,7 +5,7 @@ import type { UpgradeCategory } from './upgrades';
 export const CURRENCY = { name: 'FRACTURE MARKS', short: 'MARKS' } as const;
 
 export type BoonId = 'bulwark' | 'swift' | 'magnet' | 'spark' | 'scholar';
-export type ContractId = 'overrun' | 'glass' | 'pressure' | 'nosw';
+export type ContractId = 'overrun' | 'glass' | 'pressure' | 'nosw' | 'bloodoath' | 'hollow' | 'longnight' | 'voidpact';
 export type UnlockId = `boon_${BoonId}` | 'tool_reroll' | 'tool_banish' | 'crest_ember' | 'crest_warden' | 'crest_silver';
 export type UnlockKind = 'boon' | 'tool' | 'crest';
 /** What an unlock needs besides marks: a feat already earned. */
@@ -35,9 +35,16 @@ export const CONTRACTS: ContractDef[] = [
   { id: 'pressure', name: 'RELIC PRESSURE', blurb: 'The arena itself turns on you.', rule: 'Arena hazards fire about 40% more often (always telegraphed).', bonus: 25, req: { runs: 2, label: 'Complete 2 runs' }, icon: 'ct_pressure' },
   { id: 'nosw', name: 'NO SECOND WIND', blurb: 'There is no coming back.', rule: 'Second Wind never appears in level-up offers.', bonus: 20, req: { feat: 'warden_down', label: 'Defeat the Fracture Warden' }, icon: 'ct_nosw' },
 ];
+/* B22 Shattered Horizons: harder contracts, unlocked by mastering the first four. */
+CONTRACTS.push(
+  { id: 'bloodoath', name: 'BLOOD OATH', blurb: 'Every wound is a debt.', rule: 'Damage taken is +60% and you never regenerate health.', bonus: 45, req: { feat: 'first_win', label: 'Defeat the Null Seraph' }, icon: 'ct_bloodoath' },
+  { id: 'hollow', name: 'HOLLOW CROWN', blurb: 'The fracture breeds tougher things.', rule: 'Every enemy has +50% health.', bonus: 45, req: { feat: 'first_win', label: 'Defeat the Null Seraph' }, icon: 'ct_hollow' },
+  { id: 'longnight', name: 'THE LONG NIGHT', blurb: 'They never stop coming.', rule: 'Enemies arrive about 80% faster and hazards fire 40% more often.', bonus: 60, req: { runs: 6, label: 'Complete 6 runs' }, icon: 'ct_longnight' },
+  { id: 'voidpact', name: 'VOID PACT', blurb: 'Power for a price.', rule: 'Dash recharges 70% slower, damage taken +30%, enemies +25% health and arrive 30% faster.', bonus: 80, req: { feat: 'first_win', label: 'Defeat the Null Seraph' }, icon: 'ct_voidpact' },
+);
 export const CONTRACT_BY_ID = Object.fromEntries(CONTRACTS.map(c => [c.id, c])) as Record<ContractId, ContractDef>;
 /** Run-rule numbers the sim reads (kept here so the card text and the game cannot disagree). */
-export const CONTRACT_RULES = { overrunSpawn: 0.72, glassHp: 0.6, pressureHazard: 0.7 } as const;
+export const CONTRACT_RULES = { overrunSpawn: 0.72, glassHp: 0.6, pressureHazard: 0.7, bloodDamage: 1.6, hollowHp: 1.5, longNightSpawn: 0.55, longNightHazard: 0.7, voidDash: 1.7, voidDamage: 1.3, voidHp: 1.25, voidSpawn: 0.77 } as const;
 
 export type FeatId = 'first_run' | 'first_win' | 'warden_down' | 'wins5' | 'gloam_win' | 'ashen_win' | 'flare' | 'comet' | 'apex' | 'specialist' | 'survivor10' | 'contract_win' | 'hunter' | 'level20' | 'ren_ascend' | 'sora_ascend';
 export interface FeatDef { id: FeatId; name: string; blurb: string; reward: number; /** lifetime goal shown as progress when the feat counts something */ goal?: number; icon: string }

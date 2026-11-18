@@ -14,7 +14,7 @@ import { blankB22, equipOutfit, outfitUnlocked, type B22Save } from '../../b22/s
 import { HintBar } from './Chrome';
 import { ASSET_BASE } from '../assetBase';
 import { branchArt, legendArt, outfitArt, relicArt, ultArt } from '../../b22/artIcons';
-const FORM_PIC: Partial<Record<string, string>> = { riftbound: 'art/b22/vex_riftbound.png', voidheart_exile: 'art/b22/vex_voidheart.png', crimson_ascendant: 'ui/heroes/ren-portrait-f1.webp', azure_sovereign: 'ui/heroes/sora-portrait-f1.webp' };
+const FORM_PIC: Partial<Record<string, string>> = { flarebound: 'ui/kit/crest-f1.webp', cometheart: 'ui/kit/crest-f2.webp', stillfire: 'ui/kit/crest-f3.webp', riftbound: 'art/b22/vex_riftbound.png', voidheart_exile: 'art/b22/vex_voidheart.png', crimson_ascendant: 'ui/heroes/ren-portrait-f1.webp', azure_sovereign: 'ui/heroes/sora-portrait-f1.webp' };
 const Ic = ({ n, big }: { n: string; big?: boolean }) => <img className={big ? 'arc-pic' : 'arc-ico'} src={`${ASSET_BASE}art/b22/${n}.png`} alt="" draggable={false} onError={e => { e.currentTarget.style.display = 'none'; }}/>;
 import { StoryPanel } from './StoryPanel';
 import { STORY, type StoryBeat } from '../../b22/story';
@@ -30,7 +30,7 @@ export function ArchivesScreen({ save, onBack, onSave }: Props) {
   const have = (id: string) => b22.owned.includes(id);
   return <main className="selection-layout archives-layout" data-testid="archives">
     <div className="screen-header"><button className="text-button" onClick={onBack} data-pad-cancel>← BACK</button><span>ARCHIVES · SHATTERED HORIZONS</span></div>
-    <div className="arc-tabs" role="tablist">{TABS.map(([k, n]) => <button key={k} role="tab" aria-selected={tab === k} className={`outlined-button ${tab === k ? 'on' : ''}`} data-testid={`arc-${k}`} onClick={() => setTab(k)}>{n}</button>)}</div>
+    <div className="arc-tabs" role="tablist">{TABS.map(([k, n]) => <button key={k} role="tab" aria-selected={tab === k} className={`outlined-button ${tab === k ? 'on' : ''}`} data-testid={`arc-${k}`} onClick={() => setTab(k)}><img className="tab-ico" src={`${ASSET_BASE}ui/icons/tab_${k}.png`} alt="" draggable={false}/>{n}</button>)}</div>
     <section className="arc-body">
       {tab === 'story' && <article className="arc-card wide"><h3>TRIAL OF THE OATHBROKEN</h3>{STORY.map(c => { const open = c.n === 1 || (b22.story.done as number[]).includes(c.n - 1), done = (b22.story.done as number[]).includes(c.n); return <p key={c.n} className={done ? 'done' : open ? '' : 'dim'}><b>{done ? '✓' : open ? '○' : '🔒'} {c.name}</b><br/>{open ? <><button className="outlined-button" data-testid={`replay-intro-${c.n}`} onClick={() => setReplay(c.intro)}>REPLAY OPENING</button> <button className="outlined-button" disabled={!done} data-testid={`replay-outro-${c.n}`} onClick={() => setReplay(c.outro)}>REPLAY ENDING</button></> : 'Finish the previous chapter to unlock.'}</p>; })}</article>}
       {tab === 'mastery' && <div className="arc-grid">{FORM_KEYS.map(f => <article key={f} className="arc-card" style={{ borderColor: FORM_INFO[f].accent }}>{FORM_PIC[f] && <img className="arc-pic" src={`${ASSET_BASE}${FORM_PIC[f]}`} alt="" draggable={false} onError={e => { e.currentTarget.style.display = 'none'; }}/>}<h3>{FORM_INFO[f].name.toUpperCase()} <small>{FORM_INFO[f].hero.toUpperCase()}</small></h3>

@@ -13,8 +13,8 @@ export interface RunConfig { boon: BoonId | null; contract: ContractId | null; r
 export const NO_CONFIG: RunConfig = { boon: null, contract: null, rerolls: 0, banishes: 0 };
 export const toolCharges = (rerollOwned: boolean, banishOwned: boolean) => ({ rerolls: rerollOwned ? RUN_TOOLS.rerolls : 0, banishes: banishOwned ? RUN_TOOLS.banishes : 0 });
 
-export interface RunState { config: RunConfig; rerollsLeft: number; banishesLeft: number; /** cards struck by the player this run */ banished: UpgradeId[]; /** cards a contract removes from the pool */ excluded: UpgradeId[]; spawnMult: number; hazardMult: number; formsUsed: number[] }
-export const makeRunState = (config: RunConfig = NO_CONFIG): RunState => ({ config, rerollsLeft: config.rerolls, banishesLeft: config.banishes, banished: [], excluded: [], spawnMult: 1, hazardMult: 1, formsUsed: [] });
+export interface RunState { config: RunConfig; rerollsLeft: number; banishesLeft: number; /** cards struck by the player this run */ banished: UpgradeId[]; /** cards a contract removes from the pool */ excluded: UpgradeId[]; spawnMult: number; hazardMult: number; /** B22 contracts */ damageTakenMult: number; enemyHpMult: number; noRegen: boolean; formsUsed: number[] }
+export const makeRunState = (config: RunConfig = NO_CONFIG): RunState => ({ config, rerollsLeft: config.rerolls, banishesLeft: config.banishes, banished: [], excluded: [], spawnMult: 1, hazardMult: 1, damageTakenMult: 1, enemyHpMult: 1, noRegen: false, formsUsed: [] });
 
 /** Applies the boon and contract to a fresh state. Every effect is a small fixed number from content/meta.ts. */
 export function applyRunConfig(state: GameState, config: RunConfig) {
@@ -38,6 +38,10 @@ export function applyRunConfig(state: GameState, config: RunConfig) {
     case 'overrun': state.run.spawnMult = CONTRACT_RULES.overrunSpawn; break;
     case 'glass': { const hp = Math.round(p.maxHp * CONTRACT_RULES.glassHp); p.maxHp = hp; p.hp = hp; break; }
     case 'pressure': state.run.hazardMult = CONTRACT_RULES.pressureHazard; break;
+    case 'bloodoath': state.run.damageTakenMult = CONTRACT_RULES.bloodDamage; state.run.noRegen = true; break;
+    case 'hollow': state.run.enemyHpMult = CONTRACT_RULES.hollowHp; break;
+    case 'longnight': state.run.spawnMult = CONTRACT_RULES.longNightSpawn; state.run.hazardMult = CONTRACT_RULES.longNightHazard; break;
+    case 'voidpact': state.mods.dashCd *= CONTRACT_RULES.voidDash; state.run.damageTakenMult = CONTRACT_RULES.voidDamage; state.run.enemyHpMult = CONTRACT_RULES.voidHp; state.run.spawnMult = CONTRACT_RULES.voidSpawn; break;
     case 'nosw': state.run.excluded = ['secondwind']; break;
     default: break;
   }

@@ -66,10 +66,10 @@
    "duration_s": 0.5714,
    "blender_action": "RunLower",
    "events": {},
-   "frame_width": 76,
+   "frame_width": 74,
    "frame_height": 93,
    "origin_px": [
-    40.0,
+    39.0,
     90.0
    ],
    "terminal": "once",
@@ -107,10 +107,10 @@
     "travel_end": 6,
     "recover_start": 7
    },
-   "frame_width": 114,
+   "frame_width": 108,
    "frame_height": 182,
    "origin_px": [
-    57.0,
+    55.0,
     176.0
    ],
    "terminal": "once",
@@ -196,10 +196,10 @@
     "recover_start": 20,
     "interruptible_from": 22
    },
-   "frame_width": 108,
+   "frame_width": 106,
    "frame_height": 176,
    "origin_px": [
-    53.0,
+    51.0,
     174.0
    ],
    "terminal": "once",
@@ -220,10 +220,10 @@
     "recover_start": 18,
     "interruptible_from": 21
    },
-   "frame_width": 98,
+   "frame_width": 88,
    "frame_height": 176,
    "origin_px": [
-    52.0,
+    47.0,
     174.0
    ],
    "terminal": "once",

@@ -95,7 +95,7 @@ export function spawnEnemy(state: GameState, rng: SeededRng): MobKind | null {
   const kind = pickKind(state, rng);
   const def = ENEMIES[kind];
   const e = state.b22.endless, cyc = e ? Math.max(0, Math.floor((state.time - e.fromT) / ENDLESS_CYCLE)) : 0;
-  const hp = (def.hp + Math.floor(state.time / 60) * def.hpPerMinute) * (1 + 0.12 * cyc);
+  const hp = (def.hp + Math.floor(state.time / 60) * def.hpPerMinute) * (1 + 0.12 * cyc) * state.run.enemyHpMult;
   // Place outside the 960x540 camera view where possible, without clipping the world.
   for (let attempt = 0; attempt < 25; attempt++) {
     const theta = rng.between(0, Math.PI * 2), range = rng.between(570, 700);

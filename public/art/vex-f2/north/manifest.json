@@ -66,10 +66,10 @@
    "duration_s": 0.5714,
    "blender_action": "RunLower",
    "events": {},
-   "frame_width": 68,
+   "frame_width": 66,
    "frame_height": 93,
    "origin_px": [
-    36.0,
+    34.0,
     90.0
    ],
    "terminal": "once",
@@ -220,10 +220,10 @@
     "recover_start": 18,
     "interruptible_from": 21
    },
-   "frame_width": 122,
+   "frame_width": 120,
    "frame_height": 194,
    "origin_px": [
-    69.0,
+    70.0,
     192.0
    ],
    "terminal": "once",

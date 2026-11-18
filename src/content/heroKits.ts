@@ -31,7 +31,7 @@ export const VEX = {
   auto: { name: 'Null Blade', arcDeg: 80, step: 3, finisherMul: 1.8, finisherPush: 90, lunge: 8, markMul: 1.35 },
   q: { name: 'Parry Halo', cooldown: 6, perfect: 0.55, guard: 0.95, recover: 0.25, arcDeg: 230, reduce: 0.7, riposteMul: 2.4, riposteReach: 190, riposteArc: 100, stun: 0.9, refund: 0.5, drive: 12, gap: 0.3, moveScale: 0.7, formPerfect: 1.4 },
   e: { name: 'Rift Reversal', cooldown: 9, distance: 230, iframes: 0.36, riposteMul: 2.0, strikeReach: 170, windup: 0.1, recover: 0.2, perfectWindow: 0.35, formCool: 0.75, formDistance: 1.4 },
-  r: { name: 'Oathbreaker Seal', cooldown: 18, marks: 5, bossMarks: 1, range: 360, windup: 0.4, fuse: 2.2, damage: 1.4, power: 0.12, wave: 150, recover: 0.3, moveScale: 0.5 },
+  r: { name: 'Oathbreaker Seal', cooldown: 18, marks: 8, marksByForm: [8, 14, 24] as readonly number[], bossMarks: 1, range: 360, windup: 0.4, fuse: 2.2, damage: 1.4, power: 0.12, wave: 150, recover: 0.3, moveScale: 0.5 },
 } as const;
 
 export const SORA = {
@@ -64,7 +64,7 @@ export const HERO_KIT: Record<'ren' | 'sora' | 'vex', HeroKitInfo> = {
       auto: 'Angular Null Blade sweeps in a three-beat rhythm; the third strike lands hard. Marked foes take extra.',
       q: 'Raise a guard in front of you. A hit in the first moments is PARRIED: refused, answered by a stunning riposte. A late hit is only softened.',
       e: 'Shift through a short safe path. If a foe is in reach you riposte at the other end; with none, you just reposition.',
-      r: 'Mark up to five foes (one boss), then detonate them after a short fuse or press R again. Damage dealt while marked adds to the blast.',
+      r: 'Mark many foes (one boss; more with each transformation), then detonate them after a short fuse or press R again. Damage dealt while marked adds to the blast.',
       form: 'Riftbound: wider parry timing, faster cooldowns and violet afterimage pressure. Voidheart Exile: silver-black precision, marks spread on a parry, the shift leaves a fracture line.',
     },
     catNames: { core: 'CORE', beam: 'RIFT', sphere: 'SEAL', survival: 'SURVIVAL', mobility: 'MOBILITY', pickup: 'SALVAGE', drive: 'OATH' },

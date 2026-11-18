@@ -38,7 +38,7 @@ export function spawnWave(state: GameState, rng: SeededRng, st: EncounterStep) {
     for (let a = 0; a < 30; a++) {
       const th = rng.between(0, Math.PI * 2), r = rng.between(480, 620), x = p.x + Math.cos(th) * r, y = p.y + Math.sin(th) * r;
       if (blocked(x, y, def.radius) || x < 70 || y < 70 || x > RULES.worldWidth - 70 || y > RULES.worldHeight - 70) continue;
-      const hp = def.hp + Math.floor(state.time / 60) * def.hpPerMinute;
+      const hp = (def.hp + Math.floor(state.time / 60) * def.hpPerMinute) * state.run.enemyHpMult;
       const e = addEnemy(state, { kind: w.kind as MobKind, x, y, hp, maxHp: hp, radius: def.radius, speed: def.moveSpeed, damage: def.damage, touchCooldown: 0, attackCd: def.attack.cooldown * 0.6, aimX: -Math.cos(th), aimY: -Math.sin(th), stepId: st.id });
       ids.push(e.id); break;
     }

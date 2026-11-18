@@ -52,9 +52,9 @@ describe('B22 Vex: Rift Reversal, Oathbreaker Seal, Null Blade', () => {
     const { sim, s } = vex(); s.player.aimX = 1; s.player.aimY = 0; mob(s, s.player.x + 200, s.player.y); mob(s, s.player.x + 215, s.player.y + 20); s.hazards.push({ id: 5000, shape: 'circle', x: s.player.x, y: s.player.y + 24, r: 90, ang: 0, arc: 0, delay: 0.2, total: 0.2, damage: 20, owner: 9, tag: 'x', fired: false, ttl: 0 });
     sim.step(DT, { ...idle, beam: true }); run(sim, 0.3); expect(s.b22.m['riposte.perfect']).toBe(1); expect(s.b22.m.riposte).toBeGreaterThanOrEqual(2);
   });
-  it('Oathbreaker Seal: marks at most 5 foes (1 boss), pays damage dealt while marked, detonates after the fuse or on a second R; boss damage is capped', () => {
+  it('Oathbreaker Seal: marks up to its form cap (1 boss), pays damage dealt while marked, detonates after the fuse or on a second R; boss damage is capped', () => {
     const { sim, s } = vex(); const es = [0, 1, 2, 3, 4, 5, 6].map(i => mob(s, s.player.x + 90 + i * 12, s.player.y + (i - 3) * 20)); sim.step(DT, { ...idle, sphere: true }); run(sim, VEX.r.windup + 0.1);
-    expect(s.b22.marks.filter(m => m.src === 'seal')).toHaveLength(5); const before = es.reduce((a, e) => a + e.maxHp - e.hp, 0); run(sim, VEX.r.fuse + 0.4); expect(es.reduce((a, e) => a + e.maxHp - e.hp, 0)).toBeGreaterThan(before + 100); expect(s.b22.marks.filter(m => m.src === 'seal')).toHaveLength(0);
+    expect(s.b22.marks.filter(m => m.src === 'seal')).toHaveLength(7); const before = es.reduce((a, e) => a + e.maxHp - e.hp, 0); run(sim, VEX.r.fuse + 0.4); expect(es.reduce((a, e) => a + e.maxHp - e.hp, 0)).toBeGreaterThan(before + 100); expect(s.b22.marks.filter(m => m.src === 'seal')).toHaveLength(0);
     const e2 = vex(); const f = mob(e2.s, e2.s.player.x + 100, e2.s.player.y); e2.sim.step(DT, { ...idle, sphere: true }); run(e2.sim, VEX.r.windup + 0.1); expect(e2.s.b22.marks.some(m => m.src === 'seal')).toBe(true); e2.s.player.sphereCooldown = 15; e2.sim.step(DT, { ...idle, sphere: true }); e2.sim.step(DT, idle); expect(e2.s.b22.marks.filter(m => m.src === 'seal')).toHaveLength(0); expect(f.hp).toBeLessThan(f.maxHp);
     const bs = vex(); startEncounter(bs.s, 'warden'); const w = bs.s.enemies.find(e => e.kind === 'warden')!; w.ai!.invuln = false; w.x = bs.s.player.x + 120; w.y = bs.s.player.y; bs.s.player.sphereCooldown = 0; bs.sim.step(DT, { ...idle, sphere: true }); run(bs.sim, VEX.r.windup + 0.1); const hp = w.hp; run(bs.sim, VEX.r.fuse + 0.3); expect(hp - w.hp).toBeLessThanOrEqual(w.maxHp * 0.065 + 1);
   });
@@ -155,3 +155,10 @@ describe('B22 modes: Boss Rush, Expedition, challenges, Vex trial', () => {
 });
 import { Simulation } from '../sim/Simulation';
 function require_sim() { return Simulation; }
+
+describe('B22 Vex: Seal cap grows with each transformation; Rift Reversal crosses terrain', () => {
+  it('marks cap is 8 / 14 / 24 by form', async () => {
+    const { VEX } = await import('../content/heroKits'); expect(VEX.r.marksByForm).toEqual([8, 14, 24]);
+    const { marksCap } = await import('../sim/VexSystem'); const a = vex(); for (const f of [0, 1, 2] as const) { a.s.player.form = f; expect(marksCap(a.s)).toBe(VEX.r.marksByForm[f]); }
+  });
+});

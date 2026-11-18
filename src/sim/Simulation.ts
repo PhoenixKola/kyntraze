@@ -69,7 +69,7 @@ export class Simulation {
     if (input.sphere && !this.rHeld) { if (!castR()) bf.r = ABILITY_BUFFER; else bf.r = 0; } else if (bf.r > 0 && castR()) bf.r = 0;
     this.qHeld = input.q; this.fHeld = fDown; this.eHeld = !!input.beam || !!input.beamHeld; this.rHeld = !!input.sphere; s.eHeld = !!input.beamHeld;
     const p = s.player; p.qCooldown = Math.max(0, p.qCooldown - dt);
-    if (s.mods.regen > 0) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
+    if (s.mods.regen > 0 && !s.run.noRegen) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
     updateDrive(s, dt);
     updateAbilities(s, dt);
     if (s.hero !== 'kai') updateHero(s, dt);
@@ -188,7 +188,7 @@ export class Simulation {
     if (input.sphere && !edge.r) { if (!castR()) bf.r = ABILITY_BUFFER; else bf.r = 0; } else if (bf.r > 0 && castR()) bf.r = 0;
     edge.q = input.q; edge.f = fDown; edge.e = !!input.beam || !!input.beamHeld; edge.r = !!input.sphere; s.eHeld = !!input.beamHeld;
     const p = s.player; p.qCooldown = Math.max(0, p.qCooldown - dt);
-    if (s.mods.regen > 0) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
+    if (s.mods.regen > 0 && !s.run.noRegen) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
     updateDrive(s, dt); updateAbilities(s, dt); if (s.hero !== 'kai') updateHero(s, dt);
   }
 }

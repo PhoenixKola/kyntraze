@@ -120,7 +120,7 @@ function doShift(s: GameState, c: HeroCast) {
   let behind: Enemy | null = null;
   if (shadow) { for (const e of s.enemies) if (alive(e) && (e.x - p.x) ** 2 + (e.y - p.y) ** 2 <= (dist + e.radius) ** 2 && (!behind || isMarked(s, e.id))) behind = e; }
   if (behind) { const d0 = normalize(behind.x - p.x, behind.y - p.y); tx = behind.x + d0.x * (behind.radius + p.radius + 6); ty = behind.y + d0.y * (behind.radius + p.radius + 6); if (blocked(tx, ty, p.radius)) { tx = p.x; ty = p.y; behind = null; } }
-  if (!behind) { for (let k = 0; k < 14 && dist > 20; k++, dist -= 14) { const x = p.x + c.dirX * dist, y = p.y + c.dirY * dist; if (!blocked(x, y, p.radius) && pathClear(p.x, p.y, x, y, p.radius)) { tx = x; ty = y; break; } } }
+  if (!behind) { for (let k = 0; k < 14 && dist > 20; k++, dist -= 14) { const x = p.x + c.dirX * dist, y = p.y + c.dirY * dist; if (!blocked(x, y, p.radius)) { tx = x; ty = y; break; } /* Rift Reversal crosses terrain: only the landing must be open */ } }
   c.sx = p.x; c.sy = p.y; c.tx = tx; c.ty = ty;
   if (f === 2 || eclipse) s.b22.zones.push({ id: s.nextId++, kind: 'line', x: c.sx, y: c.sy, x2: tx, y2: ty, r: 26, t: 0, dur: 2.2, tick: 0.3, next: 0.3, dmg: p.qDamage * 0.35, push: 0, src: 'vex_fracture' });
   p.x = tx; p.y = ty; emitK(s, 'reversal_blink', tx, ty);
@@ -144,8 +144,10 @@ export function vexR(s: GameState): boolean {
   s.hx.act = c; p.sphereCooldown = VEX.r.cooldown * s.mods.sphereCd * coolMul(s);
   emitK(s, 'seal_mark', p.x, p.y); return true;
 }
+/** Oathbreaker Seal grows with each transformation: base, Riftbound, Voidheart Exile. */
+export const marksCap = (s: GameState) => VEX.r.marksByForm[Math.min(2, s.player.form)];
 function applySeal(s: GameState) {
-  const p = s.player, severance = s.b22.branches.includes('severance_judgment'), cap = severance ? 2 : VEX.r.marks + (s.b22.branches.includes('marked_detonation') ? 0 : 0);
+  const p = s.player, severance = s.b22.branches.includes('severance_judgment'), cap = severance ? 2 : marksCap(s);
   const cands = s.enemies.filter(e => alive(e) && !e.part && (e.x - p.x) ** 2 + (e.y - p.y) ** 2 <= VEX.r.range ** 2).sort((a, b) => {
     if (severance) { const pa = (isBoss(a.kind) ? 3 : a.maxHp > 100 ? 2 : 0), pb = (isBoss(b.kind) ? 3 : b.maxHp > 100 ? 2 : 0); if (pa !== pb) return pb - pa; }
     return (a.x - p.x) ** 2 + (a.y - p.y) ** 2 - ((b.x - p.x) ** 2 + (b.y - p.y) ** 2);
@@ -196,4 +198,4 @@ export const vexMoveScale = (c: HeroCast): number => (c.act === 'parry_halo' ? V
 /** Perfect-evasion-like helper for tests / HUD: true while the guard's perfect window is open. */
 export const parryOpen = (s: GameState) => { const c = s.hx.act; return !!c && c.act === 'parry_halo' && c.t <= VEX.q.perfect * perfectScale(s); };
 export const vexActiveForm = (s: GameState) => activeForm(s);
-void slideMove;
+void slideMove; void pathClear;

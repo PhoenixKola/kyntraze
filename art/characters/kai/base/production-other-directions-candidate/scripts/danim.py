@@ -102,7 +102,7 @@ _calibrate()
 if D in ("east", "west"):
     SOLES = {REAR: canv(14, 157), LEAD: canv(60, 133)}      # rear foot low and back, lead foot forward and higher (further from the camera)
 else:
-    SOLES = {"n": canvN(13, 153), "f": canvN(72, 156)}
+    SOLES = {"n": canvN(27, 153), "f": canvN(58, 156)}   # B22: a natural rear stance (feet under the hips, not an A-frame)
 def stance_arms():
     """(lead guard, rear waist) arm dicts for this direction."""
     if D in ("east", "west"):
@@ -152,7 +152,7 @@ def run():
         p = stance(); ph = 2 * math.pi * i / 8; c = math.cos(ph)
         for s, off in (("n", 0), ("f", 4)):
             dx, dy, ft, fs, planted = (PROFILE_LEG if D != "north" else BACK_LEG)[(i + off) % 8]
-            if D == "north": o = -1 if s == "n" else 1; bx, by = RX + o * 11, RY - 2; sole = (bx + o * dx, by + dy)
+            if D == "north": o = -1 if s == "n" else 1; bx, by = RX + o * 8, RY - 2; sole = (bx + o * dx, by + dy)
             else: bx = RX + (-3 if s == "n" else 3) * SX; by = RY + (2 if s == "n" else -2); sole = (bx + SX * dx, by + dy)
             p[f"leg_{s}"] = {"sole": sole, "fs_t": ft, "fs_s": fs, "planted": planted, "straight": True, "slack": 2.0 if planted else 3.0}
         p["pelvis"] = (round(1.0 * c * SX), (7 if D != "north" else 0) + HIP_DY[i]); p["chest"] = (round(-1.0 * c * SX), HIP_DY[i] // 2 + 1)
