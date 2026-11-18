@@ -20,7 +20,7 @@ function heroRingTexture(scene: Phaser.Scene) {
 /** Floor light pool, contact shadows (hero + enemies) and the hero separation halo. Cheap: pooled images, no per-frame allocation after warm-up. */
 export class Presentation {
   private readonly pool: Phaser.GameObjects.Image; private readonly halo: Phaser.GameObjects.Image; private readonly heroShadow: Phaser.GameObjects.Image; private readonly ring: Phaser.GameObjects.Image; private readonly knock: Phaser.GameObjects.Image;
-  private readonly shadows = new Map<number, Phaser.GameObjects.Image>();
+  private readonly shadows = new Map<number, Phaser.GameObjects.Image>(); private partnerShadow!: Phaser.GameObjects.Image; private partnerRing!: Phaser.GameObjects.Image;
   constructor(private readonly scene: Phaser.Scene) {
     radial(scene, 'pres-pool', 256, [[0, 'rgba(255,255,255,0.5)'], [0.45, 'rgba(255,255,255,0.2)'], [1, 'rgba(255,255,255,0)']]);
     radial(scene, 'pres-shadow', 64, [[0, 'rgba(0,0,0,0.62)'], [0.6, 'rgba(0,0,0,0.38)'], [1, 'rgba(0,0,0,0)']]);
@@ -30,17 +30,20 @@ export class Presentation {
     // a soft dark cut-out behind Kai (above enemies, below him): separates him from similarly coloured bodies in a swarm without any glow
     this.knock = scene.add.image(0, 0, 'pres-shadow').setDepth(9.55).setScale(1.55, 1.75).setAlpha(0);
     heroRingTexture(scene); this.ring = scene.add.image(0, 0, 'pres-ring').setDepth(9.6).setScale(0.46, 0.2).setAlpha(0.75);
+    this.partnerShadow = scene.add.image(0, 0, 'pres-shadow').setDepth(9.5).setScale(1.2, 0.5).setAlpha(0.95).setVisible(false); this.partnerRing = scene.add.image(0, 0, 'pres-ring').setDepth(9.6).setScale(0.46, 0.2).setAlpha(0.75).setVisible(false);
   }
-  update(state: GameState, heroX: number, heroY: number, formVisible: boolean, reduced: boolean) {
-    const tint = formVisible ? 0xe9b25f : 0x4fb8c6;
-    this.pool.setPosition(heroX, heroY - 6).setTint(formVisible ? 0xc18a3c : 0x4a9cac);
+  /** Co-op: the second fighter's contact shadow and ground ring, tinted like their own form. */
+  partner(x: number, y: number, tint: number, show: boolean, downed: boolean) { this.partnerShadow.setVisible(show).setPosition(x, y - 1); this.partnerRing.setVisible(show).setPosition(x, y - 1).setTint(tint).setAlpha(downed ? 0.35 : 0.78); }
+  update(state: GameState, heroX: number, heroY: number, formVisible: boolean, reduced: boolean, formTint: number | null = null) {
+    const tint = formTint ?? (formVisible ? 0xe9b25f : 0x4fb8c6);
+    this.pool.setPosition(heroX, heroY - 6).setTint(formTint ?? (formVisible ? 0xc18a3c : 0x4a9cac));
     this.halo.setPosition(heroX, heroY - 2).setTint(tint).setVisible(!reduced);
     this.heroShadow.setPosition(heroX, heroY - 1);
     let near = 0; for (const e of state.enemies) if (e.hp > 0 && Math.abs(e.x - state.player.x) < 70 && Math.abs(e.y - state.player.y) < 70) near++;
     this.knock.setPosition(heroX, heroY - 30).setAlpha(Math.min(0.6, near * 0.12));
     // B08.1 A3: the ring is Kai's anchor in a crowd: brighter and gently pulsing while hit-invulnerable, slow heartbeat at low health
     const hurt = state.player.invulnerable > 0, low = state.player.hp / state.player.maxHp <= 0.3, t = state.time;
-    this.ring.setPosition(heroX, heroY - 1).setTint(formVisible ? 0xffc86a : 0xbff4ff).setAlpha(hurt ? 1 : low ? 0.62 + 0.3 * (0.5 + 0.5 * Math.sin(t * 5)) : 0.78).setScale(hurt ? 0.5 + 0.04 * Math.sin(t * 24) : 0.46, hurt ? 0.22 : 0.2);
+    this.ring.setPosition(heroX, heroY - 1).setTint(formTint ?? (formVisible ? 0xffc86a : 0xbff4ff)).setAlpha(hurt ? 1 : low ? 0.62 + 0.3 * (0.5 + 0.5 * Math.sin(t * 5)) : 0.78).setScale(hurt ? 0.5 + 0.04 * Math.sin(t * 24) : 0.46, hurt ? 0.22 : 0.2);
     const live = new Set<number>();
     for (const e of state.enemies) {
       if (e.hp <= 0) continue; live.add(e.id);
@@ -49,5 +52,5 @@ export class Presentation {
     }
     for (const [id, s] of this.shadows) if (!live.has(id)) { s.destroy(); this.shadows.delete(id); }
   }
-  destroy() { this.pool.destroy(); this.halo.destroy(); this.heroShadow.destroy(); this.ring.destroy(); this.knock.destroy(); for (const s of this.shadows.values()) s.destroy(); this.shadows.clear(); }
+  destroy() { this.pool.destroy(); this.halo.destroy(); this.heroShadow.destroy(); this.ring.destroy(); this.partnerShadow.destroy(); this.partnerRing.destroy(); this.knock.destroy(); for (const s of this.shadows.values()) s.destroy(); this.shadows.clear(); }
 }

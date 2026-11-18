@@ -1,6 +1,6 @@
 # B22 combat corrections: status
 
-Branch `main`, local commits only (nothing pushed). Evidence labels: **tests** = unit tests; **screens** = in-game screenshots reviewed; **not verified** = no motion, audio or controller check.
+Branch `main`. Evidence labels: **tests** = unit tests; **screens** = in-game screenshots reviewed; **not verified** = no motion, audio or controller check.
 
 ## 1. NORTH art
 - Hair: the detached right-hand tuft of Ren Ascendant and Vex Riftbound / Voidheart came from the front hair part (`head_f1.png`) and the rear hair part (`hair_f1.png`). Both source parts were trimmed in `art/characters/{ren,vex}/f1/north/parts` (originals kept as `*.orig.png`) and the rigs rebuilt. Voidheart is a recolour of the Riftbound sheets, so it inherits the fix. (screens)
@@ -21,3 +21,8 @@ Sora card regenerated in the Ren/Vex card style; archive tab icons, Aetherfall/P
 
 ## Known gaps
 Voidheart Exile redesign (own ImageGen design, rig, animations); normal-speed motion clips; audio for new abilities; controller verification.
+
+## Follow-up pass
+Voidheart south head rebuilt (stale head pivot in `form_geometry.json` floated it above the collar). Ground ring / halo now follow the form contour colour; Voidheart effects (zones, marks, bursts, ability art desaturated at runtime) are gray; Surge Step contour, ring and trail are blue. Local co-op draws the second fighter with a real hero renderer (`EntityRenderer(scene, true)`) instead of the placeholder body. Kai Q orb/burst/comet/pillar/sbeam/sigil art stripped of neighbour-cell fragments. Loadout chips have icons. Added ember trails, meteor descent streak, flare embers and Surge afterimages.
+
+Still open: dedicated Blender poses for the new Kai abilities (existing clips reused); by-ear audio, controller and normal-speed motion review; Windows installer not rebuilt.

@@ -43,7 +43,7 @@ export const CONTOUR: Record<string, Palette> = {
   sora: { c1: rgb(0x0a3fb0), c2: rgb(0x35c2ff), c3: rgb(0xe6fbff), flow: 2.6, jag: 0.3, sparks: 0.6 },
   vex1: { c1: rgb(0x3b0f8a), c2: rgb(0xa06af0), c3: rgb(0xf0dcff), flow: 3.0, jag: 0.8, sparks: 0.9 },
   vex2: { c1: rgb(0x14161a), c2: rgb(0x3b4048), c3: rgb(0x9aa2ad), flow: 1.9, jag: 0.2, sparks: 0.15 },
-  surge: { c1: rgb(0xb06a00), c2: rgb(0xffc43a), c3: rgb(0xfff4c0), flow: 4.5, jag: 0.4, sparks: 0.3 },
+  surge: { c1: rgb(0x0a4fc0), c2: rgb(0x3ab4ff), c3: rgb(0xe6fbff), flow: 4.5, jag: 0.4, sparks: 0.3 },
 };
 
 export class ContourController extends (Phaser as unknown as { Filters: { Controller: new (camera: unknown, node: string) => Record<string, unknown> } }).Filters.Controller {
@@ -65,3 +65,8 @@ export function registerContourFilter(game: Phaser.Game) {
   });
   r.renderNodes.addNodeConstructor('FilterContour', Node); registered = true;
 }
+
+/** Palette key of the transformation a fighter is in (null = untransformed), shared by the stroke, the ground ring and the effects. */
+export const formKey = (hero: string, form: number): string | null => hero === 'kai' ? (form === 1 ? 'flare' : form === 2 ? 'comet' : form === 3 ? 'still' : null) : hero === 'vex' ? (form === 1 ? 'vex1' : form === 2 ? 'vex2' : null) : form >= 1 ? (hero === 'ren' ? 'ren' : 'sora') : null;
+/** Ground ring / halo colour for each palette key (the mid colour of the form's contour). */
+export const RING_TINT: Record<string, number> = { flare: 0xff9a2e, comet: 0xffd12a, still: 0xc9d6ee, ren: 0xff3a2a, sora: 0x35c2ff, vex1: 0xa06af0, vex2: 0x8a929e, surge: 0x3ab4ff };

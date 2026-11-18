@@ -1,6 +1,7 @@
 /** B19: everything Ren and Sora draw on top of the world that is not the character sprite: projectiles, orbs, shockwaves, the Lance, ground telegraphs, the transformation reveal and the persistent auras.
  *  Pure projection of sim state (state.hx, state.abilityEvents, state.cinema); it never decides anything. Drawn with two Graphics layers (normal + additive) so the cost is two draw batches whatever the crowd. */
 import { vexSkin } from '../../assets/heroAnimation';
+import { grayKey } from './vexTint';
 import Phaser from 'phaser';
 import type { GameState, HeroCast } from '../../sim/GameState';
 import { hand, lanceHalfWidth } from '../../sim/HeroSystem';
@@ -34,11 +35,11 @@ export class HeroFxView {
   private readonly imgs: Phaser.GameObjects.Image[] = []; private used = 0;
   /** Pooled additive image: the sprite layer of the aura and the big moments (hidden again every frame unless re-placed). */
   private put(name: string, x: number, y: number, scale: number, alpha: number, o: { rot?: number; sy?: number; ox?: number; oy?: number; depth?: number; flip?: boolean } = {}) {
-    const key = heroFxKey(this.hero, name); if (!this.scene.textures.exists(key) || alpha <= 0.01) return;
+    let key = heroFxKey(this.hero, name); if (!this.scene.textures.exists(key) || alpha <= 0.01) return; if (this.gray) key = grayKey(this.scene, key);
     let im = this.imgs[this.used]; if (!im) { if (this.imgs.length >= 110) return; im = this.scene.add.image(0, 0, key).setBlendMode(Phaser.BlendModes.ADD); this.imgs.push(im); }
     this.used++; im.setTexture(key).setVisible(true).setPosition(Math.round(x), Math.round(y)).setScale(scale * (o.flip ? -1 : 1), scale * (o.sy ?? 1)).setAlpha(Math.min(1, alpha)).setRotation(o.rot ?? 0).setOrigin(o.ox ?? 0.5, o.oy ?? 0.5).setDepth(o.depth ?? 11.3);
   }
-  private lastEvent = 0; private readonly auraTrack = new AuraTracker(); private readonly director = new ImpactDirector(); private readonly auraView: AuraView;
+  private gray = false; private lastEvent = 0; private readonly auraTrack = new AuraTracker(); private readonly director = new ImpactDirector(); private readonly auraView: AuraView;
   private zoom = 1; private shake = 0; private evo: Evolution | null = null;
   constructor(private readonly scene: Phaser.Scene, private readonly hero: 'ren' | 'sora') {
     this.ground = scene.add.graphics().setDepth(3.6);
@@ -51,7 +52,7 @@ export class HeroFxView {
   destroy() { this.auraView.destroy(); for (const i of this.imgs) i.destroy(); this.ground.destroy(); this.g.destroy(); this.glow.destroy(); }
 
   update(s: GameState, dt: number, reduced: boolean, crowded: boolean, wx: number, wy: number) {
-    const pal = PAL[this.hero], p = s.player, h = s.hx;
+    const pal = PAL[this.hero], p = s.player, h = s.hx; this.gray = s.hero === 'vex' && p.form === 2;
     this.ground.clear(); this.g.clear(); this.glow.clear(); this.used = 0;
     this.evo = evolution(s, this.hero === 'ren' ? 2 : 1); this.director.tick(s.phase === 'running' ? dt : 0);
     for (const e of s.abilityEvents) if (e.id > this.lastEvent) { this.lastEvent = e.id; this.onEvent(e.kind, e.x, e.y, e.n ?? 0, s, reduced); }

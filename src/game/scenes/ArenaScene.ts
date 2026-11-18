@@ -12,7 +12,8 @@ import { Presentation } from '../render/arenaArt';
 import { Ambience, ArenaHazardView, ArenaProps, createArenaFloor } from '../render/arenaWorld';
 import { NO_CONFIG } from '../../sim/RunConfig';
 import { RemoteSimulation } from '../../net/RemoteSimulation';
-import { slotPlayer } from '../../sim/CoopSystem';
+import { inSlot, slotPlayer } from '../../sim/CoopSystem';
+import { RING_TINT, formKey } from '../render/contourFilter';
 import { B22Overlay, RealmProps, createRealmFloor } from '../render/realmWorld';
 import { ARENAS as ARENA_DEFS } from '../../content/arenas';
 import type { ArenaId } from '../../content/arenas';
@@ -31,7 +32,7 @@ const VICTORY_CELEBRATE_MS = 1800, VICTORY_RESULTS_MS = 4300;
 export class ArenaScene extends Phaser.Scene {
   private simulation!: Simulation;
   private controller!: InputController;
-  private entityRenderer!: EntityRenderer;
+  private entityRenderer!: EntityRenderer; private partnerRenderer: EntityRenderer | null = null;
   private fx!: EffectsRenderer;
   private presentation!: Presentation;
   private fixed = new FixedStep();
@@ -92,7 +93,13 @@ export class ArenaScene extends Phaser.Scene {
     this.entityRenderer.sync(s, this.lastInput, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.reduced);
     this.hitstopLeft = Math.max(this.hitstopLeft, this.entityRenderer.takeHitstop());
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
-    const hp = this.entityRenderer.debugPose(); this.presentation.update(s, hp.x, hp.y, hp.visualForm !== 'base', this.reduced);
+    const hp = this.entityRenderer.debugPose(), k0 = formKey(s.hero, s.player.form) ?? (s.hero === 'kai' && s.hx.kk?.surge ? 'surge' : null);
+    this.presentation.update(s, hp.x, hp.y, hp.visualForm !== 'base', this.reduced, k0 ? RING_TINT[k0] : null);
+    if (s.party) {
+      this.partnerRenderer ??= new EntityRenderer(this, true);
+      const d = s.party.slots[1].down, in1 = s.party.slots[1].input, pr = this.partnerRenderer;
+      inSlot(s, 1, () => { pr.sync(s, in1, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.reduced); const q = pr.debugPose(), k = formKey(s.hero, s.player.form); this.presentation.partner(q.x, q.y, k ? RING_TINT[k] : 0xbff4ff, true, d.downed); });
+    } else this.presentation.partner(0, 0, 0, false, false);
     this.b22?.update(s, s.phase === 'running' ? delta / 1000 : 0, this.reduced);
     this.props?.update(s, this.time.now / 1000); this.ambience?.update(this.time.now / 1000, this.reduced); this.hazardView?.sync(s, s.phase === 'running' ? delta / 1000 : 0); this.marks?.update(s, delta / 1000, this.reduced); this.floorLights?.update(s, delta / 1000, this.reduced); this.evoFx?.update(s, delta / 1000, this.reduced);
     if (s.phase === 'victory') {
@@ -119,7 +126,7 @@ export class ArenaScene extends Phaser.Scene {
   private dispose() {
     if (this.disposed) return; this.disposed = true; this.scale.off(Phaser.Scale.Events.RESIZE);
     this.events.off('b21-cue', this.onCue); window.removeEventListener('keydown', this.unlockAudio); window.removeEventListener('pointerdown', this.unlockAudio); this.audio?.dispose();
-    this.controller?.destroy(); this.entityRenderer?.destroy(); this.fx?.destroy(); this.presentation?.destroy(); this.debug?.destroy(); this.props?.destroy(); this.realmProps?.destroy(); this.b22?.destroy(); this.ambience?.destroy(); this.hazardView?.destroy(); this.marks?.destroy(); this.floorLights?.destroy(); this.evoFx?.destroy(); this.bridge.unbind();
+    this.controller?.destroy(); this.entityRenderer?.destroy(); this.partnerRenderer?.destroy(); this.partnerRenderer = null; this.fx?.destroy(); this.presentation?.destroy(); this.debug?.destroy(); this.props?.destroy(); this.realmProps?.destroy(); this.b22?.destroy(); this.ambience?.destroy(); this.hazardView?.destroy(); this.marks?.destroy(); this.floorLights?.destroy(); this.evoFx?.destroy(); this.bridge.unbind();
     delete (window as Window & { __KYNT_QA__?: unknown }).__KYNT_QA__;
   }
 }

@@ -6,7 +6,6 @@ import type { Enemy, GameState, Hazard } from '../../sim/GameState';
 import { BOSSES } from '../../content/bosses';
 import { isBoss, isRealmKind, type BossKind } from '../../content/enemies';
 import { slotPlayer } from '../../sim/CoopSystem';
-import { slotHero as slotHeroOf } from '../../sim/CoopCombos';
 
 const hash = (x: number, y: number) => { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 const col = (hex: string) => Phaser.Display.Color.HexStringToColor(hex).color;
@@ -103,15 +102,16 @@ export class B22Overlay {
       }
     }
     // ---- zones, scheduled effects, marks (authoritative state; drawn for every arena)
-    for (const z of s.b22.zones) { const life = 1 - z.t / z.dur, c = z.src === 'rift_key' ? 0xc58bff : z.src.includes('vex') ? 0xa070ff : z.src.includes('burning') || z.src.includes('crater') || z.src.includes('rupture') || z.src.includes('crucible') ? 0xff7a3d : 0xffd36a;
+    const gz = s.hero === 'vex' && s.player.form === 2, gray = (c: number) => gz ? (c === 0xa070ff ? 0x9aa2ad : c === 0xc58bff ? 0xd5dae2 : c) : c;   // Voidheart Exile: every violet effect colour reads as the form's dark gray
+    for (const z of s.b22.zones) { const life = 1 - z.t / z.dur, c = gray(z.src === 'rift_key' ? 0xc58bff : z.src.includes('vex') ? 0xa070ff : z.src.includes('burning') || z.src.includes('crater') || z.src.includes('rupture') || z.src.includes('crucible') ? 0xff7a3d : 0xffd36a);
       fg.lineStyle(3, c, 0.7 * life); fg.fillStyle(c, 0.16 * life);
       if (z.kind === 'line') { const dx = z.x2 - z.x, dy = z.y2 - z.y, L = Math.hypot(dx, dy) || 1, nx = -dy / L * z.r, ny = dx / L * z.r; fg.fillPoints([new Phaser.Math.Vector2(z.x + nx, z.y + ny), new Phaser.Math.Vector2(z.x2 + nx, z.y2 + ny), new Phaser.Math.Vector2(z.x2 - nx, z.y2 - ny), new Phaser.Math.Vector2(z.x - nx, z.y - ny)], true); }
       else { fg.fillCircle(z.x, z.y, z.r); fg.strokeCircle(z.x, z.y, z.r); } }
     for (const f of s.b22.fx) if (f.kind === 'area' || f.kind === 'nova' || f.kind === 'strike') { const t = Math.max(0, f.at - s.time); fg.lineStyle(2, 0xffe08a, 0.6); fg.strokeCircle(f.x, f.y, f.r * (0.4 + 0.6 * (1 - Math.min(1, t / 0.8)))); }
-    for (const m of s.b22.marks) { const e = s.enemies.find(x => x.id === m.enemy); if (!e) continue; const c = m.src === 'seal' ? 0xa070ff : 0xff9aa0, r = e.radius + 10 + 3 * Math.sin(this.clock * 6); fg.lineStyle(2, c, 0.95); fg.strokeCircle(e.x, e.y, r); fg.beginPath().moveTo(e.x - r - 4, e.y).lineTo(e.x - r + 6, e.y).moveTo(e.x + r + 4, e.y).lineTo(e.x + r - 6, e.y).moveTo(e.x, e.y - r - 4).lineTo(e.x, e.y - r + 6).moveTo(e.x, e.y + r + 4).lineTo(e.x, e.y + r - 6).strokePath(); }
+    for (const m of s.b22.marks) { const e = s.enemies.find(x => x.id === m.enemy); if (!e) continue; const c = m.src === 'seal' ? gray(0xa070ff) : 0xff9aa0, r = e.radius + 10 + 3 * Math.sin(this.clock * 6); fg.lineStyle(2, c, 0.95); fg.strokeCircle(e.x, e.y, r); fg.beginPath().moveTo(e.x - r - 4, e.y).lineTo(e.x - r + 6, e.y).moveTo(e.x + r + 4, e.y).lineTo(e.x + r - 6, e.y).moveTo(e.x, e.y - r - 4).lineTo(e.x, e.y - r + 6).moveTo(e.x, e.y + r + 4).lineTo(e.x, e.y + r - 6).strokePath(); }
     // ---- one-shot flashes from sim events (branches, relics, legendaries, ultimates, parries)
-    for (const ev of s.b22.ev) { if (ev.id <= this.evCur) continue; this.evCur = ev.id; const warm = /dawn|sigil|prism|feather|hourglass|bearing/.test(ev.kind) ? 0xffe08a : /rift|parry|mark|seal|waltz|judge|vex/.test(ev.kind) ? 0xa070ff : /ult|collapse|nova|crater|crucible|cone|area|line|chain|relay|arc|fan/.test(ev.kind) ? 0xffb347 : 0x9fe6e0; this.bursts.push({ x: ev.x, y: ev.y, t: 0, dur: ev.x2 !== undefined ? 0.25 : 0.4, r: Math.max(24, Math.min(260, ev.n ?? 70)), c: warm, x2: ev.x2, y2: ev.y2 }); }
-    for (const ev of s.b22.ev) { if (ev.id <= this.popCur) continue; this.popCur = ev.id; const ic = (ev.kind === 'ult_strike' || ev.kind === 'ult_release') ? `fx_ult${Math.max(0, ['kai', 'ren', 'sora', 'vex'].indexOf(s.hero))}` : POP_ICON[ev.kind] ?? (/dawn/.test(ev.kind) ? 'relic_1' : ev.kind === 'ult_start' ? `ult_${Math.max(0, ['kai', 'ren', 'sora', 'vex'].indexOf(s.hero))}` : null); if (ic && this.scene.textures.exists(`b22-${ic}`)) { const fxp = ic.startsWith('fx_'), big = ic.startsWith('ult'); const im = this.scene.add.image(ev.x, ev.y - (fxp ? 0 : 36), `b22-${ic}`).setDepth(fxp ? 5.6 : 10.7).setBlendMode(Phaser.BlendModes.ADD); this.pops.push({ im, t: 0, dur: fxp ? 0.7 : big ? 1.1 : 0.7, size: fxp ? 340 : big ? 150 : 54, rise: fxp ? 0 : 26 }); } }
+    for (const ev of s.b22.ev) { if (ev.id <= this.evCur) continue; this.evCur = ev.id; const warm = /dawn|sigil|prism|feather|hourglass|bearing/.test(ev.kind) ? 0xffe08a : /rift|parry|mark|seal|waltz|judge|vex/.test(ev.kind) ? 0xa070ff : /ult|collapse|nova|crater|crucible|cone|area|line|chain|relay|arc|fan/.test(ev.kind) ? 0xffb347 : 0x9fe6e0; this.bursts.push({ x: ev.x, y: ev.y, t: 0, dur: ev.x2 !== undefined ? 0.25 : 0.4, r: Math.max(24, Math.min(260, ev.n ?? 70)), c: gray(warm), x2: ev.x2, y2: ev.y2 }); }
+    for (const ev of s.b22.ev) { if (ev.id <= this.popCur) continue; this.popCur = ev.id; const ic = (ev.kind === 'ult_strike' || ev.kind === 'ult_release') ? `fx_ult${Math.max(0, ['kai', 'ren', 'sora', 'vex'].indexOf(s.hero))}` : POP_ICON[ev.kind] ?? (/dawn/.test(ev.kind) ? 'relic_1' : ev.kind === 'ult_start' ? `ult_${Math.max(0, ['kai', 'ren', 'sora', 'vex'].indexOf(s.hero))}` : null); if (ic && this.scene.textures.exists(`b22-${ic}`)) { const fxp = ic.startsWith('fx_'), big = ic.startsWith('ult'); const im = this.scene.add.image(ev.x, ev.y - (fxp ? 0 : 36), `b22-${ic}`).setDepth(fxp ? 5.6 : 10.7).setBlendMode(Phaser.BlendModes.ADD); if (gz && (ic === 'fx_ult3' || ic === 'ult_3')) im.setTint(0x9aa2ad); this.pops.push({ im, t: 0, dur: fxp ? 0.7 : big ? 1.1 : 0.7, size: fxp ? 340 : big ? 150 : 54, rise: fxp ? 0 : 26 }); } }
     const hc = s.hero === 'vex' ? s.hx.act : null;   // Vex Rift Reversal: entry tear, a violet blink streak and an exit burst (the shift itself is instant in the sim)
     if (hc && hc.act === 'rift_reversal' && hc.sx !== undefined && hc.id !== this.shiftId && this.scene.textures.exists('b22-fx_vexe0')) {
       this.shiftId = hc.id; const sx = hc.sx, sy = hc.sy ?? 0, tx = hc.tx ?? sx, ty = hc.ty ?? sy, len = Math.hypot(tx - sx, ty - sy);
@@ -122,17 +122,10 @@ export class B22Overlay {
     for (let k = this.pops.length - 1; k >= 0; k--) { const q = this.pops[k]; q.t += dt; const u = q.t / q.dur; if (u >= 1) { q.im.destroy(); this.pops.splice(k, 1); continue; } if (q.fixed) { q.im.setAlpha(1 - u); continue; } const sc = q.size * (0.6 + 0.6 * Math.min(1, u * 2.5)) / q.im.height; q.im.setScale(sc).setAlpha(u < 0.2 ? u / 0.2 : 1 - (u - 0.2) / 0.8).y -= q.rise * dt; }
     for (const ev of s.enemyEvents) { if (ev.id <= this.enemyCur) continue; this.enemyCur = ev.id; if (ev.kind === 'enemy_death' && (isRealmKind(ev.enemy) || isBoss(ev.enemy as BossKind))) this.bursts.push({ x: ev.x, y: ev.y, t: 0, dur: ev.tag === 'boss' ? 1.2 : 0.4, r: ev.tag === 'boss' ? 180 : 50, c: 0xffe9a8 }); }
     const keep: Burst[] = []; for (const b of this.bursts) { b.t += dt; if (b.t >= b.dur) continue; keep.push(b); const u = b.t / b.dur; fg.lineStyle(4 * (1 - u) + 1, b.c, 1 - u); if (b.x2 !== undefined) fg.beginPath().moveTo(b.x, b.y).lineTo(b.x2, b.y2!).strokePath(); else { fg.strokeCircle(b.x, b.y, b.r * (0.25 + 0.75 * u)); if (!reduced) { fg.fillStyle(b.c, 0.25 * (1 - u)); fg.fillCircle(b.x, b.y, b.r * u * 0.7); } } } this.bursts = keep.slice(-40);
-    // ---- B22.6 co-op: a ring under P1, the whole P2 figure (interim procedural body), downed / revive state
+    // ---- B22.6 co-op: revive progress (both fighters are real hero renderers now)
     if (s.party) {
-      const HEX: Record<string, number> = { kai: 0xeeb56c, ren: 0xff4a3d, sora: 0x59b8ff, vex: 0xa070ff };
       for (let i = 0; i < 2; i++) {
-        const q = slotPlayer(s, i), d = s.party.slots[i].down, hero = slotHeroOf(s, i), c = HEX[hero] ?? 0xffffff; const x = q.x, y = q.y + 24;
-        ag.lineStyle(3, i === 0 ? 0xffffff : c, d.downed ? 0.35 : 0.9); ag.strokeEllipse(x, y, 46, 18);
-        if (i === 1) {
-          const al = d.downed ? 0.45 : 1; ag.fillStyle(0x000000, 0.4); ag.fillEllipse(x, y, 40, 14); ag.fillStyle(d.downed ? 0x555566 : c, al); ag.fillRoundedRect(x - 11, y - (d.downed ? 22 : 56), 22, d.downed ? 20 : 44, 6); ag.fillStyle(0xf2d8c0, al); ag.fillCircle(x, y - (d.downed ? 26 : 64), 9);
-          const aim = Math.atan2(q.aimY, q.aimX); ag.lineStyle(3, 0xffffff, 0.7 * al); ag.beginPath().moveTo(x, y - 34).lineTo(x + Math.cos(aim) * 26, y - 34 + Math.sin(aim) * 26).strokePath();
-          if (q.form > 0) { ag.lineStyle(2, c, 0.8); ag.strokeCircle(x, y - 34, 26 + 3 * Math.sin(this.clock * 8)); }
-        }
+        const q = slotPlayer(s, i), d = s.party.slots[i].down; const x = q.x, y = q.y + 24;
         if (d.downed) { ag.lineStyle(4, 0x7fffd4, 0.9); ag.beginPath().arc(x, y - 28, 24, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, d.hold / 2.2)).strokePath(); }
       }
     }
