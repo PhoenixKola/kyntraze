@@ -86,7 +86,8 @@ describe('B22 Ascension: 24 mutually exclusive branches change real combat (actu
   for (const hero of ['kai', 'ren', 'sora', 'vex'] as const) for (const slot of ['q', 'e', 'r'] as const) {
     const pair = BRANCHES.filter(b => b.hero === hero && b.slot === slot);
     it(`${hero}.${slot}: ${pair.map(p => p.name).join(' vs ')} each differ from the base skill AND from each other`, () => {
-      const base = trial(hero, slot, null), a = trial(hero, slot, pair[0].id), b = trial(hero, slot, pair[1].id);
+      const fm = hero === 'kai' && slot === 'q' ? 1 : 0;   // Kai's base Q is the Surge Step buff (no damage): the Q branches are exercised through Flarebound's Scatter Burst
+      const base = trial(hero, slot, null, fm), a = trial(hero, slot, pair[0].id, fm), b = trial(hero, slot, pair[1].id, fm);
       expect(base.dmg, 'the base skill must hit the crowd').toBeGreaterThan(0);
       expect(differs(a, base), `${pair[0].id} vs base: ${JSON.stringify([a, base])}`).toBe(true); expect(differs(b, base), `${pair[1].id} vs base: ${JSON.stringify([b, base])}`).toBe(true); expect(differs(a, b), `${pair[0].id} vs ${pair[1].id}`).toBe(true);
     });

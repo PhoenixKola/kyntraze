@@ -14,8 +14,8 @@ export interface BranchDef {
 }
 const B = (id: BranchId, hero: HeroId, slot: Slot, side: 'A' | 'B', name: string, skill: string, gain: string, cost: string, tradeoff: BranchDef['tradeoff'] = {}): BranchDef => ({ id, hero, slot, side, name, skill, gain, cost, icon: `branch_${id}`, tradeoff });
 export const BRANCHES: readonly BranchDef[] = [
-  B('seismic_impact', 'kai', 'q', 'A', 'Seismic Impact', 'Impact Pulse', 'Two compact quake pulses follow the pulse and stagger what they hit.', 'Pulse radius -15%.', { }),
-  B('pressure_wave', 'kai', 'q', 'B', 'Pressure Wave', 'Impact Pulse', 'A forward cone shoves and slows foes away from you.', 'Burst damage -20%.', { qDamage: 0.8 }),
+  B('seismic_impact', 'kai', 'q', 'A', 'Seismic Impact', 'Kai Q', 'Two compact quake pulses follow your Q and stagger what they hit.', 'Pulse radius -15%.', { }),
+  B('pressure_wave', 'kai', 'q', 'B', 'Pressure Wave', 'Kai Q', 'A forward cone shoves and slows foes away from you.', 'Burst damage -20%.', { qDamage: 0.8 }),
   B('prism_conductor', 'kai', 'e', 'A', 'Prism Conductor', 'Fracture Lance', 'Each enemy the cast actually hits chains energy to up to 2 more foes for 40%.', 'Cooldown +10%.', { beamCd: 1.1 }),
   B('burning_wake', 'kai', 'e', 'B', 'Burning Wake', 'Fracture Lance', 'The cast leaves a damaging afterburn line along its path for 2.4 s.', 'Direct damage -10%.', { beamDamage: 0.9 }),
   B('starfall_bloom', 'kai', 'r', 'A', 'Starfall Bloom', 'Nova Bloom', 'Marked enemies take delayed follow-up bursts at their own locations.', 'Main burst radius -10%.', { sphereRadius: 0.9 }),

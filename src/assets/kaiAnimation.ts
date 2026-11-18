@@ -2,7 +2,7 @@
 import { skinRoot } from './skin';
 import { BEAM, SPHERE } from '../content/abilities';
 import { CANNON, DRAGON } from '../content/cometheart';
-import { RIFT, REVERSAL } from '../content/stillfire';
+import { RIFT } from '../content/stillfire';
 export type Facing = 'south' | 'north' | 'east' | 'west';
 /** RunLower + RunPunchUpper are the two LAYERS of the moving attack (legs+hips of the Run cycle, and an upper body whose frames are `step * 8 + leg phase`); the runtime draws the lower one first. */
 export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere' | 'RunLower' | 'RunPunchUpper';
@@ -142,9 +142,9 @@ export const FORM_REVERT_SECONDS = 0.25;
 export type KaiAnimEvent = 'form_start' | 'form_commit' | 'form_end';
 
 /** Clip frame for a cast at sim time t: frames before the clip's `release` event are spread over the sim's wind-up, the rest over what is left, so the release frame lands on the release tick whatever the clip's fps. */
-export type CastKind = 'beam' | 'sphere' | 'dragon' | 'comet' | 'rift' | 'reversal';
+export type CastKind = 'beam' | 'sphere' | 'dragon' | 'comet' | 'rift' | 'reversal' | 'scatter' | 'meteor' | 'flare' | 'crucible';
 /** The sheet clip each cast plays: Dragonfang Rush is a body-driven BasicPunch (its `impact` frame is the release), Cometbreaker the Beam clip. */
-export const CAST_CLIP: Record<CastKind, 'Beam' | 'Sphere' | 'BasicPunch'> = { beam: 'Beam', sphere: 'Sphere', dragon: 'BasicPunch', comet: 'Beam', rift: 'Beam', reversal: 'Sphere' };
+export const CAST_CLIP: Record<CastKind, 'Beam' | 'Sphere' | 'BasicPunch'> = { beam: 'Beam', sphere: 'Sphere', dragon: 'BasicPunch', comet: 'Beam', rift: 'Beam', reversal: 'Sphere', scatter: 'BasicPunch', meteor: 'BasicPunch', flare: 'Beam', crucible: 'Sphere' };
 /** Silver Rift: anticipation, a seamless looping charge hold (events hold_start..hold_end) for as long as E is held, then the release tail. Instinct Reversal spreads the whole Sphere clip over the string of strikes. */
 function riftFrame(a: KaiClipInfo, t: number, dur: number | undefined, released: boolean, rt: number): number {
   const hs = a.events.hold_start ?? 3, he = Math.max(hs, a.events.hold_end ?? hs + 3), rel = a.events.release ?? he + 1;
@@ -153,7 +153,10 @@ function riftFrame(a: KaiClipInfo, t: number, dur: number | undefined, released:
 }
 export function castFrame(a: KaiClipInfo, kind: CastKind, t: number, dur?: number, released = false, rt = 0): number {
   if (kind === 'rift') return riftFrame(a, t, dur, released, rt);
-  if (kind === 'reversal') return Math.min(a.frames - 1, Math.floor(Math.min(0.999999, t / Math.max(0.1, dur ?? REVERSAL.lead + REVERSAL.maxTargets * REVERSAL.hop + REVERSAL.recover)) * a.frames));
+  if (kind === 'reversal') return Math.min(a.frames - 1, Math.floor(((t * 5) % 1) * Math.min(a.frames, 10)) + (released ? 0 : 0));   // a sustained string of strikes loops a quick strike motion
+  if (kind === 'scatter') { const imp = a.events.impact ?? Math.floor(a.frames / 2), lo = Math.max(0, imp - 3), hi = Math.min(a.frames - 1, imp + 2); return lo + Math.floor(((t / 0.14) % 1) * (hi - lo + 1)); }
+  if (kind === 'meteor') { const imp = a.events.impact ?? Math.floor(a.frames / 2), lo = Math.max(0, imp - 3), hi = Math.min(a.frames - 1, imp + 2); return t < 0.12 ? Math.max(0, Math.floor(t / 0.12 * lo)) : lo + Math.floor((((t - 0.12) / 0.17) % 1) * (hi - lo + 1)); }
+  if (kind === 'flare' || kind === 'crucible') { const rel = a.events.release ?? Math.floor(a.frames / 2), tr = kind === 'flare' ? 0.2 : 0.55; if (t < tr) return Math.min(rel - 1, Math.max(0, Math.floor(t / tr * rel))); return Math.min(a.frames - 1, rel + Math.floor(Math.min(0.999999, (t - tr) / Math.max(0.1, (dur ?? tr + 0.5) - tr)) * (a.frames - rel))); }
   const rel = (kind === 'dragon' ? a.events.impact : a.events.release) ?? Math.floor(a.frames / 2);
   const tr = kind === 'beam' ? BEAM.charge : kind === 'sphere' ? SPHERE.gather : kind === 'dragon' ? DRAGON.windup : CANNON.gather;
   const total = dur ?? (kind === 'beam' ? BEAM.charge + BEAM.fire + BEAM.recover : kind === 'sphere' ? SPHERE.gather + SPHERE.recover : kind === 'dragon' ? DRAGON.windup + DRAGON.lunge + DRAGON.recover : CANNON.gather + CANNON.fire + CANNON.recover);

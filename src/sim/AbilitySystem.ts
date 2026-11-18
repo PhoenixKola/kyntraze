@@ -10,6 +10,8 @@ import { KAI_GROUND_DY, KAI_SCALE } from '../assets/kaiAnimation';
 import { RIFT, REVERSAL } from '../content/stillfire';
 import { cancelHero, heroMoveScale, heroStartE, heroStartR, interruptHero } from './HeroSystem';
 import { startRift, startReversal, updateRift, updateReversal, trackFreeAim, freeAim } from './ApexSystem';
+import { crucibleR, flareE, isKitKind, kaiMoveScale, updateKaiKit } from './KaiKit';
+import { STRIKES } from '../content/kaiKit';
 
 const EVENT_CAP = 24;
 function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number) {
@@ -18,7 +20,7 @@ function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: nu
 }
 /** Seconds into the cast at which the ability is released (beam fires / sphere is thrown). */
 export const releaseTime = (kind: Cast['kind']) => (kind === 'rift' ? RIFT.minCharge : kind === 'reversal' ? REVERSAL.lead : kind === 'beam' ? BEAM.charge : kind === 'sphere' ? SPHERE.gather : kind === 'dragon' ? DRAGON.windup : CANNON.gather);
-export const castDuration = (kind: Cast['kind']) => (kind === 'rift' ? RIFT.maxCharge + RIFT.fire[2] + RIFT.recover : kind === 'reversal' ? REVERSAL.lead + REVERSAL.maxTargets * REVERSAL.hop + 0.06 + REVERSAL.recover : kind === 'beam' ? BEAM.charge + BEAM.fire + BEAM.recover : kind === 'sphere' ? SPHERE.gather + SPHERE.recover : kind === 'dragon' ? DRAGON.windup + DRAGON.lunge + DRAGON.recover : CANNON.gather + CANNON.fire + CANNON.recover);
+export const castDuration = (kind: Cast['kind']) => (kind === 'rift' ? RIFT.maxCharge + RIFT.fire[2] + RIFT.recover : kind === 'reversal' ? REVERSAL.lead + REVERSAL.recover + 2 : kind === 'beam' ? BEAM.charge + BEAM.fire + BEAM.recover : kind === 'sphere' ? SPHERE.gather + SPHERE.recover : kind === 'dragon' ? DRAGON.windup + DRAGON.lunge + DRAGON.recover : CANNON.gather + CANNON.fire + CANNON.recover);
 const FORM_KEY = ['base', 'f1', 'f2', 'f3'] as const;
 /** Anchor table lookup that falls back to Form II until the Form III anchors exist for a table/facing. */
 const anchor = <T extends Record<string, Record<Face, { x: number; y: number }>>>(t: T, form: number, face: Face) => ((t as Record<string, Record<Face, { x: number; y: number }> | undefined>)[FORM_KEY[form]] ?? t.f2)[face];
@@ -29,6 +31,7 @@ const BEAM_PULSES_MAX = BEAM_PULSES + Math.round(BEAM.recover / BEAM.pulseEvery)
 export function castMoveScale(s: GameState): number {
   if (s.hero !== 'kai') return heroMoveScale(s);
   const c = s.cast; if (!c) return 1;
+  if (isKitKind(c.kind)) return kaiMoveScale(c);
   if (c.kind === 'rift') return !c.released ? RIFT.moveScaleCharge : (c.rt ?? 0) < RIFT.fire[c.tier ?? 0] ? RIFT.moveScaleFire : RIFT.moveScaleRecover;
   if (c.kind === 'reversal') return REVERSAL.moveScale;
   if (c.kind === 'dragon') return c.t < DRAGON.windup ? DRAGON.moveScaleWindup : c.t < DRAGON.windup + DRAGON.lunge ? 0 : DRAGON.moveScaleRecover;
@@ -106,7 +109,9 @@ function pickSphereTarget(s: GameState): { x: number; y: number } {
 export function startAbility(s: GameState, key: 'beam' | 'sphere'): boolean {
   if (s.hero !== 'kai') return key === 'beam' ? heroStartE(s) : heroStartR(s);
   const p = s.player;
+  if (key === 'sphere' && s.cast?.kind === 'reversal' && !s.cast.released && s.cast.t > STRIKES.escapeAfter + 0.3) { s.cast.nextAt = -1; return false; }   // R again ends the chain
   if (s.phase !== 'running' || s.cinema || s.cast || p.dashRemaining > 0 || p.hp <= 0) return false;
+  if (p.form === 1) return key === 'beam' ? flareE(s) : crucibleR(s);   // B22: Rising Flare / Sunfall Crucible own E / R in Flarebound
   if (p.form === 3) return key === 'beam' ? startRift(s) : startReversal(s);   // B13: Silver Rift / Instinct Reversal own E / R in Stillfire Apex
   // B12: in Cometheart the E / R keys fire Dragonfang Rush / Cometbreaker Cannon (own cooldowns); Base / Flarebound keep Fracture Lance / Nova Bloom untouched
   const kind: Cast['kind'] = p.form === 2 ? (key === 'beam' ? 'dragon' : 'comet') : key;
@@ -126,7 +131,8 @@ export function startAbility(s: GameState, key: 'beam' | 'sphere'): boolean {
 /** End the cast now (dash, or a hit before release). The cooldown stays spent. */
 export function cancelCast(s: GameState) {
   if (s.hero !== 'kai') { cancelHero(s); return; }
-  if (!s.cast) return; if (s.cast.kind === 'rift' && !s.cast.released) s.player.riftCooldown = Math.max(s.player.riftCooldown, RIFT.cancelCooldown * s.mods.beamCd);   // a cancelled charge is never free
+  if (!s.cast) return; if (s.cast.kind === 'reversal') s.player.reversalCooldown = Math.max(s.player.reversalCooldown, REVERSAL.cooldown * s.mods.sphereCd);   // an escaped chain pays the full cooldown
+  if (s.cast.kind === 'rift' && !s.cast.released) s.player.riftCooldown = Math.max(s.player.riftCooldown, RIFT.cancelCooldown * s.mods.beamCd);   // a cancelled charge is never free
   emit(s, 'cast_cancel', s.player.x, s.player.y); s.cast = null;
 }
 /** A hit interrupts only the wind-up; once released the attack always completes. */
@@ -176,12 +182,13 @@ function echoBurst(s: GameState, ec: GameState['echoes'][number]) {
 export function updateAbilities(s: GameState, dt: number) {
   const p = s.player;
   p.beamCooldown = Math.max(0, p.beamCooldown - dt); p.sphereCooldown = Math.max(0, p.sphereCooldown - dt); p.dragonCooldown = Math.max(0, p.dragonCooldown - dt); p.cometCooldown = Math.max(0, p.cometCooldown - dt); p.riftCooldown = Math.max(0, p.riftCooldown - dt); p.reversalCooldown = Math.max(0, p.reversalCooldown - dt); p.evadeCooldown = Math.max(0, p.evadeCooldown - dt);
+  if (s.hero === 'kai') updateKaiKit(s, dt);
   for (const b of s.blasts) b.ttl -= dt;
   s.blasts = s.blasts.filter(b => b.ttl > 0);
   if (s.echoes.length) { for (const ec of s.echoes) ec.t -= dt; const due = s.echoes.filter(ec => ec.t <= 0); s.echoes = s.echoes.filter(ec => ec.t > 0); for (const ec of due) echoBurst(s, ec); }
   const sh = s.sphere;
   if (sh) { sh.t += dt; if (sh.t >= SPHERE.flight) { s.sphere = null; detonate(s, sh); } }
-  const c = s.cast; if (!c) return;
+  const c = s.cast; if (!c || isKitKind(c.kind)) return;
   const before = c.t; c.t += dt;
   if (c.kind === 'rift') { updateRift(s, c, dt); if (c.released && c.t >= c.dur - 1e-9) s.cast = null; return; }
   if (c.kind === 'reversal') { updateReversal(s, c); if (c.t >= c.dur - 1e-9) s.cast = null; return; }

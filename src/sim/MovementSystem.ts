@@ -1,3 +1,4 @@
+import { surgeSpeedMul } from './KaiKit';
 import type { GameState, InputState } from './GameState';
 import { normalize } from '../core/Math';
 import { slideMove } from './CollisionSystem';
@@ -14,7 +15,7 @@ export function movePlayer(state: GameState, input: InputState, dt: number) {
     state.impacts.push({ id: state.nextId++, kind: 'dash', x: p.x, y: p.y, ttl: apex ? 0.3 : 0.22, life: apex ? 0.3 : 0.22 });
     if (apex) state.abilityEvents.push({ id: state.nextId++, kind: 'form3_dash', x: p.x, y: p.y });
   }
-  const formSpeed = !p.form ? 1 : state.hero === 'ren' ? ASCEND.ren.speedMul : state.hero === 'sora' ? ASCEND.sora.speedMul : state.hero === 'vex' ? ASCEND.vex.speedMul[Math.min(1, p.form - 1)] : 1.16;
+  const formSpeed = !p.form ? surgeSpeedMul(state) : state.hero === 'ren' ? ASCEND.ren.speedMul : state.hero === 'sora' ? ASCEND.sora.speedMul : state.hero === 'vex' ? ASCEND.vex.speedMul[Math.min(1, p.form - 1)] : 1.16;
   const dashing = p.dashRemaining > 0; const lock = dashing ? 1 : castMoveScale(state) * (state.b22.ult.act ? 0.15 : 1);
   if (apex) {
     // Form III glides: velocity eases toward the input (ease-in / ease-out), the dash is a near-instant displacement (same ~175 px as before, in 0.13 s)

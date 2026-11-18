@@ -32,10 +32,6 @@ describe('Fracture Lance (beam)', () => {
     for (let i = 0; i < 120; i++) sim.step(DT, idle({ beam: true })); expect(s.player.beamCooldown).toBeGreaterThan(BEAM.cooldown - 2.1);
     expect(s.cast?.len ?? 0).toBeLessThan(200);
   });
-  it('Form I is wider and harder, snapshotted at cast time', () => {
-    const { sim, s } = setup([[1300, 800 + BEAM.halfWidth + 25, 400]]); s.player.aimX = 1; s.player.aimY = 0; s.player.form = 1; s.player.drive = 100;
-    press(sim, 'beam'); s.player.form = 0; run(sim, castDuration('beam')); expect(s.enemies[0].hp).toBe(400 - BEAM.damage * BEAM.formDamage * 5);
-  });
   it('dash cancels the cast; a hit cancels only the wind-up', () => {
     let { sim, s } = setup(); press(sim, 'beam'); run(sim, 0.1); sim.step(DT, idle({ dash: true, x: 1 })); expect(s.cast).toBeNull();
     ({ sim, s } = setup()); press(sim, 'beam'); run(sim, 0.1); damagePlayer(s, 5); expect(s.cast).toBeNull();

@@ -5,7 +5,8 @@ import type { Enemy, InputState } from '../sim/GameState';
 import { damageEnemy, damagePlayer } from '../sim/CombatSystem';
 import { migrateSave } from '../sim/SaveSystem';
 import { formChoices, selectedForm } from '../sim/FormSystem';
-import { findBlink, pickReversalTargets, riftAim } from '../sim/ApexSystem';
+import { riftAim } from '../sim/ApexSystem';
+import { CHAIN } from '../content/kaiKit';
 import { castFrame, type KaiClipInfo } from '../assets/kaiAnimation';
 import { readPad, AIM_DEADZONE, type PadLike } from '../game/input/gamepadMap';
 
@@ -114,25 +115,38 @@ describe('E Silver Rift', () => {
     const { sim, s } = apexForm(); sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 0, aimY: 1, aimSrc: 'stick' })); run(sim, 0.1, idle({ beamHeld: true, aimX: -0.6, aimY: 0.8, aimSrc: 'stick' }));
     run(sim, 0.1, idle({ beamHeld: true })); const d = riftAim(s); expect(d.x).toBeCloseTo(-0.6, 2); expect(d.y).toBeCloseTo(0.8, 2);
   });
-  it('short and full charges are different tiers; releasing blinks to a safe spot and fires from the hand origin', () => {
-    const quick = apexForm([[1300, 770, 4000]]); quick.sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(quick.sim, 0.2, idle({ aimX: 1, aimY: 0, aimSrc: 'pointer' }));
-    expect(quick.s.cast?.released).toBe(true); expect(quick.s.cast?.tier).toBe(0); const x = quick.s.player.x; expect(x).toBeLessThan(1100); // blinked backwards
-    run(quick.sim, 1.2); const dq = 4000 - quick.s.enemies[0].hp;
-    const full = apexForm([[1300, 770, 4000]]); full.sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(full.sim, RIFT.maxCharge, idle({ beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' }));
-    expect(full.s.cast?.tier).toBe(2); run(full.sim, 1.2); const df = 4000 - full.s.enemies[0].hp; expect(dq).toBeGreaterThan(0); expect(df).toBeGreaterThan(dq * 1.5);
-    expect(full.s.abilityEvents.some(e => e.kind === 'rift_blink' || e.kind === 'rift_fire')).toBe(true);
+  it('short and full charges are different tiers; the release no longer blinks first and fires from the hand origin', () => {
+    const quick = apexForm([[1300, 770, 400000]]); quick.sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(quick.sim, 0.2, idle({ aimX: 1, aimY: 0, aimSrc: 'pointer' }));
+    expect(quick.s.cast?.released).toBe(true); expect(quick.s.cast?.tier).toBe(0); expect(Math.hypot(quick.s.player.x - 1100, quick.s.player.y - 800)).toBeLessThan(2);   // the blink moved into the post-hit chain
+    run(quick.sim, 0.45); const dq = 400000 - quick.s.enemies[0].hp;
+    const full = apexForm([[1300, 770, 400000]]); full.sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(full.sim, RIFT.maxCharge, idle({ beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' }));
+    expect(full.s.cast?.tier).toBe(2); run(full.sim, 0.7); const df = 400000 - full.s.enemies[0].hp; expect(dq).toBeGreaterThan(0); expect(df).toBeGreaterThan(dq * 1.5);
+    expect(full.s.abilityEvents.some(e => e.kind === 'rift_fire')).toBe(true);
   });
-  it('the blink never lands in a wall or on an enemy; with no safe spot the release happens in place', () => {
-    const corner = apexForm(); corner.s.player.x = 60; corner.s.player.y = 60;    // pinned into the arena corner, aiming into the room: back/side spots are walls
-    const b = findBlink(corner.s, { x: 1, y: 1 }); if (b) { expect(b.x).toBeGreaterThan(40); expect(b.y).toBeGreaterThan(40); }
-    const boxed = apexForm(); const ring: Array<[number, number, number?]> = []; for (let a = 0; a < 16; a++) ring.push([1100 + Math.cos(a / 16 * 6.283) * 60, 800 + Math.sin(a / 16 * 6.283) * 60, 5000]);
-    boxed.s.enemies = ring.map(([x, y, hp], i) => enemy(500 + i, x, y, hp)); expect(findBlink(boxed.s, { x: 1, y: 0 })).toBeNull();
-    boxed.sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(boxed.sim, 0.2, idle({ aimX: 1, aimY: 0, aimSrc: 'pointer' })); expect(boxed.s.cast?.released).toBe(true); expect(boxed.s.cast?.blink).toBeNull();
-    expect(Math.hypot(boxed.s.player.x - 1100, boxed.s.player.y - 800)).toBeLessThan(2);
+  const field = (): Array<[number, number, number?]> => { const out: Array<[number, number, number?]> = [[1300, 770, 400000]]; for (let x = 300; x <= 2000; x += 300) for (let y = 300; y <= 1400; y += 300) if (Math.hypot(x - 1100, y - 800) > 120 && Math.hypot(x - 1300, y - 770) > 60) out.push([x, y, 400000]); return out; };
+  it('after the first beam damages something, Kai teleports five times and fires a beam at the nearest target from each landing', () => {
+    const r = apexForm(field()); const hops: Array<{ x: number; y: number }> = []; let fires = 0; const seen = new Set<number>(); let hpTotal0 = r.s.enemies.reduce((a, e) => a + e.hp, 0);
+    r.sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' }));
+    for (let i = 0; i < 480; i++) { r.sim.step(DT, idle({ aimX: 1, aimY: 0, aimSrc: 'pointer' })); for (const e of r.s.abilityEvents) if (!seen.has(e.id)) { seen.add(e.id); if (e.kind === 'rift_hop') hops.push({ x: e.x, y: e.y }); if (e.kind === 'rift_fire' && (e.n ?? 0) >= 3) fires++; } }
+    expect(hops.length).toBe(CHAIN.follow); expect(fires).toBe(CHAIN.follow); expect(r.s.cast).toBeNull();
+    expect(r.s.enemies.reduce((a, e) => a + e.hp, 0)).toBeLessThan(hpTotal0);
+    const landed = hops.map((_h, i) => (i === hops.length - 1 ? { x: r.s.player.x, y: r.s.player.y } : hops[i + 1])); void landed;
+    for (let i = 1; i < hops.length; i++) expect(Math.hypot(hops[i].x - hops[i - 1].x, hops[i].y - hops[i - 1].y)).toBeGreaterThan(CHAIN.minApart);
+    expect(r.s.player.x).toBeGreaterThan(40); expect(r.s.player.y).toBeGreaterThan(40);
+  });
+  it('the chain is deterministic per seed and differs between seeds', () => {
+    const pos = (seed: number) => { const r = apexForm(field()); r.s.seed = seed; r.sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(r.sim, 4, idle({ aimX: 1, aimY: 0, aimSrc: 'pointer' })); return [Math.round(r.s.player.x), Math.round(r.s.player.y)].join(','); };
+    expect(pos(11)).toBe(pos(11)); expect(pos(11)).not.toBe(pos(97));
+  });
+  it('a first beam that hits nothing finishes normally with no teleports; a lone dying target ends the chain cleanly', () => {
+    const miss = apexForm([[1300, 1500, 4000]]); miss.sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(miss.sim, 3, idle({ aimX: 1, aimY: 0, aimSrc: 'pointer' }));
+    expect(miss.s.abilityEvents.filter(e => e.kind === 'rift_hop').length).toBe(0); expect(miss.s.cast).toBeNull(); expect(Math.hypot(miss.s.player.x - 1100, miss.s.player.y - 800)).toBeLessThan(2);
+    const lone = apexForm([[1300, 770, 1]]); lone.sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(lone.sim, 3, idle({ aimX: 1, aimY: 0, aimSrc: 'pointer' }));
+    expect(lone.s.abilityEvents.filter(e => e.kind === 'rift_hop').length).toBe(0); expect(lone.s.cast).toBeNull();
   });
   it('hits a boss too, has a cooldown (no spam), and cancelling a charge is never free', () => {
     const { sim, s } = apexForm(); s.enemies = [enemy(700, 1300, 770, 4000, 'warden')]; sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(sim, 0.3, idle({ aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(sim, 1);
-    expect(s.enemies[0].hp).toBeLessThan(4000); expect(s.player.riftCooldown).toBeGreaterThan(5); sim.step(DT, idle({ beam: true, beamHeld: true })); expect(s.cast).toBeNull();
+    expect(s.enemies[0].hp).toBeLessThan(4000); expect(s.player.riftCooldown).toBeGreaterThan(5); run(sim, 4); expect(s.cast).toBeNull(); sim.step(DT, idle({ beam: true, beamHeld: true })); expect(s.cast).toBeNull();
     const c = apexForm(); c.sim.step(DT, idle({ beam: true, beamHeld: true })); c.sim.step(DT, idle({ beamHeld: true, x: 1, dash: true })); expect(c.s.cast).toBeNull(); expect(c.s.player.riftCooldown).toBeGreaterThanOrEqual(RIFT.cancelCooldown - 0.1);
   });
   it('Lance upgrades carry into Silver Rift (damage, width, pulses)', () => {
@@ -147,22 +161,34 @@ describe('E Silver Rift', () => {
   });
 });
 
-describe('R Instinct Reversal', () => {
-  it('strikes up to the target cap, prioritising the nearest non-bosses, hits each, ends cleanly with a cooldown', () => {
-    const { sim, s } = apexForm([[1180, 800, 400], [1200, 860, 400], [1050, 760, 400], [1000, 840, 400], [1230, 740, 400], [1900, 800, 400]]);
-    const ids = pickReversalTargets(s); expect(ids.length).toBe(REVERSAL.maxTargets); expect(ids).not.toContain(105);
-    sim.step(DT, idle({ sphere: true })); expect(s.cast?.kind).toBe('reversal'); run(sim, 1.2);
-    expect(s.cast).toBeNull(); expect(s.enemies.filter(e => e.hp < 400).length).toBeGreaterThanOrEqual(REVERSAL.maxTargets); expect(s.enemies[5].hp).toBe(400);
-    expect(s.player.reversalCooldown).toBeGreaterThan(10); expect(s.abilityEvents.filter(e => e.kind === 'reversal_hit').length).toBeGreaterThan(0);
+describe('R Instinct Reversal (sustained)', () => {
+  const crowd: Array<[number, number, number?]> = [[1180, 800], [1200, 860], [1050, 760], [1000, 840], [1230, 740], [1150, 700], [1300, 820], [1100, 900]];
+  const strikes = (s: { abilityEvents: Array<{ kind: string }> }) => s.abilityEvents.filter(e => e.kind === 'reversal_strike').length;
+  it('keeps striking past four targets and re-strikes survivors while enemies remain in radius', () => {
+    const { sim, s } = apexForm(crowd); sim.step(DT, idle({ sphere: true })); expect(s.cast?.kind).toBe('reversal'); let n = 0; const seen = new Set<number>();
+    for (let i = 0; i < 240; i++) { sim.step(DT, idle()); for (const e of s.abilityEvents) if (!seen.has(e.id)) { seen.add(e.id); if (e.kind === 'reversal_strike') n++; } }
+    expect(n).toBeGreaterThan(8); expect(s.enemies.filter(e => e.hp < 400).length).toBeGreaterThanOrEqual(7); expect(s.cast?.kind).toBe('reversal');
   });
-  it('Kai never ends outside the arena or inside an obstacle, and fails gracefully with nobody near', () => {
-    const { sim, s } = apexForm([[200, 200, 400], [260, 210, 400]]); s.player.x = 230; s.player.y = 260; sim.step(DT, idle({ sphere: true })); run(sim, 1.2); expect(s.player.x).toBeGreaterThan(20); expect(s.player.y).toBeGreaterThan(20);
+  it('stops promptly once nothing is left in radius and pays the full cooldown', () => {
+    const { sim, s } = apexForm([[1180, 800, 30], [1200, 860, 30], [1050, 760, 30]]); sim.step(DT, idle({ sphere: true })); run(sim, 3);
+    expect(s.enemies.every(e => e.hp <= 0)).toBe(true); expect(s.cast).toBeNull(); expect(s.player.reversalCooldown).toBeGreaterThan(10);
+  });
+  it('acquires an enemy that arrives mid-chain', () => {
+    const { sim, s } = apexForm([[1180, 800, 400]]); sim.step(DT, idle({ sphere: true })); run(sim, 0.5);
+    s.enemies.push(enemy(900, s.player.x - 20, s.player.y + 120, 60)); run(sim, 2); { const n = s.enemies.find(e => e.id === 900); expect(!n || n.hp < 60).toBe(true); }
+  });
+  it('Kai never ends outside the arena, and a cast with nobody near fails gracefully', () => {
+    const { sim, s } = apexForm([[200, 200, 400], [260, 210, 400]]); s.player.x = 230; s.player.y = 260; sim.step(DT, idle({ sphere: true })); run(sim, 1.5); expect(s.player.x).toBeGreaterThan(20); expect(s.player.y).toBeGreaterThan(20);
     const e = apexForm(); e.sim.step(DT, idle({ sphere: true })); run(e.sim, 0.8); expect(e.s.cast).toBeNull(); expect(e.s.player.reversalCooldown).toBeLessThan(5);
   });
-  it('a boss can be struck but is not chain-executed; Nova upgrades add targets and damage', () => {
-    const { sim, s } = apexForm([[1180, 800, 400]]); s.enemies.push(enemy(800, 1230, 800, 4000, 'warden')); sim.step(DT, idle({ sphere: true })); run(sim, 1.2); expect(4000 - s.enemies[1].hp).toBeLessThan(REVERSAL.damage * 4 + REVERSAL.finishDamage * 4);
-    const base = apexForm(); const up = apexForm(); up.s.mods.sphereEcho = 2; expect(pickReversalTargets(up.s).length).toBeGreaterThanOrEqual(pickReversalTargets(base.s).length);
-    const crowd: Array<[number, number, number?]> = [[1150, 800], [1180, 830], [1210, 790], [1100, 860], [1250, 800], [1050, 780]]; const a = apexForm(crowd); const b = apexForm(crowd); b.s.mods.sphereEcho = 2; expect(pickReversalTargets(b.s).length).toBe(pickReversalTargets(a.s).length + 2);
+  it('a boss can be hit repeatedly but only once per beat; R again ends the chain with the full cooldown', () => {
+    const { sim, s } = apexForm([]); s.enemies.push(enemy(800, 1230, 800, 4000, 'warden')); sim.step(DT, idle({ sphere: true })); run(sim, 1.2);
+    const n = strikes(s); const lost = 4000 - s.enemies[0].hp; expect(lost).toBeGreaterThan(REVERSAL.damage); expect(lost).toBeLessThan(REVERSAL.damage * 9 + REVERSAL.finishDamage * 3);
+    sim.step(DT, idle({ sphere: true })); run(sim, 0.3); expect(s.cast).toBeNull(); expect(s.player.reversalCooldown).toBeGreaterThan(10); void n;
+  });
+  it('Nova upgrades widen the strike radius', () => {
+    const near: Array<[number, number, number?]> = [[1100 + 330, 800, 400]]; const a = apexForm(near); const b = apexForm(near); b.s.mods.sphereRadius = 1.4;
+    a.sim.step(DT, idle({ sphere: true })); b.sim.step(DT, idle({ sphere: true })); expect(a.s.cast?.dur).toBeLessThan(1e8); expect(b.s.cast?.dur).toBeGreaterThan(1e8);
   });
 });
 

@@ -1,3 +1,4 @@
+import { decoyFor } from './KaiKit';
 import type { Enemy, GameState, Hazard } from './GameState';
 import { normalize } from '../core/Math';
 import { slideMove, blocked } from './CollisionSystem';
@@ -54,7 +55,7 @@ export function moveEnemies(state: GameState, dt: number) {
     if (cantors.length && e.kind !== 'cantor') for (const c of cantors) { const r = ENEMIES.cantor.aura!.radius; if ((c.x - e.x) ** 2 + (c.y - e.y) ** 2 <= r * r) { rally = true; break; } }
     const cdRate = rally ? ENEMIES.cantor.aura!.recover : 1;
     e.touchCooldown = Math.max(0, e.touchCooldown - dt); e.attackCd = Math.max(0, e.attackCd - dt * cdRate); e.stagger = Math.max(0, e.stagger - dt);
-    const dx = p.x - e.x, dy = p.y - e.y, dist = Math.hypot(dx, dy), v = normalize(dx, dy);
+    const tp = decoyFor(state, e) ?? p, dx = tp.x - e.x, dy = tp.y - e.y, dist = Math.hypot(dx, dy), v = normalize(dx, dy);
     const slow = (e.stagger > 0 ? STAGGER_SLOW : 1) * (rally ? ENEMIES.cantor.aura!.speed : 1);
     if (e.mode === 'move') {
       let mx = v.x, my = v.y, k = 1;

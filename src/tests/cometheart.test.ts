@@ -111,8 +111,8 @@ describe('Cometbreaker Cannon (R in Form II)', () => {
     const dBase = formII([[1230, 800, 9999]]); tap(dBase.sim, { beam: true }); run(dBase.sim, 1);
     const dUp = formII([[1230, 800, 9999]]); dUp.s.mods.beamDamage = 1.5; tap(dUp.sim, { beam: true }); run(dUp.sim, 1); expect(9999 - dUp.s.enemies[0].hp).toBeCloseTo((9999 - dBase.s.enemies[0].hp) * 1.5, 3);
   });
-  it('base Fracture Lance / Nova Bloom still fire in Base and Flarebound', () => {
-    for (const form of [0, 1] as const) { const { sim, s } = setup(true); s.player.form = form; s.player.aimX = 1; s.player.aimY = 0; tap(sim, { beam: true }); expect(s.cast?.kind).toBe('beam'); run(sim, 1.5); tap(sim, { sphere: true }); expect(s.cast?.kind).toBe('sphere'); }
+  it('base Fracture Lance / Nova Bloom still fire in Base (Flarebound has Rising Flare / Sunfall Crucible)', () => {
+    for (const form of [0] as const) { const { sim, s } = setup(true); s.player.form = form; s.player.aimX = 1; s.player.aimY = 0; tap(sim, { beam: true }); expect(s.cast?.kind).toBe('beam'); run(sim, 1.5); tap(sim, { sphere: true }); expect(s.cast?.kind).toBe('sphere'); }
   });
 });
 

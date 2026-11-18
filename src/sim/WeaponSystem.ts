@@ -2,6 +2,7 @@ import type { GameState } from './GameState';
 import { damageEnemy } from './CombatSystem';
 import { distanceSquared } from '../core/Math';
 import { heroActivateQ, updateHeroAuto } from './HeroSystem';
+import { kaiQ, surgeAutoMul } from './KaiKit';
 export function updateAutoWeapon(state: GameState, dt: number) {
   const p = state.player;
   if (state.hero !== 'kai') { updateHeroAuto(state, dt); return; }
@@ -16,19 +17,11 @@ export function updateAutoWeapon(state: GameState, dt: number) {
     const target = candidates[i];
     state.impacts.push({ id: state.nextId++, kind: 'shot', x: p.x, y: p.y - 15,
       targetX: target.x, targetY: target.y, ttl: 0.2, life: 0.2 });
-    damageEnemy(state, target, p.attackDamage * (p.form ? 1.4 * state.mods.formPower : 1));
+    damageEnemy(state, target, p.attackDamage * surgeAutoMul(state) * (p.form ? 1.4 * state.mods.formPower : 1));
     if (p.form === 0) p.drive = Math.min(100, p.drive + 1.7 * state.mods.driveGain);
   }
 }
 export function activateQ(state: GameState) {
   if (state.hero !== 'kai') return heroActivateQ(state);
-  const p = state.player;
-  if (p.qCooldown > 0) return false;
-  p.qCooldown = 8.5;
-  const radius = p.qRadius * (p.form ? 1.25 : 1);
-  state.impacts.push({ id: state.nextId++, kind: 'pulse', x: p.x, y: p.y, ttl: 0.35, life: 0.35 });
-  for (const enemy of state.enemies) {
-    if (enemy.hp > 0 && distanceSquared(p.x, p.y, enemy.x, enemy.y) <= (radius + enemy.radius) ** 2) damageEnemy(state, enemy, p.qDamage * (p.form ? 1.25 : 1), { area: true });
-  }
-  return true;
+  return kaiQ(state);
 }
