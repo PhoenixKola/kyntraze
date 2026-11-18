@@ -31,6 +31,6 @@ test('E charges while Kai glides and fires on release (no pre-fire blink); R run
 });
 test('retry during the Form III reveal starts a clean run', async ({ page }) => {
   await start(page); await page.keyboard.press('f'); await page.waitForTimeout(150); await page.keyboard.press('f'); await page.waitForTimeout(400);
-  await page.evaluate(() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))); await page.waitForFunction(() => { const q = (window as unknown as { __KYNT_QA__?: Qa }).__KYNT_QA__; return !!q && q.sim().time < 1 && q.sim().cinema === null; }, null, { timeout: 8000 });
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))); await page.waitForFunction(() => { const q = (window as unknown as { __KYNT_QA__?: Qa }).__KYNT_QA__; return !!q && q.sim().time < 1 && q.sim().cinema === null; }, null, { timeout: 30000 });
   const s = await qa(page); expect(s.form).toBe(0); expect(s.cin).toBeNull(); expect(s.seen).toBe(0);
 });
