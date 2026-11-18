@@ -1,3 +1,5 @@
+import { faceOf } from './AbilitySystem';
+import { strikeHand } from './Strike';
 /** B22.3 Vex: the counter specialist. Null Blade (auto), Parry Halo (Q), Rift Reversal (E), Oathbreaker Seal (R). Every effect is a real damage / status event in the sim; the renderer only reads it. Handed control by HeroSystem when `state.hero === 'vex'`. */
 import type { AbilityEventKind, Enemy, GameState, HeroCast } from './GameState';
 import { damageEnemy } from './CombatSystem';
@@ -36,7 +38,7 @@ export function vexAuto(s: GameState) {
     damageEnemy(s, e, dmg); hits++; if (fin) push(s, e, e.x - p.x, e.y - p.y, VEX.auto.finisherPush / 4, 0.18); driveGain(s, fin ? 2.4 : 1.4);
   }
   if (fin && s.b22.vex.requiem > 0) s.b22.vex.requiem = 0;
-  s.hx.strike = { x: dir.x, y: dir.y, t: s.time, step };
+  s.hx.strike = { x: dir.x, y: dir.y, t: s.time, step, hand: strikeHand(faceOf(dir.x, dir.y), dir.x, dir.y, step) };   // the blade hand: a target on the left is struck with a left-hand swing
   emit(s, fin ? 'auto_finisher' : 'auto_hit', p.x + dir.x * 34, p.y + dir.y * 34, hits);
 }
 

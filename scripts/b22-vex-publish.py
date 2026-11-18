@@ -1,7 +1,7 @@
 """Publishes Vex's bespoke rig sheets (art/characters/vex/<dir>/sheets, f1/<dir>/sheets) to public/art/vex and public/art/vex-f1, replacing the earlier palette-remapped Ren stand-in. Only manifest.json and vex_* sheets are copied."""
 import os, shutil
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); SRC = os.path.join(ROOT, "art", "characters", "vex"); PUB = os.path.join(ROOT, "public", "art")
-for form, srcbase, dst in (("base", SRC, "vex"), ("f1", os.path.join(SRC, "f1"), "vex-f1")):
+for form, srcbase, dst in (("base", SRC, "vex"), ("f1", os.path.join(SRC, "f1"), "vex-f1"), ("f2", os.path.join(SRC, "f2"), "vex-f2")):
     for d in ("south", "north", "east", "west"):
         s = os.path.join(srcbase, d, "sheets"); t = os.path.join(PUB, dst, d)
         if os.path.exists(t): shutil.rmtree(t)

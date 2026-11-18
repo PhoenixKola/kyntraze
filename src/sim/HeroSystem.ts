@@ -1,3 +1,4 @@
+import { strikeHand } from './Strike';
 /** B19: the combat kits of Ren (crimson brawler) and Sora (azure controller). Kai's systems are untouched; Simulation / WeaponSystem / AbilitySystem hand over to this file only when `state.hero !== 'kai'`.
  *  Slot mapping: Q = qCooldown, E = beamCooldown (+ beam mods), R = sphereCooldown (+ sphere mods). The automatic attack is separate from Q and keeps running while moving. */
 import type { AbilityEventKind, Bolt, Enemy, Face, GameState, HeroCast, Orb } from './GameState';
@@ -88,7 +89,7 @@ function renAuto(s: GameState) {
     .sort((a, b) => (a.x - p.x) ** 2 + (a.y - p.y) ** 2 - ((b.x - p.x) ** 2 + (b.y - p.y) ** 2)).slice(0, p.targets + (form ? 1 : 0));
   const dmg = p.attackDamage * formMul(s, form ? ASCEND.ren.autoMul : 1) * (fin ? REN.auto.finisherMul : 1);
   let hits = 0; for (const e of cands) { damageEnemy(s, e, dmg); hits++; if (fin) push(s, e, e.x - p.x, e.y - p.y, REN.auto.finisherPush / 4, 0.2); driveGain(s, fin ? 2.4 : 1.4); }
-  s.hx.strike = { x: dir.x, y: dir.y, t: s.time, step };
+  s.hx.strike = { x: dir.x, y: dir.y, t: s.time, step, hand: strikeHand(faceOf(dir.x, dir.y), dir.x, dir.y, step) };
   emit(s, fin ? 'auto_finisher' : 'auto_hit', p.x + dir.x * 34, p.y + dir.y * 34, hits);
 }
 function soraAuto(s: GameState) {
@@ -100,7 +101,7 @@ function soraAuto(s: GameState) {
   for (let i = 0; i < n; i++) {
     const t = cands[i], dir = normalize(t.x - p.x, t.y - p.y), o = hand(s, dir.x, dir.y, SORA.auto.muzzle);
     spawnBolt(s, { x: o.x, y: o.y, dirX: dir.x, dirY: dir.y, speed: SORA.auto.speed, ttl: (p.attackRange + 60) / SORA.auto.speed + 0.12, damage: dmg, radius: SORA.auto.radius, kind: 'needle', pierce: form ? SORA.auto.formPierce : 0, homing: SORA.auto.homing });
-    if (i === 0) s.hx.strike = { x: dir.x, y: dir.y, t: s.time, step: s.hx.autoStep++ % 2 };
+    if (i === 0) { const st = s.hx.autoStep++ % 2; s.hx.strike = { x: dir.x, y: dir.y, t: s.time, step: st, hand: strikeHand(faceOf(dir.x, dir.y), dir.x, dir.y, st) }; }
   }
   emit(s, 'needle_fire', p.x, p.y, n);
 }

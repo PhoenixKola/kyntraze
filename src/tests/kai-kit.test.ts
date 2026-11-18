@@ -106,6 +106,6 @@ describe('Kai auto attack presentation contract', () => {
     const { faceOf, fistWorld } = await import('../sim/AbilitySystem');
     const { sim, s } = kai(0, [[1000, 800], [1200, 700]]); s.player.attackClock = 0.01; s.player.targets = 2; run(sim, 0.05);
     const shots = s.impacts.filter(i => i.kind === 'shot'); expect(shots.length).toBe(2); const face = faceOf(s.hx.strike.x, s.hx.strike.y); expect(face).toBe('west');
-    const o = fistWorld(s, 0, face); for (const sh of shots) { expect(sh.x).toBeCloseTo(o.x, 5); expect(sh.y).toBeCloseTo(o.y, 5); } expect(s.hx.strike.t).toBeCloseTo(s.time, 1);
+    const { handOffset } = await import('../sim/Strike'); const o = fistWorld(s, 0, face), ho = handOffset(face, s.hx.strike.hand!); for (const sh of shots) { expect(sh.x).toBeCloseTo(o.x + ho.x, 5); expect(sh.y).toBeCloseTo(o.y + ho.y, 5); } expect(s.hx.strike.t).toBeCloseTo(s.time, 1);
   });
 });

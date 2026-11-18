@@ -56,3 +56,17 @@ Prompt:
 Contract icon sheet for a game UI on a flat pure black (#000000) background, wide black gutters. A clean grid of FOUR separate octagonal brass-framed medallion icons (2 columns by 2 rows), equal size, pixel-art emblems on dark interiors, dangerous and ominous mood, matching the attached medallion style. (1) BLOOD OATH: a bleeding sigil, a heart pierced by a crimson blade. (2) HOLLOW CROWN: a broken black crown with violet cracks. (3) THE LONG NIGHT: a crescent moon over a vast swarm of red eyes. (4) VOID PACT: a black sphere with a violet ring devouring light. No text, no labels.
 ```
 
+## 2026-11-18T14:12:34.620Z - vex_portrait_f2.png
+
+- File: vex_portrait_f2.png (1254x1254)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1eeff-eba0-7d10-a72a-351cfe51a225
+- Reference images: ref-vex-portrait-f1.png, south-heads.png
+- Seconds: 43.1
+
+Prompt:
+
+```text
+Pixel-art character bust portrait for a game HUD, square, on a flat pure black (#000000) background, matching the first attached portrait EXACTLY in framing, pixel scale, outline weight, shading style and face proportions (same young man, VEX). Draw VEX in his VOIDHEART EXILE form: long smooth ASH-SILVER hair swept back (use the second attached sheet for the hair design), a thin dark circlet across the forehead, pale white-violet glowing eyes, calm grave expression, a dark charcoal high-collared coat with silver trim and a cracked order crest, a dark grey scarf (not purple). No purple glow shards, no floating pieces. Same head size and face scale as the first portrait. No text, no frame, no watermark.
+```
+

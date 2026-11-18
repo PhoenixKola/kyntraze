@@ -5,6 +5,7 @@ import { heroActivateQ, updateHeroAuto } from './HeroSystem';
 import { kaiQ, surgeAutoMul } from './KaiKit';
 import { faceOf, fistWorld } from './AbilitySystem';
 import { normalize } from '../core/Math';
+import { handOffset, strikeHand } from './Strike';
 export function updateAutoWeapon(state: GameState, dt: number) {
   const p = state.player;
   if (state.hero !== 'kai') { updateHeroAuto(state, dt); return; }
@@ -16,8 +17,8 @@ export function updateAutoWeapon(state: GameState, dt: number) {
     .sort((a, b) => distanceSquared(a.x, a.y, p.x, p.y) - distanceSquared(b.x, b.y, p.x, p.y));
   const amount = Math.min(candidates.length, p.targets + (p.form ? 1 : 0));
   // one authoritative strike: the body faces the PRIMARY target, every shot of the volley leaves that fist (a secondary shot in another direction visibly branches from the primary release)
-  if (amount > 0) { const d = normalize(candidates[0].x - p.x, candidates[0].y - p.y); state.hx.strike = { x: d.x, y: d.y, t: state.time, step: state.hx.autoStep++ % 3 }; }
-  const fist = amount > 0 ? fistWorld(state, p.form, faceOf(state.hx.strike.x, state.hx.strike.y)) : { x: p.x, y: p.y - 15 };
+  if (amount > 0) { const d = normalize(candidates[0].x - p.x, candidates[0].y - p.y); const step = state.hx.autoStep++ % 3; state.hx.strike = { x: d.x, y: d.y, t: state.time, step, hand: strikeHand(faceOf(d.x, d.y), d.x, d.y, step) }; }
+  const sf = amount > 0 ? faceOf(state.hx.strike.x, state.hx.strike.y) : 'south', fa = amount > 0 ? fistWorld(state, p.form, sf) : { x: p.x, y: p.y - 15 }, ho = amount > 0 ? handOffset(sf, state.hx.strike.hand ?? 'right') : { x: 0, y: 0 }, fist = { x: fa.x + ho.x, y: fa.y + ho.y };
   for (let i = 0; i < amount; i++) {
     const target = candidates[i];
     state.impacts.push({ id: state.nextId++, kind: 'shot', x: fist.x, y: fist.y,
