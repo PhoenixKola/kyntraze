@@ -1,3 +1,4 @@
+import { vexTint } from './vexTint';
 import Phaser from 'phaser';
 import { RULES } from '../../core/Rules';
 import { FxPool, vfxKey } from './fxPool';
@@ -245,7 +246,7 @@ export class EntityRenderer {
     const c = state.hero === 'vex' ? state.hx.act : null;
     if (c && c.act === 'rift_reversal' && c.sx !== undefined && c.id !== this.blinkId && this.hero.visible) {
       this.blinkId = c.id; const sx = c.sx, sy = (c.sy ?? 0) + KAI_GROUND_DY, tx = c.tx ?? sx, ty = (c.ty ?? c.sy ?? 0) + KAI_GROUND_DY, n = reduced ? 3 : 7;
-      for (let k = 0; k < n; k++) { const u = k / n; this.blinkGhosts.push({ spr: this.scene.add.sprite(sx + (tx - sx) * u, sy + (ty - sy) * u + this.hoverY, this.hero.texture.key, this.hero.frame.name).setOrigin(this.hero.originX, this.hero.originY).setScale(this.hero.scaleX, this.hero.scaleY).setFlipX(this.hero.flipX).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.2).setTint(k % 2 ? 0xc58bff : 0x8f5cff), life: 0.42 + u * 0.12, max: 0.42 + u * 0.12 }); this.blinkGhosts[this.blinkGhosts.length - 1].spr.tintMode = Phaser.TintModes.FILL; }
+      for (let k = 0; k < n; k++) { const u = k / n; this.blinkGhosts.push({ spr: this.scene.add.sprite(sx + (tx - sx) * u, sy + (ty - sy) * u + this.hoverY, this.hero.texture.key, this.hero.frame.name).setOrigin(this.hero.originX, this.hero.originY).setScale(this.hero.scaleX, this.hero.scaleY).setFlipX(this.hero.flipX).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.2).setTint(k % 2 ? vexTint(state.player.form).hot : vexTint(state.player.form).main), life: 0.42 + u * 0.12, max: 0.42 + u * 0.12 }); this.blinkGhosts[this.blinkGhosts.length - 1].spr.tintMode = Phaser.TintModes.FILL; }
       this.blinkFlicker = 0.3;
     }
     for (let k = this.blinkGhosts.length - 1; k >= 0; k--) { const g = this.blinkGhosts[k]; g.life -= dt; if (g.life <= 0) { g.spr.destroy(); this.blinkGhosts.splice(k, 1); continue; } g.spr.setAlpha((g.life / g.max) * 0.85).setScale(g.spr.scaleX * (1 + dt * 0.4)); }
@@ -258,7 +259,7 @@ export class EntityRenderer {
     if (fast && this.ghostClock <= 0 && this.hero.visible) {
       this.ghostClock = p.form ? 0.028 : 0.04;
       let g = this.ghosts.find(q => q.life <= 0); if (!g && this.ghosts.length < cap) { g = { spr: this.scene.add.sprite(0, 0, this.hero.texture.key, 0).setScale(this.hero.scaleX).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.2), life: 0 }; this.ghosts.push(g); }
-      if (g) { g.life = 0.28; g.spr.setTexture(this.hero.texture.key, this.hero.frame.name).setOrigin(this.hero.originX, this.hero.originY).setPosition(x, y).setTint(state.hero === 'vex' ? 0x9a6bff : hero === 'ren' ? 0xff3a2e : 0x6fc8ff); g.spr.tintMode = Phaser.TintModes.FILL; }
+      if (g) { g.life = 0.28; g.spr.setTexture(this.hero.texture.key, this.hero.frame.name).setOrigin(this.hero.originX, this.hero.originY).setPosition(x, y).setTint(state.hero === 'vex' ? vexTint(state.player.form).ghost : hero === 'ren' ? 0xff3a2e : 0x6fc8ff); g.spr.tintMode = Phaser.TintModes.FILL; }
     }
     for (const g of this.ghosts) { if (g.life > 0) { g.life -= dt; g.spr.setVisible(g.life > 0).setAlpha(Math.max(0, g.life / 0.28) * (p.form ? 0.55 : 0.4)); } else g.spr.setVisible(false); }
   }
