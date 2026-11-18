@@ -203,6 +203,66 @@
    "sovereign_f5",
    "sovereign_f6",
    "sovereign_f7"
+  ],
+  "choir_0": [
+   "choir_0_f0",
+   "choir_0_f1",
+   "choir_0_f2",
+   "choir_0_f3",
+   "choir_0_f4",
+   "choir_0_f5",
+   "choir_0_f6",
+   "choir_0_f7"
+  ],
+  "choir_1": [
+   "choir_1_f0",
+   "choir_1_f1",
+   "choir_1_f2",
+   "choir_1_f3",
+   "choir_1_f4",
+   "choir_1_f5",
+   "choir_1_f6",
+   "choir_1_f7"
+  ],
+  "choir_2": [
+   "choir_2_f0",
+   "choir_2_f1",
+   "choir_2_f2",
+   "choir_2_f3",
+   "choir_2_f4",
+   "choir_2_f5",
+   "choir_2_f6",
+   "choir_2_f7"
+  ],
+  "sovpart_0": [
+   "sovpart_0_f0",
+   "sovpart_0_f1",
+   "sovpart_0_f2",
+   "sovpart_0_f3",
+   "sovpart_0_f4",
+   "sovpart_0_f5",
+   "sovpart_0_f6",
+   "sovpart_0_f7"
+  ],
+  "sovpart_1": [
+   "sovpart_1_f0",
+   "sovpart_1_f1",
+   "sovpart_1_f2",
+   "sovpart_1_f3",
+   "sovpart_1_f4",
+   "sovpart_1_f5",
+   "sovpart_1_f6",
+   "sovpart_1_f7"
+  ],
+  "sovpart_2": [
+   "sovpart_2_f0",
+   "sovpart_2_f1",
+   "sovpart_2_f2",
+   "sovpart_2_f3",
+   "sovpart_2_f4",
+   "sovpart_2_f5",
+   "sovpart_2_f6",
+   "sovpart_2_f7"
   ]
  },
  "icons": {

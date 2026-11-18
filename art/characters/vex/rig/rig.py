@@ -71,6 +71,7 @@ PARTS = [
     dict(id="fist_side_f", img="fist_waist.png", bone="hand_f", pivot=(3.0, 10.0), angle=0.0, slot="hand_f:side"),
     dict(id="upper_arm_n", img="upper_arm_n.png", bone="upper_arm_n", pivot=(11.0, 6.0), child=(10.5, 21.0)),
     dict(id="forearm_n", img="forearm_n.png", bone="forearm_n", pivot=(10.5, 9.0), child=(11.0, 26.0)),
+    dict(id="blade", img="blade.png", bone="hand_n", pivot=(8.5, 7.0), angle=0.0),
     dict(id="fist_waist", img="fist_waist.png", bone="hand_n", pivot=(3.0, 10.0), angle=0.0, slot="hand_n:side"),
     dict(id="fist_front_n", img="fist_front.png", bone="hand_n", pivot=(13.0, 25.0), angle=0.0, slot="hand_n:front"),
     dict(id="fist_angle_n", img="fist_front_angle.png", bone="hand_n", pivot=(8.5, 25.0), angle=0.0, slot="hand_n:angle"),

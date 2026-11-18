@@ -54,6 +54,9 @@ def build(d):
         if "slot" in p: q["slot"] = p["slot"]
         if "point" in p: q["point"] = p["point"]
         parts.append(q); info[p["id"]] = (q, B - t)
+    if os.path.exists(os.path.join(pdir, "blade.png")):      # Vex's counter-blade: hangs from the near hand bone, drawn just under the near fist
+        bi = next((i for i, q in enumerate(parts) if q["id"].startswith("fist") and q.get("slot", "").startswith("hand_n")), len(parts))
+        parts.insert(bi, dict(id="blade", img="blade.png", bone="hand_n", pivot=[8.5, 7.0], angle=0.0))
     L = lambda pid: float(np.linalg.norm(np.array(info[pid][0]["child"]) - np.array(info[pid][0]["pivot"])))
     cx = rx
     Lt = {s: L(f"thigh_{s}") for s in "nf"}; Ls = {s: L(f"shin_{s}") for s in "nf"}

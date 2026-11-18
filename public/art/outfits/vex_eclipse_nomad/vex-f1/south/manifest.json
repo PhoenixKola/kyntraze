@@ -86,10 +86,10 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 144,
-   "frame_height": 130,
+   "frame_width": 149,
+   "frame_height": 136,
    "origin_px": [
-    53.0,
+    58.0,
     167.0
    ],
    "terminal": "once",
@@ -108,10 +108,10 @@
     "travel_end": 6,
     "recover_start": 7
    },
-   "frame_width": 132,
+   "frame_width": 141,
    "frame_height": 179,
    "origin_px": [
-    49.0,
+    58.0,
     169.0
    ],
    "terminal": "once",
@@ -128,10 +128,10 @@
     "impact": 0,
     "interruptible_from": 5
    },
-   "frame_width": 148,
+   "frame_width": 157,
    "frame_height": 179,
    "origin_px": [
-    49.0,
+    58.0,
     170.0
    ],
    "terminal": "once",
@@ -197,10 +197,10 @@
     "recover_start": 20,
     "interruptible_from": 22
    },
-   "frame_width": 114,
+   "frame_width": 129,
    "frame_height": 174,
    "origin_px": [
-    43.0,
+    58.0,
     165.0
    ],
    "terminal": "once",
@@ -221,10 +221,10 @@
     "recover_start": 18,
     "interruptible_from": 21
    },
-   "frame_width": 110,
-   "frame_height": 201,
+   "frame_width": 120,
+   "frame_height": 204,
    "origin_px": [
-    45.0,
+    55.0,
     192.0
    ],
    "terminal": "once",

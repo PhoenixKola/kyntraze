@@ -86,7 +86,7 @@
     "impact": 24
    },
    "frame_width": 122,
-   "frame_height": 118,
+   "frame_height": 126,
    "origin_px": [
     73.0,
     165.0
@@ -220,10 +220,10 @@
     "recover_start": 18,
     "interruptible_from": 21
    },
-   "frame_width": 118,
-   "frame_height": 192,
+   "frame_width": 120,
+   "frame_height": 203,
    "origin_px": [
-    72.0,
+    74.0,
     192.0
    ],
    "terminal": "once",

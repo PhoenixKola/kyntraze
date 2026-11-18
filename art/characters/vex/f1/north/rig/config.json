@@ -388,6 +388,16 @@
    ]
   },
   {
+   "id": "blade",
+   "img": "blade.png",
+   "bone": "hand_n",
+   "pivot": [
+    8.5,
+    7.0
+   ],
+   "angle": 0.0
+  },
+  {
    "id": "fist_guard_n",
    "img": "fist_guard.png",
    "bone": "hand_n",

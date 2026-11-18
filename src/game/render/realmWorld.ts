@@ -151,10 +151,11 @@ export class B22Overlay {
   }
   private sprite(e: Enemy, flash: boolean): boolean {
     let key = this.artKey(e); if (!key) return false;
-    const cyc = !e.part && this.scene.textures.exists(`b22-${e.kind}_f0`);   // frame-by-frame cycle: move x4, windup, strike, hurt, death
+    const base = key.slice(4), cyc = this.scene.textures.exists(`b22-${base}_f0`);   // frame-by-frame cycle: idle/move x4, windup, strike, hurt, death
+    if (cyc) { const pp = this.prevPos.get(e.id), mvg = !!pp && Math.hypot(e.x - pp.x, e.y - pp.y) > 0.4, fr = flash ? 6 : e.mode === 'windup' || e.mode === 'phase' ? 4 : e.mode === 'strike' ? 5 : (mvg || e.part) ? Math.floor(this.clock * (e.part ? 6 : 8) + e.id) % 4 : 0; key = `b22-${base}_f${fr}`; if (!this.scene.textures.exists(key)) key = `b22-${base}`; }
     if (cyc) { const fr = flash ? 6 : e.mode === 'windup' || e.mode === 'phase' ? 4 : e.mode === 'strike' ? 5 : (this.prevPos.get(e.id) && Math.hypot(e.x - this.prevPos.get(e.id)!.x, e.y - this.prevPos.get(e.id)!.y) > 0.4) ? Math.floor(this.clock * 8) % 4 : 0; key = `b22-${e.kind}_f${fr}`; if (!this.scene.textures.exists(key)) key = `b22-${e.kind}`; }
     let im = this.imgs.get(e.id); if (!im) { im = this.scene.add.image(e.x, e.y, key).setOrigin(0.5, 0.72); this.imgs.set(e.id, im); }
-    im.setData('k', e.kind); this.used.add(e.id); const boss = isBoss(e.kind as BossKind), h = e.radius * (e.part ? 3.2 : boss ? 3.9 : 4.5), w = im.width * h / im.height, t = this.clock + e.id * 1.7, pp = this.prevPos.get(e.id), mv = !!pp && Math.hypot(e.x - pp.x, e.y - pp.y) > 0.4; this.prevPos.set(e.id, { x: e.x, y: e.y });
+    im.setData('k', base); this.used.add(e.id); const boss = isBoss(e.kind as BossKind), h = e.radius * (e.part ? 3.2 : boss ? 3.9 : 4.5), w = im.width * h / im.height, t = this.clock + e.id * 1.7, pp = this.prevPos.get(e.id), mv = !!pp && Math.hypot(e.x - pp.x, e.y - pp.y) > 0.4; this.prevPos.set(e.id, { x: e.x, y: e.y });
     // procedural animation on the single-pose sprite: breathing, hop while moving, windup squash, strike stretch, recovery droop, lean into the aim
     let sx = 1 + 0.025 * Math.sin(t * 3), sy = 1 - 0.025 * Math.sin(t * 3), oy = mv ? -Math.abs(Math.sin(t * 9)) * (boss ? 3 : 4) : Math.sin(t * 2) * (boss ? 1.5 : 2.5), rot = Math.max(-0.12, Math.min(0.12, e.aimX * (mv ? 0.06 : 0.02)));
     if (e.mode === 'windup' || e.mode === 'phase') { const u = Math.min(1, e.modeT / 0.8); sy = 1 - 0.1 * u; sx = 1 + 0.07 * u; rot = -e.aimX * 0.1 * u; }

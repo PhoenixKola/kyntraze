@@ -938,3 +938,157 @@ Prompt:
 Original 2D game boss sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact boss. Redraw the SAME boss (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the boss. ROW 1 (cells 1-4): a looping 4-frame idle/advance cycle with clear differences between frames (floating bob, limb or ornament sway). ROW 2: cell 5 = WIND-UP (clear anticipation, gathering power, glowing brighter), cell 6 = STRIKE (the attack released, stretched forward), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (breaking apart / collapsing). Boss: Sovereign.
 ```
 
+## 2026-11-18T10:21:20.944Z - pc_choir_0.png
+
+- File: pc_choir_0.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee2b-fc24-75c1-9933-15823a58f746
+- Reference images: p_choir_voices.png
+- Seconds: 58.9
+
+Prompt:
+
+```text
+Original 2D game boss-part sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved design sheet containing this part. Redraw ONLY the part named below (same design, palette, outline, chunky pixel-art style, three-quarter raised top-down view) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the part. ROW 1 (cells 1-4): a looping 4-frame idle (hover bob, glow pulse, slow rotation or sway) with clear differences. ROW 2: cell 5 = WIND-UP (gathering power, glowing brighter), cell 6 = STRIKE (releasing its attack, stretched/flaring), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (shattering into fragments). Part: the tall thin pale-lilac PILLAR-lance construct (the FIRST of three in the attached sheet).
+```
+
+## 2026-11-18T10:21:23.261Z - pc_choir_2.png
+
+- File: pc_choir_2.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee2b-fc1f-7fc3-870f-62afa8b5d9b0
+- Reference images: p_choir_voices.png
+- Seconds: 61.2
+
+Prompt:
+
+```text
+Original 2D game boss-part sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved design sheet containing this part. Redraw ONLY the part named below (same design, palette, outline, chunky pixel-art style, three-quarter raised top-down view) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the part. ROW 1 (cells 1-4): a looping 4-frame idle (hover bob, glow pulse, slow rotation or sway) with clear differences. ROW 2: cell 5 = WIND-UP (gathering power, glowing brighter), cell 6 = STRIKE (releasing its attack, stretched/flaring), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (shattering into fragments). Part: the RING construct made of two concentric pale-lilac rings (the THIRD of three in the attached sheet).
+```
+
+## 2026-11-18T10:21:34.540Z - pc_choir_1.png
+
+- File: pc_choir_1.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee2b-fc23-74c1-8925-c3d4b411ed78
+- Reference images: p_choir_voices.png
+- Seconds: 72.5
+
+Prompt:
+
+```text
+Original 2D game boss-part sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved design sheet containing this part. Redraw ONLY the part named below (same design, palette, outline, chunky pixel-art style, three-quarter raised top-down view) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the part. ROW 1 (cells 1-4): a looping 4-frame idle (hover bob, glow pulse, slow rotation or sway) with clear differences. ROW 2: cell 5 = WIND-UP (gathering power, glowing brighter), cell 6 = STRIKE (releasing its attack, stretched/flaring), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (shattering into fragments). Part: the wide fan-shaped CONE construct, an open pale-violet bell/horn (the SECOND of three in the attached sheet).
+```
+
+## 2026-11-18T10:22:31.155Z - pc_sovpart_2.png
+
+- File: pc_sovpart_2.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee2d-194e-75d2-9eb7-69e063bb5c41
+- Reference images: p_sovereign_parts.png
+- Seconds: 56.1
+
+Prompt:
+
+```text
+Original 2D game boss-part sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved design sheet containing this part. Redraw ONLY the part named below (same design, palette, outline, chunky pixel-art style, three-quarter raised top-down view) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the part. ROW 1 (cells 1-4): a looping 4-frame idle (hover bob, glow pulse, slow rotation or sway) with clear differences. ROW 2: cell 5 = WIND-UP (gathering power, glowing brighter), cell 6 = STRIKE (releasing its attack, stretched/flaring), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (shattering into fragments). Part: the inverted-triangle crown HEAD mask in pale lilac (the THIRD of three in the attached sheet).
+```
+
+## 2026-11-18T10:22:42.640Z - pc_sovpart_1.png
+
+- File: pc_sovpart_1.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee2d-1952-77b1-9e90-246f86eb9cd3
+- Reference images: p_sovereign_parts.png
+- Seconds: 67.6
+
+Prompt:
+
+```text
+Original 2D game boss-part sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved design sheet containing this part. Redraw ONLY the part named below (same design, palette, outline, chunky pixel-art style, three-quarter raised top-down view) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the part. ROW 1 (cells 1-4): a looping 4-frame idle (hover bob, glow pulse, slow rotation or sway) with clear differences. ROW 2: cell 5 = WIND-UP (gathering power, glowing brighter), cell 6 = STRIKE (releasing its attack, stretched/flaring), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (shattering into fragments). Part: the large armoured ARM / gauntlet slab with lilac trim (the SECOND of three in the attached sheet).
+```
+
+## 2026-11-18T10:22:51.873Z - pc_sovpart_0.png
+
+- File: pc_sovpart_0.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee2d-191d-7f71-bd9b-60978d28b643
+- Reference images: p_sovereign_parts.png
+- Seconds: 76.9
+
+Prompt:
+
+```text
+Original 2D game boss-part sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved design sheet containing this part. Redraw ONLY the part named below (same design, palette, outline, chunky pixel-art style, three-quarter raised top-down view) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the part. ROW 1 (cells 1-4): a looping 4-frame idle (hover bob, glow pulse, slow rotation or sway) with clear differences. ROW 2: cell 5 = WIND-UP (gathering power, glowing brighter), cell 6 = STRIKE (releasing its attack, stretched/flaring), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (shattering into fragments). Part: the triangular ANCHOR crystal obelisk with a glowing core (the FIRST of three in the attached sheet).
+```
+
+## 2026-11-18T10:31:30.150Z - hud_vex_crest.png
+
+- File: hud_vex_crest.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee35-8445-7a22-b49f-d3995640d0d3
+- Reference images: none
+- Seconds: 43.4
+
+Prompt:
+
+```text
+Two round game crest medallions side by side (2 columns, 1 row), chunky pixel-art style, thin dark outline, 3-tone cel shading, each fully inside its cell, on a flat pure green (#00ff00) background with a wide gutter, no text, no labels, no green in the crests. LEFT: VEX base crest, a cracked silver order-crest shield with a broken vertical line on a dark-indigo disc, silver rim. RIGHT: VEX form crest, the same cracked order-crest now glowing violet with rift shards and a lilac rim.
+```
+
+## 2026-11-18T10:31:31.960Z - hud_vex_riftbound.png
+
+- File: hud_vex_riftbound.png (1278x1230)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee35-842f-70f0-becd-94cea06a9148
+- Reference images: ref-kai-portrait.png, ref-vex.png
+- Seconds: 45.3
+
+Prompt:
+
+```text
+Pixel-art character bust portrait for a 2D game HUD. Attached: (1) the approved Kai HUD bust portrait defining the framing, size, chunky pixel-block style, thin dark outline and 3-4 tone cel shading; (2) the approved full-body design of VEX. Draw VEX as a head-and-shoulders bust in EXACTLY that Kai portrait framing and pixel style, facing slightly right, on a flat pure green (#00ff00) background, square canvas, no text, no frame, no green in the character. VEX: young exile, dark swept hair with a few sharp spikes, violet scarf, dark-indigo coat collar with silver trim, calm guarded eyes. RIFTBOUND form: the hair glows violet with spiky light-violet tips, violet glowing eyes, thin glowing violet cracks across the face and collar, a few floating rift shards.
+```
+
+## 2026-11-18T10:31:32.039Z - hud_vex_voidheart.png
+
+- File: hud_vex_voidheart.png (1254x1254)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee35-8425-7da0-939b-aff1a1664c65
+- Reference images: ref-kai-portrait.png, ref-vex.png
+- Seconds: 45.3
+
+Prompt:
+
+```text
+Pixel-art character bust portrait for a 2D game HUD. Attached: (1) the approved Kai HUD bust portrait defining the framing, size, chunky pixel-block style, thin dark outline and 3-4 tone cel shading; (2) the approved full-body design of VEX. Draw VEX as a head-and-shoulders bust in EXACTLY that Kai portrait framing and pixel style, facing slightly right, on a flat pure green (#00ff00) background, square canvas, no text, no frame, no green in the character. VEX: young exile, dark swept hair with a few sharp spikes, violet scarf, dark-indigo coat collar with silver trim, calm guarded eyes. VOIDHEART EXILE form: black void-metal collar with pale-lilac trim, pale-lilac glowing eyes, a broken halo of void shards behind the head, a white-lilac glow at the chest.
+```
+
+## 2026-11-18T10:31:43.755Z - hud_vex_glyphs.png
+
+- File: hud_vex_glyphs.png (1536x1024)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee35-843c-70b3-96a2-7eeef8727ee2
+- Reference images: none
+- Seconds: 57
+
+Prompt:
+
+```text
+Six game ability glyphs in a 3x2 grid (3 columns, 2 rows), pure WHITE pixel-art silhouettes with thin internal detail lines, on a solid pure BLACK (#000000) background with wide black gutters, equal size, each fully inside its cell, chunky pixel blocks, no colour, no text, no labels. In reading order: 1 AUTO 'Null Blade' (a short blade diagonal slash with two spark ticks); 2 Q 'Parry Halo' (a ring halo with a blade crossing it and a deflect spark); 3 E 'Rift Reversal' (a blink streak ending at a cracked rift tear); 4 R 'Oathbreaker Seal' (a circular seal with a cracked mark and a falling blade); 5 F 'Riftbound' (a fractured crown of rift shards around a spiral); 6 CREST (a cracked order-crest shield with a broken line through it).
+```
+
+## 2026-11-18T10:32:07.315Z - hud_vex_base.png
+
+- File: hud_vex_base.png (1254x1254)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee35-8407-76b0-ae66-2216c42bcbbf
+- Reference images: ref-kai-portrait.png, ref-vex.png
+- Seconds: 80.6
+
+Prompt:
+
+```text
+Pixel-art character bust portrait for a 2D game HUD. Attached: (1) the approved Kai HUD bust portrait defining the framing, size, chunky pixel-block style, thin dark outline and 3-4 tone cel shading; (2) the approved full-body design of VEX. Draw VEX as a head-and-shoulders bust in EXACTLY that Kai portrait framing and pixel style, facing slightly right, on a flat pure green (#00ff00) background, square canvas, no text, no frame, no green in the character. VEX: young exile, dark swept hair with a few sharp spikes, violet scarf, dark-indigo coat collar with silver trim, calm guarded eyes. Base form: dark indigo-black hair, violet eyes, plain calm expression.
+```
+

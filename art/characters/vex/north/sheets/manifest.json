@@ -86,7 +86,7 @@
     "impact": 24
    },
    "frame_width": 116,
-   "frame_height": 108,
+   "frame_height": 114,
    "origin_px": [
     72.0,
     160.0
@@ -107,10 +107,10 @@
     "travel_end": 6,
     "recover_start": 7
    },
-   "frame_width": 112,
+   "frame_width": 124,
    "frame_height": 168,
    "origin_px": [
-    56.0,
+    68.0,
     162.0
    ],
    "terminal": "once",
@@ -127,10 +127,10 @@
     "impact": 0,
     "interruptible_from": 5
    },
-   "frame_width": 136,
+   "frame_width": 148,
    "frame_height": 164,
    "origin_px": [
-    55.0,
+    67.0,
     162.0
    ],
    "terminal": "once",
@@ -148,10 +148,10 @@
     "ground_contact": 10,
     "settled": 14
    },
-   "frame_width": 164,
+   "frame_width": 169,
    "frame_height": 166,
    "origin_px": [
-    83.0,
+    88.0,
     162.0
    ],
    "terminal": "hold_last_frame",
@@ -172,10 +172,10 @@
     "recover_start": 20,
     "interruptible_from": 22
    },
-   "frame_width": 90,
+   "frame_width": 114,
    "frame_height": 162,
    "origin_px": [
-    46.0,
+    70.0,
     160.0
    ],
    "terminal": "once",
@@ -196,10 +196,10 @@
     "recover_start": 18,
     "interruptible_from": 21
    },
-   "frame_width": 108,
+   "frame_width": 122,
    "frame_height": 194,
    "origin_px": [
-    55.0,
+    69.0,
     192.0
    ],
    "terminal": "once",

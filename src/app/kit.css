@@ -507,7 +507,6 @@ button.hero-card:focus-visible { outline: 2px solid var(--accent, #e0a24a); outl
 .legend-offer { margin: calc(10 * var(--u)) auto 0; display: block; width: min(100%, calc(560 * var(--u))); box-shadow: 0 0 calc(14 * var(--u)) rgba(255, 211, 106, .45); }
 
 /* B22 interim: Vex shares Ren's UI art, shifted toward violet-black */
-.hud.hero-vex .portrait img, .hud.hero-vex .slot-ico { filter: hue-rotate(255deg) saturate(.85) brightness(.95); }
 
 /* B22 Mode Select */
 .mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(calc(210 * var(--u)), 1fr)); gap: calc(8 * var(--u)); width: min(100%, calc(900 * var(--u))); margin: 0 auto; }

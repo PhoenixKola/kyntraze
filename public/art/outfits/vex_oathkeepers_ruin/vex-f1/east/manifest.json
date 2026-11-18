@@ -5,14 +5,14 @@
  "direction": "east",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/vex-east.blend",
- "frame_width": 134,
+ "frame_width": 147,
  "frame_height": 178,
  "origin_px": [
-  57.0,
+  70.0,
   174.0
  ],
  "origin_normalized": [
-  0.425373,
+  0.47619,
   0.977528
  ],
  "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
@@ -85,10 +85,10 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 114,
-   "frame_height": 118,
+   "frame_width": 137,
+   "frame_height": 137,
    "origin_px": [
-    47.0,
+    70.0,
     164.0
    ],
    "terminal": "once",
@@ -107,10 +107,10 @@
     "travel_end": 6,
     "recover_start": 7
    },
-   "frame_width": 168,
+   "frame_width": 176,
    "frame_height": 167,
    "origin_px": [
-    62.0,
+    70.0,
     167.0
    ],
    "terminal": "once",
@@ -172,10 +172,10 @@
     "reveal_hold": 8,
     "interruptible_from": 10
    },
-   "frame_width": 120,
+   "frame_width": 132,
    "frame_height": 186,
    "origin_px": [
-    58.0,
+    70.0,
     186.0
    ],
    "terminal": "once",
@@ -196,10 +196,10 @@
     "recover_start": 20,
     "interruptible_from": 22
    },
-   "frame_width": 114,
+   "frame_width": 116,
    "frame_height": 172,
    "origin_px": [
-    41.0,
+    43.0,
     172.0
    ],
    "terminal": "once",
@@ -220,10 +220,10 @@
     "recover_start": 18,
     "interruptible_from": 21
    },
-   "frame_width": 120,
+   "frame_width": 136,
    "frame_height": 192,
    "origin_px": [
-    47.0,
+    63.0,
     192.0
    ],
    "terminal": "once",

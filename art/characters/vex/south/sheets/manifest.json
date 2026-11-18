@@ -86,10 +86,10 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 142,
-   "frame_height": 120,
+   "frame_width": 149,
+   "frame_height": 126,
    "origin_px": [
-    51.0,
+    58.0,
     157.0
    ],
    "terminal": "once",
@@ -108,10 +108,10 @@
     "travel_end": 6,
     "recover_start": 7
    },
-   "frame_width": 132,
+   "frame_width": 141,
    "frame_height": 167,
    "origin_px": [
-    49.0,
+    58.0,
     157.0
    ],
    "terminal": "once",
@@ -128,10 +128,10 @@
     "impact": 0,
     "interruptible_from": 5
    },
-   "frame_width": 142,
+   "frame_width": 152,
    "frame_height": 165,
    "origin_px": [
-    48.0,
+    58.0,
     156.0
    ],
    "terminal": "once",
@@ -150,10 +150,10 @@
     "settled": 14
    },
    "frame_width": 157,
-   "frame_height": 166,
+   "frame_height": 173,
    "origin_px": [
     58.0,
-    154.0
+    161.0
    ],
    "terminal": "hold_last_frame",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
@@ -173,10 +173,10 @@
     "recover_start": 20,
     "interruptible_from": 22
    },
-   "frame_width": 114,
+   "frame_width": 129,
    "frame_height": 165,
    "origin_px": [
-    43.0,
+    58.0,
     156.0
    ],
    "terminal": "once",
@@ -197,10 +197,10 @@
     "recover_start": 18,
     "interruptible_from": 21
    },
-   "frame_width": 108,
-   "frame_height": 201,
+   "frame_width": 120,
+   "frame_height": 204,
    "origin_px": [
-    43.0,
+    55.0,
     192.0
    ],
    "terminal": "once",

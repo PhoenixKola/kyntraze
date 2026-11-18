@@ -56,19 +56,19 @@ def slice_sheet(name, prefix, n, h, rows=None):
 
 
 BOSSK = {"castellan", "regent", "oathkeeper", "mirror_tyrant", "chronophage", "hollow_choir", "sovereign"}
-CYC = {"sky_lancer": 120, "halo_scribe": 120, "citadel_bulwark": 170, "rift_mimic": 110, "phase_harrier": 110, "singularity_husk": 140, "castellan": 280, "regent": 220, "oathkeeper": 210, "mirror_tyrant": 240, "chronophage": 250, "hollow_choir": 220, "sovereign": 420}
+CYC = {"sky_lancer": 120, "halo_scribe": 120, "citadel_bulwark": 170, "rift_mimic": 110, "phase_harrier": 110, "singularity_husk": 140, "castellan": 280, "regent": 220, "oathkeeper": 210, "mirror_tyrant": 240, "chronophage": 250, "hollow_choir": 220, "sovereign": 420, "choir_0": 110, "choir_1": 110, "choir_2": 110, "sovpart_0": 130, "sovpart_1": 130, "sovpart_2": 130}
 def cycles():
     """Animation sheets c_<kind>.png (8 cells: move x4, windup, strike, hurt, death) -> public/art/b22/<kind>_f0..7.png, all frames scaled by ONE factor and bottom-centre aligned on a shared canvas so they do not jitter."""
     out = {}
     for k, h in CYC.items():
-        f = os.path.join(SRC, ("bc_" if k in BOSSK else "c_") + k + ".png")
+        f = os.path.join(SRC, ("pc_" if "_" in k and k.split("_")[0] in ("choir", "sovpart") else "bc_" if k in BOSSK else "c_") + k + ".png")
         if not os.path.exists(f): continue
         im = key(Image.open(f)); al = np.array(im.getchannel("A")) > 0; al = ndi.binary_dilation(al, iterations=10); lab, n = ndi.label(al)
         boxes = []
         for i, sl in enumerate(ndi.find_objects(lab)):
             if sl is not None and (lab[sl] == i + 1).sum() > 2500: boxes.append((sl[0].start, sl[0].stop, sl[1].start, sl[1].stop, (lab[sl] == i + 1).sum()))
         boxes = sorted(boxes, key=lambda b: -b[4])[:8]
-        if len(boxes) < 8 or k in BOSSK: frames = [crop(c, 2) for c in grid_crops(im, 4, 2)]   # cells merged: fall back to the fixed 4x2 grid
+        if len(boxes) < 8 or k in BOSSK or k.startswith(("choir_", "sovpart_")): frames = [crop(c, 2) for c in grid_crops(im, 4, 2)]   # cells merged: fall back to the fixed 4x2 grid
         else:
             boxes.sort(key=lambda b: ((b[0] + b[1]) // 2 // (im.height // 2), b[2]))
             frames = [crop(im.crop((x0, y0, x1, y1)), 2) for (y0, y1, x0, x1, _) in boxes]

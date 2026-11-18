@@ -28,7 +28,7 @@ export class EntityRenderer {
   private readonly formFx: FormFx;
   private readonly abilityFx: AbilityFx;
   private readonly anchors: AnchorTable | undefined;
-  private hand: HandAnchor | null = null; private vexBlade?: Phaser.GameObjects.Image;
+  private hand: HandAnchor | null = null;
   private readonly enemies: EnemyRenderer;
   private readonly bosses: BossRenderer;
   private readonly animator: KaiAnimator;
@@ -220,7 +220,6 @@ export class EntityRenderer {
       this.applyMotion(state, dt, hero, reduced, hurt, p.dashRemaining > 0, pose.clip, pose.facing);
       this.ghostTrail(state, dt, x, y, hero, reduced);
       this.hand = this.heroAnchors ? handAnchorWorld(this.heroAnchors, form, pose.facing, pose.clip, pose.frame, x, y, this.baseScale) : null;
-      if (state.hero === 'vex' && !dead && this.scene.textures.exists('b22-vexblade')) { this.vexBlade ??= this.scene.add.image(0, 0, 'b22-vexblade').setOrigin(0.15, 0.5); const fv = ({ east: [1, 0], west: [-1, 0], south: [0.35, 1], north: [-0.35, -1] } as Record<string, number[]>)[pose.facing] ?? [1, 0], L = 56, aimA = Math.atan2(p.aimY, p.aimX); const atk = !!this.hand; this.vexBlade.setVisible(true).setPosition(atk ? this.hand!.n.x : x + fv[0] * 15, atk ? this.hand!.n.y : y - 22).setRotation(atk ? aimA : Math.atan2(fv[1] * 0.5 + 0.9, fv[0] * 0.8 + 0.01)).setDepth(pose.facing === 'north' ? 9.9 : 10.2).setDisplaySize(L, L * this.vexBlade.height / this.vexBlade.width).setFlipY(!atk && fv[0] < 0); } else this.vexBlade?.setVisible(false);
     } else {
       this.hero.setVisible(false); this.legs.setVisible(false); this.heroDeadT = dead ? this.heroDeadT + dt : 0; const ren = hero === 'ren';
       body.fillStyle(0x000000, 0.3).fillEllipse(x, y, 36, 12);
