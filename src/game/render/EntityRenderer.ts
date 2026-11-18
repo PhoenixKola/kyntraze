@@ -49,7 +49,7 @@ export class EntityRenderer {
   private heroFx: HeroFxView | null = null; private heroBody: Phaser.GameObjects.Graphics | null = null;
   private orbs = new Map<number, { gem: Phaser.GameObjects.Image; glow: Phaser.GameObjects.Image }>();
   /** `partner` = the second fighter of local co-op: the same hero pipeline, but no world (enemies, bosses, pickups) and no shared ability-event layers, which the first renderer already draws once. */
-  constructor(private readonly scene: Phaser.Scene, private readonly partner = false) {
+  constructor(private readonly scene: Phaser.Scene, private readonly partner = false, private readonly ownKaiFx = false) {
     const manifests = scene.registry.get(KAI_REGISTRY_KEY) as KaiManifests | undefined;
     if (!manifests) throw new Error('Kai animation manifests were not loaded by BootScene');
     this.f1 = scene.registry.get(KAI_F1_REGISTRY_KEY) as KaiManifests | undefined;
@@ -201,7 +201,7 @@ export class EntityRenderer {
     this.formFx.update(dt, this.hero.x, this.hero.y, this.baseScale / KAI_SCALE, this.animator.visualForm === 'f1', !dead, this.pose.events, reducedEffects, emphasis, state.enemies.length > 45, this.hero);
     const dead2 = dead;
     this.hand = this.anchors ? handAnchorWorld(this.anchors, this.pose.form, this.pose.facing, this.pose.clip, this.pose.frame, this.hero.x, this.hero.y, this.baseScale) : null;
-    if (!this.partner) { this.abilityFx.update(dt, state, reducedEffects, this.animator.visualForm !== 'base', this.hand); this.kitFx.update(dt, state, reducedEffects, this.baseScale); }
+    if (!this.partner || this.ownKaiFx) { this.abilityFx.update(dt, state, reducedEffects, this.animator.visualForm !== 'base', this.hand); this.kitFx.update(dt, state, reducedEffects, this.baseScale); }   // a Kai partner of a non-Kai runner draws their own ability layers (the first renderer draws Ren / Sora / Vex layers through heroFx)
     this.apexFx.update({ dt, state, hero: this.hero, x: this.hero.x, y: this.hero.y, facing: this.pose.facing, reduced: reducedEffects, crowded: state.enemies.length > 45, f3: this.animator.visualForm === 'f3' && !dead2,
       moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, speed: Math.hypot(p.vx, p.vy), dashing: p.dashRemaining > 0, hand: this.hand, events: this.pose.events });
     this.cometFx.update({ dt, state, hero: this.hero, x: this.hero.x, y: this.hero.y, facing: this.pose.facing, reduced: reducedEffects, crowded: state.enemies.length > 45, f2: this.animator.visualForm === 'f2' && !dead2 && p.form !== 3 && state.cinema?.to !== 3,

@@ -96,7 +96,7 @@ export class ArenaScene extends Phaser.Scene {
     const hp = this.entityRenderer.debugPose(), k0 = formKey(s.hero, s.player.form) ?? (s.hero === 'kai' && s.hx.kk?.surge ? 'surge' : null);
     this.presentation.update(s, hp.x, hp.y, hp.visualForm !== 'base', this.reduced, k0 ? RING_TINT[k0] : null);
     if (s.party) {
-      this.partnerRenderer ??= new EntityRenderer(this, true);
+      this.partnerRenderer ??= new EntityRenderer(this, true, s.hero !== 'kai' && s.party.slots[1].bag.hero === 'kai');
       const d = s.party.slots[1].down, in1 = s.party.slots[1].input, pr = this.partnerRenderer;
       inSlot(s, 1, () => { pr.sync(s, in1, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.reduced); const q = pr.debugPose(), k = formKey(s.hero, s.player.form); this.presentation.partner(q.x, q.y, k ? RING_TINT[k] : 0xbff4ff, true, d.downed); });
     } else this.presentation.partner(0, 0, 0, false, false);
