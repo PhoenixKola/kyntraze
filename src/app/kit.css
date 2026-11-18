@@ -518,7 +518,7 @@ button.hero-card:focus-visible { outline: 2px solid var(--accent, #e0a24a); outl
 .mode-strip { margin-right: calc(8 * var(--u)); } .mode-lock { font-size: max(8px, calc(10 * var(--u))); letter-spacing: .12em; color: #e9c27a; margin-right: calc(8 * var(--u)); }
 
 /* B22: four runners in one row; Vex's interim card art is Ren's, shifted violet */
-.hero-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: calc(10 * var(--u)) !important; } .hero-card.is-vex .hero-art { filter: hue-rotate(255deg) saturate(.8) brightness(.9); } .hero-copy small { overflow-wrap: anywhere; }
+.hero-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: calc(10 * var(--u)) !important; } .hero-card.is-vex .hero-art { background-size: contain !important; background-repeat: no-repeat !important; background-position: center bottom !important; image-rendering: pixelated; } .hero-copy small { overflow-wrap: anywhere; }
 
 /* B22.6 partner panel */
 .hud-partner { position: absolute; top: calc(112 * var(--u)); left: calc(10 * var(--u)); width: calc(190 * var(--u)); padding: calc(5 * var(--u)) calc(8 * var(--u)); display: flex; flex-direction: column; gap: calc(3 * var(--u)); font-size: max(8px, calc(10 * var(--u))); z-index: 3; } .hud-partner b { letter-spacing: .12em; color: #e9c27a; } .hud-partner.down { filter: saturate(.4); border-color: #7fffd4; } .hud-partner .bar-hp { height: calc(10 * var(--u)); } .hud-partner small { color: var(--k-dim); }
@@ -551,3 +551,12 @@ button.hero-card:focus-visible { outline: 2px solid var(--accent, #e0a24a); outl
 .story-actions span{margin-right:auto;opacity:.6}
 @media (prefers-reduced-motion:reduce){.story-panel{animation:none}}
 @keyframes storyIn{from{opacity:0}to{opacity:1}}
+
+/* B22 art hooks */
+.asc-icon{width:64px;height:64px;object-fit:contain;image-rendering:pixelated;margin:.2rem auto 0;display:block}
+.hud-ult-icon{width:28px;height:28px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:.4rem}
+.arc-ico{width:32px;height:32px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:.5rem;float:left}
+.arc-pic{width:100%;max-height:220px;object-fit:contain;image-rendering:pixelated;display:block;margin:0 auto .4rem}
+.story-line{display:flex;align-items:flex-end;gap:1.5rem}
+.story-portrait{height:min(46vh,380px);width:auto;image-rendering:pixelated;filter:drop-shadow(0 0 18px rgba(160,112,255,.5))}
+.story-portrait.dim{opacity:.45;filter:grayscale(.4) drop-shadow(0 0 12px rgba(160,112,255,.3))}

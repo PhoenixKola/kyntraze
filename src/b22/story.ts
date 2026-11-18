@@ -1,6 +1,6 @@
 /** Trial of the Oathbroken: authored story beats shown before (intro) and after (outro) each chapter. Pure data; the UI (StoryPanel) plays them, can skip them and replays unlocked ones from the Archives. */
 export interface StoryLine { who: string; text: string }
-export interface StoryBeat { title: string; place: string; lines: StoryLine[] }
+export interface StoryBeat { title: string; place: string; lines: StoryLine[]; portraits?: Record<string, string> }
 export interface Chapter { n: 1 | 2 | 3; name: string; intro: StoryBeat; outro: StoryBeat }
 
 export const STORY: readonly Chapter[] = [
@@ -32,3 +32,6 @@ export const STORY: readonly Chapter[] = [
       { who: 'NARRATOR', text: 'Voidheart Exile awakens, and the Vanguard crest is yours.' } ] } },
 ];
 export const chapterStory = (n: number): Chapter | undefined => STORY.find(c => c.n === n);
+/** Speaker -> portrait file (public/art/b22) for a beat: Vex shows the form earned at that point of the story. */
+export const storyPortraits = (n: number, part: 'intro' | 'outro'): Record<string, string> => ({ VEX: part === 'outro' && n === 2 ? 'vex_riftbound' : part === 'outro' && n === 3 ? 'vex_voidheart' : 'vex_base', OATHKEEPER: 'oathkeeper' });
+for (const c of STORY) { c.intro.portraits = storyPortraits(c.n, 'intro'); c.outro.portraits = storyPortraits(c.n, 'outro'); }

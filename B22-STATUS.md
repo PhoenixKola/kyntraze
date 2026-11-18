@@ -3,12 +3,12 @@
 Legend: **VERIFIED** = automated test + (where marked) a real-browser run by me. **IMPLEMENTED** = code exists and is wired, exercised only by unit tests. **INTERIM** = works but uses procedural stand-in art. **NOT DONE** = not built. **OWNER REVIEW** = needs a human eye/ear. Nothing here is pushed or deployed. Local commits only.
 
 ## What I did and did not do (read this first)
-* I did **not** use ImageGen or Blender. Every new visual (two arenas, six enemies, seven bosses, Vex, eight outfits, portraits, icons, cards) is either procedural (Phaser Graphics, see `src/game/render/realmWorld.ts`) or a tinted stand-in. Production art is **NOT DONE**.
-* Music is original and procedurally synthesised (`scripts/b22-synth.py`, 9 cues + co-op stinger); SFX are runtime-synthesised (`src/game/audio/b22Sfx.ts`). **I have not listened to any of it.** Peak/format checks only. OWNER REVIEW.
-* I did not play any run as a human. "Verified" means tests and short scripted browser runs.
+* **Art pass done with ImageGen** (owner request): 6 realm enemies, 7 bosses, Choir voice + Sovereign part sprites, Vex base / Riftbound / Voidheart portraits (generated against a cleaned Kai style reference and checked to match Kai/Ren/Sora's chunky pixel style), 8 outfit cards (real outfit names, each against its own hero reference), 2 realm floor textures, 4 props, icon sheets for 8 relics, 4 ultimates, 12 legendaries, 24 branches. Sources + prompts + PROVENANCE in `art/b22/source`; runtime PNGs in `public/art/b22` via `scripts/b22-art-gen.py` and `scripts/b22-art-process.py`. Verified in a real browser (floor, props, enemies, Castellan, Regent, Sovereign, hero card, story portraits, picker/Archives icons wired).
+* **Still not art-complete:** Vex **in a run** is still the Ren animated rig tinted (no 4-direction animated Vex sheets, no Blender rig); enemies/bosses are single-pose sprites (flip, bob, hit-flash) not animated cycles; outfits are cards (in a run an outfit is palette/aura only); branch and legendary icons are thematic and assigned by order, not one bespoke icon per name; no per-ultimate animation, no illustrated story panels or cinematics.
+* Audio and Expedition/Endless playtests were reviewed by the owner (removed from the open list).
 * No physical controller was available; pad paths are code + unit-level only.
 * Online co-op was verified between two real browser contexts and a local server. Public hosting, outside-network latency, and an Electron client joining are **not** verified.
-* `npm run build` and `npm run desktop:smoke` pass after the B22 changes (two launches, saved profile persisted). The NSIS installer was not rebuilt, and an Electron client joining an online room was not tested.
+* `npm run build` and `npm run desktop:smoke` passed after the B22 changes; the NSIS installer was not rebuilt.
 
 ## Test evidence (run by me, this session)
 * `npx tsc -b` clean. `npx vitest run`: 540+ tests, all green except none failing at last run (music-file test fixed by the synth). New suites: `b22-core`, `b22-enemies`, `b22-bosses`, `b22-ascension`, `b22-vex-modes`, `b22-save`, `b22-coop`, `b22-server`.
@@ -54,5 +54,5 @@ Legend: **VERIFIED** = automated test + (where marked) a real-browser run by me.
 * Contract text no longer overlaps the clock panel (moved inside it).
 * Ability tiles: hover/focus tooltip (name, key, description, real numbers) and click-to-use.
 
-## Remaining work (needs you or hardware)
-ImageGen + Blender art for everything INTERIM; human playtests for balance and feel; listening review of music/SFX; a real 20-min Expedition and a 30-min Endless soak; illustrated story art; controller testing (two pads); hosting + outside-network test; Electron installer rebuild + smoke; code signing (installer is unsigned).
+## Remaining work
+Animated Vex sheets (Blender rig) and animated enemy/boss cycles; bespoke ultimate/relic VFX; illustrated story panels; controller testing (two pads); hosting + outside-network test; Electron installer rebuild + smoke; code signing (installer is unsigned).

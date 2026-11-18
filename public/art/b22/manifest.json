@@ -1,0 +1,76 @@
+{
+ "choir": [
+  "choir_0",
+  "choir_1",
+  "choir_2"
+ ],
+ "sovparts": [
+  "sovpart_0",
+  "sovpart_1",
+  "sovpart_2"
+ ],
+ "props": [
+  "prop_0",
+  "prop_1",
+  "prop_2",
+  "prop_3"
+ ],
+ "relic_": [
+  "relic_0",
+  "relic_1",
+  "relic_2",
+  "relic_3",
+  "relic_4",
+  "relic_5",
+  "relic_6",
+  "relic_7"
+ ],
+ "ult_": [
+  "ult_0",
+  "ult_1",
+  "ult_2",
+  "ult_3"
+ ],
+ "leg_": [
+  "leg_0",
+  "leg_1",
+  "leg_2",
+  "leg_3",
+  "leg_4",
+  "leg_5",
+  "leg_6",
+  "leg_7",
+  "leg_8",
+  "leg_9",
+  "leg_10",
+  "leg_11"
+ ],
+ "brA_": [
+  "brA_0",
+  "brA_1",
+  "brA_2",
+  "brA_3",
+  "brA_4",
+  "brA_5",
+  "brA_6",
+  "brA_7",
+  "brA_8",
+  "brA_9",
+  "brA_10",
+  "brA_11"
+ ],
+ "brB_": [
+  "brB_0",
+  "brB_1",
+  "brB_2",
+  "brB_3",
+  "brB_4",
+  "brB_5",
+  "brB_6",
+  "brB_7",
+  "brB_8",
+  "brB_9",
+  "brB_10",
+  "brB_11"
+ ]
+}

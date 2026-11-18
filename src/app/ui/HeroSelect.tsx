@@ -23,7 +23,7 @@ export function HeroSelect({ modeName, onMode, locked, hero, onHero, onProgress,
     <div className="screen-header"><button className="text-button" onClick={onBack} data-pad-cancel>← BACK</button><span>01 / RUNNER SELECTION</span></div>
     <p className="eyebrow">SELECT YOUR RUNNER</p><h2 className="large-heading">WHO FACES THE FRACTURE?</h2>
     <div className="hero-grid">
-      {HEROES.map((h, i) => <button type="button" key={h.id} onClick={() => onHero(h.id)} aria-pressed={hero === h.id} data-testid={`hero-card-${h.id}`} className={`hero-card ${hero === h.id ? 'active-hero picked' : 'idle-hero'} has-art ${h.id === 'vex' ? 'is-vex' : ''}`} style={{ '--accent': h.accent, ...(h.id === 'kai' ? {} : { '--hero-art': `url(${ASSET_BASE}ui/heroes/${h.id === 'vex' ? 'ren' : h.id}-card.webp)` }) } as CSSProperties}><span className="hero-art" aria-hidden="true"/>
+      {HEROES.map((h, i) => <button type="button" key={h.id} onClick={() => onHero(h.id)} aria-pressed={hero === h.id} data-testid={`hero-card-${h.id}`} className={`hero-card ${hero === h.id ? 'active-hero picked' : 'idle-hero'} has-art ${h.id === 'vex' ? 'is-vex' : ''}`} style={{ '--accent': h.accent, ...(h.id === 'kai' ? {} : { '--hero-art': h.id === 'vex' ? `url(${ASSET_BASE}art/b22/vex_base.png)` : `url(${ASSET_BASE}ui/heroes/${h.id}-card.webp)` }) } as CSSProperties}><span className="hero-art" aria-hidden="true"/>
         <div className="hero-card-index">0{i + 1} / {h.title}</div>
         <div className={`hero-silhouette hero-${h.id}`} aria-hidden="true"/>
         <div className="hero-copy"><h3>{h.name}</h3><p>{h.role}</p><small>AUTO · {h.weapon.toUpperCase()}</small><FormRow save={save} hero={h.id}/></div>

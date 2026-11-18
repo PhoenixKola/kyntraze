@@ -3,6 +3,7 @@ import { STARTER_TEXTURES } from '../../assets/atlasRegistry';
 import { ABILITY_FX_NAMES, abilityFxKey, abilityFxUrl } from '../render/abilityFx';
 import { VFX_NAMES, vfxKey, vfxUrl } from '../render/fxPool';
 import { ARENA_FX, FLOOR_TILE_COUNT, HAZARD_FX, PROPS_KEY, arenaAssetUrl, arenaFxKey, arenaPropNames, floorTileKey, floorTileUrl, parsePropManifest, propKey } from '../render/arenaWorld';
+import { B22_ART } from '../render/realmArt';
 import { ARENAS, type ArenaId } from '../../content/arenas';
 import { ENEMY_FX_NAMES, enemyFxKey, enemyFxUrl, enemyManifestKey, enemyManifestUrl, enemySheetKey, enemySheetUrl, type EnemyManifest } from '../render/enemyRenderer';
 import { BOSS_FX_NAMES, BOSS_KINDS, bossFxKey, bossFxUrl, bossManifestKey, bossManifestUrl, bossSheetKey, bossSheetUrl, type BossManifest } from '../render/bossRenderer';
@@ -31,6 +32,7 @@ export class BootScene extends Phaser.Scene {
     if (this.hero !== 'kai') HERO_FX_NAMES[artHero(this.hero)].forEach((n: string) => this.load.image(heroFxKey(artHero(this.hero), n), heroFxUrl(artHero(this.hero), n)));
     this.load.json(F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL);
     B21_GROUPS.forEach(g => this.load.json(b21ManifestKey(g), b21ManifestUrl(g)));   // B21: optional art groups, a missing manifest is ignored
+    B22_ART.forEach(n => this.load.image(`b22-${n}`, `art/b22/${n}.png`));
     COMET_FX_NAMES.forEach(n => this.load.image(cometFxKey(n), cometFxUrl(n)));
     B14_FX_NAMES.forEach(n => this.load.image(b14Key(n), b14Url(n)));
     FORM_FX_NAMES.forEach(n => this.load.image(formFxKey(n), formFxUrl(n)));

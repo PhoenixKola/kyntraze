@@ -22,7 +22,9 @@ export function createRealmFloor(scene: Phaser.Scene, id: ArenaId) {
   for (let i = 0; i < 160; i++) { const x = hash(i, 3) * W, y = hash(i, 9) * H; g.fillStyle = id === 'aetherfall' ? `rgba(255,236,190,${0.15 + hash(i, 5) * 0.4})` : `rgba(140,230,230,${0.1 + hash(i, 5) * 0.4})`; g.fillRect(x, y, 2, 2); }
   const inset = a.inset - 22, S = id === 'aetherfall' ? 96 : 110;
   g.save(); g.beginPath(); g.rect(inset, inset, W - inset * 2, H - inset * 2); g.clip();
-  for (let ty = 0; ty * S < H; ty++) for (let tx = 0; tx * S < W; tx++) {
+  const tk = `b22-floor_${id}`, art = scene.textures.exists(tk) ? scene.textures.get(tk).getSourceImage() as CanvasImageSource : null;
+  if (art) { const T = 256; for (let ty = 0; ty * T < H; ty++) for (let tx = 0; tx * T < W; tx++) g.drawImage(art, tx * T, ty * T, T, T); g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(0, 0, W, H); }
+  else for (let ty = 0; ty * S < H; ty++) for (let tx = 0; tx * S < W; tx++) {
     const v = hash(tx, ty), x = tx * S, y = ty * S;
     g.fillStyle = v > 0.5 ? p.floorA : p.floorB; g.fillRect(x, y, S, S);
     if (id === 'paradox') { const sh = g.createLinearGradient(x, y, x + S, y + S); sh.addColorStop(0, 'rgba(111,227,225,0)'); sh.addColorStop(0.5, `rgba(111,227,225,${0.05 + v * 0.07})`); sh.addColorStop(1, 'rgba(111,227,225,0)'); g.fillStyle = sh; g.fillRect(x, y, S, S); }
@@ -44,19 +46,21 @@ export function createRealmFloor(scene: Phaser.Scene, id: ArenaId) {
 
 /** Solid props drawn to the exact footprint rect used by collision (so art and collision cannot disagree). */
 export class RealmProps {
-  private readonly g: Phaser.GameObjects.Graphics;
+  private readonly g: Phaser.GameObjects.Graphics; private readonly imgs: Phaser.GameObjects.Image[] = [];
   constructor(scene: Phaser.Scene, id: ArenaId) {
     const a = ARENAS[id], p = a.palette!, g = this.g = scene.add.graphics().setDepth(5);
     for (const s of a.solids) {
       const f = PROP_FOOTPRINTS[s.prop], x = s.x, y = s.y, w = f.w, h = f.h, tall = Math.min(110, 30 + w * 0.6);
       const base = id === 'aetherfall' ? col('#b9ae8a') : col('#2a2358'), top = id === 'aetherfall' ? col('#e3d6a6') : col('#4a3f98'), edge = col(p.accent);
       g.fillStyle(0x000000, 0.35); g.fillEllipse(x + w / 2, y + h, w * 1.15, h * 0.6);
+      const pk = `b22-prop_${id === 'aetherfall' ? (/plinth|monolith|obelisk/.test(s.prop) ? 1 : 0) : (/spire|shard|obelisk/.test(s.prop) ? 2 : 3)}`;
+      if (scene.textures.exists(pk)) { const im = scene.add.image(x + w / 2, y + h, pk).setOrigin(0.5, 1).setDepth(5.01 + y * 1e-5); im.setDisplaySize(Math.max(w * 1.25, 60), Math.max(w * 1.25, 60) * im.height / im.width); this.imgs.push(im); continue; }
       g.fillStyle(base, 1); g.fillRect(x, y - tall * 0.35, w, h + tall * 0.35); g.fillStyle(top, 1); g.fillRect(x, y - tall * 0.35, w, Math.max(8, tall * 0.28));
       if (s.prop.includes('shard') || s.prop.includes('spire') || s.prop.includes('prism')) { g.fillStyle(top, 0.9); g.fillTriangle(x + 4, y, x + w / 2, y - tall * 1.4, x + w - 4, y); }
       g.lineStyle(2, edge, 0.7); g.strokeRect(x, y - tall * 0.35, w, h + tall * 0.35);
     }
   }
-  destroy() { this.g.destroy(); }
+  destroy() { this.g.destroy(); this.imgs.forEach(i => i.destroy()); }
 }
 
 const ACCENT: Record<string, string> = { sky_lancer: '#f2d27a', halo_scribe: '#ffe9a8', citadel_bulwark: '#e6c98a', rift_mimic: '#9fe6e0', phase_harrier: '#b18cff', singularity_husk: '#6a5cff', halo_sigil: '#ffe08a' };
@@ -69,7 +73,8 @@ interface Burst { x: number; y: number; t: number; dur: number; r: number; c: nu
 export class B22Overlay {
   private readonly haz: Phaser.GameObjects.Graphics; private readonly act: Phaser.GameObjects.Graphics; private readonly fxg: Phaser.GameObjects.Graphics;
   private bursts: Burst[] = []; private evCur = 0; private enemyCur = 0; private lastHp = new Map<number, number>(); private clock = 0;
-  constructor(scene: Phaser.Scene) { this.haz = scene.add.graphics().setDepth(5.55); this.act = scene.add.graphics().setDepth(6.5); this.fxg = scene.add.graphics().setDepth(10.6).setBlendMode(Phaser.BlendModes.ADD); }
+  private readonly scene: Phaser.Scene; private readonly nul: Phaser.GameObjects.Graphics; private readonly imgs = new Map<number, Phaser.GameObjects.Image>(); private used = new Set<number>();
+  constructor(scene: Phaser.Scene) { this.scene = scene; this.nul = scene.add.graphics().setVisible(false); this.haz = scene.add.graphics().setDepth(5.55); this.act = scene.add.graphics().setDepth(6.5); this.fxg = scene.add.graphics().setDepth(10.6).setBlendMode(Phaser.BlendModes.ADD); }
   private hazardColor(h: Hazard) { return h.echo ? 0x7fe0e8 : h.tag.startsWith('well') ? 0xffcf6a : h.tag === 'shatter' ? 0xf4d78a : h.tag === 'fold' ? 0xb18cff : h.tag === 'lance' || h.tag === 'lance_land' ? 0xf2d27a : h.tag === 'arrival' ? 0xb18cff : h.tag.startsWith('husk') ? 0x6a5cff : h.tag === 'collapse' ? 0xe9c8ff : 0xff5a6a; }
   update(s: GameState, dt: number, reduced: boolean) {
     this.clock += dt; const hg = this.haz, ag = this.act, fg = this.fxg; hg.clear(); ag.clear(); fg.clear();
@@ -129,15 +134,41 @@ export class B22Overlay {
       if (dn) { ag.lineStyle(4, 0x7fffd4, 0.9); ag.beginPath().arc(x, y - 28, 24, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, np.down.hold / 2.2)).strokePath(); }
     }
     // ---- actors
-    const seen = new Set<number>();
+    const seen = new Set<number>(); this.used.clear();
     for (const e of s.enemies) { if (e.hp <= 0) continue; if (!isRealmKind(e.kind) && !(isBoss(e.kind) && e.kind !== 'warden' && e.kind !== 'seraph')) continue; seen.add(e.id); this.actor(ag, e, s); }
     for (const id of this.lastHp.keys()) if (!seen.has(id)) this.lastHp.delete(id);
+    for (const [id, im] of this.imgs) if (!this.used.has(id)) { im.destroy(); this.imgs.delete(id); }
+    this.nul.clear();
   }
-  private actor(g: Phaser.GameObjects.Graphics, e: Enemy, s: GameState) {
+  /** Production art: realm enemies and bosses draw an ImageGen sprite when its texture is loaded; the procedural body below stays as the fallback and the gameplay read-outs (shield arcs, reflect rings, hands) are always drawn on top. */
+  private artKey(e: Enemy): string | null {
+    const role = e.part?.role, k = role === 'line' ? 'choir_0' : role === 'cone' ? 'choir_1' : role === 'ring' ? 'choir_2' : role === 'anchor' ? 'sovpart_0' : role === 'arm' ? 'sovpart_1' : role === 'head' ? 'sovpart_2' : role === 'decoy' ? 'regent' : e.kind;
+    const key = `b22-${k}`; return this.scene.textures.exists(key) ? key : null;
+  }
+  private sprite(e: Enemy, flash: boolean): boolean {
+    const key = this.artKey(e); if (!key) return false;
+    let im = this.imgs.get(e.id); if (!im) { im = this.scene.add.image(e.x, e.y, key).setOrigin(0.5, 0.72); this.imgs.set(e.id, im); }
+    this.used.add(e.id); const boss = isBoss(e.kind as BossKind), h = e.radius * (e.part ? 3.2 : boss ? 3.9 : 4.5);
+    im.setTexture(key).setPosition(e.x, e.y).setDisplaySize(im.width * h / im.height, h).setFlipX(e.aimX < 0).setDepth(6.4 + e.y * 1e-5).setAlpha(e.mode === 'blink' ? 0.5 : e.part?.role === 'decoy' ? 0.7 : 1);
+    if (flash) { im.setTint(0xffffff); im.tintMode = Phaser.TintModes.FILL; } else { im.clearTint(); im.tintMode = Phaser.TintModes.MULTIPLY; } return true;
+  }
+  private extras(g: Phaser.GameObjects.Graphics, e: Enemy) {
+    const r = e.radius, x = e.x, y = e.y, X = e.ex ?? {}, ph2 = e.ai?.phase === 2;
+    if (e.ai?.exposed) { g.lineStyle(3, 0xffffff, 0.5 + 0.4 * Math.sin(this.clock * 14)); g.strokeCircle(x, y - r * 0.3, r * 1.1); }
+    if (e.kind === 'citadel_bulwark' && (e.ex?.crack ?? 4) > 0) { g.lineStyle(5, 0xfff0c0, e.mode === 'recover' ? 0.25 : 0.95); const f = e.aimX >= 0 ? 1 : -1; g.beginPath().arc(x, y - r * 0.3, r * 1.5, f > 0 ? -1.2 : Math.PI - 1.2, f > 0 ? 1.2 : Math.PI + 1.2).strokePath(); }
+    if (e.kind === 'oathkeeper' && X.reflect) { g.lineStyle(3, 0xffffff, 0.8); g.strokeCircle(x, y - r * 0.4, r * 1.6); }
+    if (e.kind === 'mirror_tyrant') { const nn = X.nn ?? 3, arc = X.arc ?? 1.7, f0 = X.face ?? 0; for (let i = 0; i < nn; i++) { const a = f0 - arc / 2 + (i + 0.5) * arc / nn, alive = (X[`n${i}`] ?? 0) > 0; g.lineStyle(alive ? 6 : 2, alive ? 0xdff6ff : 0x44566a, alive ? 1 : 0.5); g.beginPath().arc(x, y - r * 0.3, r * 2, a - arc / nn / 2 + 0.05, a + arc / nn / 2 - 0.05).strokePath(); } }
+    if (e.kind === 'chronophage') { const w = this.clock * (ph2 ? 3 : 1.5); g.lineStyle(4, 0xfff0b0, 0.9); g.beginPath().moveTo(x, y - r * 0.3).lineTo(x + Math.cos(w) * r, y - r * 0.3 + Math.sin(w) * r).strokePath(); }
+    if (e.kind === 'sovereign' && X.shield) { g.lineStyle(5, 0x9fe6ff, 0.8); g.strokeCircle(x, y - r * 0.3, r * 1.5); }
+    if (e.part) { const w = r * 2.2, f = Math.max(0, e.hp / e.maxHp); g.fillStyle(0x000000, 0.75); g.fillRect(x - w / 2, y - r * 2.1, w, 5); g.fillStyle(0xe9c8ff, 1); g.fillRect(x - w / 2, y - r * 2.1, w * f, 5); }
+  }
+  private actor(g0: Phaser.GameObjects.Graphics, e: Enemy, s: GameState) {
     const prev = this.lastHp.get(e.id) ?? e.hp, hurt = e.hp < prev - 0.01; this.lastHp.set(e.id, e.hp);
     const k = e.kind, def = isBoss(k as BossKind) ? BOSSES[k as BossKind] : null, ac = col(def?.accent ?? ACCENT[k] ?? '#ffffff'), r = e.radius, fy = e.y, face = Math.atan2(e.aimY, e.aimX), flash = hurt || (e.stagger > 0 && e.stagger < 0.1);
     const body = (c: number) => (flash ? 0xffffff : c), tele = e.mode === 'windup' || e.mode === 'phase' || e.mode === 'blink';
-    g.fillStyle(0x000000, 0.4); g.fillEllipse(e.x, fy + r * 0.6, r * 2.1, r * 0.8);
+    g0.fillStyle(0x000000, 0.4); g0.fillEllipse(e.x, fy + r * 0.6, r * 2.1, r * 0.8);
+    const art = this.sprite(e, flash), g = art ? this.nul : g0;
+    if (e.part) { this.part(g, e, ac, flash, s); if (art) this.extras(g0, e); return; }
     if (e.part) return this.part(g, e, ac, flash, s);
     g.lineStyle(3, 0x0a0a14, 1);
     switch (k) {
@@ -150,8 +181,9 @@ export class B22Overlay {
       case 'halo_sigil': { const life = (e.ex?.life ?? 7) / 7; g.lineStyle(3, 0xffe08a, 0.5 + 0.5 * life); g.strokeCircle(e.x, fy, r); g.beginPath().moveTo(e.x - r, fy).lineTo(e.x + r, fy).moveTo(e.x, fy - r).lineTo(e.x, fy + r).strokePath(); g.fillStyle(body(0xffe08a), 0.5); g.fillCircle(e.x, fy, r * 0.55); break; }
       default: this.boss(g, e, ac, flash);
     }
-    if (tele) { g.lineStyle(2, 0xffffff, 0.5 + 0.4 * Math.sin(this.clock * 18)); g.strokeCircle(e.x, fy - r * 0.3, r * 1.5); }
-    if (k !== 'halo_sigil' && !def) { const w = r * 2, f = Math.max(0, e.hp / e.maxHp); g.fillStyle(0x000000, 0.7); g.fillRect(e.x - w / 2, fy - r * 2.2, w, 4); g.fillStyle(ac, 1); g.fillRect(e.x - w / 2, fy - r * 2.2, w * f, 4); }
+    if (tele) { g0.lineStyle(2, 0xffffff, 0.5 + 0.4 * Math.sin(this.clock * 18)); g0.strokeCircle(e.x, fy - r * 0.3, r * 1.5); }
+    if (k !== 'halo_sigil' && !def) { const w = r * 2, f = Math.max(0, e.hp / e.maxHp); g0.fillStyle(0x000000, 0.7); g0.fillRect(e.x - w / 2, fy - r * 2.2, w, 4); g0.fillStyle(ac, 1); g0.fillRect(e.x - w / 2, fy - r * 2.2, w * f, 4); }
+    if (art) this.extras(g0, e);
     void s;
   }
   private boss(g: Phaser.GameObjects.Graphics, e: Enemy, ac: number, flash: boolean) {
@@ -180,5 +212,5 @@ export class B22Overlay {
     else { g.lineStyle(5, c(0xe6d8ff), 1); g.strokeCircle(x, y - r * 0.4, r); g.strokeCircle(x, y - r * 0.4, r * 0.55); }
     const w = r * 2.2; g.fillStyle(0x000000, 0.75); g.fillRect(x - w / 2, y - r * 2.1, w, 5); g.fillStyle(0xe9c8ff, 1); g.fillRect(x - w / 2, y - r * 2.1, w * f, 5); void s;
   }
-  destroy() { this.haz.destroy(); this.act.destroy(); this.fxg.destroy(); }
+  destroy() { for (const im of this.imgs.values()) im.destroy(); this.nul.destroy(); this.haz.destroy(); this.act.destroy(); this.fxg.destroy(); }
 }

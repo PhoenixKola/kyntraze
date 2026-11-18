@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { StoryBeat } from '../../b22/story';
 import { HintBar } from './Chrome';
+import { ASSET_BASE } from '../assetBase';
 
 interface Props { beat: StoryBeat; onDone: () => void; doneLabel?: string }
 /** Story interstitial: subtitles-style lines, advance with Enter/Space/click/pad A, skip all with Esc/pad B. Respects reduced motion (no fade). */
@@ -14,7 +15,7 @@ export function StoryPanel({ beat, onDone, doneLabel = 'CONTINUE' }: Props) {
   const line = beat.lines[i];
   return <main className="story-panel" data-testid="story-panel" role="dialog" aria-label={beat.title} onClick={next}>
     <div className="story-head"><h2>{beat.title}</h2><small>{beat.place}</small></div>
-    <div className="story-line" aria-live="polite"><b>{line.who}</b><p>{line.text}</p></div>
+    <div className="story-line" aria-live="polite">{(beat.portraits?.[line.who] ?? beat.portraits?.VEX) && <img className={`story-portrait ${beat.portraits?.[line.who] ? '' : 'dim'}`} src={`${ASSET_BASE}art/b22/${beat.portraits?.[line.who] ?? beat.portraits?.VEX}.png`} alt="" draggable={false} onError={e => { e.currentTarget.style.display = 'none'; }}/>}<div><b>{line.who}</b><p>{line.text}</p></div></div>
     <div className="story-actions"><span>{i + 1} / {beat.lines.length}</span>
       <button className="outlined-button" data-testid="story-skip" data-pad-cancel onClick={e => { e.stopPropagation(); onDone(); }}>SKIP</button>
       <button className="primary-button" data-testid="story-next" onClick={e => { e.stopPropagation(); next(); }}>{last ? doneLabel : 'NEXT'}</button></div>
