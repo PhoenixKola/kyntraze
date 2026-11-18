@@ -9,7 +9,7 @@ import { ApexFx } from './stillfireFx';
 import { AbilityFx } from './abilityFx';
 import { KaiKitFx } from './kaiKitFx';
 import { PASSIVE_AURA } from './fxPolicy';
-import { CONTOUR, ContourController, EDGE_STATES, formKey, registerContourFilter } from './contourFilter';
+import { CONTOUR, ContourController, EDGE_STATES, edgePalette, formKey, registerContourFilter } from './contourFilter';
 import { HeroFxView } from './heroFxView';
 import { BodyMotion, styleFor } from './bodyMotion';
 import { AuraView, type AuraState } from './auraView';
@@ -95,7 +95,7 @@ export class EntityRenderer {
     const f = state.player.form, h = state.hero;
     const key = formKey(h, f);
     const surge = h === 'kai' && f === 0 && (state.hx.kk?.surge ?? 0) > 0;
-    const pal = key ? CONTOUR[key] : surge ? CONTOUR.surge : null, on = !!pal && !state.cinema && state.phase !== 'dead';
+    const pal = key ? edgePalette(key) : surge ? CONTOUR.surge : null, on = !!pal && !state.cinema && state.phase !== 'dead';
     // the edge follows what the fighter is really doing (AuraTracker over sim state): idle breathing, run, dash, charge gather, release wave, settle. Intensity is eased, never stepped, so it cannot strobe.
     const st = EDGE_STATES[this.auraSample.smp.phase], calm = reduced ? 0.6 : 1, run = state.phase === 'running' ? dt : 0;
     const target = on ? (surge ? 0.7 : 1) * st.power * calm : 0;

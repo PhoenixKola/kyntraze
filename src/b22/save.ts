@@ -1,8 +1,8 @@
 /** B22 persistence: ONE additive block (`save.b22`) next to the untouched B18 meta. Sanitised per field, idempotent to migrate, and every run result is granted at most once through a ledger of run ids. Offline numbers are LOCAL records; nothing here is ever labelled "verified" (only the server can verify). */
 import { HERO_IDS, isHeroId, type HeroId } from '../content/heroes';
 import { ARENA_IDS, isArenaId, type ArenaId } from '../content/arenas';
-import { MILESTONES, MILESTONE_BY_ID, isMilestoneId } from './mastery';
-import { COSMETICS, OUTFITS, isCosmeticId, isOutfitId, type OutfitDef, type OutfitId } from './cosmetics';
+import { FORM_KEYS, MILESTONES, MILESTONE_BY_ID, isMilestoneId, type FormKey } from './mastery';
+import { COSMETICS, OUTFITS, isCosmeticId, isCrestId, isOutfitId, type OutfitDef, type OutfitId } from './cosmetics';
 import { RUN_MODE_IDS, type RunModeId } from './plan';
 import { RELIC_IDS, type RelicId } from './relics';
 import { BRANCHES } from './branches';
@@ -14,7 +14,7 @@ export interface ModeRecord { runs: number; wins: number; bestSeconds: number; b
 export interface ChallengeProof { best: number; attempts: number; done: boolean; /** always 'local': only a server may mark a score verified */ status: 'local' }
 export interface B22Save {
   v: 1; vexForms: [boolean, boolean]; story: { done: (1 | 2 | 3)[]; seen: boolean };
-  mastery: Record<string, true>; owned: string[]; equipped: { outfit: Partial<Record<HeroId, OutfitId>>; crest: string | null; aura: Partial<Record<HeroId, string>> };
+  mastery: Record<string, true>; owned: string[]; equipped: { outfit: Partial<Record<HeroId, OutfitId>>; crest: string | null; /** edge detail reward id per mastery form (FormKey) */ aura: Partial<Record<FormKey, string>> };
   records: Record<string, ModeRecord>; challenges: Record<string, ChallengeProof>;
   seen: { relics: RelicId[]; branches: string[]; legends: string[]; bosses: string[] };
   server: { url: string; name: string };
@@ -40,7 +40,8 @@ export function migrateB22(raw: unknown): B22Save {
   b.owned = strs(r.owned, x => isCosmeticId(x) || isOutfitId(x));
   const eq = (typeof r.equipped === 'object' && r.equipped ? r.equipped : {}) as Record<string, unknown>, eo = (typeof eq.outfit === 'object' && eq.outfit ? eq.outfit : {}) as Record<string, unknown>;
   for (const h of HERO_IDS) { const v = eo[h]; if (isOutfitId(v) && b.owned.includes(v) && OUTFITS.find(o => o.id === v)?.hero === h) b.equipped.outfit[h] = v; }
-  b.equipped.crest = typeof eq.crest === 'string' && b.owned.includes(eq.crest) ? eq.crest : null;
+  b.equipped.crest = typeof eq.crest === 'string' && b.owned.includes(eq.crest) && isCrestId(eq.crest) ? eq.crest : null;
+  { const ea = (typeof eq.aura === 'object' && eq.aura ? eq.aura : {}) as Record<string, unknown>; for (const f of FORM_KEYS) { const v = ea[f]; if (v === `aura_detail_${f}` && b.owned.includes(v)) b.equipped.aura[f] = v; } }   // B23: the seven edge details are equippable per form (older saves never restored them)
   const rec = (typeof r.records === 'object' && r.records ? r.records : {}) as Record<string, Record<string, unknown>>;
   for (const k of Object.keys(rec).slice(0, 400)) { const [mode, hero, arena, party] = k.split('|'); if (!(RUN_MODE_IDS as readonly string[]).includes(mode) || !isHeroId(hero) || !isArenaId(arena) || !/^[1-2]$/.test(party ?? '')) continue; const x = rec[k] ?? {}; b.records[k] = { runs: num(x.runs), wins: num(x.wins), bestSeconds: num(x.bestSeconds), bestScore: num(x.bestScore), bestKills: num(x.bestKills), bestCycle: num(x.bestCycle, 1e4), bestLevel: num(x.bestLevel, 1e4) }; }
   const ch = (typeof r.challenges === 'object' && r.challenges ? r.challenges : {}) as Record<string, Record<string, unknown>>;
@@ -90,3 +91,12 @@ export const equipOutfit = (s: B22Save, hero: HeroId, id: OutfitId | null, ctx: 
   return { ...s, owned: s.owned.includes(id) ? s.owned : [...s.owned, id], equipped: { ...s.equipped, outfit: { ...s.equipped.outfit, [hero]: id } } };
 };
 void ARENA_IDS;
+
+/** Equip / remove a form's mastery edge detail. Only an earned detail of that very form can be equipped. */
+export const equipAura = (s: B22Save, form: FormKey, on: boolean): B22Save => {
+  const id = `aura_detail_${form}`, a = { ...s.equipped.aura };
+  if (!on) { delete a[form]; return { ...s, equipped: { ...s.equipped, aura: a } }; }
+  if (!s.owned.includes(id)) return s; a[form] = id; return { ...s, equipped: { ...s.equipped, aura: a } };
+};
+/** Equip / remove a crest (mastery crest or mode crest). Must be owned. */
+export const equipB22Crest = (s: B22Save, id: string | null): B22Save => (id === null ? { ...s, equipped: { ...s.equipped, crest: null } } : s.owned.includes(id) && isCrestId(id) ? { ...s, equipped: { ...s.equipped, crest: id } } : s);

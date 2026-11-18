@@ -34,3 +34,4 @@ export const COSMETICS: readonly CosmeticDef[] = [
 ];
 export const COSMETIC_IDS = new Set(COSMETICS.map(c => c.id));
 export const isCosmeticId = (v: unknown): v is string => typeof v === 'string' && COSMETIC_IDS.has(v);
+export const isCrestId = (v: unknown): v is string => typeof v === 'string' && COSMETICS.some(c => c.id === v && (c.kind === 'crest' || c.kind === 'crest_mode'));
