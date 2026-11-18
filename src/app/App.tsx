@@ -12,6 +12,11 @@ import { Hud } from './ui/Hud';
 import { LevelUpScreen } from './ui/LevelUpScreen';
 import { PauseMenu } from './ui/PauseMenu';
 import { AscensionPicker } from './ui/AscensionPicker';
+import { ModeSelect, type ModeChoice } from './ui/ModeSelect';
+import { CLASSIC_ARENAS, REALM_ARENAS } from '../content/arenas';
+import { planFor, type RunPlan } from '../b22/plan';
+import { dailyChallenge, weeklyChallenge } from '../b22/challenges';
+import type { RelicId } from '../b22/relics';
 import { ResultsScreen } from './ui/ResultsScreen';
 import { SettingsPanel } from './ui/SettingsPanel';
 import { ProgressionScreen, type ProgressTab } from './ui/ProgressionScreen';
@@ -24,6 +29,7 @@ import { LoadingScreen } from './ui/LoadingScreen';
 import './ui.css';
 import './kit.css';
 const initialSave = loadSave();
+interface RunSetup { plan: RunPlan | null; challengeId?: string; startRelic?: RelicId | null; hero?: HeroId }
 function GameStage({ bridge, seed, arena, pad, onHome, onProgress, onSettings }: { bridge: GameBridge; seed: number; arena: ArenaId; pad: boolean; onHome: () => void; onProgress: () => void; onSettings: () => void }) {
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const snapshot = useSyncExternalStore(listener => bridge.subscribe(listener), () => bridge.snapshot());
@@ -45,19 +51,30 @@ function GameStage({ bridge, seed, arena, pad, onHome, onProgress, onSettings }:
 }
 export default function App() {
   const pad = useControllerNav();
-  const [view, setView] = useState<'title' | 'select' | 'arena' | 'progress' | 'game'>('title');
+  const [view, setView] = useState<'title' | 'select' | 'arena' | 'progress' | 'game' | 'mode'>('title');
+  const [mode, setMode] = useState<ModeChoice>({ id: 'classic' });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [leaving, setLeaving] = useState(false);
-  type View = 'title' | 'select' | 'arena' | 'progress' | 'game';
+  type View = 'title' | 'select' | 'arena' | 'progress' | 'game' | 'mode';
   /** Menu route change: the current screen eases out (~110 ms) and the next eases in. Input is never blocked after the swap; a second press during the exit is ignored. */
   const go = (to: View) => { if (leaving) return; if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { setView(to); return; } setLeaving(true); window.setTimeout(() => { setView(to); setLeaving(false); }, 110); };
   const [save, setSave] = useState(initialSave);
   const [seedInput, setSeedInput] = useState(new URLSearchParams(window.location.search).get('seed') ?? '');
   const urlArena = new URLSearchParams(window.location.search).get('arena');
   const [arena, setArena] = useState<ArenaId>(isArenaId(urlArena) ? urlArena : initialSave.arena ?? DEFAULT_ARENA);
-  const [run, setRun] = useState({ seed: 0, serial: 0, arena });
-  const bridge = useMemo(() => new GameBridge(run.serial === 0 ? save : loadSave()), [run.serial]); // intentionally new per run
-  const start = (same = false) => { const nextSeed = same ? run.seed : parseSeed(seedInput.trim()); setRun(s => ({ seed: nextSeed, serial: s.serial + 1, arena: same ? s.arena : arena })); setView('game'); };
+  const [run, setRun] = useState<{ seed: number; serial: number; arena: ArenaId; setup: RunSetup }>({ seed: 0, serial: 0, arena, setup: { plan: null } });
+  const bridge = useMemo(() => { const base = run.serial === 0 ? save : loadSave(); const b = new GameBridge(run.setup.hero ? { ...base, hero: run.setup.hero } : base); if (run.setup.plan) b.setMode(run.setup.plan, { startRelic: run.setup.startRelic, challengeId: run.setup.challengeId, hero: run.setup.hero }); return b; }, [run.serial]); // intentionally new per run
+  const allowedArenas = mode.id === 'classic' ? CLASSIC_ARENAS : mode.id === 'fracture_expedition' ? REALM_ARENAS : undefined;
+  const modeName = mode.id === 'boss_rush' ? `BOSS RUSH · ${mode.track ?? 'initiation'}${mode.practice ? ' (PRACTICE)' : ''}`.toUpperCase().replace(/_/g, ' ') : mode.id === 'vex_trial' ? `VEX TRIAL · CH ${mode.chapter ?? 1}` : mode.id.replace(/_/g, ' ').toUpperCase();
+  const lockedHero = mode.id === 'vex_trial' ? 'vex' as HeroId : null;
+  const start = (same = false) => {
+    if (same) { setRun(s => ({ ...s, serial: s.serial + 1 })); setView('game'); return; }
+    const now = Date.now(); let setup: RunSetup = { plan: null }, nextArena = arena, nextSeed = parseSeed(seedInput.trim());
+    if (mode.id === 'daily_challenge' || mode.id === 'weekly_challenge') { const ch = mode.id === 'daily_challenge' ? dailyChallenge(now) : weeklyChallenge(now); setup = { plan: ch.plan, challengeId: ch.id, startRelic: ch.startRelic, hero: ch.hero ?? undefined }; nextArena = ch.arena; nextSeed = ch.seed; }
+    else if (mode.id !== 'classic') { const a = mode.id === 'fracture_expedition' && !REALM_ARENAS.includes(arena) ? REALM_ARENAS[0] : arena; nextArena = mode.id === 'vex_trial' ? planFor('vex_trial', { chapter: mode.chapter ?? 1 }).arena ?? arena : a; setup = { plan: planFor(mode.id, { arena: nextArena, track: mode.track, chapter: mode.chapter, practice: mode.practice }), hero: lockedHero ?? undefined }; }
+    else if (!CLASSIC_ARENAS.includes(arena)) nextArena = CLASSIC_ARENAS[0];
+    setRun(s => ({ seed: nextSeed, serial: s.serial + 1, arena: nextArena, setup })); setView('game');
+  };
   useEffect(() => { const retry = () => start(true); window.addEventListener('kyntraze-retry', retry); return () => window.removeEventListener('kyntraze-retry', retry); });
   const updateSettings = (next: GameSettings) => { bridge.setSettings(next); const updated = { ...save, settings: next }; setSave(updated); storeSave(updated); };
   const chooseHero = (id: HeroId) => { const updated = { ...save, hero: id }; setSave(updated); storeSave(updated); };
@@ -74,9 +91,10 @@ export default function App() {
   return <PadContext.Provider value={pad.connected}><div className="app">
     {pad.connected && <ControllerBadge/>}
     {view === 'title' && <div className={`screen ${leaving ? 'leaving' : ''}`}><TitleScreen onPlay={() => go('select')} onSettings={() => setSettingsOpen(true)} onProgress={() => openProgress('title')} save={save}/></div>}
-    {view === 'select' && <div className={`screen ${leaving ? 'leaving' : ''}`}><HeroSelect hero={save.hero ?? 'kai'} onHero={chooseHero} onBack={() => go('title')} onStart={() => start()} seed={seedInput} onSeed={setSeedInput} arena={arena} onArena={() => go('arena')} onProgress={tab => openProgress('select', tab)} save={save}/></div>}
+    {view === 'mode' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ModeSelect choice={mode} onChoose={c => { setMode(c); if (c.id === 'fracture_expedition' && !REALM_ARENAS.includes(arena)) chooseArena(REALM_ARENAS[0]); if (c.id === 'classic' && !CLASSIC_ARENAS.includes(arena)) chooseArena(CLASSIC_ARENAS[0]); }} onBack={() => go('select')} save={save}/></div>}
+    {view === 'select' && <div className={`screen ${leaving ? 'leaving' : ''}`}><HeroSelect modeName={modeName} onMode={() => go('mode')} locked={lockedHero ? 'HERO LOCKED: VEX' : mode.id === 'daily_challenge' || mode.id === 'weekly_challenge' ? 'ARENA / SEED SET BY THE CHALLENGE' : null} hero={save.hero ?? 'kai'} onHero={chooseHero} onBack={() => go('title')} onStart={() => start()} seed={seedInput} onSeed={setSeedInput} arena={arena} onArena={() => go('arena')} onProgress={tab => openProgress('select', tab)} save={save}/></div>}
     {view === 'progress' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ProgressionScreen meta={save.meta} unlocks={{ cometheart: !!save.unlocks?.cometheart, stillfire: !!save.unlocks?.stillfire, ren: !!save.unlocks?.ren, sora: !!save.unlocks?.sora }} tab={progTab} onTab={setProgTab} onMeta={updateMeta} onBack={() => go(progFrom)} onDeploy={progFrom === 'select' ? () => start() : undefined}/></div>}
-    {view === 'arena' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ArenaSelect selected={arena} onSelect={chooseArena} onBack={() => go('select')}/></div>}
+    {view === 'arena' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ArenaSelect selected={arena} onSelect={chooseArena} onBack={() => go('select')} allowed={allowedArenas}/></div>}
     {view === 'game' && <GameStage key={run.serial} bridge={bridge} seed={run.seed} arena={run.arena} pad={pad.connected} onHome={home} onProgress={() => { setSave(loadSave()); setProgFrom('select'); setProgTab('armory'); setView('progress'); }} onSettings={() => setSettingsOpen(true)}/>}
     {settingsOpen && <SettingsPanel settings={save.settings} onChange={updateSettings} onClose={() => setSettingsOpen(false)}/>}
   </div></PadContext.Provider>;

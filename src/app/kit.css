@@ -508,3 +508,14 @@ button.hero-card:focus-visible { outline: 2px solid var(--accent, #e0a24a); outl
 
 /* B22 interim: Vex shares Ren's UI art, shifted toward violet-black */
 .hud.hero-vex .portrait img, .hud.hero-vex .slot-ico { filter: hue-rotate(255deg) saturate(.85) brightness(.95); }
+
+/* B22 Mode Select */
+.mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(calc(210 * var(--u)), 1fr)); gap: calc(8 * var(--u)); width: min(100%, calc(900 * var(--u))); margin: 0 auto; }
+.mode-card { position: relative; text-align: left; padding: calc(10 * var(--u)) calc(12 * var(--u)); display: flex; flex-direction: column; gap: calc(4 * var(--u)); background: linear-gradient(180deg, #14212b, #0b121a); border: 1px solid #2c4252; color: #cfdde2; cursor: pointer; }
+.mode-card.selected { border-color: #e9c27a; box-shadow: 0 0 calc(12 * var(--u)) rgba(233, 194, 122, .35); } .mode-card b { font-size: max(11px, calc(14 * var(--u))); letter-spacing: .08em; color: #fff; } .mode-index { font-size: max(8px, calc(9 * var(--u))); color: #6f8791; letter-spacing: .2em; }
+.mode-blurb { font-size: max(9px, calc(11 * var(--u))); line-height: 1.35; } .mode-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-top: auto; } .mode-meta i { font-style: normal; font-size: max(7px, calc(8 * var(--u))); letter-spacing: .1em; padding: 1px 5px; border: 1px solid #34505f; color: #8fb4bf; }
+.mode-detail { width: min(100%, calc(900 * var(--u))); margin: calc(8 * var(--u)) auto; min-height: calc(20 * var(--u)); font-size: max(9px, calc(11 * var(--u))); } .mode-opts { display: flex; flex-wrap: wrap; gap: calc(6 * var(--u)); } .mode-opts .on { border-color: #e9c27a; color: #fff; } .mode-chal ul { margin: 4px 0; padding-left: 1.1em; } .mode-chal em { color: #9be6b8; font-style: normal; }
+.mode-strip { margin-right: calc(8 * var(--u)); } .mode-lock { font-size: max(8px, calc(10 * var(--u))); letter-spacing: .12em; color: #e9c27a; margin-right: calc(8 * var(--u)); }
+
+/* B22: four runners in one row; Vex's interim card art is Ren's, shifted violet */
+.hero-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: calc(10 * var(--u)) !important; } .hero-card.is-vex .hero-art { filter: hue-rotate(255deg) saturate(.8) brightness(.9); } .hero-copy small { overflow-wrap: anywhere; }
