@@ -4,7 +4,7 @@ Branch `main`, local commits only (nothing pushed). Evidence labels: **tests** =
 
 ## 1. NORTH art
 - Hair: the detached right-hand tuft of Ren Ascendant and Vex Riftbound / Voidheart came from the front hair part (`head_f1.png`) and the rear hair part (`hair_f1.png`). Both source parts were trimmed in `art/characters/{ren,vex}/f1/north/parts` (originals kept as `*.orig.png`) and the rigs rebuilt. Voidheart is a recolour of the Riftbound sheets, so it inherits the fix. (screens)
-- Legs: the NORTH stance was an A-frame (feet about 59 px apart, 22 px run offset). `danim.py` in every rig copy now uses a narrower stance (feet about 31 px apart, 16 px run offset); backups are `danim.py.b22.bak`. Rebuilt: Ren base and Ascendant, Vex base and Riftbound, Sora base, Kai base and the three forms. (screens for Ren; see build log for the rest)
+- Legs: the NORTH stance was an A-frame (feet about 59 px apart, 22 px run offset). `danim.py` in every rig copy now uses a narrower stance (feet about 31 px apart, 16 px run offset); backups are `danim.py.b22.bak`. Rebuilt and published: Ren base and Ascendant, Vex base and Riftbound (Voidheart re-derived), Sora base and Sovereign, Kai base and the three forms. Reviewed on a contact sheet of all 11 appearances (screens).
 - Not done: new ImageGen rear-boot studies and authored rear attack poses. The rear boots already read as heel views.
 
 ## 2-4. Kai kit (sim + tests)
@@ -15,6 +15,9 @@ Kai only: the strike direction is recorded in the sim, shots leave the fist anch
 
 ## 6. Contour energy
 `src/game/render/contourFilter.ts` (custom Phaser 4 filter), palettes per form. Passive blazes retired via `src/game/render/fxPolicy.ts`. Voidheart contour is dark gray by owner request; Vex effect tints follow the contour (`vexTint.ts`).
+
+## UI / content pass (this session)
+Sora card regenerated in the Ren/Vex card style; archive tab icons, Aetherfall/Paradox medallions and four new contract icons are ImageGen art (`art/uipass`). New contracts: Blood Oath, Hollow Crown, The Long Night, Void Pact (rules in `content/meta.ts`, effects in `RunConfig.ts` / `CombatSystem.ts` / `EnemyDirector.ts`). Vex: Rift Reversal crosses terrain; Oathbreaker Seal caps at 8 / 14 / 24 by form. Loading screen plays the runner's real run cycle.
 
 ## Known gaps
 Voidheart Exile redesign (own ImageGen design, rig, animations); normal-speed motion clips; audio for new abilities; controller verification.
