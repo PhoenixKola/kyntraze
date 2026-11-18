@@ -55,20 +55,23 @@ def slice_sheet(name, prefix, n, h, rows=None):
     return names
 
 
+BOSSK = {"castellan", "regent", "oathkeeper", "mirror_tyrant", "chronophage", "hollow_choir", "sovereign"}
+CYC = {"sky_lancer": 120, "halo_scribe": 120, "citadel_bulwark": 170, "rift_mimic": 110, "phase_harrier": 110, "singularity_husk": 140, "castellan": 280, "regent": 220, "oathkeeper": 210, "mirror_tyrant": 240, "chronophage": 250, "hollow_choir": 220, "sovereign": 420}
 def cycles():
     """Animation sheets c_<kind>.png (8 cells: move x4, windup, strike, hurt, death) -> public/art/b22/<kind>_f0..7.png, all frames scaled by ONE factor and bottom-centre aligned on a shared canvas so they do not jitter."""
     out = {}
-    for k, h in H.items():
-        f = os.path.join(SRC, "c_" + k + ".png")
+    for k, h in CYC.items():
+        f = os.path.join(SRC, ("bc_" if k in BOSSK else "c_") + k + ".png")
         if not os.path.exists(f): continue
         im = key(Image.open(f)); al = np.array(im.getchannel("A")) > 0; al = ndi.binary_dilation(al, iterations=10); lab, n = ndi.label(al)
         boxes = []
         for i, sl in enumerate(ndi.find_objects(lab)):
             if sl is not None and (lab[sl] == i + 1).sum() > 2500: boxes.append((sl[0].start, sl[0].stop, sl[1].start, sl[1].stop, (lab[sl] == i + 1).sum()))
         boxes = sorted(boxes, key=lambda b: -b[4])[:8]
-        if len(boxes) < 8: print("cycle", k, "found", len(boxes), "cells, skipped"); continue
-        boxes.sort(key=lambda b: ((b[0] + b[1]) // 2 // (im.height // 2), b[2]))
-        frames = [crop(im.crop((x0, y0, x1, y1)), 2) for (y0, y1, x0, x1, _) in boxes]
+        if len(boxes) < 8 or k in BOSSK: frames = [crop(c, 2) for c in grid_crops(im, 4, 2)]   # cells merged: fall back to the fixed 4x2 grid
+        else:
+            boxes.sort(key=lambda b: ((b[0] + b[1]) // 2 // (im.height // 2), b[2]))
+            frames = [crop(im.crop((x0, y0, x1, y1)), 2) for (y0, y1, x0, x1, _) in boxes]
         sc = h / max(fr.height for fr in frames[:4]); cw = max(round(fr.width * sc) for fr in frames) + 4; ch = max(round(fr.height * sc) for fr in frames) + 4
         names = []
         for i, fr in enumerate(frames):
@@ -76,6 +79,27 @@ def cycles():
             nm = f"{k}_f{i}"; cv.save(os.path.join(DST, nm + ".png")); names.append(nm)
         out[k] = names
     return out
+
+ICONS = {"ic_br_kai": ["seismic_impact", "pressure_wave", "prism_conductor", "burning_wake", "starfall_bloom", "twin_nova"], "ic_br_ren": ["relentless_chain", "crimson_guardbreak", "bloodline_relay", "meteor_collision", "red_comet_rain", "crimson_crater"],
+         "ic_br_sora": ["needle_spiral", "stormline_array", "piercing_meridian", "celestial_prism", "starfield_array", "celestial_collapse"], "ic_br_vex": ["reversal_guard", "mirror_counter", "shadow_riposte", "eclipse_shift", "marked_detonation", "severance_judgment"],
+         "ic_lg_a": ["solar_rupture", "dragon_overture", "nova_constellation", "crimson_relay", "meteor_crucible", "bloodstar_rupture"], "ic_lg_b": ["blue_needle_storm", "prismatic_meridian", "zero_convergence", "shard_requiem", "oathbreaker_chain", "null_waltz"]}
+def grid_crops(im, cols, rows):
+    W, H = im.size; out = []
+    for r in range(rows):
+        for c in range(cols):
+            cell = im.crop((c * W // cols, r * H // rows, (c + 1) * W // cols, (r + 1) * H // rows)); bb = cell.getchannel("A").getbbox()
+            out.append(cell.crop(bb) if bb else cell)
+    return out
+
+def named_icons():
+    """3x2 green-key icon sheets -> public/art/b22/ic_<id>.png (one bespoke icon per branch / legendary, in the prompt's reading order)."""
+    done = {}
+    for sheet, ids in ICONS.items():
+        f = os.path.join(SRC, sheet + ".png")
+        if not os.path.exists(f): continue
+        crops = grid_crops(key(Image.open(f)), 3, 2)
+        for c, i in zip(crops, ids): fit(crop(c, 2), 112).save(os.path.join(DST, "ic_" + i + ".png")); done[i] = "ic_" + i
+    return done
 
 if __name__ == "__main__":
     man = {}
@@ -98,7 +122,7 @@ if __name__ == "__main__":
     for n, o in [("a_aetherfall_floor", "floor_aetherfall"), ("a_paradox_floor", "floor_paradox")]:
         if ex(n):
             im = Image.open(os.path.join(SRC, n + ".png")).convert("RGB"); s = min(im.size); im = im.crop(((im.width - s) // 2, (im.height - s) // 2, (im.width + s) // 2, (im.height + s) // 2)).resize((256, 256), Image.LANCZOS); im.save(os.path.join(DST, o + ".png"))
-    man["cycles"] = cycles()
+    man["cycles"] = cycles(); man["icons"] = named_icons()
     if ex("fx_vexblade"): single("fx_vexblade", "vexblade", 40)
     if ex("fx_ult"):
         for j, nm in enumerate(slice_sheet_black("fx_ult", "fx_ult", 4)): pass

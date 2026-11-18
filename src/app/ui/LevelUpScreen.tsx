@@ -1,3 +1,4 @@
+import { legendArt } from '../../b22/artIcons';
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { OfferCard, OwnedUpgrade } from '../../bridge/UiSnapshot';
 import { CATEGORIES, RARITY_LABEL, type UpgradeId } from '../../content/upgrades';
@@ -51,7 +52,7 @@ export function LevelUpScreen({ legend, onLegend, level, reward, cards, owned, o
   return <div className={`overlay lv-overlay ${hasEpic ? 'has-epic' : ''} ${pick ? 'leaving' : ''}`} data-testid="level-up"><section className="lv-modal" role="dialog" aria-modal="true" aria-labelledby="level-title">
     <header className="lv-head"><span className="lv-badge" aria-hidden="true"><b>{reward ? '★' : level}</b></span><div><p className="eyebrow">{reward ? 'FRACTURE WARDEN DEFEATED · BOSS REWARD' : `LEVEL ${level} · NEW POWER`}</p><h2 id="level-title">{reward ? 'CLAIM YOUR SPOILS' : 'CHOOSE YOUR EVOLUTION'}</h2></div></header>
     <div className="lv-list" role="group" aria-label="Upgrade choices">{cards.map((c, i) => <Card key={c.id} c={c} i={i} onChoose={onChoose} picked={pick === c.id}/>)}</div>
-    {legend && <button className="lv-card asc-card legend-offer" style={{ '--c': '#ffd36a' } as CSSProperties} onClick={() => onLegend?.(legend.id)} data-testid={`legend-${legend.id}`}><span className="lv-tags"><b className="lv-rarity">{legend.sub}</b><em>INSTEAD OF A CARD</em></span><strong className="lv-name">{legend.name}</strong>{legend.lines.map((l, k) => <span key={k} className="lv-blurb asc-line">{l}</span>)}</button>}
+    {legend && <button className="lv-card asc-card legend-offer" style={{ '--c': '#ffd36a' } as CSSProperties} onClick={() => onLegend?.(legend.id)} data-testid={`legend-${legend.id}`}><img className="asc-icon" src={`${ASSET_BASE}art/b22/${legendArt(legend.id)}.png`} alt="" draggable={false} onError={e => { e.currentTarget.style.display = 'none'; }}/><span className="lv-tags"><b className="lv-rarity">{legend.sub}</b><em>INSTEAD OF A CARD</em></span><strong className="lv-name">{legend.name}</strong>{legend.lines.map((l, k) => <span key={k} className="lv-blurb asc-line">{l}</span>)}</button>}
     {(rerolls > 0 || banishes > 0 || onReroll) && (rerolls > 0 || banishes > 0) && <div className="lv-tools" data-testid="lv-tools">
       {rerolls > 0 && <button className="outlined-button lv-tool" onClick={() => onReroll?.()} data-testid="lv-reroll">↻ REROLL <b>{rerolls}</b></button>}
       {banishes > 0 && <span className="lv-banish"><em>BANISH · {banishes} LEFT</em>{cards.map((c, i) => <button key={c.id} className="outlined-button lv-tool small" onClick={() => onBanish?.(c.id)} data-testid={`lv-banish-${i}`} aria-label={`Banish ${c.name}`}>✕ {i + 1}</button>)}</span>}

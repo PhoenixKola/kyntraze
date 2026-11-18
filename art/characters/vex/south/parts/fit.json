@@ -1,0 +1,124 @@
+{
+ "boot_f": {
+  "pivot": [
+   8.0,
+   9.5
+  ]
+ },
+ "shin_f": {
+  "pivot": [
+   13.0,
+   8.0
+  ],
+  "child": [
+   12.0,
+   32.0
+  ]
+ },
+ "boot_n": {
+  "pivot": [
+   14.5,
+   9.5
+  ]
+ },
+ "sash_band": {
+  "pivot": [
+   20.5,
+   6.0
+  ]
+ },
+ "torso": {
+  "pivot": [
+   22.5,
+   44.0
+  ]
+ },
+ "head": {
+  "pivot": [
+   24.5,
+   45.0
+  ]
+ },
+ "upper_arm_f": {
+  "pivot": [
+   11.0,
+   8.0
+  ],
+  "child": [
+   11.0,
+   26.0
+  ]
+ },
+ "forearm_f": {
+  "pivot": [
+   10.0,
+   8.0
+  ],
+  "child": [
+   10.0,
+   22.5
+  ]
+ },
+ "fist_guard": {
+  "pivot": [
+   14.0,
+   25.0
+  ]
+ },
+ "fist_front_f": {
+  "pivot": [
+   13.0,
+   27.0
+  ]
+ },
+ "fist_angle_f": {
+  "pivot": [
+   10.5,
+   28.0
+  ]
+ },
+ "fist_side_f": {
+  "pivot": [
+   3.0,
+   9.5
+  ]
+ },
+ "upper_arm_n": {
+  "pivot": [
+   12.5,
+   6.0
+  ],
+  "child": [
+   12.0,
+   24.0
+  ]
+ },
+ "forearm_n": {
+  "pivot": [
+   12.0,
+   9.0
+  ],
+  "child": [
+   12.5,
+   30.0
+  ]
+ },
+ "fist_waist": {
+  "pivot": [
+   3.0,
+   9.5
+  ]
+ },
+ "fist_front_n": {
+  "pivot": [
+   13.0,
+   27.0
+  ]
+ },
+ "fist_angle_n": {
+  "pivot": [
+   10.5,
+   28.0
+  ]
+ }
+}

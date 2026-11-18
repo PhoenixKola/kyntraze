@@ -756,3 +756,185 @@ Prompt:
 Original 2D game enemy sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact enemy. Redraw the SAME creature (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, feet/contact on one common ground line per row, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the creature. Enemy: Singularity Husk. ROW 1 (cells 1-4): a looping 4-frame movement cycle (walk/hover/glide) with clear differences between frames. ROW 2: cell 5 = WIND-UP (clear anticipation pose, body coiling or raising its weapon/power, glowing brighter), cell 6 = STRIKE (the attack released, stretched, weapon/power extended forward), cell 7 = HURT (flinching back, flash-edge), cell 8 = DEATH (breaking apart, collapsing, fading).
 ```
 
+## 2026-11-18T09:38:38.470Z - ic_br_ren.png
+
+- File: ic_br_ren.png (1536x1024)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee05-0096-7401-b53c-3a72ac73d5b8
+- Reference images: none
+- Seconds: 51.1
+
+Prompt:
+
+```text
+Six separate game skill icons in a 3x2 grid (3 columns, 2 rows), chunky pixel-art style, thin dark outline, 3-tone cel shading, each a round dark medallion with a glowing emblem inside, each distinct and instantly readable at 64px, on a flat pure green (#00ff00) background with wide green gutters, equal size, reading order left to right then top to bottom, no text, no labels, no green in the icons. Icons in order: 1 RELENTLESS CHAIN (a crimson chain of linked fists, chained strikes); 2 CRIMSON GUARDBREAK (a heavy red fist shattering a cracked shield); 3 BLOODLINE RELAY (a meteor streak relaying between three crimson nodes); 4 METEOR COLLISION (a huge red meteor impact with splash); 5 RED COMET RAIN (several small crimson comets falling); 6 CRIMSON CRATER (a deep molten crater with a glowing fissure ring).
+```
+
+## 2026-11-18T09:38:41.810Z - ic_br_sora.png
+
+- File: ic_br_sora.png (1536x1024)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee05-00cc-76b0-88f4-a21efbe18c81
+- Reference images: none
+- Seconds: 54.4
+
+Prompt:
+
+```text
+Six separate game skill icons in a 3x2 grid (3 columns, 2 rows), chunky pixel-art style, thin dark outline, 3-tone cel shading, each a round dark medallion with a glowing emblem inside, each distinct and instantly readable at 64px, on a flat pure green (#00ff00) background with wide green gutters, equal size, reading order left to right then top to bottom, no text, no labels, no green in the icons. Icons in order: 1 NEEDLE SPIRAL (azure needles spiralling with a homing arc); 2 STORMLINE ARRAY (a straight barrage of blue bolts piercing through enemies in a line); 3 PIERCING MERIDIAN (a long thin tight cyan beam through a meridian line); 4 CELESTIAL PRISM (a prism fanning a beam into three beams); 5 STARFIELD ARRAY (many orbiting blue orbs over a star field); 6 CELESTIAL COLLAPSE (orbs converging into one huge blue blast).
+```
+
+## 2026-11-18T09:38:53.398Z - ic_br_kai.png
+
+- File: ic_br_kai.png (1536x1024)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee05-00c8-7821-8d37-69ebf7d4d881
+- Reference images: none
+- Seconds: 66.1
+
+Prompt:
+
+```text
+Six separate game skill icons in a 3x2 grid (3 columns, 2 rows), chunky pixel-art style, thin dark outline, 3-tone cel shading, each a round dark medallion with a glowing emblem inside, each distinct and instantly readable at 64px, on a flat pure green (#00ff00) background with wide green gutters, equal size, reading order left to right then top to bottom, no text, no labels, no green in the icons. Icons in order: 1 SEISMIC IMPACT (two compact golden quake pulses cracking the ground); 2 PRESSURE WAVE (a golden forward cone-shaped shockwave pushing outward); 3 PRISM CONDUCTOR (a cyan lance beam splitting through a prism into chained branches); 4 BURNING WAKE (a streak of fire trailing behind a lance); 5 STARFALL BLOOM (a blooming flower of falling stars marking points); 6 TWIN NOVA (two concentric golden-white expanding rings).
+```
+
+## 2026-11-18T09:39:07.528Z - bc_oathkeeper.png
+
+- File: bc_oathkeeper.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee05-00f1-7bb3-a20f-087faf2f397e
+- Reference images: b_oathkeeper.png
+- Seconds: 80.1
+
+Prompt:
+
+```text
+Original 2D game boss sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact boss. Redraw the SAME boss (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the boss. ROW 1 (cells 1-4): a looping 4-frame idle/advance cycle with clear differences between frames (floating bob, limb or ornament sway). ROW 2: cell 5 = WIND-UP (clear anticipation, gathering power, glowing brighter), cell 6 = STRIKE (the attack released, stretched forward), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (breaking apart / collapsing). Boss: Oathkeeper.
+```
+
+## 2026-11-18T09:39:07.601Z - bc_regent.png
+
+- File: bc_regent.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee05-00ee-7913-ac3f-f0146a5d51eb
+- Reference images: b_regent.png
+- Seconds: 80.2
+
+Prompt:
+
+```text
+Original 2D game boss sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact boss. Redraw the SAME boss (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the boss. ROW 1 (cells 1-4): a looping 4-frame idle/advance cycle with clear differences between frames (floating bob, limb or ornament sway). ROW 2: cell 5 = WIND-UP (clear anticipation, gathering power, glowing brighter), cell 6 = STRIKE (the attack released, stretched forward), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (breaking apart / collapsing). Boss: Regent.
+```
+
+## 2026-11-18T09:39:11.108Z - bc_castellan.png
+
+- File: bc_castellan.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee05-00d2-7302-bb19-d78a292fbd32
+- Reference images: b_castellan.png
+- Seconds: 83.7
+
+Prompt:
+
+```text
+Original 2D game boss sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact boss. Redraw the SAME boss (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the boss. ROW 1 (cells 1-4): a looping 4-frame idle/advance cycle with clear differences between frames (floating bob, limb or ornament sway). ROW 2: cell 5 = WIND-UP (clear anticipation, gathering power, glowing brighter), cell 6 = STRIKE (the attack released, stretched forward), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (breaking apart / collapsing). Boss: Castellan.
+```
+
+## 2026-11-18T09:39:51.539Z - ic_lg_a.png
+
+- File: ic_lg_a.png (1536x1024)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee06-0381-73e0-be7d-139321b71bd4
+- Reference images: none
+- Seconds: 57.9
+
+Prompt:
+
+```text
+Six separate game skill icons in a 3x2 grid (3 columns, 2 rows), chunky pixel-art style, thin dark outline, 3-tone cel shading, each a round dark medallion with a glowing emblem inside, each distinct and instantly readable at 64px, on a flat pure green (#00ff00) background with wide green gutters, equal size, reading order left to right then top to bottom, no text, no labels, no green in the icons. Icons in order: 1 SOLAR RUPTURE (a blazing solar fissure splitting along a line); 2 DRAGON OVERTURE (a golden dragon head striking, three strikes); 3 NOVA CONSTELLATION (four small nova nodes linked by star lines); 4 CRIMSON RELAY (a crimson dash blur relaying to a new target with a finishing fist); 5 METEOR CRUCIBLE (a molten crucible with a burning path and pressure burst); 6 BLOODSTAR RUPTURE (a molten fissure field pushing outward). All six with a golden legendary rim.
+```
+
+## 2026-11-18T09:39:57.323Z - ic_br_vex.png
+
+- File: ic_br_vex.png (1536x1024)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee06-0382-7eb0-b8df-eacdb0384e43
+- Reference images: none
+- Seconds: 63.6
+
+Prompt:
+
+```text
+Six separate game skill icons in a 3x2 grid (3 columns, 2 rows), chunky pixel-art style, thin dark outline, 3-tone cel shading, each a round dark medallion with a glowing emblem inside, each distinct and instantly readable at 64px, on a flat pure green (#00ff00) background with wide green gutters, equal size, reading order left to right then top to bottom, no text, no labels, no green in the icons. Icons in order: 1 REVERSAL GUARD (a wide violet shield-halo with a stun spark); 2 MIRROR COUNTER (a mirror shard reflecting a blade slash); 3 SHADOW RIPOSTE (a violet blink streak ending in a stab behind a target); 4 ECLIPSE SHIFT (a dark eclipse disc with a fracture line trailing); 5 MARKED DETONATION (violet seal marks chain-exploding); 6 SEVERANCE JUDGMENT (a single large seal mark with a falling judgment blade).
+```
+
+## 2026-11-18T09:40:31.697Z - bc_mirror_tyrant.png
+
+- File: bc_mirror_tyrant.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee06-4975-7612-8747-e5e0cc73cd46
+- Reference images: b_mirror_tyrant.png
+- Seconds: 80.2
+
+Prompt:
+
+```text
+Original 2D game boss sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact boss. Redraw the SAME boss (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the boss. ROW 1 (cells 1-4): a looping 4-frame idle/advance cycle with clear differences between frames (floating bob, limb or ornament sway). ROW 2: cell 5 = WIND-UP (clear anticipation, gathering power, glowing brighter), cell 6 = STRIKE (the attack released, stretched forward), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (breaking apart / collapsing). Boss: Mirror Tyrant.
+```
+
+## 2026-11-18T09:40:35.859Z - bc_hollow_choir.png
+
+- File: bc_hollow_choir.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee06-49b1-7602-93b4-3a8c57192056
+- Reference images: b_hollow_choir.png
+- Seconds: 84.3
+
+Prompt:
+
+```text
+Original 2D game boss sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact boss. Redraw the SAME boss (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the boss. ROW 1 (cells 1-4): a looping 4-frame idle/advance cycle with clear differences between frames (floating bob, limb or ornament sway). ROW 2: cell 5 = WIND-UP (clear anticipation, gathering power, glowing brighter), cell 6 = STRIKE (the attack released, stretched forward), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (breaking apart / collapsing). Boss: Hollow Choir.
+```
+
+## 2026-11-18T09:41:10.923Z - bc_chronophage.png
+
+- File: bc_chronophage.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee06-498a-7212-981b-d6c955a1330d
+- Reference images: b_chronophage.png
+- Seconds: 119.4
+
+Prompt:
+
+```text
+Original 2D game boss sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact boss. Redraw the SAME boss (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the boss. ROW 1 (cells 1-4): a looping 4-frame idle/advance cycle with clear differences between frames (floating bob, limb or ornament sway). ROW 2: cell 5 = WIND-UP (clear anticipation, gathering power, glowing brighter), cell 6 = STRIKE (the attack released, stretched forward), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (breaking apart / collapsing). Boss: Chronophage.
+```
+
+## 2026-11-18T09:41:19.025Z - ic_lg_b.png
+
+- File: ic_lg_b.png (1536x1024)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee06-038a-7681-8541-0b7ca65beee1
+- Reference images: none
+- Seconds: 145.3
+
+Prompt:
+
+```text
+Six separate game skill icons in a 3x2 grid (3 columns, 2 rows), chunky pixel-art style, thin dark outline, 3-tone cel shading, each a round dark medallion with a glowing emblem inside, each distinct and instantly readable at 64px, on a flat pure green (#00ff00) background with wide green gutters, equal size, reading order left to right then top to bottom, no text, no labels, no green in the icons. Icons in order: 1 BLUE NEEDLE STORM (a storm of blue needles splitting into fragments); 2 PRISMATIC MERIDIAN (a piercing prismatic beam arcing between foes); 3 ZERO CONVERGENCE (a ring of orbs collapsing into one white-blue point); 4 SHARD REQUIEM (a violet shard shield storing a glowing retaliation charge); 5 OATHBREAKER CHAIN (a broken chain with spreading violet fracture marks); 6 NULL WALTZ (three violet footsteps in a dance sequence around a rift). All six with a golden legendary rim.
+```
+
+## 2026-11-18T09:42:38.992Z - bc_sovereign.png
+
+- File: bc_sovereign.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1ee08-1d1e-7702-a317-96bc32c1543d
+- Reference images: b_sovereign.png
+- Seconds: 87.8
+
+Prompt:
+
+```text
+Original 2D game boss sprite sheet for KYNTRAZE: FRACTURE RUSH. Attached: the approved single-pose design of this exact boss. Redraw the SAME boss (same design, palette, proportions, outline, chunky pixel-art style, three-quarter raised top-down view, FACING RIGHT) as an animation sheet. Layout: EXACTLY 8 cells in 2 rows of 4 on a flat pure green (#00ff00) background with wide green gutters, one pose per cell, same scale in every cell, nothing cropped, no text, no labels, no grid lines, no shadows, no watermark, no green in the boss. ROW 1 (cells 1-4): a looping 4-frame idle/advance cycle with clear differences between frames (floating bob, limb or ornament sway). ROW 2: cell 5 = WIND-UP (clear anticipation, gathering power, glowing brighter), cell 6 = STRIKE (the attack released, stretched forward), cell 7 = HURT (flinching, flash-edge), cell 8 = DEATH (breaking apart / collapsing). Boss: Sovereign.
+```
+

@@ -1,10 +1,10 @@
 {
  "schema": "kyntraze.anim-manifest/0.1-pilot",
- "character": "ren",
+ "character": "vex",
  "form": "base",
  "direction": "south",
  "status": "PRODUCTION CANDIDATE - owner approval required",
- "source_blend": "rig/ren-south.blend",
+ "source_blend": "rig/vex-south.blend",
  "frame_width": 160,
  "frame_height": 170,
  "origin_px": [
@@ -23,7 +23,7 @@
  },
  "animations": {
   "Idle": {
-   "sheet": "sheets/ren_south_idle.png",
+   "sheet": "sheets/vex_south_idle.png",
    "frames": 16,
    "fps": 10,
    "loop": true,
@@ -32,7 +32,7 @@
    "events": {}
   },
   "Run": {
-   "sheet": "sheets/ren_south_run.png",
+   "sheet": "sheets/vex_south_run.png",
    "frames": 8,
    "fps": 14,
    "loop": true,
@@ -45,7 +45,7 @@
    "speed_note": "in-place cycle, 3.5 steps/s at 14 fps; scale fps with speed (14*speed/250, clamp 10..18). Front-view stance feet cannot lock to the world at 250 px/s."
   },
   "BasicPunch": {
-   "sheet": "sheets/ren_south_basicpunch.png",
+   "sheet": "sheets/vex_south_basicpunch.png",
    "frames": 14,
    "fps": 16,
    "loop": false,
@@ -60,7 +60,7 @@
    "hit_contract": "apply damage/hitstop in Phaser on 'impact' (0-based frame 5)"
   },
   "RunLower": {
-   "sheet": "sheets/ren_south_runlower.png",
+   "sheet": "sheets/vex_south_runlower.png",
    "frames": 8,
    "fps": 14,
    "loop": true,
@@ -77,7 +77,7 @@
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
   },
   "RunPunchUpper": {
-   "sheet": "sheets/ren_south_runpunchupper.png",
+   "sheet": "sheets/vex_south_runpunchupper.png",
    "frames": 48,
    "fps": 16,
    "loop": false,
@@ -96,7 +96,7 @@
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
   },
   "Dash": {
-   "sheet": "sheets/ren_south_dash.png",
+   "sheet": "sheets/vex_south_dash.png",
    "frames": 10,
    "fps": 22,
    "loop": false,
@@ -118,7 +118,7 @@
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
   },
   "Hurt": {
-   "sheet": "sheets/ren_south_hurt.png",
+   "sheet": "sheets/vex_south_hurt.png",
    "frames": 8,
    "fps": 20,
    "loop": false,
@@ -138,7 +138,7 @@
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
   },
   "Death": {
-   "sheet": "sheets/ren_south_death.png",
+   "sheet": "sheets/vex_south_death.png",
    "frames": 18,
    "fps": 14,
    "loop": false,
@@ -159,7 +159,7 @@
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
   },
   "Beam": {
-   "sheet": "sheets/ren_south_beam.png",
+   "sheet": "sheets/vex_south_beam.png",
    "frames": 26,
    "fps": 20,
    "loop": false,
@@ -183,7 +183,7 @@
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
   },
   "Sphere": {
-   "sheet": "sheets/ren_south_sphere.png",
+   "sheet": "sheets/vex_south_sphere.png",
    "frames": 24,
    "fps": 20,
    "loop": false,

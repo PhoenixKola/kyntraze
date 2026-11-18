@@ -1,4 +1,4 @@
-"""Builds Vex's animated sprite sheets by palette-remapping Ren's rig sheets (same pixel art, same frames): crimson/red -> violet / indigo, golds -> silver-lilac, skin and dark neutrals untouched. Output: public/art/vex, public/art/vex-f1, public/art/fx/vex. Usage: python scripts/b22-vex-recolor.py"""
+"""SUPERSEDED by the bespoke rig (art/characters/vex, scripts/b22-vex-publish.py); kept only as the recolour method for hero outfits. Builds Vex's animated sprite sheets by palette-remapping Ren's rig sheets (same pixel art, same frames): crimson/red -> violet / indigo, golds -> silver-lilac, skin and dark neutrals untouched. Output: public/art/vex, public/art/vex-f1, public/art/fx/vex. Usage: python scripts/b22-vex-recolor.py"""
 import os, shutil, colorsys
 import numpy as np
 from PIL import Image

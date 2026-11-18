@@ -25,10 +25,11 @@ def remap(img, hero, prim, sec):
     if hero == "kai": acc = (h > 28) & (h < 60) & (s > 0.62) & (v > 0.35)
     elif hero == "ren": acc = ((h >= 335) | (h <= 12)) & (s > 0.52) & (v > 0.12)
     elif hero == "sora": acc = (h > 185) & (h < 255) & (s > 0.4) & (v > 0.3)
-    else: acc = (h > 245) & (h < 295) & (s > 0.3) & (v > 0.15)
+    else: acc = (h > 262) & (h < 292) & (s > 0.45) & (v > 0.38)   # Vex: violet scarf / rift glow
     sh, ss, sv = rgb2hsv(sec[None, None, :]); sh, ss = float(sh[0, 0]), float(ss[0, 0])
     acc_rgb = hsv2rgb(np.full(h.shape, sh, np.float32), np.clip(np.maximum(s * 0.8, ss * 0.85), 0, 1), np.clip(v * 1.0 + (1 - v) * 0.15 * (sv[0, 0] > 0.8), 0, 1))
-    below = ~((h > 150) & (h < 235) & (v < 0.5)) if hero == "kai" else np.ones(h.shape, bool)   # Kai's teal-black hair stays untouched
+    below = ~((h > 150) & (h < 235) & (v < 0.5)) if hero == "kai" else np.ones(h.shape, bool)
+    if hero == "vex": s = np.where((h > 225) & (h < 262) & (v < 0.72), np.minimum(s, 0.2), s)   # indigo coat cloth counts as recolourable cloth   # Kai's teal-black hair stays untouched
     body = (~acc) & (s < 0.28) & (v > 0.08) & (v < 0.86) & below
     k = np.clip(v / 0.42, 0.3, 1.7)[..., None]; col = np.clip(prim[None, None, :] * k, 0, 1)
     out = a[..., :3].copy(); out = np.where(body[..., None], out * 0.2 + col * 0.8, out); out = np.where(acc[..., None], acc_rgb, out)
