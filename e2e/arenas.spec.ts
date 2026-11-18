@@ -47,7 +47,7 @@ test('arena selection with the keyboard only', async ({ page }) => {
   const problems = await prep(page, 960, 540); await page.goto('/?seed=9&qa=1'); await page.evaluate(() => localStorage.clear()); await page.reload(); await page.getByTestId('play-button').click();
   await page.getByTestId('arena-open').focus(); await page.keyboard.press('Enter'); await expect(page.getByTestId('arena-select')).toBeVisible();
   await page.getByTestId('arena-card-gloam').focus(); await page.keyboard.press('Tab'); await expect(page.getByTestId('arena-card-ashen')).toBeFocused(); await page.keyboard.press('Enter');
-  await expect(page.getByTestId('arena-card-ashen')).toHaveAttribute('aria-checked', 'true'); await page.keyboard.press('Tab'); await expect(page.getByTestId('arena-confirm')).toBeFocused(); await page.keyboard.press('Enter');
+  await expect(page.getByTestId('arena-card-ashen')).toHaveAttribute('aria-checked', 'true'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await expect(page.getByTestId('arena-confirm')).toBeFocused(); await page.keyboard.press('Enter');
   await expect(page.getByTestId('hero-select')).toBeVisible(); await expect(page.getByTestId('arena-open')).toContainText('ASHEN'); expect(problems).toEqual([]);
 });
 
