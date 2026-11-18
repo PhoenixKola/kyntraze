@@ -1,5 +1,6 @@
 /** B19: everything Ren and Sora draw on top of the world that is not the character sprite: projectiles, orbs, shockwaves, the Lance, ground telegraphs, the transformation reveal and the persistent auras.
  *  Pure projection of sim state (state.hx, state.abilityEvents, state.cinema); it never decides anything. Drawn with two Graphics layers (normal + additive) so the cost is two draw batches whatever the crowd. */
+import { vexSkin } from '../../assets/heroAnimation';
 import Phaser from 'phaser';
 import type { GameState, HeroCast } from '../../sim/GameState';
 import { hand, lanceHalfWidth } from '../../sim/HeroSystem';
@@ -16,7 +17,7 @@ export const HERO_FX_NAMES: Record<'ren' | 'sora', readonly string[]> = {
   sora: [...Array.from({ length: 20 }, (_, i) => `vfx_${String(i).padStart(2, '0')}`), 'sl_beam', 'sl_beam2', 'sl_muzzle', 'sl_cap', 'sl_orb1', 'sl_orb2', 'sl_orb3', 'sl_vortex', 'sm_needle', 'sm_volley', 'sm_dashlines', 'sm_dashslash', 'sm_back1', 'sm_back2', 'sm_arcs', 'sm_ground', 'sm_motes', 'sm_afterimage', 'sm_ring', 'sm_hit'],
 };
 export const heroFxKey = (hero: string, n: string) => `hfx-${hero}-${n}`;
-export const heroFxUrl = (hero: string, n: string) => `/art/fx/${hero}/${n}.png`;
+export const heroFxUrl = (hero: string, n: string) => `/art/fx/${hero === 'ren' && vexSkin ? 'vex' : hero}/${n}.png`;
 const PAL = {
   ren: { core: 0xfff0d8, hot: 0xff7a3d, mid: 0xff2e2a, deep: 0x8a0f1c, dark: 0x2a0508, ember: 0xffb36b },
   sora: { core: 0xffffff, hot: 0xcfeeff, mid: 0x4db8ff, deep: 0x1c5fd6, dark: 0x081840, ember: 0x9fe8ff },

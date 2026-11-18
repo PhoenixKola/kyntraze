@@ -1,5 +1,6 @@
 /** B19: Ren / Sora clip selection. Same sheet contract as Kai (parseKaiManifest, KaiClip names, RunPunchUpper layering) so the renderer draws a pose the same way; only the state machine differs, because the hero's moves are driven by the sim's HeroCast timeline (never by a render-side guess).
  *  Clip meaning per hero is documented in art/characters/<hero>/ART-NOTES.md: BasicPunch = auto strike / Q beat (Ren) or needle / volley cast (Sora), Beam = Meteor Rush strike (Ren) or Celestial Lance (Sora), Sphere = Bloodstar Impact (Ren) or Zero Horizon (Sora). */
+import { skinRoot } from './skin';
 import { RUN_PHASES, SIM_DASH_SECONDS, facingFromInput, facingFromVector, type AnimPose, type Facing, type KaiClip, type KaiClipInfo, type KaiManifests } from './kaiAnimation';
 import type { HeroAct } from '../content/heroKits';
 import { REN, SORA } from '../content/heroKits';
@@ -7,14 +8,16 @@ import { REN, SORA } from '../content/heroKits';
 /** Which hero sheet sets are complete (all four facings, every clip) and may be loaded. Flip to true only when public/art/<hero>[-f1]/ is fully built; until then the hero draws the clearly-marked dev placeholder body instead of half a rig. */
 export const HERO_SHEETS: Record<'ren' | 'sora', { base: boolean; f1: boolean; anchors: boolean }> = { ren: { base: true, f1: true, anchors: true }, sora: { base: true, f1: true, anchors: true } };
 /** B22 INTERIM ART: Vex has no ImageGen sprite set yet, so he is drawn from Ren's rig (the nearest melee silhouette) with a violet-black tint and his own effects. Replace by shipping public/art/vex (all four facings) and setting HERO_SHEETS.vex. */
-export const artHero = (h: string): 'ren' | 'sora' => (h === 'vex' ? 'ren' : (h as 'ren' | 'sora'));
-export const VEX_TINT = 0x8a6cc8;
+export const artHero = (h: string): 'ren' | 'sora' => (h === 'vex' ? 'ren' : (h as 'ren' | 'sora'));   // Vex = Ren's rig, recoloured
+/** Vex plays Ren's animation rig using palette-remapped sheets (scripts/b22-vex-recolor.py -> public/art/vex, vex-f1, fx/vex). Set once per run before assets load. */
+export let vexSkin = false; export const setVexSkin = (on: boolean) => { vexSkin = on; };
+export const VOID_TINT = 0x9a90c0;
 export const HERO_REGISTRY_KEY = (hero: string, form: 'base' | 'f1') => `hero-${hero}-${form}-manifests`;
 export const HERO_ANCHORS_KEY = (hero: string) => `hero-${hero}-anchors`;
-export const heroRoot = (hero: string, form: 'base' | 'f1') => `/art/${hero}${form === 'f1' ? '-f1' : ''}`;
+export const heroRoot = (hero: string, form: 'base' | 'f1') => skinRoot(`/art/${hero === 'ren' && vexSkin ? 'vex' : hero}${form === 'f1' ? '-f1' : ''}`);
 export const heroManifestUrl = (hero: string, dir: Facing, form: 'base' | 'f1') => `${heroRoot(hero, form)}/${dir}/manifest.json`;
 export const heroSheetUrl = (hero: string, dir: Facing, clip: KaiClipInfo, form: 'base' | 'f1') => `${heroRoot(hero, form)}/${dir}/${clip.sheet}`;
-export const heroAnchorsUrl = (hero: string) => `/art/${hero}-anchors.json`;
+export const heroAnchorsUrl = (hero: string) => `/art/${hero === 'ren' && vexSkin ? 'vex' : hero}-anchors.json`;
 export const heroTextureKey = (hero: string, dir: Facing, clip: KaiClip, form: 'base' | 'f1') => `${hero}${form === 'f1' ? 'f1' : ''}-${dir}-${clip}`;
 
 export interface HeroActView { id: number; act: HeroAct; t: number; dur: number; face: Facing; released: boolean; moving: boolean; beats: number; hop: number; hops: number; hopT: number; charge: number }

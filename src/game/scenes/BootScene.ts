@@ -10,7 +10,7 @@ import { BOSS_FX_NAMES, BOSS_KINDS, bossFxKey, bossFxUrl, bossManifestKey, bossM
 import { ENEMY_KINDS } from '../../content/enemies';
 import type { HeroId } from '../../content/heroes';
 import { HERO_FX_NAMES, heroFxKey, heroFxUrl } from '../render/heroFxView';
-import { artHero, HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroManifestUrl, heroSheetUrl, heroTextureKey } from '../../assets/heroAnimation';
+import { setVexSkin, artHero, HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroManifestUrl, heroSheetUrl, heroTextureKey } from '../../assets/heroAnimation';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
 import { B14_FX_NAMES, b14Key, b14Url } from '../render/b14fx';
@@ -18,7 +18,7 @@ import { B21_GROUPS, b21Key, b21ManifestKey, b21ManifestUrl, b21Names, b21Url } 
 import { F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL, f3fxKey, f3fxUrl } from '../render/stillfireFx';
 import { KAI_F3_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiClipInfo, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
-  constructor(private readonly arena: ArenaId = 'gloam', private readonly hero: HeroId = 'kai') { super({ key: 'BootScene' }); }
+  constructor(private readonly arena: ArenaId = 'gloam', private readonly hero: HeroId = 'kai') { super({ key: 'BootScene' }); setVexSkin(hero === 'vex'); }
   /** Two load phases (starter assets, then the ~100 Kai sheets whose frame sizes come from the manifests): report one combined 0..1 to the loading screen. */
   private report(phase: 0 | 1, v: number) { window.dispatchEvent(new CustomEvent('kyntraze-load', { detail: phase === 0 ? v * 0.2 : 0.2 + v * 0.8 })); }
   preload() {

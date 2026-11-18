@@ -602,3 +602,45 @@ Prompt:
 Pixel-art character for a 2D top-down action game. Attached: the existing hero in his normal outfit. Copy EXACTLY its rendering language and proportions: chunky visible pixel blocks, thin dark outline, 3-4 tone cel shading, limited palette, no anti-aliasing, no gradients, same stocky ~4-heads-tall proportions, same face, hair and body. Redraw the SAME hero wearing a NEW ALTERNATE OUTFIT: OATHKEEPER'S RUIN: broken guardian regalia, cracked silver pauldrons, a torn tabard bearing a split order-crest, deep indigo with violet glow. ONE view only: three-quarter front, facing right, same height and fighting-stance pose as the reference, centred, on a flat solid pure green #00ff00 background. No green in the character. No text, no labels, no watermark.
 ```
 
+## 2026-11-18T08:52:05.517Z - story_2.png
+
+- File: story_2.png (1672x941)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1edda-82c6-77e1-b628-6bab998df1ed
+- Reference images: none
+- Seconds: 42.8
+
+Prompt:
+
+```text
+Original 2D game story illustration for KYNTRAZE: FRACTURE RUSH. Wide 16:9 cinematic scene in chunky pixel-art style: visible pixel blocks, clean dark outlines, cel-shaded 3-4 tone shading, limited moody palette, no text, no letters, no UI, no watermark, no characters in the foreground (a tiny distant silhouette is fine). Scene: the Paradox Expanse, the first fold: a dim indigo void where floating glass-and-crystal platforms fold into each other like origami, teal-cyan fracture lines, violet reflections, an unfinished banner of a broken order drifting in the air, a distant shadowy knight silhouette on a far platform.
+```
+
+## 2026-11-18T08:52:13.996Z - story_1.png
+
+- File: story_1.png (1672x941)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1edda-82ba-7612-97ec-5af7cf089c75
+- Reference images: none
+- Seconds: 51.3
+
+Prompt:
+
+```text
+Original 2D game story illustration for KYNTRAZE: FRACTURE RUSH. Wide 16:9 cinematic scene in chunky pixel-art style: visible pixel blocks, clean dark outlines, cel-shaded 3-4 tone shading, limited moody palette, no text, no letters, no UI, no watermark, no characters in the foreground (a tiny distant silhouette is fine). Scene: the Gloam Circuit, a fractured transit-ring under a dark night sky, an hour before the fracture bells: huge cracked bronze bells hanging in a ruined steel arch, teal circuit light along the floor, violet rift cracks in the sky, a lone distant figure in a torn indigo coat with a violet scarf standing in the ring.
+```
+
+## 2026-11-18T08:52:15.748Z - story_3.png
+
+- File: story_3.png (1672x941)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1edda-82d1-7db1-ae4d-60e2f8c6f668
+- Reference images: none
+- Seconds: 53.1
+
+Prompt:
+
+```text
+Original 2D game story illustration for KYNTRAZE: FRACTURE RUSH. Wide 16:9 cinematic scene in chunky pixel-art style: visible pixel blocks, clean dark outlines, cel-shaded 3-4 tone shading, limited moody palette, no text, no letters, no UI, no watermark, no characters in the foreground (a tiny distant silhouette is fine). Scene: the Oathkeeper's hall between two ticks of a clock: a vast empty circular hall of dark violet stone, a giant cracked clock-face halo hanging above, a long pale blade stuck point-down in the floor, two silhouettes facing each other far apart (a hooded knight with a long blade, and a young exile in a coat), lilac light shafts, drifting dust.
+```
+

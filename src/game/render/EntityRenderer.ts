@@ -10,7 +10,7 @@ import { HeroFxView } from './heroFxView';
 import { BodyMotion, styleFor } from './bodyMotion';
 import { AuraView, type AuraState } from './auraView';
 import { AuraTracker } from './auraState';
-import { VEX_TINT, artHero, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, HeroAnimator, heroTextureKey, type HeroActView } from '../../assets/heroAnimation';
+import { VOID_TINT, artHero, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, HeroAnimator, heroTextureKey, type HeroActView } from '../../assets/heroAnimation';
 import { EnemyRenderer } from './enemyRenderer';
 import { BossRenderer } from './bossRenderer';
 import { KAI_ANCHORS_KEY, handAnchorWorld, type AnchorTable, type HandAnchor } from '../../assets/kaiAnimation';
@@ -211,8 +211,8 @@ export class EntityRenderer {
       this.hero.setFrame(pose.frame).setOrigin(fr.ox / fr.w, fr.oy / fr.h).setPosition(x, y).setVisible(true);
       const hitFlash = !dead && p.invulnerable > RULES.contactInvulnerability - 0.1 && !state.hx.act, alpha = !dead && pose.clip !== 'Transform' && p.invulnerable > 0 && Math.floor(state.time * 18) % 2 === 0 ? 0.86 : 1;
       this.hero.setAlpha(alpha); this.hero.tintMode = Phaser.TintModes.MULTIPLY; this.legs.tintMode = Phaser.TintModes.MULTIPLY;
-      if (hitFlash) { this.hero.setTint(0xffeef2); this.hero.tintMode = Phaser.TintModes.FILL; } else if (state.hero === 'vex') this.hero.setTint(state.player.form === 2 ? 0xd8d0ff : VEX_TINT); else this.hero.clearTint();   // B22 interim: Vex = Ren's rig tinted violet-black
-      if (state.hero === 'vex' && !hitFlash) this.legs.setTint(state.player.form === 2 ? 0xd8d0ff : VEX_TINT);
+      if (hitFlash) { this.hero.setTint(0xffeef2); this.hero.tintMode = Phaser.TintModes.FILL; } else if (state.hero === 'vex' && state.player.form === 2) this.hero.setTint(VOID_TINT); else this.hero.clearTint();   // Voidheart Exile darkens the recoloured rig
+      if (state.hero === 'vex' && !hitFlash && state.player.form === 2) this.legs.setTint(VOID_TINT);
       if (pose.legs !== null) {
         const lf = clipFrame(m, 'RunLower'), lkey = heroTextureKey(hero, pose.facing, 'RunLower', form); if (this.legs.texture.key !== lkey) this.legs.setTexture(lkey);
         this.legs.setFrame(pose.legs).setOrigin(lf.ox / lf.w, lf.oy / lf.h).setPosition(x, y).setAlpha(alpha).setVisible(true); if (hitFlash) { this.legs.setTint(0xffeef2); this.legs.tintMode = Phaser.TintModes.FILL; } else this.legs.clearTint();

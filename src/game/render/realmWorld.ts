@@ -63,6 +63,7 @@ export class RealmProps {
   destroy() { this.g.destroy(); this.imgs.forEach(i => i.destroy()); }
 }
 
+const POP_ICON: Record<string, string> = { prism: 'relic_0', prism_fan: 'relic_0', sigil: 'relic_2', sigil_strike: 'relic_2', feather: 'relic_3', hourglass: 'relic_4', echo_warn: 'relic_5', rift: 'relic_6', bearing: 'relic_7' };
 const ACCENT: Record<string, string> = { sky_lancer: '#f2d27a', halo_scribe: '#ffe9a8', citadel_bulwark: '#e6c98a', rift_mimic: '#9fe6e0', phase_harrier: '#b18cff', singularity_husk: '#6a5cff', halo_sigil: '#ffe08a' };
 const isClassicHazardOwner = (s: GameState, h: Hazard) => { const o = s.enemies.find(e => e.id === h.owner); return !!o && (o.kind === 'warden' || o.kind === 'seraph'); };
 /** Hazards the classic renderers already draw (their own boss hazards and classic arena surges / pylons). */
@@ -73,7 +74,7 @@ interface Burst { x: number; y: number; t: number; dur: number; r: number; c: nu
 export class B22Overlay {
   private readonly haz: Phaser.GameObjects.Graphics; private readonly act: Phaser.GameObjects.Graphics; private readonly fxg: Phaser.GameObjects.Graphics;
   private bursts: Burst[] = []; private evCur = 0; private enemyCur = 0; private lastHp = new Map<number, number>(); private clock = 0;
-  private readonly scene: Phaser.Scene; private readonly nul: Phaser.GameObjects.Graphics; private readonly imgs = new Map<number, Phaser.GameObjects.Image>(); private used = new Set<number>();
+  private readonly scene: Phaser.Scene; private readonly nul: Phaser.GameObjects.Graphics; private readonly imgs = new Map<number, Phaser.GameObjects.Image>(); private used = new Set<number>(); private popCur = 0; private pops: { im: Phaser.GameObjects.Image; t: number; dur: number; size: number }[] = []; private prevPos = new Map<number, { x: number; y: number }>(); private ghosts: { im: Phaser.GameObjects.Image; t: number; dur: number }[] = [];
   constructor(scene: Phaser.Scene) { this.scene = scene; this.nul = scene.add.graphics().setVisible(false); this.haz = scene.add.graphics().setDepth(5.55); this.act = scene.add.graphics().setDepth(6.5); this.fxg = scene.add.graphics().setDepth(10.6).setBlendMode(Phaser.BlendModes.ADD); }
   private hazardColor(h: Hazard) { return h.echo ? 0x7fe0e8 : h.tag.startsWith('well') ? 0xffcf6a : h.tag === 'shatter' ? 0xf4d78a : h.tag === 'fold' ? 0xb18cff : h.tag === 'lance' || h.tag === 'lance_land' ? 0xf2d27a : h.tag === 'arrival' ? 0xb18cff : h.tag.startsWith('husk') ? 0x6a5cff : h.tag === 'collapse' ? 0xe9c8ff : 0xff5a6a; }
   update(s: GameState, dt: number, reduced: boolean) {
@@ -110,6 +111,8 @@ export class B22Overlay {
     for (const m of s.b22.marks) { const e = s.enemies.find(x => x.id === m.enemy); if (!e) continue; const c = m.src === 'seal' ? 0xa070ff : 0xff9aa0, r = e.radius + 10 + 3 * Math.sin(this.clock * 6); fg.lineStyle(2, c, 0.95); fg.strokeCircle(e.x, e.y, r); fg.beginPath().moveTo(e.x - r - 4, e.y).lineTo(e.x - r + 6, e.y).moveTo(e.x + r + 4, e.y).lineTo(e.x + r - 6, e.y).moveTo(e.x, e.y - r - 4).lineTo(e.x, e.y - r + 6).moveTo(e.x, e.y + r + 4).lineTo(e.x, e.y + r - 6).strokePath(); }
     // ---- one-shot flashes from sim events (branches, relics, legendaries, ultimates, parries)
     for (const ev of s.b22.ev) { if (ev.id <= this.evCur) continue; this.evCur = ev.id; const warm = /dawn|sigil|prism|feather|hourglass|bearing/.test(ev.kind) ? 0xffe08a : /rift|parry|mark|seal|waltz|judge|vex/.test(ev.kind) ? 0xa070ff : /ult|collapse|nova|crater|crucible|cone|area|line|chain|relay|arc|fan/.test(ev.kind) ? 0xffb347 : 0x9fe6e0; this.bursts.push({ x: ev.x, y: ev.y, t: 0, dur: ev.x2 !== undefined ? 0.25 : 0.4, r: Math.max(24, Math.min(260, ev.n ?? 70)), c: warm, x2: ev.x2, y2: ev.y2 }); }
+    for (const ev of s.b22.ev) { if (ev.id <= this.popCur) continue; this.popCur = ev.id; const ic = POP_ICON[ev.kind] ?? (/dawn/.test(ev.kind) ? 'relic_1' : ev.kind === 'ult_start' ? `ult_${Math.max(0, ['kai', 'ren', 'sora', 'vex'].indexOf(s.hero))}` : null); if (ic && this.scene.textures.exists(`b22-${ic}`)) { const big = ic.startsWith('ult'); const im = this.scene.add.image(ev.x, ev.y - 36, `b22-${ic}`).setDepth(10.7).setBlendMode(Phaser.BlendModes.ADD); this.pops.push({ im, t: 0, dur: big ? 1.1 : 0.7, size: big ? 150 : 54 }); } }
+    for (let k = this.pops.length - 1; k >= 0; k--) { const q = this.pops[k]; q.t += dt; const u = q.t / q.dur; if (u >= 1) { q.im.destroy(); this.pops.splice(k, 1); continue; } const sc = q.size * (0.6 + 0.6 * Math.min(1, u * 2.5)) / q.im.height; q.im.setScale(sc).setAlpha(u < 0.2 ? u / 0.2 : 1 - (u - 0.2) / 0.8).y -= 26 * dt; }
     for (const ev of s.enemyEvents) { if (ev.id <= this.enemyCur) continue; this.enemyCur = ev.id; if (ev.kind === 'enemy_death' && (isRealmKind(ev.enemy) || isBoss(ev.enemy as BossKind))) this.bursts.push({ x: ev.x, y: ev.y, t: 0, dur: ev.tag === 'boss' ? 1.2 : 0.4, r: ev.tag === 'boss' ? 180 : 50, c: 0xffe9a8 }); }
     const keep: Burst[] = []; for (const b of this.bursts) { b.t += dt; if (b.t >= b.dur) continue; keep.push(b); const u = b.t / b.dur; fg.lineStyle(4 * (1 - u) + 1, b.c, 1 - u); if (b.x2 !== undefined) fg.beginPath().moveTo(b.x, b.y).lineTo(b.x2, b.y2!).strokePath(); else { fg.strokeCircle(b.x, b.y, b.r * (0.25 + 0.75 * u)); if (!reduced) { fg.fillStyle(b.c, 0.25 * (1 - u)); fg.fillCircle(b.x, b.y, b.r * u * 0.7); } } } this.bursts = keep.slice(-40);
     // ---- B22.6 co-op: a ring under P1, the whole P2 figure (interim procedural body), downed / revive state
@@ -137,7 +140,8 @@ export class B22Overlay {
     const seen = new Set<number>(); this.used.clear();
     for (const e of s.enemies) { if (e.hp <= 0) continue; if (!isRealmKind(e.kind) && !(isBoss(e.kind) && e.kind !== 'warden' && e.kind !== 'seraph')) continue; seen.add(e.id); this.actor(ag, e, s); }
     for (const id of this.lastHp.keys()) if (!seen.has(id)) this.lastHp.delete(id);
-    for (const [id, im] of this.imgs) if (!this.used.has(id)) { im.destroy(); this.imgs.delete(id); }
+    for (const [id, im] of this.imgs) if (!this.used.has(id)) { im.setTint(0xffffff); im.tintMode = Phaser.TintModes.FILL; this.ghosts.push({ im, t: 0, dur: im.displayHeight > 200 ? 1.1 : 0.4 }); this.imgs.delete(id); this.prevPos.delete(id); }
+    for (let k = this.ghosts.length - 1; k >= 0; k--) { const g = this.ghosts[k]; g.t += dt; const u = Math.min(1, g.t / g.dur); g.im.setAlpha(1 - u).setScale(g.im.scaleX * (1 + 0.5 * dt), g.im.scaleY * (1 - 0.35 * dt)); if (u >= 1) { g.im.destroy(); this.ghosts.splice(k, 1); } }
     this.nul.clear();
   }
   /** Production art: realm enemies and bosses draw an ImageGen sprite when its texture is loaded; the procedural body below stays as the fallback and the gameplay read-outs (shield arcs, reflect rings, hands) are always drawn on top. */
@@ -148,8 +152,14 @@ export class B22Overlay {
   private sprite(e: Enemy, flash: boolean): boolean {
     const key = this.artKey(e); if (!key) return false;
     let im = this.imgs.get(e.id); if (!im) { im = this.scene.add.image(e.x, e.y, key).setOrigin(0.5, 0.72); this.imgs.set(e.id, im); }
-    this.used.add(e.id); const boss = isBoss(e.kind as BossKind), h = e.radius * (e.part ? 3.2 : boss ? 3.9 : 4.5);
-    im.setTexture(key).setPosition(e.x, e.y).setDisplaySize(im.width * h / im.height, h).setFlipX(e.aimX < 0).setDepth(6.4 + e.y * 1e-5).setAlpha(e.mode === 'blink' ? 0.5 : e.part?.role === 'decoy' ? 0.7 : 1);
+    this.used.add(e.id); const boss = isBoss(e.kind as BossKind), h = e.radius * (e.part ? 3.2 : boss ? 3.9 : 4.5), w = im.width * h / im.height, t = this.clock + e.id * 1.7, pp = this.prevPos.get(e.id), mv = !!pp && Math.hypot(e.x - pp.x, e.y - pp.y) > 0.4; this.prevPos.set(e.id, { x: e.x, y: e.y });
+    // procedural animation on the single-pose sprite: breathing, hop while moving, windup squash, strike stretch, recovery droop, lean into the aim
+    let sx = 1 + 0.025 * Math.sin(t * 3), sy = 1 - 0.025 * Math.sin(t * 3), oy = mv ? -Math.abs(Math.sin(t * 9)) * (boss ? 3 : 4) : Math.sin(t * 2) * (boss ? 1.5 : 2.5), rot = Math.max(-0.12, Math.min(0.12, e.aimX * (mv ? 0.06 : 0.02)));
+    if (e.mode === 'windup' || e.mode === 'phase') { const u = Math.min(1, e.modeT / 0.8); sy = 1 - 0.1 * u; sx = 1 + 0.07 * u; rot = -e.aimX * 0.1 * u; }
+    else if (e.mode === 'strike') { sy = 1.12; sx = 0.94; rot = e.aimX * 0.14; }
+    else if (e.mode === 'recover') { sy = 0.95; sx = 1.04; oy += 2; }
+    const f = e.stagger > 0 ? Math.sin(this.clock * 60) * 2 : 0;
+    im.setTexture(key).setPosition(e.x + f, e.y + oy).setDisplaySize(w * sx, h * sy).setRotation(rot).setFlipX(e.aimX < 0).setDepth(6.4 + e.y * 1e-5).setAlpha(e.mode === 'blink' ? 0.5 : e.part?.role === 'decoy' ? 0.7 : 1);
     if (flash) { im.setTint(0xffffff); im.tintMode = Phaser.TintModes.FILL; } else { im.clearTint(); im.tintMode = Phaser.TintModes.MULTIPLY; } return true;
   }
   private extras(g: Phaser.GameObjects.Graphics, e: Enemy) {
@@ -212,5 +222,5 @@ export class B22Overlay {
     else { g.lineStyle(5, c(0xe6d8ff), 1); g.strokeCircle(x, y - r * 0.4, r); g.strokeCircle(x, y - r * 0.4, r * 0.55); }
     const w = r * 2.2; g.fillStyle(0x000000, 0.75); g.fillRect(x - w / 2, y - r * 2.1, w, 5); g.fillStyle(0xe9c8ff, 1); g.fillRect(x - w / 2, y - r * 2.1, w * f, 5); void s;
   }
-  destroy() { for (const im of this.imgs.values()) im.destroy(); this.nul.destroy(); this.haz.destroy(); this.act.destroy(); this.fxg.destroy(); }
+  destroy() { this.pops.forEach(p => p.im.destroy()); for (const im of this.imgs.values()) im.destroy(); this.ghosts.forEach(g => g.im.destroy()); this.nul.destroy(); this.haz.destroy(); this.act.destroy(); this.fxg.destroy(); }
 }

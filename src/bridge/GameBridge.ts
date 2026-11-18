@@ -1,3 +1,4 @@
+import { setOutfitSkin } from '../assets/skin';
 import type { NetClient } from '../net/RemoteSimulation';
 import { slotPlayer } from '../sim/CoopSystem';
 import { slotHero } from '../sim/CoopCombos';
@@ -39,6 +40,7 @@ export class GameBridge {
   private reward: RunReward | null = null; private finalized = false;
   private config: RunConfig; private challengeId: string | undefined; private b22Grant: B22Grant | null = null;
   constructor(private readonly save: SaveV1) {
+    setOutfitSkin(save.b22?.equipped?.outfit?.[save.hero ?? 'kai'] ?? null);
     if (!save.meta) save.meta = blankMeta();   // hand-built saves (tests, very old callers) get an empty meta
     const m = save.meta, tools = toolCharges(m.owned.includes('tool_reroll'), m.owned.includes('tool_banish'));
     const hero = save.hero ?? 'kai';

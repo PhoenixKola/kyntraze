@@ -1,4 +1,5 @@
 /** Kai base-form directional animation: manifest contract + pure animation state (no Phaser, unit-testable). */
+import { skinRoot } from './skin';
 import { BEAM, SPHERE } from '../content/abilities';
 import { CANNON, DRAGON } from '../content/cometheart';
 import { RIFT, REVERSAL } from '../content/stillfire';
@@ -58,7 +59,7 @@ export function clipFrame(m: KaiManifest, clip: KaiClip) {
   return { w: a.frame_width ?? m.frame_width, h: a.frame_height ?? m.frame_height, ox: (a.origin_px ?? m.origin_px)[0], oy: (a.origin_px ?? m.origin_px)[1] };
 }
 
-const formRoot = (form: KaiForm) => (form === 'f3' ? '/art/kai-f3' : form === 'f2' ? '/art/kai-f2' : form === 'f1' ? '/art/kai-f1' : '/art/kai');
+const formRoot = (form: KaiForm) => skinRoot(form === 'f3' ? '/art/kai-f3' : form === 'f2' ? '/art/kai-f2' : form === 'f1' ? '/art/kai-f1' : '/art/kai');
 export const kaiManifestUrl = (dir: Facing, form: KaiForm = 'base') => `${formRoot(form)}/${dir}/manifest.json`;
 export const kaiSheetUrl = (dir: Facing, clip: KaiClipInfo, form: KaiForm = 'base') => `${formRoot(form)}/${dir}/${clip.sheet}`;
 export const kaiTextureKey = (dir: Facing, clip: KaiClip, form: KaiForm = 'base') => `${form === 'f3' ? 'kaif3' : form === 'f2' ? 'kaif2' : form === 'f1' ? 'kaif1' : 'kai'}-${dir}-${clip}`;

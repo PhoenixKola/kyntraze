@@ -1,0 +1,233 @@
+{
+ "schema": "kyntraze.anim-manifest/0.1-pilot",
+ "character": "kai",
+ "form": "form-ii",
+ "direction": "east",
+ "status": "PRODUCTION CANDIDATE - owner approval required",
+ "source_blend": "rig/kai-east.blend",
+ "frame_width": 128,
+ "frame_height": 180,
+ "origin_px": [
+  54.0,
+  176.0
+ ],
+ "origin_normalized": [
+  0.421875,
+  0.977778
+ ],
+ "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
+ "scale_note": "1 px = 1 native art px (approved ~160 px Kai); the game renders Kai at about 0.5x",
+ "root_motion": {
+  "baked": false,
+  "contract": "frames are in place; Phaser owns movement, collision, hitboxes and damage; events are frame indices only"
+ },
+ "animations": {
+  "Idle": {
+   "sheet": "sheets/kai_east_idle.png",
+   "frames": 16,
+   "fps": 10,
+   "loop": true,
+   "duration_s": 1.6,
+   "blender_action": "Idle",
+   "events": {}
+  },
+  "Run": {
+   "sheet": "sheets/kai_east_run.png",
+   "frames": 8,
+   "fps": 14,
+   "loop": true,
+   "duration_s": 0.5714,
+   "blender_action": "Run",
+   "events": {
+    "foot_contact_near": 0,
+    "foot_contact_far": 4
+   }
+  },
+  "BasicPunch": {
+   "sheet": "sheets/kai_east_basicpunch.png",
+   "frames": 14,
+   "fps": 16,
+   "loop": false,
+   "duration_s": 0.875,
+   "blender_action": "BasicPunch",
+   "events": {
+    "anticipation_start": 1,
+    "impact": 5,
+    "recover_start": 8,
+    "interruptible_from": 11
+   },
+   "hit_contract": "apply damage and hitstop in Phaser on event 'impact' (0-based frame 5); the animation never applies damage itself"
+  },
+  "RunLower": {
+   "sheet": "sheets/kai_east_runlower.png",
+   "frames": 8,
+   "fps": 14,
+   "loop": true,
+   "duration_s": 0.5714,
+   "blender_action": "RunLower",
+   "events": {},
+   "frame_width": 78,
+   "frame_height": 91,
+   "origin_px": [
+    35.0,
+    87.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "RunPunchUpper": {
+   "sheet": "sheets/kai_east_runpunchupper.png",
+   "frames": 48,
+   "fps": 16,
+   "loop": false,
+   "duration_s": 3.0,
+   "blender_action": "RunPunchUpper",
+   "events": {
+    "impact": 24
+   },
+   "frame_width": 108,
+   "frame_height": 119,
+   "origin_px": [
+    44.0,
+    168.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Dash": {
+   "sheet": "sheets/kai_east_dash.png",
+   "frames": 10,
+   "fps": 22,
+   "loop": false,
+   "duration_s": 0.4545,
+   "blender_action": "Dash",
+   "events": {
+    "anticipation_start": 0,
+    "burst_start": 2,
+    "travel_end": 6,
+    "recover_start": 7
+   },
+   "frame_width": 168,
+   "frame_height": 170,
+   "origin_px": [
+    67.0,
+    170.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Hurt": {
+   "sheet": "sheets/kai_east_hurt.png",
+   "frames": 8,
+   "fps": 20,
+   "loop": false,
+   "duration_s": 0.4,
+   "blender_action": "Hurt",
+   "events": {
+    "impact": 0,
+    "interruptible_from": 5
+   },
+   "frame_width": 116,
+   "frame_height": 175,
+   "origin_px": [
+    70.0,
+    175.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Death": {
+   "sheet": "sheets/kai_east_death.png",
+   "frames": 18,
+   "fps": 14,
+   "loop": false,
+   "duration_s": 1.2857,
+   "blender_action": "Death",
+   "events": {
+    "hit": 0,
+    "ground_contact": 10,
+    "settled": 14
+   },
+   "frame_width": 167,
+   "frame_height": 184,
+   "origin_px": [
+    70.0,
+    172.0
+   ],
+   "terminal": "hold_last_frame",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Transform": {
+   "sheet": "sheets/kai_east_transform.png",
+   "frames": 16,
+   "fps": 20,
+   "loop": false,
+   "duration_s": 0.8,
+   "blender_action": "Transform",
+   "events": {
+    "anticipation_start": 0,
+    "gather_start": 2,
+    "release_start": 6,
+    "form_commit": 7,
+    "reveal_hold": 8,
+    "interruptible_from": 10
+   },
+   "frame_width": 112,
+   "frame_height": 188,
+   "origin_px": [
+    54.0,
+    188.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Beam": {
+   "sheet": "sheets/kai_east_beam.png",
+   "frames": 26,
+   "fps": 20,
+   "loop": false,
+   "duration_s": 1.3,
+   "blender_action": "Beam",
+   "events": {
+    "charge_start": 0,
+    "charge_hold": 7,
+    "release": 10,
+    "fire_end": 20,
+    "recover_start": 20,
+    "interruptible_from": 22
+   },
+   "frame_width": 108,
+   "frame_height": 175,
+   "origin_px": [
+    39.0,
+    175.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Sphere": {
+   "sheet": "sheets/kai_east_sphere.png",
+   "frames": 24,
+   "fps": 20,
+   "loop": false,
+   "duration_s": 1.2,
+   "blender_action": "Sphere",
+   "events": {
+    "gather_start": 0,
+    "raise": 7,
+    "hold": 12,
+    "release": 16,
+    "recover_start": 18,
+    "interruptible_from": 21
+   },
+   "frame_width": 106,
+   "frame_height": 175,
+   "origin_px": [
+    42.0,
+    175.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  }
+ }
+}

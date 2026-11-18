@@ -28,3 +28,9 @@ test('B22 art: Paradox enemies and bosses', async ({ page }) => {
   await spawn(page, 'rift_mimic', 120, -60); await spawn(page, 'phase_harrier', 220, 40); await spawn(page, 'singularity_husk', -150, 30); await page.waitForTimeout(400); await page.screenshot({ path: 'test-results/b22-art-mobsB.png' });
   for (const k of ['regent', 'mirror_tyrant', 'chronophage', 'hollow_choir', 'sovereign']) { await spawn(page, k, 300, 0); await page.waitForTimeout(3800); await page.screenshot({ path: `test-results/b22-art-${k}.png` }); }
 });
+test('B22 art: equipped outfit recolours the in-run hero', async ({ page }) => {
+  test.setTimeout(90000); await page.setViewportSize({ width: 1280, height: 720 });
+  await page.addInitScript(() => localStorage.setItem('kyntraze-b00-v1-qa', JSON.stringify({ version: 1, hero: 'kai', settings: {}, b22: { v: 1, owned: ['kai_celestial_wanderer'], equipped: { outfit: { kai: 'kai_celestial_wanderer' }, crest: null, aura: {} } } })));
+  await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click(); await boot(page); await page.waitForTimeout(2500);
+  await page.screenshot({ path: 'test-results/b22-art-outfit.png', clip: { x: 440, y: 220, width: 400, height: 280 } });
+});
