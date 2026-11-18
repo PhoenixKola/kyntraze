@@ -642,3 +642,27 @@ button.hero-card:focus-visible { outline: 2px solid var(--accent, #e0a24a); outl
 .loadout-chip.mode-strip, .loadout-chip.mode-strip b { white-space: nowrap; } .loadout-chip.mode-strip { min-width: max-content; }
 .hud.hero-vex .portrait.is-form::before { box-shadow: inset 0 0 0 2px #a070ff; } .hud.hero-vex .portrait.is-form2::before { box-shadow: inset 0 0 0 2px #e0d4ff; }
 .hud.hero-vex .portrait.is-form { box-shadow: 0 0 calc(10 * var(--u)) rgba(160, 112, 255, .6); } .hud.hero-vex .portrait.is-form2 { box-shadow: 0 0 calc(12 * var(--u)) rgba(224, 212, 255, .8); }
+
+/* B22 UI pass 2: hero card text, mode panel overlap, deploy row, arena grid 2-up scroll */
+.hero-card-index { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .08em; font-size: max(7px, calc(9 * var(--u))); padding-bottom: calc(4 * var(--u)); }
+.hero-card.has-art .hero-status { display: none; }
+.hero-card.has-art .hero-copy { padding: calc(6 * var(--u)) calc(12 * var(--u)) calc(10 * var(--u)); flex: none; }
+.hero-card.has-art .hero-copy p { margin-bottom: calc(4 * var(--u)); }
+.hero-card.has-art .form-row { margin-top: calc(6 * var(--u)); }
+.hero-card.has-art .form-row li span { font-size: max(7px, calc(8.5 * var(--u))); letter-spacing: .03em; }
+@media (max-height: 620px) { button.hero-card .form-row li span { display: block; } button.hero-card .hero-copy p { display: none; } }
+.mode-panel > *, .mode-detail > * { flex-shrink: 0; } .mode-detail { display: block; } .mode-panel .mode-detail .mode-opts { margin-bottom: calc(6 * var(--u)); }
+.mode-panel .mode-detail .outlined-button { flex: 0 0 auto; min-height: calc(34 * var(--u)); }
+.mode-panel .mode-chal { line-height: 1.5; font-size: max(11px, calc(13 * var(--u))); } .mode-panel .mode-chal ul { margin: 6px 0; padding-left: 18px; } .mode-panel .mode-chal p { margin: 6px 0 0; color: var(--k-dim); }
+.mode-panel .mode-coop { margin-top: calc(10 * var(--u)); }
+main[data-testid="hero-select"] .start-row .mode-lock { flex: 1 1 auto; text-align: right; margin: 0; line-height: 1.5; padding-bottom: calc(10 * var(--u)); }
+main[data-testid="hero-select"] .start-row .arena-strip { flex: 1 1 calc(260 * var(--u)); max-width: calc(440 * var(--u)); margin-right: 0; }
+main[data-testid="hero-select"] .start-row .seed-field { flex: 0 1 calc(230 * var(--u)); min-width: calc(150 * var(--u)); }
+.hero-card-index { flex: none; }
+.coop-chip { padding: 4px 9px 4px 4px; gap: 6px; letter-spacing: .06em; } .coop-chips { gap: calc(6 * var(--u)); }
+.coop-chip img, .coop-chip .coop-solo { width: calc(24 * var(--u)); min-width: 22px; height: calc(24 * var(--u)); min-height: 22px; }
+.mode-layout .mode-heading { font-size: clamp(20px, 4.4vh, 44px); }
+.mode-panel { padding: calc(14 * var(--u)) calc(20 * var(--u)); gap: calc(9 * var(--u)); } .mode-panel-head img { width: calc(60 * var(--u)); min-width: 46px; }
+.arena-layout .arena-grid, .arena-layout .arena-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; overflow-y: auto !important; grid-auto-rows: minmax(clamp(190px, 36vh, 340px), auto); }
+@media (min-width: 1100px) { .arena-layout .arena-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; overflow-y: auto !important; } }
+.mode-panel .mode-coop { position: sticky; bottom: calc(-14 * var(--u)); z-index: 2; margin-top: auto; padding-bottom: calc(10 * var(--u)); background: linear-gradient(180deg, rgba(10,16,23,.92), #0a1017 30%); }

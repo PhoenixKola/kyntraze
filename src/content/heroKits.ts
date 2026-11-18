@@ -29,7 +29,7 @@ export const REN = {
 export const VEX = {
   base: { hp: 124, speed: 248, attackDamage: 14, attackPeriod: 0.5, attackRange: 118, targets: 2, qDamage: 36, qRadius: 120, radius: 17 },
   auto: { name: 'Null Blade', arcDeg: 80, step: 3, finisherMul: 1.8, finisherPush: 90, lunge: 8, markMul: 1.35 },
-  q: { name: 'Parry Halo', cooldown: 8, perfect: 0.34, guard: 0.62, recover: 0.3, arcDeg: 150, reduce: 0.55, riposteMul: 2.4, riposteReach: 190, riposteArc: 100, stun: 0.9, refund: 0.4, drive: 12, gap: 0.6, moveScale: 0.5, formPerfect: 1.5 },
+  q: { name: 'Parry Halo', cooldown: 6, perfect: 0.55, guard: 0.95, recover: 0.25, arcDeg: 230, reduce: 0.7, riposteMul: 2.4, riposteReach: 190, riposteArc: 100, stun: 0.9, refund: 0.5, drive: 12, gap: 0.3, moveScale: 0.7, formPerfect: 1.4 },
   e: { name: 'Rift Reversal', cooldown: 9, distance: 230, iframes: 0.36, riposteMul: 2.0, strikeReach: 170, windup: 0.1, recover: 0.2, perfectWindow: 0.35, formCool: 0.75, formDistance: 1.4 },
   r: { name: 'Oathbreaker Seal', cooldown: 18, marks: 5, bossMarks: 1, range: 360, windup: 0.4, fuse: 2.2, damage: 1.4, power: 0.12, wave: 150, recover: 0.3, moveScale: 0.5 },
 } as const;

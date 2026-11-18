@@ -116,8 +116,8 @@ export class B22Overlay {
     if (hc && hc.act === 'rift_reversal' && hc.sx !== undefined && hc.id !== this.shiftId && this.scene.textures.exists('b22-fx_vexe0')) {
       this.shiftId = hc.id; const sx = hc.sx, sy = hc.sy ?? 0, tx = hc.tx ?? sx, ty = hc.ty ?? sy, len = Math.hypot(tx - sx, ty - sy);
       const mk = (k: string, x: number, y: number, size: number, dur: number, depth: number) => { const im = this.scene.add.image(x, y, `b22-${k}`).setDepth(depth).setBlendMode(Phaser.BlendModes.ADD); this.pops.push({ im, t: 0, dur, size, rise: 0 }); return im; };
-      mk('fx_vexe0', sx, sy + 8, 190, 0.6, 5.6); mk('fx_vexe2', tx, ty + 8, 240, 0.7, 5.6);
-      if (len > 8) { const st = this.scene.add.image(sx, sy - 10, 'b22-fx_vexe1').setOrigin(0, 0.5).setDepth(10.5).setBlendMode(Phaser.BlendModes.ADD).setRotation(Math.atan2(ty - sy, tx - sx)); st.setDisplaySize(len + 70, 84); this.pops.push({ im: st, t: 0, dur: 0.5, size: 0, rise: 0, fixed: true }); }
+      mk('fx_vexe0', sx, sy + 8, 110, 0.5, 5.6); mk('fx_vexe2', tx, ty + 8, 150, 0.6, 5.6);
+      if (len > 8) { const st = this.scene.add.image(sx, sy - 10, 'b22-fx_vexe1').setOrigin(0, 0.5).setDepth(10.5).setBlendMode(Phaser.BlendModes.ADD).setRotation(Math.atan2(ty - sy, tx - sx)); st.setDisplaySize(len + 40, 52); this.pops.push({ im: st, t: 0, dur: 0.5, size: 0, rise: 0, fixed: true }); }
     }
     for (let k = this.pops.length - 1; k >= 0; k--) { const q = this.pops[k]; q.t += dt; const u = q.t / q.dur; if (u >= 1) { q.im.destroy(); this.pops.splice(k, 1); continue; } if (q.fixed) { q.im.setAlpha(1 - u); continue; } const sc = q.size * (0.6 + 0.6 * Math.min(1, u * 2.5)) / q.im.height; q.im.setScale(sc).setAlpha(u < 0.2 ? u / 0.2 : 1 - (u - 0.2) / 0.8).y -= q.rise * dt; }
     for (const ev of s.enemyEvents) { if (ev.id <= this.enemyCur) continue; this.enemyCur = ev.id; if (ev.kind === 'enemy_death' && (isRealmKind(ev.enemy) || isBoss(ev.enemy as BossKind))) this.bursts.push({ x: ev.x, y: ev.y, t: 0, dur: ev.tag === 'boss' ? 1.2 : 0.4, r: ev.tag === 'boss' ? 180 : 50, c: 0xffe9a8 }); }

@@ -77,6 +77,7 @@ export class BootScene extends Phaser.Scene {
         const set = {} as KaiManifests; KAI_DIRS.forEach((dir, i) => { set[dir] = parseKaiManifest(raw[i], dir, form); }); this.registry.set(HERO_REGISTRY_KEY(h, form), set);
         for (const dir of KAI_DIRS) for (const clip of form === 'f1' ? KAI_F1_CLIPS : KAI_CLIPS) { const m = set[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo; this.load.spritesheet(heroTextureKey(h, dir, clip, form), heroSheetUrl(h, dir, a, form), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 }); }
       }
+      if (this.hero === 'vex') { const f1 = this.registry.get(HERO_REGISTRY_KEY(h, 'f1')) as KaiManifests | undefined; if (f1) for (const dir of KAI_DIRS) for (const clip of KAI_F1_CLIPS) { const m = f1[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo; this.load.spritesheet(`vexf2-${dir}-${clip}`, `/art/vex-f2/${dir}/${a.sheet}`, { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 }); } }
       this.registry.set(HERO_ANCHORS_KEY(h), this.cache.json.get(HERO_ANCHORS_KEY(h)));
     }
     for (const g of B21_GROUPS) for (const n of b21Names(this.cache.json.get(b21ManifestKey(g)))) this.load.image(b21Key(g, n), b21Url(g, n));

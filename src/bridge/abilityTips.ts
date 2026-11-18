@@ -26,7 +26,7 @@ export function abilityTips(s: GameState): Record<TipSlot, AbilityTip> {
     et = { name: SORA.e.name, key: 'E (hold)', pad: 'RB (hold)', blurb: hk!.blurbs.e, stats: [['Damage', `${n(SORA.e.damage[0] * m.beamDamage)} / ${n(SORA.e.damage[1] * m.beamDamage)} / ${n(SORA.e.damage[2] * m.beamDamage)}`], ['Charge tiers', 'T1 / T2 / T3'], ['Cooldown', cd(SORA.e.cooldown * m.beamCd)]] };
     rt = { name: SORA.r.name, key: 'R', pad: 'LB', blurb: hk!.blurbs.r + ult, stats: [['Damage / orb', n(SORA.r.damage * m.sphereDamage * (f ? SORA.r.formDamage : 1))], ['Orbs', n(f ? SORA.r.formOrbs : SORA.r.orbs)], ['Cooldown', cd(SORA.r.cooldown * m.sphereCd)]] };
   } else {
-    qt = { name: VEX.q.name, key: 'Q', pad: 'X', blurb: hk!.blurbs.q, stats: [['Riposte damage', n(q * VEX.q.riposteMul)], ['Perfect window', `${n(VEX.q.perfect * (f === 1 ? VEX.q.formPerfect : 1), 2)}s`], ['Late guard', '-55% damage'], ['Cooldown', cd(VEX.q.cooldown)]] };
+    qt = { name: VEX.q.name, key: 'Q', pad: 'X', blurb: hk!.blurbs.q, stats: [['Riposte damage', n(q * VEX.q.riposteMul)], ['Perfect window', `${n(VEX.q.perfect * (f === 1 ? VEX.q.formPerfect : 1), 2)}s`], ['Late guard', `-${Math.round(VEX.q.reduce * 100)}% damage`], ['Cooldown', cd(VEX.q.cooldown)]] };
     et = { name: VEX.e.name, key: 'E', pad: 'RB', blurb: hk!.blurbs.e, stats: [['Riposte damage', n(q * VEX.e.riposteMul * m.beamDamage)], ['Shift', `${n(VEX.e.distance * m.beamWidth)} px`], ['Cooldown', cd(VEX.e.cooldown * m.beamCd)]] };
     rt = { name: VEX.r.name, key: 'R', pad: 'LB', blurb: hk!.blurbs.r + ult, stats: [['Damage / mark', n(q * VEX.r.damage * m.sphereDamage)], ['Marks', `${VEX.r.marks} (1 boss)`], ['Cooldown', cd(VEX.r.cooldown * m.sphereCd)]] };
   }

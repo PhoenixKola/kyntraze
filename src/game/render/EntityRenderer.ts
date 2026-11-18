@@ -10,7 +10,7 @@ import { HeroFxView } from './heroFxView';
 import { BodyMotion, styleFor } from './bodyMotion';
 import { AuraView, type AuraState } from './auraView';
 import { AuraTracker } from './auraState';
-import { VOID_TINT, artHero, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, HeroAnimator, heroTextureKey, type HeroActView } from '../../assets/heroAnimation';
+import { artHero, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, HeroAnimator, heroTextureKey, type HeroActView } from '../../assets/heroAnimation';
 import { EnemyRenderer } from './enemyRenderer';
 import { BossRenderer } from './bossRenderer';
 import { KAI_ANCHORS_KEY, handAnchorWorld, type AnchorTable, type HandAnchor } from '../../assets/kaiAnimation';
@@ -18,7 +18,7 @@ import { KAI_F1_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_F3_REGISTRY_KEY, KAI_GROU
 interface StrokeCtl { outerStrength: number; color: number; active?: boolean }
 export class EntityRenderer {
   private hero: Phaser.GameObjects.Sprite; private auraBody!: Phaser.GameObjects.Container; private auraCopyHero!: Phaser.GameObjects.Sprite; private auraCopyLegs!: Phaser.GameObjects.Sprite;
-  private legs: Phaser.GameObjects.Sprite;
+  private legs: Phaser.GameObjects.Sprite; private hoverY = 0; private blinkId = 0; private blinkFlicker = 0; private blinkGhosts: { spr: Phaser.GameObjects.Sprite; life: number; max: number }[] = [];
   private readonly manifests: KaiManifests;
   private readonly f1: KaiManifests | undefined;
   private readonly f2: KaiManifests | undefined;
@@ -111,12 +111,23 @@ export class EntityRenderer {
       dst.setFrame(src.frame.name).setOrigin(src.originX, src.originY).setPosition(src.x, src.y).setScale(src.scaleX, src.scaleY).setRotation(src.rotation).setFlipX(src.flipX).setVisible(src.visible).setAlpha(src.alpha);
     }
   }
+  /** Voidheart Exile: the runner levitates over a dark void disc, a broken crimson halo turns behind the head and shards orbit the body. */
+  private voidAura(g: Phaser.GameObjects.Graphics, t: number, x: number, y: number, reduced: boolean) {
+    g.fillStyle(0x12020a, 0.55).fillEllipse(x, y + 2, 64, 20); g.lineStyle(2, 0xff3a52, 0.75).strokeEllipse(x, y + 2, 64 + Math.sin(t * 3) * 4, 20);
+    g.lineStyle(1, 0xffc766, 0.6).strokeEllipse(x, y + 2, 40, 12);
+    const cx = x, cy = y + this.hoverY - 54, spin = t * 1.1;
+    for (let k = 0; k < 6; k++) { const a0 = spin + k * (Math.PI / 3), a1 = a0 + 0.55; g.lineStyle(3, k % 2 ? 0xff3a52 : 0xffc766, 0.85); g.beginPath(); g.arc(cx, cy, 36, a0, a1); g.strokePath(); }
+    if (reduced) return;
+    for (let k = 0; k < 5; k++) { const a = -spin * 1.6 + k * (Math.PI * 2 / 5), ox = Math.cos(a) * 34, oy = Math.sin(a) * 12 + this.hoverY * 0.5 - 30 + Math.sin(t * 2 + k) * 6, back = Math.sin(a) < 0;
+      g.fillStyle(back ? 0x7a1228 : 0xff6a5a, 0.9).fillTriangle(x + ox, y + oy - 7, x + ox - 3, y + oy, x + ox, y + oy + 7).fillTriangle(x + ox, y + oy - 7, x + ox + 3, y + oy, x + ox, y + oy + 7); }
+  }
   /** B21.1: spring lean / squash / bob around the feet for the current hero state (identity while dead, in a reveal or frozen). */
   private applyMotion(state: GameState, dt: number, hero: 'kai' | 'ren' | 'sora', reduced: boolean, hurt: boolean, dashing: boolean, clip: string, facing: string) {
     const p = state.player, frozen = !!state.cinema || clip === 'Transform' || state.phase !== 'running', cast = state.cast ?? state.hx.act;
     const m = this.motion.update({ dt, style: styleFor(hero, p.form), vx: p.vx, vy: p.vy, maxSpeed: p.speed * 1.2, dashing, dashDx: p.dashDx, dashDy: p.dashDy, casting: !!cast, released: !!cast && cast.released, hurt, hurtDir: facing === 'east' ? -1 : 1, alive: p.hp > 0, frozen, reduced });
     for (const s of [this.hero, this.legs]) { s.setRotation(m.rot).setScale(this.baseScale * m.sx, this.baseScale * m.sy); }
-    this.hero.y += m.dy; this.legs.y = this.hero.y;
+    this.hoverY = hero === 'ren' && state.hero === 'vex' && p.form === 2 && !frozen ? -22 - Math.sin(state.time * 2.4) * 3 : 0;
+    this.hero.y += m.dy + this.hoverY; this.legs.y = this.hero.y;
     this.mirrorAura();
   }
   /** World position of Kai's fists for the frame on screen (Beam / Sphere clips only). */
@@ -151,7 +162,7 @@ export class EntityRenderer {
     const m = set[this.pose.facing]; const fr = clipFrame(m, this.pose.clip);
     const artForm = this.pose.form === 'f3' && !this.f3 ? 'f2' : this.pose.form;
     const key = kaiTextureKey(this.pose.facing, this.pose.clip, artForm);
-    if (this.hero.texture.key !== key) this.hero.setTexture(key);
+    if (this.hero.texture.key !== key && this.scene.textures.exists(key)) this.hero.setTexture(key);
     this.hero.setFrame(this.pose.frame);
     this.hero.setOrigin(fr.ox / fr.w, fr.oy / fr.h);
     this.hero.setPosition(Math.round(p.x), Math.round(p.y + KAI_GROUND_DY));
@@ -206,20 +217,21 @@ export class EntityRenderer {
     if (anim) {
       const c = state.hx.act, view: HeroActView | null = c ? { id: c.id, act: c.act, t: c.t, dur: c.dur, face: c.face, released: c.released, moving: c.moving, beats: c.beats, hop: c.hop, hops: c.hops.length, hopT: c.hopT, charge: c.charge } : null;
       const pose = anim.update({ dt, alive: !dead, moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, inputX: input.x, inputY: input.y, runSpeed: p.speed * (p.form ? 1.1 : 1), dashing: p.dashRemaining > 0, dashX: p.dashDx, dashY: p.dashDy, dashRemaining: p.dashRemaining, hurt, form: p.form, cinema: state.cinema ? { t: state.cinema.t, dur: state.cinema.dur, commitAt: state.cinema.commitAt } : null, act: view, strike: state.hx.strike });
-      this.pose = pose; const form = pose.form === 'f1' ? 'f1' : 'base', set = (form === 'f1' ? this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f1')) : this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'base'))) as KaiManifests, m = set[pose.facing], fr = clipFrame(m, pose.clip), key = heroTextureKey(hero, pose.facing, pose.clip, form);
+      this.pose = pose; const form = pose.form === 'f1' ? 'f1' : 'base', set = (form === 'f1' ? this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f1')) : this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'base'))) as KaiManifests, m = set[pose.facing], fr = clipFrame(m, pose.clip), key0 = heroTextureKey(hero, pose.facing, pose.clip, form), voidForm = state.hero === 'vex' && p.form === 2 && form === 'f1', key = voidForm ? key0.replace(/^renf1-/, 'vexf2-').replace(/^vexf1-/, 'vexf2-') : key0;
+      if (voidForm && !this.scene.textures.exists(key)) { /* sheet missing: fall back to Riftbound art */ }
       if (this.hero.texture.key !== key) this.hero.setTexture(key);
       this.hero.setFrame(pose.frame).setOrigin(fr.ox / fr.w, fr.oy / fr.h).setPosition(x, y).setVisible(true);
       const hitFlash = !dead && p.invulnerable > RULES.contactInvulnerability - 0.1 && !state.hx.act, alpha = !dead && pose.clip !== 'Transform' && p.invulnerable > 0 && Math.floor(state.time * 18) % 2 === 0 ? 0.86 : 1;
       this.hero.setAlpha(alpha); this.hero.tintMode = Phaser.TintModes.MULTIPLY; this.legs.tintMode = Phaser.TintModes.MULTIPLY;
-      if (hitFlash) { this.hero.setTint(0xffeef2); this.hero.tintMode = Phaser.TintModes.FILL; } else if (state.hero === 'vex' && state.player.form === 2) this.hero.setTint(VOID_TINT); else this.hero.clearTint();   // Voidheart Exile darkens the recoloured rig
-      if (state.hero === 'vex' && !hitFlash && state.player.form === 2) this.legs.setTint(VOID_TINT);
+      if (hitFlash) { this.hero.setTint(0xffeef2); this.hero.tintMode = Phaser.TintModes.FILL; } else this.hero.clearTint();   // Voidheart Exile is its own recoloured sheet set (vexf2-*), not a tint
       if (pose.legs !== null) {
         const lf = clipFrame(m, 'RunLower'), lkey = heroTextureKey(hero, pose.facing, 'RunLower', form); if (this.legs.texture.key !== lkey) this.legs.setTexture(lkey);
         this.legs.setFrame(pose.legs).setOrigin(lf.ox / lf.w, lf.oy / lf.h).setPosition(x, y).setAlpha(alpha).setVisible(true); if (hitFlash) { this.legs.setTint(0xffeef2); this.legs.tintMode = Phaser.TintModes.FILL; } else this.legs.clearTint();
       } else this.legs.setVisible(false);
       this.applyMotion(state, dt, hero, reduced, hurt, p.dashRemaining > 0, pose.clip, pose.facing);
-      this.ghostTrail(state, dt, x, y, hero, reduced);
-      this.hand = this.heroAnchors ? handAnchorWorld(this.heroAnchors, form, pose.facing, pose.clip, pose.frame, x, y, this.baseScale) : null;
+      this.ghostTrail(state, dt, x, y, hero, reduced); this.blinkTrail(state, dt, reduced);
+      this.hand = this.heroAnchors ? handAnchorWorld(this.heroAnchors, form, pose.facing, pose.clip, pose.frame, x, y + this.hoverY, this.baseScale) : null;
+      if (voidForm && !dead) this.voidAura(body, state.time, x, y, reduced);
     } else {
       this.hero.setVisible(false); this.legs.setVisible(false); this.heroDeadT = dead ? this.heroDeadT + dt : 0; const ren = hero === 'ren';
       body.fillStyle(0x000000, 0.3).fillEllipse(x, y, 36, 12);
@@ -227,6 +239,17 @@ export class EntityRenderer {
     }
     fx.update(state, dt, reduced, state.enemies.length > 45, x, y);
     const sh = fx.takeShake(); if (sh > 0 && !reduced) this.scene.cameras.main.shake(110, sh);
+  }
+  /** Vex Rift Reversal: a row of violet afterimages is left along the whole blink path (the shift itself is instant in the sim), and the body flickers in from the exit. */
+  private blinkTrail(state: GameState, dt: number, reduced: boolean) {
+    const c = state.hero === 'vex' ? state.hx.act : null;
+    if (c && c.act === 'rift_reversal' && c.sx !== undefined && c.id !== this.blinkId && this.hero.visible) {
+      this.blinkId = c.id; const sx = c.sx, sy = (c.sy ?? 0) + KAI_GROUND_DY, tx = c.tx ?? sx, ty = (c.ty ?? c.sy ?? 0) + KAI_GROUND_DY, n = reduced ? 3 : 7;
+      for (let k = 0; k < n; k++) { const u = k / n; this.blinkGhosts.push({ spr: this.scene.add.sprite(sx + (tx - sx) * u, sy + (ty - sy) * u + this.hoverY, this.hero.texture.key, this.hero.frame.name).setOrigin(this.hero.originX, this.hero.originY).setScale(this.hero.scaleX, this.hero.scaleY).setFlipX(this.hero.flipX).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.2).setTint(k % 2 ? 0xc58bff : 0x8f5cff), life: 0.42 + u * 0.12, max: 0.42 + u * 0.12 }); this.blinkGhosts[this.blinkGhosts.length - 1].spr.tintMode = Phaser.TintModes.FILL; }
+      this.blinkFlicker = 0.3;
+    }
+    for (let k = this.blinkGhosts.length - 1; k >= 0; k--) { const g = this.blinkGhosts[k]; g.life -= dt; if (g.life <= 0) { g.spr.destroy(); this.blinkGhosts.splice(k, 1); continue; } g.spr.setAlpha((g.life / g.max) * 0.85).setScale(g.spr.scaleX * (1 + dt * 0.4)); }
+    if (this.blinkFlicker > 0) { this.blinkFlicker -= dt; this.hero.setAlpha(Math.floor(this.blinkFlicker * 40) % 2 ? 0.45 : 1); this.legs.setAlpha(this.hero.alpha); }
   }
   /** Afterimages behind a rushing / dashing hero: pooled copies of the current frame, additive and tinted (crimson for Ren, blue-white for Sora), fading in ~0.28 s. */
   private ghostTrail(state: GameState, dt: number, x: number, y: number, hero: 'ren' | 'sora', reduced: boolean) {
@@ -256,5 +279,5 @@ export class EntityRenderer {
     for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies.stats(), boss: this.bosses.stats() }; }
-  destroy() { this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies.destroy(); this.bosses.destroy(); this.hero.destroy(); this.legs.destroy();  this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); }
+  destroy() { this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies.destroy(); this.bosses.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); }
 }

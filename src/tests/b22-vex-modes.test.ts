@@ -22,8 +22,8 @@ describe('B22 Vex: Parry Halo', () => {
     expect(s.player.hp).toBe(100); expect(r0 - f.hp).toBeGreaterThan(50); expect(f.stagger).toBeGreaterThan(0.5); expect(s.player.qCooldown).toBeLessThan(cd0 * 0.7); expect(s.b22.m['parry.perfect']).toBe(1);
     s.player.invulnerable = 0; shotAt(s, 12, 0); sim.step(DT, idle); expect(s.player.hp).toBeLessThan(100);   // guard is over: no free chain
   });
-  it('late guard: 55% reduction; from behind: no guard; arena hazards (owner 0) can never be parried', () => {
-    const late = vex({ hp: 100 }); late.s.player.hp = 100; late.s.player.aimX = 1; late.s.player.aimY = 0; late.sim.step(DT, { ...idle, q: true }); run(late.sim, VEX.q.perfect + 0.05); shotAt(late.s, 12, 0); late.sim.step(DT, idle); expect(100 - late.s.player.hp).toBeCloseTo(40 * 0.45, 3);
+  it('late guard: reduced damage; from behind: no guard; arena hazards (owner 0) can never be parried', () => {
+    const late = vex({ hp: 100 }); late.s.player.hp = 100; late.s.player.aimX = 1; late.s.player.aimY = 0; late.sim.step(DT, { ...idle, q: true }); run(late.sim, VEX.q.perfect + 0.05); shotAt(late.s, 12, 0); late.sim.step(DT, idle); expect(100 - late.s.player.hp).toBeCloseTo(40 * (1 - VEX.q.reduce), 3);
     const back = vex({ hp: 100 }); back.s.player.hp = 100; mob(back.s, back.s.player.x + 90, back.s.player.y); back.sim.step(DT, { ...idle, q: true }); back.s.enemyShots.push({ id: 9000, x: back.s.player.x - 12, y: back.s.player.y, vx: 0, vy: 0, ttl: 3, damage: 40, radius: 8, kind: 'prism', owner: 5, k: 1 }); back.sim.step(DT, idle); expect(back.s.player.hp).toBe(60);
     const haz = vex({ hp: 100 }); haz.s.player.hp = 100; haz.sim.step(DT, { ...idle, q: true }); haz.s.lastHazardOwner = 0; expect(damagePlayer(haz.s, 30, 'surge', { x: haz.s.player.x + 30, y: haz.s.player.y }, 0)).toBe(true); expect(haz.s.player.hp).toBe(70);
   });
