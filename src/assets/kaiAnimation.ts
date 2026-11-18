@@ -205,6 +205,13 @@ export class KaiAnimator {
 
   get punching() { return this.punchTime >= 0; }
   get runPunching() { return this.runPunchTime >= 0; }
+  private planted = false;
+  /** B22: a shot that goes in a different cardinal direction than the run (e.g. backing away from a pursuer) is shown as a short planted strike toward the target, so the visible hand and the shot agree; same-direction shots keep the RunPunchUpper + RunLower composite. */
+  private plantedStrike(i: AnimFrameInput): boolean {
+    if (this.planted) { if (this.punching || this.runPunchTime >= 0 || i.shot) return true; this.planted = false; return false; }
+    if (i.shot && i.moving && facingFromVector(this.facing, i.shot.dx, i.shot.dy) !== facingFromInput(this.facing, i.inputX, i.inputY)) { this.planted = true; return true; }
+    return false;
+  }
   get dead() { return this.deathTime >= 0; }
   get transforming() { return this.transformTime >= 0 || this.cinemaOn; }
   /** True once the Death clip has played through and held its last frame for DEATH_RESULTS_HOLD_SECONDS. Never true while alive. */
@@ -285,7 +292,7 @@ export class KaiAnimator {
     this.casting = casting;
 
     if (casting) { /* the signature ability owns the hands */ }
-    else if (!busy && this.movingNow) {
+    else if (!busy && this.movingNow && !this.plantedStrike(i)) {
       // Pre-B12: the auto-attack is visible while running as two layers of the SAME rig (RunPunchUpper over RunLower, leg-phase matched), not a pixel crop of two sprites.
       // Facing stays input-driven (target changes never turn the body mid-run); the sim keeps sole authority over when the hit lands, we only predict it from attackClock.
       if (i.moving) this.turn(facingFromInput(this.facing, i.inputX, i.inputY));

@@ -42,7 +42,7 @@ export const CONTOUR: Record<string, Palette> = {
   ren: { c1: rgb(0x9a0a18), c2: rgb(0xff3a2a), c3: rgb(0xffc060), flow: 3.6, jag: 0.5, sparks: 0.8 },
   sora: { c1: rgb(0x0a3fb0), c2: rgb(0x35c2ff), c3: rgb(0xe6fbff), flow: 2.6, jag: 0.3, sparks: 0.6 },
   vex1: { c1: rgb(0x3b0f8a), c2: rgb(0xa06af0), c3: rgb(0xf0dcff), flow: 3.0, jag: 0.8, sparks: 0.9 },
-  vex2: { c1: rgb(0x12043a), c2: rgb(0x6a3fe0), c3: rgb(0xe8f2ff), flow: 1.9, jag: 0.4, sparks: 0.5 },
+  vex2: { c1: rgb(0x14161a), c2: rgb(0x3b4048), c3: rgb(0x9aa2ad), flow: 1.9, jag: 0.2, sparks: 0.15 },
   surge: { c1: rgb(0xb06a00), c2: rgb(0xffc43a), c3: rgb(0xfff4c0), flow: 4.5, jag: 0.4, sparks: 0.3 },
 };
 

@@ -100,3 +100,12 @@ describe('Kit hygiene', () => {
     for (const f of [0, 1, 2, 3] as const) { const k = kai(f, [[1150, 800]]); k.sim.step(DT, idle({ q: true })); expect(k.s.impacts.some(i => i.kind === 'pulse')).toBe(false); }
   });
 });
+
+describe('Kai auto attack presentation contract', () => {
+  it('the strike records the primary target direction and every shot of the volley leaves the fist of that facing', async () => {
+    const { faceOf, fistWorld } = await import('../sim/AbilitySystem');
+    const { sim, s } = kai(0, [[1000, 800], [1200, 700]]); s.player.attackClock = 0.01; s.player.targets = 2; run(sim, 0.05);
+    const shots = s.impacts.filter(i => i.kind === 'shot'); expect(shots.length).toBe(2); const face = faceOf(s.hx.strike.x, s.hx.strike.y); expect(face).toBe('west');
+    const o = fistWorld(s, 0, face); for (const sh of shots) { expect(sh.x).toBeCloseTo(o.x, 5); expect(sh.y).toBeCloseTo(o.y, 5); } expect(s.hx.strike.t).toBeCloseTo(s.time, 1);
+  });
+});

@@ -59,6 +59,8 @@ export function clampToFace(dx: number, dy: number, face: Face, max: number) {
   if (Math.abs(a) <= max) return n;
   const t = Math.sign(a) * max; const c = Math.cos(t), s2 = Math.sin(t); return { x: ax * c - ay * s2, y: ax * s2 + ay * c };
 }
+/** World position of Kai's striking fist for an automatic attack facing `face` (the same exported contact anchors the Beam / Dragon use). */
+export const fistWorld = (s: GameState, form: number, face: Face) => worldPoint(s, anchor(PUNCH_FIST, form, face));
 export const punchOrigin = (s: GameState, c: Cast) => worldPoint(s, anchor(PUNCH_FIST, c.form, c.face));
 const worldPoint = (s: GameState, pt: { x: number; y: number }) => ({ x: s.player.x + pt.x * KAI_SCALE, y: s.player.y + KAI_GROUND_DY + pt.y * KAI_SCALE });
 /** Where the two fists meet at release, in world px: the sim lane and the thrown sphere start here (table generated from the exported sprite anchors). */

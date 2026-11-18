@@ -141,19 +141,24 @@ describe('KaiAnimator', () => {
     expect(p).toMatchObject({ clip: 'BasicPunch', facing: 'east' }); expect(p.frame).toBeGreaterThanOrEqual(2);
   });
 
-  it('pre-B12: auto-attacking while running plays the layered RunPunchUpper over a leg-phase-matched RunLower, with no turn toward the target and one strike per shot', () => {
-    const a = new KaiAnimator(manifests); const clips = new Set<string>(); const facings = new Set<string>(); let layered = 0, impactFrames = 0, prevLegs = -1;
+  it('B22: auto-attacking while running in the shot direction keeps the layered RunPunchUpper over a leg-phase-matched RunLower', () => {
+    const a = new KaiAnimator(manifests); const clips = new Set<string>(); const facings = new Set<string>(); let layered = 0, impactFrames = 0;
     for (let i = 0; i < 90; i++) {
       const shotNow = i % 30 === 12;
-      const p = a.update({ ...idle, moving: true, inputX: 1, attackClock: i % 30 > 20 ? 0.05 : 1, hasTarget: true, targetDx: -100, shot: shotNow ? { dx: -100, dy: 0 } : null }, 0.55);
+      const p = a.update({ ...idle, moving: true, inputX: 1, attackClock: i % 30 > 20 ? 0.05 : 1, hasTarget: true, targetDx: 100, shot: shotNow ? { dx: 100, dy: 0 } : null }, 0.55);
       clips.add(p.clip); facings.add(p.facing);
       if (p.clip === 'RunPunchUpper') { layered++; expect(p.legs).not.toBeNull(); expect(p.frame % 8).toBe(p.legs); expect(p.legs!).toBeGreaterThanOrEqual(0); expect(p.legs!).toBeLessThan(8); if (Math.floor(p.frame / 8) === 3) impactFrames++; }
       else expect(p.legs).toBeNull();
-      void prevLegs; prevLegs = p.legs ?? -1;
     }
-    expect(clips.has('RunPunchUpper')).toBe(true); expect(clips.has('Run')).toBe(true); expect(layered).toBeGreaterThan(8); expect(impactFrames).toBeGreaterThanOrEqual(3);
-    expect([...facings]).toEqual(['east']);   // moving east while the target is west: the body never flips to chase the target
+    expect(clips.has('RunPunchUpper')).toBe(true); expect(clips.has('Run')).toBe(true); expect(layered).toBeGreaterThan(8); expect(impactFrames).toBeGreaterThanOrEqual(3); expect([...facings]).toEqual(['east']);
     expect(a.update({ ...idle }, 0.55).legs).toBeNull();
+  });
+  it('B22: a shot fired the OPPOSITE way to the run turns the body to the target for a short planted strike (hand and shot agree), then returns to the run facing', () => {
+    const a = new KaiAnimator(manifests); const seen: Array<[string, string]> = [];
+    for (let i = 0; i < 40; i++) { const p = a.update({ ...idle, moving: true, inputX: 1, attackClock: 1, hasTarget: true, targetDx: -100, shot: i === 5 ? { dx: -100, dy: 0 } : null }, 0.55); seen.push([p.clip, p.facing]); }
+    expect(seen.slice(5, 12).some(([c, f]) => c === 'BasicPunch' && f === 'west')).toBe(true);   // planted strike toward the target
+    expect(seen[39]).toEqual(['Run', 'east']);   // back to running the way the player is moving
+    expect(seen.slice(0, 5).every(([, f]) => f === 'east')).toBe(true);
   });
   it('pre-B12: stopping mid-attack finishes it as the standing punch, and starting to run mid-punch carries it into the run punch (no snap to idle/run)', () => {
     const a = new KaiAnimator(manifests); const moving = { ...idle, moving: true, inputX: 1 };

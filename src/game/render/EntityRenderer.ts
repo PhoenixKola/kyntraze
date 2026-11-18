@@ -121,14 +121,12 @@ export class EntityRenderer {
     }
   }
   /** Voidheart Exile: the runner levitates over a dark void disc, a broken crimson halo turns behind the head and shards orbit the body. */
-  /** Voidheart Exile levitates over a dark void disc (the halo and shards were code-drawn placeholders and are gone; the contour energy carries the form's identity). */
-  private voidAura(g: Phaser.GameObjects.Graphics, _t: number, x: number, y: number, _reduced: boolean) { g.fillStyle(0x12020a, 0.55).fillEllipse(x, y + 2, 60, 18); }
   /** B21.1: spring lean / squash / bob around the feet for the current hero state (identity while dead, in a reveal or frozen). */
   private applyMotion(state: GameState, dt: number, hero: 'kai' | 'ren' | 'sora', reduced: boolean, hurt: boolean, dashing: boolean, clip: string, facing: string) {
     const p = state.player, frozen = !!state.cinema || clip === 'Transform' || state.phase !== 'running', cast = state.cast ?? state.hx.act;
     const m = this.motion.update({ dt, style: styleFor(hero, p.form), vx: p.vx, vy: p.vy, maxSpeed: p.speed * 1.2, dashing, dashDx: p.dashDx, dashDy: p.dashDy, casting: !!cast, released: !!cast && cast.released, hurt, hurtDir: facing === 'east' ? -1 : 1, alive: p.hp > 0, frozen, reduced });
     for (const s of [this.hero, this.legs]) { s.setRotation(m.rot).setScale(this.baseScale * m.sx, this.baseScale * m.sy); }
-    this.hoverY = hero === 'ren' && state.hero === 'vex' && p.form === 2 && !frozen ? -22 - Math.sin(state.time * 2.4) * 3 : 0;
+    this.hoverY = 0;
     this.hero.y += m.dy + this.hoverY; this.legs.y = this.hero.y;
     this.mirrorAura();
   }
@@ -233,7 +231,7 @@ export class EntityRenderer {
       this.applyMotion(state, dt, hero, reduced, hurt, p.dashRemaining > 0, pose.clip, pose.facing);
       this.ghostTrail(state, dt, x, y, hero, reduced); this.blinkTrail(state, dt, reduced);
       this.hand = this.heroAnchors ? handAnchorWorld(this.heroAnchors, form, pose.facing, pose.clip, pose.frame, x, y + this.hoverY, this.baseScale) : null;
-      if (voidForm && !dead) this.voidAura(body, state.time, x, y, reduced);
+
     } else {
       this.hero.setVisible(false); this.legs.setVisible(false); this.heroDeadT = dead ? this.heroDeadT + dt : 0; const ren = hero === 'ren';
       body.fillStyle(0x000000, 0.3).fillEllipse(x, y, 36, 12);
