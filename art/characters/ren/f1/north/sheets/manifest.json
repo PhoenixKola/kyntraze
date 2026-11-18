@@ -5,14 +5,14 @@
  "direction": "north",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/ren-north.blend",
- "frame_width": 142,
+ "frame_width": 138,
  "frame_height": 175,
  "origin_px": [
   83.0,
   172.0
  ],
  "origin_normalized": [
-  0.584507,
+  0.601449,
   0.982857
  ],
  "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
@@ -85,10 +85,10 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 122,
+   "frame_width": 116,
    "frame_height": 118,
    "origin_px": [
-    73.0,
+    72.0,
     170.0
    ],
    "terminal": "once",

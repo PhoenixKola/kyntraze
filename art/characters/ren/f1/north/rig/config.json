@@ -416,8 +416,8 @@
    "img": "hair_f1.png",
    "bone": "hair",
    "pivot": [
-    7.0,
-    18.227272727272727
+    15.0,
+    13.0
    ],
    "angle": 0.0,
    "slot": "form:f1"
