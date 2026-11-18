@@ -35,6 +35,12 @@ const FRAG = [
 
 interface Palette { c1: number[]; c2: number[]; c3: number[]; flow: number; jag: number; sparks: number }
 const rgb = (h: number) => [((h >> 16) & 255) / 255, ((h >> 8) & 255) / 255, (h & 255) / 255];
+/** Edge parameters for one moment of play: how strong, how fast it flows, how rough and spark-laden it is. All eased by the renderer (never stepped), so the outline cannot strobe. */
+export interface EdgeState { power: number; flowMul: number; jagAdd: number; sparkAdd: number }
+export const EDGE_STATES: Record<'idle' | 'moving' | 'dash' | 'charge' | 'release' | 'settle', EdgeState> = {
+  idle: { power: 0.82, flowMul: 0.8, jagAdd: 0, sparkAdd: 0 }, moving: { power: 0.95, flowMul: 1.15, jagAdd: 0.05, sparkAdd: 0.05 }, dash: { power: 1.05, flowMul: 1.9, jagAdd: 0.25, sparkAdd: 0.25 },
+  charge: { power: 0.95, flowMul: 1.5, jagAdd: 0.1, sparkAdd: 0.3 }, release: { power: 1.12, flowMul: 2.2, jagAdd: 0.35, sparkAdd: 0.45 }, settle: { power: 0.9, flowMul: 1.0, jagAdd: 0.05, sparkAdd: 0.1 },
+};
 export const CONTOUR: Record<string, Palette> = {
   flare: { c1: rgb(0xc43d05), c2: rgb(0xffa21c), c3: rgb(0xfff1a0), flow: 3.2, jag: 0.2, sparks: 0.8 },
   comet: { c1: rgb(0xd97a00), c2: rgb(0xffd12a), c3: rgb(0xfffbd0), flow: 5.2, jag: 1.0, sparks: 1.0 },
@@ -42,28 +48,31 @@ export const CONTOUR: Record<string, Palette> = {
   ren: { c1: rgb(0x9a0a18), c2: rgb(0xff3a2a), c3: rgb(0xffc060), flow: 3.6, jag: 0.5, sparks: 0.8 },
   sora: { c1: rgb(0x0a3fb0), c2: rgb(0x35c2ff), c3: rgb(0xe6fbff), flow: 2.6, jag: 0.3, sparks: 0.6 },
   vex1: { c1: rgb(0x3b0f8a), c2: rgb(0xa06af0), c3: rgb(0xf0dcff), flow: 3.0, jag: 0.8, sparks: 0.9 },
-  vex2: { c1: rgb(0x14161a), c2: rgb(0x3b4048), c3: rgb(0x9aa2ad), flow: 1.9, jag: 0.2, sparks: 0.15 },
+  vex2: { c1: rgb(0x0c0e12), c2: rgb(0x7d8896), c3: rgb(0xeef3fa), flow: 1.9, jag: 0.2, sparks: 0.3 },
   surge: { c1: rgb(0x0a4fc0), c2: rgb(0x3ab4ff), c3: rgb(0xe6fbff), flow: 4.5, jag: 0.4, sparks: 0.3 },
 };
 
 export class ContourController extends (Phaser as unknown as { Filters: { Controller: new (camera: unknown, node: string) => Record<string, unknown> } }).Filters.Controller {
   power = 0; time = 0; pal: Palette = CONTOUR.flare;
+  /** state-reactive extras (set by the renderer from real activity): faster flow, rougher edge, more attached sparks */
+  jagAdd = 0; sparkAdd = 0;
   constructor(camera: unknown) { super(camera, 'FilterContour'); (this as unknown as Record<string, unknown>).setPaddingOverride && (this as unknown as { setPaddingOverride: (a: number, b: number, c: number, d: number) => void }).setPaddingOverride(-6, -6, 6, 6); }
 }
-let registered = false;
+/** Per Phaser game: a recreated game (hero change, retry) registers its own renderer again. */
+const registered = new WeakSet<Phaser.Game>();
 export function registerContourFilter(game: Phaser.Game) {
-  if (registered) return; const r = game.renderer as unknown as { renderNodes?: { addNodeConstructor: (n: string, c: unknown) => void } }; if (!r.renderNodes) return;
+  if (registered.has(game)) return; const r = game.renderer as unknown as { renderNodes?: { addNodeConstructor: (n: string, c: unknown) => void } }; if (!r.renderNodes) return;
   const P = Phaser as unknown as { Class: new (d: Record<string, unknown>) => unknown; Renderer: { WebGL: { RenderNodes: { BaseFilterShader: new (...a: unknown[]) => unknown } } } };
   const Base = P.Renderer.WebGL.RenderNodes.BaseFilterShader as unknown as { call: (...a: unknown[]) => void };
   const Node = new P.Class({
     Extends: Base,
     initialize: function FilterContour(this: unknown, manager: unknown) { Base.call(this, 'FilterContour', manager, null, FRAG); },
     setupUniforms: function (this: { programManager: { setUniform: (n: string, v: unknown) => void } }, c: ContourController, dc: { width: number; height: number }) {
-      const pm = this.programManager; pm.setUniform('resolution', [dc.width, dc.height]); pm.setUniform('time', c.time); pm.setUniform('flow', c.pal.flow); pm.setUniform('power', c.power); pm.setUniform('jag', c.pal.jag); pm.setUniform('sparks', c.pal.sparks);
+      const pm = this.programManager; pm.setUniform('resolution', [dc.width, dc.height]); pm.setUniform('time', c.time); pm.setUniform('flow', c.pal.flow); pm.setUniform('power', c.power); pm.setUniform('jag', Math.min(1.4, c.pal.jag + c.jagAdd)); pm.setUniform('sparks', Math.min(1.4, c.pal.sparks + c.sparkAdd));
       pm.setUniform('c1', c.pal.c1); pm.setUniform('c2', c.pal.c2); pm.setUniform('c3', c.pal.c3);
     },
   });
-  r.renderNodes.addNodeConstructor('FilterContour', Node); registered = true;
+  r.renderNodes.addNodeConstructor('FilterContour', Node); registered.add(game);
 }
 
 /** Palette key of the transformation a fighter is in (null = untransformed), shared by the stroke, the ground ring and the effects. */

@@ -9,7 +9,7 @@ import { ApexFx } from './stillfireFx';
 import { AbilityFx } from './abilityFx';
 import { KaiKitFx } from './kaiKitFx';
 import { PASSIVE_AURA } from './fxPolicy';
-import { CONTOUR, ContourController, formKey, registerContourFilter } from './contourFilter';
+import { CONTOUR, ContourController, EDGE_STATES, formKey, registerContourFilter } from './contourFilter';
 import { HeroFxView } from './heroFxView';
 import { BodyMotion, styleFor } from './bodyMotion';
 import { AuraView, type AuraState } from './auraView';
@@ -96,11 +96,15 @@ export class EntityRenderer {
     const key = formKey(h, f);
     const surge = h === 'kai' && f === 0 && (state.hx.kk?.surge ?? 0) > 0;
     const pal = key ? CONTOUR[key] : surge ? CONTOUR.surge : null, on = !!pal && !state.cinema && state.phase !== 'dead';
-    if (state.phase === 'running') this.contourT += dt; const split = this.legs.visible;
-    const power = on ? (surge ? 0.7 : 1) * (reduced ? 0.6 : 1) : 0;
-    for (const c of this.contour) { c.time = this.contourT; c.power = power; if (pal) c.pal = pal; c.active = on; }
+    // the edge follows what the fighter is really doing (AuraTracker over sim state): idle breathing, run, dash, charge gather, release wave, settle. Intensity is eased, never stepped, so it cannot strobe.
+    const st = EDGE_STATES[this.auraSample.smp.phase], calm = reduced ? 0.6 : 1, run = state.phase === 'running' ? dt : 0;
+    const target = on ? (surge ? 0.7 : 1) * st.power * calm : 0;
+    this.edgePower += (target - this.edgePower) * Math.min(1, run * 9 + (on ? 0 : 1)); this.edgeFlow += ((reduced ? 0.7 : st.flowMul) - this.edgeFlow) * Math.min(1, run * 6);
+    this.contourT += run * this.edgeFlow; const split = this.legs.visible;
+    for (const c of this.contour) { c.time = this.contourT; c.power = this.edgePower; if (pal) c.pal = pal; c.jagAdd = reduced ? 0 : st.jagAdd; c.sparkAdd = reduced ? 0 : st.sparkAdd; c.active = on || this.edgePower > 0.02; }
     for (const c of this.rim) c.outerStrength = on || split ? 0 : 1.6;   // the thin pale readability rim is for untransformed runners only
   }
+  private edgePower = 0; private edgeFlow = 1;
   /** B12: camera punch-in factor of the Form II reveal, and a pending visual hit-stop (ms) the scene turns into skipped sim ticks. */
   cameraZoom() { return this.cometFx.cameraZoom() * this.apexFx.cameraZoom() * (this.heroFx?.cameraZoom() ?? 1); }
   takeHitstop() { return Math.max(this.cometFx.takeHitstop(), this.apexFx.takeHitstop(), this.heroFx?.takeHitstop() ?? 0); }
@@ -138,7 +142,7 @@ export class EntityRenderer {
   fxOrigin() { return this.abilityFx.lastOrigin; }
   debugPose() { return { ...this.pose, visualForm: this.animator.visualForm, transforming: this.animator.transforming, texture: this.hero.texture.key, frameIndex: Number(this.hero.frame.name), x: this.hero.x, y: this.hero.y, scale: this.baseScale }; }
   sync(state: GameState, input: InputState, deltaMs = 0, reducedEffects = false) {
-    this.updateStroke(state, Math.min(0.1, deltaMs / 1000), reducedEffects); this.updateAura(state, Math.min(0.1, deltaMs / 1000), reducedEffects);
+    this.updateAura(state, Math.min(0.1, deltaMs / 1000), reducedEffects); this.updateStroke(state, Math.min(0.1, deltaMs / 1000), reducedEffects);
     if (state.hero !== 'kai') { this.syncHero(state, input, deltaMs, reducedEffects); this.syncWorld(state, deltaMs, reducedEffects); return; }
     const p = state.player;
     const dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0;
