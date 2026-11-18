@@ -12,7 +12,7 @@ import { ASCEND, HERO_KIT } from '../content/heroKits';
 import { behaviorOf } from './bosses/runner';
 import { stepById } from '../b22/plan';
 import { MODIFIER_RULES } from '../b22/challenges';
-import { b22PostDamage, b22PreDamage } from './B22Hooks';
+import { b22PostDamage, b22PreDamage, type HitOpts } from './B22Hooks';
 import { noteBossKill } from './B22Mastery';
 import { vexIntercept } from './VexSystem';
 import { downFighter } from './CoopSystem';
@@ -51,7 +51,7 @@ export function shieldFaces(state: GameState, e: Enemy, arcDeg: number): boolean
 
 /** Kills are worth more as the run goes on: the late game thins out (boss mob caps, tougher enemies) but the level-up cadence holds. */
 export const xpTimeScale = (t: number) => 1 + t / 400;
-export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts?: { area?: boolean; proj?: boolean; fx?: boolean }): boolean {
+export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts?: HitOpts): boolean {
   if (enemy.hp <= 0) return false;
   if (enemy.ai?.invuln) return false;
   let dmg = Math.max(0, damage), blocked = false;

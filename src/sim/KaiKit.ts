@@ -127,7 +127,7 @@ function castScatter(s: GameState, c: Cast) {
 }
 function blast(s: GameState, x: number, y: number, dmg: number) {
   const r = SCATTER.blast * (s.player.qRadius / 132); let n = 0;
-  for (const e of s.enemies) { if (!alive(e)) continue; if (Math.hypot(e.x - x, e.y - y) <= r + e.radius) { damageEnemy(s, e, dmg, { area: true }); n++; } }
+  for (const e of s.enemies) { if (!alive(e)) continue; if (Math.hypot(e.x - x, e.y - y) <= r + e.radius) { damageEnemy(s, e, dmg, { area: true, slot: 'q' }); n++; } }
   emit(s, 'scatter_blast', x, y, n);
 }
 function updateShots(s: GameState, k: KaiKit, dt: number) {
@@ -157,7 +157,7 @@ function castMeteor(s: GameState, c: Cast) {
     const fx = p.x + c.dirX * 30, fy = p.y + c.dirY * 30, dmg = p.qDamage * METEOR.damageMul * (last ? METEOR.finalMul : 1) * s.mods.formPower; let n = 0;
     for (const e of s.enemies) {
       if (!alive(e) || Math.hypot(e.x - fx, e.y - fy) > METEOR.reach + e.radius) continue;
-      damageEnemy(s, e, dmg, { area: true }); n++;
+      damageEnemy(s, e, dmg, { area: true, slot: 'q' }); n++;
       if (e.hp > 0 && !isBoss(e.kind)) for (let i = 0; i < 3; i++) slideMove(e, c.dirX * (last ? METEOR.finalKnock : METEOR.knock) / 0.45, c.dirY * (last ? METEOR.finalKnock : METEOR.knock) / 0.45, 0.15);
     }
     emit(s, 'meteor_beat', fx, fy, last ? 100 + n : n);
@@ -172,7 +172,7 @@ function updatePillars(s: GameState, k: KaiKit) {
     if (pl.fired || s.time < pl.at) continue; pl.fired = true; let n = 0;
     for (const e of s.enemies) {
       if (!alive(e) || Math.hypot(e.x - pl.x, e.y - pl.y) > pl.r + e.radius || (k.riseHits[e.id] ?? 0) >= RISE.maxHitsPerEnemy) continue;
-      k.riseHits[e.id] = (k.riseHits[e.id] ?? 0) + 1; damageEnemy(s, e, pl.dmg, { area: true }); n++;
+      k.riseHits[e.id] = (k.riseHits[e.id] ?? 0) + 1; damageEnemy(s, e, pl.dmg, { area: true, slot: 'e' }); n++;
       if (e.hp > 0 && !isBoss(e.kind)) { const d = normalize(e.x - pl.x, e.y - pl.y); for (let i = 0; i < 3; i++) slideMove(e, d.x * RISE.push / 0.45, d.y * RISE.push / 0.45, 0.15); e.stagger = Math.max(e.stagger, 0.3); }
     }
     emit(s, 'flare_pillar', pl.x, pl.y, n);
@@ -194,12 +194,12 @@ function updateCrucible(s: GameState, k: KaiKit, dt: number) {
   for (const e of s.enemies) { if (!alive(e) || isBoss(e.kind) || e.hp <= 0) continue; const d = Math.hypot(e.x - z.x, e.y - z.y); if (d < z.r + e.radius && d > 14) slideMove(e, (z.x - e.x) / d * CRUCIBLE.pull, (z.y - e.y) / d * CRUCIBLE.pull, dt); }
   const gap = (z.life - 0.35) / z.pulses;
   while (z.pulse < z.pulses && z.t >= (z.pulse + 1) * gap - 1e-9) {
-    z.pulse++; let n = 0; for (const e of s.enemies) if (alive(e) && Math.hypot(e.x - z.x, e.y - z.y) <= z.r + e.radius) { damageEnemy(s, e, z.dmg, { area: true }); n++; }
+    z.pulse++; let n = 0; for (const e of s.enemies) if (alive(e) && Math.hypot(e.x - z.x, e.y - z.y) <= z.r + e.radius) { damageEnemy(s, e, z.dmg, { area: true, slot: 'r' }); n++; }
     emit(s, 'crucible_pulse', z.x, z.y, n);
   }
   if (!z.done && z.t >= z.life - 1e-9) {
     z.done = true; let n = 0;
-    for (const e of s.enemies) if (alive(e) && Math.hypot(e.x - z.x, e.y - z.y) <= z.finalR + e.radius) { damageEnemy(s, e, z.finalDmg, { area: true }); n++; if (e.hp > 0 && !isBoss(e.kind)) { e.stagger = Math.max(e.stagger, CRUCIBLE.stagger); const d = normalize(e.x - z.x, e.y - z.y); for (let i = 0; i < 3; i++) slideMove(e, d.x * 150 / 0.45, d.y * 150 / 0.45, 0.15); } }
+    for (const e of s.enemies) if (alive(e) && Math.hypot(e.x - z.x, e.y - z.y) <= z.finalR + e.radius) { damageEnemy(s, e, z.finalDmg, { area: true, slot: 'r' }); n++; if (e.hp > 0 && !isBoss(e.kind)) { e.stagger = Math.max(e.stagger, CRUCIBLE.stagger); const d = normalize(e.x - z.x, e.y - z.y); for (let i = 0; i < 3; i++) slideMove(e, d.x * 150 / 0.45, d.y * 150 / 0.45, 0.15); } }
     emit(s, 'crucible_final', z.x, z.y, n); k.crucible = null;
   }
 }
@@ -213,7 +213,7 @@ function updateClone(s: GameState, k: KaiKit, dt: number) {
   for (const e of s.enemies) { if (!alive(e)) continue; const d = Math.hypot(e.x - c.x, e.y - c.y); if (d < ECHO.seek && d < bd) { bd = d; tgt = e; } }
   let mx = 0, my = 0;
   if (tgt) { const d = bd, v = normalize(tgt.x - c.x, tgt.y - c.y); c.face = faceOf(v.x, v.y); if (d > ECHO.keep + 30) { mx = v.x; my = v.y; } else if (d < ECHO.keep - 40) { mx = -v.x; my = -v.y; }
-    if (d <= p.attackRange && c.atk <= 0) { c.atk = ECHO.atkEvery; c.swing = 0.2; s.impacts.push({ id: s.nextId++, kind: 'shot', x: c.x, y: c.y - 15, targetX: tgt.x, targetY: tgt.y, ttl: 0.2, life: 0.2 }); damageEnemy(s, tgt, c.dmg); } }
+    if (d <= p.attackRange && c.atk <= 0) { c.atk = ECHO.atkEvery; c.swing = 0.2; s.impacts.push({ id: s.nextId++, kind: 'shot', x: c.x, y: c.y - 15, targetX: tgt.x, targetY: tgt.y, ttl: 0.2, life: 0.2 }); damageEnemy(s, tgt, c.dmg, { slot: 'none' }); } }
   else { const d = Math.hypot(p.x - c.x, p.y - c.y); if (d > 120) { const v = normalize(p.x - c.x, p.y - c.y); mx = v.x; my = v.y; } }
   c.moving = mx !== 0 || my !== 0; if (c.moving) slideMove(c, mx * ECHO.speed, my * ECHO.speed, dt);
   for (const e of s.enemies) {
