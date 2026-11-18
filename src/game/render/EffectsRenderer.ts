@@ -20,7 +20,7 @@ export class EffectsRenderer {
   render(state: GameState, reduced = false) {
     const p = state.player, hero = state.hero, mine = hero !== 'kai', solar = !mine && p.form >= 1 && p.form !== 3;   // B20: Ren / Sora never borrow Kai's orange solar set; they have their own ImageGen dash and hit art
     this.vexNow = hero === 'vex'; this.vexForm = p.form; const rh = hero === 'vex' ? 'ren' : hero;
-    const g2 = hero === 'vex' && p.form === 2, hk = (n: string) => { const key = heroFxKey(rh === 'ren' ? 'ren' : 'sora', n); return g2 ? grayKey(this.scene, key) : key; }, hcol = hero === 'vex' ? vexTint(p.form).main : rh === 'ren' ? 0xff4a3a : 0x9fe8ff;   // B13: Stillfire Apex keeps the cool cyan/silver effect set
+    const g2 = hero === 'vex' && p.form === 2, hk = (n: string) => { const key = heroFxKey(hero === 'vex' ? 'vex' : rh === 'ren' ? 'ren' : 'sora', n); return g2 ? grayKey(this.scene, key) : key; }, hcol = hero === 'vex' ? vexTint(p.form).main : rh === 'ren' ? 0xff4a3a : 0x9fe8ff;   // B13: Stillfire Apex keeps the cool cyan/silver effect set
     const k = (n: string) => vfxKey(n, solar);
     const running = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory';
     const dt = running ? Math.min(0.05, this.scene.game.loop.delta / 1000) : 0;   // frozen with the sim while paused / choosing an upgrade

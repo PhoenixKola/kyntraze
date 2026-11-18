@@ -145,7 +145,8 @@ export class Simulation {
     const s = this.state, P = s.party!; s.time += dt; P.shared.time = s.time;
     const evStart = s.abilityEvents.length;
     for (let i = 0; i < P.slots.length; i++) {
-      if (!standing(s, i)) { const q = P.slots[i]; q.input = inputs[i]; continue; }
+      P.slots[i].input = inputs[i];   // the renderer animates each fighter from their own stored input
+      if (!standing(s, i)) continue;
       swapTo(s, i); const n0 = s.abilityEvents.length; this.playerPhase(s, dt, inputs[i], P.slots[i]);
       for (let k = n0; k < s.abilityEvents.length; k++) s.abilityEvents[k].slot = i;
     }

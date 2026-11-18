@@ -1,6 +1,6 @@
 /** B19: everything Ren and Sora draw on top of the world that is not the character sprite: projectiles, orbs, shockwaves, the Lance, ground telegraphs, the transformation reveal and the persistent auras.
  *  Pure projection of sim state (state.hx, state.abilityEvents, state.cinema); it never decides anything. Drawn with two Graphics layers (normal + additive) so the cost is two draw batches whatever the crowd. */
-import { vexSkin } from '../../assets/heroAnimation';
+import type { HeroArt } from '../../assets/heroAnimation';
 import { grayKey } from './vexTint';
 import Phaser from 'phaser';
 import type { GameState, HeroCast } from '../../sim/GameState';
@@ -13,12 +13,13 @@ import { AuraView } from './auraView';
 import { evolution, tierGain, tierSparks, type Evolution } from './buildEvolution';
 
 /** ImageGen VFX sprites (public/art/fx/<hero>/): additive, used for the aura and the big moments; the Graphics layers keep the geometry (rings, beams, bolts). */
-export const HERO_FX_NAMES: Record<'ren' | 'sora', readonly string[]> = {
+export const HERO_FX_NAMES: Record<HeroArt, readonly string[]> = {
   ren: ['rs_slash1', 'rs_slash2', 'rs_finisher', 'rs_rush', 'rs_dashlines', 'rs_dashslash', 'rs_meteor', 'rs_impact', 'rs_ring', 'rs_fissure', 'rs_afterimage', 'rs_fist', 'ra_back1', 'ra_back2', 'ra_veil', 'ra_embersring', 'ra_ground', 'ra_pillar', 'ra_nova', 'ra_embers', 'afterimage_streak', 'aura_wisp_a', 'aura_wisp_b', 'dust_puff', 'embers', 'fist_orb', 'ground_crack', 'ground_ring', 'impact_burst', 'light_pillar', 'speed_streak', 'supernova_ring'],
   sora: [...Array.from({ length: 20 }, (_, i) => `vfx_${String(i).padStart(2, '0')}`), 'sl_beam', 'sl_beam2', 'sl_muzzle', 'sl_cap', 'sl_orb1', 'sl_orb2', 'sl_orb3', 'sl_vortex', 'sm_needle', 'sm_volley', 'sm_dashlines', 'sm_dashslash', 'sm_back1', 'sm_back2', 'sm_arcs', 'sm_ground', 'sm_motes', 'sm_afterimage', 'sm_ring', 'sm_hit'],
+  get vex() { return this.ren; },
 };
 export const heroFxKey = (hero: string, n: string) => `hfx-${hero}-${n}`;
-export const heroFxUrl = (hero: string, n: string) => `/art/fx/${hero === 'ren' && vexSkin ? 'vex' : hero}/${n}.png`;
+export const heroFxUrl = (hero: string, n: string) => `/art/fx/${hero}/${n}.png`;
 const PAL = {
   ren: { core: 0xfff0d8, hot: 0xff7a3d, mid: 0xff2e2a, deep: 0x8a0f1c, dark: 0x2a0508, ember: 0xffb36b },
   sora: { core: 0xffffff, hot: 0xcfeeff, mid: 0x4db8ff, deep: 0x1c5fd6, dark: 0x081840, ember: 0x9fe8ff },
@@ -35,13 +36,13 @@ export class HeroFxView {
   private readonly imgs: Phaser.GameObjects.Image[] = []; private used = 0;
   /** Pooled additive image: the sprite layer of the aura and the big moments (hidden again every frame unless re-placed). */
   private put(name: string, x: number, y: number, scale: number, alpha: number, o: { rot?: number; sy?: number; ox?: number; oy?: number; depth?: number; flip?: boolean } = {}) {
-    let key = heroFxKey(this.hero, name); if (!this.scene.textures.exists(key) || alpha <= 0.01) return; if (this.gray) key = grayKey(this.scene, key);
+    let key = heroFxKey(this.art, name); if (!this.scene.textures.exists(key) || alpha <= 0.01) return; if (this.gray) key = grayKey(this.scene, key);
     let im = this.imgs[this.used]; if (!im) { if (this.imgs.length >= 110) return; im = this.scene.add.image(0, 0, key).setBlendMode(Phaser.BlendModes.ADD); this.imgs.push(im); }
     this.used++; im.setTexture(key).setVisible(true).setPosition(Math.round(x), Math.round(y)).setScale(scale * (o.flip ? -1 : 1), scale * (o.sy ?? 1)).setAlpha(Math.min(1, alpha)).setRotation(o.rot ?? 0).setOrigin(o.ox ?? 0.5, o.oy ?? 0.5).setDepth(o.depth ?? 11.3);
   }
   private gray = false; private lastEvent = 0; private readonly auraTrack = new AuraTracker(); private readonly director = new ImpactDirector(); private readonly auraView: AuraView;
   private zoom = 1; private shake = 0; private evo: Evolution | null = null;
-  constructor(private readonly scene: Phaser.Scene, private readonly hero: 'ren' | 'sora') {
+  constructor(private readonly scene: Phaser.Scene, private readonly hero: 'ren' | 'sora', private readonly art: HeroArt = hero) {
     this.ground = scene.add.graphics().setDepth(3.6);
     this.g = scene.add.graphics().setDepth(11);
     this.glow = scene.add.graphics().setDepth(11.2).setBlendMode(Phaser.BlendModes.ADD);

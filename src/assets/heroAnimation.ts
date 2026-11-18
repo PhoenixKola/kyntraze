@@ -5,20 +5,27 @@ import { RUN_PHASES, SIM_DASH_SECONDS, facingFromInput, facingFromVector, type A
 import type { HeroAct } from '../content/heroKits';
 import { REN, SORA } from '../content/heroKits';
 
-/** Which hero sheet sets are complete (all four facings, every clip) and may be loaded. Flip to true only when public/art/<hero>[-f1]/ is fully built; until then the hero draws the clearly-marked dev placeholder body instead of half a rig. */
-export const HERO_SHEETS: Record<'ren' | 'sora', { base: boolean; f1: boolean; anchors: boolean }> = { ren: { base: true, f1: true, anchors: true }, sora: { base: true, f1: true, anchors: true } };
-/** B22 INTERIM ART: Vex has no ImageGen sprite set yet, so he is drawn from Ren's rig (the nearest melee silhouette) with a violet-black tint and his own effects. Replace by shipping public/art/vex (all four facings) and setting HERO_SHEETS.vex. */
-export const artHero = (h: string): 'ren' | 'sora' => (h === 'vex' ? 'ren' : (h as 'ren' | 'sora'));   // Vex = Ren's rig, recoloured
-/** Vex plays Ren's animation rig using palette-remapped sheets (scripts/b22-vex-recolor.py -> public/art/vex, vex-f1, fx/vex). Set once per run before assets load. */
-export let vexSkin = false; export const setVexSkin = (on: boolean) => { vexSkin = on; };
+/** The heroes whose art is a hero sheet set (Kai has his own kaiAnimation pipeline). */
+export type HeroArt = 'ren' | 'sora' | 'vex';
+/** Appearance sets: base, f1 (first transformation), f2 (Vex's Voidheart Exile only). */
+export type HeroForm = 'base' | 'f1' | 'f2';
+export const HERO_ART: readonly HeroArt[] = ['ren', 'sora', 'vex'];
+export const isHeroArt = (h: string): h is HeroArt => h === 'ren' || h === 'sora' || h === 'vex';
+/** Which sheet sets exist (all four facings, every clip). A missing set draws the clearly-marked dev placeholder body instead of half a rig. */
+export const HERO_SHEETS: Record<HeroArt, { base: boolean; f1: boolean; f2: boolean; anchors: boolean }> = { ren: { base: true, f1: true, f2: false, anchors: true }, sora: { base: true, f1: true, f2: false, anchors: true }, vex: { base: true, f1: true, f2: true, anchors: true } };
+export const heroForms = (h: HeroArt): HeroForm[] => (['base', 'f1', 'f2'] as const).filter(f => HERO_SHEETS[h][f]);
+/** Motion/FX rig family: Vex reuses Ren's state machine and effect logic (his art, textures and sounds are his own explicit keys). */
+export const rigOf = (h: HeroArt): 'ren' | 'sora' => (h === 'sora' ? 'sora' : 'ren');
 export const VOID_TINT = 0x9a90c0;
-export const HERO_REGISTRY_KEY = (hero: string, form: 'base' | 'f1') => `hero-${hero}-${form}-manifests`;
+export const HERO_REGISTRY_KEY = (hero: string, form: HeroForm) => `hero-${hero}-${form}-manifests`;
 export const HERO_ANCHORS_KEY = (hero: string) => `hero-${hero}-anchors`;
-export const heroRoot = (hero: string, form: 'base' | 'f1') => skinRoot(`/art/${hero === 'ren' && vexSkin ? 'vex' : hero}${form === 'f1' ? '-f1' : ''}`);
-export const heroManifestUrl = (hero: string, dir: Facing, form: 'base' | 'f1') => `${heroRoot(hero, form)}/${dir}/manifest.json`;
-export const heroSheetUrl = (hero: string, dir: Facing, clip: KaiClipInfo, form: 'base' | 'f1') => `${heroRoot(hero, form)}/${dir}/${clip.sheet}`;
-export const heroAnchorsUrl = (hero: string) => `/art/${hero === 'ren' && vexSkin ? 'vex' : hero}-anchors.json`;
-export const heroTextureKey = (hero: string, dir: Facing, clip: KaiClip, form: 'base' | 'f1') => `${hero}${form === 'f1' ? 'f1' : ''}-${dir}-${clip}`;
+const FORM_SUFFIX: Record<HeroForm, string> = { base: '', f1: '-f1', f2: '-f2' };
+/** Outfits are Kai/Ren/Sora/Vex-specific (skinRoot checks the owner), and Vex's f2 set has no outfit variants. */
+export const heroRoot = (hero: string, form: HeroForm) => (form === 'f2' ? `/art/${hero}-f2` : skinRoot(`/art/${hero}${FORM_SUFFIX[form]}`));
+export const heroManifestUrl = (hero: string, dir: Facing, form: HeroForm) => `${heroRoot(hero, form)}/${dir}/manifest.json`;
+export const heroSheetUrl = (hero: string, dir: Facing, clip: KaiClipInfo, form: HeroForm) => `${heroRoot(hero, form)}/${dir}/${clip.sheet}`;
+export const heroAnchorsUrl = (hero: string) => `/art/${hero}-anchors.json`;
+export const heroTextureKey = (hero: string, dir: Facing, clip: KaiClip, form: HeroForm) => `${hero}${form === 'base' ? '' : form}-${dir}-${clip}`;
 
 export interface HeroActView { id: number; act: HeroAct; t: number; dur: number; face: Facing; released: boolean; moving: boolean; beats: number; hop: number; hops: number; hopT: number; charge: number }
 export interface HeroAnimInput {
@@ -43,7 +50,7 @@ export class HeroAnimator {
   private time = 0; private runTime = 0; private sinceTurn = 1; private hurtT = -1; private deathT = -1; private dashRec = -1; private dashWas = false; private dashProg = 0;
   private strikeT = -1; private lastStrike = -9; private actId = 0; private beatSeen = 0; private beatT = 99; private formPrev = 0; private moveNow = false; private cinemaOn = false; private cinemaT = 0; private cinemaCommit = 1; private cinemaDur = 1;
   private actView: HeroActView | null = null;
-  constructor(readonly hero: 'ren' | 'sora', private readonly base: KaiManifests, private readonly f1?: KaiManifests) {}
+  constructor(readonly hero: HeroArt, private readonly base: KaiManifests, private readonly f1?: KaiManifests) {}
   get dead() { return this.deathT >= 0; }
   deathPresented() { if (this.deathT < 0) return false; const d = this.info('Death'); return this.deathT >= d.frames / d.fps + DEATH_HOLD; }
   private set(form: 'base' | 'f1' = this.visualForm) { return form === 'f1' && this.f1 ? this.f1 : this.base; }

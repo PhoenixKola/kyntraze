@@ -14,7 +14,7 @@ import { HeroFxView } from './heroFxView';
 import { BodyMotion, styleFor } from './bodyMotion';
 import { AuraView, type AuraState } from './auraView';
 import { AuraTracker } from './auraState';
-import { artHero, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, HeroAnimator, heroTextureKey, type HeroActView } from '../../assets/heroAnimation';
+import { HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, HeroAnimator, heroTextureKey, rigOf, type HeroActView, type HeroArt, type HeroForm } from '../../assets/heroAnimation';
 import { EnemyRenderer } from './enemyRenderer';
 import { BossRenderer } from './bossRenderer';
 import { KAI_ANCHORS_KEY, handAnchorWorld, type AnchorTable, type HandAnchor } from '../../assets/kaiAnimation';
@@ -124,7 +124,7 @@ export class EntityRenderer {
   }
   /** Voidheart Exile: the runner levitates over a dark void disc, a broken crimson halo turns behind the head and shards orbit the body. */
   /** B21.1: spring lean / squash / bob around the feet for the current hero state (identity while dead, in a reveal or frozen). */
-  private applyMotion(state: GameState, dt: number, hero: 'kai' | 'ren' | 'sora', reduced: boolean, hurt: boolean, dashing: boolean, clip: string, facing: string) {
+  private applyMotion(state: GameState, dt: number, hero: 'kai' | 'ren' | 'sora' | 'vex', reduced: boolean, hurt: boolean, dashing: boolean, clip: string, facing: string) {
     const p = state.player, frozen = !!state.cinema || clip === 'Transform' || state.phase !== 'running', cast = state.cast ?? state.hx.act;
     const m = this.motion.update({ dt, style: styleFor(hero, p.form), vx: p.vx, vy: p.vy, maxSpeed: p.speed * 1.2, dashing, dashDx: p.dashDx, dashDy: p.dashDy, casting: !!cast, released: !!cast && cast.released, hurt, hurtDir: facing === 'east' ? -1 : 1, alive: p.hp > 0, frozen, reduced });
     for (const s of [this.hero, this.legs]) { s.setRotation(m.rot).setScale(this.baseScale * m.sx, this.baseScale * m.sy); }
@@ -206,12 +206,12 @@ export class EntityRenderer {
   }
   /** B19: Ren / Sora. The character sprite is drawn from the hero sheets when they exist (HeroAnimator over the same sheet contract as Kai); a flat dev body stands in only while a hero has no sheets. The effects layer is always the sim projection in heroFxView. */
   private syncHero(state: GameState, input: InputState, deltaMs: number, reduced: boolean) {
-    const p = state.player, dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0, hero = artHero(state.hero);
+    const p = state.player, dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0, hero = state.hero as HeroArt;
     const hurt = !Number.isNaN(this.lastHp) && p.hp < this.lastHp && p.hp > 0; this.lastHp = p.hp;
     if (Number.isNaN(this.lastX)) { this.lastX = p.x; this.lastY = p.y; }
     if (Math.hypot(p.x - this.lastX, p.y - this.lastY) > 0.05) this.moveHold = 0.1; else this.moveHold = Math.max(0, this.moveHold - dt);
     this.lastX = p.x; this.lastY = p.y;
-    if (!this.heroFx) { this.heroFx = new HeroFxView(this.scene, hero); this.heroBody = this.scene.add.graphics().setDepth(10); }
+    if (!this.heroFx) { this.heroFx = new HeroFxView(this.scene, rigOf(hero), hero); this.heroBody = this.scene.add.graphics().setDepth(10); }
     if (this.heroAnim === undefined) {
       const b = this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'base')) as KaiManifests | undefined;
       this.heroAnim = b ? new HeroAnimator(hero, b, this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f1')) as KaiManifests | undefined) : null; this.heroAnchors = this.scene.registry.get(HERO_ANCHORS_KEY(hero)) as AnchorTable | undefined;
@@ -221,19 +221,20 @@ export class EntityRenderer {
     if (anim) {
       const c = state.hx.act, view: HeroActView | null = c ? { id: c.id, act: c.act, t: c.t, dur: c.dur, face: c.face, released: c.released, moving: c.moving, beats: c.beats, hop: c.hop, hops: c.hops.length, hopT: c.hopT, charge: c.charge } : null;
       const pose = anim.update({ dt, alive: !dead, moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, inputX: input.x, inputY: input.y, runSpeed: p.speed * (p.form ? 1.1 : 1), dashing: p.dashRemaining > 0, dashX: p.dashDx, dashY: p.dashDy, dashRemaining: p.dashRemaining, hurt, form: p.form, cinema: state.cinema ? { t: state.cinema.t, dur: state.cinema.dur, commitAt: state.cinema.commitAt } : null, act: view, strike: state.hx.strike });
-      this.pose = pose; const form = pose.form === 'f1' ? 'f1' : 'base', voidForm = state.hero === 'vex' && p.form === 2 && form === 'f1' && !!this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f2' as 'f1')), set = (voidForm ? this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f2' as 'f1')) : form === 'f1' ? this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f1')) : this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'base'))) as KaiManifests, m = set[pose.facing], fr = clipFrame(m, pose.clip), key0 = heroTextureKey(hero, pose.facing, pose.clip, form), key = voidForm ? key0.replace(/^renf1-/, 'vexf2-').replace(/^vexf1-/, 'vexf2-') : key0;
-      if (voidForm && !this.scene.textures.exists(key)) { /* sheet missing: fall back to Riftbound art */ }
+      this.pose = pose; const form: 'base' | 'f1' = pose.form === 'f1' ? 'f1' : 'base';
+      // one appearance for BOTH body layers: Voidheart Exile (Vex f2) resolves its upper, legs and anchors from the same set
+      const look: HeroForm = hero === 'vex' && p.form === 2 && form === 'f1' && !!this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f2')) ? 'f2' : form, set = this.scene.registry.get(HERO_REGISTRY_KEY(hero, look)) as KaiManifests, m = set[pose.facing], fr = clipFrame(m, pose.clip), key = heroTextureKey(hero, pose.facing, pose.clip, look);
       if (this.hero.texture.key !== key) this.hero.setTexture(key);
       this.hero.setFrame(pose.frame).setOrigin(fr.ox / fr.w, fr.oy / fr.h).setPosition(x, y).setVisible(true);
       const hitFlash = !dead && p.invulnerable > RULES.contactInvulnerability - 0.1 && !state.hx.act, alpha = !dead && pose.clip !== 'Transform' && p.invulnerable > 0 && Math.floor(state.time * 18) % 2 === 0 ? 0.86 : 1;
       this.hero.setAlpha(alpha); this.hero.tintMode = Phaser.TintModes.MULTIPLY; this.legs.tintMode = Phaser.TintModes.MULTIPLY;
       if (hitFlash) { this.hero.setTint(0xffeef2); this.hero.tintMode = Phaser.TintModes.FILL; } else this.hero.clearTint();   // Voidheart Exile is its own recoloured sheet set (vexf2-*), not a tint
       if (pose.legs !== null) {
-        const lf = clipFrame(m, 'RunLower'), lkey = heroTextureKey(hero, pose.facing, 'RunLower', form); if (this.legs.texture.key !== lkey) this.legs.setTexture(lkey);
+        const lf = clipFrame(m, 'RunLower'), lkey = heroTextureKey(hero, pose.facing, 'RunLower', look); if (this.legs.texture.key !== lkey) this.legs.setTexture(lkey);
         this.legs.setFrame(pose.legs).setOrigin(lf.ox / lf.w, lf.oy / lf.h).setPosition(x, y).setAlpha(alpha).setVisible(true); if (hitFlash) { this.legs.setTint(0xffeef2); this.legs.tintMode = Phaser.TintModes.FILL; } else this.legs.clearTint();
       } else this.legs.setVisible(false);
       this.applyMotion(state, dt, hero, reduced, hurt, p.dashRemaining > 0, pose.clip, pose.facing);
-      this.ghostTrail(state, dt, x, y, hero, reduced); this.blinkTrail(state, dt, reduced);
+      this.ghostTrail(state, dt, x, y, rigOf(hero), reduced); this.blinkTrail(state, dt, reduced);
       this.hand = this.heroAnchors ? handAnchorWorld(this.heroAnchors, form, pose.facing, pose.clip, pose.frame, x, y + this.hoverY, this.baseScale) : null;
 
     } else {

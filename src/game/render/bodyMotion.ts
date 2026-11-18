@@ -1,5 +1,5 @@
 /** B21.1: runtime body motion for the eight hero states. Critically-damped springs turn the real velocity, dash, cast and hurt state into a small lean / squash / hover offset applied around the feet (the sprite origin), so starts, stops, turns, landings and hits carry weight in every facing without touching the authored sheets. Presentation only. */
-export type MotionStyle = 'kai' | 'flare' | 'comet' | 'still' | 'ren' | 'ren_asc' | 'sora' | 'sora_sov';
+export type MotionStyle = 'kai' | 'flare' | 'comet' | 'still' | 'ren' | 'ren_asc' | 'sora' | 'sora_sov' | 'vex' | 'vex_rift' | 'vex_void';
 export interface Signature { lean: number; leanSpring: number; squash: number; bob: number; bobHz: number; hover: number; breathe: number; stopKick: number }
 
 /** Each state's character: Kai grounded, Flarebound springy, Cometheart explosive forward lean, Stillfire a floating glide; Ren planted and heavy, Ascendant a coiled spring; Sora light, Sovereign a smooth glide. */
@@ -11,10 +11,13 @@ export const SIGNATURE: Record<MotionStyle, Signature> = {
   ren:      { lean: 0.04,  leanSpring: 12, squash: 1.1,  bob: 1.4, bobHz: 7,   hover: 0,   breathe: 0.016, stopKick: 0.8 },
   ren_asc:  { lean: 0.075, leanSpring: 22, squash: 1.5,  bob: 1.0, bobHz: 9,   hover: 0,   breathe: 0.012, stopKick: 1.2 },
   sora:     { lean: 0.045, leanSpring: 18, squash: 0.8,  bob: 0.7, bobHz: 9.5, hover: 0,   breathe: 0.01,  stopKick: 0.4 },
+  vex:      { lean: 0.03,  leanSpring: 14, squash: 0.7,  bob: 0.6, bobHz: 8,   hover: 0,   breathe: 0.01,  stopKick: 0.6 },
+  vex_rift: { lean: 0.05,  leanSpring: 20, squash: 0.9,  bob: 0.5, bobHz: 9,   hover: 0,   breathe: 0.009, stopKick: 0.9 },
+  vex_void: { lean: 0.022, leanSpring: 9,  squash: 0.45, bob: 0.2, bobHz: 6,   hover: 0,   breathe: 0.008, stopKick: 0.3 },
   sora_sov: { lean: 0.03,  leanSpring: 8,  squash: 0.4,  bob: 0,   bobHz: 0,   hover: 0,   breathe: 0.007, stopKick: 0.2 },
 };
-export const styleFor = (hero: 'kai' | 'ren' | 'sora', form: number): MotionStyle =>
-  hero === 'kai' ? (form === 1 ? 'flare' : form === 2 ? 'comet' : form === 3 ? 'still' : 'kai') : hero === 'ren' ? (form ? 'ren_asc' : 'ren') : (form ? 'sora_sov' : 'sora');
+export const styleFor = (hero: 'kai' | 'ren' | 'sora' | 'vex', form: number): MotionStyle =>
+  hero === 'vex' ? (form === 2 ? 'vex_void' : form === 1 ? 'vex_rift' : 'vex') : hero === 'kai' ? (form === 1 ? 'flare' : form === 2 ? 'comet' : form === 3 ? 'still' : 'kai') : hero === 'ren' ? (form ? 'ren_asc' : 'ren') : (form ? 'sora_sov' : 'sora');
 
 export interface MotionIn { dt: number; style: MotionStyle; vx: number; vy: number; maxSpeed: number; dashing: boolean; dashDx: number; dashDy: number; casting: boolean; released: boolean; hurt: boolean; hurtDir: number; alive: boolean; frozen: boolean; reduced: boolean }
 export interface MotionOut { rot: number; sx: number; sy: number; dy: number }
