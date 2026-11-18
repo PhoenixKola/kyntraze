@@ -11,6 +11,7 @@ import { BOSS_FX_NAMES, BOSS_KINDS, bossFxKey, bossFxUrl, bossManifestKey, bossM
 import { ENEMY_KINDS } from '../../content/enemies';
 import type { HeroId } from '../../content/heroes';
 import { HERO_FX_NAMES, heroFxKey, heroFxUrl } from '../render/heroFxView';
+import { HAIR_ANCHORS_KEY } from '../render/hairRig';
 import { HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroForms, heroManifestUrl, heroSheetUrl, heroTextureKey, isHeroArt, type HeroArt } from '../../assets/heroAnimation';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
@@ -35,6 +36,7 @@ export class BootScene extends Phaser.Scene {
       if (HERO_SHEETS[h].base) { for (const form of heroForms(h)) KAI_DIRS.forEach(dir => this.load.json(`hero-${h}-${form}-manifest-${dir}`, heroManifestUrl(h, dir, form))); if (HERO_SHEETS[h].anchors) this.load.json(HERO_ANCHORS_KEY(h), heroAnchorsUrl(h)); }
       HERO_FX_NAMES[h].forEach((n: string) => this.load.image(heroFxKey(h, n), heroFxUrl(h, n)));
     }
+    this.load.json(HAIR_ANCHORS_KEY, '/art/hair-anchors.json');   // B23: per-frame head anchors for the hair rig (optional: without it the hair simply stays pinned)
     this.load.json(F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL);
     B21_GROUPS.forEach(g => this.load.json(b21ManifestKey(g), b21ManifestUrl(g)));   // B21: optional art groups, a missing manifest is ignored
     B22_ART.forEach(n => this.load.image(`b22-${n}`, `art/b22/${n}.png`));
@@ -58,7 +60,7 @@ export class BootScene extends Phaser.Scene {
     const manifests = {} as KaiManifests;
     for (const dir of KAI_DIRS) manifests[dir] = parseKaiManifest(this.cache.json.get(`kai-manifest-${dir}`), dir);
     this.registry.set(KAI_REGISTRY_KEY, manifests);
-    this.registry.set(KAI_ANCHORS_KEY, this.cache.json.get(KAI_ANCHORS_KEY));
+    this.registry.set(KAI_ANCHORS_KEY, this.cache.json.get(KAI_ANCHORS_KEY)); this.registry.set(HAIR_ANCHORS_KEY, this.cache.json.get(HAIR_ANCHORS_KEY));
     const f1 = {} as KaiManifests;
     for (const dir of KAI_DIRS) f1[dir] = parseKaiManifest(this.cache.json.get(`kai-f1-manifest-${dir}`), dir, 'f1');
     this.registry.set(KAI_F1_REGISTRY_KEY, f1);

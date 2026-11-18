@@ -12,6 +12,8 @@ import { PASSIVE_AURA } from './fxPolicy';
 import { CONTOUR, ContourController, EDGE_STATES, edgePalette, formKey, registerContourFilter } from './contourFilter';
 import { HeroFxView } from './heroFxView';
 import { BodyMotion, styleFor } from './bodyMotion';
+import { HAIR_ANCHORS_KEY, HAIR_STYLE, HairDriver, type HairTable } from './hairRig';
+import { HairLayer } from './hairLayer';
 import { AuraView, type AuraState } from './auraView';
 import { AuraTracker } from './auraState';
 import { HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, HeroAnimator, heroTextureKey, rigOf, type HeroActView, type HeroArt, type HeroForm } from '../../assets/heroAnimation';
@@ -55,6 +57,7 @@ export class EntityRenderer {
     this.f1 = scene.registry.get(KAI_F1_REGISTRY_KEY) as KaiManifests | undefined;
     this.f2 = scene.registry.get(KAI_F2_REGISTRY_KEY) as KaiManifests | undefined;
     this.f3 = scene.registry.get(KAI_F3_REGISTRY_KEY) as KaiManifests | undefined;
+    this.hairLayer = new HairLayer(scene); this.hairTable = scene.registry.get(HAIR_ANCHORS_KEY) as HairTable | undefined;
     this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1, this.f2, this.f3); this.cometFx = new CometFx(scene); this.kitFx = new KaiKitFx(scene, this.f3); this.apexFx = new ApexFx(scene); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = partner ? null : new EnemyRenderer(scene); this.bosses = partner ? null : new BossRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
@@ -65,6 +68,13 @@ export class EntityRenderer {
     this.auraCopyHero = scene.add.sprite(0, 0, kaiTextureKey('south', 'Idle'), 0); this.auraCopyLegs = scene.add.sprite(0, 0, kaiTextureKey('south', 'Run'), 0).setVisible(false);
     this.auraBody = scene.add.container(0, 0, [this.auraCopyLegs, this.auraCopyHero]).setDepth(9.7).setVisible(false); this.auraBody.enableFilters();
     this.auraGlow.push(this.auraBody.filters!.internal.addGlow(0xffffff, 0, 0, 1, true, 4, 10) as unknown as StrokeCtl);
+  }
+  private readonly hairDrv = new HairDriver(); private readonly hairLayer: HairLayer; private readonly hairTable: HairTable | undefined;
+  /** B23: the character's hair tips are deformed from real motion (hairRig); the roots stay pinned. */
+  private hairStep(state: GameState, dt: number, hero: 'kai' | 'ren' | 'sora' | 'vex', key: string, frame: number, clip: string, hurt: boolean, reduced: boolean) {
+    const p = state.player, st = HAIR_STYLE[styleFor(hero, p.form)], dead = state.phase === 'dead' || p.hp <= 0, cast = state.cast ?? state.hx.act;
+    const o = this.hairDrv.update({ dt, vx: this.velX, vy: this.velY, maxSpeed: p.speed * 1.2, frozen: !!state.cinema || clip === 'Transform' || state.phase !== 'running', reduced, style: st, released: !!cast && cast.released, hurt, hurtDir: this.pose.facing === 'east' ? -1 : 1, dead });
+    this.hairLayer.apply(this.hero, this.hairTable, key, frame, o.x, o.y, st.low, st.ramp);
   }
   private readonly contour: ContourController[] = []; private contourT = 0; private readonly rim: StrokeCtl[] = []; private readonly auraGlow: StrokeCtl[] = []; private readonly auraTrack = new AuraTracker(); private auraMotes: FxPool | null = null; private moteClock = 0;
   /** B21.3 (revised): the transformation aura now FITS the body like the stroke: a soft, form-coloured glow filter on the sprite's own silhouette that breathes with activity (idle < moving < dash < charge < release), instead of art wings that extend past the character. */
@@ -130,7 +140,7 @@ export class EntityRenderer {
   /** B21.1: spring lean / squash / bob around the feet for the current hero state (identity while dead, in a reveal or frozen). */
   private applyMotion(state: GameState, dt: number, hero: 'kai' | 'ren' | 'sora' | 'vex', reduced: boolean, hurt: boolean, dashing: boolean, clip: string, facing: string) {
     const p = state.player, frozen = !!state.cinema || clip === 'Transform' || state.phase !== 'running', cast = state.cast ?? state.hx.act;
-    const m = this.motion.update({ dt, style: styleFor(hero, p.form), vx: p.vx, vy: p.vy, maxSpeed: p.speed * 1.2, dashing, dashDx: p.dashDx, dashDy: p.dashDy, casting: !!cast, released: !!cast && cast.released, hurt, hurtDir: facing === 'east' ? -1 : 1, alive: p.hp > 0, frozen, reduced });
+    const m = this.motion.update({ dt, style: styleFor(hero, p.form), vx: this.velX, vy: this.velY, maxSpeed: p.speed * 1.2, dashing, dashDx: p.dashDx, dashDy: p.dashDy, casting: !!cast, released: !!cast && cast.released, hurt, hurtDir: facing === 'east' ? -1 : 1, alive: p.hp > 0, frozen, reduced });
     for (const s of [this.hero, this.legs]) { s.setRotation(m.rot).setScale(this.baseScale * m.sx, this.baseScale * m.sy); }
     this.hoverY = 0;
     this.hero.y += m.dy + this.hoverY; this.legs.y = this.hero.y;
@@ -140,8 +150,16 @@ export class EntityRenderer {
   handAnchor() { return this.hand; }
   /** QA: the world point the beam/orb was last anchored to and whether it came from the sprite anchors or the sim fallback. */
   fxOrigin() { return this.abilityFx.lastOrigin; }
-  debugPose() { return { ...this.pose, visualForm: this.animator.visualForm, transforming: this.animator.transforming, texture: this.hero.texture.key, frameIndex: Number(this.hero.frame.name), x: this.hero.x, y: this.hero.y, scale: this.baseScale }; }
+  debugPose() { return { ...this.pose, visualForm: this.animator.visualForm, transforming: this.animator.transforming, texture: this.hairLayer.srcKey || this.hero.texture.key, frameIndex: Number(this.hairLayer.srcFrame || this.hero.frame.name), hair: { x: this.hairDrv.spring.x, y: this.hairDrv.spring.y, live: this.hairLayer.active }, x: this.hero.x, y: this.hero.y, scale: this.baseScale }; }
+  /** The sim only keeps player.vx/vy for Stillfire's glide, so the renderer derives the real velocity from displacement (eased; a teleport resets it). */
+  private velX = 0; private velY = 0; private prevPX = NaN; private prevPY = NaN;
+  private trackVelocity(state: GameState, dt: number) {
+    const p = state.player; if (Number.isNaN(this.prevPX)) { this.prevPX = p.x; this.prevPY = p.y; }
+    if (dt > 0) { const ddx = p.x - this.prevPX, ddy = p.y - this.prevPY; if (Math.hypot(ddx, ddy) > 90) { this.velX = this.velY = 0; } else { const k = Math.min(1, dt * 14); this.velX += (ddx / dt - this.velX) * k; this.velY += (ddy / dt - this.velY) * k; } }
+    this.prevPX = p.x; this.prevPY = p.y;
+  }
   sync(state: GameState, input: InputState, deltaMs = 0, reducedEffects = false) {
+    this.trackVelocity(state, state.phase === 'running' ? Math.min(0.1, deltaMs / 1000) : 0);
     this.updateAura(state, Math.min(0.1, deltaMs / 1000), reducedEffects); this.updateStroke(state, Math.min(0.1, deltaMs / 1000), reducedEffects);
     if (state.hero !== 'kai') { this.syncHero(state, input, deltaMs, reducedEffects); this.syncWorld(state, deltaMs, reducedEffects); return; }
     const p = state.player;
@@ -187,6 +205,7 @@ export class EntityRenderer {
       this.legs.setPosition(this.hero.x, this.hero.y).setAlpha(alpha * this.apexFx.heroAlphaMul).setVisible(true);
       if (!(hitFlash && !state.cast)) this.legs.clearTint();
     } else this.legs.setVisible(false);
+    this.hairStep(state, dt, 'kai', key, this.pose.frame, this.pose.clip, hurt, reducedEffects);
     this.applyMotion(state, dt, 'kai', reducedEffects, hurt, p.dashRemaining > 0, this.pose.clip, this.pose.facing);
     this.ghostTrail(state, dt, this.hero.x, this.hero.y, 'kai', reducedEffects);
     this.kaiForm(state, dt, dead, reducedEffects);
@@ -237,6 +256,7 @@ export class EntityRenderer {
         const lf = clipFrame(m, 'RunLower'), lkey = heroTextureKey(hero, pose.facing, 'RunLower', look); if (this.legs.texture.key !== lkey) this.legs.setTexture(lkey);
         this.legs.setFrame(pose.legs).setOrigin(lf.ox / lf.w, lf.oy / lf.h).setPosition(x, y).setAlpha(alpha).setVisible(true); if (hitFlash) { this.legs.setTint(0xffeef2); this.legs.tintMode = Phaser.TintModes.FILL; } else this.legs.clearTint();
       } else this.legs.setVisible(false);
+      this.hairStep(state, dt, hero, key, pose.frame, pose.clip, hurt, reduced);
       this.applyMotion(state, dt, hero, reduced, hurt, p.dashRemaining > 0, pose.clip, pose.facing);
       this.ghostTrail(state, dt, x, y, rigOf(hero), reduced); this.blinkTrail(state, dt, reduced);
       this.hand = this.heroAnchors ? handAnchorWorld(this.heroAnchors, form, pose.facing, pose.clip, pose.frame, x, y + this.hoverY, this.baseScale) : null;
@@ -254,7 +274,7 @@ export class EntityRenderer {
     const c = state.hero === 'vex' ? state.hx.act : null;
     if (c && c.act === 'rift_reversal' && c.sx !== undefined && c.id !== this.blinkId && this.hero.visible) {
       this.blinkId = c.id; const sx = c.sx, sy = (c.sy ?? 0) + KAI_GROUND_DY, tx = c.tx ?? sx, ty = (c.ty ?? c.sy ?? 0) + KAI_GROUND_DY, n = reduced ? 3 : 7;
-      for (let k = 0; k < n; k++) { const u = k / n; this.blinkGhosts.push({ spr: this.scene.add.sprite(sx + (tx - sx) * u, sy + (ty - sy) * u + this.hoverY, this.hero.texture.key, this.hero.frame.name).setOrigin(this.hero.originX, this.hero.originY).setScale(this.hero.scaleX, this.hero.scaleY).setFlipX(this.hero.flipX).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.2).setTint(k % 2 ? vexTint(state.player.form).hot : vexTint(state.player.form).main), life: 0.42 + u * 0.12, max: 0.42 + u * 0.12 }); this.blinkGhosts[this.blinkGhosts.length - 1].spr.tintMode = Phaser.TintModes.FILL; }
+      for (let k = 0; k < n; k++) { const u = k / n; this.blinkGhosts.push({ spr: this.scene.add.sprite(sx + (tx - sx) * u, sy + (ty - sy) * u + this.hoverY, this.hairLayer.srcKey || this.hero.texture.key, this.hairLayer.srcFrame).setOrigin(this.hero.originX, this.hero.originY).setScale(this.hero.scaleX, this.hero.scaleY).setFlipX(this.hero.flipX).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.2).setTint(k % 2 ? vexTint(state.player.form).hot : vexTint(state.player.form).main), life: 0.42 + u * 0.12, max: 0.42 + u * 0.12 }); this.blinkGhosts[this.blinkGhosts.length - 1].spr.tintMode = Phaser.TintModes.FILL; }
       this.blinkFlicker = 0.3;
     }
     for (let k = this.blinkGhosts.length - 1; k >= 0; k--) { const g = this.blinkGhosts[k]; g.life -= dt; if (g.life <= 0) { g.spr.destroy(); this.blinkGhosts.splice(k, 1); continue; } g.spr.setAlpha((g.life / g.max) * 0.85).setScale(g.spr.scaleX * (1 + dt * 0.4)); }
@@ -266,8 +286,8 @@ export class EntityRenderer {
     this.ghostClock -= dt;
     if (fast && this.ghostClock <= 0 && this.hero.visible) {
       this.ghostClock = p.form ? 0.028 : 0.04;
-      let g = this.ghosts.find(q => q.life <= 0); if (!g && this.ghosts.length < cap) { g = { spr: this.scene.add.sprite(0, 0, this.hero.texture.key, 0).setScale(this.hero.scaleX).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.2), life: 0 }; this.ghosts.push(g); }
-      if (g) { g.life = 0.28; g.spr.setTexture(this.hero.texture.key, this.hero.frame.name).setOrigin(this.hero.originX, this.hero.originY).setPosition(x, y).setTint(surge ? 0x4fb8ff : state.hero === 'vex' ? vexTint(state.player.form).ghost : hero === 'ren' ? 0xff3a2e : 0x6fc8ff); g.spr.tintMode = Phaser.TintModes.FILL; }
+      let g = this.ghosts.find(q => q.life <= 0); if (!g && this.ghosts.length < cap) { g = { spr: this.scene.add.sprite(0, 0, this.hairLayer.srcKey || this.hero.texture.key, 0).setScale(this.hero.scaleX).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.2), life: 0 }; this.ghosts.push(g); }
+      if (g) { g.life = 0.28; g.spr.setTexture(this.hairLayer.srcKey || this.hero.texture.key, this.hairLayer.srcFrame).setOrigin(this.hero.originX, this.hero.originY).setPosition(x, y).setTint(surge ? 0x4fb8ff : state.hero === 'vex' ? vexTint(state.player.form).ghost : hero === 'ren' ? 0xff3a2e : 0x6fc8ff); g.spr.tintMode = Phaser.TintModes.FILL; }
     }
     for (const g of this.ghosts) { if (g.life > 0) { g.life -= dt; g.spr.setVisible(g.life > 0).setAlpha(Math.max(0, g.life / 0.28) * (p.form ? 0.55 : 0.4)); } else g.spr.setVisible(false); }
   }
@@ -289,5 +309,5 @@ export class EntityRenderer {
     for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies!.stats(), boss: this.bosses!.stats() }; }
-  destroy() { this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); }
+  destroy() { this.hairLayer.destroy(); this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); }
 }

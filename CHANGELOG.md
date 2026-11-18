@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.23.0 (B23 completion pass, local; PARTIAL - see B23-STATUS.md)
+- Local co-op: the partner is drawn from their own sheets (BootScene loads every fighting hero) and animates (P2 input is now stored per slot); Vex has explicit `vex*` asset keys, no Ren alias; Voidheart upper/legs/anchors resolve one appearance; outfits only re-skin their own hero.
+- Living hair: tips of the hair deform from real motion with roots pinned (idle sway, run trail, cast / hurt kicks) for all 11 appearances x 4 facings, via a mask-skinned warp of the shipped pixels. Reduced Effects halves it; pause/cinematic freeze it.
+- Hit provenance: damage carries its producer's slot; Kai Scatter/Meteor = Q, Rising Flare = E, Crucible = R, clone strikes belong to no slot.
+- Online snapshots carry Kai's kit state and clear it on expiry.
+- Contour edge follows idle / run / dash / charge / release / settle with eased intensity; per-game shader registration; brighter silver Voidheart edge.
+- Mastery edge details and crests are equippable (save restore, Archives controls, per-form palettes). Labels now describe the attached-edge look.
+- Four arena materials for floor scars (no Gloam/Ashen fallback), Vex and Kai-kit marks.
+
 ## 0.22.0 (B22 Shattered Horizons, local, unpushed)
 Run plans and 7 modes, 2 realm arenas, 6 realm enemies, 7 new bosses, Vex (interim art), Ascension (24 branches, 12 legendaries, 4 ultimates, 8 relics, mastery), local + online co-op (dependency-free server), Archives, Mode Select, ability tooltips + click, contract overlap fix. See B22-STATUS.md for what is interim or not done.
 
