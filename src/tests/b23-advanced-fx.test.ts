@@ -58,3 +58,12 @@ describe('B23 reveal accents', () => {
     for (const q of ['reveal_still', 'reveal_vex2']) { expect(REVEAL_ACCENT[q].shake).toBe(0); expect(REVEAL_ACCENT[q].flash).toBeUndefined(); }
   });
 });
+
+import { synth } from '../game/audio/b22Sfx';
+describe('B23 measured levels of every synthesised recipe (offline, 44.1 kHz)', () => {
+  it('no recipe clips (peak <= 0.9), none is inaudible (peak >= 0.05), and the Stillfire reveal is the quietest reveal by a margin', () => {
+    const peak = (k: string) => { let m = 0; for (const v of synth(SFX[k], 44100)) m = Math.max(m, Math.abs(v)); return m; };
+    for (const k of Object.keys(SFX)) { const p = peak(k); expect(p, k).toBeLessThanOrEqual(0.9); expect(p, k).toBeGreaterThanOrEqual(0.05); }
+    const still = peak('sig_reveal_still'); for (const o of ['flare', 'comet', 'ren', 'sora', 'vex1']) expect(still, o).toBeLessThan(peak(`sig_reveal_${o}`) * 0.75);
+  });
+});
