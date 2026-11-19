@@ -1,4 +1,4 @@
-import { B22Sfx, B22_EVENT_SFX, EVENT_SFX } from './b22Sfx';
+import { B22Sfx, B22_EVENT_SFX, EVENT_SFX, signatureSfx } from './b22Sfx';
 import { isBoss } from '../../content/enemies';
 import type { AbilityEvent, EnemyEvent, GameState, Impact } from '../../sim/GameState';
 import { MusicDirector, STINGERS, type MusicCue } from './music';
@@ -384,7 +384,7 @@ export class AbilityAudio {
   }
   private b22Sync(s: GameState) {
     if (!s.b22 || s.phase !== 'running') return;
-    for (const ev of s.b22.ev) { if (ev.id <= this.b22Cur) continue; this.b22Cur = ev.id; const r = B22_EVENT_SFX[ev.kind]; if (r) this.b22Play(r); }
+    for (const ev of s.b22.ev) { if (ev.id <= this.b22Cur) continue; this.b22Cur = ev.id; const r = B22_EVENT_SFX[ev.kind] ?? signatureSfx(ev.kind); if (r) this.b22Play(r); }
     for (const ev of s.abilityEvents) { if (ev.id <= this.b22Ab) continue; this.b22Ab = ev.id; const r = EVENT_SFX[ev.kind]; if (r) this.b22Play(r); }
   }
   /** Scene teardown (retry / home): reset per-run counters and cut effect voices. The context, buses and score survive so the next scene (or the menu) continues the music. */

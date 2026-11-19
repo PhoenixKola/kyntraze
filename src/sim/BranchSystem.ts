@@ -57,7 +57,7 @@ export function chainFx(s: GameState, from: { x: number; y: number }, n: number,
   return k;
 }
 export function schedule(s: GameState, f: Omit<ScheduledFx, 'id'>) { if (s.b22.fx.length < FX_CAP) s.b22.fx.push({ id: s.nextId++, ...f }); }
-export function zoneFx(s: GameState, z: Omit<Zone, 'id' | 't' | 'next'>) { if (s.b22.zones.length < ZONE_CAP) s.b22.zones.push({ id: s.nextId++, t: 0, next: z.tick, ...z }); }
+export function zoneFx(s: GameState, z: Omit<Zone, 'id' | 't' | 'next'>) { if (s.b22.zones.length < ZONE_CAP) { s.b22.zones.push({ id: s.nextId++, t: 0, next: z.tick, ...z }); b22Emit(s.b22, z.src, z.x, z.y, z.kind === 'line' ? { x2: z.x2, y2: z.y2, n: z.r || 40 } : { n: Math.max(30, z.r) }); } }
 
 /* ---------------------------------------------------------------- which slot a hit belongs to */
 export function slotOfAct(s: GameState): Slot | null {
@@ -237,6 +237,7 @@ export function updateFx(s: GameState, dt: number) {
       else if (f.kind === 'line') lineFx(s, f.x, f.y, f.x2 ?? f.x, f.y2 ?? f.y, f.w ?? 40, f.dmg, f.cap, f.tag ?? 'line');
       else { const n = areaFx(s, x, y, f.r, f.dmg, f.push, f.stagger, f.cap, f.tag?.startsWith('follow') ? 'follow_burst' : f.kind === 'nova' ? 'nova_fx' : (f.tag ?? 'area')); void n; }
       emit(s, f.src.includes('rupture') || f.src.includes('overture') || f.src === 'solar_rupture' ? 'legend_fx' : 'branch_fx', x, y, f.cap);
+      b22Emit(b, f.src, x, y, f.kind === 'line' || f.kind === 'chain' ? { x2: f.x2, y2: f.y2, n: f.r || 60 } : { n: Math.max(30, f.r) });   // the entry's own id: the renderer draws that entry's signature (advancedFx.ts)
     }
   }
   if (b.zones.length) {
