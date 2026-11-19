@@ -700,3 +700,7 @@ main[data-testid="hero-select"] .arena-strip-go { position: static; white-space:
 .hud-partner .hud-slots.compact { position: static; transform: none; left: auto; bottom: auto; padding: calc(2 * var(--u)) 0 0; gap: calc(2 * var(--u)); justify-content: flex-start; background: none; border: 0; box-shadow: none; pointer-events: auto; }
 .hud-partner .hud-slots.compact .slot { width: max(24px, calc(30 * var(--u))); height: max(24px, calc(30 * var(--u))); cursor: default; }
 .hud-partner .hud-slots.compact .slot-tip { display: none; }
+
+/* B23: the hero's own victory pose (real sheet frames) beside the results plate; hidden on short or narrow screens so nothing in the footer is ever pushed */
+.results-overlay .res-pose { position: absolute; left: 4%; bottom: 8%; transform: scale(1.1); transform-origin: left bottom; image-rendering: pixelated; pointer-events: none; z-index: 1; filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
+@media (max-height: 520px), (max-width: 900px) { .results-overlay .res-pose { display: none; } }
