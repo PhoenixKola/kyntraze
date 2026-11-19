@@ -709,3 +709,5 @@ main[data-testid="hero-select"] .arena-strip-go { position: static; white-space:
 .result-modal .stacked-actions button { white-space: normal; line-height: 1.1; text-overflow: clip; overflow: visible; }
 .result-modal .stacked-actions button[data-testid="continue-endless"] { font-size: max(10px, calc(13 * var(--u))); letter-spacing: .04em; }
 @media (max-height: 600px) { .result-modal .res-crest, .result-modal .res-sub { display: none; } .result-modal .score-number, .result-win .score-number { font-size: calc(34 * var(--u)); margin: calc(2 * var(--u)) 0; } .result-modal .stacked-actions { margin-top: calc(8 * var(--u)); } .result-modal .rw-panel { margin-top: calc(6 * var(--u)); } }
+
+.res-b22crest { margin: 0 0 calc(2 * var(--u)); font-size: max(9px, calc(11 * var(--u))); letter-spacing: .12em; color: #e8c978; }
