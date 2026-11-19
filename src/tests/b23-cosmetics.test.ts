@@ -33,7 +33,7 @@ describe('B23 mastery rewards are equippable and survive reload', () => {
   });
 });
 
-import { CONTOUR_FORM, finisherFor, setFinisherRewards } from '../game/render/edgePalette';
+import { finisherFor, setFinisherRewards } from '../game/render/edgePalette';
 import { SIGNATURES } from '../game/render/advancedFx';
 describe('B23 adept finishers', () => {
   it('only an owned finisher of the current form plays; each form has its own signature', () => {
