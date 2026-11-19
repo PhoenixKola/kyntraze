@@ -38,6 +38,8 @@ const FAMILY: Partial<Record<Shape, Partial<Recipe> & { base: number }>> = {
 };
 export const idRecipe = (id: string, shape: Shape): Recipe => { const f = FAMILY[shape] ?? { base: 400 }, j = hash(id), base = f.base * (0.8 + 0.5 * j), up = hash(id + 'u') > 0.5; return { f0: up ? base : base * 1.8, f1: up ? base * 1.9 : base * 0.6, dur: f.dur ?? 0.3, noise: f.noise ?? 0.2, decay: f.decay ?? 8, wave: f.wave ?? 'saw', gain: 0.55 + 0.25 * hash(id + 'g'), fm: f.fm }; };
 for (const [id, sg] of Object.entries(SIGNATURES)) { const key = `sig_${id}`; if (!SFX[key]) SFX[key] = idRecipe(id, sg.shape); }
+// Stillfire's reveal is deliberately near-silent (a soft, slow breath), not a roar
+if (SFX.sig_reveal_still) Object.assign(SFX.sig_reveal_still, { gain: 0.3, noise: 0.02, wave: 'sine', decay: 2.2, dur: 1.1 });
 export const signatureSfx = (id: string): string | null => (SIGNATURES[id] ? `sig_${id}` : null);
 export function synth(r: Recipe, sr: number): Float32Array {
   const n = Math.max(1, Math.floor(r.dur * sr)), out = new Float32Array(n); let ph = 0, seed = 1337;

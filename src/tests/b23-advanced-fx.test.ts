@@ -39,3 +39,14 @@ describe('B23 the sim emits each entry\'s own id at the real effect position', (
     const z = s.b22.ev.find(e => e.kind === 'burning_wake'); expect(z).toBeDefined(); expect(z!.x2).toBe(310);
   });
 });
+
+import { activateForm } from '../sim/FormSystem';
+describe('B23 each transformation announces its own reveal at the commit', () => {
+  it('Flarebound commits with reveal_flare; all seven reveals have distinct signatures and sounds, Stillfire is the quietest', () => {
+    const s = new Simulation(5, 'gloam', true, true).state; s.player.drive = 100; s.heroFormUnlocked = true; expect(activateForm(s, 1)).toBe(true);
+    expect(s.player.form).toBe(1); expect(s.b22.ev.some(e => e.kind === 'reveal_flare')).toBe(true);
+    const ids = ['flare', 'comet', 'still', 'ren', 'sora', 'vex1', 'vex2'].map(k => `reveal_${k}`); for (const id of ids) expect(signatureOf(id), id).not.toBeNull();
+    expect(new Set(ids.map(id => SIGNATURES[id].shape + SIGNATURES[id].color)).size).toBe(7);
+    const gains = ids.map(id => SFX[signatureSfx(id)!].gain); expect(SFX[signatureSfx('reveal_still')!].gain).toBe(Math.min(...gains));
+  });
+});

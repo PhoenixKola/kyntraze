@@ -18,6 +18,7 @@ export const SIGNATURES: Record<string, Signature> = {
   rift_key: S('rift', [0xb18cff, 0xffffff], 5, 0.5), rift: S('rift', [0xb18cff, 0xffffff], 5, 0.5), paradox_compass: S('compass', [0x9fe6e0, 0xffffff], 4, 0.35), bearing: S('compass', [0x9fe6e0, 0xffffff], 4, 0.35),
   pair_dragonfall: S('dragon', [0xff8a3a, 0xffe6b0], 7, 0.9), pair_convergence: S('implode', [0xffd070, 0x9fe8ff], 4, 0.9), pair_singularity: S('spiral', [0xff5a3a, 0x59b8ff], 5, 0.9),
   pair_oath: S('judgment', [0xffb347, 0xa070ff], 2, 0.9), pair_ruinbreaker: S('crater', [0xff4a3a, 0xa070ff], 10, 0.9), pair_eclipse: S('eclipse', [0x59b8ff, 0xa070ff], 2, 0.9),
+  reveal_flare: S('flames', [0xffa21c, 0xfff1a0], 11, 0.9), reveal_comet: S('shatter', [0xffd12a, 0xffffff], 14, 0.7), reveal_still: S('implode', [0xc9d6ee, 0xffffff], 3, 1.1), reveal_ren: S('burst', [0xff3a2a, 0xffc060], 12, 0.8), reveal_sora: S('meridian', [0x35c2ff, 0xe6fbff], 5, 0.9), reveal_vex1: S('rift', [0xa06af0, 0xf0dcff], 6, 0.8), reveal_vex2: S('eclipse', [0x7d8896, 0xeef3fa], 3, 1.1),
   ult_kai: S('dragon', [0xffc24a, 0xffffff], 9, 1.0), ult_ren: S('crater', [0xff3a2a, 0xffd0a0], 14, 1.0), ult_sora: S('meridian', [0x59b8ff, 0xffffff], 5, 1.0), ult_vex: S('judgment', [0xa070ff, 0xffffff], 5, 1.0),
 };
 export const signatureOf = (id: string): Signature | null => SIGNATURES[id] ?? null;

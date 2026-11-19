@@ -7,6 +7,10 @@ import { slideMove } from './CollisionSystem';
 import { cancelCast } from './AbilitySystem';
 import { ASCEND } from '../content/heroKits';
 import { clearHero } from './HeroSystem';
+import { b22Emit } from '../b22/state';
+/** B23: one reveal event per form at the real commit moment (same frame as the sprite / stats change); the renderer and audio read it by id (advancedFx / b22Sfx). */
+const revealKey = (hero: string, form: number) => (hero === 'kai' ? ['', 'flare', 'comet', 'still'][form] : hero === 'vex' ? `vex${form}` : hero) || '';
+export const emitReveal = (s: GameState) => { const k = revealKey(s.hero, s.player.form); if (k) b22Emit(s.b22, `reveal_${k}`, s.player.x, s.player.y, { n: 150 }); };
 
 function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number) {
   s.abilityEvents.push({ id: s.nextId++, kind, x, y, n });
@@ -36,7 +40,7 @@ export function activateForm(state: GameState, want?: 1 | 2 | 3) {
   const p = state.player; const which = want && formChoices(state).includes(want) ? want : selectedForm(state); if (!which) return false;
   state.selector.pick = which; state.selector.open = false;
   if (which === 1 && state.hero === 'kai') {
-    p.form = 1; p.invulnerable = Math.max(p.invulnerable, 0.5);
+    p.form = 1; p.invulnerable = Math.max(p.invulnerable, 0.5); emitReveal(state);
     state.impacts.push({ id: state.nextId++, kind: 'form', x: p.x, y: p.y, ttl: 0.5, life: 0.5 });
     return true;
   }
@@ -84,7 +88,7 @@ export function updateCinema(s: GameState, dt: number) {
       e.stagger = Math.max(e.stagger, K.stagger);
     }
   }
-  if (!c.committed && c.t >= c.commitAt) { c.committed = true; p.form = c.to; p.drive = 100; emit(s, ev('commit'), p.x, p.y); }
+  if (!c.committed && c.t >= c.commitAt) { c.committed = true; p.form = c.to; p.drive = 100; emit(s, ev('commit'), p.x, p.y); emitReveal(s); }
   if (c.t >= c.dur - 1e-9) { if (!c.committed) { c.committed = true; p.form = c.to; p.drive = 100; } s.cinema = null; if (hero) s.heroFormSeen++; else if (apex) s.apexSeen++; else s.cometSeen++; p.invulnerable = Math.max(p.invulnerable, 0.5); }
 }
 export function endForm2(s: GameState) { const p = s.player; emit(s, 'form2_end', p.x, p.y); p.form = 0; p.formCooldown = COMET.cooldown * s.mods.formCd; }
