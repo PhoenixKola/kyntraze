@@ -5,7 +5,8 @@ import { ARENAS, PROP_FOOTPRINTS, type ArenaId } from '../../content/arenas';
 import { RULES } from '../../core/Rules';
 import type { Enemy, GameState, Hazard } from '../../sim/GameState';
 import { BOSSES } from '../../content/bosses';
-import { isBoss, isRealmKind, type BossKind } from '../../content/enemies';
+import { ENEMIES, isBoss, isRealmKind, type BossKind, type MobKind } from '../../content/enemies';
+import { finisherFor, formKey } from './edgePalette';
 import { slotPlayer } from '../../sim/CoopSystem';
 
 const hash = (x: number, y: number) => { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
@@ -73,7 +74,7 @@ interface Burst { x: number; y: number; t: number; dur: number; r: number; c: nu
 /** The dynamic B22 layer: hazards of every new shape, realm actors, parts, marks, zones, scheduled effects and branch / relic / ultimate event flashes. Created for every arena. */
 export class B22Overlay {
   private readonly haz: Phaser.GameObjects.Graphics; private readonly act: Phaser.GameObjects.Graphics; private readonly fxg: Phaser.GameObjects.Graphics;
-  private bursts: Burst[] = []; private evCur = 0; private enemyCur = 0; private lastHp = new Map<number, number>(); private clock = 0;
+  private finisherAt = -9; private bursts: Burst[] = []; private evCur = 0; private enemyCur = 0; private lastHp = new Map<number, number>(); private clock = 0;
   private readonly scene: Phaser.Scene; private readonly nul: Phaser.GameObjects.Graphics; private readonly imgs = new Map<number, Phaser.GameObjects.Image>(); private used = new Set<number>(); private shiftId = -1; private popCur = 0; private pops: { im: Phaser.GameObjects.Image; t: number; dur: number; size: number; rise: number; fixed?: boolean }[] = []; private prevPos = new Map<number, { x: number; y: number }>(); private ghosts: { im: Phaser.GameObjects.Image; t: number; dur: number }[] = [];
   constructor(scene: Phaser.Scene) { this.scene = scene; this.nul = scene.add.graphics().setVisible(false); this.haz = scene.add.graphics().setDepth(5.55); this.act = scene.add.graphics().setDepth(6.5); this.fxg = scene.add.graphics().setDepth(10.6).setBlendMode(Phaser.BlendModes.ADD); }
   private hazardColor(h: Hazard) { return h.echo ? 0x7fe0e8 : h.tag.startsWith('well') ? 0xffcf6a : h.tag === 'shatter' ? 0xf4d78a : h.tag === 'fold' ? 0xb18cff : h.tag === 'lance' || h.tag === 'lance_land' ? 0xf2d27a : h.tag === 'arrival' ? 0xb18cff : h.tag.startsWith('husk') ? 0x6a5cff : h.tag === 'collapse' ? 0xe9c8ff : 0xff5a6a; }
@@ -121,7 +122,7 @@ export class B22Overlay {
       if (len > 8) { const st = this.scene.add.image(sx, sy - 10, 'b22-fx_vexe1').setOrigin(0, 0.5).setDepth(10.5).setBlendMode(Phaser.BlendModes.ADD).setTint(s.player.form === 2 ? 0x9aa2ad : 0xffffff).setRotation(Math.atan2(ty - sy, tx - sx)); st.setDisplaySize(len + 40, 52); this.pops.push({ im: st, t: 0, dur: 0.5, size: 0, rise: 0, fixed: true }); }
     }
     for (let k = this.pops.length - 1; k >= 0; k--) { const q = this.pops[k]; q.t += dt; const u = q.t / q.dur; if (u >= 1) { q.im.destroy(); this.pops.splice(k, 1); continue; } if (q.fixed) { q.im.setAlpha(1 - u); continue; } const sc = q.size * (0.6 + 0.6 * Math.min(1, u * 2.5)) / q.im.height; q.im.setScale(sc).setAlpha(u < 0.2 ? u / 0.2 : 1 - (u - 0.2) / 0.8).y -= q.rise * dt; }
-    for (const ev of s.enemyEvents) { if (ev.id <= this.enemyCur) continue; this.enemyCur = ev.id; if (ev.kind === 'enemy_death' && (isRealmKind(ev.enemy) || isBoss(ev.enemy as BossKind))) this.bursts.push({ x: ev.x, y: ev.y, t: 0, dur: ev.tag === 'boss' ? 1.2 : 0.4, r: ev.tag === 'boss' ? 180 : 50, c: 0xffe9a8 }); }
+    for (const ev of s.enemyEvents) { if (ev.id <= this.enemyCur) continue; this.enemyCur = ev.id; if (ev.kind === 'enemy_death' && this.clock - this.finisherAt > 0.6 && (ev.tag === 'boss' || ENEMIES[ev.enemy as MobKind]?.elite)) { const fk = formKey(s.hero, s.player.form), fid = fk ? finisherFor(fk) : null, fs = fid ? signatureOf(fid) : null; if (fs) { this.finisherAt = this.clock; this.bursts.push({ x: ev.x, y: ev.y, t: 0, dur: reduced ? 0.4 : fs.dur, r: ev.tag === 'boss' ? 170 : 100, c: fs.color, sig: fs, seed: ev.id }); } } if (ev.kind === 'enemy_death' && (isRealmKind(ev.enemy) || isBoss(ev.enemy as BossKind))) this.bursts.push({ x: ev.x, y: ev.y, t: 0, dur: ev.tag === 'boss' ? 1.2 : 0.4, r: ev.tag === 'boss' ? 180 : 50, c: 0xffe9a8 }); }
     const keep: Burst[] = []; for (const b of this.bursts) { b.t += dt; if (b.t >= b.dur) continue; keep.push(b); const u = b.t / b.dur; if (b.sig) { drawSignature(fg, b.sig, b.x, b.y, b.r, u, { reduced, ang: b.ang, x2: b.x2, y2: b.y2, seed: b.seed }); continue; } fg.lineStyle(4 * (1 - u) + 1, b.c, 1 - u); if (b.x2 !== undefined) fg.beginPath().moveTo(b.x, b.y).lineTo(b.x2, b.y2!).strokePath(); else { fg.strokeCircle(b.x, b.y, b.r * (0.25 + 0.75 * u)); if (!reduced) { fg.fillStyle(b.c, 0.25 * (1 - u)); fg.fillCircle(b.x, b.y, b.r * u * 0.7); } } } this.bursts = keep.slice(-40);
     // ---- B22.6 co-op: revive progress (both fighters are real hero renderers now)
     if (s.party) {

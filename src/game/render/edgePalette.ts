@@ -33,6 +33,10 @@ export const CONTOUR_FORM: Record<string, string> = { flare: 'flarebound', comet
 let equippedDetails: Record<string, string> = {};
 /** Set once per run from the save (form key -> reward id); a form with no entry keeps its canonical edge. */
 export const setEdgeDetails = (d: Record<string, string | undefined>) => { equippedDetails = {}; for (const [k, v] of Object.entries(d)) if (v && v === `aura_detail_${k}`) equippedDetails[k] = v; };
+let finishers = new Set<string>();
+/** Earned finisher rewards (ids `finisher_<form>`), set once per run from the save. Cosmetic: a flourish on boss / elite kills, never damage, scoring or a lockout. */
+export const setFinisherRewards = (owned: readonly string[]) => { finishers = new Set(owned.filter(id => id.startsWith('finisher_'))); };
+export const finisherFor = (contourKey: string): string | null => { const f = CONTOUR_FORM[contourKey]; return f && finishers.has(`finisher_${f}`) ? `finisher_${contourKey}` : null; };
 export const edgePalette = (key: string): Palette => { const f = CONTOUR_FORM[key]; return f && equippedDetails[f] && AURA_DETAIL[key] ? AURA_DETAIL[key] : CONTOUR[key]; };
 
 /** Palette key of the transformation a fighter is in (null = untransformed), shared by the stroke, the ground ring and the effects. */

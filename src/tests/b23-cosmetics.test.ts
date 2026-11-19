@@ -32,3 +32,14 @@ describe('B23 mastery rewards are equippable and survive reload', () => {
     setEdgeDetails({});
   });
 });
+
+import { CONTOUR_FORM, finisherFor, setFinisherRewards } from '../game/render/edgePalette';
+import { SIGNATURES } from '../game/render/advancedFx';
+describe('B23 adept finishers', () => {
+  it('only an owned finisher of the current form plays; each form has its own signature', () => {
+    setFinisherRewards([]); for (const k of Object.keys(CONTOUR_FORM)) expect(finisherFor(k)).toBeNull();
+    setFinisherRewards(['finisher_flarebound', 'aura_detail_cometheart']); expect(finisherFor('flare')).toBe('finisher_flare'); expect(finisherFor('comet')).toBeNull();
+    for (const k of Object.keys(CONTOUR_FORM)) expect(SIGNATURES[`finisher_${k}`], k).toBeDefined();
+    expect(new Set(Object.keys(CONTOUR_FORM).map(k => SIGNATURES[`finisher_${k}`].shape)).size).toBe(7); setFinisherRewards([]);
+  });
+});
