@@ -1,0 +1,11 @@
+Create ONE image: a 4x2 grid sheet (4 columns, 2 rows, 8 cells) of additive-blend visual effect sprites for a pixel-art sci-fi action game: the Crimson Ascendant transformation of a fire brawler named Ren. Pure black (#000000) background everywhere (additive-blended), NO characters, NO text, no cell borders, each effect centered in its cell with generous spacing. Painterly polished glow, white-gold hot cores fading to crimson (#e8242a) and deep red, with floating embers. Same style across all eight.
+Row 1:
+1 BACK FLAMES A: a tall plume of flame wings rising behind a character, left-leaning, tapered.
+2 BACK FLAMES B: a second wider flame plume, right-leaning, with sparks.
+3 EMBER SWARM: a loose cloud of rising glowing embers.
+4 EMBER RING: a ring of orbiting embers and small flames seen at 3/4 perspective.
+Row 2:
+5 GROUND BLAZE: a wide flat ellipse of fire spreading on the ground, 3/4 perspective.
+6 NOVA: a huge radial fire nova explosion, circular, bright centre with expanding flame petals.
+7 FIRE PILLAR: a vertical column of fire and light rising from the ground, narrow base.
+8 HEAT VEIL: a translucent shimmering curtain of flame and heat haze, wavy and wide.

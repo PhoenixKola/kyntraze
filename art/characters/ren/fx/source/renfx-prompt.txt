@@ -1,0 +1,13 @@
+Create ONE image: a 5x2 grid sheet (5 columns, 2 rows, 10 cells) of additive-blend visual effect sprites for a pixel-art sci-fi action game hero named Ren, a brawler whose power is crimson fire and burning embers. Pure black (#000000) background everywhere (effects glow on black and are additive-blended), NO characters, NO text, no cell borders, each effect centered in its cell with generous spacing. Painterly polished glow style like a premium game VFX atlas: white-yellow hot cores fading through orange to saturated crimson (#e8242a) edges, flame-like ragged edges. Same style across all ten.
+Row 1:
+1 FLAME CRESCENT: one large curved crescent slash arc made of fire, thick in the middle tapering to sharp points.
+2 SMALL FLAME CRESCENT: a smaller tighter fiery crescent, a quick swipe.
+3 FIRE CROSS: a big X of two crossing fire crescents with a bright flash at the crossing, a finishing strike.
+4 FLAME STREAKS: five long thin horizontal fire speed lines of different lengths fading at both ends.
+5 DASH BLAZE: a diagonal fire streak from lower-left to upper-right with a tapered tail and flying sparks.
+Row 2:
+6 IMPACT BURST: a starburst impact flash with jagged flame spikes radiating outward, white core.
+7 FIRE RING: a flat wide elliptical ground ring of flame (3/4 perspective) with small flame tongues.
+8 MAGMA FISSURE: a radial ground crack pattern with glowing orange lava lines spreading from a bright centre.
+9 EMBER TRAIL: a horizontal streak of drifting embers and flame wisps, a fading afterimage trail.
+10 FIST FIRE: a clenched fist silhouette glowing inside a swirling fireball.

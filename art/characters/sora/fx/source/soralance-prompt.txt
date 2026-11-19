@@ -1,0 +1,11 @@
+Create ONE image: a 4x2 grid sheet (4 columns, 2 rows, 8 cells) of additive-blend visual effect sprites for the lance cannon of a pixel-art sci-fi hero named Sora. Pure black (#000000) background everywhere (additive-blended), NO characters, NO text, no cell borders, each effect centered in its cell with generous spacing. Painterly polished glow: white-hot cores, electric azure (#2fa4ff) and cyan edges, deep blue accents. Same style across all eight.
+Row 1:
+1 LANCE BEAM: a long straight horizontal laser beam, filling the full cell width, bright white core and azure glow.
+2 THIN BEAM: an even thinner, longer horizontal laser beam with a faint outer shimmer, filling the full cell width.
+3 CAP: a bright round beam endcap, a glowing burst with radial rays.
+4 MUZZLE: a muzzle flash, a bright cone burst pointing right with sparks.
+Row 2:
+5 SMALL ORB: a small glowing energy orb with a white core.
+6 MEDIUM ORB: a medium energy orb with a swirling halo and electric arcs.
+7 LARGE ORB: a large charged energy sphere with crackling lightning arcs and a bright core.
+8 VORTEX: a spinning vortex of azure energy spiralling into the centre.
