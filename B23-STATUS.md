@@ -42,3 +42,11 @@ While cleaning up a comparison worktree, `git worktree remove` followed a `node_
 
 ## Not done, and the minimum needed
 Rows 05-07, 11 (full), 16, 19-35, 38, 40-41, 43, 47-48, 50-51, 53-54 need original art/Blender/audio production and real-speed review. Installer/Electron online smoke: see below.
+
+## Final block (supersedes the test numbers above)
+Verification was deliberately scoped by the owner: no full e2e re-run; quick general checks only.
+- `npx tsc --noEmit`: clean. `npx vitest run`: all pass after fixing one real defect found by the run (Kai Form II north manifest carried `form-i`; fixed in the rig output and the published manifest). `npm run build`: passes.
+- Full e2e was last run at 117 passed / 2 failed / 3 skipped (before the hair-teardown fix; the two failures re-passed individually). It was NOT re-run after the later art/north/crest/outfit/death-strip changes, by owner decision.
+- Installer rebuilt: `release/KYNTRAZE-FRACTURE-RUSH-Setup-0.23.0.exe`, 285,024,345 bytes, SHA256 `eea7979ffdf066983f685b4078704281da52815f36e040a35f0f37072e9a0fee`, unsigned. `npm run desktop:smoke` PASS on rerun (the first attempt timed out on a cold first launch, canvas not up in 58 s; both launches passed on the retry).
+- Added since the last block: rear-view (NORTH) strike poses for all 11 sets with refreshed hand/head anchors; seven crest artworks; outfit head accessories (ImageGen); boss damage decals; 12 enemy death strips; Vex bespoke clips + own effect set; reshaped reveals and Victory poses; boss phase-shift surge (scale pop and burst on phase change).
+- Honest remaining gaps: outfits are head accessories only (no shoulder/gauntlet/tabard geometry); rear-view boots/heels are the previous art (only the strike pose changed); realm bosses and enemies already had windup/strike/hurt/death frame cycles and now a phase-shift surge, but no new bespoke boss attack animation set was authored; classic enemies use pose-based attack reads, with only death sequences newly authored; Kai/Ren/Sora effect sprites are their earlier sets (only Vex got a new one); audio is synthesized, never listened to; real-speed playback, performance and two-client online tests were not run (owner will do them).

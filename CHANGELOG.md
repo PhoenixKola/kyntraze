@@ -8,6 +8,7 @@
 - Contour edge follows idle / run / dash / charge / release / settle with eased intensity; per-game shader registration; brighter silver Voidheart edge.
 - Mastery edge details and crests are equippable (save restore, Archives controls, per-form palettes). Labels now describe the attached-edge look.
 - Four arena materials for floor scars (no Gloam/Ashen fallback), Vex and Kai-kit marks.
+- Rear view (NORTH): new away-from-camera strike poses for all 11 sets; seven crest artworks; outfit head accessories; boss damage decals and phase-shift surge; 12 enemy death animations; Vex bespoke clips and effect set; reshaped reveals and Victory poses. Remaining gaps are listed in B23-STATUS.md.
 
 ## 0.22.0 (B22 Shattered Horizons, local, unpushed)
 Run plans and 7 modes, 2 realm arenas, 6 realm enemies, 7 new bosses, Vex (interim art), Ascension (24 branches, 12 legendaries, 4 ultimates, 8 relics, mastery), local + online co-op (dependency-free server), Archives, Mode Select, ability tooltips + click, contract overlap fix. See B22-STATUS.md for what is interim or not done.
