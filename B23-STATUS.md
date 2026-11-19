@@ -19,7 +19,13 @@
 - Still NOT done: NORTH/rear anatomy and attack poses, authored reveal choreography, a Vex-specific animation set, the eight real outfits, victory poses, boss part/phase animation, split screen, real audio production. These need original art/Blender/audio work that was not produced; nothing was faked as done.
 
 ## Tests
-FINAL_TEST_BLOCK
+Final HEAD, one worker, dev server (`playwright.b23.config.ts`, port 5199 - this repo's own):
+- `npx tsc -b`: clean. `npx vitest run`: 683 passed, 1 skipped (a first run under load had 7 timeouts, the immediate rerun was clean).
+- `npm run build`: passes (2m09s, chunk-size warning only).
+- Full e2e: **117 passed, 2 failed, 3 skipped** (122 tests, 33.6 min). The 2 failures (`arenas` retry, `progression` B18 960x540) were caused by a Phaser "texture not found" warning from my hair layer on scene teardown; fixed afterwards and both re-passed individually, but the full suite was NOT re-run after that fix.
+- Earlier with 2 workers the heavy software-GL specs timed out under load; use `--workers=1`.
+- Installer: `release/KYNTRAZE-FRACTURE-RUSH-Setup-0.23.0.exe`, 276,968,448 bytes, SHA256 `2619b29662325ec80c9fe3bdd5d9bf4bf6ed56a3eef4c87939d84d23af5a98b4`, built from the commit before the final doc commit, unsigned. `npm run desktop:smoke` PASS (two launches, profile persisted, origin `app://kyntraze`). NOT done: installing it, upgrade-over-existing-data, uninstall, online join from Electron, hash check against the final commit.
+- Not run: real-speed playback, audio listening, GPU/frame-time measurement, 30-minute soak, two-client online latency run, physical controller.
 
 ## Hazard incident (disclosed)
 While cleaning up a comparison worktree, `git worktree remove` followed a `node_modules` junction and deleted part of the real `node_modules` (`.bin`, `.vite`, `@babel`, ...). Restored with `npm rebuild --ignore-scripts` and `npm install --ignore-scripts` (40 packages re-added from the lockfile, no version changes). Typecheck, unit tests and dev server verified afterwards.

@@ -40,8 +40,8 @@ Legend: **DONE** = implemented + wired + automated test + stills inspected (neve
 | 53-54 | Perf, full routes, soak | NOT DONE | |
 | 55 | Save regression | PARTIAL | Unit tests green; no real-save fixtures run. |
 | 56 | Manifest/provenance | PARTIAL | `scripts/b23-hair-anchors.py` reproducible; hair table committed. |
-| 57 | Web release candidate | see STATUS | |
-| 58-59 | Installer / Electron online | see STATUS | |
+| 57 | Web release candidate | PARTIAL | typecheck, 683 unit tests, production build, 117/122 e2e (2 fixed after, rerun individually). No production-preview e2e, no `?qa=1`-absent check this run. |
+| 58-59 | Installer / Electron online | PARTIAL | 0.23.0 NSIS built, unsigned, hash in STATUS, desktop smoke PASS. Install/upgrade/uninstall and Electron online join NOT run. |
 | 60 | Limitations stated | DONE | This file + STATUS. |
 | 61 | Docs | PARTIAL | CHANGELOG, PLAN, ACCEPTANCE, STATUS added; older status files not rewritten. |
 | 62 | Independent audit | NOT DONE | |
