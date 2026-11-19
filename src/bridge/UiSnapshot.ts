@@ -32,7 +32,7 @@ export interface UiSnapshot {
   /** Seconds since Second Wind fired (drives a short HUD flash), or a large number. */
   sinceRevive: number; revives: number;
   run: RunHud;
-  /** B22.6 the second fighter (null in solo) */ partner: { name: string; hero: HeroId; hp: number; maxHp: number; form: number; drive: number; down: boolean; out: boolean; revive: number; level: number } | null; party: { resonance: number; resonanceT: number; pair: string | null; chooser: number | null } | null;
+  /** B22.6 the second fighter (null in solo) */ partner: { name: string; hero: HeroId; hp: number; maxHp: number; form: number; drive: number; down: boolean; out: boolean; revive: number; level: number; /** the partner's own ability bar data: cooldowns, form, kit, tooltips */ bar?: import('./abilityView').AbilityView | null } | null; party: { resonance: number; resonanceT: number; pair: string | null; chooser: number | null } | null;
   /** B22: branch / relic / legendary offers, ultimate gauge, Endless state */ asc: AscView | null;
   /** B22: hover tooltips for the ability tiles (real numbers for this build) */ tips: Record<TipSlot, AbilityTip> | null;
   /** True once the finale beat has played and the Victory results may show (render-driven, like deathShown). */

@@ -12,6 +12,9 @@ import type { RelicId } from '../b22/relics';
 import type { HeroId } from '../content/heroes';
 import type { Simulation } from '../sim/Simulation';
 import { abilityTips } from './abilityTips';
+import { abilityView } from './abilityView';
+import { inSlot } from '../sim/CoopSystem';
+import type { GameState as GS } from '../sim/GameState';
 import { ascView } from './ascView';
 import { blankSnapshot, type MiniMap, type RunHud, type UiSnapshot } from './UiSnapshot';
 import { UPGRADES, UPGRADE_BY_ID, type UpgradeId } from '../content/upgrades';
@@ -77,7 +80,7 @@ export class GameBridge {
     if (s.cometUnlockedNow) { s.cometUnlockedNow = false; this.save.unlocks = { ...(this.save.unlocks ?? { cometheart: false }), cometheart: true }; storeSave(this.save); }
     if (s.phase !== 'dead') this.deathShown = false;
     if (s.phase !== 'victory') this.victoryShown = false;
-    this.current = { partner: (() => { const P = s.party; const np = (s as unknown as { partner?: { player: { hp: number; maxHp: number; form: number; drive: number; level: number }; hero: HeroId; down: { downed: boolean; out: boolean; hold: number } } }).partner; if (!P && np) return { name: 'P2', hero: np.hero, hp: np.player.hp, maxHp: np.player.maxHp, form: np.player.form, drive: np.player.drive, down: np.down.downed, out: np.down.out, revive: np.down.hold / REVIVE.hold, level: np.player.level }; if (!P) return null; const q = slotPlayer(s, 1), d = P.slots[1].down; return { name: P.names[1], hero: slotHero(s, 1), hp: q.hp, maxHp: q.maxHp, form: q.form, drive: q.drive, down: d.downed, out: d.out, revive: d.hold / REVIVE.hold, level: q.level }; })(), party: s.party ? { resonance: s.party.shared.resonance, resonanceT: s.party.shared.resonanceT, pair: s.party.shared.pair, chooser: s.party.chooser } : null, asc: (() => { try { return ascView(s); } catch { return null; } })(), tips: (() => { try { return abilityTips(s); } catch { return null; } })(), phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
+    this.current = { partner: (() => { const P = s.party; const np = (s as unknown as { partner?: { player: { hp: number; maxHp: number; form: number; drive: number; level: number }; hero: HeroId; down: { downed: boolean; out: boolean; hold: number } } }).partner; if (!P && np) return { bar: onlineBar(s, np), name: 'P2', hero: np.hero, hp: np.player.hp, maxHp: np.player.maxHp, form: np.player.form, drive: np.player.drive, down: np.down.downed, out: np.down.out, revive: np.down.hold / REVIVE.hold, level: np.player.level }; if (!P) return null; const q = slotPlayer(s, 1), d = P.slots[1].down; return { bar: (() => { try { return inSlot(s, 1, () => abilityView(s)); } catch { return null; } })(), name: P.names[1], hero: slotHero(s, 1), hp: q.hp, maxHp: q.maxHp, form: q.form, drive: q.drive, down: d.downed, out: d.out, revive: d.hold / REVIVE.hold, level: q.level }; })(), party: s.party ? { resonance: s.party.shared.resonance, resonanceT: s.party.shared.resonanceT, pair: s.party.shared.pair, chooser: s.party.chooser } : null, asc: (() => { try { return ascView(s); } catch { return null; } })(), tips: (() => { try { return abilityTips(s); } catch { return null; } })(), phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
       dashCooldown: p.dashCooldown, qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form, dragonCooldown: p.dragonCooldown, cometCooldown: p.cometCooldown, hero: s.hero, heroFormUnlocked: s.hero === 'vex' ? (s.b22.vex.forms[0] || s.b22.vex.forms[1]) : s.heroFormUnlocked, heroReady: s.hero !== 'kai' && formChoices(s).includes(1), lanceCharge: lance ? lance.charge / SORA.e.maxCharge : 0, lanceTier: lance ? SORA.e.tiers.reduce((t, v, i) => (lance.charge >= v ? i : t), -1) : -1, heroAct: s.hx?.act?.act ?? '', cometUnlocked: s.cometUnlocked, cometReady: formChoices(s).includes(2), apexUnlocked: s.apexUnlocked, apexReady: formChoices(s).includes(3), riftCooldown: p.riftCooldown, reversalCooldown: p.reversalCooldown, evadeCooldown: p.evadeCooldown, riftCharge: s.cast?.kind === 'rift' && !s.cast.released ? Math.min(1, s.cast.t / RIFT.maxCharge) : 0, selector: { open: !!s.selector?.open, pick: selectedForm(s) ?? 0, choices: formChoices(s), left: Math.max(0, SELECTOR_MAX - (s.selector?.held ?? 0)) }, cinema: !!s.cinema,
       formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? s.upgradeOffers.map(id => offerCard(s, id)) : [], owned: UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] })), map: miniMap(s),
@@ -167,4 +170,13 @@ function runHud(s: GameState): RunHud {
   const next = !s.encounter.spawned.warden ? { label: 'FRACTURE WARDEN', at: w } : !finaleOut ? { label: 'NULL SERAPH', at: f } : { label: bossUp ? 'DEFEAT THE SERAPH' : '', at: 0 };
   const a = s.announce && s.time - s.announce.at < 6 ? { text: s.announce.text, sub: s.announce.sub, age: s.time - s.announce.at } : null;
   return { t: s.time, wardenAt: w, finaleAt: f, wardenDone: wardenDone || s.bossesDefeated > 0, finaleOut, nextLabel: next.label, nextIn: Math.max(0, next.at - s.time), announce: a };
+}
+
+/** Online: the partner's fighter snapshot (player, hero, hx, cast, mods, ultimate) laid over the local state gives the same ability view as a local second fighter. */
+function onlineBar(s: GS, np: unknown) {
+  try {
+    const q = np as { player: GS['player']; hero: GS['hero']; hx?: GS['hx']; cast?: GS['cast']; mods?: GS['mods']; heroFormUnlocked?: boolean; b22?: { ult?: GS['b22']['ult']; vex?: GS['b22']['vex'] } };
+    const view = { ...s, player: q.player, hero: q.hero, hx: q.hx ?? s.hx, cast: q.cast ?? null, mods: q.mods ?? s.mods, heroFormUnlocked: q.heroFormUnlocked ?? s.heroFormUnlocked, b22: { ...s.b22, ult: q.b22?.ult ?? s.b22.ult, vex: q.b22?.vex ?? s.b22.vex } } as GS;
+    return abilityView(view);
+  } catch { return null; }
 }
