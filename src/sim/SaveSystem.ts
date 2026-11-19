@@ -8,15 +8,15 @@ export const SAVE_KEY = 'kyntraze-b00-v1';
 export const QA_SAVE_KEY = 'kyntraze-b00-v1-qa';
 export const isQaRoute = () => { try { return !!import.meta.env.DEV && new URLSearchParams(globalThis.location?.search ?? '').get('qa') === '1'; } catch { return false; } };
 export const activeSaveKey = () => (isQaRoute() ? QA_SAVE_KEY : SAVE_KEY);
-export interface GameSettings { mute: boolean; reducedEffects: boolean; pauseOnBlur: boolean; /** B16 mix, each 0..1 */ master: number; music: number; sfx: number; ui: number; }
+export interface GameSettings { mute: boolean; reducedEffects: boolean; pauseOnBlur: boolean; /** B23 local co-op: split the screen when the partners are too far apart for one view */ coopSplit: boolean; /** B16 mix, each 0..1 */ master: number; music: number; sfx: number; ui: number; }
 export type VolumeKey = 'master' | 'music' | 'sfx' | 'ui';
 export interface SaveV1 { version: 1; settings: GameSettings; best: (RunTelemetry & { score: number; /** B19: who set it (older saves: Kai) */ hero?: HeroId }) | null; /** B19: the selected runner (older saves: Kai) */ hero?: HeroId; /** last selected arena (persisted choice; older saves default to the Gloam Circuit) */ arena?: ArenaId; /** B12: permanent Kai unlocks (Cometheart = the Fracture Warden has been defeated once); older saves default to none */ unlocks?: { cometheart: boolean; stillfire?: boolean; /** B19: Crimson Ascendant / Azure Sovereign, each earned by defeating the Warden with that runner */ ren?: boolean; sora?: boolean }; /** B18 meta-progression (always present after migration) */ meta: MetaState; /** B22 additive block: records, mastery, cosmetics, story, challenge proofs (always present after migration) */ b22?: B22Save; }
-export const DEFAULT_SETTINGS: GameSettings = { mute: false, reducedEffects: false, pauseOnBlur: true, master: 1, music: 0.7, sfx: 1, ui: 0.8 };
+export const DEFAULT_SETTINGS: GameSettings = { mute: false, reducedEffects: false, pauseOnBlur: true, coopSplit: true, master: 1, music: 0.7, sfx: 1, ui: 0.8 };
 const vol = (v: unknown, d: number) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : d);
 export function migrateSave(raw: unknown): SaveV1 {
   const obj = typeof raw === 'object' && raw !== null ? raw as Record<string, unknown> : {};
   const st = typeof obj.settings === 'object' && obj.settings !== null ? obj.settings as Record<string, unknown> : {};
-  const settings: GameSettings = { mute: st.mute === true, reducedEffects: st.reducedEffects === true, pauseOnBlur: st.pauseOnBlur !== false, master: vol(st.master, 1), music: vol(st.music, 0.7), sfx: vol(st.sfx, 1), ui: vol(st.ui, 0.8) };
+  const settings: GameSettings = { mute: st.mute === true, reducedEffects: st.reducedEffects === true, pauseOnBlur: st.pauseOnBlur !== false, coopSplit: st.coopSplit !== false, master: vol(st.master, 1), music: vol(st.music, 0.7), sfx: vol(st.sfx, 1), ui: vol(st.ui, 0.8) };
   let best: SaveV1['best'] = null;
   const b = typeof obj.best === 'object' && obj.best !== null ? obj.best as Record<string, unknown> : {};
   if (Number.isFinite(b.score) && Number.isFinite(b.survivalSeconds) && Number.isFinite(b.kills) && Number.isFinite(b.level) && Number.isFinite(b.seed)) {

@@ -8,6 +8,7 @@ import { InputController } from '../input/InputController';
 import { EntityRenderer } from '../render/EntityRenderer';
 import { EffectsRenderer } from '../render/EffectsRenderer';
 import { followPlayer, fitZoom } from '../render/CameraController';
+import { planCoopCamera, splitViewports } from '../render/coopCamera';
 import { Presentation } from '../render/arenaArt';
 import { Ambience, ArenaHazardView, ArenaProps, createArenaFloor } from '../render/arenaWorld';
 import { NO_CONFIG } from '../../sim/RunConfig';
@@ -89,7 +90,7 @@ export class ArenaScene extends Phaser.Scene {
     this.fixed.tick(simDelta, dt => { this.lastInput = this.controller.read(); if (this.simulation.state.party) this.simulation.step(dt, this.lastInput, this.controller.readP2()); else this.simulation.step(dt, this.lastInput); });
     const s = this.simulation.state;
     this.cameras.main.setZoom(fitZoom(this.scale.width, this.scale.height) * this.entityRenderer.cameraZoom());
-    { const P = s.party; if (P) { const o = slotPlayer(s, 1), mx = (s.player.x + o.x) / 2, my = (s.player.y + o.y) / 2, d = Math.hypot(s.player.x - o.x, s.player.y - o.y); followPlayer(this.cameras.main, mx, my); this.cameras.main.setZoom(fitZoom(this.scale.width, this.scale.height) * this.entityRenderer.cameraZoom() * Math.max(0.55, Math.min(1, 760 / Math.max(760, d + 320)))); } else followPlayer(this.cameras.main, s.player.x, s.player.y); }
+    { const P = s.party; if (P) this.coopCamera(s); else { this.setSplit(false); followPlayer(this.cameras.main, s.player.x, s.player.y); } }
     this.entityRenderer.sync(s, this.lastInput, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.reduced);
     this.hitstopLeft = Math.max(this.hitstopLeft, this.entityRenderer.takeHitstop());
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
@@ -113,6 +114,20 @@ export class ArenaScene extends Phaser.Scene {
     this.audio?.setMuted(this.bridge.getSettings().mute); this.audio?.sync(s);
     this.publishClock += delta;
     if ((s.phase === 'running' && this.publishClock >= 100) || this.bridge.snapshot().phase !== s.phase) { this.publishClock = 0; this.bridge.publish(); }
+  }
+  private cam2: Phaser.Cameras.Scene2D.Camera | null = null; private splitOn = false;
+  /** Shared view while close; automatic left/right split (one camera per fighter) when far apart, with hysteresis. */
+  private coopCamera(s: Simulation['state']) {
+    const o = slotPlayer(s, 1), d = Math.hypot(s.player.x - o.x, s.player.y - o.y), W = this.scale.width, H = this.scale.height, plan = planCoopCamera(this.splitOn, d, this.bridge.getSettings().coopSplit, W), cam = this.cameras.main, zoom = this.entityRenderer.cameraZoom();
+    this.setSplit(plan.split);
+    if (!plan.split) { cam.setZoom(fitZoom(W, H) * zoom * plan.zoomFactor); followPlayer(cam, (s.player.x + o.x) / 2, (s.player.y + o.y) / 2); return; }
+    const v = splitViewports(W, H), c2 = this.cam2!; cam.setViewport(v.left.x, v.left.y, v.left.w, v.left.h); c2.setViewport(v.right.x, v.right.y, v.right.w, v.right.h);
+    const z = fitZoom(v.left.w, v.left.h) * zoom; cam.setZoom(z); c2.setZoom(z); followPlayer(cam, s.player.x, s.player.y); followPlayer(c2, o.x, o.y);
+  }
+  private setSplit(on: boolean) {
+    if (on === this.splitOn) return; this.splitOn = on;
+    if (on) { this.cam2 ??= this.cameras.add(0, 0, 1, 1, false, 'p2cam'); this.cam2.setVisible(true).setBackgroundColor('#101a29'); this.cam2.setRoundPixels(true); }
+    else { this.cam2?.setVisible(false); this.cameras.main.setViewport(0, 0, this.scale.width, this.scale.height); }
   }
   /** Finale beat: a white-gold flash, a camera kick and three expanding gold shock rings from Kai (rings only with effects on). */
   private celebrate(x: number, y: number) {
