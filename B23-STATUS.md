@@ -18,7 +18,17 @@
 - Seven per-form reveal events (signature + sound) at the real commit frame; adept finishers on boss/elite kills; enemy windup/strike/recover body acting; online movement prediction.
 - Still NOT done: NORTH/rear anatomy and attack poses, authored reveal choreography, a Vex-specific animation set, the eight real outfits, victory poses, boss part/phase animation, split screen, real audio production. These need original art/Blender/audio work that was not produced; nothing was faked as done.
 
-## Tests
+## Third pass (owner follow-ups)
+- **Co-op P2 HUD (owner-reported):** the second fighter now has their own ability row (dash/Q/E/R/F with real cooldown sweeps, form and charge state, correct per-hero icons and names), inside the P2 panel; works for a local second fighter and an online partner view.
+- **Split screen:** automatic left/right split when the partners are far apart (setting "Co-op split screen"), hysteresis, shared view on narrow canvases.
+- **Reveal accents:** per-form floor light + bounded camera accent at the commit; quiet for Stillfire/Voidheart.
+- **Victory pose:** win screen shows the hero's real stance for the form reached; equipped crest named.
+- **Audio:** all 120 synthesised recipes measured offline (peak <= 0.62).
+- **Results screen fixes (owner-reported):** Endless button text no longer cropped; Marks Earned panel fully visible on short windows.
+- **Skipped on request:** real-speed playback, performance run, two-client online test (owner will run on hardware).
+- **Not done, needs Blender / ImageGen:** Vex-specific clips (the Vex sheets are recolours of Ren's rig per form and direction; new clips need all of them rebuilt and reviewed frame by frame), authored reveal poses, seven new victory animations, seven crest artworks, outfits, rear anatomy, boss part art.
+
+## Tests (second pass; the third pass is re-verified in the final block at the end of this file if present)
 Final HEAD, one worker, dev server (`playwright.b23.config.ts`, port 5199 - this repo's own):
 - `npx tsc -b`: clean. `npx vitest run`: 683 passed, 1 skipped (a first run under load had 7 timeouts, the immediate rerun was clean).
 - `npm run build`: passes (2m09s, chunk-size warning only).
