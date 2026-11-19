@@ -1,4 +1,5 @@
 /** Browser / Electron online client. Presents the same surface the scene and bridge use from `Simulation`, but the state comes from the authoritative server: the client sends INPUT and CHOICES and renders what the server says. Own movement is smoothed toward the server position every frame (interpolation, no authority). Result / rewards come from the server's `result` message only. */
+import { MovePredictor, reconcile } from './prediction';
 import type { GameState, InputState } from '../sim/GameState';
 import { applySnapshot, blankClientState, type Snap } from './snapshot';
 import { PROTOCOL_VERSION, fromInputState, type RoomMode, type ServerMsg } from './protocol';
@@ -20,7 +21,7 @@ export class NetClient {
       ws.onmessage = e => {
         let m: ServerMsg; try { m = JSON.parse(String(e.data)) as ServerMsg; } catch { return; }
         if (m.t === 'welcome') { if (m.token) this.token = m.token; this.error = null; res(); }
-        else if (m.t === 'room') this.room = m; else if (m.t === 'snap') this.latest = m.s as Snap; else if (m.t === 'result') this.result = m;
+        else if (m.t === 'room') this.room = m; else if (m.t === 'snap') { this.latest = m.s as Snap; this.ack = typeof m.ack === 'number' ? m.ack : this.ack; } else if (m.t === 'result') this.result = m;
         else if (m.t === 'error') { this.error = m.code === 'version' ? 'Update required: this client and the server use different protocol versions.' : m.msg; if (m.code === 'version') rej(new Error('version')); }
         else if (m.t === 'pong') this.rtt = Date.now() - m.n; this.emit();
       };
@@ -28,16 +29,28 @@ export class NetClient {
     });
   }
   send(m: object) { if (this.ws?.readyState === 1) this.ws.send(JSON.stringify(m)); }
-  sendInput(i: InputState) { this.send({ t: 'input', seq: ++this.seq, i: fromInputState(i) }); }
+  ack = 0;
+  sendInput(i: InputState) { this.send({ t: 'input', seq: ++this.seq, i: fromInputState(i) }); return this.seq; }
   close() { this.send({ t: 'leave' }); this.ws?.close(); }
 }
 /** Stands in for `Simulation` in the arena scene during an online run. */
 export class RemoteSimulation {
-  readonly state: GameState; private target = { x: 0, y: 0 }; private first = true;
+  readonly state: GameState; private first = true;
   constructor(private readonly net: NetClient, seed: number, arena: ArenaId) { this.state = blankClientState(seed, arena); }
-  step(_dt: number, input: InputState) {
-    const n = this.net.latest; this.net.sendInput(input);
-    if (n) { const was = { x: this.state.player.x, y: this.state.player.y }; applySnapshot(this.state, n); this.target = { x: this.state.player.x, y: this.state.player.y }; if (!this.first) { const k = 0.35; this.state.player.x = was.x + (this.target.x - was.x) * k; this.state.player.y = was.y + (this.target.y - was.y) * k; } this.first = false; this.net.latest = null; }
+  private readonly pred = new MovePredictor();
+  /** Movement is only predicted while the fighter is free to walk: not casting, dashing, in a reveal, down or dead (the server position is used as is then). */
+  private canPredict() { const s = this.state, p = s.player; return s.phase === 'running' && p.hp > 0 && p.dashRemaining <= 0 && !s.cast && !s.hx.act && !s.cinema && !s.b22.ult.act; }
+  step(dt: number, input: InputState) {
+    const n = this.net.latest, seq = this.net.sendInput(input), free = this.canPredict();
+    if (free) this.pred.record(seq, input.x, input.y, dt); else this.pred.reset();
+    if (n) {
+      const was = { x: this.state.player.x, y: this.state.player.y }; applySnapshot(this.state, n); this.pred.ack(this.net.ack);
+      const base = { x: this.state.player.x, y: this.state.player.y }, speed = this.state.player.speed, goal = free && !this.first ? this.pred.replay(base.x, base.y, speed) : base;
+      if (this.first) { this.first = false; } else { const r = reconcile(was.x, was.y, goal.x, goal.y); this.state.player.x = r.x; this.state.player.y = r.y; }
+      this.net.latest = null;
+    } else if (free && !this.first) {   // between snapshots: advance by this tick's own input, the next snapshot corrects it
+      const l = Math.hypot(input.x, input.y), k = l > 1 ? 1 / l : 1, p = this.state.player; p.x += input.x * k * p.speed * dt; p.y += input.y * k * p.speed * dt;
+    }
   }
   chooseUpgrade(id: string) { this.net.send({ t: 'pick', kind: 'upgrade', id }); return true; }
   chooseBranch(id: string) { this.net.send({ t: 'pick', kind: 'branch', id }); return true; }
