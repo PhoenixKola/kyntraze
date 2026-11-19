@@ -1,7 +1,7 @@
 {
  "schema": "kyntraze.anim-manifest/0.1-pilot",
  "character": "kai",
- "form": "form-i",
+ "form": "form-ii",
  "direction": "north",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/kai-north.blend",
