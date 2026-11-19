@@ -5,7 +5,7 @@ import { ENEMIES, ENEMY_KINDS, AIM_LOCK_FRACTION, groundDy, isBoss, isRealmKind,
 import { FxPool, vfxKey } from './fxPool';
 import { b14Key } from './b14fx';
 import { b21Key } from './b21Assets';
-import { reactionFor, reactionPose, type ReactKind, type Reaction } from './bodyReaction';
+import { attackPose, reactionFor, reactionPose, type ReactKind, type Reaction } from './bodyReaction';
 
 /** B07 enemy art: ImageGen sheets (8 frames: move x4, windup, release, hurt, death; east-facing, mirrored for west) cut by scripts/build-enemy-art.py. */
 export const ENEMY_FX_NAMES = ['aimline', 'chevron', 'bolt', 'bolt-hit', 'death-burst', 'hit-spark', 'circle-warn', 'circle-slam'] as const;
@@ -156,9 +156,9 @@ export class EnemyRenderer {
       const hover = def.caster ? -9 - Math.sin(tr.t * 4 + e.id) * 3 : 0;
       const shake = e.mode === 'windup' && e.kind === 'bruiser' ? Math.sin(tr.t * 60) * (0.8 + prog * 1.6) : 0;
       const lean = e.mode === 'windup' && e.kind !== 'bruiser' ? prog * 2 : 0;
-      const feetY = e.y + groundDy(def.radius);
-      spr.setPosition(Math.round(e.x + shake - tr.face * lean + tr.rx * pose.off), Math.round(feetY + hover + tr.ry * pose.off * 0.6)).setDepth(6 + (feetY / 1600) * 1.8);
-      spr.setRotation(pose.tilt * (tr.rx >= 0 ? 1 : -1)).setScale(SCALE * (1 + pose.sq * 0.5), SCALE * (1 - pose.sq));
+      const feetY = e.y + groundDy(def.radius), act = attackPose(e.kind, e.mode, prog, e.mode === 'recover' ? e.modeT / Math.max(0.05, def.attack.recover) : 0);
+      spr.setPosition(Math.round(e.x + shake - tr.face * lean + tr.face * act.fwd + tr.rx * pose.off), Math.round(feetY + hover + tr.ry * pose.off * 0.6)).setDepth(6 + (feetY / 1600) * 1.8);
+      spr.setRotation(pose.tilt * (tr.rx >= 0 ? 1 : -1)).setScale(SCALE * (1 + pose.sq * 0.5) * act.sx, SCALE * (1 - pose.sq) * act.sy);
       if (tr.flash > 0) { spr.setTint(0xffe6ee); spr.tintMode = Phaser.TintModes.FILL; } else { spr.clearTint(); spr.tintMode = Phaser.TintModes.MULTIPLY; }
       this.telegraph(e, tr, prog, feetY);
       this.aura(e, tr, feetY, def);

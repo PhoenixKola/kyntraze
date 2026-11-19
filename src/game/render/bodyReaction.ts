@@ -33,3 +33,17 @@ export function bossDamageLevel(hpFrac: number, phase: 1 | 2): 0 | 1 | 2 | 3 {
   if (phase === 2) return hpFrac < 0.4 ? 3 : 2;
   return hpFrac < 0.4 ? 2 : hpFrac < 0.75 ? 1 : 0;
 }
+
+/** B23: how an enemy body ACTS through its own attack (presentation only, the sim timings are untouched): anticipation crouch while the tell runs, a forward stretch on the strike, a slump that recovers. `prog` = tell progress 0..1, `rec` = recover time left 1..0. Archetype decides how much: bruisers load slowly and slam short, flankers coil and dart, casters lift. */
+export interface AttackPose { sx: number; sy: number; fwd: number }
+const ACT: Record<string, { crouch: number; stretch: number; fwd: number; slump: number }> = {
+  pursuer: { crouch: 0.07, stretch: 0.1, fwd: 5, slump: 0.05 }, flanker: { crouch: 0.12, stretch: 0.16, fwd: 11, slump: 0.07 }, bruiser: { crouch: 0.1, stretch: 0.07, fwd: 3, slump: 0.1 },
+  ranged: { crouch: 0.03, stretch: 0.08, fwd: 2, slump: 0.04 }, aegis: { crouch: 0.05, stretch: 0.05, fwd: 4, slump: 0.05 }, cantor: { crouch: 0.03, stretch: 0.07, fwd: 1, slump: 0.04 },
+};
+export function attackPose(kind: string, mode: string, prog: number, rec: number): AttackPose {
+  const a = ACT[kind] ?? ACT.pursuer;
+  if (mode === 'windup') { const e = prog * prog * (3 - 2 * Math.min(1, prog)); return { sx: 1 + a.crouch * 0.6 * e, sy: 1 - a.crouch * e, fwd: -a.fwd * 0.25 * e }; }
+  if (mode === 'strike') return { sx: 1 + a.stretch, sy: 1 - a.stretch * 0.7, fwd: a.fwd };
+  if (mode === 'recover') { const e = Math.max(0, Math.min(1, rec)); return { sx: 1 + a.slump * 0.4 * e, sy: 1 - a.slump * e, fwd: a.fwd * 0.3 * e }; }
+  return { sx: 1, sy: 1, fwd: 0 };
+}
