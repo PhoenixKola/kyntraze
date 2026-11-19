@@ -67,3 +67,15 @@ export function drawSignature(g: Pen, sig: Signature, x: number, y: number, r: n
     default: thin(4); g.strokeCircle(x, y, R);
   }
 }
+
+/** B23 reveal accents at the commit: one local floor light (radius px, alpha) and one small camera accent per form. Stillfire gets a light and NO shake (its reveal is deliberately quiet); nothing here lengthens or freezes anything. Reduced Effects skips the camera part. */
+export interface RevealAccent { light: { r: number; a: number; life: number }; shake: number; shakeMs: number; flash?: { rgb: [number, number, number]; ms: number } }
+export const REVEAL_ACCENT: Record<string, RevealAccent> = {
+  reveal_flare: { light: { r: 260, a: 0.5, life: 0.8 }, shake: 0.0022, shakeMs: 110, flash: { rgb: [255, 200, 120], ms: 90 } },
+  reveal_comet: { light: { r: 300, a: 0.6, life: 0.7 }, shake: 0.0045, shakeMs: 170, flash: { rgb: [255, 235, 160], ms: 110 } },
+  reveal_still: { light: { r: 280, a: 0.35, life: 1.4 }, shake: 0, shakeMs: 0 },
+  reveal_ren: { light: { r: 290, a: 0.55, life: 0.8 }, shake: 0.004, shakeMs: 150, flash: { rgb: [255, 120, 90], ms: 100 } },
+  reveal_sora: { light: { r: 280, a: 0.5, life: 0.9 }, shake: 0.001, shakeMs: 90, flash: { rgb: [170, 225, 255], ms: 120 } },
+  reveal_vex1: { light: { r: 250, a: 0.45, life: 0.8 }, shake: 0.0028, shakeMs: 120 },
+  reveal_vex2: { light: { r: 260, a: 0.4, life: 1.2 }, shake: 0, shakeMs: 0 },
+};

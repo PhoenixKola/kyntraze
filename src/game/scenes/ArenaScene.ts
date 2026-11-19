@@ -9,6 +9,7 @@ import { EntityRenderer } from '../render/EntityRenderer';
 import { EffectsRenderer } from '../render/EffectsRenderer';
 import { followPlayer, fitZoom } from '../render/CameraController';
 import { planCoopCamera, splitViewports } from '../render/coopCamera';
+import { REVEAL_ACCENT } from '../render/advancedFx';
 import { Presentation } from '../render/arenaArt';
 import { Ambience, ArenaHazardView, ArenaProps, createArenaFloor } from '../render/arenaWorld';
 import { NO_CONFIG } from '../../sim/RunConfig';
@@ -93,6 +94,7 @@ export class ArenaScene extends Phaser.Scene {
     { const P = s.party; if (P) this.coopCamera(s); else { this.setSplit(false); followPlayer(this.cameras.main, s.player.x, s.player.y); } }
     this.entityRenderer.sync(s, this.lastInput, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.reduced);
     this.hitstopLeft = Math.max(this.hitstopLeft, this.entityRenderer.takeHitstop());
+    for (const ev of s.b22.ev) { if (ev.id <= this.revealCur) continue; this.revealCur = ev.id; const a = REVEAL_ACCENT[ev.kind]; if (a && !this.reduced) { if (a.shake > 0) this.cameras.main.shake(a.shakeMs, a.shake); if (a.flash) this.cameras.main.flash(a.flash.ms, ...a.flash.rgb, true); } }
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
     const hp = this.entityRenderer.debugPose(), k0 = formKey(s.hero, s.player.form) ?? (s.hero === 'kai' && s.hx.kk?.surge ? 'surge' : null);
     this.presentation.update(s, hp.x, hp.y, hp.visualForm !== 'base', this.reduced, k0 ? RING_TINT[k0] : null);
@@ -115,7 +117,7 @@ export class ArenaScene extends Phaser.Scene {
     this.publishClock += delta;
     if ((s.phase === 'running' && this.publishClock >= 100) || this.bridge.snapshot().phase !== s.phase) { this.publishClock = 0; this.bridge.publish(); }
   }
-  private cam2: Phaser.Cameras.Scene2D.Camera | null = null; private splitOn = false;
+  private revealCur = 0; private cam2: Phaser.Cameras.Scene2D.Camera | null = null; private splitOn = false;
   /** Shared view while close; automatic left/right split (one camera per fighter) when far apart, with hysteresis. */
   private coopCamera(s: Simulation['state']) {
     const o = slotPlayer(s, 1), d = Math.hypot(s.player.x - o.x, s.player.y - o.y), W = this.scale.width, H = this.scale.height, plan = planCoopCamera(this.splitOn, d, this.bridge.getSettings().coopSplit, W), cam = this.cameras.main, zoom = this.entityRenderer.cameraZoom();

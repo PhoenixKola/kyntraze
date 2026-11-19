@@ -2,6 +2,7 @@
 import Phaser from 'phaser';
 import type { GameState } from '../../sim/GameState';
 import { planLights } from './lightPlan';
+import { REVEAL_ACCENT, signatureOf } from './advancedFx';
 
 const KEY = 'b21-soft-light', SIZE = 128, CAP = 12;
 function ensureTexture(scene: Phaser.Scene) {
@@ -14,13 +15,15 @@ function ensureTexture(scene: Phaser.Scene) {
 interface Live { img: Phaser.GameObjects.Image; age: number; life: number; a: number; r: number }
 
 export class LightLayer {
-  private readonly live: Live[] = []; private readonly free: Phaser.GameObjects.Image[] = []; private ability = 0; private enemy = 0;
+  private readonly live: Live[] = []; private readonly free: Phaser.GameObjects.Image[] = []; private ability = 0; private enemy = 0; private reveal = 0;
   constructor(private readonly scene: Phaser.Scene) { ensureTexture(scene); }
   get count() { return this.live.length; }
   update(s: GameState, dt: number, reduced: boolean) {
     const running = s.phase === 'running', step = running ? dt : 0;
     const r = planLights(s, this.ability, this.enemy); this.ability = r.ability; this.enemy = r.enemy;
-    if (running) for (const l of r.lights) {
+    const lights = [...r.lights];
+    for (const ev of s.b22.ev) { if (ev.id <= this.reveal) continue; this.reveal = ev.id; const a = REVEAL_ACCENT[ev.kind], sg = signatureOf(ev.kind); if (a && sg) lights.push({ x: ev.x, y: ev.y + 10, radius: a.light.r, color: sg.color, alpha: a.light.a, life: a.light.life }); }
+    if (running) for (const l of lights) {
       if (this.live.length >= CAP) break; if (reduced && l.alpha < 0.3) continue;
       const img = this.free.pop() ?? this.scene.add.image(0, 0, KEY).setBlendMode(Phaser.BlendModes.ADD).setDepth(3.2);
       img.setVisible(true).setTint(l.color).setPosition(Math.round(l.x), Math.round(l.y)); this.live.push({ img, age: 0, life: l.life, a: l.alpha * (reduced ? 0.5 : 1), r: l.radius });

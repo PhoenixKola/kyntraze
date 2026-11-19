@@ -50,3 +50,11 @@ describe('B23 each transformation announces its own reveal at the commit', () =>
     const gains = ids.map(id => SFX[signatureSfx(id)!].gain); expect(SFX[signatureSfx('reveal_still')!].gain).toBe(Math.min(...gains));
   });
 });
+
+import { REVEAL_ACCENT } from '../game/render/advancedFx';
+describe('B23 reveal accents', () => {
+  it('every reveal has a light; Stillfire and Voidheart stay quiet (no shake, no flash); loud forms are bounded', () => {
+    for (const id of ['flare', 'comet', 'still', 'ren', 'sora', 'vex1', 'vex2']) { const a = REVEAL_ACCENT[`reveal_${id}`]; expect(a, id).toBeDefined(); expect(a.light.a).toBeLessThanOrEqual(0.6); expect(a.shake).toBeLessThanOrEqual(0.005); expect(a.shakeMs).toBeLessThanOrEqual(200); expect(a.flash?.ms ?? 0).toBeLessThanOrEqual(120); }
+    for (const q of ['reveal_still', 'reveal_vex2']) { expect(REVEAL_ACCENT[q].shake).toBe(0); expect(REVEAL_ACCENT[q].flash).toBeUndefined(); }
+  });
+});
