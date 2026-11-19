@@ -5,14 +5,14 @@
  "direction": "north",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/vex-north.blend",
- "frame_width": 138,
+ "frame_width": 140,
  "frame_height": 165,
  "origin_px": [
-  83.0,
+  85.0,
   162.0
  ],
  "origin_normalized": [
-  0.601449,
+  0.607143,
   0.981818
  ],
  "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
@@ -85,10 +85,10 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 116,
-   "frame_height": 114,
+   "frame_width": 118,
+   "frame_height": 108,
    "origin_px": [
-    72.0,
+    74.0,
     160.0
    ],
    "terminal": "once",

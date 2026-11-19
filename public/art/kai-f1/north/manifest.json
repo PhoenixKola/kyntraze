@@ -5,14 +5,14 @@
  "direction": "north",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/kai-north.blend",
- "frame_width": 134,
+ "frame_width": 104,
  "frame_height": 167,
  "origin_px": [
-  81.0,
+  51.0,
   164.0
  ],
  "origin_normalized": [
-  0.604478,
+  0.490385,
   0.982036
  ],
  "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
@@ -85,10 +85,10 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 114,
+   "frame_width": 84,
    "frame_height": 111,
    "origin_px": [
-    71.0,
+    41.0,
     164.0
    ],
    "terminal": "once",
@@ -176,6 +176,25 @@
    "frame_height": 166,
    "origin_px": [
     63.0,
+    164.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Victory": {
+   "sheet": "sheets/kai_north_victory.png",
+   "frames": 16,
+   "fps": 10,
+   "loop": false,
+   "duration_s": 1.6,
+   "blender_action": "Victory",
+   "events": {
+    "hold": 8
+   },
+   "frame_width": 120,
+   "frame_height": 166,
+   "origin_px": [
+    62.0,
     164.0
    ],
    "terminal": "once",
@@ -291,25 +310,6 @@
    "frame_height": 166,
    "origin_px": [
     49.0,
-    164.0
-   ],
-   "terminal": "once",
-   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
-  },
-  "Victory": {
-   "sheet": "sheets/kai_north_victory.png",
-   "frames": 16,
-   "fps": 10,
-   "loop": false,
-   "duration_s": 1.6,
-   "blender_action": "Victory",
-   "events": {
-    "hold": 8
-   },
-   "frame_width": 120,
-   "frame_height": 166,
-   "origin_px": [
-    62.0,
     164.0
    ],
    "terminal": "once",

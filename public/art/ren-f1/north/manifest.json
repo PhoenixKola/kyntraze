@@ -5,14 +5,14 @@
  "direction": "north",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/ren-north.blend",
- "frame_width": 138,
+ "frame_width": 106,
  "frame_height": 175,
  "origin_px": [
-  83.0,
+  51.0,
   172.0
  ],
  "origin_normalized": [
-  0.601449,
+  0.481132,
   0.982857
  ],
  "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
@@ -85,10 +85,10 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 116,
+   "frame_width": 86,
    "frame_height": 118,
    "origin_px": [
-    72.0,
+    42.0,
     170.0
    ],
    "terminal": "once",
@@ -181,6 +181,25 @@
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
   },
+  "Victory": {
+   "sheet": "sheets/ren_north_victory.png",
+   "frames": 16,
+   "fps": 10,
+   "loop": false,
+   "duration_s": 1.6,
+   "blender_action": "Victory",
+   "events": {
+    "hold": 8
+   },
+   "frame_width": 124,
+   "frame_height": 187,
+   "origin_px": [
+    63.0,
+    185.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
   "Beam": {
    "sheet": "sheets/ren_north_beam.png",
    "frames": 26,
@@ -225,25 +244,6 @@
    "origin_px": [
     50.0,
     192.0
-   ],
-   "terminal": "once",
-   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
-  },
-  "Victory": {
-   "sheet": "sheets/ren_north_victory.png",
-   "frames": 16,
-   "fps": 10,
-   "loop": false,
-   "duration_s": 1.6,
-   "blender_action": "Victory",
-   "events": {
-    "hold": 8
-   },
-   "frame_width": 124,
-   "frame_height": 187,
-   "origin_px": [
-    63.0,
-    185.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"

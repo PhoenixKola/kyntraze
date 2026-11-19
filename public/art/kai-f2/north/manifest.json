@@ -1,18 +1,18 @@
 {
  "schema": "kyntraze.anim-manifest/0.1-pilot",
  "character": "kai",
- "form": "form-ii",
+ "form": "form-i",
  "direction": "north",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/kai-north.blend",
- "frame_width": 132,
+ "frame_width": 104,
  "frame_height": 178,
  "origin_px": [
-  80.0,
+  52.0,
   175.0
  ],
  "origin_normalized": [
-  0.606061,
+  0.5,
   0.983146
  ],
  "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
@@ -85,10 +85,10 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 112,
+   "frame_width": 82,
    "frame_height": 123,
    "origin_px": [
-    70.0,
+    40.0,
     174.0
    ],
    "terminal": "once",
@@ -176,6 +176,25 @@
    "frame_height": 190,
    "origin_px": [
     63.0,
+    188.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Victory": {
+   "sheet": "sheets/kai_north_victory.png",
+   "frames": 16,
+   "fps": 10,
+   "loop": false,
+   "duration_s": 1.6,
+   "blender_action": "Victory",
+   "events": {
+    "hold": 8
+   },
+   "frame_width": 120,
+   "frame_height": 190,
+   "origin_px": [
+    62.0,
     188.0
    ],
    "terminal": "once",
@@ -292,25 +311,6 @@
    "origin_px": [
     49.0,
     175.0
-   ],
-   "terminal": "once",
-   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
-  },
-  "Victory": {
-   "sheet": "sheets/kai_north_victory.png",
-   "frames": 16,
-   "fps": 10,
-   "loop": false,
-   "duration_s": 1.6,
-   "blender_action": "Victory",
-   "events": {
-    "hold": 8
-   },
-   "frame_width": 120,
-   "frame_height": 190,
-   "origin_px": [
-    62.0,
-    188.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"

@@ -177,7 +177,10 @@ def punch():
     sx = SX; L = LEAD; R = REAR; Lu, Lf = LU[L], LF[L]
     lead_g = copy.deepcopy(LEAD_GUARD); rear = lambda d=0: arm(REAR_WAIST["u"][0] - sx * d if D != "north" else REAR_WAIST["u"][0] + d, LU[R], REAR_WAIST["f"][0], LF[R], 0.0, "side")
     TUCK = arm(sx * 20, Lu * 0.8, -sx * 158, Lf * 0.7, 0.0, "guard"); LOAD = arm(sx * 28, Lu * 0.75, -sx * 164, Lf * 0.65, 0.0, "guard")
-    ext = lambda a, b, cap=None: arm(sx * a, Lu, sx * b, Lf, 0.0, "side", cap)
+    if D == "north":   # B23 REAR view: a strike goes AWAY from the camera - the arm rises up the screen beside the head, foreshortened - instead of swinging out sideways
+        ext = lambda a, b, cap=None: arm(-(150 + (a - 62) * 0.3), Lu * 0.78, -(165 + (b - 82) * 0.25), Lf * 0.62, 0.0, "side", cap)
+    else:
+        ext = lambda a, b, cap=None: arm(sx * a, Lu, sx * b, Lf, 0.0, "side", cap)
     lead_leg = f"leg_{L}"; fwd = lambda dx: {"sole": (SOLES[L][0] + sx * dx, SOLES[L][1])}
     k = [
         {},

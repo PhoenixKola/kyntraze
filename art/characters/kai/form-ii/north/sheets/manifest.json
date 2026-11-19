@@ -5,14 +5,14 @@
  "direction": "north",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/kai-north.blend",
- "frame_width": 132,
+ "frame_width": 104,
  "frame_height": 178,
  "origin_px": [
-  80.0,
+  52.0,
   175.0
  ],
  "origin_normalized": [
-  0.606061,
+  0.5,
   0.983146
  ],
  "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
@@ -85,10 +85,10 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 112,
+   "frame_width": 82,
    "frame_height": 123,
    "origin_px": [
-    70.0,
+    40.0,
     174.0
    ],
    "terminal": "once",

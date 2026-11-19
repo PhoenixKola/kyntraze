@@ -5,14 +5,14 @@
  "direction": "north",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/sora-north.blend",
- "frame_width": 134,
+ "frame_width": 106,
  "frame_height": 170,
  "origin_px": [
-  81.0,
+  53.0,
   167.0
  ],
  "origin_normalized": [
-  0.604478,
+  0.5,
   0.982353
  ],
  "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
@@ -85,10 +85,10 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 112,
+   "frame_width": 82,
    "frame_height": 107,
    "origin_px": [
-    70.0,
+    40.0,
     163.0
    ],
    "terminal": "once",
