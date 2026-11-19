@@ -69,6 +69,7 @@ export class EntityRenderer {
     this.auraBody = scene.add.container(0, 0, [this.auraCopyLegs, this.auraCopyHero]).setDepth(9.7).setVisible(false); this.auraBody.enableFilters();
     this.auraGlow.push(this.auraBody.filters!.internal.addGlow(0xffffff, 0, 0, 1, true, 4, 10) as unknown as StrokeCtl);
   }
+  private lastRipEv = 0; private riposteAt = -99;
   private readonly hairDrv = new HairDriver(); private readonly hairLayer: HairLayer; private readonly hairTable: HairTable | undefined;
   /** B23: the character's hair tips are deformed from real motion (hairRig); the roots stay pinned. */
   private hairStep(state: GameState, dt: number, hero: 'kai' | 'ren' | 'sora' | 'vex', key: string, frame: number, clip: string, hurt: boolean, reduced: boolean) {
@@ -242,7 +243,8 @@ export class EntityRenderer {
     const fx = this.heroFx, body = this.heroBody!, x = Math.round(p.x), y = Math.round(p.y + KAI_GROUND_DY), dead = state.phase === 'dead' || p.hp <= 0, anim = this.heroAnim;
     body.clear();
     if (anim) {
-      const c = state.hx.act, view: HeroActView | null = c ? { id: c.id, act: c.act, t: c.t, dur: c.dur, face: c.face, released: c.released, moving: c.moving, beats: c.beats, hop: c.hop, hops: c.hops.length, hopT: c.hopT, charge: c.charge } : null;
+      for (const ev of state.abilityEvents) if (ev.id > this.lastRipEv) { this.lastRipEv = ev.id; if (ev.kind === 'parry_perfect' || ev.kind === 'reversal_riposte') this.riposteAt = state.time; }
+      const c = state.hx.act, view: HeroActView | null = c ? { riposte: state.time - this.riposteAt, id: c.id, act: c.act, t: c.t, dur: c.dur, face: c.face, released: c.released, moving: c.moving, beats: c.beats, hop: c.hop, hops: c.hops.length, hopT: c.hopT, charge: c.charge } : null;
       const pose = anim.update({ dt, alive: !dead, moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, inputX: input.x, inputY: input.y, runSpeed: p.speed * (p.form ? 1.1 : 1), dashing: p.dashRemaining > 0, dashX: p.dashDx, dashY: p.dashDy, dashRemaining: p.dashRemaining, hurt, form: p.form, cinema: state.cinema ? { t: state.cinema.t, dur: state.cinema.dur, commitAt: state.cinema.commitAt } : null, act: view, strike: state.hx.strike });
       this.pose = pose; const form: 'base' | 'f1' = pose.form === 'f1' ? 'f1' : 'base';
       // one appearance for BOTH body layers: Voidheart Exile (Vex f2) resolves its upper, legs and anchors from the same set

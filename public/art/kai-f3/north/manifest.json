@@ -175,10 +175,10 @@
     "interruptible_from": 12
    },
    "frame_width": 122,
-   "frame_height": 190,
+   "frame_height": 183,
    "origin_px": [
     63.0,
-    188.0
+    181.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
@@ -319,6 +319,25 @@
    "origin_px": [
     44.0,
     179.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Victory": {
+   "sheet": "sheets/kai_north_victory.png",
+   "frames": 16,
+   "fps": 10,
+   "loop": false,
+   "duration_s": 1.6,
+   "blender_action": "Victory",
+   "events": {
+    "hold": 8
+   },
+   "frame_width": 120,
+   "frame_height": 184,
+   "origin_px": [
+    62.0,
+    182.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"

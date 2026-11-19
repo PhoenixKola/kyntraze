@@ -221,6 +221,9 @@ import danim_form  # noqa: E402  (Form I: hair follow-through + Transform clip; 
 CLIPS += danim_form.CLIPS
 import danim_b05  # noqa: E402  (B05: Beam + Sphere signature abilities, base and Form I)
 CLIPS += danim_b05.CLIPS
+import danim_vex  # noqa: E402  (B23: Vex's own Guard / Riposte)
+_own = {f()["name"] for f in danim_vex.CLIPS}
+CLIPS = [f for f in CLIPS if f()["name"] not in _own] + danim_vex.CLIPS   # Vex's own clips replace same-named inherited ones (Transform)
 
 if r.F3:        # Form III (Stillfire Apex): levitation layer over the Form II poses (form-iii/scripts/hover3.py); every clip name and event the runtime knows stays
     sys.path.insert(0, os.environ["KAI_F3_SCRIPTS"]); import hover3

@@ -1,0 +1,4 @@
+Create ONE image: damage-state DECALS for a game boss, to be overlaid on the attached boss sprite. The boss is a dimensional ruler whose body splits into echoes.
+Draw TWO overlays side by side on a flat solid pure magenta (#FF00FF) background, left half = DAMAGE LEVEL 2 (moderate), right half = DAMAGE LEVEL 3 (severe, includes everything from level 2 plus much more). Each overlay shows ONLY the damage marks (cracks, chips, torn-off pieces, broken plates, leaking light, scorch) laid out over the same body silhouette area and proportions as the attached sprite, transparent elsewhere (magenta), NOT the whole boss and not the boss body itself. Same scale and centered in each half, matching the attached sprite's pixel-art-like polished style, palette and lighting.
+Theme of the damage: reality tears across the body, teal-violet glass-like fracture lines, offset duplicated edges, pieces drifting apart.
+No text, no letters, no frames, no ground shadow.

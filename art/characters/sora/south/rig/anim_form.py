@@ -45,4 +45,13 @@ def transform():
     return {"name": "Transform", "fps": 20, "loop": False, "frames": frames,
             "events": {"anticipation_start": 0, "gather_start": 2, "release_start": 6, "form_commit": 7, "reveal_hold": 8, "interruptible_from": 10}}
 
-CLIPS = [transform] if FORM else []
+# ---- B23: per-form reveal acting + Victory clip (shared module art/characters/_shared/b23_reveal.py)
+import os as _os, sys as _sys
+_d = _os.path.dirname(_os.path.abspath(__file__))
+while _d and not _os.path.isdir(_os.path.join(_d, "_shared")) and _os.path.dirname(_d) != _d: _d = _os.path.dirname(_d)
+_sys.path.insert(0, _os.path.join(_d, "_shared")); import b23_reveal as _b23   # noqa: E402
+_STYLE = "sora"
+_transform_raw = transform
+def transform(): return _b23.reshape(_transform_raw(), _STYLE)
+def victory(): return _b23.victory(_transform_raw(), _STYLE)
+CLIPS = [transform, victory] if FORM else []

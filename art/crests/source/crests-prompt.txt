@@ -1,0 +1,13 @@
+Create ONE image: a 4x2 grid sheet (4 columns, 2 rows, 7 medals used, the 8th cell left EMPTY) of seven game "mastery crest" medals for a premium sci-fi action game UI. Every medal MUST use exactly the same frame design as the attached reference image: a diamond (rotated square) dark-steel plate frame with riveted bevelled metal corners and small amber/teal accent brackets, a small ring loop at the top, painterly-polished UI-icon rendering with soft inner glow, crisp edges. Same size and same centered position in each cell, generous even spacing, no text, no letters, no numbers, no cell borders.
+Flat solid pure magenta (#FF00FF) background everywhere outside the medals.
+The emblem inside each diamond (centered, bold readable silhouette), with its own color family:
+1 (row1 col1) SOLAR VERDICT: a radiant golden-orange sun burst with flame tongues, warm gold glow.
+2 (row1 col2) COMET VERDICT: a golden comet streaking diagonally with three sharp lightning trails, bright yellow-white core.
+3 (row1 col3) SILVER VERDICT: a calm silver-white crescent and a single floating feather-blade, cool white-silver glow, very quiet and elegant.
+4 (row1 col4) CRIMSON VERDICT: a clenched crimson gauntlet fist with a heavy impact star, deep red with hot orange edge light.
+2nd row:
+5 (row2 col1) AZURE VERDICT: a blue-white sovereign halo ring pierced by a vertical lance of light, bright azure glow.
+6 (row2 col2) VIOLET VERDICT: a violet crystalline shard cracked in two with a thin blade between, angular violet glow.
+7 (row2 col3) VOID VERDICT: a broken graphite-gray halo (ring with a gap) around a dark eclipse disc, silver highlights on dark gray, NO purple.
+8 (row2 col4): empty magenta.
+Keep the frames identical across all seven; only the emblem and its glow color change. No drop shadows outside the medal.

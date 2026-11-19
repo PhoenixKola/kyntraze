@@ -7,6 +7,7 @@ import type { Enemy, GameState, Hazard } from '../../sim/GameState';
 import { BOSSES } from '../../content/bosses';
 import { ENEMIES, isBoss, isRealmKind, type BossKind, type MobKind } from '../../content/enemies';
 import { finisherFor, formKey } from './edgePalette';
+import { bossDamageLevel } from './bodyReaction';
 import { slotPlayer } from '../../sim/CoopSystem';
 
 const hash = (x: number, y: number) => { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
@@ -142,6 +143,7 @@ export class B22Overlay {
     const seen = new Set<number>(); this.used.clear();
     for (const e of s.enemies) { if (e.hp <= 0) continue; if (!isRealmKind(e.kind) && !(isBoss(e.kind) && e.kind !== 'warden' && e.kind !== 'seraph')) continue; seen.add(e.id); this.actor(ag, e, s); }
     for (const id of this.lastHp.keys()) if (!seen.has(id)) this.lastHp.delete(id);
+    for (const [id, d] of this.dmgImgs) if (!this.used.has(id)) { d.destroy(); this.dmgImgs.delete(id); }
     for (const [id, im] of this.imgs) if (!this.used.has(id)) { const dk = `b22-${im.getData('k')}_f7`; if (this.scene.textures.exists(dk)) im.setTexture(dk).clearTint(); else im.setTint(0xffffff); if (this.scene.textures.exists(dk)) im.tintMode = Phaser.TintModes.MULTIPLY; else im.tintMode = Phaser.TintModes.FILL; this.ghosts.push({ im, t: 0, dur: im.displayHeight > 200 ? 1.1 : 0.4 }); this.imgs.delete(id); this.prevPos.delete(id); }
     for (let k = this.ghosts.length - 1; k >= 0; k--) { const g = this.ghosts[k]; g.t += dt; const u = Math.min(1, g.t / g.dur); g.im.setAlpha(1 - u).setScale(g.im.scaleX * (1 + 0.5 * dt), g.im.scaleY * (1 - 0.35 * dt)); if (u >= 1) { g.im.destroy(); this.ghosts.splice(k, 1); } }
     this.nul.clear();
@@ -165,7 +167,18 @@ export class B22Overlay {
     else if (e.mode === 'recover') { sy = 0.95; sx = 1.04; oy += 2; }
     const f = e.stagger > 0 ? Math.sin(this.clock * 60) * 2 : 0;
     im.setTexture(key).setPosition(e.x + f, e.y + oy).setDisplaySize(w * sx, h * sy).setRotation(rot).setFlipX(e.aimX < 0).setDepth(6.4 + e.y * 1e-5).setAlpha(e.mode === 'blink' ? 0.5 : e.part?.role === 'decoy' ? 0.7 : 1);
-    if (flash && !cyc) { im.setTint(0xffffff); im.tintMode = Phaser.TintModes.FILL; } else { im.clearTint(); im.tintMode = Phaser.TintModes.MULTIPLY; } return true;
+    if (flash && !cyc) { im.setTint(0xffffff); im.tintMode = Phaser.TintModes.FILL; } else { im.clearTint(); im.tintMode = Phaser.TintModes.MULTIPLY; }
+    this.damage(e, im, boss && !e.part);
+    return true;
+  }
+  /** B23: a boss's real HP fraction and phase pick a damage decal (moderate / severe) drawn with the sprite's own transform; cosmetic only, never targetable. */
+  private dmgImgs = new Map<number, Phaser.GameObjects.Image>();
+  private damage(e: Enemy, im: Phaser.GameObjects.Image, eligible: boolean) {
+    const lvl = eligible ? bossDamageLevel(Math.max(0, e.hp / e.maxHp), Math.min(2, e.ai?.phase ?? 1) as 1 | 2) : 0, key = lvl >= 3 ? `b22-dmg_${e.kind}_l3` : lvl === 2 ? `b22-dmg_${e.kind}_l2` : null;
+    let d = this.dmgImgs.get(e.id);
+    if (!key || !this.scene.textures.exists(key)) { d?.setVisible(false); return; }
+    if (!d) { d = this.scene.add.image(0, 0, key); this.dmgImgs.set(e.id, d); }
+    d.setTexture(key).setVisible(true).setOrigin(im.originX, im.originY).setPosition(im.x, im.y).setDisplaySize(im.displayWidth, im.displayHeight).setRotation(im.rotation).setFlipX(im.flipX).setDepth(im.depth + 0.01).setAlpha(im.alpha * 0.92);
   }
   private extras(g: Phaser.GameObjects.Graphics, e: Enemy) {
     const r = e.radius, x = e.x, y = e.y, X = e.ex ?? {}, ph2 = e.ai?.phase === 2;
@@ -227,5 +240,5 @@ export class B22Overlay {
     else { g.lineStyle(5, c(0xe6d8ff), 1); g.strokeCircle(x, y - r * 0.4, r); g.strokeCircle(x, y - r * 0.4, r * 0.55); }
     const w = r * 2.2; g.fillStyle(0x000000, 0.75); g.fillRect(x - w / 2, y - r * 2.1, w, 5); g.fillStyle(0xe9c8ff, 1); g.fillRect(x - w / 2, y - r * 2.1, w * f, 5); void s;
   }
-  destroy() { this.pops.forEach(p => p.im.destroy()); for (const im of this.imgs.values()) im.destroy(); this.ghosts.forEach(g => g.im.destroy()); this.nul.destroy(); this.haz.destroy(); this.act.destroy(); this.fxg.destroy(); }
+  destroy() { this.pops.forEach(p => p.im.destroy()); for (const im of this.imgs.values()) im.destroy(); for (const d of this.dmgImgs.values()) d.destroy(); this.ghosts.forEach(g => g.im.destroy()); this.nul.destroy(); this.haz.destroy(); this.act.destroy(); this.fxg.destroy(); }
 }

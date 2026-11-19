@@ -12,6 +12,7 @@ import { ENEMY_KINDS } from '../../content/enemies';
 import type { HeroId } from '../../content/heroes';
 import { HERO_FX_NAMES, heroFxKey, heroFxUrl } from '../render/heroFxView';
 import { HAIR_ANCHORS_KEY } from '../render/hairRig';
+import { VEX_CLIPS } from '../../assets/kaiAnimation';
 import { HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroForms, heroManifestUrl, heroSheetUrl, heroTextureKey, isHeroArt, type HeroArt } from '../../assets/heroAnimation';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
@@ -82,7 +83,7 @@ export class BootScene extends Phaser.Scene {
       for (const form of heroForms(h)) {
         const raw = KAI_DIRS.map(dir => this.cache.json.get(`hero-${h}-${form}-manifest-${dir}`)); if (!raw.every(r => r && typeof r === 'object' && (r as { direction?: string }).direction)) continue;
         const set = {} as KaiManifests; KAI_DIRS.forEach((dir, i) => { set[dir] = parseKaiManifest(raw[i], dir, form === 'base' ? 'base' : 'f1'); }); this.registry.set(HERO_REGISTRY_KEY(h, form), set);
-        for (const dir of KAI_DIRS) for (const clip of form === 'base' ? KAI_CLIPS : KAI_F1_CLIPS) { const m = set[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo; this.load.spritesheet(heroTextureKey(h, dir, clip, form), heroSheetUrl(h, dir, a, form), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 }); }
+        for (const dir of KAI_DIRS) for (const clip of [...(form === 'base' ? KAI_CLIPS : KAI_F1_CLIPS), ...(h === 'vex' ? VEX_CLIPS : [])]) { const m = set[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue; this.load.spritesheet(heroTextureKey(h, dir, clip, form), heroSheetUrl(h, dir, a, form), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 }); }
       }
       this.registry.set(HERO_ANCHORS_KEY(h), this.cache.json.get(HERO_ANCHORS_KEY(h)));
     }

@@ -157,30 +157,6 @@
    "terminal": "hold_last_frame",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
   },
-  "Transform": {
-   "sheet": "sheets/vex_north_transform.png",
-   "frames": 16,
-   "fps": 20,
-   "loop": false,
-   "duration_s": 0.8,
-   "blender_action": "Transform",
-   "events": {
-    "anticipation_start": 0,
-    "gather_start": 2,
-    "release_start": 6,
-    "form_commit": 7,
-    "reveal_hold": 8,
-    "interruptible_from": 10
-   },
-   "frame_width": 130,
-   "frame_height": 171,
-   "origin_px": [
-    68.0,
-    169.0
-   ],
-   "terminal": "once",
-   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
-  },
   "Beam": {
    "sheet": "sheets/vex_north_beam.png",
    "frames": 26,
@@ -225,6 +201,88 @@
    "origin_px": [
     70.0,
     192.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Guard": {
+   "sheet": "sheets/vex_north_guard.png",
+   "frames": 12,
+   "fps": 10,
+   "loop": true,
+   "duration_s": 1.2,
+   "blender_action": "Guard",
+   "events": {},
+   "frame_width": 94,
+   "frame_height": 150,
+   "origin_px": [
+    59.0,
+    148.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Riposte": {
+   "sheet": "sheets/vex_north_riposte.png",
+   "frames": 12,
+   "fps": 20,
+   "loop": false,
+   "duration_s": 0.6,
+   "blender_action": "Riposte",
+   "events": {
+    "anticipation_start": 1,
+    "impact": 4,
+    "recover_start": 6,
+    "interruptible_from": 9
+   },
+   "frame_width": 126,
+   "frame_height": 150,
+   "origin_px": [
+    88.0,
+    148.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Victory": {
+   "sheet": "sheets/vex_north_victory.png",
+   "frames": 16,
+   "fps": 10,
+   "loop": false,
+   "duration_s": 1.6,
+   "blender_action": "Victory",
+   "events": {
+    "hold": 8
+   },
+   "frame_width": 124,
+   "frame_height": 157,
+   "origin_px": [
+    88.0,
+    155.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Transform": {
+   "sheet": "sheets/vex_north_transform.png",
+   "frames": 16,
+   "fps": 20,
+   "loop": false,
+   "duration_s": 0.8,
+   "blender_action": "Transform",
+   "events": {
+    "anticipation_start": 0,
+    "gather_start": 2,
+    "release_start": 6,
+    "form_commit": 7,
+    "reveal_hold": 8,
+    "interruptible_from": 10
+   },
+   "frame_width": 129,
+   "frame_height": 167,
+   "origin_px": [
+    88.0,
+    165.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"

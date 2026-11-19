@@ -174,10 +174,29 @@
     "interruptible_from": 10
    },
    "frame_width": 140,
-   "frame_height": 187,
+   "frame_height": 186,
    "origin_px": [
     65.0,
-    178.0
+    177.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Victory": {
+   "sheet": "sheets/sora_south_victory.png",
+   "frames": 16,
+   "fps": 10,
+   "loop": false,
+   "duration_s": 1.6,
+   "blender_action": "Victory",
+   "events": {
+    "hold": 8
+   },
+   "frame_width": 140,
+   "frame_height": 186,
+   "origin_px": [
+    65.0,
+    177.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"

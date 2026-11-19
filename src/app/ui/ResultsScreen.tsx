@@ -23,7 +23,7 @@ export function ResultsScreen({ s, onRetry, onHome, onProgress, onEndless }: Pro
       <div className="result-scroll">
       {won && <img className="res-crest" src={`${base}ui/victory-crest.png`} alt="" draggable={false}/>}
       <p className="eyebrow" data-testid="result-hero">{HERO_BY_ID[s.hero].name} · {won ? 'THE NULL SERAPH IS DOWN' : 'CONNECTION TO THE ZONE LOST'}</p>
-      {s.b22Crest && <p className="res-b22crest" data-testid="res-b22crest">EQUIPPED CREST · {COSMETICS.find(c => c.id === s.b22Crest)?.name.toUpperCase() ?? ''}</p>}
+      {s.b22Crest && <p className="res-b22crest" data-testid="res-b22crest"><img src={`${base}ui/crests/${s.b22Crest}_s.png`} alt="" draggable={false} onError={e => { e.currentTarget.style.display = 'none'; }}/>EQUIPPED CREST · {COSMETICS.find(c => c.id === s.b22Crest)?.name.toUpperCase() ?? ''}</p>}
       <h2 id="result-title">{won ? 'THE FRACTURE HOLDS' : 'RUN TERMINATED'}</h2>
       {won && <p className="res-sub">Kai sealed the rift. The zone falls quiet.</p>}
       <div className="score-number">{s.score.toLocaleString()} <span>POINTS</span></div>
@@ -47,16 +47,16 @@ export function ResultsScreen({ s, onRetry, onHome, onProgress, onEndless }: Pro
 
 /** The hero's real in-game pose for the form reached (authored sheet frames, looped ping-pong). Hidden on short screens by CSS so the action footer always fits. */
 function VictoryPoseView({ hero, form }: { hero: string; form: number }) {
-  const [st, setSt] = useState<{ url: string; w: number; h: number; n: number; from: number; to: number; fps: number } | null>(null), [i, setI] = useState(0);
+  const [st, setSt] = useState<{ url: string; w: number; h: number; n: number; from: number; to: number; fps: number; intro: number } | null>(null), [i, setI] = useState(0);
   useEffect(() => {
     let dead = false; const p = victoryPoseFor(hero, form);
     fetch(`${base}art/${p.root}/south/manifest.json`).then(r => r.json()).then(m => {
-      const a = m.animations?.[p.clip]; if (dead || !a) return; const f = victoryFrames(p.clip, a.frames, a.events);
-      setSt({ url: `${base}art/${p.root}/south/${a.sheet}`, w: a.frame_width ?? m.frame_width, h: a.frame_height ?? m.frame_height, n: a.frames, from: f.from, to: f.to, fps: Math.min(8, a.fps ?? 8) }); setI(f.from);
+      const own = m.animations?.Victory, a = own ?? m.animations?.[p.clip]; if (dead || !a) return; const f = victoryFrames(own ? 'Victory' : p.clip, a.frames, a.events);
+      setSt({ url: `${base}art/${p.root}/south/${a.sheet}`, w: a.frame_width ?? m.frame_width, h: a.frame_height ?? m.frame_height, n: a.frames, from: f.from, to: f.to, fps: Math.min(own ? 10 : 8, a.fps ?? 8), intro: own ? 0 : f.from }); setI(own ? 0 : f.from);
     }).catch(() => undefined);
     return () => { dead = true; };
   }, [hero, form]);
-  useEffect(() => { if (!st || st.to <= st.from) return; let dir = 1, k = st.from; const t = window.setInterval(() => { k += dir; if (k >= st.to) { k = st.to; dir = -1; } else if (k <= st.from) { k = st.from; dir = 1; } setI(k); }, 1000 / st.fps); return () => window.clearInterval(t); }, [st]);
+  useEffect(() => { if (!st || st.to <= st.from) return; let dir = 1, k = st.intro, entered = st.intro >= st.from; const t = window.setInterval(() => { k += dir; if (!entered) { if (k >= st.from) { k = st.from; entered = true; } } else if (k >= st.to) { k = st.to; dir = -1; } else if (k <= st.from) { k = st.from; dir = 1; } setI(k); }, 1000 / st.fps); return () => window.clearInterval(t); }, [st]);
   if (!st) return null;
   return <div className="res-pose" data-testid="victory-pose" data-form={form} aria-hidden="true" style={{ width: st.w, height: st.h, backgroundImage: `url(${st.url})`, backgroundSize: `${st.n * st.w}px ${st.h}px`, backgroundPosition: `-${i * st.w}px 0` }}/>;
 }

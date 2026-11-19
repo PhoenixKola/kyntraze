@@ -3,7 +3,7 @@
 import { skinRoot } from './skin';
 import { RUN_PHASES, SIM_DASH_SECONDS, facingFromInput, facingFromVector, type AnimPose, type Facing, type KaiClip, type KaiClipInfo, type KaiManifests } from './kaiAnimation';
 import type { HeroAct } from '../content/heroKits';
-import { REN, SORA } from '../content/heroKits';
+import { REN, SORA, VEX } from '../content/heroKits';
 
 /** The heroes whose art is a hero sheet set (Kai has his own kaiAnimation pipeline). */
 export type HeroArt = 'ren' | 'sora' | 'vex';
@@ -27,7 +27,7 @@ export const heroSheetUrl = (hero: string, dir: Facing, clip: KaiClipInfo, form:
 export const heroAnchorsUrl = (hero: string) => `/art/${hero}-anchors.json`;
 export const heroTextureKey = (hero: string, dir: Facing, clip: KaiClip, form: HeroForm) => `${hero}${form === 'base' ? '' : form}-${dir}-${clip}`;
 
-export interface HeroActView { id: number; act: HeroAct; t: number; dur: number; face: Facing; released: boolean; moving: boolean; beats: number; hop: number; hops: number; hopT: number; charge: number }
+export interface HeroActView { /** seconds since this act's successful counter (Vex), large when none */ riposte?: number; id: number; act: HeroAct; t: number; dur: number; face: Facing; released: boolean; moving: boolean; beats: number; hop: number; hops: number; hopT: number; charge: number }
 export interface HeroAnimInput {
   dt: number; alive: boolean; moving: boolean; inputX: number; inputY: number; runSpeed: number;
   dashing: boolean; dashX: number; dashY: number; dashRemaining: number; hurt: boolean;
@@ -92,14 +92,15 @@ export class HeroAnimator {
     if (want === 'Run') this.time += runStep; else if (want === 'Idle') this.time += i.dt;
     return this.pose(events);
   }
+  private has(clip: KaiClip): boolean { return !!(this.set(this.visualForm)[this.facing].animations as Partial<Record<KaiClip, KaiClipInfo>>)[clip]; }
   private actClip(a: HeroActView, moving: boolean): KaiClip {
     switch (a.act) {
       case 'crimson_break': case 'azure_volley': return moving ? 'RunPunchUpper' : 'BasicPunch';
       case 'meteor_rush': return a.hop < a.hops && a.hopT <= REN.e.hopTime ? 'Dash' : a.hop >= a.hops ? 'Dash' : 'BasicPunch';
       case 'bloodstar': case 'zero_horizon': return 'Sphere';
       case 'celestial_lance': return 'Beam';
-      case 'parry_halo': return 'BasicPunch';
-      case 'rift_reversal': return 'Dash';
+      case 'parry_halo': return this.has('Guard') ? ((a.riposte ?? 9) < 0.6 && this.has('Riposte') ? 'Riposte' : 'Guard') : 'BasicPunch';
+      case 'rift_reversal': return this.has('Riposte') && a.t >= VEX.e.windup ? 'Riposte' : 'Dash';
       case 'oathbreaker_seal': case 'ultimate': return 'Sphere';
     }
   }
@@ -118,6 +119,10 @@ export class HeroAnimator {
       let u = 0; if (v && (v.act === 'crimson_break' || v.act === 'azure_volley')) u = v.act === 'crimson_break' ? this.beatT / (this.visualForm === 'f1' ? REN.q.formGap : REN.q.gap) : Math.max(0, v.t - SORA.q.windup) / SORA.q.burst * 0.9 + 0.05;
       else if (v?.act === 'meteor_rush') u = Math.max(0, v.hopT - REN.e.hopTime) / REN.e.strikeTime; else u = this.strikeT / 0.22;
       const step = frameAt(a, u, lo, hi); frame = this.clip === 'RunPunchUpper' ? step * RUN_PHASES + this.leg() : step;
+    } else if ((this.clip === 'Guard' || this.clip === 'Riposte') && v) {
+      if (this.clip === 'Guard') frame = Math.floor(v.t * a.fps) % a.frames;
+      else if (v.act === 'parry_halo') frame = Math.min(a.frames - 1, (a.events.anticipation_start ?? 1) + 2 + Math.floor((v.riposte ?? 0) * a.fps));
+      else frame = Math.min(a.frames - 1, 3 + Math.floor(Math.min(0.999, Math.max(0, v.t - VEX.e.windup) / Math.max(0.05, v.dur - VEX.e.windup)) * (a.frames - 3)));
     } else if (this.clip === 'Sphere' && v) {
       const rel = a.events.release ?? Math.floor(a.frames / 2), tr = v.act === 'bloodstar' ? REN.r.windup + REN.r.flight : SORA.r.summon;
       frame = v.t < tr ? Math.min(rel - 1, Math.floor(leapCurve(v.t / tr, rel, v.act === 'bloodstar' ? REN.r.windup / tr : 0.4) * rel)) : Math.min(a.frames - 1, rel + Math.floor(Math.min(0.999999, (v.t - tr) / Math.max(0.05, v.dur - tr)) * (a.frames - rel)));

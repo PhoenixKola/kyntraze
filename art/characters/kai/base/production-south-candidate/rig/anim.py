@@ -234,6 +234,12 @@ if r.F3:        # Form III (Stillfire Apex): levitation layer over the Form II p
         def w():
             c = fn(); nm = c["name"]
             if nm == "Transform": return hover3.transform3(c, _ctx)
+            if nm == "Victory":
+                c = copy.deepcopy(c); n_ = len(c["frames"])
+                for i_, p_ in enumerate(c["frames"]):
+                    if i_ >= 5: _ctx.hover_legs(p_, i_, n_, sway=0.4)
+                    hover3._lift(p_, hover3.HOVER * min(1.0, i_ / 8.0))
+                return c
             if nm == "Sphere": return hover3.sphere3(_ctx, _punch_raw)
             c = hover3.hoverize(nm, c, _ctx, _run_raw)
             return hover3.beam_events(c) if nm == "Beam" else c

@@ -7,7 +7,9 @@ export type Facing = 'south' | 'north' | 'east' | 'west';
 /** RunLower + RunPunchUpper are the two LAYERS of the moving attack (legs+hips of the Run cycle, and an upper body whose frames are `step * 8 + leg phase`); the runtime draws the lower one first. */
 export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere' | 'RunLower' | 'RunPunchUpper' | 'Lunge' | 'Uppercut' | 'Slam';
 /** Transform exists only in the Form I sheets. */
-export type KaiClip = KaiBaseClip | 'Transform' | 'IdleSpecial';
+export type KaiClip = KaiBaseClip | 'Transform' | 'IdleSpecial' | 'Guard' | 'Riposte';
+/** B23: Vex's own clips (blade-ready counter stance, outward counter-cut). Optional per sheet set: a set without them plays the older mapping. */
+export const VEX_CLIPS = ['Guard', 'Riposte'] as const;
 /** Which art set is shown: the approved base Kai, or the separately authored Form I sheets (never a tinted base). */
 export type KaiForm = 'base' | 'f1' | 'f2' | 'f3';
 export const KAI_DIRS: readonly Facing[] = ['south', 'north', 'east', 'west'];
@@ -51,7 +53,7 @@ export interface KaiClipInfo {
 }
 export interface KaiManifest {
   direction: Facing; frame_width: number; frame_height: number; origin_px: [number, number];
-  root_motion: { baked: boolean }; animations: Record<KaiBaseClip, KaiClipInfo> & { Transform?: KaiClipInfo; IdleSpecial?: KaiClipInfo };
+  root_motion: { baked: boolean }; animations: Record<KaiBaseClip, KaiClipInfo> & { Transform?: KaiClipInfo; IdleSpecial?: KaiClipInfo; Guard?: KaiClipInfo; Riposte?: KaiClipInfo };
 }
 export type KaiManifests = Record<Facing, KaiManifest>;
 

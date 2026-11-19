@@ -711,3 +711,9 @@ main[data-testid="hero-select"] .arena-strip-go { position: static; white-space:
 @media (max-height: 600px) { .result-modal .res-crest, .result-modal .res-sub { display: none; } .result-modal .score-number, .result-win .score-number { font-size: calc(34 * var(--u)); margin: calc(2 * var(--u)) 0; } .result-modal .stacked-actions { margin-top: calc(8 * var(--u)); } .result-modal .rw-panel { margin-top: calc(6 * var(--u)); } }
 
 .res-b22crest { margin: 0 0 calc(2 * var(--u)); font-size: max(9px, calc(11 * var(--u))); letter-spacing: .12em; color: #e8c978; }
+
+/* B23: mastery crest artworks (ImageGen, art/crests) */
+.arc-crest-art { float: right; width: calc(64 * var(--u)); min-width: 44px; margin: 0 0 calc(4 * var(--u)) calc(6 * var(--u)); filter: grayscale(.85) brightness(.6); opacity: .8; image-rendering: auto; }
+.arc-crest-art.earned { filter: drop-shadow(0 0 calc(8 * var(--u)) rgba(255, 210, 120, .5)); opacity: 1; }
+.arc-crest-mini { width: calc(26 * var(--u)); min-width: 20px; vertical-align: middle; margin-right: calc(6 * var(--u)); } .arc-crest-mini.locked { filter: grayscale(1) brightness(.5); }
+.res-b22crest { display: flex; align-items: center; gap: calc(6 * var(--u)); } .res-b22crest img { width: calc(30 * var(--u)); min-width: 22px; }
