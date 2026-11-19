@@ -702,5 +702,10 @@ main[data-testid="hero-select"] .arena-strip-go { position: static; white-space:
 .hud-partner .hud-slots.compact .slot-tip { display: none; }
 
 /* B23: the hero's own victory pose (real sheet frames) beside the results plate; hidden on short or narrow screens so nothing in the footer is ever pushed */
-.results-overlay .res-pose { position: absolute; left: 4%; bottom: 8%; transform: scale(1.1); transform-origin: left bottom; image-rendering: pixelated; pointer-events: none; z-index: 1; filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
+.results-overlay .res-pose { position: absolute; left: 0.5%; bottom: 8%; transform: scale(1); transform-origin: left bottom; image-rendering: pixelated; pointer-events: none; z-index: 1; filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
 @media (max-height: 520px), (max-width: 900px) { .results-overlay .res-pose { display: none; } }
+
+/* B23: long button labels wrap instead of being cropped, and on windows up to 600 px tall the decorative crest / subtitle give way so the Marks Earned panel is fully visible */
+.result-modal .stacked-actions button { white-space: normal; line-height: 1.1; text-overflow: clip; overflow: visible; }
+.result-modal .stacked-actions button[data-testid="continue-endless"] { font-size: max(10px, calc(13 * var(--u))); letter-spacing: .04em; }
+@media (max-height: 600px) { .result-modal .res-crest, .result-modal .res-sub { display: none; } .result-modal .score-number, .result-win .score-number { font-size: calc(34 * var(--u)); margin: calc(2 * var(--u)) 0; } .result-modal .stacked-actions { margin-top: calc(8 * var(--u)); } .result-modal .rw-panel { margin-top: calc(6 * var(--u)); } }

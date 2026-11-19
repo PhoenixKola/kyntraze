@@ -36,7 +36,7 @@ export function ResultsScreen({ s, onRetry, onHome, onProgress, onEndless }: Pro
       <BuildStrip owned={s.owned} title="BUILD"/>
       </div>
       <div className="result-foot">
-      <div className="stacked-actions">{won && s.asc?.canEndless && onEndless && <button className="primary-button" onClick={onEndless} data-testid="continue-endless">CONTINUE INTO THE FRACTURE (ENDLESS) <span>∞</span></button>}<button className={won && s.asc?.canEndless ? 'outlined-button' : 'primary-button'} onClick={onRetry} data-pad-default data-pad-start>{won ? 'RUN IT AGAIN' : 'RETRY SAME SEED'} <span>↗</span></button><button className="outlined-button" onClick={onProgress} data-testid="results-armory">ARMORY{rw && rw.balance > 0 ? ` · ${rw.balance}` : ''}</button><button className="outlined-button" onClick={onHome}>RETURN TO TITLE</button></div>
+      <div className="stacked-actions">{won && s.asc?.canEndless && onEndless && <button className="primary-button" onClick={onEndless} data-testid="continue-endless">CONTINUE · ENDLESS <span>∞</span></button>}<button className={won && s.asc?.canEndless ? 'outlined-button' : 'primary-button'} onClick={onRetry} data-pad-default data-pad-start>{won ? 'RUN IT AGAIN' : 'RETRY SAME SEED'} <span>↗</span></button><button className="outlined-button" onClick={onProgress} data-testid="results-armory">ARMORY{rw && rw.balance > 0 ? ` · ${rw.balance}` : ''}</button><button className="outlined-button" onClick={onHome}>RETURN TO TITLE</button></div>
       <HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'ENTER', pad: 'START', label: 'RETRY' }]}/>
       </div>
     </section>
