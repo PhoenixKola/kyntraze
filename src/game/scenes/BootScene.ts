@@ -12,6 +12,8 @@ import { ENEMY_KINDS } from '../../content/enemies';
 import type { HeroId } from '../../content/heroes';
 import { HERO_FX_NAMES, heroFxKey, heroFxUrl } from '../render/heroFxView';
 import { HAIR_ANCHORS_KEY } from '../render/hairRig';
+import { accKey, accUrl, hasAccessory, type AccView } from '../render/outfitLayer';
+import { equippedOutfit } from '../../assets/skin';
 import { VEX_CLIPS } from '../../assets/kaiAnimation';
 import { HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroForms, heroManifestUrl, heroSheetUrl, heroTextureKey, isHeroArt, type HeroArt } from '../../assets/heroAnimation';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
@@ -22,8 +24,8 @@ import { F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL, f3fxKey, f3fxUrl } from '../ren
 import { KAI_F3_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_KIT_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiClipInfo, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
   /** Every hero that fights this run (the runner plus co-op partners): each gets its own explicitly keyed sheet set. Kai's sheets are always loaded. */
-  private readonly arts: HeroArt[];
-  constructor(private readonly arena: ArenaId = 'gloam', hero: HeroId = 'kai', mates: readonly HeroId[] = []) { super({ key: 'BootScene' }); this.arts = [...new Set([hero, ...mates])].filter(isHeroArt); }
+  private readonly arts: HeroArt[]; private readonly hero0: HeroId;
+  constructor(private readonly arena: ArenaId = 'gloam', hero: HeroId = 'kai', mates: readonly HeroId[] = []) { super({ key: 'BootScene' }); this.hero0 = hero; this.arts = [...new Set([hero, ...mates])].filter(isHeroArt); }
   /** Two load phases (starter assets, then the ~100 Kai sheets whose frame sizes come from the manifests): report one combined 0..1 to the loading screen. */
   private report(phase: 0 | 1, v: number) { window.dispatchEvent(new CustomEvent('kyntraze-load', { detail: phase === 0 ? v * 0.2 : 0.2 + v * 0.8 })); }
   preload() {
@@ -37,6 +39,7 @@ export class BootScene extends Phaser.Scene {
       if (HERO_SHEETS[h].base) { for (const form of heroForms(h)) KAI_DIRS.forEach(dir => this.load.json(`hero-${h}-${form}-manifest-${dir}`, heroManifestUrl(h, dir, form))); if (HERO_SHEETS[h].anchors) this.load.json(HERO_ANCHORS_KEY(h), heroAnchorsUrl(h)); }
       HERO_FX_NAMES[h].forEach((n: string) => this.load.image(heroFxKey(h, n), heroFxUrl(h, n)));
     }
+    { const oid = equippedOutfit(); if (hasAccessory(oid, this.hero0)) for (const v of ['front', 'side', 'back'] as AccView[]) this.load.image(accKey(oid, v), accUrl(oid, v)); }   // B23: the equipped outfit's head accessory (3 views)
     this.load.json(HAIR_ANCHORS_KEY, '/art/hair-anchors.json');   // B23: per-frame head anchors for the hair rig (optional: without it the hair simply stays pinned)
     this.load.json(F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL);
     B21_GROUPS.forEach(g => this.load.json(b21ManifestKey(g), b21ManifestUrl(g)));   // B21: optional art groups, a missing manifest is ignored

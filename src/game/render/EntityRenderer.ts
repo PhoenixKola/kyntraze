@@ -14,6 +14,7 @@ import { HeroFxView } from './heroFxView';
 import { BodyMotion, styleFor } from './bodyMotion';
 import { HAIR_ANCHORS_KEY, HAIR_STYLE, HairDriver, type HairTable } from './hairRig';
 import { HairLayer } from './hairLayer';
+import { OutfitLayer } from './outfitLayer';
 import { AuraView, type AuraState } from './auraView';
 import { AuraTracker } from './auraState';
 import { HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, HeroAnimator, heroTextureKey, rigOf, type HeroActView, type HeroArt, type HeroForm } from '../../assets/heroAnimation';
@@ -57,7 +58,7 @@ export class EntityRenderer {
     this.f1 = scene.registry.get(KAI_F1_REGISTRY_KEY) as KaiManifests | undefined;
     this.f2 = scene.registry.get(KAI_F2_REGISTRY_KEY) as KaiManifests | undefined;
     this.f3 = scene.registry.get(KAI_F3_REGISTRY_KEY) as KaiManifests | undefined;
-    this.hairLayer = new HairLayer(scene); this.hairTable = scene.registry.get(HAIR_ANCHORS_KEY) as HairTable | undefined;
+    this.hairLayer = new HairLayer(scene); this.outfitLayer = new OutfitLayer(scene, scene.registry.get(HAIR_ANCHORS_KEY) as HairTable | undefined); this.hairTable = scene.registry.get(HAIR_ANCHORS_KEY) as HairTable | undefined;
     this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1, this.f2, this.f3); this.cometFx = new CometFx(scene); this.kitFx = new KaiKitFx(scene, this.f3); this.apexFx = new ApexFx(scene); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = partner ? null : new EnemyRenderer(scene); this.bosses = partner ? null : new BossRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
@@ -70,12 +71,13 @@ export class EntityRenderer {
     this.auraGlow.push(this.auraBody.filters!.internal.addGlow(0xffffff, 0, 0, 1, true, 4, 10) as unknown as StrokeCtl);
   }
   private lastRipEv = 0; private riposteAt = -99;
-  private readonly hairDrv = new HairDriver(); private readonly hairLayer: HairLayer; private readonly hairTable: HairTable | undefined;
+  private readonly hairDrv = new HairDriver(); private readonly hairLayer: HairLayer; private readonly outfitLayer: OutfitLayer; private readonly hairTable: HairTable | undefined;
   /** B23: the character's hair tips are deformed from real motion (hairRig); the roots stay pinned. */
   private hairStep(state: GameState, dt: number, hero: 'kai' | 'ren' | 'sora' | 'vex', key: string, frame: number, clip: string, hurt: boolean, reduced: boolean) {
     const p = state.player, st = HAIR_STYLE[styleFor(hero, p.form)], dead = state.phase === 'dead' || p.hp <= 0, cast = state.cast ?? state.hx.act;
     const o = this.hairDrv.update({ dt, vx: this.velX, vy: this.velY, maxSpeed: p.speed * 1.2, frozen: !!state.cinema || clip === 'Transform' || state.phase !== 'running', reduced, style: st, released: !!cast && cast.released, hurt, hurtDir: this.pose.facing === 'east' ? -1 : 1, dead });
     this.hairLayer.apply(this.hero, this.hairTable, key, frame, o.x, o.y, st.low, st.ramp);
+    this.outfitLayer.update(this.hero, key, frame, this.pose.facing, hero, dead, dt);
   }
   private readonly contour: ContourController[] = []; private contourT = 0; private readonly rim: StrokeCtl[] = []; private readonly auraGlow: StrokeCtl[] = []; private readonly auraTrack = new AuraTracker(); private auraMotes: FxPool | null = null; private moteClock = 0;
   /** B21.3 (revised): the transformation aura now FITS the body like the stroke: a soft, form-coloured glow filter on the sprite's own silhouette that breathes with activity (idle < moving < dash < charge < release), instead of art wings that extend past the character. */
@@ -151,7 +153,7 @@ export class EntityRenderer {
   handAnchor() { return this.hand; }
   /** QA: the world point the beam/orb was last anchored to and whether it came from the sprite anchors or the sim fallback. */
   fxOrigin() { return this.abilityFx.lastOrigin; }
-  debugPose() { return { ...this.pose, visualForm: this.animator.visualForm, transforming: this.animator.transforming, texture: this.hairLayer.srcKey || this.hero.texture.key, frameIndex: Number(this.hairLayer.srcFrame || this.hero.frame.name), hair: { x: this.hairDrv.spring.x, y: this.hairDrv.spring.y, live: this.hairLayer.active }, x: this.hero.x, y: this.hero.y, scale: this.baseScale }; }
+  debugPose() { return { ...this.pose, visualForm: this.animator.visualForm, transforming: this.animator.transforming, texture: this.hairLayer.srcKey || this.hero.texture.key, frameIndex: Number(this.hairLayer.srcFrame || this.hero.frame.name), outfit: this.outfitLayer.shown, hair: { x: this.hairDrv.spring.x, y: this.hairDrv.spring.y, live: this.hairLayer.active }, x: this.hero.x, y: this.hero.y, scale: this.baseScale }; }
   /** The sim only keeps player.vx/vy for Stillfire's glide, so the renderer derives the real velocity from displacement (eased; a teleport resets it). */
   private velX = 0; private velY = 0; private prevPX = NaN; private prevPY = NaN;
   private trackVelocity(state: GameState, dt: number) {
@@ -311,5 +313,5 @@ export class EntityRenderer {
     for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies!.stats(), boss: this.bosses!.stats() }; }
-  destroy() { this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
+  destroy() { this.outfitLayer.destroy(); this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
 }

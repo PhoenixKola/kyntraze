@@ -1,0 +1,6 @@
+Create ONE image: a sheet of head-worn game ACCESSORIES drawn as separate sprites, to be overlaid on a pixel-art fighter's head. Match the attached reference's art style exactly: chunky pixel-art look with dark outlines, flat shading with 3-4 tone colour ramps, crisp edges, no gradients or painterly blur, no photoreal. Flat solid pure magenta (#FF00FF) background, no text, no cell borders, each sprite centred in its cell with generous spacing, NOT attached to any head or body (accessory only, empty inside where the head would be).
+Grid: 3 columns x 4 rows. Columns = three views of the SAME accessory at the same scale: column 1 FRONT view, column 2 SIDE view (facing screen-right), column 3 BACK view. Each row is one accessory:
+Row 1 AZURE ARTIFICER visor: a sleek glowing azure lens visor across the eyes held by a thin white-and-navy band, with a tiny antenna on one side.
+Row 2 SKYBOUND ORACLE halo: a slim floating ring halo (open space in the middle) hovering above where the head is, pale blue-white with three small orbiting sigil diamonds.
+Row 3 OATHKEEPER'S RUIN crown: a broken guardian circlet - a cracked dark violet-and-silver band with missing pieces and a few detached shards hanging.
+Row 4 ECLIPSE NOMAD cowl: a lightweight hooded cowl brim and neck-wrap in dark grey-violet cloth, open at the face, with a small crescent clasp.

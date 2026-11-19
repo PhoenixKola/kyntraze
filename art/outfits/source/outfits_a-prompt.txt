@@ -1,0 +1,6 @@
+Create ONE image: a sheet of head-worn game ACCESSORIES drawn as separate sprites, to be overlaid on a pixel-art fighter's head. Match the attached reference's art style exactly: chunky pixel-art look with dark outlines, flat shading with 3-4 tone colour ramps, crisp edges, no gradients or painterly blur, no photoreal. Flat solid pure magenta (#FF00FF) background, no text, no cell borders, each sprite centred in its cell with generous spacing, NOT attached to any head or body (accessory only, empty inside where the head would be).
+Grid: 3 columns x 4 rows. Columns = three views of the SAME accessory at the same scale: column 1 FRONT view, column 2 SIDE view (facing screen-right), column 3 BACK view. Each row is one accessory:
+Row 1 CIRCUIT VANGUARD headset: an angular techfighter headset - a thin metal brow plate with a small angular earpiece on each side and a tiny cyan status light. Steel grey with cyan accent.
+Row 2 CELESTIAL WANDERER circlet: a slim ceremonial gold headband with a small pale gem at the brow and two long cream-white ribbon tails trailing behind.
+Row 3 IRONHEART BRUISER brow guard: a heavy crimson steel brow-guard band with a raised centre ridge and riveted edges, dark metal with red enamel.
+Row 4 EMBER RONIN headband: a narrow black cloth headband with an ember-orange knot at the back and two short frayed tails.
