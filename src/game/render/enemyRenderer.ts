@@ -10,6 +10,8 @@ import { attackPose, reactionFor, reactionPose, type ReactKind, type Reaction } 
 /** B07 enemy art: ImageGen sheets (8 frames: move x4, windup, release, hurt, death; east-facing, mirrored for west) cut by scripts/build-enemy-art.py. */
 export const ENEMY_FX_NAMES = ['aimline', 'chevron', 'bolt', 'bolt-hit', 'death-burst', 'hit-spark', 'circle-warn', 'circle-slam'] as const;
 export const enemySheetKey = (k: EnemyKind) => `enemy-sheet-${k}`;
+/** B23: six-frame authored death strip of a classic enemy (same frame size / origin as its sheet), public/art/enemies/death/<kind>.png */
+export const enemyDeathKey = (k: EnemyKind) => `enemy-death-${k}`; export const enemyDeathUrl = (k: EnemyKind) => `/art/enemies/death/${k}.png`;
 export const enemySheetUrl = (k: EnemyKind) => `/art/enemies/${k}.png`;
 export const enemyManifestKey = (k: EnemyKind) => `enemy-manifest-${k}`;
 export const enemyManifestUrl = (k: EnemyKind) => `/art/enemies/${k}.json`;
@@ -35,7 +37,7 @@ const GHOST_CAP = 24;
 const BOLT_LOOK = { bolt: { key: 'bolt', w: 51 }, orb: { key: 'orb-bolt', w: 30 }, prism: { key: 'prism-bolt', w: 34 } } as const;
 const boltKey = (k: keyof typeof BOLT_LOOK) => (k === 'bolt' ? enemyFxKey('bolt') : `boss-fx-${BOLT_LOOK[k].key}`);
 interface Track { t: number; face: 1 | -1; hp: number; hurt: number; flash: number; tele: Phaser.GameObjects.Image | null; tele2: Phaser.GameObjects.Image | null; recoverT: number; fan: Phaser.GameObjects.Image[]; aura: Phaser.GameObjects.Image | null; glyph: Phaser.GameObjects.Image | null; react: Reaction | null; reactT: number; rx: number; ry: number; prevMode: string }
-interface Ghost { spr: Phaser.GameObjects.Sprite; age: number; baseY: number }
+interface Ghost { spr: Phaser.GameObjects.Sprite; age: number; baseY: number; strip?: boolean }
 
 export class EnemyRenderer {
   private readonly manifests = {} as Record<EnemyKind, EnemyManifest>;
@@ -105,10 +107,11 @@ export class EnemyRenderer {
     const spr = this.ghostFree.pop() ?? this.newSprite(kind);
     if (this.ghosts.length >= GHOST_CAP) { const old = this.ghosts.shift()!; old.spr.setVisible(false); this.ghostFree.push(old.spr); }
     const m = this.manifests[kind];
-    spr.setTexture(enemySheetKey(kind), FRAME.death).setOrigin(m.origin_px[0] / m.frame_width, m.origin_px[1] / m.frame_height).setScale(SCALE).setVisible(true).setAlpha(1).clearTint()
+    const strip = this.scene.textures.exists(enemyDeathKey(kind));
+    spr.setTexture(strip ? enemyDeathKey(kind) : enemySheetKey(kind), strip ? 0 : FRAME.death).setOrigin(m.origin_px[0] / m.frame_width, m.origin_px[1] / m.frame_height).setScale(SCALE).setVisible(true).setAlpha(1).clearTint()
       .setFlipX((this.lastFace.get(enemyId) ?? 1) < 0).setDepth(6.05).setPosition(Math.round(x), Math.round(feetY));
     spr.tintMode = Phaser.TintModes.MULTIPLY;
-    this.ghosts.push({ spr, age: 0, baseY: feetY });
+    this.ghosts.push({ spr, age: 0, baseY: feetY, strip });
     this.lastFace.delete(enemyId);
     const big = kind === 'bruiser' || kind === 'aegis' ? 1.5 : 1, look = DEATH_LOOK[kind as keyof typeof DEATH_LOOK], rnd = Math.random;
     this.pool.spawn({ key: enemyFxKey('death-burst'), x, y: y - 10, depth: 10.3, life: 0.3, blend: 'normal', s0: 0.22 * big, s1: 0.5 * big, a0: 0.85, a1: 0, rot: (enemyId % 7) * 0.9 });
@@ -168,6 +171,7 @@ export class EnemyRenderer {
     for (let i = this.ghosts.length - 1; i >= 0; i--) {
       const g = this.ghosts[i]; g.age += dt; const u = g.age / DEATH_LIFE;
       if (u >= 1) { g.spr.setVisible(false); this.ghostFree.push(g.spr); this.ghosts.splice(i, 1); continue; }
+      if (g.strip) { g.spr.setFrame(Math.min(5, Math.floor(u * 6))).setAlpha(u < 0.85 ? 1 : 1 - (u - 0.85) / 0.15).clearTint(); g.spr.tintMode = Phaser.TintModes.MULTIPLY; continue; }
       g.spr.setAlpha(u < 0.45 ? 1 : 1 - (u - 0.45) / 0.55).setY(Math.round(g.baseY + u * 4)).setScale(SCALE * (1 + u * 0.06), SCALE * (1 - u * 0.12));
       if (u < 0.18) { g.spr.setTint(0xffe6ee); g.spr.tintMode = Phaser.TintModes.FILL; } else { g.spr.clearTint(); g.spr.tintMode = Phaser.TintModes.MULTIPLY; }
     }

@@ -5,8 +5,9 @@ import { KK_FX, kkKey, kkUrl } from '../render/kaiKitFx';
 import { VFX_NAMES, vfxKey, vfxUrl } from '../render/fxPool';
 import { ARENA_FX, FLOOR_TILE_COUNT, HAZARD_FX, PROPS_KEY, arenaAssetUrl, arenaFxKey, arenaPropNames, floorTileKey, floorTileUrl, parsePropManifest, propKey } from '../render/arenaWorld';
 import { B22_ART } from '../render/realmArt';
+const DEATH_STRIP_CLASSIC = ['pursuer', 'flanker', 'bruiser', 'ranged', 'aegis', 'cantor'];
 import { ARENAS, type ArenaId } from '../../content/arenas';
-import { ENEMY_FX_NAMES, enemyFxKey, enemyFxUrl, enemyManifestKey, enemyManifestUrl, enemySheetKey, enemySheetUrl, type EnemyManifest } from '../render/enemyRenderer';
+import { enemyDeathKey, enemyDeathUrl, ENEMY_FX_NAMES, enemyFxKey, enemyFxUrl, enemyManifestKey, enemyManifestUrl, enemySheetKey, enemySheetUrl, type EnemyManifest } from '../render/enemyRenderer';
 import { BOSS_FX_NAMES, BOSS_KINDS, bossFxKey, bossFxUrl, bossManifestKey, bossManifestUrl, bossSheetKey, bossSheetUrl, type BossManifest } from '../render/bossRenderer';
 import { ENEMY_KINDS } from '../../content/enemies';
 import type { HeroId } from '../../content/heroes';
@@ -97,7 +98,7 @@ export class BootScene extends Phaser.Scene {
       const m = f2[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue;
       this.load.spritesheet(kaiTextureKey(dir, clip, 'f2'), kaiSheetUrl(dir, a, 'f2'), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 });
     }
-    for (const k of ENEMY_KINDS) { const m = this.cache.json.get(enemyManifestKey(k)) as EnemyManifest; this.load.spritesheet(enemySheetKey(k), enemySheetUrl(k), { frameWidth: m.frame_width, frameHeight: m.frame_height, endFrame: m.frames - 1 }); }
+    for (const k of ENEMY_KINDS) { const m = this.cache.json.get(enemyManifestKey(k)) as EnemyManifest; this.load.spritesheet(enemySheetKey(k), enemySheetUrl(k), { frameWidth: m.frame_width, frameHeight: m.frame_height, endFrame: m.frames - 1 }); if (DEATH_STRIP_CLASSIC.includes(k as never)) this.load.spritesheet(enemyDeathKey(k), enemyDeathUrl(k), { frameWidth: m.frame_width, frameHeight: m.frame_height, endFrame: 5 }); }   // B23: authored six-frame death strips
     if (!ARENAS[this.arena].procedural) {
     // arena art (selected arena only): props/decor named by the arena data, rim, corner, ambience and hazard fx
     const man = parsePropManifest(this.cache.json.get(PROPS_KEY(this.arena)));
