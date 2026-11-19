@@ -43,5 +43,6 @@ export class HairLayer {
     }
     sprite.setTexture(this.key, name); this.active = true; return true;
   }
-  destroy() { if (this.tex) { this.scene.textures.remove(this.key); this.tex = null; this.ctx = null; } }
+  /** The canvas texture is owned by the game's texture manager and goes with it; removing it here would race with sprites that still show it (Phaser warns on a missing key). */
+  destroy() { this.tex = null; this.ctx = null; this.cache.clear(); }
 }

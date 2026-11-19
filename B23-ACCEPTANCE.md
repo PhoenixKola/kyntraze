@@ -16,26 +16,26 @@ Legend: **DONE** = implemented + wired + automated test + stills inspected (neve
 | 13 | Composited contour | PARTIAL | Per-game registration; still two per-sprite filters (union-silhouette compositing NOT DONE). |
 | 14 | State-reactive contour palettes | PARTIAL | idle/run/dash/charge/release/settle driven by `AuraTracker`, eased; brighter silver Voidheart. Hold/hurt/parry states not separate. |
 | 15 | No passive blazes | DONE | `PASSIVE_AURA=false` untouched; nothing re-enabled. |
-| 16 | Seven reveals | NOT DONE | |
+| 16 | Seven reveals | PARTIAL | Each form emits its own reveal event at the real commit frame (`FormSystem.emitReveal`), drawn as its own signature and with its own sound (Stillfire near-silent); test `b23-advanced-fx.test.ts`. No authored hold/crouch/hair choreography, no camera/light work, first-vs-repeat difference not added. |
 | 17 | Immutable provenance | PARTIAL | `HitOpts.slot` set by producer; Kai kit slots corrected; clone = no slot; test `b23-provenance.test.ts`. Unique cast IDs / owner / form-at-emission / `damageEnemy` audit NOT DONE. |
 | 18 | New Kai kit attribution | PARTIAL | Q/E/R mapping for scatter, meteor, flare, crucible proven; per-form counters across all 12 slots not exhaustively tested. |
-| 19-25 | Per-hero kit VFX art/geometry | NOT DONE | |
-| 26-31 | Branches, recipes, relics, ultimates, pairs, resonance | NOT DONE | Existing mechanics unchanged and still tested; no new in-world art or audio. |
-| 32-35 | Bestiary + bosses | NOT DONE | |
+| 19-25 | Per-hero kit VFX art/geometry | NOT DONE | Kit effects unchanged this run (only floor scars and slot attribution). |
+| 26-31 | Branches, recipes, relics, ultimates, pairs, resonance | PARTIAL | Every one of the 24 branches, 12 legendaries, 8 relics, 6 pair attacks and 4 ultimates now has its own in-world signature (shape + palette; the two branches of a skill differ in shape) and its own sound recipe, driven by the sim's own source id at the real position/radius (`advancedFx.ts`, `b22Sfx.ts`, `BranchSystem`). These are procedural line-art accents, NOT authored animated sprites; mechanics/tradeoffs were not re-verified; Resonance has no dedicated link visual. |
+| 32-35 | Bestiary + bosses | PARTIAL | Enemy bodies now act through windup/strike/recover (archetype-specific anticipation, stretch, slump; `attackPose`). No new frames, shield art, boss part/phase animation or death staging. |
 | 36 | Four arena material families | PARTIAL | Four distinct floor-scar materials, no Ashen/Gloam fallback, `b23-materials.test.ts`. No new ImageGen decals for Aetherfall/Paradox (tinted generic marks). |
 | 37 | World response to events | PARTIAL | Kai kit + Vex marks added. Light plan not extended. |
 | 38 | Eight premium outfits | NOT DONE | Still palette recolours. |
 | 39 | Seven initiate edge details | DONE (as palette variants) | Earned -> equippable per form -> contour palette; save migration; Archives UI; `b23-cosmetics.test.ts`. Same shader, different colours/flow/roughness (no new art). |
-| 40-41 | Finishers, crests art, victory poses | NOT DONE | Crests are equippable (save + UI) but no new crest art / pose animations. |
+| 40-41 | Finishers, crests art, victory poses | PARTIAL | Owned adept finishers play a form-specific flourish on boss/elite kills (cosmetic, throttled, `b23-cosmetics.test.ts`). Crests equippable. NO new crest art, NO victory poses. |
 | 42 | Mode crests wired | PARTIAL | Equip/remove + persistence done; no HUD display. |
 | 43 | 21 mastery criteria tests | NOT DONE | |
 | 44 | Cosmetic migration safety | DONE | Forged aura/crest ids dropped; idempotent; tested. |
 | 45 | Per-fighter namespaced assets | DONE | Every fighting hero (local partner or online room) loaded under explicit keys; outfit skin only for its hero; e2e for 7 pairings. Same-hero pair shares one outfit. |
 | 46 | Online snapshots | PARTIAL | Kai kit state in snapshots with explicit clear (`b23-snapshot.test.ts`). Cinema, boss parts, protocol version bump NOT DONE. |
-| 47-48 | Prediction, split screen | NOT DONE | |
+| 47-48 | Prediction, split screen | PARTIAL | Online: bounded movement-only prediction (unacked-input replay on the authoritative position, blended reconcile, hard snap, off during casts/dashes/reveals; `net/prediction.ts`, unit-tested). No RTT-scenario measurement, no real two-client latency run. Split screen NOT DONE. |
 | 49 | Co-op integration | PARTIAL | Local co-op art + animation fixed (owner-reported). Two-client online / rejoin NOT run. |
 | 50 | Server records | NOT DONE | |
-| 51 | New audio | NOT DONE | |
+| 51 | New audio | PARTIAL | ~70 new procedural synth recipes (one per signature entry + seven reveals); never listened to, no loudness measurement, no new music/boss/enemy audio. |
 | 52 | UI sweep | PARTIAL | Archives gained Edge Details + crest equip; not screenshot-swept at all sizes. |
 | 53-54 | Perf, full routes, soak | NOT DONE | |
 | 55 | Save regression | PARTIAL | Unit tests green; no real-save fixtures run. |
