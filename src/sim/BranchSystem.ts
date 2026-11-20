@@ -5,6 +5,7 @@ import { slideMove } from './CollisionSystem';
 import { isBoss } from '../content/enemies';
 import { BEAM } from '../content/abilities';
 import { REN, SORA } from '../content/heroKits';
+import { REN_Q } from '../content/renCombat';
 import { b22Emit, bump, type ScheduledFx, type Zone } from '../b22/state';
 import type { BranchId, Slot } from '../b22/branches';
 import { BRANCH_BY_ID, BRANCH_RULES, branchesFor } from '../b22/branches';
@@ -63,7 +64,7 @@ export function zoneFx(s: GameState, z: Omit<Zone, 'id' | 't' | 'next'>) { if (s
 export function slotOfAct(s: GameState): Slot | null {
   const c = s.cast, h = s.hx.act;
   if (c) return c.kind === 'signature' ? null : c.kind === 'beam' || c.kind === 'dragon' || c.kind === 'rift' || c.kind === 'flare' ? 'e' : c.kind === 'scatter' || c.kind === 'meteor' ? 'q' : 'r';
-  if (h) { switch (h.act) { case 'crimson_break': case 'azure_volley': case 'parry_halo': return 'q'; case 'meteor_rush': case 'celestial_lance': case 'rift_reversal': return 'e'; case 'bloodstar': case 'zero_horizon': case 'oathbreaker_seal': return 'r'; default: return null; } }
+  if (h) { switch (h.act) { case 'crimson_break': case 'infernal_cyclone': case 'azure_volley': case 'parry_halo': return 'q'; case 'meteor_rush': case 'scarlet_rampage': case 'celestial_lance': case 'rift_reversal': return 'e'; case 'bloodstar': case 'crimson_catastrophe': case 'zero_horizon': case 'oathbreaker_seal': return 'r'; default: return null; } }
   return null;
 }
 
@@ -118,7 +119,7 @@ export function onCast(s: GameState, slot: Slot) {
   }
   // ---- Ren
   if (s.hero === 'ren') {
-    if (slot === 'q' && has(s, 'crimson_guardbreak')) schedule(s, { at: at + REN.q.beats * REN.q.gap + 0.35, kind: 'cone', x: p.x, y: p.y, ang, r: 135, w: (100 * Math.PI) / 180, dmg: q(s) * 1.4, push: 120, stagger: 1.0, cap: 6, src: 'crimson_guardbreak', tag: 'guardbreak' });
+    if (slot === 'q' && has(s, 'crimson_guardbreak')) schedule(s, { at: at + (p.form ? REN_Q.windup + REN_Q.spin + 0.2 : REN.q.beats * REN.q.gap + 0.35), kind: 'cone', x: p.x, y: p.y, ang, r: 135, w: (100 * Math.PI) / 180, dmg: q(s) * 1.4, push: 120, stagger: 1.0, cap: 6, src: 'crimson_guardbreak', tag: 'guardbreak' });
     if (slot === 'e' && legend(s, 'meteor_crucible')) b.legendMisc.crucible = 1;
   }
   // ---- Sora
@@ -163,10 +164,19 @@ export function onNeedleHit(s: GameState, e: Enemy, dmg: number) {
 export function onAbilityEvent(s: GameState, kind: string, x: number, y: number, n: number | undefined) {
   const p = s.player, b = s.b22, h = s.hx.act, ang = h ? Math.atan2(h.dirY, h.dirX) : Math.atan2(p.aimY, p.aimX);
   switch (kind) {
+    case 'ren_r_hit': if (!((n ?? 0) & 32)) break;   // B26: only the converging final fist of Crimson Catastrophe seeds the Bloodstar-family branches
+    // falls through
     case 'bloodstar_slam': {
       if (has(s, 'red_comet_rain')) { const c = s.enemies.filter(alive).filter(e => (e.x - x) ** 2 + (e.y - y) ** 2 < 340 ** 2).sort((a, c2) => (a.x - x) ** 2 + (a.y - y) ** 2 - ((c2.x - x) ** 2 + (c2.y - y) ** 2)).slice(0, 4); c.forEach((e, i) => schedule(s, { at: s.time + 0.25 * (i + 1), kind: 'area', x: e.x, y: e.y, r: 72, dmg: q(s) * 0.4 * s.mods.sphereDamage, push: 30, stagger: 0.3, cap: 4, src: 'red_comet_rain', tag: `follow:${e.id}`, hit: [e.id] })); }
       if (has(s, 'crimson_crater')) zoneFx(s, { kind: 'ring', x, y, x2: x, y2: y, r: REN.r.radius * s.mods.sphereRadius * 0.9, dur: 3.5, tick: 0.5, dmg: q(s) * 0.25, push: 40, src: 'crimson_crater' });
       if (legend(s, 'bloodstar_rupture')) zoneFx(s, { kind: 'circle', x, y, x2: x, y2: y, r: 150, dur: 4, tick: 0.4, dmg: q(s) * 0.2, push: 50, src: 'bloodstar_rupture' });
+      break;
+    }
+    case 'ren_e_grab': if ((n ?? 0) & 1) bump(b, 'rush.strike.form', 1); break;   // B26: First Rush counts real Scarlet Rampage contacts
+    case 'ren_e_slam': case 'ren_e_hit': {
+      if (((n ?? 0) >> 8) & 63) bump(b, 'rush.strike.form', 1);
+      if (has(s, 'meteor_collision')) areaFx(s, p.x, p.y, 130, q(s) * 1.2, 200, 0.6, 8, 'collision');
+      if (legend(s, 'meteor_crucible') && h) { zoneFx(s, { kind: 'line', x: h.sx, y: h.sy, x2: p.x, y2: p.y, r: 36, dur: 2.4, tick: 0.3, dmg: q(s) * 0.3, push: 0, src: 'meteor_crucible' }); areaFx(s, p.x, p.y, 120, q(s) * 0.8, 160, 0.4, 8, 'crucible_burst'); }
       break;
     }
     case 'rush_end': {
@@ -202,6 +212,8 @@ export function onAbilityEvent(s: GameState, kind: string, x: number, y: number,
     }
     case 'horizon_burst': { if (has(s, 'starfield_array') && s.b22.zones.filter(z => z.src === 'starfield_array').length < 5) zoneFx(s, { kind: 'circle', x, y, x2: x, y2: y, r: 80, dur: 3, tick: 0.5, dmg: q(s) * 0.2, push: 0, src: 'starfield_array' }); break; }
     case 'evasion': bump(b, 'evade.count'); break;
+    case 'ren_auto': if (!((n ?? 0) & 32)) break;   // B26: the uppercut finisher is the relay trigger
+    // falls through
     case 'auto_finisher': {
       if (legend(s, 'crimson_relay') && s.hero === 'ren' && s.time - (b.legendCd.crimson_relay ?? -9) > 4) {
         const struck = new Set(b.hits.map(h2 => h2.id)); const c = s.enemies.filter(alive).filter(e => !struck.has(e.id) && (e.x - p.x) ** 2 + (e.y - p.y) ** 2 < 280 ** 2).sort((a, c2) => (a.x - p.x) ** 2 + (a.y - p.y) ** 2 - ((c2.x - p.x) ** 2 + (c2.y - p.y) ** 2))[0];

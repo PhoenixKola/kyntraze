@@ -11,6 +11,7 @@ import { freeAim } from './ApexSystem';
 import { HERO_ANCHORS } from '../content/heroAnchors';
 import { KAI_GROUND_DY, KAI_SCALE } from '../assets/kaiAnimation';
 import { densestOrbTarget } from './BranchSystem';
+import { isRenAct, renE, renFuryAuto, renMoveScale, renQ, renR, renCancelAct, updateRenAct, updateRenCombat } from './RenCombat';
 import { updateVexAct, updateVexMarks, vexAuto, vexE, vexMoveScale, vexQ, vexR } from './VexSystem';
 
 const EVENT_CAP = 24, BOLT_CAP = 90;
@@ -80,6 +81,7 @@ export function updateHeroAuto(s: GameState, dt: number) {
   if (s.hero === 'ren') renAuto(s); else if (s.hero === 'vex') vexAuto(s); else soraAuto(s);
 }
 function renAuto(s: GameState) {
+  if (inForm(s)) { renFuryAuto(s); return; }   // B26: Crimson Ascendant has its own four-beat Crimson Fury
   const p = s.player, form = inForm(s), period = Math.max(0.16, p.attackPeriod * (form ? 0.78 : 1));
   const tgt = nearest(s, p.attackRange); if (!tgt) { p.attackClock = 0; return; }   // melee waits for someone in reach instead of wasting the swing
   p.attackClock += period;
@@ -115,6 +117,7 @@ export function heroActivateQ(s: GameState): boolean {
   const p = s.player; if (p.qCooldown > 0 || s.hx.act || s.cinema || p.dashRemaining > 0 || p.hp <= 0) return false;
   const form = inForm(s);
   if (s.hero === 'vex') return vexQ(s);
+  if (s.hero === 'ren' && form) return renQ(s);   // B26: Infernal Cyclone replaces Crimson Break in the transformed state
   if (s.hero === 'ren') {
     const dir = aimDir(s, 190); const beats = form ? REN.q.formBeats : REN.q.beats, gap = form ? REN.q.formGap : REN.q.gap;
     p.qCooldown = REN.q.cooldown; s.hx.act = newCast(s, 'crimson_break', dir, 0.06 + beats * gap + REN.q.recover);
@@ -163,12 +166,12 @@ function updateAzureVolley(s: GameState, c: HeroCast) {
 /* ------------------------------------------------------------------ E */
 export function heroStartE(s: GameState): boolean {
   const p = s.player; if (p.beamCooldown > 0 || s.hx.act || s.cinema || p.dashRemaining > 0 || p.hp <= 0 || s.phase !== 'running') return false;
-  return s.hero === 'ren' ? startRush(s) : s.hero === 'vex' ? vexE(s) : startLance(s);
+  return s.hero === 'ren' ? (inForm(s) ? renE(s) : startRush(s)) : s.hero === 'vex' ? vexE(s) : startLance(s);
 }
 export function heroStartR(s: GameState): boolean {
   const p = s.player;
   if (s.hero === 'vex' && s.b22.marks.some(m => m.src === 'seal') && s.phase === 'running' && !s.cinema && p.hp > 0) return vexR(s);   // R again: detonate the Seal early if (p.sphereCooldown > 0 || s.hx.act || s.cinema || p.dashRemaining > 0 || p.hp <= 0 || s.phase !== 'running') return false;
-  return s.hero === 'ren' ? startBloodstar(s) : s.hero === 'vex' ? vexR(s) : startHorizon(s);
+  return s.hero === 'ren' ? (inForm(s) ? renR(s) : startBloodstar(s)) : s.hero === 'vex' ? vexR(s) : startHorizon(s);
 }
 /** Meteor Rush plan: chain of nearest unvisited enemies, each reachable by a wall-free straight line. Fixed at the press, so the route is predictable. */
 function planRush(s: GameState, count: number): { x: number; y: number; id: number }[] {
@@ -228,7 +231,7 @@ function startBloodstar(s: GameState): boolean {
   c.tx = tg.x; c.ty = tg.y; c.sx = p.x; c.sy = p.y; s.hx.act = c; emit(s, 'bloodstar_crouch', p.x, p.y); return true;
 }
 /** Ground target for a leap / blast: the pointer spot (or stick direction at the default range) pulled onto the densest nearby cluster; walls pull it back. */
-function pickGround(s: GameState, maxRange: number, defaultRange: number, cluster: number, bodyR: number): { x: number; y: number } {
+export function pickGround(s: GameState, maxRange: number, defaultRange: number, cluster: number, bodyR: number): { x: number; y: number } {
   const p = s.player, fa = freeAim(s); let best: { x: number; y: number } | null = null, bestScore = -Infinity, pt: { x: number; y: number };
   const clampWall = (x: number, y: number) => { let r = Math.hypot(x - p.x, y - p.y); const d = normalize(x - p.x, y - p.y); while (r > 0 && blocked(p.x + d.x * r, p.y + d.y * r, bodyR)) r -= 10; return { x: p.x + d.x * r, y: p.y + d.y * r }; };
   if (fa) { const r = clamp(fa.d ?? defaultRange, 70, maxRange); pt = clampWall(p.x + fa.x * r, p.y + fa.y * r); }
@@ -374,7 +377,7 @@ function updateOrbs(s: GameState, dt: number) {
 
 /* ------------------------------------------------------------------ per-tick update */
 export function updateHero(s: GameState, dt: number) {
-  const h = s.hx; h.t += dt;
+  const h = s.hx; h.t += dt; updateRenCombat(s, dt);
   if (s.hero === 'vex') updateVexMarks(s, dt);
   for (const r of h.rings) r.t += dt; h.rings = h.rings.filter(r => r.t < r.dur);
   for (const a of h.arcs) a.t += dt; h.arcs = h.arcs.filter(a => a.t < a.dur);
@@ -403,6 +406,7 @@ export function updateHero(s: GameState, dt: number) {
     case 'celestial_lance': updateLance(s, c, dt); if (c.released && before < SORA.e.maxCharge + SORA.e.fire && c.t >= SORA.e.maxCharge + SORA.e.fire) emit(s, 'lance_end', s.player.x, s.player.y); break;
     case 'zero_horizon': break;
     case 'parry_halo': case 'rift_reversal': case 'oathbreaker_seal': updateVexAct(s, c, dt, before); break;
+    case 'infernal_cyclone': case 'scarlet_rampage': case 'crimson_catastrophe': case 'nova_fist': updateRenAct(s, c, dt, before); break;
     case 'ultimate': break;
   }
   if (h.act === c && (c.act === 'celestial_lance' ? c.released && c.t >= c.dur - 1e-9 : c.act === 'meteor_rush' ? c.hop >= c.hops.length && c.t >= c.len - 1e-9 : c.t >= c.dur - 1e-9)) h.act = null;
@@ -441,17 +445,19 @@ export function heroMoveScale(s: GameState): number {
     case 'celestial_lance': return !c.released ? SORA.e.moveCharge : c.t < SORA.e.maxCharge + SORA.e.fire ? SORA.e.moveFire : 0.6;
     case 'zero_horizon': return c.t < SORA.r.summon ? SORA.r.moveScale : 0.7;
     case 'parry_halo': case 'rift_reversal': case 'oathbreaker_seal': return vexMoveScale(c);
+    case 'infernal_cyclone': case 'scarlet_rampage': case 'crimson_catastrophe': case 'nova_fist': return renMoveScale(c);
     case 'ultimate': return 0.2;
   }
 }
 /** Dash (or the form reveal) ends the move now. A cancelled Lance charge is never free; a dash does not cancel the orbs already summoned. */
 export function cancelHero(s: GameState) {
   const c = s.hx.act; if (!c) return;
+  if (isRenAct(c)) { renCancelAct(s, c); return; }
   if (c.act === 'celestial_lance' && !c.released) s.player.beamCooldown = Math.max(s.player.beamCooldown, SORA.e.cooldown * SORA.e.cancelCooldown * s.mods.beamCd);
   if (c.act === 'zero_horizon' && s.hx.orbPhase !== 'converge') { s.hx.orbs = []; s.hx.orbPhase = 'none'; }
   emit(s, 'cast_cancel', s.player.x, s.player.y); s.hx.act = null;
 }
 /** A hit interrupts only an unreleased Lance charge; every other move is committed. */
-export function interruptHero(s: GameState) { const c = s.hx.act; if (c && c.act === 'celestial_lance' && !c.released) cancelHero(s); }
+export function interruptHero(s: GameState) { const c = s.hx.act; if (c && ((c.act === 'celestial_lance' && !c.released) || (c.act === 'nova_fist' && !c.released))) cancelHero(s); }
 /** Hard reset used by the transformation reveal: nothing of the old move may leak into the cinematic. */
 export function clearHero(s: GameState) { s.hx.act = null; s.hx.bolts = []; s.hx.orbs = []; s.hx.orbPhase = 'none'; s.hx.pending = []; s.hx.arcs = []; s.hx.rings = []; }

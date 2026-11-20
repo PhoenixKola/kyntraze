@@ -97,6 +97,10 @@ export class HeroAnimator {
     switch (a.act) {
       case 'crimson_break': case 'azure_volley': return moving ? 'RunPunchUpper' : 'BasicPunch';
       case 'meteor_rush': return a.hop < a.hops && a.hopT <= REN.e.hopTime ? 'Dash' : a.hop >= a.hops ? 'Dash' : 'BasicPunch';
+      case 'infernal_cyclone': return this.has('Slam') ? 'Slam' : 'Sphere';   // B26: interim mapping onto existing clips until the Ren-authored poses land
+      case 'scarlet_rampage': return a.hop === 0 || a.hop === 1 ? 'Dash' : 'BasicPunch';
+      case 'crimson_catastrophe': return 'Sphere';
+      case 'nova_fist': return a.released ? 'Dash' : 'BasicPunch';
       case 'bloodstar': case 'zero_horizon': return 'Sphere';
       case 'celestial_lance': return 'Beam';
       case 'parry_halo': return this.has('Guard') ? ((a.riposte ?? 9) < 0.6 && this.has('Riposte') ? 'Riposte' : 'Guard') : 'BasicPunch';

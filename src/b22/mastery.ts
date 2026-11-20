@@ -23,7 +23,7 @@ export const MILESTONES: readonly Milestone[] = [
   M('stillfire', 'initiate', 'Quiet Step', 'Perfect-evade once.', 'evade.count', 1, 'aura_detail', 'Silver-ripple edge detail'),
   M('stillfire', 'adept', 'Weightless', 'Perfect-evade 5 times in one run.', 'evade.count', 5, 'finisher', 'Silver finisher'),
   M('stillfire', 'master', 'Untouched', 'Defeat a boss in Stillfire without taking damage during that fight.', 'boss.flawless.stillfire', 1, 'crest', 'Silver crest + victory pose'),
-  M('crimson_ascendant', 'initiate', 'First Rush', 'Land 15 Meteor Rush strikes in Ascendant.', 'rush.strike.form', 15, 'aura_detail', 'Ember-lash edge detail'),
+  M('crimson_ascendant', 'initiate', 'First Rush', 'Land 15 Scarlet Rampage contacts and slams in Ascendant.', 'rush.strike.form', 15, 'aura_detail', 'Ember-lash edge detail'),
   M('crimson_ascendant', 'adept', 'Scarlet Tide', 'Defeat 40 enemies in one Ascendant run.', 'kill.crimson_ascendant', 40, 'finisher', 'Crimson finisher'),
   M('crimson_ascendant', 'master', 'Ascendant Verdict', 'Defeat a boss in Ascendant.', 'boss.crimson_ascendant', 1, 'crest', 'Crimson crest + victory pose'),
   M('azure_sovereign', 'initiate', 'Full Charge', 'Fire 3 tier-3 Lances in Sovereign.', 'lance.t3.form', 3, 'aura_detail', 'Azure-halo edge detail'),
