@@ -27,4 +27,5 @@ def run(name):
             c = fist_points(ch, slots, s); fr[s] = [round(float(c[0]), 2), round(float(c[1]), 2)] if c is not None else None
         res.append(fr)
     return res
-if __name__ == "__main__": print(json.dumps({"Beam": run("Beam"), "Sphere": run("Sphere"), "BasicPunch": run("BasicPunch")}))
+B26_CLIPS = ("Jab", "Kick", "Hook", "Uppercut", "Cyclone", "Rampage", "Pound", "NovaCharge", "Lunge", "Takeoff", "Glide", "Dive")   # Form I only (art/characters/ren/rig/anim_b26.py)
+if __name__ == "__main__": print(json.dumps({**{"Beam": run("Beam"), "Sphere": run("Sphere"), "BasicPunch": run("BasicPunch")}, **({c: run(c) for c in B26_CLIPS} if form == "f1" else {})}))

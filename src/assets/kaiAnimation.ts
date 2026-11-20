@@ -5,7 +5,7 @@ import { CANNON, DRAGON } from '../content/cometheart';
 import { RIFT } from '../content/stillfire';
 export type Facing = 'south' | 'north' | 'east' | 'west';
 /** RunLower + RunPunchUpper are the two LAYERS of the moving attack (legs+hips of the Run cycle, and an upper body whose frames are `step * 8 + leg phase`); the runtime draws the lower one first. */
-export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere' | 'RunLower' | 'RunPunchUpper' | 'Lunge' | 'Uppercut' | 'Slam' | 'Kick' | 'Glide' | 'Dive';
+export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere' | 'RunLower' | 'RunPunchUpper' | 'Lunge' | 'Uppercut' | 'Slam' | 'Kick' | 'Glide' | 'Dive' | 'Jab' | 'Hook' | 'Cyclone' | 'Rampage' | 'Pound' | 'NovaCharge' | 'Takeoff';
 /** Transform exists only in the Form I sheets. */
 export type KaiClip = KaiBaseClip | 'Transform' | 'IdleSpecial' | 'Guard' | 'Riposte';
 /** B23: Vex's own clips (blade-ready counter stance, outward counter-cut). Optional per sheet set: a set without them plays the older mapping. */
@@ -17,6 +17,8 @@ export const KAI_CLIPS: readonly KaiBaseClip[] = ['Idle', 'Run', 'BasicPunch', '
 /** B22 Kai-only clips (Surge Step / Meteor Drive Lunge, Rising Flare Uppercut, Sunfall Crucible Slam); Ren / Sora sheets do not have them. */
 /** B25.1 (Combat Identity): Kick (leg-contact auto beat), Glide (Skybreaker cruise loop) and Dive (descent strike / landing compression). */
 export const KAI_KIT_CLIPS = ['Lunge', 'Uppercut', 'Slam', 'Kick', 'Glide', 'Dive'] as const;
+/** B26 Ren Crimson Ascendant clips (art/characters/ren/rig/anim_b26.py): Fury beats (Jab, Kick, Hook, Uppercut), Cyclone, Rampage, Pound (Catastrophe), NovaCharge + Lunge (Nova Fist), Takeoff / Glide / Dive. Form I sheets only. */
+export const REN_F1_CLIPS = ['Jab', 'Kick', 'Hook', 'Uppercut', 'Cyclone', 'Rampage', 'Pound', 'NovaCharge', 'Lunge', 'Takeoff', 'Glide', 'Dive'] as const;
 /** Leg phases per strike step in RunPunchUpper. */
 export const RUN_PHASES = 8;
 export const KAI_F1_CLIPS: readonly KaiClip[] = [...KAI_CLIPS, 'Transform'];
@@ -33,8 +35,8 @@ export interface WorldPt { x: number; y: number }
 export interface HandAnchor { n: WorldPt; f: WorldPt; m: WorldPt }
 /** World position of the two fists for a drawn frame. (heroX, heroY) is where the sprite's ground origin is placed in the world, `scale` the sprite scale. */
 export function handAnchorWorld(t: AnchorTable, form: KaiForm, facing: Facing, clip: KaiClip, frame: number, heroX: number, heroY: number, scale: number): HandAnchor | null {
-  if (clip !== 'Beam' && clip !== 'Sphere' && clip !== 'BasicPunch') return null;
-  const fr = t.forms[form]?.[facing]?.[clip]?.[frame]; if (!fr) return null;
+  const table = t.forms[form]?.[facing] as Partial<Record<string, AnchorFrame[]>> | undefined;   // B26: Ren's Crimson Ascendant clips export their fist anchors too (only clips present in the table resolve)
+  const fr = table?.[clip]?.[frame]; if (!fr) return null;
   const w = (p: [number, number]) => ({ x: heroX + p[0] * scale, y: heroY + p[1] * scale });
   return { n: w(fr.n), f: w(fr.f), m: w(fr.m) };
 }

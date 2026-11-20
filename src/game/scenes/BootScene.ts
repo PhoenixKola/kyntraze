@@ -20,6 +20,7 @@ import { HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroF
 import { KP_NAMES, kpKey, kpUrl } from '../render/kaiPresence';
 import { KO_NAMES, koKey, koUrl } from '../render/kaiCombatFx';
 import { RF_NAMES, rfKey, rfUrl } from '../render/renFox';
+import { SP_NAMES, spKey, spUrl } from '../render/soraPhoenix';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
 import { B14_FX_NAMES, b14Key, b14Url } from '../render/b14fx';
@@ -61,6 +62,7 @@ export class BootScene extends Phaser.Scene {
     ABILITY_FX_NAMES.forEach(n => this.load.image(abilityFxKey(n), abilityFxUrl(n)));
     KK_FX.forEach(n => this.load.image(kkKey(n), kkUrl(n)));
     KP_NAMES.forEach(n => this.load.image(kpKey(n), kpUrl(n)));
+    SP_NAMES.forEach(n => this.load.image(spKey(n), spUrl(n)));   // B27 Astral Phoenix + Sora form FX (ImageGen)
     RF_NAMES.forEach(n => this.load.image(rfKey(n), rfUrl(n)));   // B26 Crimson Nine-Tailed Fox + Ren form FX (ImageGen); a missing file leaves that layer off
     KO_NAMES.forEach(n => this.load.image(koKey(n), koUrl(n)));   // Primal Overdrive / signature / flight / form-shift art (ImageGen)   // Kai transformation presence (ImageGen); a missing file just leaves that layer off
     for (let i = 0; i < 4; i++) this.load.image(`xpgem${i}`, `/art/fx/xp/gem${i}.png`);

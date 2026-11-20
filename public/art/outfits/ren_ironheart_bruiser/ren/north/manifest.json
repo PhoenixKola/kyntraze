@@ -5,14 +5,14 @@
  "direction": "north",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/ren-north.blend",
- "frame_width": 138,
+ "frame_width": 106,
  "frame_height": 165,
  "origin_px": [
-  83.0,
+  51.0,
   162.0
  ],
  "origin_normalized": [
-  0.601449,
+  0.481132,
   0.981818
  ],
  "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
@@ -66,10 +66,10 @@
    "duration_s": 0.5714,
    "blender_action": "RunLower",
    "events": {},
-   "frame_width": 68,
+   "frame_width": 66,
    "frame_height": 93,
    "origin_px": [
-    36.0,
+    34.0,
     90.0
    ],
    "terminal": "once",
@@ -85,10 +85,10 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 116,
+   "frame_width": 86,
    "frame_height": 108,
    "origin_px": [
-    72.0,
+    42.0,
     160.0
    ],
    "terminal": "once",
@@ -172,10 +172,10 @@
     "recover_start": 20,
     "interruptible_from": 22
    },
-   "frame_width": 90,
+   "frame_width": 88,
    "frame_height": 162,
    "origin_px": [
-    46.0,
+    44.0,
     160.0
    ],
    "terminal": "once",
@@ -196,10 +196,10 @@
     "recover_start": 18,
     "interruptible_from": 21
    },
-   "frame_width": 108,
+   "frame_width": 100,
    "frame_height": 194,
    "origin_px": [
-    55.0,
+    50.0,
     192.0
    ],
    "terminal": "once",

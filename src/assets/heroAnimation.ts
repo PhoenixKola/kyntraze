@@ -4,6 +4,7 @@ import { skinRoot } from './skin';
 import { RUN_PHASES, SIM_DASH_SECONDS, facingFromInput, facingFromVector, type AnimPose, type Facing, type KaiClip, type KaiClipInfo, type KaiManifests } from './kaiAnimation';
 import type { HeroAct } from '../content/heroKits';
 import { REN, SORA, VEX } from '../content/heroKits';
+import { REN_E, REN_Q, REN_R } from '../content/renCombat';
 
 /** The heroes whose art is a hero sheet set (Kai has his own kaiAnimation pipeline). */
 export type HeroArt = 'ren' | 'sora' | 'vex';
@@ -34,6 +35,8 @@ export interface HeroAnimInput {
   form: number; cinema: { t: number; dur: number; commitAt: number } | null;
   act: HeroActView | null;
   /** the sim's last automatic strike (time it happened, offset direction) */ strike: { t: number; x: number; y: number };
+  /** B26 Ren Crimson Fury: the last auto beat (0 jab, 1 kick, 2 hook, 3 uppercut) and seconds since it landed; null when none */ fury?: { beat: number; t: number } | null;
+  /** B26 Ren Skybreaker: seconds airborne (0 on the ground) */ flyT?: number;
 }
 const FACING_DWELL = 0.12, DEATH_HOLD = 0.35, DASH_REC = 0.12;
 const frameAt = (a: KaiClipInfo, u: number, lo = 0, hi = a.frames - 1) => Math.max(lo, Math.min(hi, lo + Math.floor(Math.min(0.999999, Math.max(0, u)) * (hi - lo + 1))));
@@ -50,6 +53,7 @@ export class HeroAnimator {
   private time = 0; private runTime = 0; private sinceTurn = 1; private hurtT = -1; private deathT = -1; private dashRec = -1; private dashWas = false; private dashProg = 0;
   private strikeT = -1; private lastStrike = -9; private actId = 0; private beatSeen = 0; private beatT = 99; private formPrev = 0; private moveNow = false; private cinemaOn = false; private cinemaT = 0; private cinemaCommit = 1; private cinemaDur = 1;
   private actView: HeroActView | null = null;
+  private furyView: { beat: number; t: number } | null = null; private flyWas = false; private flyDur = 0; private flying = false; private landT = -1; private landDive = false; private relT = -1;
   constructor(readonly hero: HeroArt, private readonly base: KaiManifests, private readonly f1?: KaiManifests) {}
   get dead() { return this.deathT >= 0; }
   deathPresented() { if (this.deathT < 0) return false; const d = this.info('Death'); return this.deathT >= d.frames / d.fps + DEATH_HOLD; }
@@ -62,7 +66,7 @@ export class HeroAnimator {
     const events: AnimPose['events'] = [], ev = events as unknown as string[];
     if (!i.alive) { if (this.deathT < 0) { this.deathT = 0; this.hurtT = -1; this.dashRec = -1; this.strikeT = -1; this.cinemaOn = false; this.clip = 'Death'; if (i.form) this.visualForm = this.f1 ? 'f1' : 'base'; } else this.deathT += i.dt; return this.pose(events); }
     if (this.deathT >= 0) { this.deathT = -1; this.clip = 'Idle'; this.time = 0; this.visualForm = 'base'; this.formPrev = 0; this.cinemaOn = false; }
-    this.sinceTurn += i.dt; this.moveNow = i.moving || i.dashing; this.actView = i.act;
+    this.sinceTurn += i.dt; this.moveNow = i.moving || i.dashing; this.actView = i.act; this.furyView = this.renForm() ? i.fury ?? null : null;
     if (i.cinema && this.f1) {
       if (!this.cinemaOn) { this.cinemaOn = true; this.strikeT = -1; this.hurtT = -1; this.dashRec = -1; ev.push('form_start'); }
       this.cinemaT = i.cinema.t; this.cinemaDur = i.cinema.dur; this.cinemaCommit = i.cinema.commitAt; this.clip = 'Transform';
@@ -87,25 +91,41 @@ export class HeroAnimator {
     } else this.strikeT = -1;
     const runStep = i.dt * Math.min(18, Math.max(10, 14 * i.runSpeed / 250)) / 14;
     if (this.moveNow) this.runTime += runStep; else this.runTime = 0;
-    const want: KaiClip = this.hurtT >= 0 ? 'Hurt' : (i.dashing || this.dashRec >= 0) ? 'Dash' : a ? this.actClip(a, i.moving) : this.strikeT >= 0 ? (i.moving ? 'RunPunchUpper' : 'BasicPunch') : i.moving ? 'Run' : 'Idle';
+    this.flying = this.renForm() && (i.flyT ?? 0) > 0 && this.has('Glide');
+    if (this.flying) { this.flyDur = i.flyT ?? 0; this.flyWas = true; this.landT = -1; } else if (this.flyWas) { this.flyWas = false; this.landT = 0; this.landDive = this.flyDur >= 0.5 && this.has('Dive'); }
+    if (this.landT >= 0) { this.landT += i.dt; if (this.landT > (this.landDive ? 0.4 : 0.2) || (i.moving && this.landT > 0.1)) this.landT = -1; }
+    const landing = this.landT >= 0 && this.landDive, fury = this.furyClip(i.moving);
+    if (a && a.act === 'nova_fist' && a.released) { if (this.relT < 0) this.relT = 0; this.relT += i.dt; } else this.relT = -1;
+    const want: KaiClip = this.hurtT >= 0 ? 'Hurt' : (i.dashing || this.dashRec >= 0) ? 'Dash' : a ? this.actClip(a, i.moving) : this.flying ? (this.flyDur < 0.3 && this.has('Takeoff') ? 'Takeoff' : 'Glide') : landing ? 'Dive' : fury ? fury : this.strikeT >= 0 ? (i.moving ? 'RunPunchUpper' : 'BasicPunch') : i.moving ? 'Run' : 'Idle';
     if (want !== this.clip) { this.clip = want; this.time = 0; }
-    if (want === 'Run') this.time += runStep; else if (want === 'Idle') this.time += i.dt;
+    if (want === 'Run') this.time += runStep; else if (want === 'Idle' || want === 'Glide' || want === 'Takeoff') this.time += i.dt;
     return this.pose(events);
+  }
+  private renForm() { return this.hero === 'ren' && this.visualForm === 'f1'; }
+  /** Crimson Fury beat clip while standing; a moving strike keeps the RunPunchUpper layering. */
+  private furyClip(moving: boolean): KaiClip | null {
+    const f = this.furyView; if (!f || moving) return null; const c: KaiClip = (['Jab', 'Kick', 'Hook', 'Uppercut'] as const)[f.beat & 3]; if (!this.has(c)) return null;
+    const a = this.info(c), rel = a.events.release ?? 3; return f.t < (a.frames - Math.max(0, rel - 2)) / a.fps ? c : null;
   }
   private has(clip: KaiClip): boolean { return !!(this.set(this.visualForm)[this.facing].animations as Partial<Record<KaiClip, KaiClipInfo>>)[clip]; }
   private actClip(a: HeroActView, moving: boolean): KaiClip {
     switch (a.act) {
       case 'crimson_break': case 'azure_volley': return moving ? 'RunPunchUpper' : 'BasicPunch';
       case 'meteor_rush': return a.hop < a.hops && a.hopT <= REN.e.hopTime ? 'Dash' : a.hop >= a.hops ? 'Dash' : 'BasicPunch';
-      case 'infernal_cyclone': return this.has('Slam') ? 'Slam' : 'Sphere';   // B26: interim mapping onto existing clips until the Ren-authored poses land
-      case 'scarlet_rampage': return a.hop === 0 || a.hop === 1 ? 'Dash' : 'BasicPunch';
-      case 'crimson_catastrophe': return 'Sphere';
-      case 'nova_fist': return a.released ? 'Dash' : 'BasicPunch';
+      case 'infernal_cyclone': return this.renForm() && this.has('Cyclone') ? 'Cyclone' : this.has('Slam') ? 'Slam' : 'Sphere';   // B26: Ren-authored clip in Crimson Ascendant, older mapping when a sheet set lacks it
+      case 'scarlet_rampage': return this.renForm() && this.has('Rampage') ? 'Rampage' : a.hop === 0 || a.hop === 1 ? 'Dash' : 'BasicPunch';
+      case 'crimson_catastrophe': return this.renForm() && this.has('Pound') ? 'Pound' : 'Sphere';
+      case 'nova_fist': return this.renForm() && this.has(a.released ? 'Lunge' : 'NovaCharge') ? (a.released ? 'Lunge' : 'NovaCharge') : a.released ? 'Dash' : 'BasicPunch';
       case 'bloodstar': case 'zero_horizon': return 'Sphere';
       case 'celestial_lance': return 'Beam';
+      // B27: Sora's Sovereign moves reuse the existing gather / thrust clips until his own poses are authored (reported as reuse, not as new poses)
+      case 'azure_prison': return moving ? 'RunPunchUpper' : 'Sphere';
+      case 'heavens_spear': case 'azure_collapse': return 'Sphere';
+      case 'astral_devastation': return a.released ? 'Beam' : 'Sphere';
       case 'parry_halo': return this.has('Guard') ? ((a.riposte ?? 9) < 0.6 && this.has('Riposte') ? 'Riposte' : 'Guard') : 'BasicPunch';
       case 'rift_reversal': return this.has('Riposte') && a.t >= VEX.e.windup ? 'Riposte' : 'Dash';
       case 'oathbreaker_seal': case 'ultimate': return 'Sphere';
+      default: return 'BasicPunch';   // acts of a later hero batch without their own clip yet
     }
   }
   pose(events: AnimPose['events'] = []): AnimPose {
@@ -130,6 +150,27 @@ export class HeroAnimator {
     } else if (this.clip === 'Sphere' && v) {
       const rel = a.events.release ?? Math.floor(a.frames / 2), tr = v.act === 'bloodstar' ? REN.r.windup + REN.r.flight : SORA.r.summon;
       frame = v.t < tr ? Math.min(rel - 1, Math.floor(leapCurve(v.t / tr, rel, v.act === 'bloodstar' ? REN.r.windup / tr : 0.4) * rel)) : Math.min(a.frames - 1, rel + Math.floor(Math.min(0.999999, (v.t - tr) / Math.max(0.05, v.dur - tr)) * (a.frames - rel)));
+    } else if (this.renForm() && (this.clip === 'Jab' || this.clip === 'Kick' || this.clip === 'Hook' || this.clip === 'Uppercut') && this.furyView) {
+      frame = Math.min(a.frames - 1, Math.max(0, (a.events.release ?? 3) - 2) + Math.floor(this.furyView.t * a.fps));
+    } else if (this.clip === 'Cyclone' && v) {
+      const ss = a.events.spin_start ?? 5, rel = a.events.release ?? 17, w = REN_Q.windup, sp = REN_Q.spin;
+      frame = v.t < w ? Math.min(ss - 1, Math.floor(v.t / w * ss)) : v.t < w + sp ? ss + Math.floor((v.t - w) * a.fps) % Math.max(1, rel - ss) : Math.min(a.frames - 1, rel + Math.floor(Math.min(0.999999, (v.t - w - sp) / REN_Q.recover) * (a.frames - rel)));
+    } else if (this.clip === 'Rampage' && v) {
+      const dr = a.events.drive ?? 6, rel = a.events.release ?? 13, ap = REN_E.approach, dv = REN_E.drive;
+      frame = v.t < ap ? Math.min(dr - 1, Math.floor(v.t / ap * dr)) : v.t < ap + dv ? Math.min(rel - 1, dr + Math.floor((v.t - ap) / dv * (rel - dr))) : Math.min(a.frames - 1, rel + Math.floor(Math.min(0.999999, (v.t - ap - dv) / REN_E.recover) * (a.frames - rel)));
+    } else if (this.clip === 'Pound' && v) {
+      const w = REN_R.windup, g = REN_R.gap, hit = [w, w + g, w + 2 * g, w + 2 * g + REN_R.finalGap], rel = a.events.release ?? 6, sb = a.events.strike_b ?? 13, fin = a.events.final ?? 18;
+      let k = -1; for (let n = 0; n < 4; n++) if (v.t >= hit[n]) k = n;
+      if (k < 0) frame = Math.min(rel - 1, Math.floor(v.t / w * rel));
+      else if (k === 3) frame = Math.min(a.frames - 1, fin + Math.floor(Math.min(0.999999, (v.t - hit[3]) / REN_R.recover) * (a.frames - fin)));
+      else { const base = [rel, sb, rel][k], since = v.t - hit[k], gap = hit[k + 1] - hit[k]; frame = since < 0.1 ? base : [10 + Math.floor(since / gap * 3), 3 + Math.floor(since / gap * 3), 17][k]; frame = Math.min(frame, a.frames - 1); }
+    } else if (this.clip === 'NovaCharge' && v) {
+      const hs = a.events.hold ?? 5, he = a.events.hold_end ?? 11;
+      frame = v.charge < 0.25 ? Math.min(hs - 1, Math.floor(v.charge / 0.25 * hs)) : hs + Math.floor(v.charge * a.fps) % (he - hs + 1);
+    } else if (this.clip === 'Lunge' && v) {
+      frame = Math.min(a.frames - 1, Math.max(0, (a.events.release ?? 3) - 1) + Math.floor(Math.max(0, this.relT) * a.fps));
+    } else if (this.clip === 'Dive' && this.landT >= 0) {
+      const rel = a.events.release ?? 7, end = a.events.interruptible_from ?? 15; frame = Math.min(a.frames - 1, rel - 1 + Math.floor(Math.min(0.999, this.landT / 0.4) * Math.max(1, end - rel + 2)));
     } else if (this.clip === 'Beam' && v) {
       const hs = a.events.hold_start ?? 3, he = Math.max(hs, a.events.hold_end ?? hs + 3), rel = a.events.release ?? he + 1;
       if (!v.released) frame = v.charge < SORA.e.minCharge ? Math.min(hs - 1, Math.floor(v.charge / SORA.e.minCharge * hs)) : hs + Math.floor((v.charge - SORA.e.minCharge) * Math.max(8, a.fps)) % (he - hs + 1);

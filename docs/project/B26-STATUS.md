@@ -54,3 +54,34 @@ Honest quality notes: every sheet was viewed at sheet scale and a contact montag
 
 **Checked:** typecheck and build clean; one headless Playwright smoke (`?qa=1&hero=ren`, form 1 forced with `odT`) with no console, page or request errors; viewed two stills (south idle with fox; east Cyclone cast).
 **Not verified:** nothing seen in motion at real speed; north view of the fox, flight fan, Rampage / Catastrophe / Nova effects, Overdrive activation and expiry not looked at; the Cyclone arcs looked bright with a hard-edged region at their right side in the still (alpha lowered, cause not diagnosed); fox size / readability in a crowd unchecked; 640x360 HUD with the new icons unchecked; no partner / two-client run. Poses are still the interim mapped clips (Blender stage separate).
+
+## Pose stage (Blender 2D part rig, Ren Crimson Ascendant)
+
+**Source rig:** `art/characters/ren/rig/` (south) and `art/characters/ren/rig_dirs/` (north / east / west), the self-contained Ren copy of Kai's part rig (parts under `art/characters/ren/f1/<dir>/parts`, editable blends `art/characters/ren/f1/<dir>/rig/ren-<dir>.blend`). Kai and Vex rigs and sheets are untouched. Clip definitions: `rig/anim_b26.py` (south) and `rig_dirs/danim_b26.py` (east authored, west = same targets through SX, north its own rear-view numbers); both are only imported when the build runs with `KAI_FORM=f1`, so base sheets and every existing clip stay byte-identical. Build: `art/characters/ren/scripts/build_f1.sh south|east|west|north` (~4 min per direction); publish only the new clips with `python scripts/b26-ren-publish.py` (copies new sheets, merges only their manifest entries).
+
+**New clips (Form I only, 4 directions each; frames @ fps, release frame):**
+
+| Clip | Used for | Frames | Release |
+|---|---|---|---|
+| Jab | Crimson Fury beat 1 | 12 @24 | 3 |
+| Kick | beat 2 (near leg whips across) | 16 @24 | 4 |
+| Hook | beat 3 | 14 @24 | 4 |
+| Uppercut | beat 4 (finisher) | 18 @24 | 6 |
+| Cyclone | Q: windup 0-4, spin 5-16, open-arm release 17 | 26 @22 | 17 |
+| Rampage | E: grab 4, drive 6, slam 13 | 22 @22 | 13 |
+| Pound | R: fist strikes at 6 / 13 / final 18 | 26 @22 | 6 |
+| NovaCharge | V charge brace, hold loop 5-11 | 12 @14 | hold 5 |
+| Lunge | V release, the driving punch | 14 @24 | 3 |
+| Takeoff / Glide / Dive | Skybreaker | 10 @20 / 4 @10 loop / 20 @22 | 4 / - / 7 |
+
+Airborne poses pitch the whole torso forward about the pelvis (`root_rot` + `hip_target`, tweened as plain numbers). Per-clip frame sizes differ and are carried by each manifest entry.
+
+**Runtime wiring:** `REN_F1_CLIPS` in `src/assets/kaiAnimation.ts`, new clip names added to `KaiBaseClip`, loaded for `ren` / `f1` in `BootScene`. `HeroAnimator` (`src/assets/heroAnimation.ts`) maps `infernal_cyclone` / `scarlet_rampage` / `crimson_catastrophe` / `nova_fist` to Cyclone / Rampage / Pound / NovaCharge+Lunge with frame timing taken from the sim constants (`REN_Q`, `REN_E`, `REN_R`), and falls back to the older clips when a sheet set lacks them. New optional inputs: `fury` (`{beat, t}`: last Crimson Fury beat and seconds since it landed) and `flyT` (seconds airborne). **The caller (`EntityRenderer`) must still pass `fury` from the latest `ren_auto` event and `flyT` from `player.flyT`; until it does, the beat clips and flight poses are never selected** (the skill clips work now). A moving strike keeps the existing RunPunchUpper layering instead of a full-body clip. `handAnchorWorld` now resolves any clip present in `ren-anchors.json`.
+
+**Anchors / outfits:** `hand_anchors_ren.py` also measures the new clips for f1; hair/accessory anchors and the two Ren outfit sets are regenerated for the new clips only (see commit).
+
+**Honest limits:**
+- Everything was judged from zoomed contact sheets of the release / key frames; **no clip has been watched in motion at real speed**, and none has been seen in game.
+- South (toward-camera) strikes are foreshortened: Jab / Lunge extend the far fist to screen-right, Hook swings the near fist across, Rampage and Pound are mostly told by body drop and arm raise; fists cannot reach the ground (arm length ~34 px), so slams read as deep crouches with fists low at the belt.
+- Cyclone's spin is arms-wide twisting frames, not a true full-body turn; the renderer can cycle facings during the spin for a real turn. NORTH poses are true rear view but their strikes are mild (arms raised / out beside the spine).
+- Frame-level checks printed by the build (enclosed holes in Dive / north poses, seam flag on Glide south) were not investigated further.
