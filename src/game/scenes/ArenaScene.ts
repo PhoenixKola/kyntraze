@@ -94,21 +94,22 @@ export class ArenaScene extends Phaser.Scene {
     const s = this.simulation.state;
     this.cameras.main.setZoom(fitZoom(this.scale.width, this.scale.height) * this.entityRenderer.cameraZoom());
     { const P = s.party; if (P) this.coopCamera(s); else { this.setSplit(false); followPlayer(this.cameras.main, s.player.x, s.player.y); } }
-    this.entityRenderer.sync(s, this.lastInput, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.reduced);
+    const twoFighters = !!s.party || !!(s as unknown as { partner?: unknown }).partner;
+    { const all = s.abilityEvents; if (twoFighters) s.abilityEvents = all.filter(e => (e.slot ?? 0) === 0); try { this.entityRenderer.sync(s, this.lastInput, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.reduced); } finally { s.abilityEvents = all; } }   // each fighter's renderer only sees the effects that fighter produced
     this.hitstopLeft = Math.max(this.hitstopLeft, this.entityRenderer.takeHitstop());
     for (const ev of s.b22.ev) { if (ev.id <= this.revealCur) continue; this.revealCur = ev.id; const a = REVEAL_ACCENT[ev.kind]; if (a && !this.reduced) { if (a.shake > 0) this.cameras.main.shake(a.shakeMs, a.shake); if (a.flash) this.cameras.main.flash(a.flash.ms, ...a.flash.rgb, true); } }
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
     const hp = this.entityRenderer.debugPose(), k0 = formKey(s.hero, s.player.form) ?? (s.hero === 'kai' && s.hx.kk?.surge ? 'surge' : null);
     this.presentation.update(s, hp.x, hp.y, hp.visualForm !== 'base', this.reduced, k0 ? RING_TINT[k0] : null);
     if (s.party) {
-      this.partnerRenderer ??= new EntityRenderer(this, true, s.hero !== 'kai' && s.party.slots[1].bag.hero === 'kai');
-      const d = s.party.slots[1].down, in1 = s.party.slots[1].input, pr = this.partnerRenderer;
-      inSlot(s, 1, () => { pr.sync(s, in1, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.reduced); const q = pr.debugPose(), k = formKey(s.hero, s.player.form); this.presentation.partner(q.x, q.y, k ? RING_TINT[k] : 0xbff4ff, true, d.downed); });
+      this.partnerRenderer ??= new EntityRenderer(this, true, s.party.slots[1].bag.hero === 'kai');
+      const d = s.party.slots[1].down, in1 = s.party.slots[1].input, pr = this.partnerRenderer, all = s.abilityEvents;
+      inSlot(s, 1, () => { s.abilityEvents = all.filter(e => e.slot === 1); try { pr.sync(s, in1, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.reduced); const q = pr.debugPose(), k = formKey(s.hero, s.player.form); this.presentation.partner(q.x, q.y, k ? RING_TINT[k] : 0xbff4ff, true, d.downed); } finally { s.abilityEvents = all; } });
     } else {
       const np = (s as unknown as { partner?: { hero: HeroId; down: { downed: boolean } } }).partner;
       if (np && this.simulation instanceof RemoteSimulation) {   // online: the other player is drawn by the same hero pipeline, from a read-only view of their server state
         if (this.partnerHero !== np.hero) { this.partnerRenderer?.destroy(); this.partnerRenderer = null; this.partnerHero = np.hero; }
-        this.partnerRenderer ??= new EntityRenderer(this, true, s.hero !== 'kai' && np.hero === 'kai'); this.pview ??= blankPartnerView(s.seed, s.arenaId);
+        this.partnerRenderer ??= new EntityRenderer(this, true, np.hero === 'kai'); this.pview ??= blankPartnerView(s.seed, s.arenaId);
         const dt = (simDelta === 0 && s.phase === 'running' ? 0 : delta) / 1000, pv = partnerView(s, this.pview, np, dt), pr = this.partnerRenderer, sp = pv.view.player.speed || 1;
         pr.sync(pv.view, { x: pv.moveX * (pv.moveX || pv.moveY ? 1 : 0), y: pv.moveY, dash: false, q: false, f: false, beam: false, sphere: false }, dt * 1000, this.reduced); void sp;
         const q = pr.debugPose(), k = formKey(pv.view.hero, pv.view.player.form); this.presentation.partner(q.x, q.y, k ? RING_TINT[k] : 0xbff4ff, true, np.down.downed);

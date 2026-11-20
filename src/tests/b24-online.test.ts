@@ -31,3 +31,13 @@ describe('online hotfix', () => {
     expect(main.hero).toBe('kai'); expect(main.player.x).not.toBe(500);
   });
 });
+
+describe('effect ownership', () => {
+  it('snapshot events carry slots relative to the receiver and the partner view only sees its own', () => {
+    const main = blankClientState(1, 'gloam'), view = blankPartnerView(1, 'gloam');
+    main.abilityEvents = [{ id: 1, kind: 'beam_fire', x: 0, y: 0, slot: 0 }, { id: 2, kind: 'comet_fire', x: 0, y: 0, slot: 1 }];
+    const np = { player: { ...main.player }, hero: 'kai', hx: { ...main.hx }, cast: null, sphere: null, mods: { ...main.mods }, aim: { ...main.aim }, heroFormUnlocked: false, b22: {} };
+    partnerView(main, view, np, 0.016);
+    expect(view.abilityEvents.map(e => e.id)).toEqual([2]);
+  });
+});

@@ -19,7 +19,7 @@ export function toSnapshot(s: GameState, tick: number, slot: number): Snap {
     tick, time: r1(s.time), phase: s.phase, arena: s.arenaId, kills: s.kills, plan: { id: s.plan.id, mode: s.plan.mode, name: s.plan.name }, announce: s.announce,
     me, partner: { ...other, down: P.slots[1 - slot].down }, enemies: s.enemies.filter(e => e.hp > 0 && (isBoss(e.kind) || near(e.x, e.y))).map(e => ({ id: e.id, kind: e.kind, x: r1(e.x), y: r1(e.y), hp: Math.round(e.hp), maxHp: Math.round(e.maxHp), radius: e.radius, mode: e.mode, modeT: r1(e.modeT), attackCd: 0, aimX: r1(e.aimX), aimY: r1(e.aimY), stagger: r1(e.stagger), speed: 0, damage: 0, touchCooldown: 0, spawnedAt: 0, ai: e.ai, ex: e.ex, part: e.part, stepId: e.stepId, blockT: e.blockT })),
     shots: s.enemyShots.filter(h => near(h.x, h.y)).map(h => ({ ...h, x: r1(h.x), y: r1(h.y) })), hazards: s.hazards.filter(h => near(h.x, h.y) || h.r > 300), pickups: s.pickups.filter(p => near(p.x, p.y)).slice(0, 120), impacts: s.impacts.slice(-30),
-    abil: s.abilityEvents.slice(-24), enemyEv: s.enemyEvents.slice(-40), b22: { ev: s.b22.ev.slice(-20), fx: s.b22.fx, endless: s.b22.endless }, offers: s.phase === 'upgrade' && P.chooser === slot ? s.upgradeOffers : [], stacks: me.player ? inSlot(s, slot, () => s.upgradeStacks) : {}, chooser: P.chooser,
+    abil: s.abilityEvents.slice(-24).map(e => (e.slot === undefined ? e : { ...e, slot: e.slot === slot ? 0 : 1 })), enemyEv: s.enemyEvents.slice(-40), b22: { ev: s.b22.ev.slice(-20), fx: s.b22.fx, endless: s.b22.endless }, offers: s.phase === 'upgrade' && P.chooser === slot ? s.upgradeOffers : [], stacks: me.player ? inSlot(s, slot, () => s.upgradeStacks) : {}, chooser: P.chooser,
     party: { resonance: Math.round(P.shared.resonance), resonanceT: r1(P.shared.resonanceT), pair: P.shared.pair, pairCd: r1(P.shared.pairCd) },
   };
 }
@@ -37,7 +37,7 @@ const SHARED_KEYS = ['time', 'phase', 'kills', 'enemies', 'enemyShots', 'hazards
 export function partnerView(main: GameState, view: GameState, partner: unknown, dt: number): { view: GameState; moveX: number; moveY: number } {
   const np = partner as ReturnType<typeof fighter>, v = view as unknown as Record<string, unknown>, m = main as unknown as Record<string, unknown>;
   for (const k of SHARED_KEYS) v[k] = m[k];
-  v.cinema = null;
+  v.cinema = null; v.abilityEvents = main.abilityEvents.filter(e => e.slot === 1);   // relative slots: 0 = the local fighter, 1 = this partner
   const ox = view.player.x, oy = view.player.y, fresh = view.player.hp === 100 && ox === 0 && oy === 0 || !Number.isFinite(ox);
   applyFighter(view, np);
   const tx = np.player.x, ty = np.player.y, far = Math.hypot(tx - ox, ty - oy) > 260, k = fresh || far ? 1 : 1 - Math.exp(-dt / 0.07);

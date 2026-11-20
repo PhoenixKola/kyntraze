@@ -1,4 +1,5 @@
 import { vexTint } from './vexTint';
+import { KaiPresence } from './kaiPresence';
 import Phaser from 'phaser';
 import { RULES } from '../../core/Rules';
 import { FxPool, vfxKey } from './fxPool';
@@ -60,6 +61,7 @@ export class EntityRenderer {
     this.f3 = scene.registry.get(KAI_F3_REGISTRY_KEY) as KaiManifests | undefined;
     this.hairLayer = new HairLayer(scene); this.outfitLayer = new OutfitLayer(scene, scene.registry.get(HAIR_ANCHORS_KEY) as HairTable | undefined); this.hairTable = scene.registry.get(HAIR_ANCHORS_KEY) as HairTable | undefined;
     this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1, this.f2, this.f3); this.cometFx = new CometFx(scene); this.kitFx = new KaiKitFx(scene, this.f3); this.apexFx = new ApexFx(scene); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = partner ? null : new EnemyRenderer(scene); this.bosses = partner ? null : new BossRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
+    this.presence = new KaiPresence(scene);
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
     // Rim + stroke run per sprite (as in B20). While the two layers are split (moving cast) they are switched off, because each layer's open waist edge would get its own glow; the aura layer below carries the glow of the UNION silhouette instead.
@@ -114,7 +116,7 @@ export class EntityRenderer {
     const target = on ? (surge ? 0.7 : 1) * st.power * calm : 0;
     this.edgePower += (target - this.edgePower) * Math.min(1, run * 9 + (on ? 0 : 1)); this.edgeFlow += ((reduced ? 0.7 : st.flowMul) - this.edgeFlow) * Math.min(1, run * 6);
     this.contourT += run * this.edgeFlow; const split = this.legs.visible;
-    for (const c of this.contour) { c.time = this.contourT; c.power = this.edgePower; if (pal) c.pal = pal; c.jagAdd = reduced ? 0 : st.jagAdd; c.sparkAdd = reduced ? 0 : st.sparkAdd; c.active = on || this.edgePower > 0.02; }
+    for (const c of this.contour) { c.time = this.contourT; c.power = this.edgePower; if (pal) c.pal = pal; const kf = h === 'kai' ? (f === 2 ? [1.6, 1.7] : f === 3 ? [0.4, 0.3] : [1, 1]) : [1, 1]; c.jagAdd = reduced ? 0 : st.jagAdd * kf[0]; c.sparkAdd = reduced ? 0 : st.sparkAdd * kf[1]; c.active = on || this.edgePower > 0.02; }
     for (const c of this.rim) c.outerStrength = on || split ? 0 : 1.6;   // the thin pale readability rim is for untransformed runners only
   }
   private edgePower = 0; private edgeFlow = 1;
@@ -228,8 +230,11 @@ export class EntityRenderer {
       moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, speed: Math.hypot(p.vx, p.vy), dashing: p.dashRemaining > 0, hand: this.hand, events: this.pose.events });
     this.cometFx.update({ dt, state, hero: this.hero, x: this.hero.x, y: this.hero.y, facing: this.pose.facing, reduced: reducedEffects, crowded: state.enemies.length > 45, f2: this.animator.visualForm === 'f2' && !dead2 && p.form !== 3 && state.cinema?.to !== 3,
       moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, speed: p.speed * (p.form ? 1.16 : 1), dashing: p.dashRemaining > 0, hand: this.hand, events: this.pose.events });
+    this.presence.update({ dt, form: p.form as 0 | 1 | 2 | 3, on: state.hero === 'kai' && p.form > 0 && !dead2 && !state.cinema && this.hero.visible, hero: this.hero, srcKey: this.hairLayer.srcKey || this.hero.texture.key, srcFrame: this.hairLayer.srcKey ? this.hairLayer.srcFrame : this.pose.frame, scale: this.baseScale, dashing: p.dashRemaining > 0, casting: !!state.cast, reduced: reducedEffects, crowded: state.enemies.length > 45, hand: this.hand, running: state.phase === 'running' });
+    for (const ev of state.abilityEvents) if (ev.id > this.presenceEv) { this.presenceEv = ev.id; if (p.form > 0 && /^(beam_fire|comet_fire|rift_fire|dragon_launch|sphere_burst|form3_dash|flare_pillar|crucible_final|meteor_beat)$/.test(ev.kind)) this.presence.burst(this.hero.x, this.hero.y - 2, p.form, /^(beam_fire|comet_fire|rift_fire)$/.test(ev.kind) ? 1.1 : 0.8); }
     this.syncWorld(state, deltaMs, reducedEffects);
   }
+  private readonly presence: KaiPresence; private presenceEv = 0;
   /** B19: Ren / Sora. The character sprite is drawn from the hero sheets when they exist (HeroAnimator over the same sheet contract as Kai); a flat dev body stands in only while a hero has no sheets. The effects layer is always the sim projection in heroFxView. */
   private syncHero(state: GameState, input: InputState, deltaMs: number, reduced: boolean) {
     const p = state.player, dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0, hero = state.hero as HeroArt;
@@ -313,5 +318,5 @@ export class EntityRenderer {
     for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies!.stats(), boss: this.bosses!.stats() }; }
-  destroy() { this.outfitLayer.destroy(); this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
+  destroy() { this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
 }
