@@ -73,6 +73,32 @@ export function renCombatSfx(kind: string, n = 0): string | null {
     default: return null;
   }
 }
+/** B27 Sora, Azure Sovereign cues (original, runtime-synthesised): glassy bell blades, a crystalline prison chime and shatter, bright spear strikes, a falling-in singularity and a held two-hand charge with tier ticks. Not listened to yet. */
+Object.assign(SFX, {
+  sr_auto_a: { f0: 1500, f1: 900, dur: 0.12, noise: 0.08, decay: 18, wave: 'bell', gain: 0.4, fm: 2.2 }, sr_auto_b: { f0: 1700, f1: 1000, dur: 0.12, noise: 0.08, decay: 18, wave: 'bell', gain: 0.4, fm: 2.2 }, sr_auto_c: { f0: 1300, f1: 800, dur: 0.18, noise: 0.1, decay: 13, wave: 'bell', gain: 0.5, fm: 2.4 }, sr_auto_d: { f0: 1900, f1: 700, dur: 0.26, noise: 0.14, decay: 10, wave: 'bell', gain: 0.58, fm: 2.6 },
+  sr_q_cast: { f0: 600, f1: 1500, dur: 0.4, noise: 0.05, decay: 5, wave: 'bell', gain: 0.5, fm: 1.8 }, sr_q_tick: { f0: 1100, f1: 800, dur: 0.1, noise: 0.05, decay: 20, wave: 'bell', gain: 0.25, fm: 2 }, sr_q_shatter: { f0: 2200, f1: 500, dur: 0.5, noise: 0.5, decay: 7, wave: 'bell', gain: 0.8, fm: 3.1 },
+  sr_e_start: { f0: 400, f1: 1300, dur: 0.3, noise: 0.1, decay: 7, wave: 'saw', gain: 0.35 }, sr_e_land: { f0: 220, f1: 60, dur: 0.24, noise: 0.5, decay: 12, wave: 'sine', gain: 0.65 }, sr_e_end: { f0: 900, f1: 500, dur: 0.2, noise: 0.05, decay: 12, wave: 'bell', gain: 0.3, fm: 1.6 },
+  sr_r_cast: { f0: 90, f1: 40, dur: 1.1, noise: 0.35, decay: 2.4, wave: 'sine', gain: 0.6 }, sr_r_burst: { f0: 700, f1: 90, dur: 0.7, noise: 0.5, decay: 5, wave: 'bell', gain: 0.95, fm: 2.8 },
+  sr_v_charge: { f0: 180, f1: 760, dur: 0.7, noise: 0.15, decay: 2.6, wave: 'sine', gain: 0.45, fm: 1.4 }, sr_v_tier: { f0: 800, f1: 1600, dur: 0.16, noise: 0, decay: 12, wave: 'bell', gain: 0.4, fm: 2 }, sr_v_release: { f0: 500, f1: 1800, dur: 0.3, noise: 0.2, decay: 7, wave: 'saw', gain: 0.6 },
+  sr_v_hit: { f0: 600, f1: 70, dur: 0.6, noise: 0.45, decay: 5, wave: 'bell', gain: 1.0, fm: 3 }, sr_v_pulse: { f0: 380, f1: 90, dur: 0.4, noise: 0.35, decay: 7, wave: 'bell', gain: 0.7, fm: 2.4 }, sr_v_pulse3: { f0: 300, f1: 60, dur: 0.7, noise: 0.4, decay: 4, wave: 'bell', gain: 0.9, fm: 2.8 },
+  sr_v_block: { f0: 300, f1: 180, dur: 0.14, noise: 0.45, decay: 16, wave: 'square', gain: 0.45 }, sr_v_fizzle: { f0: 900, f1: 300, dur: 0.22, noise: 0.35, decay: 11, wave: 'bell', gain: 0.35, fm: 1.8 },
+  sr_od_start: { f0: 400, f1: 1500, dur: 1.2, noise: 0.35, decay: 1.8, wave: 'bell', gain: 0.9, fm: 2.2 }, sr_od_end: { f0: 1200, f1: 300, dur: 0.6, noise: 0.2, decay: 4, wave: 'bell', gain: 0.45, fm: 1.8 },
+  sr_fly_start: { f0: 500, f1: 1400, dur: 0.35, noise: 0.35, decay: 7, wave: 'saw', gain: 0.4 }, sr_fly_slam: { f0: 700, f1: 160, dur: 0.4, noise: 0.45, decay: 8, wave: 'bell', gain: 0.7, fm: 2.4 }, sr_fly_soft: { f0: 900, f1: 500, dur: 0.14, noise: 0.25, decay: 14, wave: 'bell', gain: 0.25, fm: 1.6 },
+} satisfies Record<string, Recipe>);
+/** Sora event -> recipe. \n carries the beat / tier flags (see SoraCombat.ts); one cue per beat, cast or landing, never per target. */
+export function soraCombatSfx(kind: string, n = 0): string | null {
+  switch (kind) {
+    case 'sora_auto': return ['sr_auto_a', 'sr_auto_b', 'sr_auto_c', 'sr_auto_d'][n & 3];
+    case 'sora_q_cast': return 'sr_q_cast'; case 'sora_q_tick': return 'sr_q_tick'; case 'sora_q_shatter': return 'sr_q_shatter';
+    case 'sora_e_start': return 'sr_e_start'; case 'sora_e_land': return 'sr_e_land'; case 'sora_e_end': return 'sr_e_end';
+    case 'sora_r_cast': return 'sr_r_cast'; case 'sora_r_burst': return 'sr_r_burst';
+    case 'sora_v_charge': return 'sr_v_charge'; case 'sora_v_tier': return 'sr_v_tier'; case 'sora_v_release': return 'sr_v_release'; case 'sora_v_hit': return 'sr_v_hit';
+    case 'sora_v_pulse': return ((n >> 5) & 3) >= 3 && (n & 31) === 0 ? 'sr_v_pulse3' : 'sr_v_pulse'; case 'sora_v_block': return 'sr_v_block'; case 'sora_v_fizzle': return 'sr_v_fizzle';
+    case 'sora_od_start': return 'sr_od_start'; case 'sora_od_end': return 'sr_od_end';
+    case 'sora_fly_start': return 'sr_fly_start'; case 'sora_fly_land': return (n & 1) ? 'sr_fly_slam' : 'sr_fly_soft';
+    default: return null;
+  }
+}
 /** Which sim event plays which recipe (event kind -> recipe name). */
 export const EVENT_SFX: Record<string, string> = { parry_perfect: 'parry_perfect', parry_guard: 'parry_guard', parry_start: 'parry_start', reversal_blink: 'reversal_blink', reversal_riposte: 'reversal_riposte', seal_mark: 'seal_mark', seal_detonate: 'seal_detonate', ult_start: 'ult_start', ult_release: 'ult_release', branch_fx: 'branch_fx', legend_fx: 'legend_fx', surge_start: 'kk_surge', scatter_fire: 'kk_scatter', scatter_blast: 'kk_blast', meteor_beat: 'kk_meteor', flare_start: 'kk_flare_wind', flare_pillar: 'kk_pillar', crucible_cast: 'kk_gather', crucible_pulse: 'kk_pulse', crucible_final: 'kk_final', clone_spawn: 'kk_clone', clone_end: 'kk_clone_end', rift_hop: 'kk_hop' };
 export const B22_EVENT_SFX: Record<string, string> = { relic_gain: 'relic_gain', legend_gain: 'legend_gain', prism: 'prism', sigil_strike: 'sigil_strike', dawn_ring: 'dawn_ring', hourglass: 'hourglass', rift: 'rift', bearing: 'bearing', echo_warn: 'echo_warn', mark: 'mark', ult_cannon: 'ult_cannon', ult_judge: 'ult_judge', parry: 'parry_perfect', ult_collapse: 'ult_release', ult_beam: 'ult_cannon', collapse_blast: 'seal_detonate', crucible_burst: 'seal_detonate', collision: 'seal_detonate', seal_blast: 'seal_detonate' };

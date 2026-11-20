@@ -48,6 +48,15 @@ export const REN_FORM_NOTE: Partial<Record<BranchId, string>> = {
   red_comet_rain: 'Ascendant: only the converging final fist of Catastrophe seeds up to 4 smaller follow-up impacts; main damage lower.',
   crimson_crater: 'Ascendant: the final fist leaves a 3.5 s fissure ring; longer cooldown.',
 };
+/** B27: what each Sora branch does in Azure Sovereign (base behaviour unchanged). celestial_collapse keeps its branch ID and name; it is shown as a Compression Focus modifier of the transformed ability. */
+export const SORA_FORM_NOTE: Partial<Record<BranchId, string>> = {
+  needle_spiral: 'Sovereign: Azure Prison shatters into up to 6 seeking shards that pick valid targets; the prison itself hits softer.',
+  stormline_array: 'Sovereign: the shatter sends 6 straight shard lanes that pierce up to 3 enemies; no homing.',
+  piercing_meridian: "Sovereign: Heaven's Spear falls in one straight, longer lane of narrower spears; width tradeoff kept.",
+  celestial_prism: 'Sovereign: the first spear to hit arcs to up to 3 nearby foes at half damage; the central hit stays lower.',
+  starfield_array: 'Sovereign: Celestial Collapse leaves short-lived control nodes around its burst; longer cooldown.',
+  celestial_collapse: 'Sovereign (Compression Focus): a tighter singularity: the burst is 22% smaller and concentrates its power, which offsets the damage cost of this branch. Base Zero Horizon keeps its own version.',
+};
 export const BRANCH_BY_ID = Object.fromEntries(BRANCHES.map(b => [b.id, b])) as Record<BranchId, BranchDef>;
 export const isBranchId = (v: unknown): v is BranchId => typeof v === 'string' && v in BRANCH_BY_ID;
 export const slotKey = (hero: HeroId, slot: Slot) => `${hero}.${slot}` as const;

@@ -55,7 +55,7 @@ export function shieldFaces(state: GameState, e: Enemy, arcDeg: number): boolean
 export const xpTimeScale = (t: number) => 1 + t / 400;
 export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts?: HitOpts): boolean {
   if (enemy.hp <= 0) return false;
-  if ((state.hero === 'kai' || state.hero === 'ren') && state.player.odT > 0) damage *= OD.dmgMul;   // Primal Overdrive (Ren's Crimson Nine-Tailed Fox shares the reference +25%)
+  if ((state.hero === 'kai' || state.hero === 'ren' || state.hero === 'sora') && state.player.odT > 0) damage *= OD.dmgMul;   // Primal Overdrive (Ren's Crimson Nine-Tailed Fox shares the reference +25%)
   if (enemy.ai?.invuln) return false;
   let dmg = Math.max(0, damage), blocked = false;
   const boss = isBoss(enemy.kind);

@@ -64,7 +64,7 @@ export function zoneFx(s: GameState, z: Omit<Zone, 'id' | 't' | 'next'>) { if (s
 export function slotOfAct(s: GameState): Slot | null {
   const c = s.cast, h = s.hx.act;
   if (c) return c.kind === 'signature' ? null : c.kind === 'beam' || c.kind === 'dragon' || c.kind === 'rift' || c.kind === 'flare' ? 'e' : c.kind === 'scatter' || c.kind === 'meteor' ? 'q' : 'r';
-  if (h) { switch (h.act) { case 'crimson_break': case 'infernal_cyclone': case 'azure_volley': case 'parry_halo': return 'q'; case 'meteor_rush': case 'scarlet_rampage': case 'celestial_lance': case 'rift_reversal': return 'e'; case 'bloodstar': case 'crimson_catastrophe': case 'zero_horizon': case 'oathbreaker_seal': return 'r'; default: return null; } }
+  if (h) { switch (h.act) { case 'crimson_break': case 'infernal_cyclone': case 'azure_volley': case 'azure_prison': case 'parry_halo': return 'q'; case 'meteor_rush': case 'scarlet_rampage': case 'celestial_lance': case 'heavens_spear': case 'rift_reversal': return 'e'; case 'bloodstar': case 'crimson_catastrophe': case 'zero_horizon': case 'azure_collapse': case 'oathbreaker_seal': return 'r'; default: return null; } }
   return null;
 }
 
@@ -124,7 +124,7 @@ export function onCast(s: GameState, slot: Slot) {
   }
   // ---- Sora
   if (s.hero === 'sora') {
-    if (slot === 'q' && has(s, 'needle_spiral')) for (let i = 0; i < 6; i++) { const a = ang + (i - 2.5) * 0.35; s.hx.bolts.push({ id: s.nextId++, x: p.x, y: p.y - 10, vx: Math.cos(a) * 520, vy: Math.sin(a) * 520, ttl: 1.3, damage: q(s) * 0.18, radius: 7, kind: 'volley', pierce: 0, hits: [], homing: 0.1, form: p.form }); }
+    if (slot === 'q' && !p.form && has(s, 'needle_spiral')) for (let i = 0; i < 6; i++) { const a = ang + (i - 2.5) * 0.35; s.hx.bolts.push({ id: s.nextId++, x: p.x, y: p.y - 10, vx: Math.cos(a) * 520, vy: Math.sin(a) * 520, ttl: 1.3, damage: q(s) * 0.18, radius: 7, kind: 'volley', pierce: 0, hits: [], homing: 0.1, form: p.form }); }
   }
   // ---- relic: Echo Lens + Skyforge Feather ride on every cast
   relicOnCast(s, slot, ang);
@@ -206,6 +206,24 @@ export function onAbilityEvent(s: GameState, kind: string, x: number, y: number,
     }
     case 'lance_pulse': { maxN(b, 'lance.pierce', n ?? 0); break; }
     case 'lance_end': { if (legend(s, 'prismatic_meridian')) { const ids = b.castHits.slice(0, 5); for (let i = 0; i + 1 < ids.length && i < 4; i++) { const a = s.enemies.find(e => e.id === ids[i]), c2 = s.enemies.find(e => e.id === ids[i + 1]); if (a && c2 && alive(a) && alive(c2) && (a.x - c2.x) ** 2 + (a.y - c2.y) ** 2 < 300 ** 2) { hit(s, c2, SORA.e.damage[1] * 0.35, false); b22Emit(b, 'arc', a.x, a.y, { x2: c2.x, y2: c2.y }); } } } break; }
+    case 'sora_q_shatter': {   // B27: Needle Spiral seeks, Stormline Array runs straight (B22Tick makes new volley bolts pierce 3 and drops their homing)
+      if (has(s, 'needle_spiral') || has(s, 'stormline_array')) {
+        const seek = has(s, 'needle_spiral'), tg = s.enemies.filter(alive).sort((a, c2) => (a.x - x) ** 2 + (a.y - y) ** 2 - ((c2.x - x) ** 2 + (c2.y - y) ** 2) || a.id - c2.id).slice(0, 6);
+        for (let i = 0; i < 6; i++) { const t = seek ? tg[i] : undefined, a = t ? Math.atan2(t.y - y, t.x - x) : (i * Math.PI) / 3 + 0.3; if (s.hx.bolts.length >= 90) break; s.hx.bolts.push({ id: s.nextId++, x, y, vx: Math.cos(a) * 520, vy: Math.sin(a) * 520, ttl: 1.1, damage: q(s) * 0.3, radius: 7, kind: 'volley', pierce: 0, hits: [], homing: seek ? 0.1 : 0, form: p.form }); }
+      }
+      break;
+    }
+    case 'sora_e_end': {
+      maxN(b, 'lance.pierce', (n ?? 0) >> 8 & 63);
+      if (legend(s, 'prismatic_meridian')) { const ids = b.castHits.slice(0, 5); for (let i = 0; i + 1 < ids.length && i < 4; i++) { const a = s.enemies.find(e => e.id === ids[i]), c2 = s.enemies.find(e => e.id === ids[i + 1]); if (a && c2 && alive(a) && alive(c2) && (a.x - c2.x) ** 2 + (a.y - c2.y) ** 2 < 300 ** 2) { hit(s, c2, q(s) * 0.35 * s.mods.beamDamage, false); b22Emit(b, 'arc', a.x, a.y, { x2: c2.x, y2: c2.y }); } } }
+      break;
+    }
+    case 'sora_r_burst': {
+      maxN(b, 'lance.pierce', (n ?? 0) >> 8 & 63);
+      if (has(s, 'starfield_array') && !legend(s, 'zero_convergence') && !((n ?? 0) & 2)) for (let i = 0; i < 3 && s.b22.zones.filter(z => z.src === 'starfield_array').length < 5; i++) { const a = i * 2.09 + 0.5; zoneFx(s, { kind: 'circle', x: x + Math.cos(a) * 110, y: y + Math.sin(a) * 110, x2: x, y2: y, r: 80, dur: 3, tick: 0.5, dmg: q(s) * 0.2, push: 0, src: 'starfield_array' }); }
+      break;
+    }
+    case 'sora_v_hit': if (((n ?? 0) & 15) === 3) bump(b, 'lance.t3.form'); break;
     case 'horizon_converge': {
       if (has(s, 'celestial_collapse') || legend(s, 'zero_convergence')) { const o = s.hx.orbs; if (o.length) { const { cx, cy } = densestOrbTarget(s); schedule(s, { at: s.time + 0.5, kind: 'nova', x: cx, y: cy, r: (legend(s, 'zero_convergence') ? 125 : 150) * s.mods.sphereRadius, dmg: q(s) * (legend(s, 'zero_convergence') ? 2.8 : 2.2), push: 120, stagger: 0.6, cap: 16, src: legend(s, 'zero_convergence') ? 'zero_convergence' : 'celestial_collapse', tag: 'collapse_blast' }); } }
       break;

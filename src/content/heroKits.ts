@@ -2,7 +2,7 @@
 import type { HeroId } from './heroes';
 import type { UpgradeCategory, UpgradeId } from './upgrades';
 
-export type HeroAct = 'crimson_break' | 'meteor_rush' | 'bloodstar' | 'azure_volley' | 'celestial_lance' | 'zero_horizon' | 'parry_halo' | 'rift_reversal' | 'oathbreaker_seal' | 'infernal_cyclone' | 'scarlet_rampage' | 'crimson_catastrophe' | 'nova_fist' | 'ultimate';
+export type HeroAct = 'crimson_break' | 'meteor_rush' | 'bloodstar' | 'azure_volley' | 'celestial_lance' | 'zero_horizon' | 'parry_halo' | 'rift_reversal' | 'oathbreaker_seal' | 'infernal_cyclone' | 'scarlet_rampage' | 'crimson_catastrophe' | 'nova_fist' | 'azure_prison' | 'heavens_spear' | 'azure_collapse' | 'astral_devastation' | 'ultimate';
 
 /** Both new heroes have exactly one transformation (form id 1). The unlock is the same milestone for each, earned by playing that hero. */
 export const ASCEND = {
@@ -54,7 +54,7 @@ export const HERO_KIT: Record<'ren' | 'sora' | 'vex', HeroKitInfo> = {
   sora: {
     act: { q: SORA.q.name, e: SORA.e.name, r: SORA.r.name }, auto: SORA.auto.name, form: 'Azure Sovereign', formShort: 'SOVEREIGN',
     quote: 'Distance is a kind of grace.', roleLine: 'Ranged controller · spacing and precision',
-    blurbs: { auto: 'Fast homing blue needles fire at the nearest enemies from a safe distance.', q: 'A quick fan of blue energy bolts for lane control. Works while moving.', e: 'Hold E to gather a piercing beam, release to fire. Longer charge means wider, longer and harder.', r: 'Summon orbiting spheres, then send them to converge on enemies and detonate together.', form: 'Full Drive and F: electric blue hair, a blue-white aura, finer Volley, a brighter Lance and a wider Horizon.' },
+    blurbs: { auto: 'Fast homing blue needles fire at the nearest enemies from a safe distance.', q: 'A quick fan of blue energy bolts for lane control. Works while moving.', e: 'Hold E to gather a piercing beam, release to fire. Longer charge means wider, longer and harder.', r: 'Summon orbiting spheres, then send them to converge on enemies and detonate together.', form: 'Full Drive and F: electric blue hair and an Astral Phoenix aura. Astral Blades, Azure Prison, Heaven’s Spear, Celestial Collapse, hold V for Astral Devastation, G for the phoenix Overdrive, hold dash to fly.' },
     catNames: { core: 'CORE', beam: 'LANCE', sphere: 'HORIZON', survival: 'SURVIVAL', mobility: 'MOBILITY', pickup: 'SALVAGE', drive: 'SOVEREIGN' },
   },
   vex: {

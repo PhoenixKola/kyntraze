@@ -12,6 +12,7 @@ import { freeAim } from './ApexSystem';
 import { handOffset, strikeHand } from './Strike';
 import { surgeAutoMul } from './KaiKit';
 import { novaCharge, renCombatInput, renOdGain } from './RenCombat';
+import { astralCharge, soraCombatInput, soraOdGain } from './SoraCombat';
 
 const alive = (e: Enemy) => e.hp > 0;
 function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number, tx?: number, ty?: number) {
@@ -47,7 +48,7 @@ export function kaiAuto(s: GameState, dt: number) {
 /* ------------------------------------------------------------------ signature technique */
 const tierOf = (charge: number) => SIG.stages.reduce((t, v, i) => (charge >= v ? i + 1 : t), 0);
 export const sigReady = (s: GameState) => { const p = s.player; return p.form >= 1 && p.sigCd <= 0; };
-export function sigCharge(s: GameState): { charge: number; tier: number } | null { if (s.hero === 'ren') return novaCharge(s); const c = s.cast; return c && c.kind === 'signature' && !c.released ? { charge: c.t, tier: tierOf(c.t) } : null; }
+export function sigCharge(s: GameState): { charge: number; tier: number } | null { if (s.hero === 'ren') return novaCharge(s); if (s.hero === 'sora') return astralCharge(s); const c = s.cast; return c && c.kind === 'signature' && !c.released ? { charge: c.t, tier: tierOf(c.t) } : null; }
 function aimDir(s: GameState) { const fa = freeAim(s); return fa ? { x: fa.x, y: fa.y } : normalize(s.player.aimX, s.player.aimY); }
 
 export function startSignature(s: GameState): boolean {
@@ -154,7 +155,7 @@ export function startOverdrive(s: GameState): boolean {
   p.odMeter = 0; p.odT = OD.duration; emit(s, 'od_start', p.x, p.y, p.form); return true;
 }
 /** Per-hit meter gain, called from damageEnemy for a transformed Kai that is not already in Overdrive. */
-export function odGain(s: GameState, kill = false) { const p = s.player; if (s.hero === 'ren') { renOdGain(s, kill); return; } if (s.hero === 'kai' && p.form >= 1 && p.odT <= 0) p.odMeter = Math.min(100, p.odMeter + (kill ? OD.perKill : OD.perHit)); }
+export function odGain(s: GameState, kill = false) { const p = s.player; if (s.hero === 'ren') { renOdGain(s, kill); return; } if (s.hero === 'sora') { soraOdGain(s, kill); return; } if (s.hero === 'kai' && p.form >= 1 && p.odT <= 0) p.odMeter = Math.min(100, p.odMeter + (kill ? OD.perKill : OD.perHit)); }
 
 /* ------------------------------------------------------------------ per-tick + input */
 export function updateKaiCombat(s: GameState, dt: number) {
@@ -203,6 +204,7 @@ export function formShiftInput(s: GameState, input: InputState, fDown: boolean, 
 }
 /** Called once per tick per fighter with their raw input and the previous tick's held state; returns the new held flags. */
 export function kaiCombatInput(s: GameState, input: InputState, prev: { sig: boolean; od: boolean }): { sig: boolean; od: boolean } {
+  if (s.hero === 'sora') return soraCombatInput(s, input, prev);   // B27: Sora's V / G / flight live in SoraCombat
   if (s.hero === 'ren') return renCombatInput(s, input, prev);   // B26: Ren's V / G / flight live in RenCombat
   const sigDown = !!(input.sig || input.sigHeld), odDown = !!input.od;
   s.sigHeld = !!input.sigHeld; s.flyHeld = !!input.flyHeld;

@@ -2,6 +2,7 @@
 import type { GameState } from '../sim/GameState';
 import { BEAM, SPHERE } from '../content/abilities';
 import { REN_E, REN_FORM_INFO, REN_Q, REN_R } from '../content/renCombat';
+import { SORA_E, SORA_FORM_INFO, SORA_Q, SORA_R } from '../content/soraCombat';
 import { HERO_KIT, REN, SORA, VEX } from '../content/heroKits';
 import { ULTIMATES } from '../b22/mastery';
 import { CHAIN, CRUCIBLE, ECHO, METEOR, RISE, SCATTER, STRIKES, SURGE } from '../content/kaiKit';
@@ -36,6 +37,11 @@ export function abilityTips(s: GameState): Record<TipSlot, AbilityTip> {
     et = { name: REN.e.name, key: 'E', pad: 'RB', blurb: hk!.blurbs.e, stats: [['Damage / strike', n(REN.e.damage * m.beamDamage)], ['Strikes', n((f ? REN.e.formHops : REN.e.hops) + m.beamLinger)], ['Cooldown', cd(REN.e.cooldown * m.beamCd)]] };
     rt = { name: REN.r.name, key: 'R', pad: 'LB', blurb: hk!.blurbs.r + ult, stats: [['Damage', n(REN.r.damage * m.sphereDamage * (f ? REN.r.formDamage : 1))], ['Radius', `${n(REN.r.radius * m.sphereRadius)} px`], ['Cooldown', cd(REN.r.cooldown * m.sphereCd)]] };
     }
+  } else if (s.hero === 'sora' && f >= 1) {   // B27: Azure Sovereign's own Q / E / R, numbers from the same content table the sim reads
+    const rs = p.qRadius / SORA.base.qRadius;
+    qt = { name: SORA_Q.name, key: 'Q', pad: 'X', blurb: SORA_FORM_INFO.q.text, stats: [['Shatter', n(q * m.formPower * SORA_Q.shatterMul)], ['Prison radius', `${n(SORA_Q.radius * rs)} px`], ['Cooldown', cd(SORA_Q.cooldown)]] };
+    et = { name: SORA_E.name, key: 'E', pad: 'RB', blurb: SORA_FORM_INFO.e.text, stats: [['Damage / spear', n(q * m.formPower * m.beamDamage * SORA_E.mul)], ['Spears', n(Math.min(SORA_E.spearsMax, SORA_E.spears + Math.max(0, Math.round(m.beamLinger))))], ['Impact radius', `${n(SORA_E.radius * m.beamWidth)} px`], ['Cooldown', cd(SORA_E.cooldown * m.beamCd)]] };
+    rt = { name: SORA_R.name, key: 'R', pad: 'LB', blurb: SORA_FORM_INFO.r.text + ult, stats: [['Burst', n(q * m.formPower * m.sphereDamage * SORA_R.burstMul)], ['Burst radius', `${n(SORA_R.burstR * m.sphereRadius)} px`], ['Cooldown', cd(SORA_R.cooldown * m.sphereCd)]] };
   } else if (s.hero === 'sora') {
     qt = { name: SORA.q.name, key: 'Q', pad: 'X', blurb: hk!.blurbs.q, stats: [['Damage / bolt', n(q * SORA.q.boltMul, 1)], ['Bolts', n(f ? SORA.q.formBolts : SORA.q.bolts)], ['Cooldown', cd(SORA.q.cooldown)]] };
     et = { name: SORA.e.name, key: 'E (hold)', pad: 'RB (hold)', blurb: hk!.blurbs.e, stats: [['Damage', `${n(SORA.e.damage[0] * m.beamDamage)} / ${n(SORA.e.damage[1] * m.beamDamage)} / ${n(SORA.e.damage[2] * m.beamDamage)}`], ['Charge tiers', 'T1 / T2 / T3'], ['Cooldown', cd(SORA.e.cooldown * m.beamCd)]] };

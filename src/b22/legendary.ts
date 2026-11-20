@@ -26,6 +26,11 @@ export const REN_FORM_LEGEND: Partial<Record<LegendaryId, string>> = {
   meteor_crucible: 'Ascendant: the Scarlet Rampage path burns for 2.4 s and the slam ends in a pressure burst.',
   bloodstar_rupture: 'Ascendant: only the final fist of Catastrophe leaves the molten field (4 s).',
 };
+export const SORA_FORM_LEGEND: Partial<Record<LegendaryId, string>> = {
+  blue_needle_storm: 'Sovereign: every fourth Astral Blade that really hits splits into two seeking fragments (1.2 s cooldown).',
+  prismatic_meridian: "Sovereign: Heaven's Spear arcs between up to 5 struck foes (4 arcs).",
+  zero_convergence: 'Sovereign: Celestial Collapse gathers its echo into one stronger precision burst (no echo, no control nodes).',
+};
 export const LEGENDARY_BY_ID = Object.fromEntries(LEGENDARIES.map(l => [l.id, l])) as Record<LegendaryId, LegendaryDef>;
 export const isLegendaryId = (v: unknown): v is LegendaryId => typeof v === 'string' && v in LEGENDARY_BY_ID;
 export const LEGENDARY_CAP = 3;
