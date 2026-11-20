@@ -3,11 +3,11 @@ import Phaser from 'phaser';
 
 const N = 28, TURNS = 1.55;
 const STYLE = {
-  1: { fill: [255, 104, 18], edge: [255, 214, 120], w: 28, alpha: 0.36, bolts: false, whisk: 0 },
-  2: { fill: [232, 180, 0], edge: [255, 242, 160], w: 32, alpha: 0.36, bolts: true, whisk: 2 },
-  3: { fill: [140, 180, 255], edge: [236, 244, 255], w: 21, alpha: 0.3, bolts: false, whisk: 2 },
+  1: { fill: [255, 104, 18], edge: [255, 214, 120], w: 20, alpha: 0.12, bolts: false, whisk: 0 },
+  2: { fill: [232, 180, 0], edge: [255, 242, 160], w: 23, alpha: 0.12, bolts: true, whisk: 2 },
+  3: { fill: [140, 180, 255], edge: [236, 244, 255], w: 15, alpha: 0.1, bolts: false, whisk: 2 },
 } as const;
-const HEAD_W = { 1: 175, 2: 185, 3: 170 } as const;
+const HEAD_W = { 1: 120, 2: 128, 3: 118 } as const;
 const KEYS = ['', 'flare', 'comet', 'still'] as const;
 const sstep = (a: number) => { const t = Math.max(0, Math.min(1, a)); return t * t * (3 - 2 * t); };
 
@@ -22,7 +22,7 @@ export class OverdriveDragon {
     const blank = 'kp-blank'; if (!scene.textures.exists(blank)) scene.textures.createCanvas(blank, 2, 2)!.refresh();
     this.rear = scene.add.graphics().setDepth(9.0).setBlendMode(Phaser.BlendModes.ADD);
     this.front = scene.add.graphics().setDepth(11.3).setBlendMode(Phaser.BlendModes.ADD);
-    this.limb = scene.add.image(0, 0, blank).setBlendMode(Phaser.BlendModes.ADD).setVisible(false).setOrigin(0.04, 0.5).setDepth(11.5);
+    this.limb = scene.add.image(0, 0, blank).setBlendMode(Phaser.BlendModes.ADD).setVisible(false).setOrigin(0.04, 0.5).setDepth(9.04);
     this.tail = scene.add.image(0, 0, blank).setBlendMode(Phaser.BlendModes.ADD).setVisible(false).setOrigin(0.97, 0.5).setDepth(9.0);
     this.head = scene.add.image(0, 0, blank).setBlendMode(Phaser.BlendModes.ADD).setVisible(false).setOrigin(0.3, 0.55);
   }
@@ -57,7 +57,7 @@ export class OverdriveDragon {
       this.px[n] = rx + (tx - rx) * this.flyMix; this.py[n] = ry + (ty - ry) * this.flyMix;
     }
     // head target: shoulder height toward the aim, surging at a struck target
-    const hs = sstep(1 - this.flyMix), hxT = this.cx[0] + Math.cos(this.aim) * 46 * sc * hs + dx * 40 * sc * this.flyMix, hyT = this.cy[0] - 62 * sc + Math.sin(this.aim) * 16 * sc * hs + dy * 14 * sc * this.flyMix;
+    const hs = sstep(1 - this.flyMix), hxT = this.cx[0] + Math.cos(this.aim) * 70 * sc * hs + dx * 40 * sc * this.flyMix, hyT = this.cy[0] - 74 * sc + Math.sin(this.aim) * 16 * sc * hs + dy * 14 * sc * this.flyMix;
     const lg = this.lunge > 0 ? sstep(this.lunge / 0.7) : 0, tgx = this.lx - i.x, tgy = this.ly - cy0, tgd = Math.hypot(tgx, tgy) || 1, reach = Math.min(tgd - 18 * sc, 110 * sc) * lg;
     const hx = hxT + (tgx / tgd) * reach, hy = hyT + (tgy / tgd) * reach;
     for (let n = 0; n < 6; n++) { const w = sstep(n / 5); this.px[n] = hx + (this.px[n] - hx) * w; this.py[n] = hy + (this.py[n] - hy) * w; }
@@ -71,14 +71,14 @@ export class OverdriveDragon {
     const alpha = A * (i.crowded ? 0.75 : 1), a0 = st.alpha * alpha;
     for (let n = 1; n < vis; n++) {
       const g = Math.sin(this.aim + (n / (N - 1)) * TURNS * 6.2832 + this.spin) > 0 && this.flyMix < 0.5 ? this.front : this.rear, n2 = n * 2, p2 = (n - 1) * 2;
-      g.fillStyle(fillC, a0 * (g === this.front ? 0.8 : 1)); g.fillTriangle(L[p2], L[p2 + 1], L[n2], L[n2 + 1], Rr[n2], Rr[n2 + 1]); g.fillTriangle(L[p2], L[p2 + 1], Rr[n2], Rr[n2 + 1], Rr[p2], Rr[p2 + 1]);
-      const ea = (g === this.front ? 0.78 : 0.62) * alpha, fade = 1 - n / (N * 1.2);
-      g.lineStyle(2, edgeC, ea * fade); g.lineBetween(L[p2], L[p2 + 1], L[n2], L[n2 + 1]); g.lineBetween(Rr[p2], Rr[p2 + 1], Rr[n2], Rr[n2 + 1]);
-      if (n % 2 === 0) { g.lineStyle(1, edgeC, 0.32 * alpha * fade); g.lineBetween(L[p2], L[p2 + 1], Rr[n2], Rr[n2 + 1]); }   // scale tick
-      if (n % 2 === 1 && n > 2) { const sw = wd[n] * 0.3 + 3 * sc; g.fillStyle(edgeC, 0.45 * alpha * fade); g.fillTriangle(L[p2], L[p2 + 1], L[n2], L[n2 + 1], (L[p2] + L[n2]) / 2 + nx[n] * sw * 0.9, (L[p2 + 1] + L[n2 + 1]) / 2 + ny[n] * sw * 0.9); }   // dorsal spine
+      if (g === this.rear) { g.fillStyle(fillC, a0); g.fillTriangle(L[p2], L[p2 + 1], L[n2], L[n2 + 1], Rr[n2], Rr[n2 + 1]); g.fillTriangle(L[p2], L[p2 + 1], Rr[n2], Rr[n2 + 1], Rr[p2], Rr[p2 + 1]); }   // only the far half of the coil is tinted; the near half is a bare stroke so Kai stays fully visible
+      const ea = (g === this.front ? 0.42 : 0.6) * alpha, fade = 1 - n / (N * 1.2);
+      g.lineStyle(1.5, edgeC, ea * fade); g.lineBetween(L[p2], L[p2 + 1], L[n2], L[n2 + 1]); g.lineBetween(Rr[p2], Rr[p2 + 1], Rr[n2], Rr[n2 + 1]);
+      if (n % 2 === 0) { g.lineStyle(1, edgeC, 0.16 * alpha * fade); g.lineBetween(L[p2], L[p2 + 1], Rr[n2], Rr[n2 + 1]); }   // scale tick
+      if (n % 2 === 1 && n > 2) { const sw = wd[n] * 0.3 + 3 * sc; g.fillStyle(edgeC, (g === this.front ? 0.18 : 0.38) * alpha * fade); g.fillTriangle(L[p2], L[p2 + 1], L[n2], L[n2 + 1], (L[p2] + L[n2]) / 2 + nx[n] * sw * 0.9, (L[p2 + 1] + L[n2 + 1]) / 2 + ny[n] * sw * 0.9); }   // dorsal spine
     }
     // spine of light along the centre line
-    this.front.lineStyle(1, 0xffffff, 0.18 * alpha); for (let n = 1; n < Math.min(vis, 14); n++) this.front.lineBetween(this.px[n - 1], this.py[n - 1], this.px[n], this.py[n]);
+    
     // ---- whiskers (lagging, spring-driven) and Cometheart arcs
     if (st.whisk && !i.reduced) for (let k = 0; k < 2; k++) {
       const arr = this.wh[k], dir = k === 0 ? -1 : 1, hxw = hx - Math.cos(this.aim) * 6 * sc, hyw = hy + 2 * sc; if (arr.length === 0) for (let q = 0; q < 12; q++) arr.push(hxw, hyw);
@@ -94,19 +94,19 @@ export class OverdriveDragon {
     const frame = this.jaw > 0.55 ? 2 : this.jaw > 0.12 || this.lunge > 0 ? 1 : 0, fk = `ko-${key}_head${frame}`;
     if (this.scene.textures.exists(fk)) {
       const w = HEAD_W[i.form] * sc * (1 + this.jaw * 0.12) * (0.55 + 0.45 * Math.min(1, A * 1.6));
-      this.head.setTexture(fk).setVisible(true).setPosition(Math.round(hx), Math.round(hy)).setScale((w / this.head.width) * (right ? 1 : -1), w / this.head.width).setRotation(ang).setAlpha(Math.min(1, alpha * 1.05)).setDepth(Math.sin(this.aim) < -0.45 && this.flyMix < 0.5 ? 9.05 : 11.45);
+      this.head.setTexture(fk).setVisible(true).setPosition(Math.round(hx), Math.round(hy)).setScale((w / this.head.width) * (right ? 1 : -1), w / this.head.width).setRotation(ang).setAlpha(Math.min(0.85, alpha)).setDepth(9.05);
     }
     // ---- ImageGen forelimb: reaches from the shoulder to the struck point and rakes; tail fin (ImageGen) trails off the last link
     this.limbT = Math.max(0, this.limbT - dt * 2.7);
     const lk = (n: number) => `ko-${key}_limb${n}`, tk = (n: number) => `ko-${key}_tail${n}`;
     if (this.limbT > 0 && this.scene.textures.exists(lk(0))) {
-      const u = 1 - this.limbT, fr = Math.min(3, Math.floor(u * 4)), sx = this.px[7], sy = this.py[7], ax = this.lx - sx, ay = this.ly - sy, la = Math.atan2(ay, ax), w = (110 + 70 * Math.sin(Math.min(1, u * 1.6) * 1.5708)) * sc;
-      this.limb.setTexture(lk(fr)).setVisible(true).setPosition(Math.round(sx), Math.round(sy)).setScale(w / this.limb.width * (Math.abs(la) > 1.5708 ? 1 : 1), (w / this.limb.width) * (Math.abs(la) > 1.5708 ? -1 : 1)).setRotation(la).setAlpha(Math.min(1, this.limbT * 3) * alpha);
+      const u = 1 - this.limbT, fr = Math.min(3, Math.floor(u * 4)), sx = this.px[7], sy = this.py[7], ax = this.lx - sx, ay = this.ly - sy, la = Math.atan2(ay, ax), w = (70 + 55 * Math.sin(Math.min(1, u * 1.6) * 1.5708)) * sc;
+      this.limb.setTexture(lk(fr)).setVisible(true).setPosition(Math.round(sx), Math.round(sy)).setScale(w / this.limb.width * (Math.abs(la) > 1.5708 ? 1 : 1), (w / this.limb.width) * (Math.abs(la) > 1.5708 ? -1 : 1)).setRotation(la).setAlpha(Math.min(1, this.limbT * 3) * alpha * 0.7);
     } else this.limb.setVisible(false);
     const ti = vis - 1;
     if (ti > 8 && this.scene.textures.exists(tk(0))) {
-      const dxT = this.px[ti] - this.px[ti - 3], dyT = this.py[ti] - this.py[ti - 3], ta = Math.atan2(dyT, dxT) - Math.PI, tw = 105 * sc * (0.6 + 0.4 * A);
-      this.tail.setTexture(tk(Math.floor(clock * 5) % 4)).setVisible(true).setPosition(Math.round(this.px[ti]), Math.round(this.py[ti])).setScale(tw / this.tail.width).setRotation(ta).setAlpha(0.9 * alpha);
+      const dxT = this.px[ti] - this.px[ti - 3], dyT = this.py[ti] - this.py[ti - 3], ta = Math.atan2(dyT, dxT) - Math.PI, tw = 78 * sc * (0.6 + 0.4 * A);
+      this.tail.setTexture(tk(Math.floor(clock * 5) % 4)).setVisible(true).setPosition(Math.round(this.px[ti]), Math.round(this.py[ti])).setScale(tw / this.tail.width).setRotation(ta).setAlpha(0.6 * alpha);
     } else this.tail.setVisible(false);
     this.fresh = false;
   }

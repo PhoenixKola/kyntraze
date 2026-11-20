@@ -42,11 +42,11 @@ export class KaiCombatFx {
         const big = fin ? 1.9 : 1;
         if (ranged) { if (ff === 3) this.ring(tx, ty, COL[3], 80 * sc, 0.35, true); else this.pop(this.fr(ff, 'burst', 0, 1), tx, ty, 40 * sc, 70 * sc, 0.22, { a: 0.8 }); break; }
         this.pop(this.fr(ff, 'burst', 0, 2), tx, ty - 6 * sc, 46 * sc * big, 92 * sc * big, fin ? 0.34 : 0.24, { rot: Math.random() * 6.28, a: 0.9 });
-        if (fin && !red) { const a = Math.atan2(ty - e.y, tx - e.x); this.pop(this.fr(ff, 'claw', 0, 3), tx, ty, 80 * sc * (od ? 1.5 : 1), 130 * sc * (od ? 1.5 : 1), 0.3, { rot: a + 0.2, a: od ? 1 : 0.7 }); }
+        if (fin && !red) { const a = Math.atan2(ty - e.y, tx - e.x); this.pop(this.fr(ff, 'claw', 0, 3), tx, ty, 80 * sc * (od ? 1.5 : 1), 130 * sc * (od ? 1.5 : 1), 0.3, { rot: a + 0.2, a: od ? 0.5 : 0.7 }); }
         if (ff === 2 && !red) this.ring(tx, ty, COL[2], 95 * sc, 0.28);
         if (ff === 3) this.pop(this.fr(3, 'shift', 1, 2), tx, ty, 50 * sc, 100 * sc, 0.28, { a: 0.7 });
         if (fin) this.shake(60, 0.0014, red);
-        if (od && !red) { const a = Math.atan2(ty - e.y, tx - e.x); this.pop(this.fr(ff, 'claw', 0, 3), tx, ty, 100 * sc, 170 * sc, 0.32, { rot: a, a: 0.85 }); }
+        if (od && !red) { const a = Math.atan2(ty - e.y, tx - e.x); this.pop(this.fr(ff, 'claw', 0, 3), tx, ty, 80 * sc, 130 * sc, 0.3, { rot: a, a: 0.4 }); }
         break;
       }
       case 'sig_tier': { const ff = f; this.ring(e.x, e.y - 30 * sc, COL[ff], (60 + 22 * n) * sc, 0.3); this.shake(50, 0.0008 * n, red); break; }
@@ -156,9 +156,9 @@ export class KaiCombatFx {
     this.dragon.update({ dt, clock: this.clock, x: h.x, y: h.y, sc, form: f as 1 | 2 | 3, amount: this.dragonA / 0.9, vx, vy, aimX: dm.x, aimY: dm.y, fly: p.flyT > 0, dash: p.dashRemaining > 0, reduced: o.reduced, crowded: o.crowded });
     if (this.dragonA > 0.02) {
       // sigil under the feet, pulsing
-      const sk = `${KO_FORM[f]}_sigil${Math.floor(this.clock * 5) % 4}`; if (this.has(sk)) this.sigil.setTexture(koKey(sk)).setVisible(true).setPosition(Math.round(h.x), Math.round(h.y + 2)).setScale((120 * sc * (1 + 0.06 * Math.sin(this.clock * 4))) / this.sigil.width).setAlpha(this.dragonA * 0.55);
+      const sk = `${KO_FORM[f]}_sigil${Math.floor(this.clock * 5) % 4}`; if (this.has(sk)) this.sigil.setTexture(koKey(sk)).setVisible(true).setPosition(Math.round(h.x), Math.round(h.y + 2)).setScale((120 * sc * (1 + 0.06 * Math.sin(this.clock * 4))) / this.sigil.width).setAlpha(this.dragonA * 0.32);
       // movement: claw-mark streaks behind Kai
-      this.trailClock -= dt; if (sp > 120 && this.trailClock <= 0 && !o.reduced) { this.trailClock = 0.11; const a = Math.atan2(vy, vx); this.pop(this.fr(f, 'claw', 0, 3), h.x - Math.cos(a) * 24, h.y - 30 * sc - Math.sin(a) * 24, 70 * sc, 120 * sc, 0.3, { rot: a + 0.15, a: 0.55, ox: 1, oy: 0.5, depth: 9.0 }); }
+      this.trailClock -= dt; if (sp > 120 && this.trailClock <= 0 && !o.reduced) { this.trailClock = 0.11; const a = Math.atan2(vy, vx); this.pop(this.fr(f, 'claw', 0, 3), h.x - Math.cos(a) * 24, h.y - 30 * sc - Math.sin(a) * 24, 70 * sc, 120 * sc, 0.3, { rot: a + 0.15, a: 0.3, ox: 1, oy: 0.5, depth: 9.0 }); }
       if (p.dashRemaining > 0 && !this.dashWas && !o.reduced) this.pop(this.fr(f, 'head', 0, 3), h.x, h.y - 30 * sc, 120 * sc, 220 * sc, 0.35, { rot: Math.atan2(p.dashDy, p.dashDx), ox: 0.2, a: 0.8 });
     } else { this.sigil.setVisible(false); }
     this.dashWas = p.dashRemaining > 0;
