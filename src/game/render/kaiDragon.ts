@@ -103,10 +103,11 @@ export class OverdriveDragon {
       const u = 1 - this.limbT, fr = Math.min(3, Math.floor(u * 4)), sx = this.px[7], sy = this.py[7], ax = this.lx - sx, ay = this.ly - sy, la = Math.atan2(ay, ax), w = (70 + 55 * Math.sin(Math.min(1, u * 1.6) * 1.5708)) * sc;
       this.limb.setTexture(lk(fr)).setVisible(true).setPosition(Math.round(sx), Math.round(sy)).setScale(w / this.limb.width * (Math.abs(la) > 1.5708 ? 1 : 1), (w / this.limb.width) * (Math.abs(la) > 1.5708 ? -1 : 1)).setRotation(la).setAlpha(Math.min(1, this.limbT * 3) * alpha * 0.7);
     } else this.limb.setVisible(false);
-    const ti = vis - 1;
-    if (ti > 8 && this.scene.textures.exists(tk(0))) {
-      const dxT = this.px[ti] - this.px[ti - 3], dyT = this.py[ti] - this.py[ti - 3], ta = Math.atan2(dyT, dxT) - Math.PI, tw = 120 * sc * (0.6 + 0.4 * A);
-      this.tail.setTexture(tk(Math.floor(clock * 5) % 4)).setVisible(true).setPosition(Math.round(this.px[ti]), Math.round(this.py[ti])).setScale(tw / this.tail.width).setRotation(ta).setAlpha(0.85 * alpha);
+    // tail (ImageGen) grows from the base of Kai's spine like a normal tail: behind him, drooping and swaying; in front of him only when he faces away
+    if (this.scene.textures.exists(tk(0))) {
+      const ax = Math.cos(this.aim), ay = Math.sin(this.aim), bx = i.x - ax * 13 * sc, by = i.y - 30 * sc - ay * 5 * sc;
+      const th = Math.atan2(-ay * 0.5 + 0.45 + Math.sin(clock * 2.1) * 0.12, -ax * 0.9 + (Math.abs(ax) < 0.3 ? (this.lastRight ? -0.6 : 0.6) : 0)), left = Math.cos(th) < 0, tw = 105 * sc * (0.55 + 0.45 * A) * (this.flyMix > 0.5 ? 1.2 : 1);
+      this.tail.setTexture(tk(Math.floor(clock * 5) % 4)).setVisible(true).setPosition(Math.round(bx), Math.round(by)).setScale((tw / this.tail.width) * (left ? 1 : -1), tw / this.tail.width).setRotation(left ? th - Math.PI : th).setAlpha(0.85 * alpha).setDepth(ay < -0.5 && this.flyMix < 0.5 ? 11.3 : 9.0);
     } else this.tail.setVisible(false);
     this.lastRight = right; this.fresh = false;
   }
