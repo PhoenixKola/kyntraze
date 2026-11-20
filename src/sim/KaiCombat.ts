@@ -89,7 +89,7 @@ function contact(s: GameState, c: Cast, f: SigForm): boolean {
   const p = s.player, tier = c.tier ?? 0, q = p.qDamage * s.mods.formPower * SIG.tierMul[tier], palm = { x: p.x + c.dirX * (p.radius + 14), y: p.y + c.dirY * (p.radius + 14) };
   const near = s.enemies.filter(e => alive(e) && Math.hypot(e.x - palm.x, e.y - palm.y) <= SIG.contactR + e.radius).sort((a, b) => Math.hypot(a.x - palm.x, a.y - palm.y) - Math.hypot(b.x - palm.x, b.y - palm.y));
   const prim = near.find(e => e.id === c.hop) ?? near[0];
-  if (!prim) { emit(s, 'sig_miss', palm.x, palm.y, f); return false; }
+  if (!prim) { emit(s, 'sig_miss', palm.x, palm.y, f); p.sigCd = Math.min(p.sigCd, 8); return false; }   // a miss only costs a short lockout, not the full cooldown
   const hit = (f === 1 ? SIG.flare.hit : f === 2 ? SIG.comet.hit : SIG.still.hit) * q, hp0 = prim.hp;
   damageEnemy(s, prim, hit, { slot: 'none' });
   c.tx = prim.x; c.ty = prim.y;   // the effects centre on what was actually struck

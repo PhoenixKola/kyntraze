@@ -338,7 +338,7 @@ function fangStrike(s: GameState, c: HeroCast) {
     const hp0 = e.hp; damageEnemy(s, e, base * (hits === 0 ? F.hit : F.pierceMul), { area: true, slot: 'none' });
     if (e.hp < hp0 || e.hp <= 0) { hits++; first ??= e; } else { if (hits === 0) emit(s, 'vex_v_block', e.x, e.y, odBit(s)); break; }   // a shield or block ends the line: no pierce through it
   }
-  if (!hits || !first) { if (!line.length) emit(s, 'vex_v_miss', c.tx, c.ty, odBit(s)); return; }   // a miss only dissipates, never an explosion
+  if (!hits || !first) { if (!line.length) emit(s, 'vex_v_miss', c.tx, c.ty, odBit(s)); s.player.sigCd = Math.min(s.player.sigCd, 8); return; }   // a miss only dissipates, never an explosion
   emit(s, 'vex_v_hit', first.x, first.y, c.tier | (Math.min(hits, 15) << 4) | odBit(s), x0, y0); if (c.tier >= 3) c.pulses = 1;
 }
 function fangPulse(s: GameState, c: HeroCast, k: number) {
@@ -353,11 +353,11 @@ function updateHorizon(s: GameState, f: VexField, dt: number): boolean {
     const sp = Math.hypot(f.d[0], f.d[1]), steps = Math.max(1, Math.ceil((sp * dt) / 8)), sx = (f.d[0] * dt) / steps, sy = (f.d[1] * dt) / steps;
     for (let i = 0; i < steps; i++) {
       const nx = f.x + sx, ny = f.y + sy;
-      if (blocked(nx, ny, 0)) { emit(s, 'vex_v_fizzle', f.x, f.y, 1 | (tier << 4) | od); return true; }   // an obstacle ends it: no blast
+      if (blocked(nx, ny, 0)) { emit(s, 'vex_v_fizzle', f.x, f.y, 1 | (tier << 4) | od); s.player.sigCd = Math.min(s.player.sigCd, 8); return true; }   // an obstacle ends it: no blast
       f.x = nx; f.y = ny; f.d[2] += Math.hypot(sx, sy);
       const prim = s.enemies.filter(e => alive(e) && !e.ai?.invuln && (e.x - f.x) ** 2 + (e.y - f.y) ** 2 <= (f.r + e.radius) ** 2).sort(byDistId(f.x, f.y))[0];
       if (prim) { const hp0 = prim.hp; damageEnemy(s, prim, H.hit * f.dmg, { slot: 'none' }); if (prim.hp < hp0 || prim.hp <= 0) { f.d[4] = 1; f.d[5] = 0; emit(s, 'vex_v_hit', f.x, f.y, tier | (2 << 3) | od); break; } emit(s, 'vex_v_block', f.x, f.y, od); return true; }
-      if (f.d[2] >= f.d[3]) { emit(s, 'vex_v_fizzle', f.x, f.y, 0 | (tier << 4) | od); return true; }   // range end with nothing met: it fizzles, no fake hit
+      if (f.d[2] >= f.d[3]) { emit(s, 'vex_v_fizzle', f.x, f.y, 0 | (tier << 4) | od); s.player.sigCd = Math.min(s.player.sigCd, 8); return true; }   // range end with nothing met: it fizzles, no fake hit
     }
     return false;
   }

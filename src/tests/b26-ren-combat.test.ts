@@ -62,7 +62,7 @@ describe('Crimson Nova Fist (V)', () => {
   });
   it('a miss pays the cooldown but never explodes; an abort cancels for free; base form cannot start it', () => {
     const a = setup(); a.sim.step(DT, idle({ sig: true, sigHeld: true })); run(a.sim, 0.2, idle({ sigHeld: true })); run(a.sim, 1.2);
-    expect(kinds(a.s)).toContain('ren_v_miss'); expect(kinds(a.s)).not.toContain('ren_v_pulse'); expect(a.s.player.sigCd).toBeGreaterThan(40);
+    expect(kinds(a.s)).toContain('ren_v_miss'); expect(kinds(a.s)).not.toContain('ren_v_pulse'); expect(a.s.player.sigCd).toBeLessThanOrEqual(8);
     const b = setup([[1150, 800]]); b.sim.step(DT, idle({ sig: true, sigHeld: true })); b.sim.step(DT, idle({ sigHeld: true, sigAbort: true })); expect(b.s.hx.act).toBeNull(); expect(b.s.player.sigCd).toBe(0);
     const c = setup([[1150, 800]]); c.s.player.form = 0; c.sim.step(DT, idle({ sig: true, sigHeld: true })); expect(c.s.hx.act).toBeNull();
   });

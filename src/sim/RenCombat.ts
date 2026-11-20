@@ -183,7 +183,7 @@ function releaseNova(s: GameState, c: HeroCast) {
 function novaContact(s: GameState, c: HeroCast): boolean {
   const p = s.player, tier = c.tier, q = p.qDamage * fm(s) * REN_V.tierMul[tier], fist = { x: p.x + c.dirX * (p.radius + 14), y: p.y + c.dirY * (p.radius + 14) };
   const near = s.enemies.filter(e => alive(e) && Math.hypot(e.x - fist.x, e.y - fist.y) <= REN_V.contactR + e.radius).sort(byDistId(fist.x, fist.y)), prim = near.find(e => e.id === c.hop) ?? near[0];
-  if (!prim) { emit(s, 'ren_v_miss', fist.x, fist.y, odBit(s)); return false; }   // a miss never explodes
+  if (!prim) { emit(s, 'ren_v_miss', fist.x, fist.y, odBit(s)); s.player.sigCd = Math.min(s.player.sigCd, 8); return false; }   // a miss never explodes
   const hp0 = prim.hp; damageEnemy(s, prim, REN_V.hit * q, { slot: 'none' }); c.tx = prim.x; c.ty = prim.y;
   if (prim.hp < hp0 || prim.hp <= 0) { emit(s, 'ren_v_hit', prim.x, prim.y, tier | odBit(s)); return true; }
   emit(s, 'ren_v_block', prim.x, prim.y, odBit(s)); return false;

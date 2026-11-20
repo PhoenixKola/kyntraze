@@ -94,7 +94,7 @@ export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts
   if (enemy.part) { partDestroyed(state, enemy); return true; }
   if (boss && state.player.form === 3) state.abilityEvents.push({ id: state.nextId++, kind: 'finisher3', x: enemy.x, y: enemy.y, n: enemy.kind === 'seraph' ? 1 : 0 });   // B13: the silver finisher
   else if (boss && state.player.form === 2) state.abilityEvents.push({ id: state.nextId++, kind: 'finisher', x: enemy.x, y: enemy.y, n: enemy.kind === 'seraph' ? 1 : 0 });   // B12: Kai delivered the boss's last blow in Cometheart
-  if (enemy.kind !== 'halo_sigil') { state.kills++; if (state.player.form === 0 && state.hero !== 'vex') state.player.drive = Math.min(100, state.player.drive + 8 * state.mods.driveGain); }
+  if (enemy.kind !== 'halo_sigil') { state.kills++; if (state.player.form === 0) state.player.drive = Math.min(100, state.player.drive + 8 * state.mods.driveGain); }
   if (boss) { bossDefeated(state, enemy); return true; }
   const d = ENEMIES[enemy.kind as keyof typeof ENEMIES];
   if (d.xp > 0 && state.pickups.length < RULES.maxPickups) addPickup(state, { x: enemy.x, y: enemy.y, xp: Math.round(d.xp * xpTimeScale(state.time) * 10) / 10 * (state.plan.modifiers.includes('guardians_burden') && d.shield ? MODIFIER_RULES.burden.xp : 1), age: 0, tier: d.elite ? 2 : d.xp >= 3 ? 1 : 0 });

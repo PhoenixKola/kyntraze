@@ -189,7 +189,7 @@ function updateAstral(s: GameState, f: SoraField, dt: number): boolean {
     const sp = Math.hypot(f.d[0], f.d[1]), steps = Math.max(1, Math.ceil((sp * dt) / 8)), sx = (f.d[0] * dt) / steps, sy = (f.d[1] * dt) / steps;
     for (let i = 0; i < steps; i++) {
       const nx = f.x + sx, ny = f.y + sy;
-      if (blocked(nx, ny, 0)) { emit(s, 'sora_v_fizzle', f.x, f.y, 1 | (tier << 4) | (f.od ? SORA_OD.bit : 0)); return true; }   // an obstacle ends it: a small fizzle, no hit
+      if (blocked(nx, ny, 0)) { emit(s, 'sora_v_fizzle', f.x, f.y, 1 | (tier << 4) | (f.od ? SORA_OD.bit : 0)); s.player.sigCd = Math.min(s.player.sigCd, 8); return true; }   // an obstacle ends it: a small fizzle, no hit
       f.x = nx; f.y = ny; f.d[2] += Math.hypot(sx, sy);
       const prim = s.enemies.filter(e => alive(e) && !e.ai?.invuln && (e.x - f.x) ** 2 + (e.y - f.y) ** 2 <= (f.r + e.radius) ** 2).sort(byDistId(f.x, f.y))[0];
       if (prim) {
@@ -197,7 +197,7 @@ function updateAstral(s: GameState, f: SoraField, dt: number): boolean {
         if (prim.hp < hp0 || prim.hp <= 0) { f.d[4] = 1; f.d[5] = 0; f.hit = [prim.id]; emit(s, 'sora_v_hit', f.x, f.y, tier | (f.od ? SORA_OD.bit : 0)); break; }
         emit(s, 'sora_v_block', f.x, f.y, f.od ? SORA_OD.bit : 0); return true;   // shield / block: consumed without a blast
       }
-      if (f.d[2] >= f.d[3]) { emit(s, 'sora_v_fizzle', f.x, f.y, 0 | (tier << 4) | (f.od ? SORA_OD.bit : 0)); return true; }
+      if (f.d[2] >= f.d[3]) { emit(s, 'sora_v_fizzle', f.x, f.y, 0 | (tier << 4) | (f.od ? SORA_OD.bit : 0)); s.player.sigCd = Math.min(s.player.sigCd, 8); return true; }
     }
     return false;
   }

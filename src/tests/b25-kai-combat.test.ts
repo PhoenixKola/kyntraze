@@ -36,7 +36,7 @@ describe('signature technique', () => {
   it('a miss recovers at the end point and applies no damage; an abort cancels without spending the cooldown', () => {
     const { sim, s } = setup(2); s.player.attackClock = 1e9;
     sim.step(DT, idle({ sig: true, sigHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(sim, 0.5, idle({ sigHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(sim, 0.5);
-    expect(s.cast).toBeNull(); expect(s.player.sigCd).toBeGreaterThan(40);
+    expect(s.cast).toBeNull(); expect(s.player.sigCd).toBeLessThanOrEqual(8);
     const tap = setup(2); tap.s.player.attackClock = 1e9; tap.sim.step(DT, idle({ sig: true, sigHeld: true })); run(tap.sim, 0.12, idle({ sigHeld: true })); run(tap.sim, 0.3); expect(tap.s.cast).toBeNull(); expect(tap.s.player.sigCd).toBe(0);   // a quick tap with nothing in reach is free expect(s.abilityEvents.some(e => e.kind === 'sig_miss')).toBe(true);
     const b = setup(3, [[1200, 800]]); b.s.player.attackClock = 1e9;
     b.sim.step(DT, idle({ sig: true, sigHeld: true })); b.sim.step(DT, idle({ sigHeld: true, sigAbort: true }));

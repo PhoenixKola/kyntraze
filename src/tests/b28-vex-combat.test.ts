@@ -93,3 +93,10 @@ describe('Form Shift, Overdrive, flight and reveal', () => {
     const b = setup(0, [[1250, 800]]); b.sim.step(DT, idle({ beam: true })); expect(b.s.hx.act?.act).toBe('rift_reversal');
   });
 });
+
+describe('Drive parity', () => {
+  it('base Vex gains Drive from kills (like Ren and Sora) and from hits', () => {
+    const { sim, s } = setup(0, [[1170, 800, 1]]); s.player.drive = 0; s.player.attackClock = 0; run(sim, 0.3);
+    expect(s.player.drive).toBeGreaterThanOrEqual(8);
+  });
+});
