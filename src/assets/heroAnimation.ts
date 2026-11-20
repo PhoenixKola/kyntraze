@@ -91,7 +91,7 @@ export class HeroAnimator {
     } else this.strikeT = -1;
     const runStep = i.dt * Math.min(18, Math.max(10, 14 * i.runSpeed / 250)) / 14;
     if (this.moveNow) this.runTime += runStep; else this.runTime = 0;
-    this.flying = this.renForm() && (i.flyT ?? 0) > 0 && this.has('Glide');
+    this.flying = (this.renForm() || this.soraForm()) && (i.flyT ?? 0) > 0 && this.has('Glide');
     if (this.flying) { this.flyDur = i.flyT ?? 0; this.flyWas = true; this.landT = -1; } else if (this.flyWas) { this.flyWas = false; this.landT = 0; this.landDive = this.flyDur >= 0.5 && this.has('Dive'); }
     if (this.landT >= 0) { this.landT += i.dt; if (this.landT > (this.landDive ? 0.4 : 0.2) || (i.moving && this.landT > 0.1)) this.landT = -1; }
     const landing = this.landT >= 0 && this.landDive, fury = this.furyClip(i.moving);
@@ -101,6 +101,7 @@ export class HeroAnimator {
     if (want === 'Run') this.time += runStep; else if (want === 'Idle' || want === 'Glide' || want === 'Takeoff') this.time += i.dt;
     return this.pose(events);
   }
+  private soraForm() { return this.hero === 'sora' && this.visualForm === 'f1'; }
   private renForm() { return this.hero === 'ren' && this.visualForm === 'f1'; }
   /** Crimson Fury beat clip while standing; a moving strike keeps the RunPunchUpper layering. */
   private furyClip(moving: boolean): KaiClip | null {

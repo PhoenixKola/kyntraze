@@ -17,13 +17,13 @@ const R_ALL = [0, 1, 2, 3];
 export class SoraPhoenix {
   private pops: Pop[] = []; private last = 0; private clock = 0; private lx = 0; private ly = 0; private px = 0; private py = 0; private fresh = true; private side = 1;
   private amt = 0; private wasOd = false; private mv = 0; private snap = 0; private snapFrame = 2; private cry = 0; private lunge = 0; private cup = 0; private ringClock = 0; private pulseT = 0; private lastDash = false; private wE = 1; private wS = 0; private wN = 0;
-  private readonly body: Phaser.GameObjects.Image; private readonly tail: Phaser.GameObjects.Image; private readonly head: Phaser.GameObjects.Image; private readonly wingFar: Phaser.GameObjects.Image; private readonly wingNear: Phaser.GameObjects.Image; private readonly wingL: Phaser.GameObjects.Image; private readonly wingR: Phaser.GameObjects.Image; private readonly cupWings: Phaser.GameObjects.Image;
+  private readonly body: Phaser.GameObjects.Image; private readonly tail: Phaser.GameObjects.Image; private readonly head: Phaser.GameObjects.Image; private readonly wingFar: Phaser.GameObjects.Image; private readonly wingNear: Phaser.GameObjects.Image; private readonly wingL: Phaser.GameObjects.Image; private readonly wingR: Phaser.GameObjects.Image;
   private readonly ground: Phaser.GameObjects.Image; private readonly jet: Phaser.GameObjects.Image[] = []; private readonly wisp: Phaser.GameObjects.Image[] = []; private readonly orb: Phaser.GameObjects.Image; private readonly ring: Phaser.GameObjects.Image;
   private readonly blades: Phaser.GameObjects.Image[] = []; private readonly prisms: Phaser.GameObjects.Image[] = []; private readonly vortex: Phaser.GameObjects.Image[] = []; private readonly flyOrbs: Phaser.GameObjects.Image[] = []; private readonly flyTrails: Phaser.GameObjects.Image[] = []; private readonly fgrounds: Phaser.GameObjects.Image[] = [];
   constructor(private readonly scene: Phaser.Scene) {
     const blank = 'kp-blank'; if (!scene.textures.exists(blank)) scene.textures.createCanvas(blank, 2, 2)!.refresh();
     const mk = (depth: number) => scene.add.image(0, 0, blank).setBlendMode(Phaser.BlendModes.ADD).setDepth(depth).setVisible(false);
-    this.tail = mk(8.9); this.wingFar = mk(8.92); this.body = mk(8.96); this.wingNear = mk(9.0); this.wingL = mk(8.92); this.wingR = mk(8.92); this.cupWings = mk(9.0); this.head = mk(9.06);
+    this.tail = mk(8.9); this.wingFar = mk(8.92); this.body = mk(8.96); this.wingNear = mk(9.0); this.wingL = mk(8.92); this.wingR = mk(8.92); this.head = mk(9.06);
     this.ground = mk(3.7); this.jet = [mk(8.8), mk(8.8)]; this.wisp = [mk(9.6), mk(9.6)]; this.orb = mk(10.6); this.ring = mk(10.55);
     for (let i = 0; i < 24; i++) this.blades.push(mk(10.2));
     for (let i = 0; i < 3; i++) { this.prisms.push(mk(9.3)); this.vortex.push(mk(10.3)); this.fgrounds.push(mk(3.65)); }
@@ -101,7 +101,7 @@ export class SoraPhoenix {
     this.mv += ((flying || sp > 60 ? 1 : 0) - this.mv) * Math.min(1, dt * 7);
     const calm = o.reduced ? 0.7 : 1, flick = 0.93 + 0.07 * Math.sin(this.clock * 5.7), A = this.amt * (o.reduced ? 0.45 : 0.6) * flick, breath = 1 + 0.025 * Math.sin(this.clock * 2.4) + this.lunge * 0.05;
     // wing beat: folded and slow at rest, quick while moving, broad in flight, a decisive snap on real attacks
-    const fps = flying ? 10 : this.mv > 0.5 ? 7 : 2.4, wf = this.snap > 0 ? this.snapFrame : Math.floor(this.clock * fps) & 3, wf2 = this.snap > 0 ? this.snapFrame : (Math.floor(this.clock * fps) + 2) & 3;
+    const fps = flying ? 10 : this.mv > 0.5 ? 7 : 2.4, cupped = charging || this.cup > 0, wf = cupped ? 3 : this.snap > 0 ? this.snapFrame : Math.floor(this.clock * fps) & 3, wf2 = cupped ? 3 : this.snap > 0 ? this.snapFrame : (Math.floor(this.clock * fps) + 2) & 3;
     const lean = clamp(vx / 1100, -0.14, 0.14), bx = this.lx - this.side * 8 * sc, by = this.ly + 4 * sc;
     const hv = !!(A * this.wE > 0.01);
     // side beast (east / west): tail and breast behind Sora, far and near wing beating out of phase, head above and ahead of his shoulders
@@ -117,9 +117,6 @@ export class SoraPhoenix {
     if (A * this.wS > 0.01 && this.tex(this.head, 'head_front', this.cry > 0 || charging ? 1 : 0)) { const k = (72 * sc * breath) / this.head.width; this.head.setVisible(true).setOrigin(0.5, 0.85).setPosition(Math.round(this.lx), Math.round(this.ly - 88 * sc)).setScale(k).setRotation(0).setAlpha(A * this.wS * 1.15); }
     else if (A * this.wN > 0.01 && this.tex(this.head, 'head_back', Math.floor(this.clock * 3))) { const k = (72 * sc * breath) / this.head.width; this.head.setVisible(true).setOrigin(0.5, 0.85).setPosition(Math.round(this.lx), Math.round(this.ly - 88 * sc)).setScale(k).setRotation(0).setAlpha(A * this.wN * 1.15); }
     else if (!hv) this.head.setVisible(false);
-    // wings cup the body while charging Astral Devastation or forming Celestial Collapse
-    const cupOn = (charging || this.cup > 0) && A > 0.01 && this.tex(this.cupWings, 'wing_cup', charging ? clamp(Math.floor((act!.tier ?? 0)), 0, 2) : 3);
-    if (cupOn) { const k = (190 * sc) / this.cupWings.width; this.cupWings.setVisible(true).setOrigin(0.5, 0.6).setPosition(Math.round(this.lx), Math.round(this.ly - 54 * sc)).setScale(k).setAlpha(A * 0.8); } else this.cupWings.setVisible(false);
     // ground pressure under the beast
     if (this.amt > 0.05 && this.tex(this.ground, 'ground_ring', 1 + (Math.floor(this.clock * 3) & 1))) this.ground.setVisible(true).setPosition(Math.round(this.lx), Math.round(this.ly + 4)).setScale((170 * sc * (1 + 0.05 * Math.sin(this.clock * 3.4))) / this.ground.width).setAlpha(this.amt * 0.3 * calm); else this.ground.setVisible(false);
     // ---- Skybreaker: wing-shaped light bursts only while flying (never in the plain transformed form)
@@ -163,6 +160,6 @@ export class SoraPhoenix {
     const wa = (o.reduced || o.crowded ? 0.12 : 0.28) + (act ? 0.2 : 0) + (od ? 0.1 : 0);
     for (let i = 0; i < 2; i++) { const im = this.wisp[i]; if (!this.tex(im, 'wisps', Math.floor(this.clock * 7) + i * 2) || this.wS > 0.5) { im.setVisible(false); continue; } const sd = i ? 1 : -1; im.setVisible(true).setOrigin(0.5, 1).setPosition(Math.round(h.x + sd * 13 * sc), Math.round(h.y - 58 * sc)).setScale((26 * sc) / im.width * (i ? -1 : 1)).setRotation(sd * 0.18 - lean).setAlpha(wa); }
   }
-  private hideLayers() { for (const im of [this.tail, this.body, this.head, this.wingFar, this.wingNear, this.wingL, this.wingR, this.cupWings, this.ground, ...this.jet, ...this.wisp, this.orb, this.ring, ...this.blades, ...this.prisms, ...this.vortex, ...this.flyOrbs, ...this.flyTrails, ...this.fgrounds]) im.setVisible(false); }
-  destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of [this.tail, this.body, this.head, this.wingFar, this.wingNear, this.wingL, this.wingR, this.cupWings, this.ground, ...this.jet, ...this.wisp, this.orb, this.ring, ...this.blades, ...this.prisms, ...this.vortex, ...this.flyOrbs, ...this.flyTrails, ...this.fgrounds]) im.destroy(); }
+  private hideLayers() { for (const im of [this.tail, this.body, this.head, this.wingFar, this.wingNear, this.wingL, this.wingR, this.ground, ...this.jet, ...this.wisp, this.orb, this.ring, ...this.blades, ...this.prisms, ...this.vortex, ...this.flyOrbs, ...this.flyTrails, ...this.fgrounds]) im.setVisible(false); }
+  destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of [this.tail, this.body, this.head, this.wingFar, this.wingNear, this.wingL, this.wingR, this.ground, ...this.jet, ...this.wisp, this.orb, this.ring, ...this.blades, ...this.prisms, ...this.vortex, ...this.flyOrbs, ...this.flyTrails, ...this.fgrounds]) im.destroy(); }
 }

@@ -26,7 +26,7 @@ import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
 import { B14_FX_NAMES, b14Key, b14Url } from '../render/b14fx';
 import { B21_GROUPS, b21Key, b21ManifestKey, b21ManifestUrl, b21Names, b21Url } from '../render/b21Assets';
 import { F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL, f3fxKey, f3fxUrl } from '../render/stillfireFx';
-import { KAI_F3_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_KIT_CLIPS, REN_F1_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiClipInfo, type KaiManifests } from '../../assets/kaiAnimation';
+import { KAI_F3_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_KIT_CLIPS, REN_F1_CLIPS, SORA_F1_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiClipInfo, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
   /** Every hero that fights this run (the runner plus co-op partners): each gets its own explicitly keyed sheet set. Kai's sheets are always loaded. */
   private readonly arts: HeroArt[]; private readonly hero0: HeroId;
@@ -95,7 +95,7 @@ export class BootScene extends Phaser.Scene {
       for (const form of heroForms(h)) {
         const raw = KAI_DIRS.map(dir => this.cache.json.get(`hero-${h}-${form}-manifest-${dir}`)); if (!raw.every(r => r && typeof r === 'object' && (r as { direction?: string }).direction)) continue;
         const set = {} as KaiManifests; KAI_DIRS.forEach((dir, i) => { set[dir] = parseKaiManifest(raw[i], dir, form === 'base' ? 'base' : 'f1'); }); this.registry.set(HERO_REGISTRY_KEY(h, form), set);
-        for (const dir of KAI_DIRS) for (const clip of [...(form === 'base' ? KAI_CLIPS : KAI_F1_CLIPS), ...(h === 'vex' ? VEX_CLIPS : []), ...(h === 'ren' && form === 'f1' ? REN_F1_CLIPS : [])]) { const m = set[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue; this.load.spritesheet(heroTextureKey(h, dir, clip, form), heroSheetUrl(h, dir, a, form), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 }); }
+        for (const dir of KAI_DIRS) for (const clip of [...(form === 'base' ? KAI_CLIPS : KAI_F1_CLIPS), ...(h === 'vex' ? VEX_CLIPS : []), ...(h === 'ren' && form === 'f1' ? REN_F1_CLIPS : []), ...(h === 'sora' && form === 'f1' ? SORA_F1_CLIPS : [])]) { const m = set[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue; this.load.spritesheet(heroTextureKey(h, dir, clip, form), heroSheetUrl(h, dir, a, form), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 }); }
       }
       this.registry.set(HERO_ANCHORS_KEY(h), this.cache.json.get(HERO_ANCHORS_KEY(h)));
     }

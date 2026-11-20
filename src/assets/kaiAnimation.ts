@@ -18,6 +18,7 @@ export const KAI_CLIPS: readonly KaiBaseClip[] = ['Idle', 'Run', 'BasicPunch', '
 /** B25.1 (Combat Identity): Kick (leg-contact auto beat), Glide (Skybreaker cruise loop) and Dive (descent strike / landing compression). */
 export const KAI_KIT_CLIPS = ['Lunge', 'Uppercut', 'Slam', 'Kick', 'Glide', 'Dive'] as const;
 /** B26 Ren Crimson Ascendant clips (art/characters/ren/rig/anim_b26.py): Fury beats (Jab, Kick, Hook, Uppercut), Cyclone, Rampage, Pound (Catastrophe), NovaCharge + Lunge (Nova Fist), Takeoff / Glide / Dive. Form I sheets only. */
+export const SORA_F1_CLIPS = ['Takeoff', 'Glide', 'Dive'] as const;   // B27 Azure Sovereign flight
 export const REN_F1_CLIPS = ['Jab', 'Kick', 'Hook', 'Uppercut', 'Cyclone', 'Rampage', 'Pound', 'NovaCharge', 'Lunge', 'Takeoff', 'Glide', 'Dive'] as const;
 /** Leg phases per strike step in RunPunchUpper. */
 export const RUN_PHASES = 8;
