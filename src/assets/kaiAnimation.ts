@@ -112,7 +112,7 @@ export function facingFromVector(prev: Facing, dx: number, dy: number): Facing {
   return ay >= ax * 0.75 ? v : h;
 }
 
-const STRIKE_CLIP: Record<string, 'BasicPunch' | 'Lunge' | 'Uppercut' | 'Slam' | 'Kick'> = { kick: 'Kick', spin: 'Slam', uppercut: 'Uppercut', dragonfist: 'Uppercut', finisher: 'Lunge' };
+const STRIKE_CLIP: Record<string, 'BasicPunch' | 'Lunge' | 'Uppercut' | 'Slam' | 'Kick'> = { kick: 'Kick', spin: 'Slam', uppercut: 'Uppercut', dragonfist: 'Uppercut', finisher: 'Kick' };
 export interface AnimFrameInput {
   /** Seconds of simulated time to advance; 0 while paused / choosing an upgrade / dead. */
   dt: number; alive: boolean;

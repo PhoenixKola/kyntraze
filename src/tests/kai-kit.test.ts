@@ -120,7 +120,7 @@ describe('Kai kit audio', () => {
 describe('B22 authored Kai clips', async () => {
   const fs = await import('node:fs'), path = await import('node:path');
   const { KAI_KIT_CLIPS, CAST_CLIP } = await import('../assets/kaiAnimation');
-  const SPEC: Record<string, [number, number]> = { Lunge: [14, 3], Uppercut: [18, 6], Slam: [26, 11] };
+  const SPEC: Record<string, [number, number]> = { Lunge: [14, 3], Uppercut: [18, 6], Slam: [26, 11], Kick: [16, 4], Glide: [4, undefined as unknown as number], Dive: [20, 7] };
   it('every form and direction ships Lunge / Uppercut / Slam sheets with the agreed frame counts and release frames', () => {
     for (const set of ['kai', 'kai-f1', 'kai-f2', 'kai-f3']) for (const d of ['south', 'north', 'east', 'west']) {
       const root = path.resolve('public/art', set, d), m = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
