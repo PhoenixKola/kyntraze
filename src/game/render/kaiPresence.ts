@@ -79,8 +79,8 @@ export class KaiPresence {
     };
     const aim = o.hand && o.casting ? Math.atan2(o.hand.m.y - y + 30, o.hand.m.x - x) : 0, flipL = h.flipX ? -1 : 1;
     const W: [number, number, number, number, number][] = [[-15, -46, 44, -0.7, 0], [15, -46, 44, 0.7, 1], [-14, -26, 38, -1.2, 2], [14, -26, 38, 1.2, 3], [-8, -4, 40, 0.1, 0], [8, -4, 40, -0.1, 1]];
-    this.wraps.forEach((im, i) => { if (i === 2 || i === 3) { im.setVisible(false); return; } const q = W[i]; place(im, `${fk}_wrap${(fr + q[4]) % 4}`, x + q[0] * sc * flipL, y + q[1] * sc * 1.6, q[2], q[3] * flipL + (i === 2 || i === 3 ? aim * 0.4 : 0), (0.3 + 0.12 * Math.sin(this.clock * 7 + i)) * act, i % 2 === 1); });
-    this.licks.forEach((im, i) => { if (i > 0) { im.setVisible(false); return; } const ph = (this.clock * (f === 3 ? 0.6 : 1.1) + i / 3) % 1, px = [0, -18, 18][i], py = [-60, -50, -50][i]; place(im, `${fk}_lick${(fr + i) % 4}`, x + px * sc, y + (py - 14 * ph) * sc * 1.5, 30, (i - 1) * 0.25 + Math.sin(this.clock * 3 + i) * 0.1, (1 - ph) * (0.3 + 0.25 * Math.min(1, drive)) * k); });
+    this.wraps.forEach((im, i) => { if (i <= 3) { im.setVisible(false); return; } const q = W[i]; place(im, `${fk}_wrap${(fr + q[4]) % 4}`, x + q[0] * sc * flipL, y + q[1] * sc * 1.6, q[2], q[3] * flipL + (i === 2 || i === 3 ? aim * 0.4 : 0), (0.3 + 0.12 * Math.sin(this.clock * 7 + i)) * act, i % 2 === 1); });
+    this.licks.forEach((im, i) => { if (i >= 0) { im.setVisible(false); return; } const ph = (this.clock * (f === 3 ? 0.6 : 1.1) + i / 3) % 1, px = [0, -18, 18][i], py = [-60, -50, -50][i]; place(im, `${fk}_lick${(fr + i) % 4}`, x + px * sc, y + (py - 14 * ph) * sc * 1.5, 30, (i - 1) * 0.25 + Math.sin(this.clock * 3 + i) * 0.1, (1 - ph) * (0.3 + 0.25 * Math.min(1, drive)) * k); });
     // afterimages: echoes of the real frame on fast travel, dash and a sharp change of direction
     this.ghostClock -= dt;
     const want = !o.reduced && this.ghostClock <= 0 && (f >= 2 ? fast || turned : o.dashing);

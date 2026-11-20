@@ -144,7 +144,7 @@ export function cancelCast(s: GameState) {
 export function interruptOnHit(s: GameState) { if (s.hero !== 'kai') { interruptHero(s); return; } if (s.cast && !s.cast.released) cancelCast(s); }
 
 function beamPulse(s: GameState, c: Cast) {
-  const o = beamOrigin(s, c); let hits = 0; const hw = BEAM.halfWidth * s.mods.beamWidth * (c.form ? BEAM.formWidth : 1); const dmg = BEAM.damage * s.mods.beamDamage * (c.form ? BEAM.formDamage * s.mods.formPower : 1);
+  const o = beamOrigin(s, c); let hits = 0; const hold = Math.min(1, (c.charge ?? 0) / BEAM.holdMax), hw = BEAM.halfWidth * s.mods.beamWidth * (c.form ? BEAM.formWidth : 1) * (1 + 0.8 * hold); const dmg = BEAM.damage * s.mods.beamDamage * (c.form ? BEAM.formDamage * s.mods.formPower : 1) * (1 + 1.0 * hold);
   for (const e of s.enemies) {
     if (e.hp <= 0) continue;
     const ex = e.x - o.x, ey = e.y - o.y; const along = ex * c.dirX + ey * c.dirY;

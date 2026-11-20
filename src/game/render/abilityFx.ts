@@ -149,7 +149,7 @@ export class AbilityFx {
         if (dt > 0 && !reduced) { this.streakClock += dt; while (this.streakClock > 0.05) { this.streakClock -= 0.05; const a = rnd() * 6.28, r = 40 + rnd() * 26; this.spawn('streak', 10.7, aura, { x: o.x + Math.cos(a) * r, y: o.y + Math.sin(a) * r * 0.8, vx: -Math.cos(a) * r / 0.18, vy: -Math.sin(a) * r * 0.8 / 0.18, life: 0.18, s0: 0.6, s1: 0.2, a0: 0.2, a1: 1, rot: a + Math.PI }); } }
         if (u >= 1) { const k = 0.5 + 0.5 * Math.sin(this.clock * 30); this.g.lineStyle(2, core, 0.4 + 0.5 * k); this.g.strokeCircle(o.x, o.y, 15 + 4 * k); }   // fully charged: a pulsing ready ring, so the release moment is readable
         {   // aim indicator: the exact lane the lance will take, steerable while E is held (fills in as the charge builds, pulses once it is held at full)
-          const hw = BEAM.halfWidth * s.mods.beamWidth, L = beamLength(simO.x, simO.y, c.dirX, c.dirY, BEAM.length), nx = -c.dirY * hw, ny = c.dirX * hw, ex = o.x + c.dirX * L, ey = o.y + c.dirY * L, held = (c.charge ?? 0) > 0, pl = held ? 0.7 + 0.3 * Math.sin(this.clock * 14) : 1;
+          const hw = BEAM.halfWidth * s.mods.beamWidth * (1 + 0.8 * Math.min(1, (c.charge ?? 0) / BEAM.holdMax)), L = beamLength(simO.x, simO.y, c.dirX, c.dirY, BEAM.length), nx = -c.dirY * hw, ny = c.dirX * hw, ex = o.x + c.dirX * L, ey = o.y + c.dirY * L, held = (c.charge ?? 0) > 0, pl = held ? 0.7 + 0.3 * Math.sin(this.clock * 14) : 1;
           this.g.fillStyle(aura, (0.06 + 0.1 * u) * pl); this.g.fillPoints([new Phaser.Math.Vector2(o.x + nx, o.y + ny), new Phaser.Math.Vector2(ex + nx, ey + ny), new Phaser.Math.Vector2(ex - nx, ey - ny), new Phaser.Math.Vector2(o.x - nx, o.y - ny)], true);
           this.g.lineStyle(1.5, aura, (0.25 + 0.4 * u) * pl); this.g.lineBetween(o.x + nx, o.y + ny, ex + nx, ey + ny); this.g.lineBetween(o.x - nx, o.y - ny, ex - nx, ey - ny);
           this.g.lineStyle(2, core, (0.3 + 0.4 * u) * pl); this.g.lineBetween(o.x, o.y, ex, ey); this.g.strokeCircle(ex, ey, hw * 0.8);
@@ -157,7 +157,7 @@ export class AbilityFx {
       } else {
         const tf = c.t - BEAM.charge; const open = Math.min(1, tf / 0.07), close = Math.min(1, Math.max(0, (BEAM.fire + s.mods.beamLinger * BEAM.pulseEvery - tf) / 0.14));
         const env = Math.min(open, close); const flick = 1 + 0.06 * Math.sin(this.clock * 70);
-        const seg = this.scene.textures.get(abilityFxKey('beam_seg')).getSourceImage(); const hw = BEAM.halfWidth * s.mods.beamWidth * (c.form ? BEAM.formWidth : 1);
+        const seg = this.scene.textures.get(abilityFxKey('beam_seg')).getSourceImage(); const hw = BEAM.halfWidth * s.mods.beamWidth * (c.form ? BEAM.formWidth : 1) * (1 + 0.8 * Math.min(1, (c.charge ?? 0) / BEAM.holdMax));
         const sy = (hw * 2 / seg.height) * Math.max(0.05, env) * flick * (1 + 0.4 * Math.max(0, 1 - tf / 0.12));   // width pop on release, settles to the lane
         const ex = simO.x + c.dirX * c.len, ey = simO.y + c.dirY * c.len;
         const len = Math.max(10, (ex - o.x) * c.dirX + (ey - o.y) * c.dirY);   // from the fists to where the sim lane ends
