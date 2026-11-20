@@ -9,7 +9,7 @@ export const KO_NAMES = (['flare', 'comet', 'still'] as const).flatMap(f => (['d
 export const koKey = (n: string) => `ko-${n}`; export const koUrl = (n: string) => `/art/fx/kai-o/${n}.png`;
 const COL = [0, 0xffa83a, 0xffd93a, 0xdfeaff] as const;
 interface Pop { im: Phaser.GameObjects.Image; t: number; dur: number; frames: string[]; w: number; w1: number; a: number; vx: number; vy: number; flat: boolean; spin: number }
-export interface CombatFxInput { dt: number; state: GameState; hero: Phaser.GameObjects.Sprite; hand: { m: { x: number; y: number } } | null; scale: number; reduced: boolean; running: boolean; dead: boolean; crowded: boolean }
+export interface CombatFxInput { dt: number; state: GameState; hero: Phaser.GameObjects.Sprite; hand: { m: { x: number; y: number } } | null; scale: number; reduced: boolean; running: boolean; dead: boolean; crowded: boolean; /** the hero sprite's facing, so the dragon looks the same way Kai does */ facing?: string }
 
 export class KaiCombatFx {
   private pops: Pop[] = []; private g: Phaser.GameObjects.Graphics; private readonly dragon: OverdriveDragon; private orb: Phaser.GameObjects.Image; private sigil: Phaser.GameObjects.Image;
@@ -152,7 +152,7 @@ export class KaiCombatFx {
     const vx = dt > 0 ? (h.x - this.px) / dt : 0, vy = dt > 0 ? (h.y - this.py) / dt : 0, sp = Math.hypot(vx, vy); this.px = h.x; this.py = h.y;
     this.lx += (h.x - this.lx) * Math.min(1, dt * 11); this.ly += (h.y - this.ly) * Math.min(1, dt * 11);
     if (Math.abs(vx) > 40) this.side += ((vx > 0 ? 1 : -1) - this.side) * Math.min(1, dt * 7); else if (c?.kind === 'signature' || s.hx.strike) this.side += ((s.aim.x >= 0 ? 1 : -1) - this.side) * Math.min(1, dt * 3);
-    const dm = (s.aim.x || s.aim.y) ? s.aim : { x: 1, y: 0 };
+    const dm = o.facing === 'east' ? { x: 1, y: 0 } : o.facing === 'west' ? { x: -1, y: 0 } : o.facing === 'north' ? { x: 0, y: -1 } : o.facing === 'south' ? { x: 0, y: 1 } : (s.aim.x || s.aim.y) ? s.aim : { x: 1, y: 0 };
     this.dragon.update({ dt, clock: this.clock, x: h.x, y: h.y, sc, form: f as 1 | 2 | 3, amount: this.dragonA / 0.9, vx, vy, aimX: dm.x, aimY: dm.y, fly: p.flyT > 0, dash: p.dashRemaining > 0, reduced: o.reduced, crowded: o.crowded });
     if (this.dragonA > 0.02) {
       // sigil under the feet, pulsing

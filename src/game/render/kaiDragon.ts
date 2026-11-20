@@ -14,7 +14,7 @@ const sstep = (a: number) => { const t = Math.max(0, Math.min(1, a)); return t *
 export interface DragonInput { dt: number; clock: number; x: number; y: number; sc: number; form: 1 | 2 | 3; amount: number; vx: number; vy: number; aimX: number; aimY: number; fly: boolean; dash: boolean; reduced: boolean; crowded: boolean }
 
 export class OverdriveDragon {
-  private readonly rear: Phaser.GameObjects.Graphics; private readonly front: Phaser.GameObjects.Graphics; private readonly head: Phaser.GameObjects.Image; private readonly limb: Phaser.GameObjects.Image; private readonly tail: Phaser.GameObjects.Image; private limbT = 0;
+  private readonly rear: Phaser.GameObjects.Graphics; private readonly front: Phaser.GameObjects.Graphics; private readonly head: Phaser.GameObjects.Image; private readonly limb: Phaser.GameObjects.Image; private readonly tail: Phaser.GameObjects.Image; private limbT = 0; private lastRight = true;
   private readonly cx = new Float32Array(N); private readonly cy = new Float32Array(N); private readonly px = new Float32Array(N); private readonly py = new Float32Array(N);
   private readonly wh: number[][] = [[], []]; private col = { fill: [255, 104, 18], edge: [255, 214, 120] }; private fresh = true;
   private spin = 0; private flyMix = 0; private lunge = 0; private lx = 0; private ly = 0; private jaw = 0; private bolts: number[][] = []; private boltT = 0; private lastForm = 0; private aim = 0;
@@ -90,7 +90,7 @@ export class OverdriveDragon {
       this.front.lineStyle(1.4, 0xffffff, 0.7 * alpha); for (const b of this.bolts) for (let z = 0; z < 3; z++) this.front.lineBetween(b[z * 2], b[z * 2 + 1], b[z * 2 + 2], b[z * 2 + 3]);
     }
     // ---- head (ImageGen art): leads the chain, mirrors to face its travel, opens the jaws on strikes
-    const fwx = hx - this.px[3], fwy = hy - this.py[3], right = Math.abs(fwx) < 6 ? Math.cos(this.aim) >= 0 : fwx >= 0, ang = Math.atan2(fwy, Math.abs(fwx) + 4) * 0.55 * (right ? 1 : -1);
+    const fwx = hx - this.px[3], fwy = hy - this.py[3], right = this.lunge > 0.3 ? tgx >= 0 : Math.abs(Math.cos(this.aim)) > 0.3 ? Math.cos(this.aim) > 0 : this.lastRight, ang = Math.atan2(fwy, Math.abs(fwx) + 4) * 0.55 * (right ? 1 : -1);
     const frame = this.jaw > 0.55 ? 2 : this.jaw > 0.12 || this.lunge > 0 ? 1 : 0, fk = `ko-${key}_head${frame}`;
     if (this.scene.textures.exists(fk)) {
       const w = HEAD_W[i.form] * sc * (1 + this.jaw * 0.12) * (0.55 + 0.45 * Math.min(1, A * 1.6));
@@ -108,7 +108,7 @@ export class OverdriveDragon {
       const dxT = this.px[ti] - this.px[ti - 3], dyT = this.py[ti] - this.py[ti - 3], ta = Math.atan2(dyT, dxT) - Math.PI, tw = 78 * sc * (0.6 + 0.4 * A);
       this.tail.setTexture(tk(Math.floor(clock * 5) % 4)).setVisible(true).setPosition(Math.round(this.px[ti]), Math.round(this.py[ti])).setScale(tw / this.tail.width).setRotation(ta).setAlpha(0.6 * alpha);
     } else this.tail.setVisible(false);
-    this.fresh = false;
+    this.lastRight = right; this.fresh = false;
   }
   destroy() { this.rear.destroy(); this.front.destroy(); this.head.destroy(); this.limb.destroy(); this.tail.destroy(); }
 }
