@@ -9,9 +9,9 @@ export const KP_NAMES = (['flare', 'comet', 'still'] as const).flatMap(f => (['r
 export const kpKey = (n: string) => `kp-${n}`; export const kpUrl = (n: string) => `/art/fx/kai-p/${n}.png`;
 interface Look { col: number; hot: number; sil: number; ghost: number; ghostLife: number; ring: number; ringAlpha: number }
 const LOOK: Record<1 | 2 | 3, Look> = {
-  1: { col: 0xff9a2e, hot: 0xffd27a, sil: 0.34, ghost: 0.26, ghostLife: 0.3, ring: 1.0, ringAlpha: 0.55 },
-  2: { col: 0xffcf2a, hot: 0xfff2a0, sil: 0.42, ghost: 0.5, ghostLife: 0.34, ring: 1.3, ringAlpha: 0.75 },
-  3: { col: 0xcfdcff, hot: 0xffffff, sil: 0.3, ghost: 0.46, ghostLife: 0.5, ring: 1.15, ringAlpha: 0.5 },
+  1: { col: 0xff9a2e, hot: 0xffd27a, sil: 0.22, ghost: 0.18, ghostLife: 0.3, ring: 1.0, ringAlpha: 0.55 },
+  2: { col: 0xffcf2a, hot: 0xfff2a0, sil: 0.28, ghost: 0.34, ghostLife: 0.34, ring: 1.3, ringAlpha: 0.75 },
+  3: { col: 0xcfdcff, hot: 0xffffff, sil: 0.2, ghost: 0.3, ghostLife: 0.5, ring: 1.15, ringAlpha: 0.5 },
 };
 interface Ghost { spr: Phaser.GameObjects.Sprite; life: number; max: number; a: number }
 interface Ring { flat?: boolean; im: Phaser.GameObjects.Image; t: number; dur: number; s0: number; s1: number; a: number }
@@ -66,10 +66,10 @@ export class KaiPresence {
     const sc = o.scale / 0.5, pulse = 0.65 + 0.35 * Math.sin(this.clock * (f === 2 ? 11 : 6)), flick = f === 2 ? (Math.sin(this.clock * 43) > 0.4 ? 1.25 : 0.9) : 1;
     const pts: [number, number, number][] = [[-16, -44, 0.5], [16, -44, 0.5], [0, -60, 0.45], [-9, 0, 0.55], [9, 0, 0.55]];
     this.glows.forEach((g, i) => {
-      const p = pts[i];
+      g.setVisible(false); return; const p = pts[i];
       g.setVisible(true).setTint(i === 2 ? L.hot : L.col).setPosition(Math.round(x + p[0] * sc), Math.round(y + p[1] * sc - (i > 2 ? 6 : 0))).setScale(p[2] * sc * (0.8 + 0.3 * pulse) * flick * (o.casting ? 1.3 : 1)).setAlpha((0.22 + 0.22 * pulse + 0.2 * Math.min(1, drive)) * k * (i === 2 ? 0.8 : 1));
     });
-    if (o.hand && o.casting) this.glows[0].setPosition(Math.round(o.hand.m.x), Math.round(o.hand.m.y)).setTint(L.hot).setScale(0.7 * sc * (0.8 + 0.4 * pulse)).setAlpha(0.45 * k);
+    if (false as boolean && o.hand && o.casting) this.glows[0].setPosition(Math.round(o.hand.m.x), Math.round(o.hand.m.y)).setTint(L.hot).setScale(0.7 * sc * (0.8 + 0.4 * pulse)).setAlpha(0.45 * k);
 
     // ImageGen energy bound to the body: arcs wrapped around shoulders / forearms / shins, wisps rising off the back and shoulders (flipbooks, pinned to the sprite)
     const fps = f === 2 ? 22 : f === 3 ? 5 : 11, fr = Math.floor(this.clock * fps), fk = KP_FORM[f], act = (0.5 + 0.5 * Math.min(1, drive)) * k;
@@ -79,8 +79,8 @@ export class KaiPresence {
     };
     const aim = o.hand && o.casting ? Math.atan2(o.hand.m.y - y + 30, o.hand.m.x - x) : 0, flipL = h.flipX ? -1 : 1;
     const W: [number, number, number, number, number][] = [[-15, -46, 44, -0.7, 0], [15, -46, 44, 0.7, 1], [-14, -26, 38, -1.2, 2], [14, -26, 38, 1.2, 3], [-8, -4, 40, 0.1, 0], [8, -4, 40, -0.1, 1]];
-    this.wraps.forEach((im, i) => { const q = W[i]; place(im, `${fk}_wrap${(fr + q[4]) % 4}`, x + q[0] * sc * flipL, y + q[1] * sc * 1.6, q[2], q[3] * flipL + (i === 2 || i === 3 ? aim * 0.4 : 0), (0.55 + 0.3 * Math.sin(this.clock * 7 + i)) * act * (o.casting && i >= 2 && i <= 3 ? 1.4 : 1), i % 2 === 1); });
-    this.licks.forEach((im, i) => { const ph = (this.clock * (f === 3 ? 0.6 : 1.1) + i / 3) % 1, px = [0, -18, 18][i], py = [-60, -50, -50][i]; place(im, `${fk}_lick${(fr + i) % 4}`, x + px * sc, y + (py - 14 * ph) * sc * 1.5, 30, (i - 1) * 0.25 + Math.sin(this.clock * 3 + i) * 0.1, (1 - ph) * (0.5 + 0.35 * Math.min(1, drive)) * k * 1.3); });
+    this.wraps.forEach((im, i) => { if (i === 2 || i === 3) { im.setVisible(false); return; } const q = W[i]; place(im, `${fk}_wrap${(fr + q[4]) % 4}`, x + q[0] * sc * flipL, y + q[1] * sc * 1.6, q[2], q[3] * flipL + (i === 2 || i === 3 ? aim * 0.4 : 0), (0.3 + 0.12 * Math.sin(this.clock * 7 + i)) * act, i % 2 === 1); });
+    this.licks.forEach((im, i) => { if (i > 0) { im.setVisible(false); return; } const ph = (this.clock * (f === 3 ? 0.6 : 1.1) + i / 3) % 1, px = [0, -18, 18][i], py = [-60, -50, -50][i]; place(im, `${fk}_lick${(fr + i) % 4}`, x + px * sc, y + (py - 14 * ph) * sc * 1.5, 30, (i - 1) * 0.25 + Math.sin(this.clock * 3 + i) * 0.1, (1 - ph) * (0.3 + 0.25 * Math.min(1, drive)) * k); });
     // afterimages: echoes of the real frame on fast travel, dash and a sharp change of direction
     this.ghostClock -= dt;
     const want = !o.reduced && this.ghostClock <= 0 && (f >= 2 ? fast || turned : o.dashing);

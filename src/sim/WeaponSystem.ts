@@ -5,11 +5,13 @@ import { heroActivateQ, updateHeroAuto } from './HeroSystem';
 import { kaiQ, surgeAutoMul } from './KaiKit';
 import { faceOf, fistWorld } from './AbilitySystem';
 import { normalize } from '../core/Math';
+import { kaiAuto } from './KaiCombat';
 import { handOffset, strikeHand } from './Strike';
 export function updateAutoWeapon(state: GameState, dt: number) {
   const p = state.player;
   if (state.hero !== 'kai') { updateHeroAuto(state, dt); return; }
   if (state.cast) return;   // signature abilities own Kai's hands; the basic attack resumes afterwards
+  kaiAuto(state, dt); return;
   p.attackClock -= dt;
   if (p.attackClock > 0) return;
   p.attackClock += Math.max(0.16, p.attackPeriod * (p.form ? 0.75 : 1));

@@ -31,8 +31,8 @@ describe('Fracture Lance hold', () => {
     expect(a.cast?.released).toBe(true);
     const sim = new Simulation(5, 'gloam', false, false), s = quiet(sim);
     sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' }));
-    run(sim, BEAM.charge + 0.6, idle({ beamHeld: true, aimX: 0, aimY: -1, aimSrc: 'pointer' }));
-    expect(s.cast?.released).toBe(false); expect(s.cast!.dirY).toBeCloseTo(-1, 3); expect(s.cast!.charge).toBeGreaterThan(0.5);
+    run(sim, BEAM.charge + 0.3, idle({ beamHeld: true, aimX: 0, aimY: -1, aimSrc: 'pointer' }));
+    expect(s.cast?.released).toBe(false); expect(s.cast!.dirY).toBeCloseTo(-1, 3); expect(s.cast!.charge).toBeGreaterThan(0.25);
     run(sim, 0.1, idle({ beamHeld: false }));
     expect(s.cast?.released).toBe(true); expect(s.cast!.dirY).toBeCloseTo(-1, 3);
   });

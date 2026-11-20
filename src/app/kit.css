@@ -727,3 +727,10 @@ main[data-testid="hero-select"] .arena-strip-go { position: static; white-space:
 .slot-tip { max-width: min(max(300px, calc(300 * var(--u))), 72vw); }
 .tip-title { flex: 1 1 auto; min-width: 3.5em; }
 .tip-key { flex: 0 1 auto; white-space: nowrap; }
+
+/* Kai signature / Overdrive tiles */
+.slot.tone-sig.ready, .slot.tone-sig.active { box-shadow: 0 0 10px rgba(255, 190, 80, .55); }
+.slot.tone-od.ready { box-shadow: 0 0 12px rgba(255, 230, 150, .8); animation: od-pulse 1s ease-in-out infinite; }
+.slot.tone-od.active { box-shadow: 0 0 14px rgba(255, 220, 120, .9); }
+@keyframes od-pulse { 50% { filter: brightness(1.35); } }
+@media (prefers-reduced-motion: reduce) { .slot.tone-od.ready { animation: none; } }

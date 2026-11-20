@@ -67,10 +67,10 @@ describe('unified InputController: keyboard + controller, one path', () => {
   beforeAll(async () => { (globalThis as unknown as { window: object }).window = { addEventListener: () => undefined, removeEventListener: () => undefined }; InputController = (await import('../game/input/InputController')).InputController; });
   const make = (frames: Array<PadLike | null>) => { let i = 0; let paused = 0, lost = 0; const c = new InputController(() => { paused++; }, () => undefined, () => { lost++; }, () => [frames[Math.min(i, frames.length - 1)]]); return { c, next: () => { i++; }, paused: () => paused, lost: () => lost }; };
   it('maps A/X/Y/RB/RT/LB/LT once per press and START to pause', () => {
-    const { c, next, paused } = make([pad(), pad({ down: ['A', 'X'] }), pad({ down: ['A', 'X'] }), pad({ down: ['Y', 'RB'] }), pad({ down: ['LT'] }), pad({ down: ['START'] }), pad()]);
+    const { c, next, paused } = make([pad(), pad({ down: ['A', 'X'] }), pad({ down: ['A', 'X'] }), pad({ down: ['Y', 'RB'] }), pad({ down: ['RT'] }), pad({ down: ['START'] }), pad()]);
     const r = []; for (let k = 0; k < 7; k++) { r.push(c.read()); next(); }
     expect(r[1].dash && r[1].q).toBe(true); expect(r[2].dash || r[2].q).toBe(false);   // held A/X do not repeat
-    expect(r[3].f && r[3].beam).toBe(true); expect(r[4].sphere).toBe(true); expect(paused()).toBe(1);
+    expect(r[3].f && r[3].beam).toBe(true); expect(r[4].sig).toBe(true); expect(r[4].sphere).toBe(false); expect(paused()).toBe(1);
     expect(r[3].sphere || r[3].dash).toBe(false);
   });
   it('left stick / D-pad drive the movement vector (8-way); the keyboard wins when both are used', () => {
@@ -81,5 +81,5 @@ describe('unified InputController: keyboard + controller, one path', () => {
     const used = make([pad(), pad({ down: ['A'] }), null, null]); for (let k = 0; k < 4; k++) { used.c.read(); used.next(); } expect(used.lost()).toBe(1);
     const idle = make([pad(), pad(), null, null]); for (let k = 0; k < 4; k++) { idle.c.read(); idle.next(); } expect(idle.lost()).toBe(0);
   });
-  it('without any controller the input is the unchanged keyboard-only shape', () => { const { c } = make([null]); expect(c.read()).toEqual({ x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false, beamHeld: false, fHeld: false }); });
+  it('without any controller the input is the unchanged keyboard-only shape', () => { const { c } = make([null]); expect(c.read()).toEqual({ x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false, beamHeld: false, fHeld: false, sig: false, sigHeld: false, od: false, flyHeld: false }); });
 });

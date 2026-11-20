@@ -12,6 +12,8 @@ import { cancelHero, heroMoveScale, heroStartE, heroStartR, interruptHero } from
 import { startRift, startReversal, updateRift, updateReversal, trackFreeAim, freeAim } from './ApexSystem';
 import { crucibleR, flareE, isKitKind, kaiMoveScale, updateKaiKit } from './KaiKit';
 import { STRIKES } from '../content/kaiKit';
+import { SIG } from '../content/kaiCombat';
+import { updateKaiCombat } from './KaiCombat';
 
 const EVENT_CAP = 24;
 function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number) {
@@ -31,6 +33,7 @@ const BEAM_PULSES_MAX = BEAM_PULSES + Math.round(BEAM.recover / BEAM.pulseEvery)
 export function castMoveScale(s: GameState): number {
   if (s.hero !== 'kai') return heroMoveScale(s);
   const c = s.cast; if (!c) return 1;
+  if (c.kind === 'signature') return c.released ? SIG.moveScaleRelease : SIG.moveScaleCharge;
   if (isKitKind(c.kind)) return kaiMoveScale(c);
   if (c.kind === 'rift') return !c.released ? RIFT.moveScaleCharge : (c.rt ?? 0) < RIFT.fire[c.tier ?? 0] ? RIFT.moveScaleFire : RIFT.moveScaleRecover;
   if (c.kind === 'reversal') return REVERSAL.moveScale;
@@ -184,13 +187,13 @@ function echoBurst(s: GameState, ec: GameState['echoes'][number]) {
 export function updateAbilities(s: GameState, dt: number) {
   const p = s.player;
   p.beamCooldown = Math.max(0, p.beamCooldown - dt); p.sphereCooldown = Math.max(0, p.sphereCooldown - dt); p.dragonCooldown = Math.max(0, p.dragonCooldown - dt); p.cometCooldown = Math.max(0, p.cometCooldown - dt); p.riftCooldown = Math.max(0, p.riftCooldown - dt); p.reversalCooldown = Math.max(0, p.reversalCooldown - dt); p.evadeCooldown = Math.max(0, p.evadeCooldown - dt);
-  if (s.hero === 'kai') updateKaiKit(s, dt);
+  if (s.hero === 'kai') { updateKaiKit(s, dt); updateKaiCombat(s, dt); }
   for (const b of s.blasts) b.ttl -= dt;
   s.blasts = s.blasts.filter(b => b.ttl > 0);
   if (s.echoes.length) { for (const ec of s.echoes) ec.t -= dt; const due = s.echoes.filter(ec => ec.t <= 0); s.echoes = s.echoes.filter(ec => ec.t > 0); for (const ec of due) echoBurst(s, ec); }
   const sh = s.sphere;
   if (sh) { sh.t += dt; if (sh.t >= SPHERE.flight) { s.sphere = null; detonate(s, sh); } }
-  const c = s.cast; if (!c || isKitKind(c.kind)) return;
+  const c = s.cast; if (!c || isKitKind(c.kind) || c.kind === 'signature') return;
   const before = c.t; c.t += dt;
   if (c.kind === 'beam' && !c.released) {   // Fracture Lance: holding E keeps the charge steerable until the last moment; letting go (or the hold limit) fires it
     const fa = freeAim(s);

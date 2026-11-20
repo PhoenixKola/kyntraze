@@ -100,7 +100,7 @@ export class ArenaScene extends Phaser.Scene {
     for (const ev of s.b22.ev) { if (ev.id <= this.revealCur) continue; this.revealCur = ev.id; const a = REVEAL_ACCENT[ev.kind]; if (a && !this.reduced) { if (a.shake > 0) this.cameras.main.shake(a.shakeMs, a.shake); if (a.flash) this.cameras.main.flash(a.flash.ms, ...a.flash.rgb, true); } }
     if (s.phase === 'dead' && this.entityRenderer.deathPresented()) this.bridge.markDeathShown();
     const hp = this.entityRenderer.debugPose(), k0 = formKey(s.hero, s.player.form) ?? (s.hero === 'kai' && s.hx.kk?.surge ? 'surge' : null);
-    this.presentation.update(s, hp.x, hp.y, hp.visualForm !== 'base', this.reduced, k0 ? RING_TINT[k0] : null);
+    this.presentation.update(s, hp.x, hp.y + (hp.lift ?? 0), hp.visualForm !== 'base', this.reduced, k0 ? RING_TINT[k0] : null);
     if (s.party) {
       this.partnerRenderer ??= new EntityRenderer(this, true, s.party.slots[1].bag.hero === 'kai');
       const d = s.party.slots[1].down, in1 = s.party.slots[1].input, pr = this.partnerRenderer, all = s.abilityEvents;

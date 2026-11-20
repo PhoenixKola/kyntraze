@@ -13,6 +13,7 @@ import { updateDrive } from './DriveSystem';
 import { pruneDeadEntities } from './EntityRegistry';
 import type { UpgradeId } from '../content/upgrades';
 import { startAbility, updateAbilities, trackAim } from './AbilitySystem';
+import { kaiCombatInput, formShiftInput } from './KaiCombat';
 import { updateHero } from './HeroSystem';
 import { gradeRun } from './GameTelemetry';
 import { updateArenaHazards } from './ArenaHazards';
@@ -38,7 +39,7 @@ export class Simulation {
   private qHeld = false;
   private fHeld = false;
   private eHeld = false;
-  private rHeld = false;
+  private rHeld = false; private kc = { sig: false, od: false };
   constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false, apexUnlocked = false, config: RunConfig = NO_CONFIG) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked, apexUnlocked); applyRunConfig(this.state, config); if (this.state.plan.cycle > 0) this.state.b22.endless = { fromT: 0, cycle: 0, bossAt: 120, offered: false, extracted: false }; }
   private readonly buf = { q: 0, e: 0, r: 0 };
   /** B22.6: bring a second fighter into the SAME simulation (local couch or an online peer). */
@@ -61,13 +62,14 @@ export class Simulation {
     const ult = !!s.b22.ult.act;   // B22: the ultimate owns the fighter's hands until it ends
     const castQ = () => { s.b22.ctxSlot = 'q'; const ok = !ult && activateQ(s); s.b22.ctxSlot = null; if (ok) onCast(s, 'q'); return ok; };
     if (input.q && !this.qHeld) { if (!castQ()) bf.q = ABILITY_BUFFER; else bf.q = 0; } else if (bf.q > 0 && castQ()) bf.q = 0;
-    const fDown = !!(input.f || input.fHeld); formInput(s, fDown, this.fHeld);   // the press edge counts too, so a tap shorter than one tick is never lost
+    const fDown = !!(input.f || input.fHeld); formShiftInput(s, input, fDown, this.fHeld); formInput(s, fDown, this.fHeld);   // the press edge counts too, so a tap shorter than one tick is never lost
     const bufE = s.hero !== 'sora';
     const castE = () => { const ok = !ult && startAbility(s, 'beam'); if (ok) onCast(s, 'e'); return ok; };
     const castR = () => { if (ult) return false; if (ultReady(s) && startUltimate(s)) return true; const ok = startAbility(s, 'sphere'); if (ok) onCast(s, 'r'); return ok; };
     if (input.beam && !this.eHeld) { if (!castE() && bufE) bf.e = ABILITY_BUFFER; else bf.e = 0; } else if (bf.e > 0 && bufE && castE()) bf.e = 0;
     if (input.sphere && !this.rHeld) { if (!castR()) bf.r = ABILITY_BUFFER; else bf.r = 0; } else if (bf.r > 0 && castR()) bf.r = 0;
     this.qHeld = input.q; this.fHeld = fDown; this.eHeld = !!input.beam || !!input.beamHeld; this.rHeld = !!input.sphere; s.eHeld = !!input.beamHeld;
+    this.kc = kaiCombatInput(s, input, this.kc);
     const p = s.player; p.qCooldown = Math.max(0, p.qCooldown - dt);
     if (s.mods.regen > 0 && !s.run.noRegen) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
     updateDrive(s, dt);
@@ -179,7 +181,7 @@ export class Simulation {
     const ult = !!s.b22.ult.act;
     const castQ = () => { s.b22.ctxSlot = 'q'; const ok = !ult && activateQ(s); s.b22.ctxSlot = null; if (ok) onCast(s, 'q'); return ok; };
     if (input.q && !edge.q) { if (!castQ()) bf.q = ABILITY_BUFFER; else bf.q = 0; } else if (bf.q > 0 && castQ()) bf.q = 0;
-    const fDown = !!(input.f || input.fHeld); const wasF = edge.f; formInput(s, fDown, wasF);
+    const fDown = !!(input.f || input.fHeld); const wasF = edge.f; formShiftInput(s, input, fDown, wasF); formInput(s, fDown, wasF);
     if (s.selector.open) { activateForm(s); s.selector.open = false; }
     if (s.cinema) { const c = s.cinema; s.cinema = null; s.player.form = c.to as 1 | 2 | 3; s.player.drive = 100; s.player.invulnerable = Math.max(s.player.invulnerable, 0.5); if (s.hero !== 'kai') s.heroFormSeen++; slot.formAt = s.time; s.b22.ev.push({ id: s.b22.evId++, kind: 'form_instant', x: s.player.x, y: s.player.y }); }
     const bufE = s.hero !== 'sora';
@@ -188,6 +190,7 @@ export class Simulation {
     if (input.beam && !edge.e) { if (!castE() && bufE) bf.e = ABILITY_BUFFER; else bf.e = 0; } else if (bf.e > 0 && bufE && castE()) bf.e = 0;
     if (input.sphere && !edge.r) { if (!castR()) bf.r = ABILITY_BUFFER; else bf.r = 0; } else if (bf.r > 0 && castR()) bf.r = 0;
     edge.q = input.q; edge.f = fDown; edge.e = !!input.beam || !!input.beamHeld; edge.r = !!input.sphere; s.eHeld = !!input.beamHeld;
+    { const k = kaiCombatInput(s, input, { sig: !!edge.sig, od: !!edge.od }); edge.sig = k.sig; edge.od = k.od; }
     const p = s.player; p.qCooldown = Math.max(0, p.qCooldown - dt);
     if (s.mods.regen > 0 && !s.run.noRegen) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
     updateDrive(s, dt); updateAbilities(s, dt); if (s.hero !== 'kai') updateHero(s, dt);

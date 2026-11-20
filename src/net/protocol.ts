@@ -13,7 +13,7 @@ export type ClientMsg =
   | { t: 'input'; seq: number; i: WireInput }
   | { t: 'pick'; kind: 'upgrade' | 'branch' | 'relic' | 'legend'; id: string }
   | { t: 'leave' } | { t: 'ping'; n: number };
-export interface WireInput { x: number; y: number; dash: boolean; q: boolean; f: boolean; beam: boolean; sphere: boolean; beamHeld: boolean; fHeld: boolean; aimX?: number; aimY?: number; aimSrc?: 'pointer' | 'stick'; aimDist?: number }
+export interface WireInput { x: number; y: number; dash: boolean; q: boolean; f: boolean; beam: boolean; sphere: boolean; beamHeld: boolean; fHeld: boolean; sig?: boolean; sigHeld?: boolean; od?: boolean; sigAbort?: boolean; flyHeld?: boolean; aimX?: number; aimY?: number; aimSrc?: 'pointer' | 'stick'; aimDist?: number }
 export type ServerMsg =
   | { t: 'welcome'; v: number; id: string; token: string; serverTime: number }
   | { t: 'room'; code: string; mode: RoomMode; arena: string; state: 'lobby' | 'running' | 'ended'; you: number; players: { name: string; hero: HeroId; ready: boolean; connected: boolean }[] }
@@ -37,6 +37,7 @@ export function parseClient(raw: string): ClientMsg | null {
     case 'input': {
       const i = o.i as Record<string, unknown> | undefined; if (!i || typeof i !== 'object' || !fin(o.seq, 0, 2 ** 31)) return null;
       if (!fin(i.x, -1, 1) || !fin(i.y, -1, 1)) return null; for (const k of ['dash', 'q', 'f', 'beam', 'sphere', 'beamHeld', 'fHeld']) if (typeof i[k] !== 'boolean') return null;
+      for (const k of ['sig', 'sigHeld', 'od', 'sigAbort', 'flyHeld']) if (i[k] !== undefined && typeof i[k] !== 'boolean') return null;
       const aim = i.aimX !== undefined ? (fin(i.aimX, -1, 1) && fin(i.aimY, -1, 1) && (i.aimSrc === 'pointer' || i.aimSrc === 'stick') && (i.aimDist === undefined || fin(i.aimDist, 0, 5000))) : true; if (!aim) return null;
       return { t: 'input', seq: o.seq as number, i: i as unknown as WireInput };
     }
@@ -46,5 +47,5 @@ export function parseClient(raw: string): ClientMsg | null {
     default: return null;
   }
 }
-export const toInputState = (w: WireInput): InputState => ({ x: w.x, y: w.y, dash: w.dash, q: w.q, f: w.f, beam: w.beam, sphere: w.sphere, beamHeld: w.beamHeld, fHeld: w.fHeld, ...(w.aimX !== undefined ? { aimX: w.aimX, aimY: w.aimY, aimSrc: w.aimSrc, ...(w.aimDist !== undefined ? { aimDist: w.aimDist } : {}) } : {}) });
-export const fromInputState = (i: InputState): WireInput => ({ x: i.x, y: i.y, dash: i.dash, q: i.q, f: i.f, beam: !!i.beam, sphere: !!i.sphere, beamHeld: !!i.beamHeld, fHeld: !!i.fHeld, ...(i.aimX !== undefined ? { aimX: i.aimX, aimY: i.aimY, aimSrc: i.aimSrc, ...(i.aimDist !== undefined ? { aimDist: i.aimDist } : {}) } : {}) });
+export const toInputState = (w: WireInput): InputState => ({ x: w.x, y: w.y, dash: w.dash, q: w.q, f: w.f, beam: w.beam, sphere: w.sphere, beamHeld: w.beamHeld, fHeld: w.fHeld, ...(w.sig ? { sig: true } : {}), ...(w.sigHeld ? { sigHeld: true } : {}), ...(w.od ? { od: true } : {}), ...(w.sigAbort ? { sigAbort: true } : {}), ...(w.flyHeld ? { flyHeld: true } : {}), ...(w.aimX !== undefined ? { aimX: w.aimX, aimY: w.aimY, aimSrc: w.aimSrc, ...(w.aimDist !== undefined ? { aimDist: w.aimDist } : {}) } : {}) });
+export const fromInputState = (i: InputState): WireInput => ({ x: i.x, y: i.y, dash: i.dash, q: i.q, f: i.f, beam: !!i.beam, sphere: !!i.sphere, beamHeld: !!i.beamHeld, fHeld: !!i.fHeld, ...(i.sig ? { sig: true } : {}), ...(i.sigHeld ? { sigHeld: true } : {}), ...(i.od ? { od: true } : {}), ...(i.sigAbort ? { sigAbort: true } : {}), ...(i.flyHeld ? { flyHeld: true } : {}), ...(i.aimX !== undefined ? { aimX: i.aimX, aimY: i.aimY, aimSrc: i.aimSrc, ...(i.aimDist !== undefined ? { aimDist: i.aimDist } : {}) } : {}) });

@@ -1,5 +1,7 @@
 import { vexTint } from './vexTint';
 import { KaiPresence } from './kaiPresence';
+import { KaiCombatFx } from './kaiCombatFx';
+import { FLY } from '../../content/kaiCombat';
 import Phaser from 'phaser';
 import { RULES } from '../../core/Rules';
 import { FxPool, vfxKey } from './fxPool';
@@ -61,7 +63,7 @@ export class EntityRenderer {
     this.f3 = scene.registry.get(KAI_F3_REGISTRY_KEY) as KaiManifests | undefined;
     this.hairLayer = new HairLayer(scene); this.outfitLayer = new OutfitLayer(scene, scene.registry.get(HAIR_ANCHORS_KEY) as HairTable | undefined); this.hairTable = scene.registry.get(HAIR_ANCHORS_KEY) as HairTable | undefined;
     this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1, this.f2, this.f3); this.cometFx = new CometFx(scene); this.kitFx = new KaiKitFx(scene, this.f3); this.apexFx = new ApexFx(scene); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = partner ? null : new EnemyRenderer(scene); this.bosses = partner ? null : new BossRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
-    this.presence = new KaiPresence(scene);
+    this.presence = new KaiPresence(scene); this.combatFx = new KaiCombatFx(scene);
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
     // Rim + stroke run per sprite (as in B20). While the two layers are split (moving cast) they are switched off, because each layer's open waist edge would get its own glow; the aura layer below carries the glow of the UNION silhouette instead.
@@ -155,7 +157,7 @@ export class EntityRenderer {
   handAnchor() { return this.hand; }
   /** QA: the world point the beam/orb was last anchored to and whether it came from the sprite anchors or the sim fallback. */
   fxOrigin() { return this.abilityFx.lastOrigin; }
-  debugPose() { return { ...this.pose, visualForm: this.animator.visualForm, transforming: this.animator.transforming, texture: this.hairLayer.srcKey || this.hero.texture.key, frameIndex: Number(this.hairLayer.srcFrame || this.hero.frame.name), outfit: this.outfitLayer.shown, hair: { x: this.hairDrv.spring.x, y: this.hairDrv.spring.y, live: this.hairLayer.active }, x: this.hero.x, y: this.hero.y, scale: this.baseScale }; }
+  debugPose() { return { lift: this.liftNow, ...this.pose, visualForm: this.animator.visualForm, transforming: this.animator.transforming, texture: this.hairLayer.srcKey || this.hero.texture.key, frameIndex: Number(this.hairLayer.srcFrame || this.hero.frame.name), outfit: this.outfitLayer.shown, hair: { x: this.hairDrv.spring.x, y: this.hairDrv.spring.y, live: this.hairLayer.active }, x: this.hero.x, y: this.hero.y, scale: this.baseScale }; }
   /** The sim only keeps player.vx/vy for Stillfire's glide, so the renderer derives the real velocity from displacement (eased; a teleport resets it). */
   private velX = 0; private velY = 0; private prevPX = NaN; private prevPY = NaN;
   private trackVelocity(state: GameState, dt: number) {
@@ -195,7 +197,7 @@ export class EntityRenderer {
     if (this.hero.texture.key !== key && this.scene.textures.exists(key)) this.hero.setTexture(key);
     this.hero.setFrame(this.pose.frame);
     this.hero.setOrigin(fr.ox / fr.w, fr.oy / fr.h);
-    this.hero.setPosition(Math.round(p.x), Math.round(p.y + KAI_GROUND_DY));
+    this.liftNow = Math.round(p.air * FLY.lift * (this.baseScale / 0.5)); this.hero.setPosition(Math.round(p.x), Math.round(p.y + KAI_GROUND_DY) - this.liftNow);
     const dead = state.phase === 'dead' || p.hp <= 0;
     const alpha = !dead && this.pose.clip !== 'Transform' && p.invulnerable > 0 && Math.floor(state.time * 18) % 2 === 0 ? 0.86 : 1;   // B08.1: i-frames never grey Kai out (was 0.56)
     const hitFlash = !dead && p.invulnerable > RULES.contactInvulnerability - 0.1;   // a clear white 0.1 s flash says "you were hit" without dimming him afterwards
@@ -231,10 +233,11 @@ export class EntityRenderer {
     this.cometFx.update({ dt, state, hero: this.hero, x: this.hero.x, y: this.hero.y, facing: this.pose.facing, reduced: reducedEffects, crowded: state.enemies.length > 45, f2: this.animator.visualForm === 'f2' && !dead2 && p.form !== 3 && state.cinema?.to !== 3,
       moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, speed: p.speed * (p.form ? 1.16 : 1), dashing: p.dashRemaining > 0, hand: this.hand, events: this.pose.events });
     this.presence.update({ dt, form: p.form as 0 | 1 | 2 | 3, on: state.hero === 'kai' && p.form > 0 && !dead2 && !state.cinema && this.hero.visible, hero: this.hero, srcKey: this.hairLayer.srcKey || this.hero.texture.key, srcFrame: this.hairLayer.srcKey ? this.hairLayer.srcFrame : this.pose.frame, scale: this.baseScale, dashing: p.dashRemaining > 0, casting: !!state.cast, reduced: reducedEffects, crowded: state.enemies.length > 45, hand: this.hand, running: state.phase === 'running' });
+    this.combatFx.update({ dt, state, hero: this.hero, hand: this.hand, scale: this.baseScale, reduced: reducedEffects, running: state.phase === 'running', dead: dead2, crowded: state.enemies.length > 45 });
     for (const ev of state.abilityEvents) if (ev.id > this.presenceEv) { this.presenceEv = ev.id; if (p.form > 0 && /^(beam_fire|comet_fire|rift_fire|dragon_launch|sphere_burst|form3_dash|flare_pillar|crucible_final|meteor_beat)$/.test(ev.kind)) this.presence.burst(this.hero.x, this.hero.y - 2, p.form, /^(beam_fire|comet_fire|rift_fire)$/.test(ev.kind) ? 1.1 : 0.8); }
     this.syncWorld(state, deltaMs, reducedEffects);
   }
-  private readonly presence: KaiPresence; private presenceEv = 0;
+  private liftNow = 0; private readonly presence: KaiPresence; private readonly combatFx: KaiCombatFx; private presenceEv = 0;
   /** B19: Ren / Sora. The character sprite is drawn from the hero sheets when they exist (HeroAnimator over the same sheet contract as Kai); a flat dev body stands in only while a hero has no sheets. The effects layer is always the sim projection in heroFxView. */
   private syncHero(state: GameState, input: InputState, deltaMs: number, reduced: boolean) {
     const p = state.player, dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0, hero = state.hero as HeroArt;
@@ -318,5 +321,5 @@ export class EntityRenderer {
     for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies!.stats(), boss: this.bosses!.stats() }; }
-  destroy() { this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
+  destroy() { this.combatFx.destroy(); this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
 }

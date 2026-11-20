@@ -4,6 +4,7 @@ import { normalize } from '../core/Math';
 import { slideMove } from './CollisionSystem';
 import { cancelCast, castMoveScale } from './AbilitySystem';
 import { APEX } from '../content/stillfire';
+import { FLY, OD } from '../content/kaiCombat';
 import { ASCEND } from '../content/heroKits';
 /** Dash charges: Kai Form II = 2, Form III = 3, Vex Form II (last form) = 2, everything else 1. */
 export function dashMax(state: GameState): number { const f = state.player.form; return state.hero === 'kai' ? (f === 3 ? 3 : f === 2 ? 2 : 1) : state.hero === 'vex' && f === 2 ? 2 : 1; }
@@ -18,12 +19,12 @@ export function movePlayer(state: GameState, input: InputState, dt: number) {
     state.impacts.push({ id: state.nextId++, kind: 'dash', x: p.x, y: p.y, ttl: apex ? 0.3 : 0.22, life: apex ? 0.3 : 0.22 });
     if (apex) state.abilityEvents.push({ id: state.nextId++, kind: 'form3_dash', x: p.x, y: p.y });
   }
-  const formSpeed = !p.form ? surgeSpeedMul(state) : state.hero === 'ren' ? ASCEND.ren.speedMul : state.hero === 'sora' ? ASCEND.sora.speedMul : state.hero === 'vex' ? ASCEND.vex.speedMul[Math.min(1, p.form - 1)] : 1.16;
+  const odMul = (state.hero === 'kai' && p.odT > 0 ? OD.speedMul : 1) * (state.hero === 'kai' && p.flyT > 0 && p.form >= 1 ? FLY.form[p.form as 1 | 2 | 3].speed : 1), formSpeed = odMul * (!p.form ? surgeSpeedMul(state) : state.hero === 'ren' ? ASCEND.ren.speedMul : state.hero === 'sora' ? ASCEND.sora.speedMul : state.hero === 'vex' ? ASCEND.vex.speedMul[Math.min(1, p.form - 1)] : 1.16);
   const dashing = p.dashRemaining > 0; const lock = dashing ? 1 : castMoveScale(state) * (state.b22.ult.act ? 0.15 : 1);
   if (apex) {
     // Form III glides: velocity eases toward the input (ease-in / ease-out), the dash is a near-instant displacement (same ~175 px as before, in 0.13 s)
     const sp = dashing ? 1350 : p.speed * lock * APEX.speedMul, wx = (dashing ? p.dashDx : direction.x) * sp, wy = (dashing ? p.dashDy : direction.y) * sp;
-    const k = dashing ? 1 : 1 - Math.exp(-dt / APEX.glideEase); p.vx += (wx - p.vx) * k; p.vy += (wy - p.vy) * k;
+    const k = dashing || p.flyT > 0 ? 1 : 1 - Math.exp(-dt / APEX.glideEase); p.vx += (wx - p.vx) * k; p.vy += (wy - p.vy) * k;
     slideMove(p, p.vx, p.vy, dt);
   } else {
     p.vx = 0; p.vy = 0;

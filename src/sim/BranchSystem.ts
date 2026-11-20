@@ -62,7 +62,7 @@ export function zoneFx(s: GameState, z: Omit<Zone, 'id' | 't' | 'next'>) { if (s
 /* ---------------------------------------------------------------- which slot a hit belongs to */
 export function slotOfAct(s: GameState): Slot | null {
   const c = s.cast, h = s.hx.act;
-  if (c) return c.kind === 'beam' || c.kind === 'dragon' || c.kind === 'rift' || c.kind === 'flare' ? 'e' : c.kind === 'scatter' || c.kind === 'meteor' ? 'q' : 'r';
+  if (c) return c.kind === 'signature' ? null : c.kind === 'beam' || c.kind === 'dragon' || c.kind === 'rift' || c.kind === 'flare' ? 'e' : c.kind === 'scatter' || c.kind === 'meteor' ? 'q' : 'r';
   if (h) { switch (h.act) { case 'crimson_break': case 'azure_volley': case 'parry_halo': return 'q'; case 'meteor_rush': case 'celestial_lance': case 'rift_reversal': return 'e'; case 'bloodstar': case 'zero_horizon': case 'oathbreaker_seal': return 'r'; default: return null; } }
   return null;
 }

@@ -12,9 +12,10 @@ import { CONTRACT_BY_ID } from '../../content/meta';
 import { HERO_KIT, REN, SORA } from '../../content/heroKits';
 import type { AbilityTip } from '../../bridge/abilityTips';
 import { ABILITY_KEYS } from '../../bridge/abilityView';
+import { OD, SIG } from '../../content/kaiCombat';
 
 interface Props { s: UiSnapshot; pad: boolean; onPause: () => void; reduced?: boolean; onForm?: (f: 1 | 2 | 3, confirm: boolean) => void; onKey?: (code: string) => void; }
-const SLOT_KEY: Record<string, string> = { shift: 'ShiftLeft', q: 'KeyQ', e: 'KeyE', r: 'KeyR', f: 'KeyF' };
+const SLOT_KEY: Record<string, string> = { sig: 'KeyV', od: 'KeyG', shift: 'ShiftLeft', q: 'KeyQ', e: 'KeyE', r: 'KeyR', f: 'KeyF' };
 
 const icon = (name: string) => `url(${ASSET_BASE}ui/icons/${name}.png)`;
 const pct = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
@@ -24,7 +25,7 @@ interface SlotProps { idp?: string; id: string; name: string; ico: string; keyLa
 type BarView = Pick<UiSnapshot, (typeof ABILITY_KEYS)[number]>;
 /** One fighter's ability row: dash, Q, E, R, F with real cooldown sweeps, charge / active state and tooltips. Used for the first player and (compact, no click) for the second co-op fighter. */
 export function AbilityBar({ s, pad, onKey, prefix = '', compact = false }: { s: BarView; pad: boolean; onKey?: (code: string) => void; prefix?: string; compact?: boolean }) {
-  const KL = compact ? { shift: 'ENTER', q: ',', e: '.', r: '/', f: ';' } : { shift: 'SHIFT', q: 'Q', e: 'E', r: 'R', f: 'F' };
+  const KL = compact ? { shift: 'ENTER', q: ',', e: '.', r: '/', f: ';', sig: "'", od: '\\' } : { shift: 'SHIFT', q: 'Q', e: 'E', r: 'R', f: 'F', sig: 'V', od: 'G' };
   const T = s.tips, hk = s.hero !== 'kai' ? HERO_KIT[s.hero] : null, H = s.hero === 'vex' ? 'ren' : s.hero, U = s.hero;
   const canForm = hk ? s.heroReady : !s.form && s.drive >= RULES.formCharge && s.formCooldown <= 0;
   const KQ = [{ name: 'Surge Step', ico: 'kai_surge' }, { name: 'Scatter Burst', ico: 'kai_scatter' }, { name: 'Meteor Drive', ico: 'kai_meteor' }, { name: 'Silver Echo', ico: 'kai_echo' }] as const;
@@ -37,6 +38,8 @@ export function AbilityBar({ s, pad, onKey, prefix = '', compact = false }: { s:
     {f3 && <Slot idp={prefix} id="evade" name="Perfect Evasion - automatic sidestep, one hit refused, 9 s recharge" ico="evasion" keyLabel="AUTO" padLabel="AUTO" pad={pad} seconds={s.evadeCooldown} max={s.cdMax.evade} state={s.evadeCooldown > 0 ? undefined : 'ready'} text={s.evadeCooldown > 0 ? undefined : 'READY'}/>}
     {hk ? <Slot idp={prefix} id="f" tip={T?.f} onUse={onKey} tone="tone-f1" name={`${hk.form} - ${hk.blurbs.form}`} ico={`${U}_f`} keyLabel={KL.f} padLabel="Y" pad={pad} seconds={s.form ? 0 : s.formCooldown} max={s.cdMax.form} state={s.form ? 'active' : s.heroReady ? 'ready' : s.formCooldown > 0 ? undefined : 'locked'} text={s.form ? 'ON' : s.heroReady ? 'GO' : s.formCooldown > 0 ? undefined : !s.heroFormUnlocked ? 'SEALED' : `${Math.floor(s.drive)}%`}/> : <Slot idp={prefix} id="f" tip={T?.f} onUse={onKey} tone={f3 || apex ? 'tone-f3' : f2 || comet ? 'tone-f2' : s.form ? 'tone-f1' : undefined} name={f3 ? 'Stillfire Apex form' : apex ? 'Stillfire Apex ready' : f2 || comet ? 'Cometheart form' : 'Flarebound form'} ico={f3 || apex ? 'form3' : f2 || comet || (s.cometUnlocked && !s.form) ? 'form2' : 'form'} keyLabel={KL.f} padLabel="Y" pad={pad} seconds={s.form ? 0 : s.formCooldown} max={s.cdMax.form}
       state={s.form >= 2 ? 'active' : comet || apex ? 'ready' : s.form ? 'active' : canForm ? 'ready' : s.formCooldown > 0 ? undefined : 'locked'} text={s.form ? 'ON' : apex ? 'III' : comet ? 'II' : canForm ? 'GO' : s.formCooldown > 0 ? undefined : `${Math.floor(s.drive)}%`}/>}
+    {!hk && <Slot idp={prefix} id="sig" tone="tone-sig" name={s.form === 1 ? 'Solar Vortex - hold to charge a rotating solar sphere, release to lunge and detonate it (hold V)' : s.form === 2 ? 'Thunderstar Breaker - hold to charge a lightning-wrapped star, release to lunge and break (hold V)' : s.form === 3 ? 'Singularity Palm - hold to gather a silver singularity, release to blink in and implode (hold V)' : 'Signature technique - transform to unlock'} ico={`sig_${s.form || 1}`} keyLabel={KL.sig} padLabel="RT" pad={pad} seconds={s.form ? s.sigCd : 0} max={SIG.cooldown} charge={s.sigCharge} state={s.sigTier >= 0 ? 'active' : s.form === 0 ? 'locked' : s.sigCd <= 0 ? 'ready' : undefined} text={s.sigTier >= 0 ? `T${s.sigTier + 1}` : s.form && s.sigCd <= 0 ? 'READY' : undefined} onUse={onKey}/>}
+    {!hk && <Slot idp={prefix} id="od" tone="tone-od" name="Primal Overdrive - fight while transformed to fill the meter, then press G to unleash the spectral dragon" ico="overdrive" keyLabel={KL.od} padLabel="B" pad={pad} seconds={0} max={1} charge={s.odT > 0 ? s.odT / OD.duration : s.odMeter / 100} state={s.odT > 0 ? 'active' : s.form > 0 && s.odMeter >= 100 ? 'ready' : 'locked'} text={s.odT > 0 ? `${Math.ceil(s.odT)}s` : s.form > 0 && s.odMeter >= 100 ? 'READY' : `${Math.floor(s.odMeter)}%`} onUse={onKey}/>}
   </div>);
 }
 

@@ -11,7 +11,7 @@ import { xpThreshold } from './GameState';
 export const SLOT_KEYS = ['player', 'hero', 'hx', 'cast', 'sphere', 'mods', 'upgradeStacks', 'aim', 'eHeld', 'b22', 'heroFormUnlocked', 'heroFormUnlockedNow', 'heroFormSeen', 'run', 'echoes', 'blasts', 'apexUnlocked', 'apexUnlockedNow', 'cometUnlocked', 'cometUnlockedNow', 'levelUpAt'] as const;
 export type SlotBag = Pick<GameState, (typeof SLOT_KEYS)[number]>;
 export interface Down { downed: boolean; out: boolean; t: number; revives: number; hold: number }
-export interface Edge { q: boolean; f: boolean; e: boolean; r: boolean; buf: { q: number; e: number; r: number } }
+export interface Edge { sig?: boolean; od?: boolean; q: boolean; f: boolean; e: boolean; r: boolean; buf: { q: number; e: number; r: number } }
 export interface Slot { bag: SlotBag; name: string; edge: Edge; down: Down; input: InputState; lastHits: { id: number; dmg: number; slot: string | null; x: number; y: number }[]; formAt: number; aimAtE: { x: number; y: number; t: number } | null; prevForm?: number }
 export interface Party { slots: Slot[]; cur: number; queue: number[]; chooser: number | null; mode: 'local' | 'online'; shared: PartyState; names: string[] }
 const blankInput = (): InputState => ({ x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false });

@@ -1,4 +1,6 @@
 import type { Enemy, GameState } from './GameState';
+import { OD } from '../content/kaiCombat';
+import { odGain } from './KaiCombat';
 import { distanceSquared } from '../core/Math';
 import { ENEMIES, isBoss, type BossKind } from '../content/enemies';
 import { BOSSES } from '../content/bosses';
@@ -53,6 +55,7 @@ export function shieldFaces(state: GameState, e: Enemy, arcDeg: number): boolean
 export const xpTimeScale = (t: number) => 1 + t / 400;
 export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts?: HitOpts): boolean {
   if (enemy.hp <= 0) return false;
+  if (state.hero === 'kai' && state.player.odT > 0) damage *= OD.dmgMul;   // Primal Overdrive
   if (enemy.ai?.invuln) return false;
   let dmg = Math.max(0, damage), blocked = false;
   const boss = isBoss(enemy.kind);
@@ -77,7 +80,7 @@ export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts
     if (enemy.kind === 'phase_harrier' && enemy.mode === 'recover') dmg *= 1.25;   // left open after its strike
   }
   dmg = b22PreDamage(state, enemy, dmg, opts);
-  enemy.hp = Math.max(0, enemy.hp - dmg);
+  enemy.hp = Math.max(0, enemy.hp - dmg); if (dmg > 0 && !enemy.part) odGain(state);
   state.impacts.push({ id: state.nextId++, kind: blocked ? 'block' : 'hit', x: enemy.x, y: enemy.y, ttl: 0.16, life: 0.16, boss, heavy: !blocked && (dmg >= 30 || (boss && !!enemy.ai?.exposed)), kill: enemy.hp <= 0 });
   b22PostDamage(state, enemy, dmg, opts);
   if (enemy.part) { const core = state.enemies.find(c => c.id === enemy.part!.of); if (core) behaviorOf(core.kind)?.onPartHit?.(state, core, enemy, dmg); }
@@ -86,7 +89,7 @@ export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts
     else if (enemy.kind !== 'bruiser' && enemy.kind !== 'aegis' && enemy.kind !== 'citadel_bulwark') enemy.stagger = 0.12;
     return false;
   }
-  pushEnemyEvent(state, 'enemy_death', enemy, enemy.aimX, enemy.aimY, boss && !enemy.part ? 'boss' : enemy.part ? 'part' : undefined);
+  pushEnemyEvent(state, 'enemy_death', enemy, enemy.aimX, enemy.aimY, boss && !enemy.part ? 'boss' : enemy.part ? 'part' : undefined); if (!enemy.part) odGain(state, true);
   if (enemy.part) { partDestroyed(state, enemy); return true; }
   if (boss && state.player.form === 3) state.abilityEvents.push({ id: state.nextId++, kind: 'finisher3', x: enemy.x, y: enemy.y, n: enemy.kind === 'seraph' ? 1 : 0 });   // B13: the silver finisher
   else if (boss && state.player.form === 2) state.abilityEvents.push({ id: state.nextId++, kind: 'finisher', x: enemy.x, y: enemy.y, n: enemy.kind === 'seraph' ? 1 : 0 });   // B12: Kai delivered the boss's last blow in Cometheart
