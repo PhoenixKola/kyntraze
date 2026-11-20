@@ -122,6 +122,7 @@ function updateSignatureCast(s: GameState, c: Cast, dt: number) {
   if (!c.released) {
     const d = aimDir(s); c.dirX = d.x; c.dirY = d.y; c.face = faceOf(d.x, d.y); c.charge = c.t;
     const tier = tierOf(c.t); if (tier > (c.tier ?? 0)) { c.tier = tier; emit(s, 'sig_tier', p.x, p.y, tier); }
+    if (!s.sigHeld && c.t >= SIG.minHold && c.t < SIG.stages[0] && !(pickTarget(s, d) ?? nearestWithin(s, 170))) { cancelSignature(s); return; }   // a quick tap with nothing in reach is cancelled for free instead of burning the 45 s cooldown on a harmless miss
     if ((!s.sigHeld && c.t >= SIG.minHold) || c.t >= SIG.maxHold) releaseSignature(s, c);
     return;
   }
