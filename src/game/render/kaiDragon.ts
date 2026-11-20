@@ -41,7 +41,7 @@ export class OverdriveDragon {
     const rgb = (c: number[]) => (Math.round(c[0]) << 16) | (Math.round(c[1]) << 8) | Math.round(c[2]);
     const fillC = rgb(this.col.fill), edgeC = rgb(this.col.edge);
     this.flyMix += ((i.fly || i.dash ? 1 : 0) - this.flyMix) * Math.min(1, dt * 7);
-    this.lunge = Math.max(0, this.lunge - dt * 2.6); this.jaw = Math.max(0, this.jaw - dt * 2.2);
+    this.lunge = Math.max(0, this.lunge - dt * 4); this.jaw = Math.max(0, this.jaw - dt * 2.2);
     const sp = Math.hypot(i.vx, i.vy), mv = sp > 40;
     const aimA = Math.atan2(i.aimY || 0.001, i.aimX || 0.001); let da = aimA - this.aim; while (da > Math.PI) da -= 6.2832; while (da < -Math.PI) da += 6.2832; this.aim += da * Math.min(1, dt * 6);
     const dirA = mv ? Math.atan2(i.vy, i.vx) : this.aim, dx = Math.cos(dirA), dy = Math.sin(dirA);
@@ -57,8 +57,8 @@ export class OverdriveDragon {
       this.px[n] = rx + (tx - rx) * this.flyMix; this.py[n] = ry + (ty - ry) * this.flyMix;
     }
     // head target: shoulder height toward the aim, surging at a struck target
-    const hs = sstep(1 - this.flyMix), hxT = this.cx[0] + Math.cos(this.aim) * 70 * sc * hs + dx * 40 * sc * this.flyMix, hyT = this.cy[0] - 74 * sc + Math.sin(this.aim) * 16 * sc * hs + dy * 14 * sc * this.flyMix;
-    const lg = this.lunge > 0 ? sstep(this.lunge / 0.7) : 0, tgx = this.lx - i.x, tgy = this.ly - cy0, tgd = Math.hypot(tgx, tgy) || 1, reach = Math.min(tgd - 18 * sc, 110 * sc) * lg;
+    const hs = sstep(1 - this.flyMix), hxT = this.cx[0] + Math.cos(this.aim) * 24 * sc * hs + dx * 40 * sc * this.flyMix, hyT = this.cy[0] - 84 * sc + Math.sin(this.aim) * 16 * sc * hs + dy * 14 * sc * this.flyMix;
+    const lg = this.lunge > 0 ? sstep(this.lunge / 0.7) : 0, tgx = this.lx - i.x, tgy = this.ly - cy0, tgd = Math.hypot(tgx, tgy) || 1, reach = Math.min(tgd - 18 * sc, 62 * sc) * lg;
     const hx = hxT + (tgx / tgd) * reach, hy = hyT + (tgy / tgd) * reach;
     for (let n = 0; n < 6; n++) { const w = sstep(n / 5); this.px[n] = hx + (this.px[n] - hx) * w; this.py[n] = hy + (this.py[n] - hy) * w; }
     // ---- body ribbon
@@ -105,8 +105,8 @@ export class OverdriveDragon {
     } else this.limb.setVisible(false);
     const ti = vis - 1;
     if (ti > 8 && this.scene.textures.exists(tk(0))) {
-      const dxT = this.px[ti] - this.px[ti - 3], dyT = this.py[ti] - this.py[ti - 3], ta = Math.atan2(dyT, dxT) - Math.PI, tw = 78 * sc * (0.6 + 0.4 * A);
-      this.tail.setTexture(tk(Math.floor(clock * 5) % 4)).setVisible(true).setPosition(Math.round(this.px[ti]), Math.round(this.py[ti])).setScale(tw / this.tail.width).setRotation(ta).setAlpha(0.6 * alpha);
+      const dxT = this.px[ti] - this.px[ti - 3], dyT = this.py[ti] - this.py[ti - 3], ta = Math.atan2(dyT, dxT) - Math.PI, tw = 120 * sc * (0.6 + 0.4 * A);
+      this.tail.setTexture(tk(Math.floor(clock * 5) % 4)).setVisible(true).setPosition(Math.round(this.px[ti]), Math.round(this.py[ti])).setScale(tw / this.tail.width).setRotation(ta).setAlpha(0.85 * alpha);
     } else this.tail.setVisible(false);
     this.lastRight = right; this.fresh = false;
   }
