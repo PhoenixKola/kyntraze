@@ -39,6 +39,15 @@ export const BRANCHES: readonly BranchDef[] = [
   B('marked_detonation', 'vex', 'r', 'A', 'Marked Detonation', 'Oathbreaker Seal', 'Marks chain-explode between valid foes.', 'Each mark deals less.', { sphereDamage: 0.9 }),
   B('severance_judgment', 'vex', 'r', 'B', 'Severance Judgment', 'Oathbreaker Seal', 'Fewer, empowered marks focus a priority enemy and open a vulnerability window.', 'Only 2 marks.', { sphereDamage: 1.0 }),
 ];
+/** B26: what a Ren branch does while Crimson Ascendant is active (the base-form text above stays the base behaviour). */
+export const REN_FORM_NOTE: Partial<Record<BranchId, string>> = {
+  relentless_chain: 'Ascendant: every third Cyclone contact within 150 px adds a small extra pull burst (max 3 per cast); per-beat damage still -10%.',
+  crimson_guardbreak: 'Ascendant: a delayed guard-breaking cone lands as the spin ends, with stagger; cooldown +15%. No boss shield bypass.',
+  bloodline_relay: 'Ascendant: Rampage hits relay up to 3 extra strikes to nearby foes at 60% damage; strike damage -10%.',
+  meteor_collision: 'Ascendant: the Rampage ends in an extra 130 px collision burst; damage tradeoff kept.',
+  red_comet_rain: 'Ascendant: only the converging final fist of Catastrophe seeds up to 4 smaller follow-up impacts; main damage lower.',
+  crimson_crater: 'Ascendant: the final fist leaves a 3.5 s fissure ring; longer cooldown.',
+};
 export const BRANCH_BY_ID = Object.fromEntries(BRANCHES.map(b => [b.id, b])) as Record<BranchId, BranchDef>;
 export const isBranchId = (v: unknown): v is BranchId => typeof v === 'string' && v in BRANCH_BY_ID;
 export const slotKey = (hero: HeroId, slot: Slot) => `${hero}.${slot}` as const;

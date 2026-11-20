@@ -20,6 +20,12 @@ export const LEGENDARIES: readonly LegendaryDef[] = [
   L('oathbreaker_chain', 'vex', 'Oathbreaker Chain', [{ id: 'hardlight', stacks: 2 }, { id: 'afterburn', stacks: 1 }], 'A Seal detonation spreads a fracture mark to surviving adjacent enemies.', '3 spread marks, one generation.'),
   L('null_waltz', 'vex', 'Null Waltz', [{ id: 'dashcool', stacks: 2 }, { id: 'embercore', stacks: 1 }], 'A perfect Rift Reversal launches a 3-step precision counter sequence.', '3 steps, no extra invulnerability, cooldown 8 s.'),
 ];
+/** B26: the same legendaries read differently in Crimson Ascendant. */
+export const REN_FORM_LEGEND: Partial<Record<LegendaryId, string>> = {
+  crimson_relay: 'Ascendant: a Crimson Fury uppercut finisher that really hits relays once (4 s cooldown).',
+  meteor_crucible: 'Ascendant: the Scarlet Rampage path burns for 2.4 s and the slam ends in a pressure burst.',
+  bloodstar_rupture: 'Ascendant: only the final fist of Catastrophe leaves the molten field (4 s).',
+};
 export const LEGENDARY_BY_ID = Object.fromEntries(LEGENDARIES.map(l => [l.id, l])) as Record<LegendaryId, LegendaryDef>;
 export const isLegendaryId = (v: unknown): v is LegendaryId => typeof v === 'string' && v in LEGENDARY_BY_ID;
 export const LEGENDARY_CAP = 3;

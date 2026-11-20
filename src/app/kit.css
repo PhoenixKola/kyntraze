@@ -734,3 +734,6 @@ main[data-testid="hero-select"] .arena-strip-go { position: static; white-space:
 .slot.tone-od.active { box-shadow: 0 0 14px rgba(255, 220, 120, .9); }
 @keyframes od-pulse { 50% { filter: brightness(1.35); } }
 @media (prefers-reduced-motion: reduce) { .slot.tone-od.ready { animation: none; } }
+/* B26: the Crimson Ascendant skill icons are full-colour ImageGen art, not white glyph masks */
+.slot.art .slot-ico { background: var(--ico) center / contain no-repeat !important; -webkit-mask: none; mask: none; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .7)); }
+.slot.art.cooling .slot-ico { opacity: .45; filter: grayscale(.8); } .slot.art.locked .slot-ico { opacity: .35; filter: grayscale(1); }

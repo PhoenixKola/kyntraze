@@ -19,12 +19,13 @@ import { VEX_CLIPS } from '../../assets/kaiAnimation';
 import { HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroForms, heroManifestUrl, heroSheetUrl, heroTextureKey, isHeroArt, type HeroArt } from '../../assets/heroAnimation';
 import { KP_NAMES, kpKey, kpUrl } from '../render/kaiPresence';
 import { KO_NAMES, koKey, koUrl } from '../render/kaiCombatFx';
+import { RF_NAMES, rfKey, rfUrl } from '../render/renFox';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
 import { B14_FX_NAMES, b14Key, b14Url } from '../render/b14fx';
 import { B21_GROUPS, b21Key, b21ManifestKey, b21ManifestUrl, b21Names, b21Url } from '../render/b21Assets';
 import { F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL, f3fxKey, f3fxUrl } from '../render/stillfireFx';
-import { KAI_F3_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_KIT_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiClipInfo, type KaiManifests } from '../../assets/kaiAnimation';
+import { KAI_F3_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_KIT_CLIPS, REN_F1_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiClipInfo, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
   /** Every hero that fights this run (the runner plus co-op partners): each gets its own explicitly keyed sheet set. Kai's sheets are always loaded. */
   private readonly arts: HeroArt[]; private readonly hero0: HeroId;
@@ -60,6 +61,7 @@ export class BootScene extends Phaser.Scene {
     ABILITY_FX_NAMES.forEach(n => this.load.image(abilityFxKey(n), abilityFxUrl(n)));
     KK_FX.forEach(n => this.load.image(kkKey(n), kkUrl(n)));
     KP_NAMES.forEach(n => this.load.image(kpKey(n), kpUrl(n)));
+    RF_NAMES.forEach(n => this.load.image(rfKey(n), rfUrl(n)));   // B26 Crimson Nine-Tailed Fox + Ren form FX (ImageGen); a missing file leaves that layer off
     KO_NAMES.forEach(n => this.load.image(koKey(n), koUrl(n)));   // Primal Overdrive / signature / flight / form-shift art (ImageGen)   // Kai transformation presence (ImageGen); a missing file just leaves that layer off
     for (let i = 0; i < 4; i++) this.load.image(`xpgem${i}`, `/art/fx/xp/gem${i}.png`);
     this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => console.error(`[boot] failed to load ${file.key} (${file.url})`));
@@ -91,7 +93,7 @@ export class BootScene extends Phaser.Scene {
       for (const form of heroForms(h)) {
         const raw = KAI_DIRS.map(dir => this.cache.json.get(`hero-${h}-${form}-manifest-${dir}`)); if (!raw.every(r => r && typeof r === 'object' && (r as { direction?: string }).direction)) continue;
         const set = {} as KaiManifests; KAI_DIRS.forEach((dir, i) => { set[dir] = parseKaiManifest(raw[i], dir, form === 'base' ? 'base' : 'f1'); }); this.registry.set(HERO_REGISTRY_KEY(h, form), set);
-        for (const dir of KAI_DIRS) for (const clip of [...(form === 'base' ? KAI_CLIPS : KAI_F1_CLIPS), ...(h === 'vex' ? VEX_CLIPS : [])]) { const m = set[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue; this.load.spritesheet(heroTextureKey(h, dir, clip, form), heroSheetUrl(h, dir, a, form), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 }); }
+        for (const dir of KAI_DIRS) for (const clip of [...(form === 'base' ? KAI_CLIPS : KAI_F1_CLIPS), ...(h === 'vex' ? VEX_CLIPS : []), ...(h === 'ren' && form === 'f1' ? REN_F1_CLIPS : [])]) { const m = set[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue; this.load.spritesheet(heroTextureKey(h, dir, clip, form), heroSheetUrl(h, dir, a, form), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 }); }
       }
       this.registry.set(HERO_ANCHORS_KEY(h), this.cache.json.get(HERO_ANCHORS_KEY(h)));
     }

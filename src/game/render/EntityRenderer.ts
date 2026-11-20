@@ -1,6 +1,7 @@
 import { vexTint } from './vexTint';
 import { KaiPresence } from './kaiPresence';
 import { KaiCombatFx } from './kaiCombatFx';
+import { RenFox } from './renFox';
 import { AUTO, FLY } from '../../content/kaiCombat';
 import Phaser from 'phaser';
 import { RULES } from '../../core/Rules';
@@ -243,7 +244,7 @@ export class EntityRenderer {
     if (state.hero !== 'kai') return undefined; const prof = AUTO[state.player.form as 0 | 1 | 2 | 3], n = prof.beats.length, st = state.hx.autoStep;
     return prof.beats[(fired ? st - 1 + n : st) % n].kind;
   }
-  private liftNow = 0; private readonly presence: KaiPresence; private readonly combatFx: KaiCombatFx; private presenceEv = 0;
+  private renFox: RenFox | null = null; private liftNow = 0; private readonly presence: KaiPresence; private readonly combatFx: KaiCombatFx; private presenceEv = 0;
   /** B19: Ren / Sora. The character sprite is drawn from the hero sheets when they exist (HeroAnimator over the same sheet contract as Kai); a flat dev body stands in only while a hero has no sheets. The effects layer is always the sim projection in heroFxView. */
   private syncHero(state: GameState, input: InputState, deltaMs: number, reduced: boolean) {
     const p = state.player, dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0, hero = state.hero as HeroArt;
@@ -284,6 +285,7 @@ export class EntityRenderer {
       body.fillStyle(0x000000, 0.3).fillEllipse(x, y, 36, 12);
       if (!dead) { body.fillStyle(ren ? (p.form ? 0xb8141c : 0x4a1018) : (p.form ? 0x2a78e0 : 0x16264f), 1).fillRoundedRect(x - 14, y - 62, 28, 56, 8); body.fillStyle(ren ? 0xffd2a8 : 0xe8f3ff, 1).fillCircle(x, y - 66, 11); body.fillStyle(0xffffff, 0.9).fillTriangle(x + p.aimX * 22, y - 36 + p.aimY * 12, x + p.aimX * 12 - p.aimY * 6, y - 36 + p.aimY * 6 + p.aimX * 6, x + p.aimX * 12 + p.aimY * 6, y - 36 + p.aimY * 6 - p.aimX * 6); }   // dev placeholder body, only while a hero has no sheets
     }
+    if (hero === 'ren') { this.renFox ??= new RenFox(this.scene); this.renFox.update({ dt, state, hero: this.hero, hand: this.hand, scale: this.baseScale, reduced, running: state.phase === 'running', dead, crowded: state.enemies.length > 45, facing: this.pose.facing, shake: !this.partner }); }
     fx.update(state, dt, reduced, state.enemies.length > 45, x, y);
     const sh = fx.takeShake(); if (sh > 0 && !reduced) this.scene.cameras.main.shake(110, sh);
   }
@@ -300,7 +302,7 @@ export class EntityRenderer {
   }
   /** Afterimages behind a rushing / dashing hero: pooled copies of the current frame, additive and tinted (crimson for Ren, blue-white for Sora), fading in ~0.28 s. */
   private ghostTrail(state: GameState, dt: number, x: number, y: number, hero: 'ren' | 'sora' | 'kai', reduced: boolean) {
-    const p = state.player, surge = state.hero === 'kai' && (state.hx.kk?.surge ?? 0) > 0 && Math.hypot(p.vx, p.vy) > 20, fast = surge || (state.hero !== 'kai' && (state.hx.act?.act === 'meteor_rush' || p.dashRemaining > 0)), cap = reduced ? 3 : 8;
+    const p = state.player, surge = state.hero === 'kai' && (state.hx.kk?.surge ?? 0) > 0 && Math.hypot(p.vx, p.vy) > 20, fast = surge || (state.hero !== 'kai' && (state.hx.act?.act === 'meteor_rush' || (state.hero === 'ren' && p.form >= 1 && (state.hx.act?.act === 'scarlet_rampage' || p.flyT > 0)) || p.dashRemaining > 0)), cap = reduced ? 3 : 8;
     this.ghostClock -= dt;
     if (fast && this.ghostClock <= 0 && this.hero.visible) {
       this.ghostClock = p.form ? 0.028 : 0.04;
@@ -327,5 +329,5 @@ export class EntityRenderer {
     for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies!.stats(), boss: this.bosses!.stats() }; }
-  destroy() { this.combatFx.destroy(); this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
+  destroy() { this.combatFx.destroy(); this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.renFox?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
 }
