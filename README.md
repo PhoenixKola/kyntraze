@@ -1,6 +1,6 @@
 # KYNTRAZE: FRACTURE RUSH · Release Candidate (B21, owner review pending)
 
-> **Working title.** Standalone, original horde-survival game. This is a **release candidate pending owner sign-off**, not a final release. Artistic, audio-by-ear, real-GPU and human-playtest sign-off are listed in [B20-STATUS.md](B20-STATUS.md) and [B20-RELEASE-CANDIDATE-CHECKLIST.md](B20-RELEASE-CANDIDATE-CHECKLIST.md). The title is not trademark-cleared; see [LICENSE-NOTICES.md](LICENSE-NOTICES.md).
+> **Working title.** Standalone, original horde-survival game. This is a **release candidate pending owner sign-off**, not a final release. Artistic, audio-by-ear, real-GPU and human-playtest sign-off are listed in [B20-STATUS.md](docs/project/B20-STATUS.md) and [B20-RELEASE-CANDIDATE-CHECKLIST.md](docs/project/B20-RELEASE-CANDIDATE-CHECKLIST.md). The title is not trademark-cleared; see [LICENSE-NOTICES.md](LICENSE-NOTICES.md).
 
 ## What the game is
 
@@ -74,4 +74,4 @@ npm run desktop:dist:win   # NSIS installer: release\KYNTRAZE-FRACTURE-RUSH-Setu
 - `src/content/`: heroes, kits, upgrades, enemies, arenas, meta economy.
 - `src/tests/`, `e2e/`: Vitest and Playwright suites.
 - `art/`, `art-source/`, `prompts/`: source art, rigs, reviews and generation records (not part of the shipped `dist/`). `public/`: runtime assets.
-- Batch history: `B06-STATUS.md` ... `B20-STATUS.md`; older `docs/` pages describe earlier batches and are labelled where stale.
+- Batch history: `docs/project/B06-STATUS.md` ... `docs/project/B20-STATUS.md`; older `docs/` pages describe earlier batches and are labelled where stale.
