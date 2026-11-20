@@ -5,13 +5,16 @@ import { slideMove } from './CollisionSystem';
 import { cancelCast, castMoveScale } from './AbilitySystem';
 import { APEX } from '../content/stillfire';
 import { ASCEND } from '../content/heroKits';
+/** Dash charges: Kai Form II = 2, Form III = 3, Vex Form II (last form) = 2, everything else 1. */
+export function dashMax(state: GameState): number { const f = state.player.form; return state.hero === 'kai' ? (f === 3 ? 3 : f === 2 ? 2 : 1) : state.hero === 'vex' && f === 2 ? 2 : 1; }
 export function movePlayer(state: GameState, input: InputState, dt: number) {
   const p = state.player;
   const direction = normalize(input.x, input.y);
   const apex = p.form === 3;
-  if (input.dash && p.dashCooldown <= 0 && (direction.x !== 0 || direction.y !== 0)) {
+  const dmax = dashMax(state); p.dashUsed = Math.min(p.dashUsed, dmax);
+  if (input.dash && (p.dashUsed < dmax || p.dashCooldown <= 0) && (direction.x !== 0 || direction.y !== 0)) {
     cancelCast(state);
-    p.dashDx = direction.x; p.dashDy = direction.y; p.dashRemaining = apex ? 0.13 : 0.22; p.dashCooldown = 3.2 * state.mods.dashCd; p.invulnerable = Math.max(p.invulnerable, 0.25);
+    p.dashDx = direction.x; p.dashDy = direction.y; p.dashRemaining = apex ? 0.13 : 0.22; p.dashUsed = Math.min(dmax, p.dashUsed + 1); if (p.dashCooldown <= 0) p.dashCooldown = 3.2 * state.mods.dashCd; p.invulnerable = Math.max(p.invulnerable, 0.25);
     state.impacts.push({ id: state.nextId++, kind: 'dash', x: p.x, y: p.y, ttl: apex ? 0.3 : 0.22, life: apex ? 0.3 : 0.22 });
     if (apex) state.abilityEvents.push({ id: state.nextId++, kind: 'form3_dash', x: p.x, y: p.y });
   }
@@ -29,5 +32,6 @@ export function movePlayer(state: GameState, input: InputState, dt: number) {
   p.dashRemaining = Math.max(0, p.dashRemaining - dt);
   if (apex && dashing && p.dashRemaining <= 0) { p.vx = p.dashDx * p.speed * APEX.speedMul; p.vy = p.dashDy * p.speed * APEX.speedMul; }
   p.dashCooldown = Math.max(0, p.dashCooldown - dt);
+  if (p.dashUsed > 0 && p.dashCooldown <= 0) { p.dashUsed--; if (p.dashUsed > 0) p.dashCooldown = 3.2 * state.mods.dashCd; }
   p.invulnerable = Math.max(0, p.invulnerable - dt);
 }

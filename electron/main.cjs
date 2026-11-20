@@ -25,8 +25,9 @@ function safeServer(raw) {
   try { const u = new URL(raw.trim()); const loop = u.hostname === '127.0.0.1' || u.hostname === 'localhost'; if (u.protocol === 'wss:' || (u.protocol === 'ws:' && loop)) return `${u.protocol}//${u.host}`; } catch { /* not a URL */ }
   return '';
 }
-let serverOrigin = '';
-function loadServer() { try { serverOrigin = safeServer(JSON.parse(fs.readFileSync(NET_FILE(), 'utf8')).url); } catch { serverOrigin = ''; } if (process.env.KYNT_SERVER_URL) serverOrigin = safeServer(process.env.KYNT_SERVER_URL) || serverOrigin; }
+const DEFAULT_SERVER = 'wss://kyntraze.onrender.com';
+let serverOrigin = DEFAULT_SERVER;
+function loadServer() { try { serverOrigin = safeServer(JSON.parse(fs.readFileSync(NET_FILE(), 'utf8')).url) || DEFAULT_SERVER; } catch { serverOrigin = DEFAULT_SERVER; } if (process.env.KYNT_SERVER_URL) serverOrigin = safeServer(process.env.KYNT_SERVER_URL) || serverOrigin; }
 const httpOf = o => (o ? o.replace(/^wss:/, 'https:').replace(/^ws:/, 'http:') : '');
 const CSP_BASE = [
   "default-src 'self'", "script-src 'self'", "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com", "font-src 'self' data: https://fonts.gstatic.com",

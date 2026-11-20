@@ -5,12 +5,13 @@ import { HERO_IDS } from '../../content/heroes';
 import { safeServerUrl } from '../../b22/save';
 import type { RoomMode } from '../../net/protocol';
 import { HintBar } from './Chrome';
+import { DEFAULT_SERVER_URL } from '../../net/defaultServer';
 
 interface Props { savedUrl: string; savedName: string; hero: HeroId; onSaveServer: (url: string, name: string) => void; onStart: (net: NetClient, seed: number) => void; onBack: () => void }
 /** Online co-op lobby: server address (wss:// only; ws:// to localhost for development), a display name, create / join by room code, hero pick and ready. Nothing is sent until you press CONNECT; solo play never touches the network. */
 export function OnlineLobby({ savedUrl, savedName, hero, onSaveServer, onStart, onBack }: Props) {
-  const [url, setUrl] = useState(savedUrl), [name, setName] = useState(savedName || 'Runner'), [code, setCode] = useState(''), [mode, setMode] = useState<RoomMode>('classic'), [h, setH] = useState<HeroId>(hero);
-  const [net, setNet] = useState<NetClient | null>(null), [, tick] = useState(0), [busy, setBusy] = useState(false);
+  const [url, setUrl] = useState(savedUrl || DEFAULT_SERVER_URL), [name, setName] = useState(savedName || 'Runner'), [code, setCode] = useState(''), [mode, setMode] = useState<RoomMode>('classic'), [h, setH] = useState<HeroId>(hero);
+  const [net, setNet] = useState<NetClient | null>(null), [, tick] = useState(0), [busy, setBusy] = useState(false), [fail, setFail] = useState(''), [adv, setAdv] = useState(false);
   const ok = safeServerUrl(url);
   useEffect(() => { if (!net) return; const off = net.on(() => tick(n => n + 1)); return off; }, [net]);
   useEffect(() => { if (net?.room?.state === 'running') onStart(net, 0); }, [net, net?.room?.state, onStart]);
@@ -18,17 +19,20 @@ export function OnlineLobby({ savedUrl, savedName, hero, onSaveServer, onStart, 
   const connect = async () => {
     if (!ok) return; setBusy(true); onSaveServer(ok, name);
     try { const w = window as unknown as { kyntrazeNet?: { setServer: (u: string) => Promise<{ ok: boolean }> } }; if (w.kyntrazeNet) { await w.kyntrazeNet.setServer(ok); } } catch { /* desktop allowlist is best-effort here */ }
-    const c = new NetClient(ok, name); try { await c.connect(); setNet(c); } catch { setNet(c); } setBusy(false);
+    const c = new NetClient(ok, name); try { await c.connect(); setNet(c); setFail(''); } catch { c.close(); setFail(c.error ?? 'Could not reach the server'); } setBusy(false);
   };
   const room = net?.room;
   return <main className="selection-layout online-layout" data-testid="online-lobby">
     <div className="screen-header"><button className="text-button" onClick={() => { net?.close(); onBack(); }} data-pad-cancel>← BACK</button><span>ONLINE CO-OP · FRACTURE ALLIANCE</span></div>
     <p className="eyebrow">TWO RUNNERS · ONE SERVER-OWNED RUN</p><h2 className="large-heading">{room ? `ROOM ${room.code}` : 'JOIN THE ALLIANCE'}</h2>
     {!net && <div className="online-form">
-      <label>SERVER<input value={url} onChange={e => setUrl(e.target.value)} placeholder="wss://your-server.example" data-testid="server-url" spellCheck={false}/></label>
+      {url === DEFAULT_SERVER_URL && !adv ? <p className="asc-note" data-testid="official-server">OFFICIAL SERVER · {DEFAULT_SERVER_URL.replace(/^wss?:\/\//, '')} <button className="text-button" onClick={() => setAdv(true)}>custom server</button></p>
+        : <label>SERVER<input value={url} onChange={e => setUrl(e.target.value)} placeholder="wss://your-server.example" data-testid="server-url" spellCheck={false}/></label>}
       <label>NAME<input value={name} maxLength={24} onChange={e => setName(e.target.value.replace(/[^\w .-]/g, ''))} data-testid="player-name"/></label>
       <p className="asc-note">{ok ? `Will connect to ${ok}. Only your inputs and choices are sent; the server runs the fight and records verified results.` : 'Enter a wss:// address (ws://127.0.0.1 works for a local test server). Public hosting is up to whoever runs the server.'}</p>
-      <button className="primary-button" disabled={!ok || busy} onClick={() => void connect()} data-testid="connect">{busy ? 'CONNECTING…' : 'CONNECT'}</button>
+      <button className="primary-button" disabled={!ok || busy} onClick={() => void connect()} data-testid="connect">{busy ? 'CONNECTING…' : fail ? 'RETRY' : 'CONNECT'}</button>
+      {busy && <p className="asc-note" data-testid="waking">Connecting. A sleeping free server can take a minute or more to wake up; please wait.</p>}
+      {fail && !busy && <p className="asc-note" role="alert" data-testid="net-error">{fail}</p>}
     </div>}
     {net && !room && <div className="online-form">
       {net.error && <p className="asc-note" role="alert" data-testid="net-error">{net.error}</p>}

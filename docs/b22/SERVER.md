@@ -1,6 +1,8 @@
 # Self-hosting the KYNTRAZE co-op server
 
-Not deployed by this repo. No public URL exists; public play is `DEPLOYMENT REQUIRED`.
+The owner runs the official server on a free Render Web Service: `wss://kyntraze.onrender.com` (root WebSocket endpoint, `/health` for the health check; the HTTP root returns 404 on purpose). It is the default in the Online lobby and in the desktop app (`src/net/defaultServer.ts`, override with `VITE_KYNT_SERVER`).
+Render settings: build `npm ci --include=dev && npx esbuild src/server/main.ts --bundle --platform=node --format=esm --outfile=dist-server/server.mjs`, start `node dist-server/server.mjs`, health check `/health`, `NODE_VERSION=22`, `KYNT_MAX_ROOMS=5`, `ELECTRON_SKIP_BINARY_DOWNLOAD=1`.
+Free-tier caveats: the instance sleeps when idle and can take a minute or more to wake (the lobby says so and waits up to 2 minutes); without `KYNT_DATA` and a persistent disk the leaderboard is lost on every restart. Neither affects co-op itself. Set `KYNT_ORIGINS` to the exact Vercel origin (and the desktop origin if you restrict it) rather than a wildcard.
 
 ## Run locally (development)
 ```

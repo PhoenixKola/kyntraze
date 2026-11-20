@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { GameState } from '../../sim/GameState';
 import { CHAIN, CRUCIBLE, ECHO, METEOR, RISE, SCATTER, STRIKES } from '../../content/kaiKit';
+import { blueKey } from './vexTint';
 import { beamOrigin } from '../../sim/AbilitySystem';
 import { KAI_GROUND_DY } from '../../assets/kaiAnimation';
 import { kaiTextureKey, clipFrame, type KaiManifests } from '../../assets/kaiAnimation';
@@ -8,7 +9,7 @@ import { kaiTextureKey, clipFrame, type KaiManifests } from '../../assets/kaiAni
 export const KK_FX = ['orb', 'burst', 'pillar', 'tele', 'sigil', 'halo', 'erupt', 'comet', 'tpring', 'sbeam', 'slash', 'glyph'] as const;
 export const kkKey = (n: string) => `kk-${n}`;
 export const kkUrl = (n: string) => `/art/kaikit/${n}.png`;
-const BLUE = 0x7fd0ff, GOLD = 0xffb23a, HOT = 0xfff0b0, SILVER = 0xcfd8ff, LAV = 0xb9a8ff;
+const GOLD = 0xffb23a, HOT = 0xfff0b0, SILVER = 0xcfd8ff, LAV = 0xb9a8ff;
 interface Pop { im: Phaser.GameObjects.Image; t: number; dur: number; w: number; grow: number; rise: number; fade: 'out' | 'inout'; rot: number; spin: number }
 
 /** Presentation of the reworked Kai kit. Reads only sim state (hx.kk, abilityEvents, cast, the chain); never changes it. Sprites are the ImageGen sheets under art/kaikit; Graphics is used only for cheap telegraph strokes and bars. */
@@ -18,9 +19,9 @@ export class KaiKitFx {
   private sigil: Phaser.GameObjects.Image | null = null; private tele: Phaser.GameObjects.Image[] = []; private beam: Phaser.GameObjects.Image | null = null;
   constructor(private readonly scene: Phaser.Scene, private readonly f3?: KaiManifests) { this.g = scene.add.graphics().setDepth(3.6); }
   private has(n: string) { return this.scene.textures.exists(kkKey(n)); }
-  private pop(n: string, x: number, y: number, w: number, dur: number, o: Partial<Pop> & { depth?: number; tint?: number; blend?: Phaser.BlendModes; origin?: [number, number]; flipY?: boolean } = {}) {
+  private pop(n: string, x: number, y: number, w: number, dur: number, o: Partial<Pop> & { depth?: number; tint?: number; blend?: Phaser.BlendModes; origin?: [number, number]; flipY?: boolean; blue?: boolean } = {}) {
     if (!this.has(n)) return null;
-    const im = this.scene.add.image(x, y, kkKey(n)).setDepth(o.depth ?? 11).setBlendMode(o.blend ?? Phaser.BlendModes.ADD).setAlpha(0); if (o.tint !== undefined) im.setTint(o.tint); if (o.origin) im.setOrigin(...o.origin); im.setRotation(o.rot ?? 0);
+    const im = this.scene.add.image(x, y, o.blue ? blueKey(this.scene, kkKey(n)) : kkKey(n)).setDepth(o.depth ?? 11).setBlendMode(o.blend ?? Phaser.BlendModes.ADD).setAlpha(0); if (o.tint !== undefined) im.setTint(o.tint); if (o.origin) im.setOrigin(...o.origin); im.setRotation(o.rot ?? 0);
     this.pops.push({ im, t: 0, dur, w: w_(w), grow: o.grow ?? 1.25, rise: o.rise ?? 0, fade: o.fade ?? 'out', rot: o.rot ?? 0, spin: o.spin ?? 0 }); return im;
   }
   update(dt: number, s: GameState, reduced: boolean, scale = 1) {
@@ -35,7 +36,7 @@ export class KaiKitFx {
         case 'crucible_pulse': this.pop('burst', ev.x, ev.y + 18, (CRUCIBLE.radius) * 2, 0.35, { depth: 3.8, grow: 1.25, tint: GOLD }); if (!reduced) this.scene.cameras.main.shake(60, 0.0014); break;
         case 'crucible_final': this.pop('erupt', ev.x, ev.y + 30, 210, 0.9, { origin: [0.5, 0.92], grow: 1.15, depth: 10.8 }); this.pop('burst', ev.x, ev.y + 18, CRUCIBLE.radius * 2.3, 0.5, { depth: 3.9, grow: 1.6 }); if (!reduced) this.scene.cameras.main.shake(180, 0.0034); break;
         case 'meteor_beat': { const last = (ev.n ?? 0) >= 100; if (!reduced) { this.pop('comet', ev.x + 30, ev.y - 260, last ? 150 : 100, 0.16, { depth: 11.6, grow: 0.8, rise: -1500, rot: Math.PI / 2 + 0.25, tint: HOT }); for (let i = 0; i < (last ? 9 : 4); i++) this.pop('burst', ev.x + (Math.random() - 0.5) * 70, ev.y + (Math.random() - 0.5) * 24, 12 + Math.random() * 16, 0.5, { depth: 11, grow: 0.5, tint: Math.random() < 0.5 ? GOLD : 0xff5a14, rise: 40 + Math.random() * 90 }); this.pop('tpring', ev.x, ev.y + 14, last ? 300 : 190, 0.35, { depth: 3.9, grow: 1.5, tint: GOLD }); } this.pop('comet', ev.x, ev.y - 8, last ? 190 : 120, last ? 0.4 : 0.26, { grow: 1.5, rot: Math.random() * 6.28 }); if (!reduced) this.scene.cameras.main.shake(last ? 140 : 70, last ? 0.0028 : 0.0016); break; }
-        case 'surge_start': this.pop('tele', p.x, p.y + gy + 2, 150, 0.45, { depth: 3.8, grow: 1.5, tint: BLUE }); break;
+        case 'surge_start': this.pop('tele', p.x, p.y + gy + 2, 150, 0.45, { depth: 3.8, grow: 1.5, blue: true }); break;
         case 'clone_spawn': this.pop('tpring', ev.x, ev.y + gy - 20, 130, 0.4, { tint: LAV, grow: 1.5 }); break;
         case 'clone_end': this.pop('tpring', ev.x, ev.y + gy - 20, 110, 0.35, { tint: LAV, grow: 1.3 }); break;
         case 'rift_hop': this.pop('tpring', ev.x, ev.y + gy - 18, 150, 0.32, { tint: SILVER, grow: 1.6 }); break;
@@ -68,7 +69,7 @@ export class KaiKitFx {
     // silver echo
     this.updateClone(dt, s, reduced, scale);
     // surge: a quick blue flicker around the boots while active
-    if (k.surge > 0 && p.form === 0 && !reduced) { this.surgeClock += dt; if (this.surgeClock > 0.22 && (p.vx !== 0 || p.vy !== 0 || s.hx.moving)) { this.surgeClock = 0; this.pop('burst', p.x, p.y + gy, 46, 0.2, { depth: 9, tint: BLUE, grow: 1.5 }); } }
+    if (k.surge > 0 && p.form === 0 && !reduced) { this.surgeClock += dt; if (this.surgeClock > 0.22 && (p.vx !== 0 || p.vy !== 0 || s.hx.moving)) { this.surgeClock = 0; this.pop('burst', p.x, p.y + gy, 46, 0.2, { depth: 9, blue: true, grow: 1.5 }); } }
     // silver rift follow-up beams
     const c = s.cast, ch = c?.chain;
     if (c && ch && ch.state === 'fire' && this.has('sbeam')) {

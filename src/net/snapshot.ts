@@ -23,13 +23,35 @@ export function toSnapshot(s: GameState, tick: number, slot: number): Snap {
     party: { resonance: Math.round(P.shared.resonance), resonanceT: r1(P.shared.resonanceT), pair: P.shared.pair, pairCd: r1(P.shared.pairCd) },
   };
 }
+/** Pours one fighter's view into a GameState-shaped object (the local player's state, or the online partner's presentation view). Absent / transient fields are cleared, never left over. */
+export function applyFighter(state: GameState, me: ReturnType<typeof fighter>): void {
+  Object.assign(state.player, me.player);
+  state.hero = me.hero; Object.assign(state.hx, me.hx);
+  state.hx.kk = me.hx.kk ? { riseHits: {}, ...me.hx.kk } : undefined;   // JSON drops an absent kit: clear it explicitly so an expired clone / crucible never lingers
+  state.cast = (me.cast ?? null) as GameState['cast']; state.sphere = (me.sphere ?? null) as GameState['sphere'];
+  Object.assign(state.mods, me.mods); Object.assign(state.aim, me.aim); state.heroFormUnlocked = me.heroFormUnlocked;
+  Object.assign(state.b22, me.b22);
+}
+const SHARED_KEYS = ['time', 'phase', 'kills', 'enemies', 'enemyShots', 'hazards', 'pickups', 'impacts', 'abilityEvents', 'enemyEvents', 'plan', 'announce', 'arenaId', 'seed', 'cinema'] as const;
+/** The online partner as a read-only presentation view: its own fighter fields (player, hero, hx, cast, mods...) over a private GameState, with the shared world referenced from the real state. Nothing here is ever simulated. `view` is created once per session and reused; the position is eased toward the server position and snapped on a teleport or the first frame. */
+export function partnerView(main: GameState, view: GameState, partner: unknown, dt: number): { view: GameState; moveX: number; moveY: number } {
+  const np = partner as ReturnType<typeof fighter>, v = view as unknown as Record<string, unknown>, m = main as unknown as Record<string, unknown>;
+  for (const k of SHARED_KEYS) v[k] = m[k];
+  v.cinema = null;
+  const ox = view.player.x, oy = view.player.y, fresh = view.player.hp === 100 && ox === 0 && oy === 0 || !Number.isFinite(ox);
+  applyFighter(view, np);
+  const tx = np.player.x, ty = np.player.y, far = Math.hypot(tx - ox, ty - oy) > 260, k = fresh || far ? 1 : 1 - Math.exp(-dt / 0.07);
+  view.player.x = ox + (tx - ox) * k; view.player.y = oy + (ty - oy) * k;
+  const d = dt > 0 ? Math.hypot(view.player.x - ox, view.player.y - oy) / dt : 0;
+  return { view, moveX: d > 30 && !fresh && !far ? (view.player.x - ox) / (d * dt) : 0, moveY: d > 30 && !fresh && !far ? (view.player.y - oy) / (d * dt) : 0 };
+}
+export const blankPartnerView = (seed: number, arena: GameState['arenaId']): GameState => { const g = makeState(seed, arena); g.player.x = 0; g.player.y = 0; return g; };
 /** Client side: pours a snapshot into a GameState-shaped object (created once with makeState defaults). */
 export function applySnapshot(state: GameState, n: Snap): void {
   const me = n.me as ReturnType<typeof fighter>, st = state as unknown as Record<string, unknown>;
   state.time = n.time; state.phase = n.phase as GameState['phase']; state.kills = n.kills; state.announce = n.announce; state.plan = { ...CLASSIC_PLAN, ...n.plan } as GameState['plan'];
-  Object.assign(state.player, me.player);
-  state.hero = me.hero; Object.assign(state.hx, me.hx); state.hx.kk = me.hx.kk ? { riseHits: {}, ...me.hx.kk } : undefined;   // JSON drops an absent kit: clear it explicitly so an expired clone / crucible never lingers state.cast = me.cast as GameState['cast']; state.sphere = me.sphere as GameState['sphere']; Object.assign(state.mods, me.mods); Object.assign(state.aim, me.aim); state.heroFormUnlocked = me.heroFormUnlocked;
-  Object.assign(state.b22, me.b22); state.upgradeOffers = n.offers as GameState['upgradeOffers']; state.upgradeStacks = n.stacks;
+  applyFighter(state, me);
+  state.upgradeOffers = n.offers as GameState['upgradeOffers']; state.upgradeStacks = n.stacks;
   state.enemies = n.enemies as GameState['enemies']; state.enemyShots = n.shots as GameState['enemyShots']; state.hazards = n.hazards as GameState['hazards']; state.pickups = n.pickups as GameState['pickups']; state.impacts = n.impacts as GameState['impacts'];
   state.abilityEvents = n.abil as GameState['abilityEvents']; state.enemyEvents = n.enemyEv as GameState['enemyEvents']; Object.assign(state.b22, n.b22 as object); st.partner = n.partner; st.netParty = n.party;
 }

@@ -17,7 +17,7 @@ export interface InputState extends Vec { dash: boolean; q: boolean; f: boolean;
 export interface Fighter extends Vec {
   hp: number; maxHp: number; radius: number; speed: number; attackDamage: number; attackPeriod: number;
   attackRange: number; attackClock: number; targets: number; pickupRadius: number;
-  dashRemaining: number; dashCooldown: number; dashDx: number; dashDy: number; invulnerable: number;
+  dashRemaining: number; dashCooldown: number; /** dash charges spent (Kai Form II/III and Vex Form II hold extra charges that recharge one by one) */ dashUsed: number; dashDx: number; dashDy: number; invulnerable: number;
   qCooldown: number; beamCooldown: number; sphereCooldown: number; aimX: number; aimY: number; qDamage: number; qRadius: number; drive: number; form: FormId; formCooldown: number; dragonCooldown: number; cometCooldown: number; riftCooldown: number; reversalCooldown: number; evadeCooldown: number; /** glide velocity (Form III) */ vx: number; vy: number;
   xp: number; nextXp: number; level: number;
 }
@@ -45,7 +45,7 @@ export interface Cinema { t: number; dur: number; breakAt: number; commitAt: num
 /** Kai is locked into a signature ability. form and aim are snapshotted at the cast so a mid-cast form expiry cannot change damage. */
 export type Face = 'south' | 'north' | 'east' | 'west';
 export interface Cast { id: number; kind: AbilityKind; face: Face; t: number; dirX: number; dirY: number; form: FormId; released: boolean; pulses: number; len: number; tx: number; ty: number; /** Dragonfang: where the lunge started and the enemy ids already bitten */ sx: number; sy: number; hits: number[]; /** total seconds of this cast (Cometbreaker's length depends on the Nova echo build) */ dur: number;
-  /** B13 Silver Rift: charge seconds, tier 0-2 and the blink taken at release; Instinct Reversal: target ids, hop index, finishing-flash points */ charge?: number; tier?: number; rt?: number; blink?: { x0: number; y0: number; x1: number; y1: number } | null; seq?: number[]; hop?: number; fin?: { x: number; y: number }[]; /** Silver Rift: the post-hit teleport chain; Instinct Reversal: per-target strike ledger and the next beat time */ chain?: RiftChain; led?: Record<number, number>; nextAt?: number; /** Kai kit casts: world point the effect resolves at */ aimDist?: number }
+  /** B13 Silver Rift: charge seconds, tier 0-2 and the blink taken at release; Instinct Reversal: target ids, hop index, finishing-flash points */ charge?: number; tier?: number; rt?: number; blink?: { x0: number; y0: number; x1: number; y1: number } | null; seq?: number[]; hop?: number; fin?: { x: number; y: number }[]; /** Silver Rift: the post-hit teleport chain; Instinct Reversal: per-target strike ledger and the next beat time */ chain?: RiftChain; led?: Record<number, number>; nextAt?: number; /** Kai kit casts: world point the effect resolves at */ aimDist?: number; /** Fracture Lance: the movement aim seen when the cast began, so a changed heading re-aims the held charge */ ax?: number; ay?: number }
 /** Silver Rift chain: 'main' while the first beam fires, then wait -> fire per follow-up teleport until `left` hits zero. */
 export interface RiftChain { state: 'main' | 'wait' | 'fire' | 'done'; left: number; hit: boolean; nextAt: number; hop: number; dests: { x: number; y: number }[]; fireAt: number; pulses: number; tier: number; dx: number; dy: number; len: number; ox: number; oy: number }
 export interface SphereShot { id: number; x0: number; y0: number; x1: number; y1: number; t: number; form: FormId }
@@ -78,7 +78,7 @@ export function makeState(seed: number, arenaId: ArenaId = 'gloam', cometUnlocke
     upgradeStacks: {}, eHeld: false, nextId: 1, spawnTimer: 0.18, nextFlanker: 7, cast: null, sphere: null, blasts: [], abilityEvents: [], enemyShots: [], enemyEvents: [], hazards: [], encounter: { spawned: {}, forced: false, doneAt: {} }, plan: CLASSIC_PLAN, b22: makeB22(), bossesDefeated: 0, lastHit: null, run: makeRunState(),
     player: { x: 1100, y: 800, radius: 17, hp: 100, maxHp: 100, speed: 250, attackDamage: 17,
       attackPeriod: 0.55, attackRange: 242, attackClock: 0.12, targets: 1, pickupRadius: 72,
-      dashRemaining: 0, dashCooldown: 0, dashDx: 0, dashDy: 0, invulnerable: 0,
+      dashRemaining: 0, dashCooldown: 0, dashUsed: 0, dashDx: 0, dashDy: 0, invulnerable: 0,
       qCooldown: 0, beamCooldown: 0, sphereCooldown: 0, aimX: 0, aimY: 1, qDamage: 34, qRadius: 132, drive: 0, form: 0, formCooldown: 0, dragonCooldown: 0, cometCooldown: 0, riftCooldown: 0, reversalCooldown: 0, evadeCooldown: 0, vx: 0, vy: 0,
       xp: 0, level: 1, nextXp: xpThreshold(1), }, };
 }

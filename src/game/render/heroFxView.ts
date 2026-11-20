@@ -24,7 +24,7 @@ const PAL = {
   ren: { core: 0xfff0d8, hot: 0xff7a3d, mid: 0xff2e2a, deep: 0x8a0f1c, dark: 0x2a0508, ember: 0xffb36b },
   sora: { core: 0xffffff, hot: 0xcfeeff, mid: 0x4db8ff, deep: 0x1c5fd6, dark: 0x081840, ember: 0x9fe8ff },
 };
-interface Flash { x: number; y: number; t: number; dur: number; r: number; kind: 'slash' | 'burst' | 'flare' | 'dust' | 'crack' | 'pillar'; ang: number; big: boolean }
+interface Flash { x: number; y: number; t: number; dur: number; r: number; kind: 'slash' | 'burst' | 'flare' | 'dust' | 'crack' | 'pillar' | 'muzzle'; ang: number; big: boolean }
 const hash = (n: number) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
 const ease = (u: number) => 1 - (1 - Math.min(1, Math.max(0, u))) ** 3;
 
@@ -93,6 +93,7 @@ export class HeroFxView {
     // ---- persistent aura and motion trails
     const smp = this.auraTrack.update(s, s.phase === 'running' ? dt : 0, Math.hypot(p.vx, p.vy) / Math.max(1, p.speed));
     const live = aura && s.phase === 'running' && p.hp > 0;
+    this.auraView.violet = s.hero === 'vex';
     if (live && this.auraView.available) this.auraView.update(smp, dt, foot, p.vx, p.vy, reduced ? 0.55 : crowded ? 0.75 : 1, calmFx); else this.auraView.hide();
     if (live && !this.auraView.available) this.auraDraw(s, foot, calmFx, smp);   // B21.3: persistent, activity-responsive aura (the B20 stroke stays as the silhouette rim)
     else if (s.cinema) this.auraDraw(s, foot, calmFx, { ...smp, k: 0.6 });
@@ -115,10 +116,11 @@ export class HeroFxView {
       case 'rush_strike': add({ kind: 'burst', dur: 0.3, r: 64, big: true }, 'e'); sparks('e', 34); add({ kind: 'dust', dur: 0.32, r: 40 }); if (!reduced) this.shake = Math.max(this.shake, 0.0024); break;
       case 'bloodstar_slam': this.director.request('finisher', reduced); add({ kind: 'crack', dur: 1.1, r: 150 }); add({ kind: 'burst', dur: 0.4, r: 120, big: true }); add({ kind: 'dust', dur: 0.5, r: 90 }); if (!reduced) this.shake = Math.max(this.shake, 0.0058); break;
       case 'bloodstar_rebound': this.director.request('heavy', reduced); add({ kind: 'burst', dur: 0.4, r: 150, big: true }); if (!reduced) this.shake = Math.max(this.shake, 0.0045); break;
-      case 'lance_fire': if (n >= 2) this.director.request('heavy', reduced); add({ kind: 'flare', dur: 0.3, r: 40 + 16 * n }); if (!reduced) this.shake = Math.max(this.shake, 0.0016 + 0.0008 * n); break;
+      case 'lance_fire': if (n >= 2) this.director.request('heavy', reduced); add({ kind: 'muzzle', dur: 0.3, r: 40 + 16 * n, ang: Math.atan2(s.hx.act?.dirY ?? 0, s.hx.act?.dirX ?? 1) }); if (!reduced) this.shake = Math.max(this.shake, 0.0016 + 0.0008 * n); break;
       case 'lance_pulse': add({ kind: 'flare', dur: 0.2, r: 30 + 10 * n }, 'e'); sparks('e', 26); break;
       case 'horizon_burst': add({ kind: 'flare', dur: 0.4, r: 80, big: true }, 'r'); sparks('r', 40); if (!reduced) this.shake = Math.max(this.shake, 0.004); break;
-      case 'volley_fire': case 'needle_fire': add({ kind: 'flare', dur: 0.1, r: 16 }); break;
+      case 'volley_fire': add({ kind: 'muzzle', dur: 0.22, r: 46, ang: Math.atan2(s.hx.act?.dirY ?? 0, s.hx.act?.dirX ?? 1) }); break;
+      case 'needle_fire': add({ kind: 'flare', dur: 0.1, r: 16 }); break;
       case 'ascend_break': this.director.request('finisher', reduced); add({ kind: 'pillar', dur: 0.9, r: 200, big: true }); add({ kind: 'burst', dur: 0.6, r: 220, big: true }); add({ kind: 'dust', dur: 0.7, r: 160 }); if (!reduced) this.shake = Math.max(this.shake, 0.007); break;
       default: break;
     }
@@ -142,7 +144,8 @@ export class HeroFxView {
     this.put('sl_beam2', o.x, o.y, len / 1572, a, { rot: Math.atan2(c.dirY, c.dirX), ox: 0, sy: (hw * 1.5) / 40, depth: 3.9 });   // the damage lane, drawn as faint beam art on the floor
   }
   private bolt(x: number, y: number, vx: number, vy: number, k: number, form: boolean) {
-    const ang = Math.atan2(vy, vx); this.put(k > 1 ? 'sm_volley' : 'sm_needle', x, y, (k > 1 ? 64 : 54) / (k > 1 ? 371 : 359) * (form ? 1.15 : 1), 1, { rot: ang, ox: 1, depth: 11.2 });
+    const ang = Math.atan2(vy, vx), vol = k > 1; this.put(vol ? 'sm_volley' : 'sm_needle', x, y, (vol ? 118 : 54) / (vol ? 371 : 359) * (form ? 1.15 : 1), 1, { rot: ang, ox: 1, depth: 11.2 });
+    if (vol) { const sp = Math.hypot(vx, vy) || 1, tl = 95, tx = x - (vx / sp) * tl, ty = y - (vy / sp) * tl; this.glow.lineStyle(9, PAL.sora.mid, 0.28).lineBetween(tx, ty, x, y); this.glow.lineStyle(3.5, PAL.sora.core, 0.85).lineBetween(tx + (x - tx) * 0.3, ty + (y - ty) * 0.3, x, y); this.put('sl_orb1', x, y, 34 / 161, 0.9, { depth: 11.3 }); }
     if (form) this.put('sm_afterimage', x, y, 46 / 392, 0.45, { rot: ang, ox: 1, depth: 11.1 });
   }
   private orb(x: number, y: number, k: number, hot: boolean, s: GameState, tx: number, ty: number) {
@@ -165,7 +168,7 @@ export class HeroFxView {
     const sy = (hw * 2.2 / 52) * open * wob * (0.55 + 0.45 * a);
     this.put('sl_beam', x0, y0, (L * 1.03) / 1618, Math.min(1, 1.15 * a + 0.2), { rot: ang, ox: 0, sy, depth: 11.25 });
     if (c.tier >= 1 || c.form === 1) this.put('sl_beam2', x0, y0, (L * 1.03) / 1572, Math.min(1, a), { rot: ang, ox: 0, sy: sy * (c.form === 1 ? 1.5 : 1.15), depth: 11.26 });
-    this.put('sl_muzzle', x0, y0, (hw * 5.5) / 404, a, { rot: ang, depth: 11.35 });
+    this.put('sl_muzzle', x0, y0, (hw * 4.2) / 404, a, { rot: ang, ox: 0.08, depth: 11.35 });
     this.put('sl_cap', x1, y1, (hw * 5) / 292, 0.9 * a, { rot: ang, depth: 11.3 });
   }
   private jag(x0: number, y0: number, x1: number, y1: number, segs: number, core: number, edge: number, a: number, seed: number, amp = 8) {
@@ -180,12 +183,13 @@ export class HeroFxView {
     void pal;
     if (f.kind === 'burst') this.put(ren ? 'rs_impact' : 'sm_hit', f.x, f.y, f.r * 2.4 / (ren ? 396 : 325) * (0.6 + 0.6 * ease(u * 1.5)), 0.95 * a, { rot: ren ? 0 : f.x });
     else if (f.kind === 'flare') this.put(ren ? 'rs_fist' : 'sl_muzzle', f.x, f.y, f.r * (ren ? 2.2 / 309 : 2.6 / 404) * (0.7 + 0.5 * u), a, { rot: ren ? 0 : f.x });
+    else if (f.kind === 'muzzle') this.put('sl_muzzle', f.x, f.y, f.r * 2.2 / 404 * (0.7 + 0.5 * u), a, { rot: ang, ox: 0.08, depth: 11.35 });   // the release flash blooms out of the hands along the beam, never around the body
     else if (f.kind === 'dust') this.put(ren ? 'dust_puff' : 'vfx_08', f.x, f.y + 8, f.r * 2.4 / 256 * (0.5 + 0.8 * ease(u)), 0.5 * a, { sy: 0.6, depth: 3.8 });
     else if (f.kind === 'crack') this.put(ren ? 'rs_fissure' : 'ground_crack', f.x, f.y + 6, f.r * 2.1 / (ren ? 353 : 256), Math.min(1, 1.6 * a), { sy: 0.55, depth: 3.7 });
     else if (f.kind === 'pillar') this.put(ren ? 'ra_pillar' : 'vfx_16', f.x, f.y + 4, (ren ? 0.8 : 0.85) * (0.8 + 0.3 * ease(u)), 0.9 * a, { oy: 0.95, sy: 1.35, depth: 11.5 });
     else if (f.kind === 'slash') {   // ImageGen crescent thrown toward the target; the finisher is the heavy double crescent
       const key = ren ? (f.big ? 'rs_finisher' : hash(f.x + f.y) > 0.5 ? 'rs_slash1' : 'rs_slash2') : 'sm_dashslash', w = ren ? (f.big ? 398 : 300) : 275;
-      this.put(key, f.x - Math.cos(ang) * f.r * 0.5, f.y - Math.sin(ang) * f.r * 0.5, f.r * 2.3 / w * (0.75 + 0.35 * ease(u * 1.6)), 0.95 * a, { rot: ang, ox: 0.35 });
+      this.put(key, f.x - Math.cos(ang) * f.r * 0.5, f.y - Math.sin(ang) * f.r * 0.5, f.r * 2.3 / w * (0.75 + 0.35 * ease(u * 1.6)), 0.95 * a, { rot: ren && !f.big ? ang + Math.PI : ang, ox: ren && !f.big ? 0.65 : 0.35 });   // the Ren crescent art has its bulge on the left, so it is turned to put the bulge toward the target
     }
   }
   /** B21.3: the aura is ImageGen art in layers (halo + flame/lightning wings BEHIND the body, a thin veil in front, a ground sigil, rising motes). It leans away from travel, tightens while charging, flares on release and settles afterwards. */

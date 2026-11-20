@@ -7,6 +7,7 @@ import { isHeroId, type HeroId } from '../content/heroes';
 /** The runner this game shows: the saved choice, or (dev server with ?qa=1 only) the ?hero= override. */
 export function resolveHero(bridge: GameBridge): HeroId {
   try { const q = new URLSearchParams(globalThis.location?.search ?? ''), h = q.get('hero'); if (import.meta.env.DEV && q.get('qa') === '1' && isHeroId(h)) return h; } catch { /* no location */ }
+  const net = bridge.getNet()?.room; if (net && net.players[net.you]) return net.players[net.you].hero;
   return bridge.getRunConfig().hero ?? 'kai';
 }
 /** Heroes fighting beside the runner: the local co-op partner, or the other players of an online room. */

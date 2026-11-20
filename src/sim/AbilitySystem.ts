@@ -46,7 +46,7 @@ export function trackAim(s: GameState, input: InputState) {
   const d = normalize(input.x, input.y); if (d.x !== 0 || d.y !== 0) { s.player.aimX = d.x; s.player.aimY = d.y; }
 }
 
-function beamLength(x: number, y: number, dx: number, dy: number, max: number): number {
+export function beamLength(x: number, y: number, dx: number, dy: number, max: number): number {
   for (let d = 0; d <= max; d += 8) if (blocked(x + dx * d, y + dy * d, 0)) return Math.max(0, d - 8);
   return max;
 }
@@ -125,7 +125,7 @@ export function startAbility(s: GameState, key: 'beam' | 'sphere'): boolean {
   const dir = kind === 'sphere' || fa ? aim : clampToFace(aim.x, aim.y, face, kind === 'beam' ? BEAM.maxAimOffset : kind === 'dragon' ? DRAGON.maxAimOffset : CANNON.maxAimOffset);
   if (kind === 'beam') p.beamCooldown = BEAM.cooldown * s.mods.beamCd; else if (kind === 'sphere') p.sphereCooldown = SPHERE.cooldown * s.mods.sphereCd;
   else if (kind === 'dragon') p.dragonCooldown = DRAGON.cooldown * s.mods.beamCd; else p.cometCooldown = CANNON.cooldown * s.mods.sphereCd;
-  s.cast = { id: s.nextId++, kind, face, t: 0, dirX: dir.x, dirY: dir.y, form: p.form, released: false, pulses: 0, len: 0, tx: tg?.x ?? p.x, ty: tg?.y ?? p.y, sx: p.x, sy: p.y, hits: [], dur: castDuration(kind) };
+  s.cast = { id: s.nextId++, kind, face, t: 0, dirX: dir.x, dirY: dir.y, form: p.form, released: false, pulses: 0, len: 0, tx: tg?.x ?? p.x, ty: tg?.y ?? p.y, sx: p.x, sy: p.y, hits: [], dur: castDuration(kind), charge: 0, ax: p.aimX, ay: p.aimY };
   emit(s, kind === 'beam' ? 'beam_charge' : kind === 'sphere' ? 'sphere_gather' : kind === 'dragon' ? 'dragon_windup' : 'comet_gather', p.x, p.y);
   return true;
 }
@@ -192,6 +192,12 @@ export function updateAbilities(s: GameState, dt: number) {
   if (sh) { sh.t += dt; if (sh.t >= SPHERE.flight) { s.sphere = null; detonate(s, sh); } }
   const c = s.cast; if (!c || isKitKind(c.kind)) return;
   const before = c.t; c.t += dt;
+  if (c.kind === 'beam' && !c.released) {   // Fracture Lance: holding E keeps the charge steerable until the last moment; letting go (or the hold limit) fires it
+    const fa = freeAim(s);
+    if (fa) { c.dirX = fa.x; c.dirY = fa.y; c.face = faceOf(fa.x, fa.y); }
+    else if (p.aimX !== c.ax || p.aimY !== c.ay) { const d = normalize(p.aimX, p.aimY); c.ax = p.aimX; c.ay = p.aimY; c.dirX = d.x; c.dirY = d.y; c.face = faceOf(d.x, d.y); }
+    if (c.t >= BEAM.charge - 1e-9 && s.eHeld && (c.charge ?? 0) < BEAM.holdMax) { c.charge = (c.charge ?? 0) + dt; c.t = BEAM.charge - 1e-6; }
+  }
   if (c.kind === 'rift') { updateRift(s, c, dt); if (c.released && c.t >= c.dur - 1e-9) s.cast = null; return; }
   if (c.kind === 'reversal') { updateReversal(s, c); if (c.t >= c.dur - 1e-9) s.cast = null; return; }
   if (c.kind === 'dragon') updateDragon(s, c, dt); else if (c.kind === 'comet') updateComet(s, c, before);

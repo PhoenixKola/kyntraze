@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { isHeroId } from '../../content/heroes';
+import { isHeroId, type HeroId } from '../../content/heroes';
 import { applyHero } from '../../sim/RunConfig';
 import { Simulation } from '../../sim/Simulation';
 import { FixedStep } from '../../sim/FixedStep';
@@ -14,6 +14,8 @@ import { Presentation } from '../render/arenaArt';
 import { Ambience, ArenaHazardView, ArenaProps, createArenaFloor } from '../render/arenaWorld';
 import { NO_CONFIG } from '../../sim/RunConfig';
 import { RemoteSimulation } from '../../net/RemoteSimulation';
+import { blankPartnerView, partnerView } from '../../net/snapshot';
+import type { GameState } from '../../sim/GameState';
 import { inSlot, slotPlayer } from '../../sim/CoopSystem';
 import { RING_TINT, formKey } from '../render/contourFilter';
 import { B22Overlay, RealmProps, createRealmFloor } from '../render/realmWorld';
@@ -34,7 +36,7 @@ const VICTORY_CELEBRATE_MS = 1800, VICTORY_RESULTS_MS = 4300;
 export class ArenaScene extends Phaser.Scene {
   private simulation!: Simulation;
   private controller!: InputController;
-  private entityRenderer!: EntityRenderer; private partnerRenderer: EntityRenderer | null = null;
+  private entityRenderer!: EntityRenderer; private partnerRenderer: EntityRenderer | null = null; private pview: GameState | null = null; private partnerHero: HeroId | null = null;
   private fx!: EffectsRenderer;
   private presentation!: Presentation;
   private fixed = new FixedStep();
@@ -102,7 +104,16 @@ export class ArenaScene extends Phaser.Scene {
       this.partnerRenderer ??= new EntityRenderer(this, true, s.hero !== 'kai' && s.party.slots[1].bag.hero === 'kai');
       const d = s.party.slots[1].down, in1 = s.party.slots[1].input, pr = this.partnerRenderer;
       inSlot(s, 1, () => { pr.sync(s, in1, simDelta === 0 && s.phase === 'running' ? 0 : delta, this.reduced); const q = pr.debugPose(), k = formKey(s.hero, s.player.form); this.presentation.partner(q.x, q.y, k ? RING_TINT[k] : 0xbff4ff, true, d.downed); });
-    } else this.presentation.partner(0, 0, 0, false, false);
+    } else {
+      const np = (s as unknown as { partner?: { hero: HeroId; down: { downed: boolean } } }).partner;
+      if (np && this.simulation instanceof RemoteSimulation) {   // online: the other player is drawn by the same hero pipeline, from a read-only view of their server state
+        if (this.partnerHero !== np.hero) { this.partnerRenderer?.destroy(); this.partnerRenderer = null; this.partnerHero = np.hero; }
+        this.partnerRenderer ??= new EntityRenderer(this, true, s.hero !== 'kai' && np.hero === 'kai'); this.pview ??= blankPartnerView(s.seed, s.arenaId);
+        const dt = (simDelta === 0 && s.phase === 'running' ? 0 : delta) / 1000, pv = partnerView(s, this.pview, np, dt), pr = this.partnerRenderer, sp = pv.view.player.speed || 1;
+        pr.sync(pv.view, { x: pv.moveX * (pv.moveX || pv.moveY ? 1 : 0), y: pv.moveY, dash: false, q: false, f: false, beam: false, sphere: false }, dt * 1000, this.reduced); void sp;
+        const q = pr.debugPose(), k = formKey(pv.view.hero, pv.view.player.form); this.presentation.partner(q.x, q.y, k ? RING_TINT[k] : 0xbff4ff, true, np.down.downed);
+      } else { this.pview = null; this.partnerHero = null; this.presentation.partner(0, 0, 0, false, false); }
+    }
     this.b22?.update(s, s.phase === 'running' ? delta / 1000 : 0, this.reduced);
     this.props?.update(s, this.time.now / 1000); this.ambience?.update(this.time.now / 1000, this.reduced); this.hazardView?.sync(s, s.phase === 'running' ? delta / 1000 : 0); this.marks?.update(s, delta / 1000, this.reduced); this.floorLights?.update(s, delta / 1000, this.reduced); this.evoFx?.update(s, delta / 1000, this.reduced);
     if (s.phase === 'victory') {

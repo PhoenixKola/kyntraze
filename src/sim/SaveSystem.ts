@@ -1,13 +1,26 @@
 import type { RunTelemetry } from './GameTelemetry';
-import { DEFAULT_ARENA, isArenaId, type ArenaId } from '../content/arenas';
+import { ARENA_IDS, DEFAULT_ARENA, isArenaId, type ArenaId } from '../content/arenas';
 import { migrateMeta, type MetaState } from './MetaSystem';
 import { isHeroId, type HeroId } from '../content/heroes';
 import { migrateB22, type B22Save } from '../b22/save';
 export const SAVE_KEY = 'kyntraze-b00-v1';
+import { COSMETICS, OUTFITS } from '../b22/cosmetics';
+import { MILESTONES } from '../b22/mastery';
+import { FEATS, MASTERY, UNLOCK_BY_ID, type UnlockId } from '../content/meta';
+import { MARKS_CAP } from './MetaSystem';
 /** B18: the dev-only QA route (`?qa=1` on the dev server) reads and writes a SEPARATE store, so test runs can never mint marks, feats or unlocks in the real save. Production builds never use it. */
 export const QA_SAVE_KEY = 'kyntraze-b00-v1-qa';
 export const isQaRoute = () => { try { return !!import.meta.env.DEV && new URLSearchParams(globalThis.location?.search ?? '').get('qa') === '1'; } catch { return false; } };
-export const activeSaveKey = () => (isQaRoute() ? QA_SAVE_KEY : SAVE_KEY);
+/** Test switch: `?unlock=all` (any build, local or hosted) opens every hero, form, outfit, crest, boon, arena and Vex chapter. It reads and writes its own store, so the real save is never touched. */
+export const UNLOCK_ALL_KEY = 'kyntraze-b00-v1-unlockall';
+export const isUnlockAll = () => { try { const v = new URLSearchParams(globalThis.location?.search ?? '').get('unlock'); return v === 'all' || v === '1' || v === 'true'; } catch { return false; } };
+export const activeSaveKey = () => (isQaRoute() ? QA_SAVE_KEY : isUnlockAll() ? UNLOCK_ALL_KEY : SAVE_KEY);
+/** Pure: the save with everything unlocked (progress records and settings are kept). */
+export function withEverythingUnlocked(save: SaveV1): SaveV1 {
+  const b22 = { ...save.b22!, vexForms: [true, true] as [boolean, boolean], story: { done: [1, 2, 3] as (1 | 2 | 3)[], seen: true }, mastery: Object.fromEntries(MILESTONES.map(m => [m.id, true])) as Record<string, true>, owned: [...new Set([...(save.b22?.owned ?? []), ...COSMETICS.map(c => c.id), ...OUTFITS.map(o => o.id)])] };
+  const meta = { ...save.meta!, marks: MARKS_CAP, owned: Object.keys(UNLOCK_BY_ID) as UnlockId[], feats: { ...Object.fromEntries(FEATS.map(f => [f.id, 0])), ...save.meta!.feats }, mastery: { ...Object.fromEntries(ARENA_IDS.flatMap(a => MASTERY[a].map(d => [`${a}.${d.id}`, true]))) as Record<string, true>, ...save.meta!.mastery }, introSeen: true };
+  return { ...save, b22, meta, unlocks: { cometheart: true, stillfire: true, ren: true, sora: true } };
+}
 export interface GameSettings { mute: boolean; reducedEffects: boolean; pauseOnBlur: boolean; /** B23 local co-op: split the screen when the partners are too far apart for one view */ coopSplit: boolean; /** B16 mix, each 0..1 */ master: number; music: number; sfx: number; ui: number; }
 export type VolumeKey = 'master' | 'music' | 'sfx' | 'ui';
 export interface SaveV1 { version: 1; settings: GameSettings; best: (RunTelemetry & { score: number; /** B19: who set it (older saves: Kai) */ hero?: HeroId }) | null; /** B19: the selected runner (older saves: Kai) */ hero?: HeroId; /** last selected arena (persisted choice; older saves default to the Gloam Circuit) */ arena?: ArenaId; /** B12: permanent Kai unlocks (Cometheart = the Fracture Warden has been defeated once); older saves default to none */ unlocks?: { cometheart: boolean; stillfire?: boolean; /** B19: Crimson Ascendant / Azure Sovereign, each earned by defeating the Warden with that runner */ ren?: boolean; sora?: boolean }; /** B18 meta-progression (always present after migration) */ meta: MetaState; /** B22 additive block: records, mastery, cosmetics, story, challenge proofs (always present after migration) */ b22?: B22Save; }
@@ -30,7 +43,7 @@ export function migrateSave(raw: unknown): SaveV1 {
 }
 export function loadSave(): SaveV1 {
   let text: string | null = null;
-  try { text = globalThis.localStorage?.getItem(activeSaveKey()) ?? null; return migrateSave(text ? JSON.parse(text) : null); }
-  catch { if (text) { try { globalThis.localStorage?.setItem(activeSaveKey() + '.corrupt', text); } catch { /* storage full or blocked */ } } return migrateSave(null); }   // unreadable data is kept aside before defaults can overwrite it
+  try { text = globalThis.localStorage?.getItem(activeSaveKey()) ?? null; const v = migrateSave(text ? JSON.parse(text) : null); return isUnlockAll() ? withEverythingUnlocked(v) : v; }
+  catch { if (text) { try { globalThis.localStorage?.setItem(activeSaveKey() + '.corrupt', text); } catch { /* storage full or blocked */ } } return isUnlockAll() ? withEverythingUnlocked(migrateSave(null)) : migrateSave(null); }   // unreadable data is kept aside before defaults can overwrite it
 }
 export function storeSave(save: SaveV1) { try { globalThis.localStorage?.setItem(activeSaveKey(), JSON.stringify(save)); return true; } catch { return false; } }

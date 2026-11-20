@@ -9,6 +9,8 @@ export const BEAM = {
   aimAssistCos: Math.cos(0.42),
   /** The sprite has four views, so the beam may deviate at most this far (rad) from the facing axis; the lane always leaves the visible hands. */
   maxAimOffset: 0.52,
+  /** Holding E keeps the Lance charged and steerable (pointer / stick / movement) for up to this many extra seconds before it fires on its own. */
+  holdMax: 1.6,
 } as const;
 export const SPHERE = {
   name: 'Nova Bloom', key: 'R',

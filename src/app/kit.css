@@ -717,3 +717,13 @@ main[data-testid="hero-select"] .arena-strip-go { position: static; white-space:
 .arc-crest-art.earned { filter: drop-shadow(0 0 calc(8 * var(--u)) rgba(255, 210, 120, .5)); opacity: 1; }
 .arc-crest-mini { width: calc(26 * var(--u)); min-width: 20px; vertical-align: middle; margin-right: calc(6 * var(--u)); } .arc-crest-mini.locked { filter: grayscale(1) brightness(.5); }
 .res-b22crest { display: flex; align-items: center; gap: calc(6 * var(--u)); } .res-b22crest img { width: calc(30 * var(--u)); min-width: 22px; }
+
+.partner-xp, .partner-form { position: relative; height: calc(9 * var(--u)); min-height: 8px; background: #0b1620; border: 1px solid #2a4a5a; overflow: hidden; }
+.partner-xp i { display: block; height: 100%; background: linear-gradient(90deg, #2f8fd0, #7fe0ff); }
+.partner-form i { display: block; height: 100%; background: linear-gradient(90deg, #b8741f, #ffc857); } .partner-form.on i { background: linear-gradient(90deg, #ff6a2b, #ffd36b); box-shadow: 0 0 6px #ff9a3b; }
+.partner-xp span, .partner-form span { position: absolute; inset: 0; display: flex; align-items: center; padding: 0 4px; font-size: max(7px, calc(8 * var(--u))); letter-spacing: .1em; color: #fff; text-shadow: 0 1px 1px #000; }
+
+/* ability tooltip: the box scales with the HUD like its text does, and the key badge can never squeeze the title out from under itself */
+.slot-tip { max-width: min(max(300px, calc(300 * var(--u))), 72vw); }
+.tip-title { flex: 1 1 auto; min-width: 3.5em; }
+.tip-key { flex: 0 1 auto; white-space: nowrap; }
