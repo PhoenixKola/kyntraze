@@ -56,7 +56,7 @@ export class EntityRenderer {
   private ghosts: { spr: Phaser.GameObjects.Sprite; life: number }[] = []; private ghostClock = 0;
   private furyId = 0; private furyBeat = -1; private furyTime = -9;
   /** Ren's last Crimson Fury beat and how long ago it landed, from the real ren_auto events (null before the first one) */
-  private furyView(state: GameState): { beat: number; t: number } | null { for (const e of state.abilityEvents) if (e.id > this.furyId) { this.furyId = e.id; if (e.kind === 'ren_auto') { this.furyBeat = (e.n ?? 0) & 3; this.furyTime = state.time; } } return this.furyBeat < 0 ? null : { beat: this.furyBeat, t: state.time - this.furyTime }; }
+  private furyView(state: GameState): { beat: number; t: number } | null { for (const e of state.abilityEvents) if (e.id > this.furyId) { this.furyId = e.id; if (e.kind === 'ren_auto' || e.kind === 'vex_auto') { this.furyBeat = (e.n ?? 0) & 3; this.furyTime = state.time; } } return this.furyBeat < 0 ? null : { beat: this.furyBeat, t: state.time - this.furyTime }; }
   private heroDeadT = 0; private heroAnim: HeroAnimator | null | undefined; private heroAnchors: AnchorTable | undefined;
   private heroFx: HeroFxView | null = null; private heroBody: Phaser.GameObjects.Graphics | null = null;
   private orbs = new Map<number, { gem: Phaser.GameObjects.Image; glow: Phaser.GameObjects.Image }>();
@@ -157,7 +157,7 @@ export class EntityRenderer {
     const bank = state.player.flyT > 0 ? Math.max(-0.4, Math.min(0.4, this.velX / 520)) : 0;
     for (const s of [this.hero, this.legs]) { s.setRotation(m.rot + bank).setScale(this.baseScale * m.sx, this.baseScale * m.sy); }
     // B28: Voidheart Exile hovers a few px above his GROUND collision feet (the shadow and every gameplay position stay on the ground); flight uses its own lift
-    this.hoverY = hero === 'vex' && p.form === 2 && p.flyT <= 0 && p.hp > 0 && !frozen ? -Math.round((6 + (reduced ? 0 : Math.sin(state.time * 1.8) * 1.8)) * (this.baseScale / 0.5)) : 0;
+    this.hoverY = hero === 'vex' && p.form === 2 && clip !== 'Hover' && p.flyT <= 0 && p.hp > 0 && !frozen ? -Math.round((6 + (reduced ? 0 : Math.sin(state.time * 1.8) * 1.8)) * (this.baseScale / 0.5)) : 0;
     this.hero.y += m.dy + this.hoverY; this.legs.y = this.hero.y;
     this.mirrorAura();
   }
@@ -261,7 +261,7 @@ export class EntityRenderer {
     if (!this.heroFx) { this.heroFx = new HeroFxView(this.scene, rigOf(hero), hero); this.heroBody = this.scene.add.graphics().setDepth(10); }
     if (this.heroAnim === undefined) {
       const b = this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'base')) as KaiManifests | undefined;
-      this.heroAnim = b ? new HeroAnimator(hero, b, this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f1')) as KaiManifests | undefined) : null; this.heroAnchors = this.scene.registry.get(HERO_ANCHORS_KEY(hero)) as AnchorTable | undefined;
+      this.heroAnim = b ? new HeroAnimator(hero, b, this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f1')) as KaiManifests | undefined, this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f2')) as KaiManifests | undefined) : null; this.heroAnchors = this.scene.registry.get(HERO_ANCHORS_KEY(hero)) as AnchorTable | undefined;
     }
     const fx = this.heroFx, body = this.heroBody!, x = Math.round(p.x), y = Math.round(p.y + KAI_GROUND_DY), dead = state.phase === 'dead' || p.hp <= 0, anim = this.heroAnim;
     body.clear();
@@ -284,7 +284,7 @@ export class EntityRenderer {
       this.hairStep(state, dt, hero, key, pose.frame, pose.clip, hurt, reduced);
       this.applyMotion(state, dt, hero, reduced, hurt, p.dashRemaining > 0, pose.clip, pose.facing);
       this.ghostTrail(state, dt, x, y, rigOf(hero), reduced); this.blinkTrail(state, dt, reduced);
-      this.hand = this.heroAnchors ? handAnchorWorld(this.heroAnchors, form, pose.facing, pose.clip, pose.frame, x, y + this.hoverY, this.baseScale) : null;
+      this.hand = this.heroAnchors ? handAnchorWorld(this.heroAnchors, look === 'f2' ? 'f2' : form, pose.facing, pose.clip, pose.frame, x, y + this.hoverY, this.baseScale) : null;
 
     } else {
       this.hero.setVisible(false); this.legs.setVisible(false); this.heroDeadT = dead ? this.heroDeadT + dt : 0; const ren = hero === 'ren';

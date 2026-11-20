@@ -222,6 +222,10 @@ import anim_vex  # noqa: E402  (B23: Vex's own Guard / Riposte)
 _own = {f()["name"] for f in anim_vex.CLIPS}
 CLIPS = [f for f in CLIPS if f()["name"] not in _own] + anim_vex.CLIPS   # Vex's own clips replace same-named inherited ones (Transform)
 
+if r.FORM == "f1" and os.environ.get("VEX_STYLE"):   # B28: authored combat poses (Riftbound / Voidheart Exile); the base build never sees them
+    import anim_b28  # noqa: E402
+    CLIPS += anim_b28.CLIPS
+
 if r.F3:        # Form III (Stillfire Apex): levitation layer over the Form II poses (form-iii/scripts/hover3.py); every clip name and event the runtime knows stays
     sys.path.insert(0, os.environ["KAI_F3_SCRIPTS"]); import hover3
     _idle_raw = idle(); _run_raw = run()["frames"]; _punch_raw = punch(); _ctx = hover3.Ctx("south", 0, _idle_raw["frames"])

@@ -5,7 +5,7 @@ import { CANNON, DRAGON } from '../content/cometheart';
 import { RIFT } from '../content/stillfire';
 export type Facing = 'south' | 'north' | 'east' | 'west';
 /** RunLower + RunPunchUpper are the two LAYERS of the moving attack (legs+hips of the Run cycle, and an upper body whose frames are `step * 8 + leg phase`); the runtime draws the lower one first. */
-export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere' | 'RunLower' | 'RunPunchUpper' | 'Lunge' | 'Uppercut' | 'Slam' | 'Kick' | 'Glide' | 'Dive' | 'Jab' | 'Hook' | 'Cyclone' | 'Rampage' | 'Pound' | 'NovaCharge' | 'Takeoff';
+export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere' | 'RunLower' | 'RunPunchUpper' | 'Lunge' | 'Uppercut' | 'Slam' | 'Kick' | 'Glide' | 'Dive' | 'Jab' | 'Hook' | 'Cyclone' | 'Rampage' | 'Pound' | 'NovaCharge' | 'Takeoff' | 'Strike1' | 'Strike2' | 'Strike3' | 'Strike4' | 'CastQ' | 'CastE' | 'CastR' | 'VCharge' | 'VRelease' | 'Hover' | 'Blink';
 /** Transform exists only in the Form I sheets. */
 export type KaiClip = KaiBaseClip | 'Transform' | 'IdleSpecial' | 'Guard' | 'Riposte';
 /** B23: Vex's own clips (blade-ready counter stance, outward counter-cut). Optional per sheet set: a set without them plays the older mapping. */
@@ -19,6 +19,9 @@ export const KAI_CLIPS: readonly KaiBaseClip[] = ['Idle', 'Run', 'BasicPunch', '
 export const KAI_KIT_CLIPS = ['Lunge', 'Uppercut', 'Slam', 'Kick', 'Glide', 'Dive'] as const;
 /** B26 Ren Crimson Ascendant clips (art/characters/ren/rig/anim_b26.py): Fury beats (Jab, Kick, Hook, Uppercut), Cyclone, Rampage, Pound (Catastrophe), NovaCharge + Lunge (Nova Fist), Takeoff / Glide / Dive. Form I sheets only. */
 export const SORA_F1_CLIPS = ['Takeoff', 'Glide', 'Dive'] as const;   // B27 Azure Sovereign flight
+/** B28 Vex authored poses (art/characters/vex/b28_poses.py): four strike beats, Q / E / R casts, V charge + release, Takeoff / Glide / Dive; Voidheart (f2) adds Hover and Blink. */
+export const VEX_F1_CLIPS = ['Strike1', 'Strike2', 'Strike3', 'Strike4', 'CastQ', 'CastE', 'CastR', 'VCharge', 'VRelease', 'Takeoff', 'Glide', 'Dive'] as const;
+export const VEX_F2_CLIPS = [...VEX_F1_CLIPS, 'Hover', 'Blink'] as const;
 export const REN_F1_CLIPS = ['Jab', 'Kick', 'Hook', 'Uppercut', 'Cyclone', 'Rampage', 'Pound', 'NovaCharge', 'Lunge', 'Takeoff', 'Glide', 'Dive'] as const;
 /** Leg phases per strike step in RunPunchUpper. */
 export const RUN_PHASES = 8;

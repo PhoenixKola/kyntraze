@@ -1,6 +1,6 @@
 # B28 status: Vex, Riftbound and Voidheart Exile dual-form combat and the Abyssal Guardian
 
-Brief: `prompts/kyntraze-b28-vex-dual-form-combat-overdrive.md`. Everything is **local, not pushed**. Nothing here has been watched at real speed or heard; the live checks were headless 960x540 runs (stills, console and request errors only).
+Brief: `prompts/kyntraze-b28-vex-dual-form-combat-overdrive.md`. The poses pass (below) is local, not pushed. Nothing here has been watched at real speed or heard; the live checks were headless 960x540 runs (stills, console and request errors only).
 
 ## Done
 
@@ -35,8 +35,8 @@ Per-fighter, bounded pools. The Guardian wraps Vex only during Overdrive; its lo
 
 ## Not verified / known gaps
 
-- **No Vex poses were authored.** Vex still uses the existing clips: no new strike, cast, glide, Takeoff / Glide / Dive, hands or turn poses, and no Voidheart-specific four-direction animation set. The brief required these; they are the largest remaining gap. The Voidheart hover is a renderer offset, not an authored pose.
-- No Vex-specific body-motion profile, hand-anchor entries or hair/accessory anchor work for new clips (nothing new was exported); outfits were not re-checked with the new FX.
+- **Authored poses (new, pose pass):** see "Vex poses" below. Still missing: a Voidheart-specific walk/run (Run / RunPunchUpper are shared with the older Vex set), a Voidheart dash that actually teleports (Blink is a pose played over the sim dash), and animated copies (they still show Vex's current frame).
+- No Vex-specific body-motion profile entries were added; outfits were not re-checked with the new poses or FX. Hair anchors and fist anchors for all new clips were regenerated (additions only, nothing existing changed).
 - No dynamic afterimages, no teleport-style dash visual for Voidheart, no hair / coat flow beyond the existing hair rig.
 - The clip-based flight shows the existing Run pose lifted by the sim, plus the form's jet or trail.
 - Spectral copies are non-targetable and show Vex's current pose (they do not run their own animation).
@@ -44,6 +44,16 @@ Per-fighter, bounded pools. The Guardian wraps Vex only during Overdrive; its lo
 - No motion at real speed, no audio listening, no two-client run, no 640x360 HUD check, no crowded-fight check, no second arena.
 - Overdrive reachability is reasoned (same numbers as Kai), not measured.
 - Cross-hero compact regression: Kai, Ren, Sora and Vex suites were run; no four-hero live session.
+
+## Vex poses (new, pose pass)
+
+Real rig poses, built with the same Blender part-rig pipeline as Sora / Ren (pose data `art/characters/vex/b28_poses.py`, solvers `rig/anim_b28.py` and `rig_dirs/danim_b28.py`, selected per form by `VEX_STYLE`, published by `scripts/b28-vex-publish.py`). All clips exist in four facings (north is a rear view, west is the east pose through the facing sign, never mirrored art).
+
+- **Riftbound (f1):** Strike1-4 (near blade cut, far claw rake, paired scissor cross, overhead-to-ground curved finisher), CastQ (crossed-blade Mirror Guard brace, held frames loop), CastE (low coil, long through-strike), CastR (blade overhead then driven into the ground), VCharge (blade hauled back, hold loop) + VRelease (lunge thrust), Takeoff / Glide / Dive (blade-first lean).
+- **Voidheart Exile (f2):** the same names with a different language: upright, narrow stance, economical gestures (far-hand flick, near sweep, drawn cross, two-handed overhead decree; arms-low-to-wide Phantom Legion summon; one-arm raised straight stroke for Severance; arms spread with raised chin for the Domain; cupped hands for the Event Horizon core and a one-arm throw), plus **Hover** (idle with the feet off the ground; replaces the old renderer offset while it plays) and **Blink** (stretched step played over the dash). Flight is upright with arms low rather than a dive lean.
+- **Wiring:** `HeroAnimator` now takes the f2 manifests (Voidheart resolves from its own sheet set), maps the real act kinds (`mirror_guard`, `phantom_legion`, `rift_execution`, `dim_severance`, `oath_ruin`, `domain_exile`, `abyssal_fang`, `event_horizon`), the real `vex_auto` beat (Strike1-4), flight and dash to these clips, and times each cast against the sim's release time. A set without a clip falls back to the older mapping. New `src/tests/b28-vex-poses.test.ts` checks that every clip ships in all four facings and that the animator selects them.
+- **Checked:** every clip rendered and inspected as stills (south and east in both forms, north Riftbound), frames zoomed at 5x; a Voidheart CastE frame with a dark sleeve stub was fixed and rebuilt. One headless run of both forms (auto, Q, E, R, V, Overdrive) with 0 console errors and 0 failed requests; typecheck, build and the Kai / Ren / Sora / Vex / co-op / snapshot suites pass.
+- **Not verified:** nothing watched at real speed; VFX attach points were not re-tuned to the new fist anchors; the blade part is always drawn on the near hand, so in raised-arm poses it overlaps the forearm / face area; north and west facings of Voidheart were only checked in contact sheets, not zoomed.
 
 ## Also fixed in this pass
 

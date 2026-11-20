@@ -5,14 +5,14 @@
  "direction": "south",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/vex-south.blend",
- "frame_width": 166,
+ "frame_width": 160,
  "frame_height": 157,
  "origin_px": [
-  64.0,
+  58.0,
   145.0
  ],
  "origin_normalized": [
-  0.385542,
+  0.3625,
   0.923567
  ],
  "origin_meaning": "ground point midway between the two soles of the approved stance (near sole is 13 px lower = closer to camera)",
@@ -86,10 +86,10 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 162,
+   "frame_width": 149,
    "frame_height": 113,
    "origin_px": [
-    71.0,
+    58.0,
     144.0
    ],
    "terminal": "once",
@@ -108,10 +108,10 @@
     "travel_end": 6,
     "recover_start": 7
    },
-   "frame_width": 162,
+   "frame_width": 141,
    "frame_height": 153,
    "origin_px": [
-    79.0,
+    58.0,
     143.0
    ],
    "terminal": "once",
@@ -128,10 +128,10 @@
     "impact": 0,
     "interruptible_from": 5
    },
-   "frame_width": 166,
+   "frame_width": 152,
    "frame_height": 152,
    "origin_px": [
-    72.0,
+    58.0,
     143.0
    ],
    "terminal": "once",
@@ -173,10 +173,10 @@
     "recover_start": 20,
     "interruptible_from": 22
    },
-   "frame_width": 134,
+   "frame_width": 129,
    "frame_height": 152,
    "origin_px": [
-    63.0,
+    58.0,
     143.0
    ],
    "terminal": "once",
@@ -236,10 +236,10 @@
     "recover_start": 6,
     "interruptible_from": 9
    },
-   "frame_width": 127,
+   "frame_width": 103,
    "frame_height": 147,
    "origin_px": [
-    82.0,
+    58.0,
     136.0
    ],
    "terminal": "once",
@@ -255,10 +255,10 @@
    "events": {
     "hold": 8
    },
-   "frame_width": 126,
+   "frame_width": 102,
    "frame_height": 161,
    "origin_px": [
-    82.0,
+    58.0,
     152.0
    ],
    "terminal": "once",
@@ -279,11 +279,313 @@
     "reveal_hold": 8,
     "interruptible_from": 10
    },
-   "frame_width": 145,
+   "frame_width": 121,
    "frame_height": 167,
    "origin_px": [
-    82.0,
+    58.0,
     158.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Strike1": {
+   "sheet": "sheets/vex_south_strike1.png",
+   "frames": 12,
+   "fps": 22,
+   "loop": false,
+   "duration_s": 0.5455,
+   "blender_action": "Strike1",
+   "events": {
+    "coil": 1,
+    "release": 3,
+    "recover_start": 6,
+    "interruptible_from": 8
+   },
+   "frame_width": 116,
+   "frame_height": 152,
+   "origin_px": [
+    43.0,
+    143.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Strike2": {
+   "sheet": "sheets/vex_south_strike2.png",
+   "frames": 14,
+   "fps": 22,
+   "loop": false,
+   "duration_s": 0.6364,
+   "blender_action": "Strike2",
+   "events": {
+    "coil": 1,
+    "release": 4,
+    "recover_start": 7,
+    "interruptible_from": 9
+   },
+   "frame_width": 118,
+   "frame_height": 152,
+   "origin_px": [
+    58.0,
+    143.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Strike3": {
+   "sheet": "sheets/vex_south_strike3.png",
+   "frames": 14,
+   "fps": 22,
+   "loop": false,
+   "duration_s": 0.6364,
+   "blender_action": "Strike3",
+   "events": {
+    "coil": 1,
+    "release": 4,
+    "recover_start": 7,
+    "interruptible_from": 10
+   },
+   "frame_width": 124,
+   "frame_height": 155,
+   "origin_px": [
+    44.0,
+    146.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Strike4": {
+   "sheet": "sheets/vex_south_strike4.png",
+   "frames": 16,
+   "fps": 22,
+   "loop": false,
+   "duration_s": 0.7273,
+   "blender_action": "Strike4",
+   "events": {
+    "coil": 2,
+    "release": 5,
+    "recover_start": 9,
+    "interruptible_from": 12
+   },
+   "frame_width": 96,
+   "frame_height": 176,
+   "origin_px": [
+    44.0,
+    167.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "CastQ": {
+   "sheet": "sheets/vex_south_castq.png",
+   "frames": 14,
+   "fps": 18,
+   "loop": false,
+   "duration_s": 0.7778,
+   "blender_action": "CastQ",
+   "events": {
+    "coil": 2,
+    "hold": 7,
+    "hold_end": 11,
+    "release": 6,
+    "recover_start": 12,
+    "interruptible_from": 12
+   },
+   "frame_width": 140,
+   "frame_height": 158,
+   "origin_px": [
+    58.0,
+    149.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "CastE": {
+   "sheet": "sheets/vex_south_caste.png",
+   "frames": 16,
+   "fps": 20,
+   "loop": false,
+   "duration_s": 0.8,
+   "blender_action": "CastE",
+   "events": {
+    "coil": 2,
+    "release": 5,
+    "recover_start": 9,
+    "interruptible_from": 12
+   },
+   "frame_width": 114,
+   "frame_height": 160,
+   "origin_px": [
+    43.0,
+    151.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "CastR": {
+   "sheet": "sheets/vex_south_castr.png",
+   "frames": 18,
+   "fps": 18,
+   "loop": false,
+   "duration_s": 1.0,
+   "blender_action": "CastR",
+   "events": {
+    "coil": 3,
+    "release": 6,
+    "hold": 7,
+    "recover_start": 13,
+    "interruptible_from": 15
+   },
+   "frame_width": 141,
+   "frame_height": 168,
+   "origin_px": [
+    58.0,
+    159.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "VCharge": {
+   "sheet": "sheets/vex_south_vcharge.png",
+   "frames": 12,
+   "fps": 14,
+   "loop": false,
+   "duration_s": 0.8571,
+   "blender_action": "VCharge",
+   "events": {
+    "coil": 1,
+    "hold": 5,
+    "hold_end": 11,
+    "recover_start": 11,
+    "interruptible_from": 11
+   },
+   "frame_width": 90,
+   "frame_height": 152,
+   "origin_px": [
+    44.0,
+    143.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "VRelease": {
+   "sheet": "sheets/vex_south_vrelease.png",
+   "frames": 12,
+   "fps": 22,
+   "loop": false,
+   "duration_s": 0.5455,
+   "blender_action": "VRelease",
+   "events": {
+    "release": 2,
+    "recover_start": 7,
+    "interruptible_from": 9
+   },
+   "frame_width": 118,
+   "frame_height": 152,
+   "origin_px": [
+    31.0,
+    143.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Hover": {
+   "sheet": "sheets/vex_south_hover.png",
+   "frames": 12,
+   "fps": 10,
+   "loop": true,
+   "duration_s": 1.2,
+   "blender_action": "Hover",
+   "events": {},
+   "frame_width": 74,
+   "frame_height": 151,
+   "origin_px": [
+    28.0,
+    151.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Blink": {
+   "sheet": "sheets/vex_south_blink.png",
+   "frames": 8,
+   "fps": 24,
+   "loop": false,
+   "duration_s": 0.3333,
+   "blender_action": "Blink",
+   "events": {
+    "coil": 0,
+    "release": 2,
+    "recover_start": 4,
+    "interruptible_from": 6
+   },
+   "frame_width": 96,
+   "frame_height": 152,
+   "origin_px": [
+    43.0,
+    143.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Takeoff": {
+   "sheet": "sheets/vex_south_takeoff.png",
+   "frames": 10,
+   "fps": 20,
+   "loop": false,
+   "duration_s": 0.5,
+   "blender_action": "Takeoff",
+   "events": {
+    "coil": 2,
+    "release": 4,
+    "recover_start": 7,
+    "interruptible_from": 9
+   },
+   "frame_width": 104,
+   "frame_height": 187,
+   "origin_px": [
+    43.0,
+    178.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Glide": {
+   "sheet": "sheets/vex_south_glide.png",
+   "frames": 4,
+   "fps": 10,
+   "loop": true,
+   "duration_s": 0.4,
+   "blender_action": "Glide",
+   "events": {},
+   "frame_width": 92,
+   "frame_height": 136,
+   "origin_px": [
+    38.0,
+    179.0
+   ],
+   "terminal": "once",
+   "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"
+  },
+  "Dive": {
+   "sheet": "sheets/vex_south_dive.png",
+   "frames": 20,
+   "fps": 22,
+   "loop": false,
+   "duration_s": 0.9091,
+   "blender_action": "Dive",
+   "events": {
+    "gather_start": 0,
+    "hold": 2,
+    "release": 7,
+    "recover_start": 10,
+    "interruptible_from": 15
+   },
+   "frame_width": 122,
+   "frame_height": 184,
+   "origin_px": [
+    43.0,
+    175.0
    ],
    "terminal": "once",
    "root_motion_note": "in place; Death may offset the body from the sim position (knock-back fall), the origin stays the pre-fall ground point"

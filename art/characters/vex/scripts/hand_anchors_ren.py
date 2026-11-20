@@ -4,8 +4,8 @@ import json, os, sys
 import numpy as np
 d, form = sys.argv[1], sys.argv[2]
 HERE = os.path.dirname(os.path.abspath(__file__)); VEX = os.path.dirname(HERE)
-if form == "f1":
-    os.environ["KAI_FORM"] = "f1"; os.environ["VEX_ROOT_SOUTH"] = os.path.join(VEX, "f1", "south"); os.environ["KAI_ROOT"] = os.path.join(VEX, "f1")
+if form in ("f1", "f2"):   # B28: f1 = Riftbound, f2 = Voidheart Exile (both are built with KAI_FORM=f1; VEX_STYLE picks the authored pose set)
+    os.environ["KAI_FORM"] = "f1"; os.environ["VEX_STYLE"] = form; os.environ["VEX_ROOT_SOUTH"] = os.path.join(VEX, form, "south"); os.environ["KAI_ROOT"] = os.path.join(VEX, form)
 if d == "south":
     sys.path.insert(0, os.path.join(VEX, "rig")); import anim as a, rig as r
 else:
@@ -27,4 +27,7 @@ def run(name):
             c = fist_points(ch, slots, s); fr[s] = [round(float(c[0]), 2), round(float(c[1]), 2)] if c is not None else None
         res.append(fr)
     return res
-if __name__ == "__main__": print(json.dumps({"Beam": run("Beam"), "Sphere": run("Sphere"), "BasicPunch": run("BasicPunch")}))
+if __name__ == "__main__":
+    names = ["Beam", "Sphere", "BasicPunch"]
+    if form in ("f1", "f2"): sys.path.insert(0, VEX); import b28_poses; names += list(b28_poses.NEW[form])
+    print(json.dumps({n: run(n) for n in names}))

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Rebuild Ren Ascendant (f1) sprite sheets into art/characters/ren/f2/<dir>/sheets: scripts/build_f1.sh [south|north|east|west ...]  (run prepare_f1.py first)
-export KAI_PAD_TOP=${KAI_PAD_TOP:-28}; export KAI_FORM=f1
+export KAI_PAD_TOP=${KAI_PAD_TOP:-28}; export KAI_FORM=f1; export VEX_STYLE=f2
 REN="$(cd "$(dirname "$0")/.." && pwd)"; B='F:\Blender\blender-5.2.3-windows-x64\blender.exe'; W="${TEMP:-/tmp}/vex-build-f2"; mkdir -p "$W"
 for d in "${@:-south north east west}"; do
   if [ "$d" = south ]; then
