@@ -1,6 +1,7 @@
 /** HUD ability tooltips: the real name, key, plain-words description and the numbers THIS run's build produces right now (after cards, branches and form). Pure read of the sim state. */
 import type { GameState } from '../sim/GameState';
 import { BEAM, SPHERE } from '../content/abilities';
+import { REN_E, REN_FORM_INFO, REN_Q, REN_R } from '../content/renCombat';
 import { HERO_KIT, REN, SORA, VEX } from '../content/heroKits';
 import { ULTIMATES } from '../b22/mastery';
 import { CHAIN, CRUCIBLE, ECHO, METEOR, RISE, SCATTER, STRIKES, SURGE } from '../content/kaiKit';
@@ -25,9 +26,16 @@ export function abilityTips(s: GameState): Record<TipSlot, AbilityTip> {
     else if (f === 1) { et = { name: RISE.name, key: 'E', pad: 'RB', blurb: 'Sweep your palm: a lane of fire pillars erupts one after another in front of you, shoving and staggering common enemies.', stats: [['Pillars', n(RISE.pillars + (m.beamLinger > 0 ? 1 : 0))], ['Damage / pillar', n(RISE.damage * m.beamDamage * m.formPower, 1)], ['Radius', `${n(RISE.radius * m.beamWidth)} px`], ['Cooldown', cd(RISE.cooldown * m.beamCd)]] }; rt = { name: CRUCIBLE.name, key: 'R', pad: 'LB', blurb: 'Gather a golden halo and plant a solar crucible. It draws foes gently inward, pulses, then ends in one rising eruption.' + ult, stats: [['Damage / pulse', n(CRUCIBLE.pulseDamage * m.sphereDamage * m.formPower, 1)], ['Eruption', n(CRUCIBLE.finalDamage * m.sphereDamage * m.formPower)], ['Radius', `${n(CRUCIBLE.radius * m.sphereRadius)} px`], ['Cooldown', cd(CRUCIBLE.cooldown * m.sphereCd)]] }; }
     else { et = { name: 'Fracture Lance', key: 'E', pad: 'RB', blurb: 'A piercing blade of light that pulses along its path.', stats: [['Damage / pulse', n(BEAM.damage * m.beamDamage, 1)], ['Pulses', n(5 + m.beamLinger)], ['Length', `${BEAM.length} px`], ['Cooldown', cd(BEAM.cooldown * m.beamCd)]] }; rt = { name: 'Nova Bloom', key: 'R', pad: 'LB', blurb: 'Throw a golden sphere that detonates in a large burst.' + ult, stats: [['Damage', n(SPHERE.damage * m.sphereDamage)], ['Radius', `${n(SPHERE.radius * m.sphereRadius)} px`], ['Cooldown', cd(SPHERE.cooldown * m.sphereCd)]] }; }
   } else if (s.hero === 'ren') {
+    if (f >= 1) {   // B26: Crimson Ascendant's own Q / E / R, numbers from the same content table the sim reads
+      const rs = p.qRadius / REN.base.qRadius;
+      qt = { name: REN_Q.name, key: 'Q', pad: 'X', blurb: REN_FORM_INFO.q.text, stats: [['Release', n(q * m.formPower * REN_Q.releaseMul)], ['Pull / blast radius', `${n(REN_Q.pullR * rs)} / ${n(REN_Q.releaseR * rs)} px`], ['Cooldown', cd(REN_Q.cooldown)]] };
+      et = { name: REN_E.name, key: 'E', pad: 'RB', blurb: REN_FORM_INFO.e.text, stats: [['Slam', n(q * m.formPower * m.beamDamage * REN_E.slamMul)], ['Slam radius', `${n(REN_E.slamR * m.beamWidth)} px`], ['Cooldown', cd(REN_E.cooldown * m.beamCd)]] };
+      rt = { name: REN_R.name, key: 'R', pad: 'LB', blurb: REN_FORM_INFO.r.text + ult, stats: [['Fist / final', `${n(REN_R.fistMul * m.sphereDamage * m.formPower)} / ${n(REN_R.finalMul * m.sphereDamage * m.formPower)}`], ['Final radius', `${n(REN_R.finalR * m.sphereRadius)} px`], ['Cooldown', cd(REN_R.cooldown * m.sphereCd)]] };
+    } else {
     qt = { name: REN.q.name, key: 'Q', pad: 'X', blurb: hk!.blurbs.q, stats: [['Damage / beat', n(q * REN.q.beatMul, 1)], ['Beats', n(f ? REN.q.formBeats : REN.q.beats)], ['Cooldown', cd(REN.q.cooldown)]] };
     et = { name: REN.e.name, key: 'E', pad: 'RB', blurb: hk!.blurbs.e, stats: [['Damage / strike', n(REN.e.damage * m.beamDamage)], ['Strikes', n((f ? REN.e.formHops : REN.e.hops) + m.beamLinger)], ['Cooldown', cd(REN.e.cooldown * m.beamCd)]] };
     rt = { name: REN.r.name, key: 'R', pad: 'LB', blurb: hk!.blurbs.r + ult, stats: [['Damage', n(REN.r.damage * m.sphereDamage * (f ? REN.r.formDamage : 1))], ['Radius', `${n(REN.r.radius * m.sphereRadius)} px`], ['Cooldown', cd(REN.r.cooldown * m.sphereCd)]] };
+    }
   } else if (s.hero === 'sora') {
     qt = { name: SORA.q.name, key: 'Q', pad: 'X', blurb: hk!.blurbs.q, stats: [['Damage / bolt', n(q * SORA.q.boltMul, 1)], ['Bolts', n(f ? SORA.q.formBolts : SORA.q.bolts)], ['Cooldown', cd(SORA.q.cooldown)]] };
     et = { name: SORA.e.name, key: 'E (hold)', pad: 'RB (hold)', blurb: hk!.blurbs.e, stats: [['Damage', `${n(SORA.e.damage[0] * m.beamDamage)} / ${n(SORA.e.damage[1] * m.beamDamage)} / ${n(SORA.e.damage[2] * m.beamDamage)}`], ['Charge tiers', 'T1 / T2 / T3'], ['Cooldown', cd(SORA.e.cooldown * m.beamCd)]] };

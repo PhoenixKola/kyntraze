@@ -48,7 +48,7 @@ export const HERO_KIT: Record<'ren' | 'sora' | 'vex', HeroKitInfo> = {
   ren: {
     act: { q: REN.q.name, e: REN.e.name, r: REN.r.name }, auto: REN.auto.name, form: 'Crimson Ascendant', formShort: 'ASCENDANT',
     quote: 'Pressure is the only plan.', roleLine: 'Close-range brawler · risk and momentum',
-    blurbs: { auto: 'Heavy chained punches hit every enemy in a short arc; every third blow lands harder.', q: 'A rapid five-beat punch combination that steps into the crowd. Works while moving.', e: 'Rush through up to three nearby enemies, exploding on each. With nobody near, dash forward and burst.', r: 'Leap to the target, slam down and release a crimson shockwave that throws the crowd back.', form: 'Full Drive and F: deep red hair, a crimson aura and faster, harder Break, Rush and Impact.' },
+    blurbs: { auto: 'Heavy chained punches hit every enemy in a short arc; every third blow lands harder.', q: 'A rapid five-beat punch combination that steps into the crowd. Works while moving.', e: 'Rush through up to three nearby enemies, exploding on each. With nobody near, dash forward and burst.', r: 'Leap to the target, slam down and release a crimson shockwave that throws the crowd back.', form: 'Full Drive and F: red hair and a Crimson Nine-Tailed Fox energy. Crimson Fury, Infernal Cyclone, Scarlet Rampage, Crimson Catastrophe, hold V for Crimson Nova Fist, G for the fox Overdrive, hold dash to fly.' },
     catNames: { core: 'CORE', beam: 'RUSH', sphere: 'IMPACT', survival: 'SURVIVAL', mobility: 'MOBILITY', pickup: 'SALVAGE', drive: 'ASCENT' },
   },
   sora: {

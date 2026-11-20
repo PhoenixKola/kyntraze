@@ -11,7 +11,7 @@ import { faceOf, fistWorld } from './AbilitySystem';
 import { freeAim } from './ApexSystem';
 import { handOffset, strikeHand } from './Strike';
 import { surgeAutoMul } from './KaiKit';
-import { renCombatInput, renOdGain } from './RenCombat';
+import { novaCharge, renCombatInput, renOdGain } from './RenCombat';
 
 const alive = (e: Enemy) => e.hp > 0;
 function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number, tx?: number, ty?: number) {
@@ -47,7 +47,7 @@ export function kaiAuto(s: GameState, dt: number) {
 /* ------------------------------------------------------------------ signature technique */
 const tierOf = (charge: number) => SIG.stages.reduce((t, v, i) => (charge >= v ? i + 1 : t), 0);
 export const sigReady = (s: GameState) => { const p = s.player; return p.form >= 1 && p.sigCd <= 0; };
-export function sigCharge(s: GameState): { charge: number; tier: number } | null { const c = s.cast; return c && c.kind === 'signature' && !c.released ? { charge: c.t, tier: tierOf(c.t) } : null; }
+export function sigCharge(s: GameState): { charge: number; tier: number } | null { if (s.hero === 'ren') return novaCharge(s); const c = s.cast; return c && c.kind === 'signature' && !c.released ? { charge: c.t, tier: tierOf(c.t) } : null; }
 function aimDir(s: GameState) { const fa = freeAim(s); return fa ? { x: fa.x, y: fa.y } : normalize(s.player.aimX, s.player.aimY); }
 
 export function startSignature(s: GameState): boolean {

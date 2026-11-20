@@ -1,0 +1,36 @@
+# B26 - Ren: Crimson Ascendant combat and Primal Overdrive
+
+Sections are appended per stage. This file starts with the **Code stage** (simulation, HUD text, audio recipes, compatibility). The art stage (Crimson Nine-Tailed Fox ImageGen assets, Blender poses, renderer wiring) is tracked separately and is NOT covered here.
+
+## Code stage
+
+### What exists (simulation, deterministic, authoritative)
+- `src/content/renCombat.ts`: every number of the form-only kit. `src/sim/RenCombat.ts`: the kit. Base Ren (Hammer Chain, Crimson Break, Meteor Rush, Bloodstar Impact) is untouched; the transformed state switches at `hero === 'ren' && form >= 1` inside `HeroSystem` (`renAuto`, `heroActivateQ`, `heroStartE`, `heroStartR`).
+- **Crimson Fury** (auto): four beats jab / kick / hook / rising uppercut (finisher sweeps 92 px, capped, bosses hurt but never thrown). Close range only: nobody within 96 px = no swing and no far hit. One `ren_auto` event per beat (n: beat bits 0-1, finisher 32, right hand 64, hit count from bit 8, Overdrive bit 1<<14).
+- **Infernal Cyclone** (Q, 8 s): 0.18 s windup, 0.65 s spin, 4 bounded contact ticks, collision-aware pull of ordinary enemies (radius 145 x qRadius), outward release at 175 x qRadius (+stagger, push). Bosses / parts / shielded foes are never pulled or pushed.
+- **Scarlet Rampage** (E, 10 s): nearest valid enemy in a forward cone (<= 300, wall-free line, ties by id). Ordinary target: real grab, 0.4 s collision-validated drive (target follows Ren, stops at the first wall), slam AoE at the real destination. Boss / part / shielded: grounded shoulder strike + splash, no relocation. Nothing in front: bounded forward rush + ground impact, no fake grab.
+- **Crimson Catastrophe** (R, 20 s): committed ground point (reuses Bloodstar's `pickGround`), 0.4 s telegraph, three alternating fists (L, R, L; r 95) then a converging final (r 175). Per-event damage once via `damageEnemy`, capped at 14 targets per hit.
+- **Crimson Nova Fist** (V, 45 s, hold): `nova_fist` HeroCast. Tiers .35 / .9 / 1.6 s, 2.3 s cap, min hold .08 s; unreleased charge cancels free on hit, dash, form change, ultimate, death, cinema, `sigAbort`; a real release spends the cooldown even on a miss. Collision-safe lunge, contact required: a miss emits `ren_v_miss` and never explodes; a blocked hit emits `ren_v_block`. Tier 0-1 burst, tier 2 burst + two spiral pulses, tier 3 eruption + delayed outer ring. Cooldown ticks in base and form.
+- **Primal Overdrive** (G): meter 0-100, +1.4 per damaging hit, +3 per kill, **rate-limited to 4 meter-hits per 0.25 s window** (`hx.odWin`), nothing fills during Overdrive, 10 s, +25% damage (applied once in `damageEnemy`, shared with Kai), +8% speed, 0.88 auto period. Ends with the form, death or a cinematic. No separate beast HP or AI.
+- **Skybreaker** (hold dash >= 0.28 s): speed x1.35, extra Drive drain 6/s on top of the form's, min Drive 12, 5 s cap, 3.5 s cooldown, one bounded landing slam only after >= 0.5 s of flight, no hazard or collision change.
+- Shared plumbing generalised for Ren, Kai code paths unchanged: `kaiCombatInput`, `odGain`, `sigCharge`, `damageEnemy` Overdrive multiplier, `MovementSystem` speed, `HeroAct` union, `AbilityEventKind` union. Co-op: all state is per fighter (`Fighter` fields and `hx`, swapped by `CoopSystem`).
+- Online: no protocol change was needed (`sig`, `sigHeld`, `sigAbort`, `od`, `flyHeld` already travel; the new acts, events and fields ride the existing `hx.act` / `abilityEvents` / `player` snapshot).
+
+### B22 compatibility (IDs, recipes, save records untouched)
+`slotOfAct` maps the new acts to q / e / r. Transformed mappings: `relentless_chain` = extra capped cyclone contact burst (every 3rd close hit, max 3); `crimson_guardbreak` = heavy cone stagger after the spin; `bloodline_relay`, `meteor_collision`, `meteor_crucible` fire on Rampage's real slam / shoulder / miss impact; `red_comet_rain`, `crimson_crater`, `bloodstar_rupture` fire on Catastrophe's final fist; `crimson_relay` fires on the uppercut finisher. Mastery counter `rush.strike.form` (First Rush) now counts Scarlet Rampage grabs and slams / shoulder / miss impacts that connected; text updated.
+
+### HUD / text / audio
+Relic Plate slots for Ren in Ascendant show Cyclone / Rampage / Catastrophe names, cooldown maxima and tooltips (`abilityTips`, `REN_FORM_INFO`), plus V and G slots (V charge bar uses the existing 72% cap, tier tag, 45 s sweep; G meter / READY / seconds). Hero-select form blurb updated. 22 original runtime-synthesised cues (`rn_*` in `b22Sfx.ts`, `renCombatSfx`), one per beat or cast event.
+
+### Verified
+- `npm run typecheck` clean. New focused file `src/tests/b26-ren-combat.test.ts` (16 tests, pass): beat order and reach, no far hit, Cyclone pull / boss immunity, Rampage grab / boss shoulder / no-grab miss, Catastrophe sequence, V charge / release / miss / abort / form change, Overdrive meter / rate limit / duration / form end, flight and single landing slam, Kai signature unchanged, base Ren kit unchanged, First Rush counter, SFX map.
+- Existing regressions run and passing: heroes (one assertion updated: transformed E is Scarlet Rampage, not a longer Meteor Rush), b22-ascension, b22-coop, b20, b25-kai-combat, heroAnimation.
+
+### NOT verified / known gaps
+- No live play, no browser run, no two-client online run, no audio listening, no real-speed observation, no 640x360 HUD glance. Numbers are untuned prototype values.
+- **Interim visuals**: no Ren-authored poses yet. `heroAnimation.ts` maps the new acts onto existing clips (Slam / Sphere / Dash / BasicPunch); the Cyclone spin, Rampage grab, fist punch, flight and dive poses do not exist yet and the animation does not show Q / E / R / V release frames. HUD V icon reuses `sig_1`; Q / E / R icons reuse the base Ren icons. No renderer yet consumes `ren_*` events (no fox, no ring art, no ground marks, no charge orb); V / G work and are audible but have almost no visual presentation beyond rings in `hx.rings`.
+- Overdrive reachability was reasoned, not measured: 4 hits per 0.25 s window x 1.4 allows up to ~22 meter/s, ordinary melee play is a few per second, so 100 should fill in roughly 12-25 s of a ~29 s Drive window. Needs play confirmation.
+- Cyclone's pull on crowds is pairwise-free but uses per-enemy `slideMove`; heavy crowds (45+) untested for cost.
+- The transformed Ren auto no longer calls `driveGain` (Drive only matters in base form anyway).
+- Mastery text for "First Rush" changed; the achievement id and save record are the same.
+- Ren branch / legendary tooltips were not rewritten to name the transformed behaviour (mappings above exist in the sim only); card text still describes the base move.

@@ -48,6 +48,31 @@ export function kaiCombatSfx(kind: string, n = 0): string | null {
     default: return null;
   }
 }
+/** B26 Ren, Crimson Ascendant cues (original, runtime-synthesised): weighty low-mid strikes, a rising spin, grab and slam thuds, hammer-fist impacts, a held-fist charge bed with tier ticks and a fox roar. Not listened to yet. */
+Object.assign(SFX, {
+  rn_jab: { f0: 240, f1: 110, dur: 0.1, noise: 0.5, decay: 22, wave: 'saw', gain: 0.5 }, rn_kick: { f0: 160, f1: 70, dur: 0.14, noise: 0.55, decay: 16, wave: 'saw', gain: 0.58 }, rn_hook: { f0: 200, f1: 80, dur: 0.16, noise: 0.5, decay: 14, wave: 'square', gain: 0.55 }, rn_upper: { f0: 120, f1: 520, dur: 0.3, noise: 0.5, decay: 8, wave: 'saw', gain: 0.8 },
+  rn_q_start: { f0: 120, f1: 420, dur: 0.5, noise: 0.45, decay: 3.5, wave: 'saw', gain: 0.6 }, rn_q_tick: { f0: 190, f1: 100, dur: 0.1, noise: 0.5, decay: 20, wave: 'saw', gain: 0.4 }, rn_q_release: { f0: 150, f1: 38, dur: 0.6, noise: 0.6, decay: 5, wave: 'saw', gain: 0.95 },
+  rn_e_start: { f0: 140, f1: 360, dur: 0.22, noise: 0.5, decay: 9, wave: 'saw', gain: 0.5 }, rn_e_grab: { f0: 100, f1: 60, dur: 0.18, noise: 0.5, decay: 14, wave: 'square', gain: 0.7 }, rn_e_slam: { f0: 110, f1: 34, dur: 0.55, noise: 0.6, decay: 6, wave: 'sine', gain: 1.0 }, rn_e_hit: { f0: 130, f1: 50, dur: 0.35, noise: 0.55, decay: 9, wave: 'saw', gain: 0.8 },
+  rn_r_mark: { f0: 300, f1: 560, dur: 0.4, noise: 0.05, decay: 5, wave: 'bell', gain: 0.45, fm: 1.6 }, rn_r_hit: { f0: 95, f1: 40, dur: 0.4, noise: 0.55, decay: 8, wave: 'sine', gain: 0.9 }, rn_r_final: { f0: 80, f1: 28, dur: 0.9, noise: 0.6, decay: 3.5, wave: 'saw', gain: 1.0 },
+  rn_v_charge: { f0: 110, f1: 420, dur: 0.6, noise: 0.25, decay: 2.8, wave: 'saw', gain: 0.45 }, rn_v_tier: { f0: 300, f1: 600, dur: 0.16, noise: 0, decay: 12, wave: 'bell', gain: 0.4 }, rn_v_release: { f0: 180, f1: 900, dur: 0.2, noise: 0.6, decay: 10, wave: 'saw', gain: 0.55 },
+  rn_v_hit: { f0: 85, f1: 30, dur: 0.55, noise: 0.55, decay: 5, wave: 'saw', gain: 1.0 }, rn_v_pulse: { f0: 120, f1: 55, dur: 0.35, noise: 0.5, decay: 8, wave: 'sine', gain: 0.75 }, rn_v_pulse3: { f0: 70, f1: 26, dur: 0.8, noise: 0.5, decay: 3.8, wave: 'saw', gain: 1.0 }, rn_v_block: { f0: 220, f1: 110, dur: 0.2, noise: 0.5, decay: 16, wave: 'square', gain: 0.6 }, rn_v_miss: { f0: 500, f1: 170, dur: 0.15, noise: 0.5, decay: 12, wave: 'sine', gain: 0.25 },
+  rn_od_start: { f0: 55, f1: 240, dur: 1.2, noise: 0.55, decay: 1.8, wave: 'saw', gain: 1.0, fm: 1.4 }, rn_od_end: { f0: 260, f1: 60, dur: 0.6, noise: 0.35, decay: 4, wave: 'saw', gain: 0.5 },
+  rn_fly_start: { f0: 130, f1: 520, dur: 0.4, noise: 0.55, decay: 6, wave: 'saw', gain: 0.55 }, rn_fly_slam: { f0: 100, f1: 32, dur: 0.5, noise: 0.6, decay: 6, wave: 'sine', gain: 0.95 }, rn_fly_soft: { f0: 330, f1: 150, dur: 0.15, noise: 0.35, decay: 12, wave: 'sine', gain: 0.3 },
+} satisfies Record<string, Recipe>);
+/** Ren event -> recipe. `n` carries the beat / tier flags (see RenCombat.ts); one cue per beat or cast event, never per target. */
+export function renCombatSfx(kind: string, n = 0): string | null {
+  switch (kind) {
+    case 'ren_auto': return ['rn_jab', 'rn_kick', 'rn_hook', 'rn_upper'][n & 3];
+    case 'ren_q_start': return 'rn_q_start'; case 'ren_q_tick': return 'rn_q_tick'; case 'ren_q_release': return 'rn_q_release';
+    case 'ren_e_start': return 'rn_e_start'; case 'ren_e_grab': return 'rn_e_grab'; case 'ren_e_slam': return 'rn_e_slam'; case 'ren_e_hit': return 'rn_e_hit';
+    case 'ren_r_mark': return 'rn_r_mark'; case 'ren_r_hit': return (n & 32) ? 'rn_r_final' : 'rn_r_hit';
+    case 'ren_v_charge': return 'rn_v_charge'; case 'ren_v_tier': return 'rn_v_tier'; case 'ren_v_release': return 'rn_v_release'; case 'ren_v_hit': return 'rn_v_hit';
+    case 'ren_v_pulse': return ((n >> 5) & 3) >= 3 && (n & 31) === 0 ? 'rn_v_pulse3' : 'rn_v_pulse'; case 'ren_v_block': return 'rn_v_block'; case 'ren_v_miss': return 'rn_v_miss';
+    case 'ren_od_start': return 'rn_od_start'; case 'ren_od_end': return 'rn_od_end';
+    case 'ren_fly_start': return 'rn_fly_start'; case 'ren_fly_land': return (n & 1) ? 'rn_fly_slam' : 'rn_fly_soft';
+    default: return null;
+  }
+}
 /** Which sim event plays which recipe (event kind -> recipe name). */
 export const EVENT_SFX: Record<string, string> = { parry_perfect: 'parry_perfect', parry_guard: 'parry_guard', parry_start: 'parry_start', reversal_blink: 'reversal_blink', reversal_riposte: 'reversal_riposte', seal_mark: 'seal_mark', seal_detonate: 'seal_detonate', ult_start: 'ult_start', ult_release: 'ult_release', branch_fx: 'branch_fx', legend_fx: 'legend_fx', surge_start: 'kk_surge', scatter_fire: 'kk_scatter', scatter_blast: 'kk_blast', meteor_beat: 'kk_meteor', flare_start: 'kk_flare_wind', flare_pillar: 'kk_pillar', crucible_cast: 'kk_gather', crucible_pulse: 'kk_pulse', crucible_final: 'kk_final', clone_spawn: 'kk_clone', clone_end: 'kk_clone_end', rift_hop: 'kk_hop' };
 export const B22_EVENT_SFX: Record<string, string> = { relic_gain: 'relic_gain', legend_gain: 'legend_gain', prism: 'prism', sigil_strike: 'sigil_strike', dawn_ring: 'dawn_ring', hourglass: 'hourglass', rift: 'rift', bearing: 'bearing', echo_warn: 'echo_warn', mark: 'mark', ult_cannon: 'ult_cannon', ult_judge: 'ult_judge', parry: 'parry_perfect', ult_collapse: 'ult_release', ult_beam: 'ult_cannon', collapse_blast: 'seal_detonate', crucible_burst: 'seal_detonate', collision: 'seal_detonate', seal_blast: 'seal_detonate' };
