@@ -68,7 +68,7 @@ export class KaiCombatFx {
         this.pop(this.fr(f, 'shift', 0, 3), e.x, e.y - 40 * sc, 90 * sc, 520 * sc, 0.8, { a: 1 });
         this.ring(e.x, e.y, COL[f], 560 * sc, 0.7); this.shake(320, 0.006, red); this.dragonA = Math.max(this.dragonA, 0.05); this.dragon.strike(e.x + 40 * sc, e.y - 40 * sc, 1.2); break;
       }
-      case 'fly_start': { const ff = n || f; this.pop(this.fr(ff, 'sigil', 0, 3), e.x, e.y + 8, 40 * sc, 190 * sc, 0.5, { flat: true, depth: 3.8, a: 0.9 }); this.pop(this.fr(ff, 'jet', 0, 3), e.x, e.y + 4, 60 * sc, 90 * sc, 0.35, { ox: 0.5, oy: 0, a: 0.9 }); this.shake(80, 0.0016, red); break; }
+      case 'fly_start': { const ff = n || f; this.pop(this.fr(ff, 'sigil', 0, 3), e.x, e.y + 8, 30 * sc, 120 * sc, 0.4, { flat: true, depth: 3.8, a: 0.55 }); this.pop(this.fr(ff, 'jet', 0, 3), e.x, e.y + 4, 30 * sc, 46 * sc, 0.25, { ox: 0.5, oy: 0, a: 0.45 }); this.shake(80, 0.0016, red); break; }
       case 'fly_land': {
         const dive = (n & 1) !== 0, ff = (n >> 1) || f, R = FLY.slam.r;
         if (dive) { this.pop(this.fr(ff, 'burst', 0, 3), e.x, e.y - 10 * sc, R * 0.8 * sc, R * 2.6 * sc, 0.55, { a: 1 }); this.pop(this.fr(ff, 'sigil', 0, 3), e.x, e.y + 8, R * 0.6 * sc, R * 2.4 * sc, 0.6, { flat: true, depth: 3.8, a: 1 }); if (ff === 2) for (let i = 0; i < 3 && !red; i++) { const a = Math.random() * 6.28; this.bolt(e.x, e.y, e.x + Math.cos(a) * R, e.y + Math.sin(a) * R * 0.5, COL[2]); } this.shake(200, 0.0045, red); }
@@ -124,8 +124,8 @@ export class KaiCombatFx {
     // ---- Skybreaker: propulsion plume under the lifted body
     if (active && p.flyT > 0) {
       this.jetClock -= dt; const gy = h.y + p.air * FLY.lift * sc;
-      if (this.jetClock <= 0) { this.jetClock = 0.07; this.pop(this.fr(f, 'jet', 0, 3), h.x, h.y + 2 * sc, 52 * sc, 74 * sc, 0.28, { ox: 0.5, oy: 0, a: 0.9, depth: 9.0 }); }
-      this.rippleClock -= dt; if (this.rippleClock <= 0 && !o.reduced) { this.rippleClock = 0.3; this.ring(h.x, gy, COL[f], 70 * sc, 0.3); }
+      if (this.jetClock <= 0) { this.jetClock = 0.14; this.pop(this.fr(f, 'jet', 0, 3), h.x, h.y + 2 * sc, 26 * sc, 36 * sc, 0.22, { ox: 0.5, oy: 0, a: 0.4, depth: 9.0 }); }
+      this.rippleClock -= dt; if (this.rippleClock <= 0 && !o.reduced) { this.rippleClock = 0.6; this.ring(h.x, gy, COL[f], 44 * sc, 0.25); }
     }
     // ---- signature charge / lunge orb attached to the real palm
     const c = s.cast; let orbOn = false;
