@@ -12,7 +12,7 @@ export const REN_V = {
   tierMul: [0.55, 0.85, 1.15, 1.6] as readonly number[], hit: 3.0, burstR: 120, burstGrow: 25, burstMul: 0.9, spiral: [0.12, 0.26] as readonly number[], spiralR: 135, spiralMul: 0.5, eruptR: 175, eruptMul: 1.5, ringAt: 0.5, ringR: 230, ringMul: 0.5, push: 160, cap: 14,
 } as const;
 /** Primal Overdrive (the Crimson Nine-Tailed Fox): same reference numbers as Kai's, plus a hit-rate window so volleys / area bursts cannot run the meter away. */
-export const REN_OD = { duration: 10, perHit: 1.4, perKill: 3, dmgMul: 1.25, speedMul: 1.08, periodMul: 0.88, window: 0.25, windowHits: 4, bit: 1 << 14 } as const;
+export const REN_OD = { duration: 10, perHit: 3, perKill: 6, dmgMul: 1.25, speedMul: 1.08, periodMul: 0.88, window: 0.25, windowHits: 6, bit: 1 << 14 } as const;
 /** Skybreaker: hold dash 0.28 s to lift off; heavy, forward-leaning, costs extra Drive on top of the transformed drain. */
 export const REN_FLY = { holdToLift: 0.28, maxT: 5, minDrive: 12, cooldown: 3.5, slamMinT: 0.5, speed: 1.35, rise: 6, drain: 6, slamR: 125, slamMul: 1.7, slamPush: 160 } as const;
 /** Display for the HUD (single source for names, key labels and one-line text). */

@@ -19,6 +19,7 @@ export class VexFx {
   private amt = 0; private wasOd = false; private mv = 0; private arm = 0; private armA = 0; private armSet: 1 | 2 = 1; private snap = 0; private cry = 0; private pulseT = 0; private ringClock = 0; private lastDash = false; private wE = 1; private wS = 0; private wN = 0; private lastForm = 0; private shiftT = 0; private stage = 0;
   private readonly torso: Phaser.GameObjects.Image; private readonly head: Phaser.GameObjects.Image; private readonly plates: Phaser.GameObjects.Image[] = []; private readonly armIm: Phaser.GameObjects.Image; private readonly ground: Phaser.GameObjects.Image; private readonly wisp: Phaser.GameObjects.Image[] = []; private readonly frag: Phaser.GameObjects.Image[] = [];
   private readonly jet: Phaser.GameObjects.Image; private readonly held: Phaser.GameObjects.Image; private readonly heldRing: Phaser.GameObjects.Image; private readonly clones: Phaser.GameObjects.Image[] = []; private readonly rings: Phaser.GameObjects.Image[] = []; private readonly orbs: Phaser.GameObjects.Image[] = []; private readonly marks: Phaser.GameObjects.Image[] = [];
+  private readonly ghosts: Phaser.GameObjects.Image[] = []; private ghostT: number[] = []; private ghostClock = 0; private ghostNext = 0;
   constructor(private readonly scene: Phaser.Scene) {
     const blank = 'kp-blank'; if (!scene.textures.exists(blank)) scene.textures.createCanvas(blank, 2, 2)!.refresh();
     const mk = (depth: number, add = true) => { const im = scene.add.image(0, 0, blank).setDepth(depth).setVisible(false); if (add) im.setBlendMode(Phaser.BlendModes.ADD); return im; };
@@ -26,6 +27,7 @@ export class VexFx {
     this.jet = mk(8.8); this.held = mk(10.6); this.heldRing = mk(10.55);
     for (let i = 0; i < 3; i++) { const c = mk(9.1, false); c.setTint(0xb8bed8); this.clones.push(c); this.rings.push(mk(3.65)); this.orbs.push(mk(10.6)); }
     for (let i = 0; i < 6; i++) this.marks.push(mk(3.9));
+    for (let i = 0; i < 6; i++) { this.ghosts.push(mk(8.7, false)); this.ghostT.push(0); }
   }
   private has(n: string) { return this.scene.textures.exists(vxKey(n)); }
   private tex(im: Phaser.GameObjects.Image, set: VxSet, i: number) { const k = vxKey(`${set}${i & 3}`); if (!this.scene.textures.exists(k)) { im.setVisible(false); return false; } if (im.texture.key !== k) im.setTexture(k); return true; }
@@ -155,9 +157,12 @@ export class VexFx {
     const wa = (o.reduced || o.crowded ? 0.12 : 0.26) + (act ? 0.18 : 0) + (od ? 0.1 : 0);
     for (let i = 0; i < 2; i++) { const im = this.wisp[i]; if (!this.tex(im, form === 1 ? 'r_wisp' : 'v_wisp', Math.floor(this.clock * 7) + i * 2) || this.wS > 0.5) { im.setVisible(false); continue; } const sd = i ? 1 : -1; im.setVisible(true).setOrigin(0.5, 1).setPosition(Math.round(h.x + sd * 13 * sc), Math.round(h.y - 58 * sc)).setScale((26 * sc) / im.width * (i ? -1 : 1)).setRotation(sd * 0.18 - lean).setAlpha(wa); }
     for (let i = 0; i < 3; i++) { const im = this.frag[i]; if (form !== 2 || o.reduced || !this.tex(im, 'v_frag', i + Math.floor(this.clock * 0.6))) { im.setVisible(false); continue; } const a = this.clock * 0.5 + i * 2.1; im.setVisible(true).setPosition(Math.round(h.x + Math.cos(a) * (30 + 8 * i) * sc), Math.round(h.y - (50 + 14 * Math.sin(a * 1.3 + i)) * sc)).setScale((46 * sc) / im.width).setAlpha(0.45 * calm); }
+    this.ghostClock += dt; const gd = p.dashRemaining > 0 && !o.reduced;
+    if (gd && h.texture && this.ghostClock >= this.ghostNext) { this.ghostNext = this.ghostClock + (form === 2 ? 0.028 : 0.04); const gi = this.ghostT.indexOf(Math.min(...this.ghostT)); this.ghostT[gi] = form === 2 ? 0.32 : 0.26; this.ghosts[gi].setTexture(h.texture.key, h.frame.name).setOrigin(h.originX, h.originY).setScale(h.scaleX, h.scaleY).setFlipX(h.flipX).setPosition(h.x, h.y).setTint(form === 2 ? 0xc9d2ee : 0x9a63ff).setVisible(true); }
+    for (let i = 0; i < this.ghosts.length; i++) { const g = this.ghosts[i]; if (this.ghostT[i] > 0) { this.ghostT[i] = Math.max(0, this.ghostT[i] - dt); g.setAlpha(Math.min(0.5, this.ghostT[i] * 1.6) * calm).setVisible(this.ghostT[i] > 0); } else g.setVisible(false); }
     const dashing = p.dashRemaining > 0; if (dashing && !this.lastDash && !o.reduced) this.pop(form === 1 ? 'r_ground' : 'v_ground', [1, 2, 3], h.x, h.y + 6, 80, 200, 0.4, { depth: 3.8, a: 0.4, squash: 0.5 }); this.lastDash = dashing;
     if (sp > 110 && !flying && !o.reduced && !o.crowded) { this.pulseT -= dt; if (this.pulseT <= 0) { this.pulseT = 0.9; this.pop(form === 1 ? 'r_ground' : 'v_ground', [0, 1], h.x, h.y + 6, 60, 120, 0.35, { depth: 3.7, a: 0.2, squash: 0.5 }); } }
   }
-  private hideLayers() { for (const im of [this.torso, this.head, ...this.plates, this.armIm, this.ground, ...this.wisp, ...this.frag, this.jet, this.held, this.heldRing, ...this.clones, ...this.rings, ...this.orbs, ...this.marks]) im.setVisible(false); }
-  destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of [this.torso, this.head, ...this.plates, this.armIm, this.ground, ...this.wisp, ...this.frag, this.jet, this.held, this.heldRing, ...this.clones, ...this.rings, ...this.orbs, ...this.marks]) im.destroy(); }
+  private hideLayers() { for (const im of [this.torso, this.head, ...this.plates, this.armIm, this.ground, ...this.wisp, ...this.frag, this.jet, this.held, this.heldRing, ...this.clones, ...this.rings, ...this.orbs, ...this.marks, ...this.ghosts]) im.setVisible(false); }
+  destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of [this.torso, this.head, ...this.plates, this.armIm, this.ground, ...this.wisp, ...this.frag, this.jet, this.held, this.heldRing, ...this.clones, ...this.rings, ...this.orbs, ...this.marks, ...this.ghosts]) im.destroy(); }
 }

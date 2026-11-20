@@ -12,7 +12,7 @@ export const SORA_V = {
   name: 'Astral Devastation', cooldown: 45, minHold: 0.08, stages: [0.35, 0.9, 1.6] as readonly number[], maxHold: 2.3, moveCharge: 0.5, recover: 0.3,
   speed: 540, speedTier: 50, range: 520, rangeTier: 60, radius: 16, radiusTier: 4, tierMul: [0.6, 0.9, 1.2, 1.7] as readonly number[], hit: 2.4, burstR: 110, burstGrow: 22, burstMul: 1.2, ringR: 190, ringMul: 0.9, afterAt: 0.38, afterR: 150, afterMul: 0.8, fizzleR: 46, push: 150, cap: 14,
 } as const;
-export const SORA_OD = { duration: 10, perHit: 1.4, perKill: 3, dmgMul: 1.25, speedMul: 1.08, periodMul: 0.88, window: 0.25, windowHits: 4, bit: 1 << 14 } as const;
+export const SORA_OD = { duration: 10, perHit: 3, perKill: 6, dmgMul: 1.25, speedMul: 1.08, periodMul: 0.88, window: 0.25, windowHits: 6, bit: 1 << 14 } as const;
 /** Skybreaker: lighter and faster than Kai's or Ren's, with a compact shard ring on landing. */
 export const SORA_FLY = { holdToLift: 0.28, maxT: 5, minDrive: 12, cooldown: 3.5, slamMinT: 0.5, speed: 1.45, rise: 7, drain: 5.5, slamR: 105, slamMul: 1.2, slamPush: 120 } as const;
 /** Display for the HUD (single source for names, key labels and one-line text). */

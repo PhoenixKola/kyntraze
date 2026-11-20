@@ -60,3 +60,12 @@ Real rig poses, built with the same Blender part-rig pipeline as Sora / Ren (pos
 - **Co-op level-up screen:** the branch / evolution offer lives in the choosing fighter's slot but the screen was built from player 1's, so it showed "Choose your evolution" with no cards. The screen is now built from the chooser's slot, and a non-choosing player sees a waiting panel. Reproduced only at sim level (new test `coop-offer-view.test.ts`); not seen in a live two-player session.
 - **Hero R cooldown guard:** the cooldown / busy check in `heroStartR` had been swallowed by a trailing comment, so Ren, Sora and Vex R presses were never gated; restored.
 - **Kai V:** a quick tap with nothing in reach is now cancelled for free instead of spending the 45 s cooldown on a harmless miss.
+
+## Follow-up pass (after owner feedback)
+
+- **Drive:** kills gave Drive to every hero except Vex; fixed (test added). Overdrive meter gain for Ren, Sora and Vex raised (3 per hit, 6 per kill, 6 hits per 0.25 s window) because it needed >90 s of constant fighting; in a swarm it now fills in about 3-6 s (Kai 2 s, he has no rate window). Reasoned from a sim probe, not felt.
+- **V:** a V that hits nothing (all four heroes) now costs an 8 s lockout instead of the full 45 s cooldown.
+- **Flight:** same logic as Ren/Sora, verified live in both Vex forms at 640x360 and on the Ashen arena (flyT/air rise, 0 console errors). The earlier "can't fly" was most likely the starved Drive bar; a level-up pause also blocks flight in harness runs.
+- **Dash afterimages:** tinted afterimage trail while dashing in Riftbound (violet) and Voidheart (silver).
+- **Checks done:** 640x360 HUD with a 28-enemy crowd, second arena, flight, Overdrive. Full vitest run: 762 pass; two load-timeouts pass alone.
+- **Still not done:** nothing watched at real speed or heard; no two-client online run; Voidheart north/west only checked in contact sheets; spectral copies still show Vex's current frame; Blink is a pose over the sim dash, not a true teleport.
