@@ -2,7 +2,7 @@
 export const APEX = {
   /** Unlock: the Null Seraph defeated once (a victory). Persisted; usable from the NEXT run, never in the run that earns it. */
   unlockBoss: 'seraph' as const,
-  /** Availability inside a run: a late-midgame window (10:00 of the 15:00 run) AND a full Drive gauge. */
+  /** Availability inside a run: a full Drive gauge (the old 10:00 time window was removed). */
   minTime: 600, charge: 100, drainPerSecond: 3.2, cooldown: 10,
   /** First activation of a run is the long quiet reveal; repeats are short. The whole sim is frozen for either (see Simulation.step). */
   cinemaFirst: { dur: 3.6, commitAt: 1.9, breakAt: 2.55 },

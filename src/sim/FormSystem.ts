@@ -16,7 +16,7 @@ function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: nu
   s.abilityEvents.push({ id: s.nextId++, kind, x, y, n });
   if (s.abilityEvents.length > 24) s.abilityEvents.splice(0, s.abilityEvents.length - 24);
 }
-/** Every form F could start right now (ascending). Flarebound needs 65 % Drive, Cometheart a FULL gauge after the Warden, Stillfire Apex a FULL gauge after the 10:00 mark when the save has it. */
+/** Every form F could start right now (ascending). Flarebound needs 65 % Drive, Cometheart a FULL gauge after the Warden, Stillfire Apex a FULL gauge when the save has it (no time gate). */
 export function formChoices(state: GameState): (1 | 2 | 3)[] {
   const p = state.player; const r: (1 | 2 | 3)[] = [];
   if (state.phase !== 'running' || state.cinema || p.formCooldown > 0 || p.hp <= 0) return r;

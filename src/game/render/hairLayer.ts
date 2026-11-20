@@ -22,7 +22,7 @@ export class HairLayer {
   apply(sprite: Phaser.GameObjects.Sprite, table: HairTable | undefined, srcKey: string, frame: number, dx: number, dy: number, low: number, ramp: number): boolean {
     this.srcKey = srcKey; this.srcFrame = frame; this.active = false;
     if (Math.hypot(dx, dy) < HAIR_MIN) return false;
-    const a = anchorOf(table, srcKey, frame); if (!a || !this.ensure()) return false;
+    const fr0 = this.scene.textures.get(srcKey).get(frame), a = anchorOf(table, srcKey, frame, fr0.cutWidth, fr0.cutHeight); if (!a || !this.ensure()) return false;
     const qx = Math.round(dx * 4) / 4, qy = Math.round(dy * 4) / 4, ck = `${srcKey}#${frame}`, sig = `${ck}|${qx}|${qy}`;
     let c = this.cache.get(ck);
     if (!c) {

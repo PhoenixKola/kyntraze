@@ -9,7 +9,7 @@ export const SIG = {
   tierMul: [0.55, 0.85, 1.15, 1.6] as readonly number[],
   flare: { name: 'Solar Vortex', hit: 2.6, splashR: 110, splashGrow: 30, splash: 0.5, bigAt: 0.35, bigR: 190, big: 1.4, push: 150 },
   comet: { name: 'Thunderstar Breaker', hit: 3.2, pulseEvery: 0.12, pulseR: 85, pulse: 0.55, clapAt: 0.5, clapR: 175, clap: 1.8, push: 120 },
-  still: { name: 'Singularity Palm', hit: 2.8, pullR: 200, pullGrow: 30, pullSpeed: 280, releaseAt: 0.45, releaseR: 150, releaseGrow: 30, release: 1.6, push: 180 },
+  still: { name: 'Singularity Palm', hit: 2.8, pullR: 200, pullGrow: 30, pullSpeed: 280, releaseAt: 0.45, releaseR: 150, releaseGrow: 30, release: 2.2, push: 180 },
 } as const;
 export const SIG_NAME: Record<SigForm, string> = { 1: SIG.flare.name, 2: SIG.comet.name, 3: SIG.still.name };
 /** Skybreaker: transformed Kai holds the dash input to lift off, flies, and lands with a slam when the hold ends. Per form: speed multiplier, rise rate, extra Drive drain per second. */

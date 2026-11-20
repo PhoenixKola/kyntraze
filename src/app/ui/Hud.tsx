@@ -48,7 +48,7 @@ function Slot({ idp, id, name, ico, keyLabel, padLabel, pad, seconds, max, state
   const cls = state === 'active' ? 'active' : state === 'locked' ? 'locked' : cooling ? 'cooling' : 'ready';
   const style = { '--ico': icon(ico), '--p': `${Math.min(1, seconds / max) * 360}deg` } as CSSProperties;
   return <div className={`slot ${cls} ${tone ?? ''}`} data-ico={ico} style={style} data-testid={`cd-${idp ?? ''}${id}`} title={`${tip?.name ?? name}`} role="button" tabIndex={0} aria-label={`${tip?.name ?? name}: ${text ?? (cooling ? `${seconds.toFixed(1)} seconds` : 'ready')}. Click to use.`} onMouseDown={e => e.preventDefault()} onClick={e => { onUse?.(SLOT_KEY[id] ?? 'KeyQ'); e.currentTarget.blur(); }} onMouseLeave={e => e.currentTarget.blur()} onKeyDown={e => { if (e.key === 'Enter') onUse?.(SLOT_KEY[id] ?? 'KeyQ'); }}>
-    <span className="slot-ico" aria-hidden="true"/>{!!charge && <i className="slot-charge" style={{ width: pct(charge * 100) }} aria-hidden="true"/>}{cooling && <span className="slot-sweep" aria-hidden="true"/>}
+    <span className="slot-ico" aria-hidden="true"/>{!!charge && <i className="slot-charge" style={{ width: pct(Math.min(1, charge) * 72) }} aria-hidden="true"/>}{cooling && <span className="slot-sweep" aria-hidden="true"/>}
     {cooling && <b className="slot-num">{seconds >= 10 ? Math.ceil(seconds) : seconds.toFixed(1)}</b>}{!cooling && text && <b className="slot-tag">{text}</b>}
     <kbd className={pad ? 'pad-key' : ''}>{pad ? padLabel : keyLabel}</kbd>
     <span className="slot-tip" role="tooltip" data-testid={`tip-${id}`}>
@@ -108,7 +108,7 @@ export function Hud({ s, pad, onPause, reduced, onForm, onKey }: Props) {
           <span className="hp-num"><span className="hp-ico" style={{ '--ico': icon('heart') } as CSSProperties}/>{Math.ceil(s.hp)}<em>/{Math.ceil(s.maxHp)}</em></span>
         </div>
         <div className={`bar-xp ${s.xp / s.nextXp > 0.85 ? 'near' : ''}`} role="progressbar" aria-label="Experience" aria-valuenow={Math.floor(s.xp)} aria-valuemax={s.nextXp}><i style={{ width: pct(s.xp / s.nextXp * 100) }}/><span><b>LV {s.level}</b><em>{Math.floor(s.xp)}/{s.nextXp}</em></span></div>
-        <div className={`bar-form ${s.form ? 'on' : canForm ? 'ready' : ''} ${f2 ? 'form2' : ''} ${f3 ? 'form3' : ''} ${comet ? 'comet-ready' : ''} ${apex ? 'apex-ready' : ''}`} role="progressbar" aria-label="Transformation drive" aria-valuenow={Math.floor(s.drive)} aria-valuemax={100} title={s.apexUnlocked ? 'Drive 65%: F = Flarebound. Full Drive: F = Cometheart or (after 10:00) Stillfire Apex; F opens the form picker (1-2-3 / A-D, F confirms; F F = last form).' : s.cometUnlocked ? 'Drive 65%: F = Flarebound. Full Drive: F = Cometheart (Form II).' : 'Drive 65%: F = Flarebound.'}>
+        <div className={`bar-form ${s.form ? 'on' : canForm ? 'ready' : ''} ${f2 ? 'form2' : ''} ${f3 ? 'form3' : ''} ${comet ? 'comet-ready' : ''} ${apex ? 'apex-ready' : ''}`} role="progressbar" aria-label="Transformation drive" aria-valuenow={Math.floor(s.drive)} aria-valuemax={100} title={s.apexUnlocked ? 'Drive 65%: F = Flarebound. Full Drive: F = Cometheart or Stillfire Apex; F opens the form picker (1-2-3 / A-D, F confirms; F F = last form).' : s.cometUnlocked ? 'Drive 65%: F = Flarebound. Full Drive: F = Cometheart (Form II).' : 'Drive 65%: F = Flarebound.'}>
           <i style={{ width: pct(s.drive) }}/>{!hk && <u style={{ left: `${RULES.formCharge}%` }}/>}{(s.cometUnlocked || s.apexUnlocked) && <u className="tick2" style={{ left: '99%' }}/>}
           <span>{fullName}</span>
         </div>

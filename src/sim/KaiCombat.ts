@@ -69,7 +69,7 @@ function pickTarget(s: GameState, d: { x: number; y: number }): Enemy | null {
 }
 function nearestWithin(s: GameState, r: number): Enemy | null { const p = s.player; let best: Enemy | null = null, bd = r; for (const e of s.enemies) { if (!alive(e)) continue; const d = Math.hypot(e.x - p.x, e.y - p.y) - e.radius; if (d < bd) { bd = d; best = e; } } return best; }
 function releaseSignature(s: GameState, c: Cast) {
-  const p = s.player, f = p.form as SigForm, d = aimDir(s), tier = tierOf(c.t), tg = pickTarget(s, d) ?? nearestWithin(s, 170);
+  const p = s.player, f = c.form as SigForm, d = aimDir(s), tier = tierOf(c.t), tg = pickTarget(s, d) ?? nearestWithin(s, 170);
   const dir = tg ? normalize(tg.x - p.x, tg.y - p.y) : d;
   let reach = tg ? Math.max(0, Math.hypot(tg.x - p.x, tg.y - p.y) - tg.radius - p.radius - 8) : 120;
   while (reach > 0 && !clearAt(p.x + dir.x * reach, p.y + dir.y * reach)) reach -= 8;
@@ -112,8 +112,9 @@ function pull(s: GameState, x: number, y: number, r: number, dt: number) {
 }
 
 function updateSignatureCast(s: GameState, c: Cast, dt: number) {
-  const p = s.player, f = p.form as SigForm;
-  if (p.hp <= 0 || s.cinema || (!c.released && (p.form < 1 || c.form !== p.form || s.b22.ult.act))) { if (!c.released) { cancelSignature(s); return; } }
+  const p = s.player, f = c.form as SigForm;   // the technique keeps the form it was committed in, whatever the player becomes meanwhile
+  if (p.hp <= 0 || s.cinema) { if (c.released) { emit(s, 'sig_end', p.x, p.y, f); s.cast = null; } else cancelSignature(s); return; }
+  if (!c.released && (p.form < 1 || c.form !== p.form || s.b22.ult.act)) { cancelSignature(s); return; }
   c.t += dt;
   if (!c.released) {
     const d = aimDir(s); c.dirX = d.x; c.dirY = d.y; c.face = faceOf(d.x, d.y); c.charge = c.t;

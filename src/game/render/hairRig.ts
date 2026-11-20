@@ -114,6 +114,7 @@ export function warpHead(src: Uint8ClampedArray, dst: Uint8ClampedArray, w: numb
 
 export interface HairTable { [textureKey: string]: { fw: number; fh: number; a: number[] } }
 export const HAIR_ANCHORS_KEY = 'hair-anchors';
-export const anchorOf = (table: HairTable | undefined, key: string, frame: number): HeadAnchor | null => { const e = table?.[key], i = frame * 3; if (!e || i + 2 >= e.a.length || e.a[i + 2] <= 0) return null; return { cx: e.a[i], cy: e.a[i + 1], r: e.a[i + 2] }; };
+/** Head anchor of a sheet frame. Outfit sheets are re-padded wider than the base art the table was built from, so when the live frame size is given the anchor shifts by the size difference (the extra padding sits left/top of the figure, measured on every outfit sheet). */
+export const anchorOf = (table: HairTable | undefined, key: string, frame: number, w?: number, h?: number): HeadAnchor | null => { const e = table?.[key], i = frame * 3; if (!e || i + 2 >= e.a.length || e.a[i + 2] <= 0) return null; return { cx: e.a[i] + (w ? w - e.fw : 0), cy: e.a[i + 1] + (h ? h - e.fh : 0), r: e.a[i + 2] }; };
 /** Offsets below this many sheet px are not worth a texture upload (the original frame is used). */
 export const HAIR_MIN = 0.3;

@@ -24,7 +24,7 @@ export class OutfitLayer {
   constructor(private readonly scene: Phaser.Scene, private readonly table: HairTable | undefined) {}
   update(hero: Phaser.GameObjects.Sprite, srcKey: string, frame: number, facing: string, heroId: string, dead: boolean, dt: number) {
     const id = equippedOutfit(); if (!hasAccessory(id, heroId) || dead) { this.img?.setVisible(false); return; }
-    this.t += dt; const a = anchorOf(this.table, srcKey, frame) ?? this.last; if (!a) { this.img?.setVisible(false); return; } this.last = a;
+    this.t += dt; const a = anchorOf(this.table, srcKey, frame, hero.frame.cutWidth, hero.frame.cutHeight) ?? this.last; if (!a) { this.img?.setVisible(false); return; } this.last = a;
     const { view, flip } = viewOf(facing), key = accKey(id, view); if (!this.scene.textures.exists(key)) { this.img?.setVisible(false); return; }
     const acc = ACCESSORIES[id], p = placeAccessory(a, acc, hero, facing, this.t); this.img ??= this.scene.add.image(0, 0, key);
     const w = p.width, tex = this.scene.textures.get(key).getSourceImage() as { width: number; height: number }, h = w * tex.height / tex.width;

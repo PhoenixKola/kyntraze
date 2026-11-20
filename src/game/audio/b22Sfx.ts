@@ -21,6 +21,33 @@ export const SFX: Record<string, Recipe> = {
   kk_clone: { f0: 700, f1: 1500, dur: 0.4, noise: 0.05, decay: 6, wave: 'bell', gain: 0.55, fm: 2.2 }, kk_clone_end: { f0: 1200, f1: 400, dur: 0.35, noise: 0.1, decay: 8, wave: 'bell', gain: 0.4, fm: 1.4 }, kk_hop: { f0: 1600, f1: 240, dur: 0.2, noise: 0.45, decay: 14, wave: 'sine', gain: 0.55 },
   pair_attack: { f0: 200, f1: 1800, dur: 0.9, noise: 0.2, decay: 3, wave: 'saw', gain: 0.9 }, resonance: { f0: 330, f1: 1320, dur: 1.4, noise: 0.05, decay: 2, wave: 'bell', gain: 0.9, fm: 3.1 }, revive: { f0: 440, f1: 880, dur: 0.9, noise: 0, decay: 3, wave: 'bell', gain: 0.8, fm: 1.6 },
 };
+/** B25.1 Kai combat identity cues (original, runtime-synthesised like every B22 cue). Per form: dry martial contact / hot solar burst / crackling fangs / airy silver strike; charge bed + tier ticks, release whoosh, hit / block / miss, per-form follow-up, dragon manifest, flight and Form Shift accents. */
+Object.assign(SFX, {
+  ka_0: { f0: 180, f1: 90, dur: 0.09, noise: 0.6, decay: 26, wave: 'sine', gain: 0.45 }, ka_0f: { f0: 700, f1: 150, dur: 0.2, noise: 0.7, decay: 12, wave: 'saw', gain: 0.5 },
+  ka_1: { f0: 300, f1: 120, dur: 0.14, noise: 0.6, decay: 14, wave: 'saw', gain: 0.5 }, ka_1f: { f0: 260, f1: 70, dur: 0.3, noise: 0.6, decay: 8, wave: 'saw', gain: 0.7 },
+  ka_2: { f0: 900, f1: 300, dur: 0.12, noise: 0.55, decay: 18, wave: 'square', gain: 0.4 }, ka_2f: { f0: 140, f1: 60, dur: 0.35, noise: 0.5, decay: 8, wave: 'saw', gain: 0.75 }, ka_chain: { f0: 1600, f1: 500, dur: 0.1, noise: 0.5, decay: 20, wave: 'square', gain: 0.3 },
+  ka_3: { f0: 1500, f1: 900, dur: 0.15, noise: 0.15, decay: 12, wave: 'bell', gain: 0.32, fm: 1.6 }, ka_3f: { f0: 1000, f1: 2200, dur: 0.3, noise: 0.1, decay: 6, wave: 'bell', gain: 0.4, fm: 2 },
+  sg_charge_1: { f0: 160, f1: 520, dur: 0.5, noise: 0.2, decay: 3, wave: 'saw', gain: 0.45 }, sg_charge_2: { f0: 220, f1: 1100, dur: 0.5, noise: 0.3, decay: 3, wave: 'saw', gain: 0.45 }, sg_charge_3: { f0: 300, f1: 1500, dur: 0.6, noise: 0.05, decay: 3, wave: 'bell', gain: 0.4, fm: 1.8 },
+  sg_tier: { f0: 600, f1: 1200, dur: 0.15, noise: 0, decay: 12, wave: 'bell', gain: 0.4 }, sg_release: { f0: 300, f1: 1400, dur: 0.18, noise: 0.6, decay: 10, wave: 'saw', gain: 0.5 },
+  sg_hit_1: { f0: 120, f1: 40, dur: 0.5, noise: 0.6, decay: 5, wave: 'saw', gain: 1.0 }, sg_hit_2: { f0: 200, f1: 60, dur: 0.45, noise: 0.5, decay: 5, wave: 'saw', gain: 1.0 }, sg_hit_3: { f0: 900, f1: 80, dur: 0.5, noise: 0.3, decay: 4, wave: 'sine', gain: 0.9 },
+  sg_pulse_1: { f0: 110, f1: 50, dur: 0.3, noise: 0.5, decay: 8, wave: 'sine', gain: 0.7 }, sg_pulse_2: { f0: 1000, f1: 200, dur: 0.25, noise: 0.5, decay: 10, wave: 'square', gain: 0.6 }, sg_pulse_3: { f0: 1400, f1: 60, dur: 0.6, noise: 0.3, decay: 4, wave: 'sine', gain: 0.9 },
+  sg_block: { f0: 220, f1: 110, dur: 0.2, noise: 0.5, decay: 16, wave: 'square', gain: 0.6 }, sg_miss: { f0: 600, f1: 200, dur: 0.15, noise: 0.5, decay: 12, wave: 'sine', gain: 0.25 },
+  od_1: { f0: 70, f1: 200, dur: 1.1, noise: 0.5, decay: 2, wave: 'saw', gain: 0.9 }, od_2: { f0: 60, f1: 300, dur: 1.1, noise: 0.6, decay: 2, wave: 'saw', gain: 1.0 }, od_3: { f0: 300, f1: 900, dur: 1.2, noise: 0.1, decay: 2.2, wave: 'bell', gain: 0.7, fm: 2 }, od_end: { f0: 600, f1: 120, dur: 0.6, noise: 0.3, decay: 4, wave: 'sine', gain: 0.5 },
+  fl_start: { f0: 200, f1: 800, dur: 0.35, noise: 0.5, decay: 7, wave: 'saw', gain: 0.5 }, fl_slam: { f0: 120, f1: 40, dur: 0.4, noise: 0.6, decay: 7, wave: 'sine', gain: 0.9 }, fl_soft: { f0: 400, f1: 200, dur: 0.15, noise: 0.3, decay: 12, wave: 'sine', gain: 0.3 },
+  fs_1: { f0: 400, f1: 1200, dur: 0.25, noise: 0.2, decay: 9, wave: 'saw', gain: 0.5 }, fs_2: { f0: 500, f1: 1500, dur: 0.25, noise: 0.3, decay: 9, wave: 'square', gain: 0.45 }, fs_3: { f0: 800, f1: 1800, dur: 0.3, noise: 0.05, decay: 7, wave: 'bell', gain: 0.45, fm: 1.5 },
+} satisfies Record<string, Recipe>);
+/** Kai combat event -> recipe. `n` is the event's packed payload (see KaiCombat.ts); kai_auto plays once per beat, not per target (the caller skips repeats), and chain strikes get only a short crackle. */
+export function kaiCombatSfx(kind: string, n = 0): string | null {
+  const form = (n >> 2) & 3, f3 = (n >> 3) & 3;
+  switch (kind) {
+    case 'kai_auto': return (n & 128) ? 'ka_chain' : `ka_${form}${(n & 32) ? 'f' : ''}`;
+    case 'sig_charge': return `sg_charge_${n || 1}`; case 'sig_tier': return 'sg_tier'; case 'sig_release': return 'sg_release';
+    case 'sig_hit': return `sg_hit_${f3 || 1}`; case 'sig_pulse': return `sg_pulse_${f3 || 1}`; case 'sig_block': return 'sg_block'; case 'sig_miss': return 'sg_miss';
+    case 'od_start': return `od_${n || 1}`; case 'od_end': return 'od_end';
+    case 'fly_start': return 'fl_start'; case 'fly_land': return (n & 1) ? 'fl_slam' : 'fl_soft'; case 'form_shift': return `fs_${n || 1}`;
+    default: return null;
+  }
+}
 /** Which sim event plays which recipe (event kind -> recipe name). */
 export const EVENT_SFX: Record<string, string> = { parry_perfect: 'parry_perfect', parry_guard: 'parry_guard', parry_start: 'parry_start', reversal_blink: 'reversal_blink', reversal_riposte: 'reversal_riposte', seal_mark: 'seal_mark', seal_detonate: 'seal_detonate', ult_start: 'ult_start', ult_release: 'ult_release', branch_fx: 'branch_fx', legend_fx: 'legend_fx', surge_start: 'kk_surge', scatter_fire: 'kk_scatter', scatter_blast: 'kk_blast', meteor_beat: 'kk_meteor', flare_start: 'kk_flare_wind', flare_pillar: 'kk_pillar', crucible_cast: 'kk_gather', crucible_pulse: 'kk_pulse', crucible_final: 'kk_final', clone_spawn: 'kk_clone', clone_end: 'kk_clone_end', rift_hop: 'kk_hop' };
 export const B22_EVENT_SFX: Record<string, string> = { relic_gain: 'relic_gain', legend_gain: 'legend_gain', prism: 'prism', sigil_strike: 'sigil_strike', dawn_ring: 'dawn_ring', hourglass: 'hourglass', rift: 'rift', bearing: 'bearing', echo_warn: 'echo_warn', mark: 'mark', ult_cannon: 'ult_cannon', ult_judge: 'ult_judge', parry: 'parry_perfect', ult_collapse: 'ult_release', ult_beam: 'ult_cannon', collapse_blast: 'seal_detonate', crucible_burst: 'seal_detonate', collision: 'seal_detonate', seal_blast: 'seal_detonate' };

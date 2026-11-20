@@ -10,7 +10,7 @@ A fast top-down survival run of about **15-18 minutes**. Move, auto-attack, spen
 
 | Hero | Style | Transformations | How each is earned |
 |---|---|---|---|
-| **Kai** | Versatile fighter | Flarebound (Drive 65+), Cometheart, Stillfire Apex | Cometheart: defeat the Warden as Kai. Stillfire Apex: defeat the Seraph as Kai; in later runs it can be chosen only from ~10:00 with full Drive. |
+| **Kai** | Versatile fighter | Flarebound (Drive 65+), Cometheart, Stillfire Apex | Cometheart: defeat the Warden as Kai. Stillfire Apex: defeat the Seraph as Kai; in later runs it can be chosen whenever Drive is full. |
 | **Ren** | Aggressive melee | Crimson Ascendant | Defeat the Fracture Warden as Ren. |
 | **Sora** | Ranged precision | Azure Sovereign | Defeat the Fracture Warden as Sora. |
 

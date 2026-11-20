@@ -2,6 +2,7 @@
 import Phaser from 'phaser';
 import type { AbilityEvent, GameState } from '../../sim/GameState';
 import { FLY, SIG } from '../../content/kaiCombat';
+import { OverdriveDragon } from './kaiDragon';
 
 export const KO_FORM = ['', 'flare', 'comet', 'still'] as const;
 export const KO_NAMES = (['flare', 'comet', 'still'] as const).flatMap(f => (['dragon', 'claw', 'orb', 'burst', 'head', 'sigil', 'jet', 'shift'] as const).flatMap(k => [0, 1, 2, 3].map(i => `${f}_${k}${i}`)));
@@ -11,12 +12,12 @@ interface Pop { im: Phaser.GameObjects.Image; t: number; dur: number; frames: st
 export interface CombatFxInput { dt: number; state: GameState; hero: Phaser.GameObjects.Sprite; hand: { m: { x: number; y: number } } | null; scale: number; reduced: boolean; running: boolean; dead: boolean; crowded: boolean }
 
 export class KaiCombatFx {
-  private pops: Pop[] = []; private g: Phaser.GameObjects.Graphics; private dragon: Phaser.GameObjects.Image; private orb: Phaser.GameObjects.Image; private sigil: Phaser.GameObjects.Image;
+  private pops: Pop[] = []; private g: Phaser.GameObjects.Graphics; private readonly dragon: OverdriveDragon; private orb: Phaser.GameObjects.Image; private sigil: Phaser.GameObjects.Image;
   private last = 0; private clock = 0; private dragonA = 0; private lx = 0; private ly = 0; private side = 1; private trailClock = 0; private fresh = true; private dashWas = false; private px = 0; private py = 0;
   constructor(private readonly scene: Phaser.Scene) {
     const blank = 'kp-blank'; if (!scene.textures.exists(blank)) scene.textures.createCanvas(blank, 2, 2)!.refresh();
     this.g = scene.add.graphics().setDepth(11.6).setBlendMode(Phaser.BlendModes.ADD);
-    this.dragon = scene.add.image(0, 0, blank).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.1).setVisible(false);
+    this.dragon = new OverdriveDragon(scene);
     this.orb = scene.add.image(0, 0, blank).setBlendMode(Phaser.BlendModes.ADD).setDepth(11.4).setVisible(false);
     this.sigil = scene.add.image(0, 0, blank).setBlendMode(Phaser.BlendModes.ADD).setDepth(3.7).setVisible(false);
   }
@@ -34,6 +35,7 @@ export class KaiCombatFx {
     const n = e.n ?? 0;
     switch (e.kind) {
       case 'kai_auto': {
+        if (od) this.dragon.strike(e.tx ?? e.x, e.ty ?? e.y, (n & 32) !== 0 ? 1.4 : 0.8);
         const form = (n >> 2) & 3, tx = e.tx ?? e.x, ty = e.ty ?? e.y, fin = (n & 32) !== 0, ranged = (n & 16) !== 0, chain = (n & 128) !== 0, ff = form || 0;
         if (chain) { this.bolt(e.x, e.y, tx, ty, COL[2]); this.pop(this.fr(2, 'burst', 0, 1), tx, ty, 50 * sc, 80 * sc, 0.2); break; }
         if (ff === 0) { if (!ranged) this.ring(tx, ty, 0xbfeaff, (fin ? 90 : 50) * sc, 0.25); break; }   // base keeps the bare-knuckle read: a clean contact ring
@@ -48,8 +50,9 @@ export class KaiCombatFx {
         break;
       }
       case 'sig_tier': { const ff = f; this.ring(e.x, e.y - 30 * sc, COL[ff], (60 + 22 * n) * sc, 0.3); this.shake(50, 0.0008 * n, red); break; }
-      case 'sig_release': { const ff = (n >> 3) & 3 || f, tier = n & 7; this.pop(this.fr(ff, 'burst', 0, 0), e.x, e.y - 30 * sc, 60 * sc, 130 * sc * (1 + tier * 0.2), 0.22); this.shake(90, 0.002 + 0.0008 * tier, red); break; }
-      case 'sig_hit': { const ff = (n >> 3) & 3 || f, tier = n & 7, s = (170 + 50 * tier) * sc; this.pop(this.fr(ff, 'burst', 0, 3), e.x, e.y - 10 * sc, s * 0.5, s, 0.5, { a: 1, rot: ff === 2 ? 0.4 : 0 }); this.ring(e.x, e.y, COL[ff], s * 1.1, 0.4); if (od && !red) this.pop(this.fr(ff, 'claw', 0, 3), e.x, e.y, s * 0.8, s * 1.2, 0.4, { rot: -0.6 }); this.shake(150, 0.0035, red); break; }
+      case 'sig_release': {
+        if (od) this.dragon.strike(e.tx ?? e.x, e.ty ?? e.y, 1.4); const ff = (n >> 3) & 3 || f, tier = n & 7; this.pop(this.fr(ff, 'burst', 0, 0), e.x, e.y - 30 * sc, 60 * sc, 130 * sc * (1 + tier * 0.2), 0.22); this.shake(90, 0.002 + 0.0008 * tier, red); break; }
+      case 'sig_hit': { const ff = (n >> 3) & 3 || f, tier = n & 7, s = (170 + 50 * tier) * sc; if (ff === 3) { this.vort = { x: e.x, y: e.y, t: 0, R: (SIG.still.pullR + SIG.still.pullGrow * tier) * sc }; this.pop(this.fr(3, 'sigil', 0, 3), e.x, e.y + 8, this.vort.R * 2.2, this.vort.R * 0.5, SIG.still.releaseAt, { flat: true, depth: 3.8, a: 1 }); } this.pop(this.fr(ff, 'burst', 0, 3), e.x, e.y - 10 * sc, s * 0.5, s, 0.5, { a: 1, rot: ff === 2 ? 0.4 : 0 }); this.ring(e.x, e.y, COL[ff], s * 1.1, 0.4); if (od && !red) this.pop(this.fr(ff, 'claw', 0, 3), e.x, e.y, s * 0.8, s * 1.2, 0.4, { rot: -0.6 }); this.shake(150, 0.0035, red); break; }
       case 'sig_block': this.ring(e.x, e.y, 0xaab4c0, 90 * sc, 0.3); this.shake(60, 0.0015, red); break;
       case 'sig_miss': this.ring(e.x, e.y + 6, 0x8a97a5, 70 * sc, 0.25, true); break;
       case 'sig_pulse': {
@@ -63,7 +66,7 @@ export class KaiCombatFx {
       case 'od_start': {
         this.pop(this.fr(f, 'sigil', 0, 3), e.x, e.y + 8, 80 * sc, 520 * sc, 1.0, { flat: true, depth: 3.8, a: 1 });
         this.pop(this.fr(f, 'shift', 0, 3), e.x, e.y - 40 * sc, 90 * sc, 520 * sc, 0.8, { a: 1 });
-        this.ring(e.x, e.y, COL[f], 560 * sc, 0.7); this.shake(320, 0.006, red); this.dragonA = Math.max(this.dragonA, 0.05); break;
+        this.ring(e.x, e.y, COL[f], 560 * sc, 0.7); this.shake(320, 0.006, red); this.dragonA = Math.max(this.dragonA, 0.05); this.dragon.strike(e.x + 40 * sc, e.y - 40 * sc, 1.2); break;
       }
       case 'fly_start': { const ff = n || f; this.pop(this.fr(ff, 'sigil', 0, 3), e.x, e.y + 8, 40 * sc, 190 * sc, 0.5, { flat: true, depth: 3.8, a: 0.9 }); this.pop(this.fr(ff, 'jet', 0, 3), e.x, e.y + 4, 60 * sc, 90 * sc, 0.35, { ox: 0.5, oy: 0, a: 0.9 }); this.shake(80, 0.0016, red); break; }
       case 'fly_land': {
@@ -90,12 +93,26 @@ export class KaiCombatFx {
     let px = x0, py = y0; const nx = -(y1 - y0), ny = x1 - x0, nl = Math.hypot(nx, ny) || 1;
     for (let i = 1; i <= 5; i++) { const u = i / 5, off = i === 5 ? 0 : (Math.random() - 0.5) * 14, qx = x0 + (x1 - x0) * u + nx / nl * off, qy = y0 + (y1 - y0) * u + ny / nl * off; this.pend.push([px, py, qx, qy, col]); px = qx; py = qy; }
   }
-  private jetClock = 0; private rippleClock = 0; private pend: [number, number, number, number, number][] = []; private pendT = 0;
+  private vort: { x: number; y: number; t: number; R: number } | null = null; private jetClock = 0; private rippleClock = 0; private pend: [number, number, number, number, number][] = []; private pendT = 0;
 
   update(o: CombatFxInput) {
     const dt = o.running ? o.dt : 0, s = o.state, p = s.player, f = Math.max(1, p.form), sc = o.scale / 0.5, h = o.hero; this.clock += dt;
     this.g.clear();
     for (const e of s.abilityEvents) if (e.id > this.last) { this.last = e.id; if (!o.dead) this.onEvent(e, o); }
+    // Singularity Palm: while the palm holds, silver arcs spiral into the point of contact and the field tightens until the implosion
+    if (this.vort) {
+      const v = this.vort; v.t += dt; const u = v.t / SIG.still.releaseAt;
+      if (u >= 1) this.vort = null; else {
+        const g = this.g, k = 1 - u;
+        g.lineStyle(2, 0xdfeaff, 0.7 * k + 0.2); g.strokeEllipse(v.x, v.y + 6, v.R * 2 * k + 14, v.R * 0.9 * k + 6);
+        for (let i = 0; i < 14; i++) {
+          const a0 = i * 0.449 + v.t * 8, r0 = v.R * k * (0.3 + 0.7 * ((i * 7) % 5) / 4), r1 = r0 * 0.78;
+          g.lineStyle(1.6, i % 3 === 0 ? 0xffffff : 0xb9d2ff, 0.75 * (0.4 + 0.6 * u));
+          g.lineBetween(v.x + Math.cos(a0) * r0, v.y - 6 + Math.sin(a0) * r0 * 0.5, v.x + Math.cos(a0 + 0.4) * r1, v.y - 6 + Math.sin(a0 + 0.4) * r1 * 0.5);
+        }
+        g.fillStyle(0xffffff, 0.15 + 0.5 * u); g.fillCircle(v.x, v.y - 6, 6 + 10 * u);
+      }
+    }
     // transient pops (flipbooks)
     for (let i = this.pops.length - 1; i >= 0; i--) {
       const q = this.pops[i]; q.t += dt; const u = q.t / q.dur; if (u >= 1) { q.im.destroy(); this.pops.splice(i, 1); continue; }
@@ -118,7 +135,7 @@ export class KaiCombatFx {
       const px = c.released ? h.x + c.dirX * (p.radius + 16) : hp.x, py = c.released ? h.y - 30 * sc + c.dirY * 10 : hp.y;
       const key = c.released ? `${KO_FORM[ff]}_orb3` : `${KO_FORM[ff]}_orb${Math.min(2, tier === 0 ? 0 : tier === 1 ? 1 : 2)}`;
       if (this.has(key)) {
-        const size = (c.released ? 70 : 26 + 80 * t) * sc * (tier >= 3 && !c.released ? 1 + 0.06 * Math.sin(this.clock * 30) : 1), jit = ff === 2 && !c.released ? 1.5 : 0;
+        const size = (c.released ? 64 : 24 + 56 * t) * sc * (tier >= 3 && !c.released ? 1 + 0.06 * Math.sin(this.clock * 30) : 1), jit = ff === 2 && !c.released ? 1.5 : 0;
         this.orb.setTexture(koKey(key)).setVisible(true).setPosition(Math.round(px + (Math.random() - 0.5) * jit * 2), Math.round(py + (Math.random() - 0.5) * jit * 2)).setScale(size / this.orb.width).setRotation(this.clock * (ff === 3 ? 2.2 : ff === 2 ? 7 : 5) * (c.released ? 2 : 1)).setAlpha(Math.min(1, 0.55 + 0.45 * t)); orbOn = true;
         if (!c.released && !o.reduced) {
           const R = size * 0.9;
@@ -135,17 +152,15 @@ export class KaiCombatFx {
     const vx = dt > 0 ? (h.x - this.px) / dt : 0, vy = dt > 0 ? (h.y - this.py) / dt : 0, sp = Math.hypot(vx, vy); this.px = h.x; this.py = h.y;
     this.lx += (h.x - this.lx) * Math.min(1, dt * 11); this.ly += (h.y - this.ly) * Math.min(1, dt * 11);
     if (Math.abs(vx) > 40) this.side += ((vx > 0 ? 1 : -1) - this.side) * Math.min(1, dt * 7); else if (c?.kind === 'signature' || s.hx.strike) this.side += ((s.aim.x >= 0 ? 1 : -1) - this.side) * Math.min(1, dt * 3);
-    const dk = `${KO_FORM[f]}_dragon${Math.floor(this.clock * 7) % 4}`;
-    if (this.dragonA > 0.02 && this.has(dk)) {
-      this.dragon.setTexture(koKey(dk));
-      const hh = 270 * sc * (1 + 0.04 * Math.sin(this.clock * 2.4)), k = hh / this.dragon.height, lean = Math.max(-0.3, Math.min(0.3, vx / 900));
-      this.dragon.setTexture(koKey(dk)).setVisible(true).setOrigin(0.62, 0.6).setScale(k * (this.side >= 0 ? 1 : -1), k).setRotation(lean + 0.04 * Math.sin(this.clock * 1.7)).setPosition(Math.round(this.lx), Math.round(this.ly - 34 * sc)).setAlpha(this.dragonA * (o.crowded ? 0.75 : 1) * (f === 3 ? 0.8 : 1));
+    const dm = (s.aim.x || s.aim.y) ? s.aim : { x: 1, y: 0 };
+    this.dragon.update({ dt, clock: this.clock, x: h.x, y: h.y, sc, form: f as 1 | 2 | 3, amount: this.dragonA / 0.9, vx, vy, aimX: dm.x, aimY: dm.y, fly: p.flyT > 0, dash: p.dashRemaining > 0, reduced: o.reduced, crowded: o.crowded });
+    if (this.dragonA > 0.02) {
       // sigil under the feet, pulsing
       const sk = `${KO_FORM[f]}_sigil${Math.floor(this.clock * 5) % 4}`; if (this.has(sk)) this.sigil.setTexture(koKey(sk)).setVisible(true).setPosition(Math.round(h.x), Math.round(h.y + 2)).setScale((120 * sc * (1 + 0.06 * Math.sin(this.clock * 4))) / this.sigil.width).setAlpha(this.dragonA * 0.55);
       // movement: claw-mark streaks behind Kai
       this.trailClock -= dt; if (sp > 120 && this.trailClock <= 0 && !o.reduced) { this.trailClock = 0.11; const a = Math.atan2(vy, vx); this.pop(this.fr(f, 'claw', 0, 3), h.x - Math.cos(a) * 24, h.y - 30 * sc - Math.sin(a) * 24, 70 * sc, 120 * sc, 0.3, { rot: a + 0.15, a: 0.55, ox: 1, oy: 0.5, depth: 9.0 }); }
       if (p.dashRemaining > 0 && !this.dashWas && !o.reduced) this.pop(this.fr(f, 'head', 0, 3), h.x, h.y - 30 * sc, 120 * sc, 220 * sc, 0.35, { rot: Math.atan2(p.dashDy, p.dashDx), ox: 0.2, a: 0.8 });
-    } else { this.dragon.setVisible(false); this.sigil.setVisible(false); }
+    } else { this.sigil.setVisible(false); }
     this.dashWas = p.dashRemaining > 0;
   }
   destroy() { for (const q of this.pops) q.im.destroy(); this.g.destroy(); this.dragon.destroy(); this.orb.destroy(); this.sigil.destroy(); }

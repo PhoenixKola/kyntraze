@@ -65,3 +65,20 @@ describe('Primal Overdrive, Skybreaker and Form Shift', () => {
     const b = setup(0); expect(formShift(b.s, 2)).toBe(false);
   });
 });
+
+describe('B25.1 corrections', () => {
+  it('a released signature keeps the form it was committed in when the player changes form', () => {
+    const { sim, s } = setup(1, [[1150, 800]]); s.player.attackClock = 1e9;
+    sim.step(DT, idle({ sig: true, sigHeld: true })); run(sim, 0.5, idle({ sigHeld: true })); sim.step(DT, idle({ sigHeld: false })); expect(s.cast?.released).toBe(true);
+    s.player.form = 3; s.player.formCooldown = 99; run(sim, 1.2);
+    const pulses = s.abilityEvents.filter(e => e.kind === 'sig_pulse' || e.kind === 'sig_hit'), forms = new Set(pulses.map(e => ((e.n ?? 0) >> 3) & 3));
+    expect([...forms]).toEqual([1]); expect(s.cast).toBeNull();
+  });
+  it('Form Shift selection survives the wire; invalid picks are rejected', async () => {
+    const { parseClient, fromInputState, toInputState } = await import('../net/protocol');
+    const w = fromInputState(idle({ selPick: 2 })); expect(toInputState(w).selPick).toBe(2);
+    const msg = (v: unknown) => parseClient(JSON.stringify({ t: 'input', seq: 1, i: { ...fromInputState(idle()), selPick: v } }));
+    expect(msg(2)).not.toBeNull(); for (const bad of [0, 4, -1, 1.5, '2']) expect(msg(bad)).toBeNull();
+    expect(parseClient(JSON.stringify({ t: 'input', seq: 1, i: fromInputState(idle()) }))).not.toBeNull();
+  });
+});

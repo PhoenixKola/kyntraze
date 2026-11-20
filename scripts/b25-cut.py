@@ -18,6 +18,10 @@ for form in ('flare', 'comet', 'still'):
         p = os.path.join(ROOT, 'art', 'fx-b25', form, kind + '.png')
         if not os.path.exists(p): continue
         im, boxes = parts(p, 3 if kind in ('sigil', 'orb', 'burst') else 8)
+        if form == 'comet' and kind == 'sigil':   # the four sigils touch, so component cutting merged two and left a 10x11 fragment: cut explicit quarter-width grid cells instead (B25.1)
+            lum = np.asarray(im).astype(np.float32).max(axis=2); cw = im.width // 4; boxes = []
+            for i in range(4):
+                ys, xs = np.where(lum[:, i * cw:(i + 1) * cw] > 25); boxes.append((i * cw + max(0, xs.min() - 4), max(0, ys.min() - 4), i * cw + min(cw, xs.max() + 4), min(im.height, ys.max() + 4)))
         for i, b in enumerate(boxes): im.crop(b).save(os.path.join(out, f'{form}_{kind}{i}.png'))
         print(form, kind, len(boxes))
 p = os.path.join(ROOT, 'art', 'fx-b25', 'ui', 'icons.png')
