@@ -85,6 +85,9 @@ def hoverize(name, c, ctx, base_run=None):
             ctx.upright(p, -1, -1); _lift(p, HOVER + (3 if 1 <= i <= 3 else 1))
     elif name == "Death":
         for i, p in enumerate(fr): _lift(p, max(0.0, HOVER * (1.0 - i / 9.0)))
+    elif name in ("Kick", "Glide", "Dive"):     # B25.1: these poses own their legs (kick / trailing glide / crouch landing): only the hover lift is added so the figure sits at the same height as Idle.
+        for i, p in enumerate(fr):
+            _lift(p, HOVER + (bob(i, n, 1.0) if name == "Glide" else 0))
     elif name in ("Beam", "Sphere", "Lunge", "Uppercut", "Slam"):
         for i, p in enumerate(fr):
             old = {k: copy.deepcopy(p[k]) for k in ("leg_n", "leg_f")}; ctx.hover_legs(p, i, n, sway=0.0); ctx.upright(p, 0, 0); _lift(p, HOVER + 0)

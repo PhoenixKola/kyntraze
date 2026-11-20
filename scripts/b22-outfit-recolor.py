@@ -37,6 +37,7 @@ def remap(img, hero, prim, sec):
 def save_q(im, path):
     a = np.array(im); alpha = a[..., 3] > 8; q = Image.fromarray(a[..., :3]).quantize(colors=96, method=Image.MEDIANCUT, dither=Image.NONE).convert("RGB")
     out = np.dstack([np.array(q), np.where(alpha, 255, 0).astype(np.uint8)]); Image.fromarray(out, "RGBA").quantize(colors=128, method=Image.FASTOCTREE, dither=Image.NONE).save(path, optimize=True)
+ONLY = [k for k in os.environ.get("B22_ONLY", "").lower().split(",") if k]
 def run(oid):
     hero, p, sc = OUTFITS[oid]; prim, sec = hx(p), hx(sc); n = 0
     for st in SETS[hero]:
@@ -45,6 +46,7 @@ def run(oid):
             out = os.path.join(dst, os.path.relpath(root, src)); os.makedirs(out, exist_ok=True)
             for f in files:
                 sp, dp = os.path.join(root, f), os.path.join(out, f)
+                if ONLY and f.lower().endswith(".png") and not any(k in f.lower() for k in ONLY): continue   # B25.1: B22_ONLY=kick,glide,dive recolours just the new clips (manifests are always re-copied)
                 if f.lower().endswith(".png"): save_q(remap(Image.open(sp).convert("RGBA"), hero, prim, sec), dp); n += 1
                 else: shutil.copyfile(sp, dp)
     print(oid, n, "png")

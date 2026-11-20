@@ -5,7 +5,7 @@ import { CANNON, DRAGON } from '../content/cometheart';
 import { RIFT } from '../content/stillfire';
 export type Facing = 'south' | 'north' | 'east' | 'west';
 /** RunLower + RunPunchUpper are the two LAYERS of the moving attack (legs+hips of the Run cycle, and an upper body whose frames are `step * 8 + leg phase`); the runtime draws the lower one first. */
-export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere' | 'RunLower' | 'RunPunchUpper' | 'Lunge' | 'Uppercut' | 'Slam';
+export type KaiBaseClip = 'Idle' | 'Run' | 'BasicPunch' | 'Dash' | 'Hurt' | 'Death' | 'Beam' | 'Sphere' | 'RunLower' | 'RunPunchUpper' | 'Lunge' | 'Uppercut' | 'Slam' | 'Kick' | 'Glide' | 'Dive';
 /** Transform exists only in the Form I sheets. */
 export type KaiClip = KaiBaseClip | 'Transform' | 'IdleSpecial' | 'Guard' | 'Riposte';
 /** B23: Vex's own clips (blade-ready counter stance, outward counter-cut). Optional per sheet set: a set without them plays the older mapping. */
@@ -15,7 +15,8 @@ export type KaiForm = 'base' | 'f1' | 'f2' | 'f3';
 export const KAI_DIRS: readonly Facing[] = ['south', 'north', 'east', 'west'];
 export const KAI_CLIPS: readonly KaiBaseClip[] = ['Idle', 'Run', 'BasicPunch', 'Dash', 'Hurt', 'Death', 'Beam', 'Sphere', 'RunLower', 'RunPunchUpper'];
 /** B22 Kai-only clips (Surge Step / Meteor Drive Lunge, Rising Flare Uppercut, Sunfall Crucible Slam); Ren / Sora sheets do not have them. */
-export const KAI_KIT_CLIPS = ['Lunge', 'Uppercut', 'Slam'] as const;
+/** B25.1 (Combat Identity): Kick (leg-contact auto beat), Glide (Skybreaker cruise loop) and Dive (descent strike / landing compression). */
+export const KAI_KIT_CLIPS = ['Lunge', 'Uppercut', 'Slam', 'Kick', 'Glide', 'Dive'] as const;
 /** Leg phases per strike step in RunPunchUpper. */
 export const RUN_PHASES = 8;
 export const KAI_F1_CLIPS: readonly KaiClip[] = [...KAI_CLIPS, 'Transform'];
@@ -111,7 +112,7 @@ export function facingFromVector(prev: Facing, dx: number, dy: number): Facing {
   return ay >= ax * 0.75 ? v : h;
 }
 
-const STRIKE_CLIP: Record<string, 'BasicPunch' | 'Lunge' | 'Uppercut' | 'Slam'> = { kick: 'Lunge', spin: 'Slam', uppercut: 'Uppercut', dragonfist: 'Uppercut', finisher: 'Lunge' };
+const STRIKE_CLIP: Record<string, 'BasicPunch' | 'Lunge' | 'Uppercut' | 'Slam' | 'Kick'> = { kick: 'Kick', spin: 'Slam', uppercut: 'Uppercut', dragonfist: 'Uppercut', finisher: 'Lunge' };
 export interface AnimFrameInput {
   /** Seconds of simulated time to advance; 0 while paused / choosing an upgrade / dead. */
   dt: number; alive: boolean;
@@ -224,8 +225,10 @@ export class KaiAnimator {
   get runPunching() { return this.runPunchTime >= 0; }
   private planted = false;
   /** Strike clip of the current auto beat: punches / palms / fangs use BasicPunch, kicks the Lunge clip, spins the Slam, uppercuts / finishers the Uppercut. */
-  private strikeClip: 'BasicPunch' | 'Lunge' | 'Uppercut' | 'Slam' = 'BasicPunch';
-  private flyWas = false; private flyDur = 0; private landTime = -1; private landDive = false; private flightMode: 'cruise' | 'land' | null = null;
+  private strikeClip: 'BasicPunch' | 'Lunge' | 'Uppercut' | 'Slam' | 'Kick' = 'BasicPunch';
+  /** The clip exists in the manifest of the art set currently on screen (older / partial sets fall back). */
+  private avail(c: KaiClip): boolean { return !!(this.set(this.visualForm)[this.facing].animations as Record<string, unknown>)[c]; }
+  private glideT = 0; private flyWas = false; private flyDur = 0; private landTime = -1; private landDive = false; private flightMode: 'cruise' | 'land' | null = null;
   /** B22: a shot that goes in a different cardinal direction than the run (e.g. backing away from a pursuer) is shown as a short planted strike toward the target, so the visible hand and the shot agree; same-direction shots keep the RunPunchUpper + RunLower composite. */
   private plantedStrike(i: AnimFrameInput): boolean {
     if (this.planted) { if (this.punching || this.runPunchTime >= 0 || i.shot) return true; this.planted = false; return false; }
@@ -305,7 +308,7 @@ export class KaiAnimator {
     }
     if (this.revertTime >= 0 && this.transformTime < 0) { this.revertTime += i.dt; if (this.revertTime >= FORM_REVERT_SECONDS || (this.movingNow && this.revertTime >= 0.1)) this.revertTime = -1; }
     const busy = this.hurtTime >= 0 || i.dashing || this.dashRec >= 0 || this.transformTime >= 0 || this.revertTime >= 0;
-    if (!this.punching) this.strikeClip = STRIKE_CLIP[i.beat ?? ''] ?? 'BasicPunch';
+    if (!this.punching) { const w = STRIKE_CLIP[i.beat ?? ''] ?? 'BasicPunch'; this.strikeClip = this.avail(w) ? w : w === 'Kick' && this.avail('Lunge') ? 'Lunge' : this.avail(w) ? w : 'BasicPunch'; }
     const plan = this.punchPlan(attackPeriod);
     const casting = !!i.cast && !busy;
     if (i.cast && casting) {
@@ -317,18 +320,18 @@ export class KaiAnimator {
     const flying = (i.flyT ?? 0) > 0 && !busy && !casting;
     this.flightMode = null;
     if (flying) {
-      if (!this.flyWas) { this.flyWas = true; this.punchTime = -1; this.runPunchTime = -1; this.planted = false; }
+      if (!this.flyWas) { this.flyWas = true; this.glideT = 0; this.punchTime = -1; this.runPunchTime = -1; this.planted = false; }
       this.flyDur = i.flyT ?? 0; this.landTime = -1; this.flightMode = 'cruise';
       if (i.moving) this.turn(facingFromInput(this.facing, i.inputX, i.inputY));
       if (i.shot && !this.punching) { this.startPunch(Math.max(0, plan.impactT - 3 / this.info(this.strikeClip).fps), plan.rate); this.turn(facingFromVector(this.facing, i.shot.dx, i.shot.dy), true); }
       if (this.punching) { this.punchTime += i.dt * this.punchRate; if (this.punchTime >= plan.duration) this.punchTime = -1; }
-      this.clip = this.punching ? this.strikeClip : 'Dash'; this.time = 0;
+      this.clip = this.punching ? this.strikeClip : this.avail('Glide') && this.flyDur >= 0.2 ? 'Glide' : 'Dash'; this.glideT += i.dt;
       return this.pose();
     }
-    if (this.flyWas) { this.flyWas = false; this.landTime = 0; this.landDive = this.flyDur >= 0.5; this.punchTime = -1; }
+    if (this.flyWas) { this.flyWas = false; this.landTime = 0; this.landDive = this.flyDur >= 0.5 && this.avail('Dive'); this.punchTime = -1; }
     if (this.landTime >= 0 && !busy && !casting) {
-      this.landTime += i.dt; if (this.landTime > (this.landDive ? 0.32 : 0.2) || i.moving && this.landTime > 0.1) this.landTime = -1;
-      else { this.flightMode = 'land'; this.clip = this.landDive ? 'Slam' : 'Dash'; this.time = 0; return this.pose(); }
+      this.landTime += i.dt; if (this.landTime > (this.landDive ? 0.4 : 0.2) || i.moving && this.landTime > 0.1) this.landTime = -1;
+      else { this.flightMode = 'land'; this.clip = this.landDive ? 'Dive' : 'Dash'; this.time = 0; return this.pose(); }
     } else if (busy || casting) this.landTime = -1;
 
     if (casting) { /* the signature ability owns the hands */ }
@@ -380,8 +383,9 @@ export class KaiAnimator {
     const form = this.formOf(this.clip);
     const a = this.info(this.clip, form);
     let frame: number;
-    if (this.flightMode === 'cruise' && this.clip === 'Dash') frame = Math.min(a.frames - 1, this.flyDur < 0.2 ? (a.events.burst_start ?? 2) : (a.events.burst_start ?? 2) + 2);
-    else if (this.flightMode === 'land') frame = this.clip === 'Slam' ? Math.min(a.frames - 1, (a.events.release ?? 11) + Math.floor(this.landTime / 0.32 * Math.max(1, (a.events.recover_start ?? 14) - (a.events.release ?? 11) + 1))) : Math.min(a.frames - 1, (a.events.recover_start ?? a.frames - 3) + Math.floor(this.landTime / 0.2 * 3));
+    if (this.flightMode === 'cruise' && this.clip === 'Glide') frame = Math.floor(this.glideT * a.fps + 1e-6) % a.frames;
+    else if (this.flightMode === 'cruise' && this.clip === 'Dash') frame = Math.min(a.frames - 1, a.events.burst_start ?? 2);
+    else if (this.flightMode === 'land') frame = this.clip === 'Dive' ? Math.min(a.frames - 1, (a.events.release ?? 7) - 1 + Math.floor(Math.min(0.999, this.landTime / 0.4) * Math.max(1, (a.events.interruptible_from ?? 15) - (a.events.release ?? 7) + 2))) : Math.min(a.frames - 1, (a.events.recover_start ?? a.frames - 3) + Math.floor(this.landTime / 0.2 * 3));
     else if (this.clip === 'Dash') {
       const rec = a.events.recover_start ?? a.frames - 3;
       frame = this.dashRec >= 0 ? Math.min(a.frames - 1, rec + Math.floor(this.dashRec / DASH_RECOVERY_SECONDS * (a.frames - rec))) : Math.min(rec - 1, Math.floor(this.dashProg * rec));
