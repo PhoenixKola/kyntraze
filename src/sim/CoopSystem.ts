@@ -8,7 +8,7 @@ import type { PartyState } from '../b22/state';
 import type { Enemy } from './GameState';
 import { xpThreshold } from './GameState';
 
-export const SLOT_KEYS = ['player', 'hero', 'hx', 'cast', 'sphere', 'mods', 'upgradeStacks', 'aim', 'eHeld', 'b22', 'heroFormUnlocked', 'heroFormUnlockedNow', 'heroFormSeen', 'run', 'echoes', 'blasts', 'apexUnlocked', 'apexUnlockedNow', 'cometUnlocked', 'cometUnlockedNow', 'levelUpAt'] as const;
+export const SLOT_KEYS = ['player', 'hero', 'hx', 'cast', 'sphere', 'mods', 'upgradeStacks', 'aim', 'eHeld', 'b22', 'heroFormUnlocked', 'heroFormUnlockedNow', 'heroFormSeen', 'vexSeen', 'run', 'echoes', 'blasts', 'apexUnlocked', 'apexUnlockedNow', 'cometUnlocked', 'cometUnlockedNow', 'levelUpAt'] as const;
 export type SlotBag = Pick<GameState, (typeof SLOT_KEYS)[number]>;
 export interface Down { downed: boolean; out: boolean; t: number; revives: number; hold: number }
 export interface Edge { sig?: boolean; od?: boolean; q: boolean; f: boolean; e: boolean; r: boolean; buf: { q: number; e: number; r: number } }

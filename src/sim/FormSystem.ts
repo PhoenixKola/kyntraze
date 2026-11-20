@@ -6,6 +6,7 @@ import { isBoss } from '../content/enemies';
 import { slideMove } from './CollisionSystem';
 import { cancelCast } from './AbilitySystem';
 import { ASCEND } from '../content/heroKits';
+import { VEX_REVEAL } from '../content/vexCombat';
 import { clearHero } from './HeroSystem';
 import { b22Emit } from '../b22/state';
 /** B23: one reveal event per form at the real commit moment (same frame as the sprite / stats change); the renderer and audio read it by id (advancedFx / b22Sfx). */
@@ -45,7 +46,7 @@ export function activateForm(state: GameState, want?: 1 | 2 | 3) {
     return true;
   }
   // Cometheart / Stillfire Apex: the whole sim freezes for the reveal; the form itself commits at `commitAt` so the art, the stats and the effects agree.
-  const hero = state.hero !== 'kai', apex = which === 3, first = (hero ? state.heroFormSeen : apex ? state.apexSeen : state.cometSeen) === 0, c = hero ? (first ? ASCEND.cinemaFirst : ASCEND.cinemaRepeat) : apex ? (first ? APEX.cinemaFirst : APEX.cinemaRepeat) : (first ? COMET.cinemaFirst : COMET.cinemaRepeat);
+  const hero = state.hero !== 'kai', apex = which === 3, first = (state.hero === 'vex' ? state.vexSeen[which - 1] : hero ? state.heroFormSeen : apex ? state.apexSeen : state.cometSeen) === 0, c = state.hero === 'vex' && which === 2 && first ? VEX_REVEAL.first : hero ? (first ? ASCEND.cinemaFirst : ASCEND.cinemaRepeat) : apex ? (first ? APEX.cinemaFirst : APEX.cinemaRepeat) : (first ? COMET.cinemaFirst : COMET.cinemaRepeat);
   state.cinema = { t: 0, dur: c.dur, breakAt: c.breakAt, commitAt: c.commitAt, first, from: p.form, to: which, broke: false, committed: false };
   state.cast = null; state.sphere = null; p.dashRemaining = 0; p.vx = 0; p.vy = 0; if (hero) clearHero(state);
   emit(state, hero ? 'ascend_start' : apex ? 'form3_start' : 'form2_start', p.x, p.y, first ? 1 : 0);
@@ -89,7 +90,7 @@ export function updateCinema(s: GameState, dt: number) {
     }
   }
   if (!c.committed && c.t >= c.commitAt) { c.committed = true; p.form = c.to; p.drive = 100; emit(s, ev('commit'), p.x, p.y); emitReveal(s); }
-  if (c.t >= c.dur - 1e-9) { if (!c.committed) { c.committed = true; p.form = c.to; p.drive = 100; } s.cinema = null; if (hero) s.heroFormSeen++; else if (apex) s.apexSeen++; else s.cometSeen++; p.invulnerable = Math.max(p.invulnerable, 0.5); }
+  if (c.t >= c.dur - 1e-9) { if (!c.committed) { c.committed = true; p.form = c.to; p.drive = 100; } s.cinema = null; if (s.hero === 'vex') s.vexSeen[c.to - 1]++; if (hero) s.heroFormSeen++; else if (apex) s.apexSeen++; else s.cometSeen++; p.invulnerable = Math.max(p.invulnerable, 0.5); }
 }
 export function endForm2(s: GameState) { const p = s.player; emit(s, 'form2_end', p.x, p.y); p.form = 0; p.formCooldown = COMET.cooldown * s.mods.formCd; }
 export function endAscend(s: GameState) { const p = s.player; emit(s, 'ascend_end', p.x, p.y); p.form = 0; p.formCooldown = ASCEND.cooldown * s.mods.formCd; }

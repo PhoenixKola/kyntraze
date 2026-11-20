@@ -57,6 +57,15 @@ export const SORA_FORM_NOTE: Partial<Record<BranchId, string>> = {
   starfield_array: 'Sovereign: Celestial Collapse leaves short-lived control nodes around its burst; longer cooldown.',
   celestial_collapse: 'Sovereign (Compression Focus): a tighter singularity: the burst is 22% smaller and concentrates its power, which offsets the damage cost of this branch. Base Zero Horizon keeps its own version.',
 };
+/** B28: what each Vex branch does in Riftbound and Voidheart Exile (base behaviour unchanged). */
+export const VEX_FORM_NOTE: Partial<Record<BranchId, string>> = {
+  reversal_guard: 'Riftbound: Mirror Guard has a wider, more forgiving window and stuns more, with lighter echoes. Voidheart: one Phantom Legion copy steps in front of one eligible hit and is spent.',
+  mirror_counter: 'Riftbound: a narrow perfect mirror window and much heavier echoes. Voidheart: a hit within 0.9 s of the Legion forming is refused and answered by one precision counter.',
+  shadow_riposte: 'Riftbound: Rift Execution prefers marked enemies, shorter reach, harder cut. Voidheart: Severance first steps safely behind a marked target within 140 px.',
+  eclipse_shift: 'Riftbound: longer portal and a lighter cut, one residual fracture along the path. Voidheart: a 35% longer lane.',
+  marked_detonation: 'Riftbound: the last seal detonates the marks it placed, spreading to neighbours. Voidheart: Domain strikes on marked enemies hit up to 3 neighbours at 40%.',
+  severance_judgment: 'Riftbound: only 3 seals, aimed at the toughest enemies, each leaving a vulnerability. Voidheart: Domain focuses 2 priority targets per strike with a vulnerability window.',
+};
 export const BRANCH_BY_ID = Object.fromEntries(BRANCHES.map(b => [b.id, b])) as Record<BranchId, BranchDef>;
 export const isBranchId = (v: unknown): v is BranchId => typeof v === 'string' && v in BRANCH_BY_ID;
 export const slotKey = (hero: HeroId, slot: Slot) => `${hero}.${slot}` as const;

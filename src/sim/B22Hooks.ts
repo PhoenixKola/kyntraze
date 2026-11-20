@@ -10,7 +10,7 @@ import { chargeUltimate } from './UltimateSystem';
 import { damageEnemy } from './CombatSystem';
 
 /** `slot` is the damage producer's own ability slot, set where the damage is emitted; 'none' marks a hit that belongs to no slot (auto strikes, clone strikes). It overrides every inference from the live cast. */
-export interface HitOpts { area?: boolean; proj?: boolean; fx?: boolean; slot?: Slot | 'none' }
+export interface HitOpts { /** B28: a spectral copy's hit never feeds the Overdrive meter */ noOd?: boolean; area?: boolean; proj?: boolean; fx?: boolean; slot?: Slot | 'none' }
 const hitSlot = (s: GameState, o?: HitOpts): Slot | null => (o?.slot === 'none' ? null : o?.slot ?? s.b22.ctxSlot ?? slotOfAct(s));
 export function b22PreDamage(s: GameState, e: Enemy, dmg: number, o?: HitOpts): number {
   if (o?.fx) return dmg;

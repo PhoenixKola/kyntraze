@@ -27,11 +27,10 @@ describe('B22 Vex: Parry Halo', () => {
     const back = vex({ hp: 100 }); back.s.player.hp = 100; mob(back.s, back.s.player.x + 90, back.s.player.y); back.sim.step(DT, { ...idle, q: true }); back.s.enemyShots.push({ id: 9000, x: back.s.player.x - 12, y: back.s.player.y, vx: 0, vy: 0, ttl: 3, damage: 40, radius: 8, kind: 'prism', owner: 5, k: 1 }); back.sim.step(DT, idle); expect(back.s.player.hp).toBe(60);
     const haz = vex({ hp: 100 }); haz.s.player.hp = 100; haz.sim.step(DT, { ...idle, q: true }); haz.s.lastHazardOwner = 0; expect(damagePlayer(haz.s, 30, 'surge', { x: haz.s.player.x + 30, y: haz.s.player.y }, 0)).toBe(true); expect(haz.s.player.hp).toBe(70);
   });
-  it('Riftbound widens the perfect window; Voidheart marks nearby foes on a perfect parry', () => {
-    const base = vex(); base.sim.step(DT, { ...idle, q: true }); const w0 = base.s.b22.vex.parryLeft;
-    const rb = vex(); rb.s.player.form = 1; rb.s.player.drive = 100; rb.sim.step(DT, { ...idle, q: true }); expect(rb.s.b22.vex.parryLeft).toBeGreaterThan(w0);
-    const vh = vex(); vh.s.player.form = 2; vh.s.player.drive = 100; const es = [1, 2, 3, 4, 5].map(i => mob(vh.s, vh.s.player.x + 60 + i * 30, vh.s.player.y)); vh.sim.step(DT, { ...idle, q: true }); shotAt(vh.s, 12, 0); vh.sim.step(DT, idle);
-    expect(vh.s.b22.marks.filter(m => m.src === 'seal').length).toBeGreaterThanOrEqual(3); expect(vh.s.b22.marks.filter(m => m.src === 'seal').length).toBeLessThanOrEqual(4); expect(es.length).toBe(5);
+  it('base Vex keeps Parry Halo; Riftbound has Mirror Guard and Voidheart has Phantom Legion in its place (B28)', () => {
+    const base = vex(); base.sim.step(DT, { ...idle, q: true }); expect(base.s.hx.act?.act).toBe('parry_halo');
+    const rb = vex(); rb.s.player.form = 1; rb.s.player.drive = 100; rb.sim.step(DT, { ...idle, q: true }); expect(rb.s.hx.act?.act).toBe('mirror_guard');
+    const vh = vex(); vh.s.player.form = 2; vh.s.player.drive = 100; mob(vh.s, vh.s.player.x + 80, vh.s.player.y); vh.sim.step(DT, { ...idle, q: true }); expect(vh.s.hx.act?.act).toBe('phantom_legion'); expect((vh.s.hx.vf ?? []).filter(f => f.k === 'clone').length).toBe(3);
   });
   it('a parry exposes the Oathkeeper (honest answer to its strike) and counts toward mastery counters', () => {
     const { sim, s } = vex(); s.player.y = 900; s.player.aimX = 1; s.player.aimY = 0; startEncounter(s, 'oathkeeper'); const b = s.enemies.find(e => e.kind === 'oathkeeper')!; for (let i = 0; i < 400 && b.mode === 'intro'; i++) sim.step(DT, idle);
@@ -81,7 +80,7 @@ describe('B22 Vex forms: Riftbound and Voidheart Exile', () => {
   });
   it('transforming into each form commits it, drains Drive at the form rate, and ends back in base with a cooldown', () => {
     for (const f of [1, 2] as const) {
-      const { sim, s } = quiet({ hero: 'vex', hp: 1e6, config: { vexForms: [true, true] } }); s.player.drive = 100; expect(activateForm(s, f)).toBe(true); run(sim, 3.2, idle); expect(s.player.form).toBe(f); const d0 = s.player.drive; run(sim, 5); expect(d0 - s.player.drive).toBeCloseTo(5 * (f === 1 ? 3.4 : 3.0), 0);
+      const { sim, s } = quiet({ hero: 'vex', hp: 1e6, config: { vexForms: [true, true] } }); s.player.drive = 100; expect(activateForm(s, f)).toBe(true); run(sim, 3.6, idle); expect(s.player.form).toBe(f); const d0 = s.player.drive; run(sim, 5); expect(d0 - s.player.drive).toBeCloseTo(5 * (f === 1 ? 3.4 : 3.0), 0);
       s.player.drive = 0.2; run(sim, 0.3); expect(s.player.form).toBe(0); expect(s.player.formCooldown).toBeGreaterThan(10);
     }
   });

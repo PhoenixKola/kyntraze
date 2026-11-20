@@ -3,6 +3,7 @@ import type { GameState } from '../sim/GameState';
 import { BEAM, SPHERE } from '../content/abilities';
 import { REN_E, REN_FORM_INFO, REN_Q, REN_R } from '../content/renCombat';
 import { SORA_E, SORA_FORM_INFO, SORA_Q, SORA_R } from '../content/soraCombat';
+import { VEX1_E, VEX1_Q, VEX1_R, VEX2_E, VEX2_Q, VEX2_R, VEX_FORM_INFO } from '../content/vexCombat';
 import { HERO_KIT, REN, SORA, VEX } from '../content/heroKits';
 import { ULTIMATES } from '../b22/mastery';
 import { CHAIN, CRUCIBLE, ECHO, METEOR, RISE, SCATTER, STRIKES, SURGE } from '../content/kaiKit';
@@ -46,6 +47,17 @@ export function abilityTips(s: GameState): Record<TipSlot, AbilityTip> {
     qt = { name: SORA.q.name, key: 'Q', pad: 'X', blurb: hk!.blurbs.q, stats: [['Damage / bolt', n(q * SORA.q.boltMul, 1)], ['Bolts', n(f ? SORA.q.formBolts : SORA.q.bolts)], ['Cooldown', cd(SORA.q.cooldown)]] };
     et = { name: SORA.e.name, key: 'E (hold)', pad: 'RB (hold)', blurb: hk!.blurbs.e, stats: [['Damage', `${n(SORA.e.damage[0] * m.beamDamage)} / ${n(SORA.e.damage[1] * m.beamDamage)} / ${n(SORA.e.damage[2] * m.beamDamage)}`], ['Charge tiers', 'T1 / T2 / T3'], ['Cooldown', cd(SORA.e.cooldown * m.beamCd)]] };
     rt = { name: SORA.r.name, key: 'R', pad: 'LB', blurb: hk!.blurbs.r + ult, stats: [['Damage / orb', n(SORA.r.damage * m.sphereDamage * (f ? SORA.r.formDamage : 1))], ['Orbs', n(f ? SORA.r.formOrbs : SORA.r.orbs)], ['Cooldown', cd(SORA.r.cooldown * m.sphereCd)]] };
+  } else if (f >= 1) {   // B28: Riftbound / Voidheart Exile's own Q / E / R, numbers from the same content table the sim reads
+    const I = VEX_FORM_INFO[f === 2 ? 2 : 1];
+    if (f === 1) {
+      qt = { name: VEX1_Q.name, key: 'Q', pad: 'X', blurb: I.q.text, stats: [['Echo damage', n(q * m.formPower * VEX1_Q.echoMul)], ['Perfect window', `${n(VEX1_Q.perfect, 2)}s`], ['Cooldown', cd(VEX1_Q.cooldown)]] };
+      et = { name: VEX1_E.name, key: 'E', pad: 'RB', blurb: I.e.text, stats: [['Cut', n(q * m.formPower * m.beamDamage * VEX1_E.mul)], ['Range', `${VEX1_E.range} px`], ['Cooldown', cd(VEX1_E.cooldown * m.beamCd)]] };
+      rt = { name: VEX1_R.name, key: 'R', pad: 'LB', blurb: I.r.text + ult, stats: [['Seal / final', `${n(q * m.formPower * m.sphereDamage * VEX1_R.mul)} / ${n(q * m.formPower * m.sphereDamage * VEX1_R.finalMul)}`], ['Final radius', `${n(VEX1_R.finalR * m.sphereRadius)} px`], ['Cooldown', cd(VEX1_R.cooldown * m.sphereCd)]] };
+    } else {
+      qt = { name: VEX2_Q.name, key: 'Q', pad: 'X', blurb: I.q.text, stats: [['Copies', n(VEX2_Q.copies)], ['Lasts', `${VEX2_Q.life}s`], ['Cooldown', cd(VEX2_Q.cooldown)]] };
+      et = { name: VEX2_E.name, key: 'E', pad: 'RB', blurb: I.e.text, stats: [['Cut', n(q * m.formPower * m.beamDamage * VEX2_E.mul)], ['Lane', `${VEX2_E.length} px`], ['Cooldown', cd(VEX2_E.cooldown * m.beamCd)]] };
+      rt = { name: VEX2_R.name, key: 'R', pad: 'LB', blurb: I.r.text + ult, stats: [['Strike', n(q * m.formPower * m.sphereDamage * VEX2_R.mul)], ['Radius', `${n(VEX2_R.radius * m.sphereRadius)} px`], ['Cooldown', cd(VEX2_R.cooldown * m.sphereCd)]] };
+    }
   } else {
     qt = { name: VEX.q.name, key: 'Q', pad: 'X', blurb: hk!.blurbs.q, stats: [['Riposte damage', n(q * VEX.q.riposteMul)], ['Perfect window', `${n(VEX.q.perfect * (f === 1 ? VEX.q.formPerfect : 1), 2)}s`], ['Late guard', `-${Math.round(VEX.q.reduce * 100)}% damage`], ['Cooldown', cd(VEX.q.cooldown)]] };
     et = { name: VEX.e.name, key: 'E', pad: 'RB', blurb: hk!.blurbs.e, stats: [['Riposte damage', n(q * VEX.e.riposteMul * m.beamDamage)], ['Shift', `${n(VEX.e.distance * m.beamWidth)} px`], ['Cooldown', cd(VEX.e.cooldown * m.beamCd)]] };

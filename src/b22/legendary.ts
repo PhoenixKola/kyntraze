@@ -31,6 +31,11 @@ export const SORA_FORM_LEGEND: Partial<Record<LegendaryId, string>> = {
   prismatic_meridian: "Sovereign: Heaven's Spear arcs between up to 5 struck foes (4 arcs).",
   zero_convergence: 'Sovereign: Celestial Collapse gathers its echo into one stronger precision burst (no echo, no control nodes).',
 };
+export const VEX_FORM_LEGEND: Partial<Record<LegendaryId, string>> = {
+  shard_requiem: 'Riftbound / Voidheart: stored only by a real perfect Mirror Guard or a Phantom Legion precision counter, spent once on the next Q or finisher; never by autos.',
+  oathbreaker_chain: 'Riftbound seal detonations and Voidheart marked Domain strikes spread at most 3 marks, one generation.',
+  null_waltz: 'Rift Execution or Dimensional Severance cast against a real incoming threat grants 3 precision steps (8 s cooldown).',
+};
 export const LEGENDARY_BY_ID = Object.fromEntries(LEGENDARIES.map(l => [l.id, l])) as Record<LegendaryId, LegendaryDef>;
 export const isLegendaryId = (v: unknown): v is LegendaryId => typeof v === 'string' && v in LEGENDARY_BY_ID;
 export const LEGENDARY_CAP = 3;

@@ -99,6 +99,37 @@ export function soraCombatSfx(kind: string, n = 0): string | null {
     default: return null;
   }
 }
+/** B28 Vex, Riftbound and Voidheart Exile cues (original, runtime-synthesised): hard violet blade slices, a glassy mirror guard, a portal whoosh, ground-breaking seals, and for Voidheart quiet low spatial tones, dry cuts and a deep implosion. Not listened to yet. */
+Object.assign(SFX, {
+  vx_cut_a: { f0: 900, f1: 240, dur: 0.12, noise: 0.45, decay: 20, wave: 'saw', gain: 0.45 }, vx_cut_b: { f0: 1100, f1: 260, dur: 0.12, noise: 0.45, decay: 20, wave: 'saw', gain: 0.45 }, vx_cut_c: { f0: 800, f1: 180, dur: 0.18, noise: 0.5, decay: 14, wave: 'saw', gain: 0.55 }, vx_cut_d: { f0: 600, f1: 120, dur: 0.28, noise: 0.5, decay: 9, wave: 'saw', gain: 0.65 },
+  vx_judg: { f0: 1600, f1: 700, dur: 0.1, noise: 0.15, decay: 24, wave: 'bell', gain: 0.3, fm: 2.6 }, vx_judg_big: { f0: 1200, f1: 400, dur: 0.22, noise: 0.2, decay: 12, wave: 'bell', gain: 0.45, fm: 3 },
+  vx_guard: { f0: 500, f1: 380, dur: 0.14, noise: 0.35, decay: 16, wave: 'square', gain: 0.4 }, vx_guard_perfect: { f0: 1500, f1: 800, dur: 0.5, noise: 0.15, decay: 6, wave: 'bell', gain: 0.9, fm: 2.4 }, vx_echo: { f0: 1000, f1: 300, dur: 0.2, noise: 0.4, decay: 13, wave: 'saw', gain: 0.5 },
+  vx_legion: { f0: 160, f1: 520, dur: 0.5, noise: 0.15, decay: 3.5, wave: 'sine', gain: 0.5, fm: 1.5 }, vx_clone: { f0: 1100, f1: 500, dur: 0.1, noise: 0.15, decay: 22, wave: 'bell', gain: 0.2, fm: 2.2 },
+  vx_portal: { f0: 300, f1: 1300, dur: 0.22, noise: 0.5, decay: 9, wave: 'saw', gain: 0.5 }, vx_arrive: { f0: 1300, f1: 260, dur: 0.2, noise: 0.45, decay: 11, wave: 'saw', gain: 0.55 }, vx_exec_cut: { f0: 700, f1: 90, dur: 0.3, noise: 0.5, decay: 9, wave: 'saw', gain: 0.8 },
+  vx_warn: { f0: 220, f1: 330, dur: 0.45, noise: 0.05, decay: 4, wave: 'sine', gain: 0.35 }, vx_sever: { f0: 1800, f1: 120, dur: 0.4, noise: 0.35, decay: 8, wave: 'bell', gain: 0.85, fm: 3.2 }, vx_reconnect: { f0: 300, f1: 60, dur: 0.45, noise: 0.5, decay: 7, wave: 'sine', gain: 0.8 },
+  vx_seal: { f0: 140, f1: 70, dur: 0.22, noise: 0.5, decay: 12, wave: 'sine', gain: 0.55 }, vx_seal_final: { f0: 90, f1: 38, dur: 0.5, noise: 0.55, decay: 7, wave: 'sine', gain: 0.95 }, vx_cast: { f0: 200, f1: 520, dur: 0.4, noise: 0.2, decay: 5, wave: 'saw', gain: 0.4 },
+  vx_domain: { f0: 70, f1: 45, dur: 1.2, noise: 0.25, decay: 2, wave: 'sine', gain: 0.55 }, vx_domain_tick: { f0: 900, f1: 300, dur: 0.1, noise: 0.3, decay: 20, wave: 'bell', gain: 0.3, fm: 2.4 },
+  vx_v_charge: { f0: 120, f1: 520, dur: 0.7, noise: 0.15, decay: 2.6, wave: 'sine', gain: 0.45, fm: 1.4 }, vx_v_tier: { f0: 700, f1: 1500, dur: 0.16, noise: 0, decay: 12, wave: 'bell', gain: 0.4, fm: 2 }, vx_v_release: { f0: 400, f1: 1500, dur: 0.26, noise: 0.35, decay: 8, wave: 'saw', gain: 0.6 },
+  vx_v_hit: { f0: 500, f1: 60, dur: 0.6, noise: 0.5, decay: 5, wave: 'saw', gain: 1.0 }, vx_v_pulse: { f0: 300, f1: 70, dur: 0.4, noise: 0.35, decay: 7, wave: 'bell', gain: 0.7, fm: 2.4 }, vx_horizon: { f0: 90, f1: 30, dur: 0.8, noise: 0.45, decay: 4, wave: 'sine', gain: 1.0 },
+  vx_v_block: { f0: 300, f1: 180, dur: 0.14, noise: 0.45, decay: 16, wave: 'square', gain: 0.45 }, vx_v_fizzle: { f0: 800, f1: 260, dur: 0.22, noise: 0.35, decay: 11, wave: 'bell', gain: 0.35, fm: 1.8 },
+  vx_od_start: { f0: 60, f1: 380, dur: 1.2, noise: 0.4, decay: 1.8, wave: 'saw', gain: 0.95, fm: 1.4 }, vx_od_start2: { f0: 50, f1: 900, dur: 1.3, noise: 0.15, decay: 1.6, wave: 'bell', gain: 0.8, fm: 2 }, vx_od_end: { f0: 600, f1: 90, dur: 0.6, noise: 0.25, decay: 4, wave: 'saw', gain: 0.45 },
+  vx_fly_start: { f0: 220, f1: 800, dur: 0.38, noise: 0.45, decay: 7, wave: 'saw', gain: 0.5 }, vx_fly_slam: { f0: 120, f1: 36, dur: 0.5, noise: 0.55, decay: 6, wave: 'sine', gain: 0.9 }, vx_fly_soft: { f0: 700, f1: 300, dur: 0.15, noise: 0.3, decay: 13, wave: 'bell', gain: 0.25, fm: 1.6 },
+  vx_shift: { f0: 400, f1: 1200, dur: 0.3, noise: 0.25, decay: 8, wave: 'bell', gain: 0.6, fm: 2.2 },
+} satisfies Record<string, Recipe>);
+/** Vex event -> recipe. The n field carries the beat / tier flags (see VexCombat.ts); one cue per beat, cast or landing, never per target. */
+export function vexCombatSfx(kind: string, n = 0): string | null {
+  switch (kind) {
+    case 'vex_auto': return ((n >> 2) & 3) === 2 ? ((n & 3) >= 2 ? 'vx_judg_big' : 'vx_judg') : ['vx_cut_a', 'vx_cut_b', 'vx_cut_c', 'vx_cut_d'][n & 3];
+    case 'vex_q_guard': return (n & 3) === 1 ? 'vx_guard_perfect' : 'vx_guard'; case 'vex_q_echo': return 'vx_echo'; case 'vex_q_legion': return (n & 1023) > 0 ? 'vx_legion' : null; case 'vex_q_clone_cut': return 'vx_clone';
+    case 'vex_e_open': return 'vx_portal'; case 'vex_e_arrive': return 'vx_arrive'; case 'vex_e_cut': return (n & 4) ? 'vx_sever' : 'vx_exec_cut'; case 'vex_e_warn': return 'vx_warn'; case 'vex_e_shock': return 'vx_reconnect';
+    case 'vex_r_cast': return 'vx_cast'; case 'vex_r_erupt': return (n & 32) ? 'vx_seal_final' : 'vx_seal'; case 'vex_r_tick': return 'vx_domain_tick'; case 'vex_r_end': return null;
+    case 'vex_v_charge': return 'vx_v_charge'; case 'vex_v_tier': return 'vx_v_tier'; case 'vex_v_release': return 'vx_v_release'; case 'vex_v_hit': return 'vx_v_hit';
+    case 'vex_v_pulse': return ((n >> 20) & 3) === 2 ? 'vx_horizon' : 'vx_v_pulse'; case 'vex_v_block': return 'vx_v_block'; case 'vex_v_fizzle': case 'vex_v_miss': return 'vx_v_fizzle';
+    case 'vex_od_start': return n === 2 ? 'vx_od_start2' : 'vx_od_start'; case 'vex_od_end': return 'vx_od_end';
+    case 'vex_fly_start': return 'vx_fly_start'; case 'vex_fly_land': return (n & 1) ? 'vx_fly_slam' : 'vx_fly_soft'; case 'vex_shift': return 'vx_shift';
+    default: return null;
+  }
+}
 /** Which sim event plays which recipe (event kind -> recipe name). */
 export const EVENT_SFX: Record<string, string> = { parry_perfect: 'parry_perfect', parry_guard: 'parry_guard', parry_start: 'parry_start', reversal_blink: 'reversal_blink', reversal_riposte: 'reversal_riposte', seal_mark: 'seal_mark', seal_detonate: 'seal_detonate', ult_start: 'ult_start', ult_release: 'ult_release', branch_fx: 'branch_fx', legend_fx: 'legend_fx', surge_start: 'kk_surge', scatter_fire: 'kk_scatter', scatter_blast: 'kk_blast', meteor_beat: 'kk_meteor', flare_start: 'kk_flare_wind', flare_pillar: 'kk_pillar', crucible_cast: 'kk_gather', crucible_pulse: 'kk_pulse', crucible_final: 'kk_final', clone_spawn: 'kk_clone', clone_end: 'kk_clone_end', rift_hop: 'kk_hop' };
 export const B22_EVENT_SFX: Record<string, string> = { relic_gain: 'relic_gain', legend_gain: 'legend_gain', prism: 'prism', sigil_strike: 'sigil_strike', dawn_ring: 'dawn_ring', hourglass: 'hourglass', rift: 'rift', bearing: 'bearing', echo_warn: 'echo_warn', mark: 'mark', ult_cannon: 'ult_cannon', ult_judge: 'ult_judge', parry: 'parry_perfect', ult_collapse: 'ult_release', ult_beam: 'ult_cannon', collapse_blast: 'seal_detonate', crucible_burst: 'seal_detonate', collision: 'seal_detonate', seal_blast: 'seal_detonate' };

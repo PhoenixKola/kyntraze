@@ -64,7 +64,7 @@ export function zoneFx(s: GameState, z: Omit<Zone, 'id' | 't' | 'next'>) { if (s
 export function slotOfAct(s: GameState): Slot | null {
   const c = s.cast, h = s.hx.act;
   if (c) return c.kind === 'signature' ? null : c.kind === 'beam' || c.kind === 'dragon' || c.kind === 'rift' || c.kind === 'flare' ? 'e' : c.kind === 'scatter' || c.kind === 'meteor' ? 'q' : 'r';
-  if (h) { switch (h.act) { case 'crimson_break': case 'infernal_cyclone': case 'azure_volley': case 'azure_prison': case 'parry_halo': return 'q'; case 'meteor_rush': case 'scarlet_rampage': case 'celestial_lance': case 'heavens_spear': case 'rift_reversal': return 'e'; case 'bloodstar': case 'crimson_catastrophe': case 'zero_horizon': case 'azure_collapse': case 'oathbreaker_seal': return 'r'; default: return null; } }
+  if (h) { switch (h.act) { case 'crimson_break': case 'infernal_cyclone': case 'azure_volley': case 'azure_prison': case 'mirror_guard': case 'phantom_legion': case 'parry_halo': return 'q'; case 'meteor_rush': case 'scarlet_rampage': case 'celestial_lance': case 'heavens_spear': case 'rift_execution': case 'dim_severance': case 'rift_reversal': return 'e'; case 'bloodstar': case 'crimson_catastrophe': case 'zero_horizon': case 'azure_collapse': case 'oath_ruin': case 'domain_exile': case 'oathbreaker_seal': return 'r'; default: return null; } }
   return null;
 }
 

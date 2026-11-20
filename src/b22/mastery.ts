@@ -32,8 +32,8 @@ export const MILESTONES: readonly Milestone[] = [
   M('riftbound', 'initiate', 'Held Breath', 'Land a perfect parry while Riftbound.', 'parry.perfect.form', 1, 'aura_detail', 'Violet-shard edge detail'),
   M('riftbound', 'adept', 'Answered', 'Land 5 perfect parries in one run.', 'parry.perfect', 5, 'finisher', 'Violet finisher'),
   M('riftbound', 'master', 'Riftbound Verdict', 'Defeat a boss while Riftbound.', 'boss.riftbound', 1, 'crest', 'Violet crest + victory pose'),
-  M('voidheart_exile', 'initiate', 'First Riposte', 'Land a Rift Reversal riposte in Voidheart.', 'riposte.form', 1, 'aura_detail', 'Broken-halo edge detail'),
-  M('voidheart_exile', 'adept', 'Exile\'s Measure', 'Land 10 ripostes in one run.', 'riposte', 10, 'finisher', 'Voidheart finisher'),
+  M('voidheart_exile', 'initiate', 'First Riposte', 'Land a Dimensional Severance on a real incoming threat in Voidheart.', 'riposte.form', 1, 'aura_detail', 'Broken-halo edge detail'),
+  M('voidheart_exile', 'adept', 'Exile\'s Measure', 'Land 10 threat-timed ripostes in one run (Rift Reversal, Rift Execution or Dimensional Severance).', 'riposte', 10, 'finisher', 'Voidheart finisher'),
   M('voidheart_exile', 'master', 'Voidheart Verdict', 'Defeat the Oathkeeper, or any boss while Voidheart.', 'boss.voidheart_exile', 1, 'crest', 'Void crest + victory pose'),
 ];
 export const MILESTONE_BY_ID = Object.fromEntries(MILESTONES.map(m => [m.id, m])) as Record<string, Milestone>;
