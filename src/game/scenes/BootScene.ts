@@ -17,6 +17,7 @@ import { accKey, accUrl, hasAccessory, type AccView } from '../render/outfitLaye
 import { equippedOutfit } from '../../assets/skin';
 import { VEX_CLIPS } from '../../assets/kaiAnimation';
 import { HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroForms, heroManifestUrl, heroSheetUrl, heroTextureKey, isHeroArt, type HeroArt } from '../../assets/heroAnimation';
+import { KP_NAMES, kpKey, kpUrl } from '../render/kaiPresence';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
 import { B14_FX_NAMES, b14Key, b14Url } from '../render/b14fx';
@@ -57,6 +58,7 @@ export class BootScene extends Phaser.Scene {
     this.load.json(KAI_ANCHORS_KEY, KAI_ANCHORS_URL);
     ABILITY_FX_NAMES.forEach(n => this.load.image(abilityFxKey(n), abilityFxUrl(n)));
     KK_FX.forEach(n => this.load.image(kkKey(n), kkUrl(n)));
+    KP_NAMES.forEach(n => this.load.image(kpKey(n), kpUrl(n)));   // Kai transformation presence (ImageGen); a missing file just leaves that layer off
     for (let i = 0; i < 4; i++) this.load.image(`xpgem${i}`, `/art/fx/xp/gem${i}.png`);
     this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => console.error(`[boot] failed to load ${file.key} (${file.url})`));
   }
