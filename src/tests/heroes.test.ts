@@ -93,7 +93,7 @@ describe('transformation: unlock, activation, single form', () => {
   it('the transformed state changes the actual abilities (not only stats)', () => {
     const base = setup('sora', [[1500, 800, 900]]); tap(base.sim, { q: true }); run(base.sim, 0.45);
     const f = setup('sora', [[1500, 800, 900]], true); f.s.player.form = 1; tap(f.sim, { q: true }); run(f.sim, 0.45);
-    expect(f.s.hx.bolts.length + 0).toBeGreaterThanOrEqual(base.s.hx.bolts.length); expect(f.s.hx.bolts.some(b => b.pierce > 0 && b.homing > 0)).toBe(true);
+    expect(base.s.hx.bolts.length).toBeGreaterThan(0); expect(f.s.hx.act?.act ?? ((f.s.hx.sf ?? [])[0]?.k === 'prison' ? 'azure_prison' : '')).toBe('azure_prison');   // B27: Sovereign Q is Azure Prison, not a finer Volley
     const rb = setup('ren', [[1250, 800, 900], [1380, 850, 900], [1500, 800, 900], [1600, 840, 900], [1700, 800, 900]], true); rb.s.player.form = 1; tap(rb.sim, { beam: true }); expect(rb.s.hx.act?.act).toBe('scarlet_rampage');   // B26: Ascendant E is Scarlet Rampage, not a longer Meteor Rush
   });
   it('a form reveal clears any move in progress and Kai\'s Flarebound feat id is never used', () => {

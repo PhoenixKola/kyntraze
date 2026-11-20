@@ -64,3 +64,4 @@ art/progression/review/b18/*.png
 
 # B21 desktop build output
 release/
+art/fx-b27/__pycache__/

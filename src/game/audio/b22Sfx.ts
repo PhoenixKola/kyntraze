@@ -85,7 +85,7 @@ Object.assign(SFX, {
   sr_od_start: { f0: 400, f1: 1500, dur: 1.2, noise: 0.35, decay: 1.8, wave: 'bell', gain: 0.9, fm: 2.2 }, sr_od_end: { f0: 1200, f1: 300, dur: 0.6, noise: 0.2, decay: 4, wave: 'bell', gain: 0.45, fm: 1.8 },
   sr_fly_start: { f0: 500, f1: 1400, dur: 0.35, noise: 0.35, decay: 7, wave: 'saw', gain: 0.4 }, sr_fly_slam: { f0: 700, f1: 160, dur: 0.4, noise: 0.45, decay: 8, wave: 'bell', gain: 0.7, fm: 2.4 }, sr_fly_soft: { f0: 900, f1: 500, dur: 0.14, noise: 0.25, decay: 14, wave: 'bell', gain: 0.25, fm: 1.6 },
 } satisfies Record<string, Recipe>);
-/** Sora event -> recipe. \n carries the beat / tier flags (see SoraCombat.ts); one cue per beat, cast or landing, never per target. */
+/** Sora event -> recipe. The n field carries the beat / tier flags (see SoraCombat.ts); one cue per beat, cast or landing, never per target. */
 export function soraCombatSfx(kind: string, n = 0): string | null {
   switch (kind) {
     case 'sora_auto': return ['sr_auto_a', 'sr_auto_b', 'sr_auto_c', 'sr_auto_d'][n & 3];

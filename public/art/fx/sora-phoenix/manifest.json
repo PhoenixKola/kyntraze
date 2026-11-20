@@ -1,0 +1,617 @@
+{
+ "head_side": {
+  "frames": 4,
+  "sizes": [
+   [
+    657,
+    540
+   ],
+   [
+    657,
+    540
+   ],
+   [
+    657,
+    540
+   ],
+   [
+    657,
+    540
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "head_side.png"
+ },
+ "head_front": {
+  "frames": 4,
+  "sizes": [
+   [
+    415,
+    703
+   ],
+   [
+    415,
+    703
+   ],
+   [
+    415,
+    703
+   ],
+   [
+    415,
+    703
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "head_front.png"
+ },
+ "head_back": {
+  "frames": 4,
+  "sizes": [
+   [
+    462,
+    642
+   ],
+   [
+    462,
+    642
+   ],
+   [
+    462,
+    642
+   ],
+   [
+    462,
+    642
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "head_back.png"
+ },
+ "body": {
+  "frames": 4,
+  "sizes": [
+   [
+    392,
+    641
+   ],
+   [
+    392,
+    641
+   ],
+   [
+    392,
+    641
+   ],
+   [
+    392,
+    641
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "body.png"
+ },
+ "wing_side": {
+  "frames": 4,
+  "sizes": [
+   [
+    523,
+    545
+   ],
+   [
+    523,
+    545
+   ],
+   [
+    523,
+    545
+   ],
+   [
+    523,
+    545
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "wing_side.png"
+ },
+ "tail": {
+  "frames": 4,
+  "sizes": [
+   [
+    486,
+    333
+   ],
+   [
+    486,
+    333
+   ],
+   [
+    486,
+    333
+   ],
+   [
+    486,
+    333
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "tail.png"
+ },
+ "feather_blade": {
+  "frames": 4,
+  "sizes": [
+   [
+    539,
+    247
+   ],
+   [
+    539,
+    247
+   ],
+   [
+    539,
+    247
+   ],
+   [
+    539,
+    247
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "feather_blade.png"
+ },
+ "activation": {
+  "frames": 4,
+  "sizes": [
+   [
+    542,
+    596
+   ],
+   [
+    542,
+    596
+   ],
+   [
+    542,
+    596
+   ],
+   [
+    542,
+    596
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "activation.png"
+ },
+ "dissolve": {
+  "frames": 4,
+  "sizes": [
+   [
+    468,
+    671
+   ],
+   [
+    468,
+    671
+   ],
+   [
+    468,
+    671
+   ],
+   [
+    468,
+    671
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "dissolve.png"
+ },
+ "ground_ring": {
+  "frames": 4,
+  "sizes": [
+   [
+    594,
+    194
+   ],
+   [
+    594,
+    194
+   ],
+   [
+    594,
+    194
+   ],
+   [
+    594,
+    194
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "ground_ring.png"
+ },
+ "prison_form": {
+  "frames": 4,
+  "sizes": [
+   [
+    453,
+    546
+   ],
+   [
+    453,
+    546
+   ],
+   [
+    453,
+    546
+   ],
+   [
+    453,
+    546
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "prison_form.png"
+ },
+ "prison_shatter": {
+  "frames": 4,
+  "sizes": [
+   [
+    433,
+    436
+   ],
+   [
+    433,
+    436
+   ],
+   [
+    433,
+    436
+   ],
+   [
+    433,
+    436
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "prison_shatter.png"
+ },
+ "spear": {
+  "frames": 4,
+  "sizes": [
+   [
+    480,
+    688
+   ],
+   [
+    480,
+    688
+   ],
+   [
+    480,
+    688
+   ],
+   [
+    480,
+    688
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "spear.png"
+ },
+ "spear_impact": {
+  "frames": 4,
+  "sizes": [
+   [
+    342,
+    505
+   ],
+   [
+    342,
+    505
+   ],
+   [
+    342,
+    505
+   ],
+   [
+    342,
+    505
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "spear_impact.png"
+ },
+ "mark_sigil": {
+  "frames": 4,
+  "sizes": [
+   [
+    539,
+    216
+   ],
+   [
+    539,
+    216
+   ],
+   [
+    539,
+    216
+   ],
+   [
+    539,
+    216
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "mark_sigil.png"
+ },
+ "collapse_vortex": {
+  "frames": 4,
+  "sizes": [
+   [
+    606,
+    679
+   ],
+   [
+    606,
+    679
+   ],
+   [
+    606,
+    679
+   ],
+   [
+    606,
+    679
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "collapse_vortex.png"
+ },
+ "collapse_burst": {
+  "frames": 4,
+  "sizes": [
+   [
+    504,
+    502
+   ],
+   [
+    504,
+    502
+   ],
+   [
+    504,
+    502
+   ],
+   [
+    504,
+    502
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "collapse_burst.png"
+ },
+ "astral_orb": {
+  "frames": 4,
+  "sizes": [
+   [
+    555,
+    617
+   ],
+   [
+    555,
+    617
+   ],
+   [
+    555,
+    617
+   ],
+   [
+    555,
+    617
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "astral_orb.png"
+ },
+ "orb_trail": {
+  "frames": 4,
+  "sizes": [
+   [
+    729,
+    188
+   ],
+   [
+    729,
+    188
+   ],
+   [
+    729,
+    188
+   ],
+   [
+    729,
+    188
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "orb_trail.png"
+ },
+ "astral_burst": {
+  "frames": 4,
+  "sizes": [
+   [
+    543,
+    523
+   ],
+   [
+    543,
+    523
+   ],
+   [
+    543,
+    523
+   ],
+   [
+    543,
+    523
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "astral_burst.png"
+ },
+ "astral_ring": {
+  "frames": 4,
+  "sizes": [
+   [
+    549,
+    551
+   ],
+   [
+    549,
+    551
+   ],
+   [
+    549,
+    551
+   ],
+   [
+    549,
+    551
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "astral_ring.png"
+ },
+ "flight_wings": {
+  "frames": 4,
+  "sizes": [
+   [
+    235,
+    308
+   ],
+   [
+    235,
+    308
+   ],
+   [
+    235,
+    308
+   ],
+   [
+    235,
+    308
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "flight_wings.png"
+ },
+ "flight_ring": {
+  "frames": 4,
+  "sizes": [
+   [
+    650,
+    321
+   ],
+   [
+    650,
+    321
+   ],
+   [
+    650,
+    321
+   ],
+   [
+    650,
+    321
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "flight_ring.png"
+ },
+ "wisps": {
+  "frames": 4,
+  "sizes": [
+   [
+    236,
+    466
+   ],
+   [
+    236,
+    466
+   ],
+   [
+    236,
+    466
+   ],
+   [
+    236,
+    466
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "wisps.png"
+ },
+ "wisp_arc": {
+  "frames": 4,
+  "sizes": [
+   [
+    208,
+    346
+   ],
+   [
+    208,
+    346
+   ],
+   [
+    208,
+    346
+   ],
+   [
+    208,
+    346
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "wisp_arc.png"
+ },
+ "_icons": {
+  "dir": "public/ui/icons",
+  "files": [
+   "sora_cf_prison.png",
+   "sora_cf_spear.png",
+   "sora_cf_collapse.png",
+   "sora_cf_devastation.png",
+   "sora_cf_overdrive.png",
+   "sora_cf_blades.png"
+  ],
+  "size": [
+   96,
+   96
+  ]
+ }
+}
