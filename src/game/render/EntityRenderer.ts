@@ -1,7 +1,7 @@
 import { vexTint } from './vexTint';
 import { KaiPresence } from './kaiPresence';
 import { KaiCombatFx } from './kaiCombatFx';
-import { FLY } from '../../content/kaiCombat';
+import { AUTO, FLY } from '../../content/kaiCombat';
 import Phaser from 'phaser';
 import { RULES } from '../../core/Rules';
 import { FxPool, vfxKey } from './fxPool';
@@ -148,7 +148,8 @@ export class EntityRenderer {
   private applyMotion(state: GameState, dt: number, hero: 'kai' | 'ren' | 'sora' | 'vex', reduced: boolean, hurt: boolean, dashing: boolean, clip: string, facing: string) {
     const p = state.player, frozen = !!state.cinema || clip === 'Transform' || state.phase !== 'running', cast = state.cast ?? state.hx.act;
     const m = this.motion.update({ dt, style: styleFor(hero, p.form), vx: this.velX, vy: this.velY, maxSpeed: p.speed * 1.2, dashing, dashDx: p.dashDx, dashDy: p.dashDy, casting: !!cast, released: !!cast && cast.released, hurt, hurtDir: facing === 'east' ? -1 : 1, alive: p.hp > 0, frozen, reduced });
-    for (const s of [this.hero, this.legs]) { s.setRotation(m.rot).setScale(this.baseScale * m.sx, this.baseScale * m.sy); }
+    const bank = state.player.flyT > 0 ? Math.max(-0.4, Math.min(0.4, this.velX / 520)) : 0;
+    for (const s of [this.hero, this.legs]) { s.setRotation(m.rot + bank).setScale(this.baseScale * m.sx, this.baseScale * m.sy); }
     this.hoverY = 0;
     this.hero.y += m.dy + this.hoverY; this.legs.y = this.hero.y;
     this.mirrorAura();
@@ -188,7 +189,7 @@ export class EntityRenderer {
     this.pose = this.animator.update({
       dt, alive: state.phase !== 'dead' && p.hp > 0, moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, inputX: input.x, inputY: input.y,
       runSpeed: p.speed * (p.form === 3 ? 1.2 : p.form ? 1.16 : 1), lunge, dashing: p.dashRemaining > 0, dashX: p.dashDx, dashY: p.dashDy, dashRemaining: p.dashRemaining, hurt, form: p.form, cinema: state.cinema ? { t: state.cinema.t, dur: state.cinema.dur, commitAt: state.cinema.commitAt, to: state.cinema.to } : null,
-      cast: state.cast ? { id: state.cast.id, kind: state.cast.kind, face: state.cast.face, t: state.cast.t, dur: state.cast.dur, dirX: state.cast.dirX, dirY: state.cast.dirY, released: state.cast.released, rt: state.cast.rt } : null, attackClock: p.attackClock, hasTarget: target !== null, targetDx: target?.dx ?? 0, targetDy: target?.dy ?? 0, shot,
+      cast: state.cast ? { id: state.cast.id, kind: state.cast.kind, face: state.cast.face, t: state.cast.t, dur: state.cast.dur, dirX: state.cast.dirX, dirY: state.cast.dirY, released: state.cast.released, rt: state.cast.rt, form: state.cast.form } : null, beat: this.beatKind(state, shot !== null), flyT: p.flyT, attackClock: p.attackClock, hasTarget: target !== null, targetDx: target?.dx ?? 0, targetDy: target?.dy ?? 0, shot,
     }, period);
     const set = this.pose.form === 'f3' && this.f3 ? this.f3 : this.pose.form === 'f3' && this.f2 ? this.f2 : this.pose.form === 'f2' && this.f2 ? this.f2 : this.pose.form === 'f1' && this.f1 ? this.f1 : this.manifests;
     const m = set[this.pose.facing]; const fr = clipFrame(m, this.pose.clip);
@@ -236,6 +237,11 @@ export class EntityRenderer {
     this.combatFx.update({ dt, state, hero: this.hero, hand: this.hand, scale: this.baseScale, reduced: reducedEffects, running: state.phase === 'running', dead: dead2, crowded: state.enemies.length > 45 });
     for (const ev of state.abilityEvents) if (ev.id > this.presenceEv) { this.presenceEv = ev.id; if (p.form > 0 && /^(beam_fire|comet_fire|rift_fire|dragon_launch|sphere_burst|form3_dash|flare_pillar|crucible_final|meteor_beat)$/.test(ev.kind)) this.presence.burst(this.hero.x, this.hero.y - 2, p.form, /^(beam_fire|comet_fire|rift_fire)$/.test(ev.kind) ? 1.1 : 0.8); }
     this.syncWorld(state, deltaMs, reducedEffects);
+  }
+  /** Kind of the auto beat that is about to fire (or just fired this frame), so the animator picks the matching strike clip. */
+  private beatKind(state: GameState, fired: boolean): string | undefined {
+    if (state.hero !== 'kai') return undefined; const prof = AUTO[state.player.form as 0 | 1 | 2 | 3], n = prof.beats.length, st = state.hx.autoStep;
+    return prof.beats[(fired ? st - 1 + n : st) % n].kind;
   }
   private liftNow = 0; private readonly presence: KaiPresence; private readonly combatFx: KaiCombatFx; private presenceEv = 0;
   /** B19: Ren / Sora. The character sprite is drawn from the hero sheets when they exist (HeroAnimator over the same sheet contract as Kai); a flat dev body stands in only while a hero has no sheets. The effects layer is always the sim projection in heroFxView. */

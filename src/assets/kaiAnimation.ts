@@ -111,6 +111,7 @@ export function facingFromVector(prev: Facing, dx: number, dy: number): Facing {
   return ay >= ax * 0.75 ? v : h;
 }
 
+const STRIKE_CLIP: Record<string, 'BasicPunch' | 'Lunge' | 'Uppercut' | 'Slam'> = { kick: 'Lunge', spin: 'Slam', uppercut: 'Uppercut', dragonfist: 'Uppercut', finisher: 'Lunge' };
 export interface AnimFrameInput {
   /** Seconds of simulated time to advance; 0 while paused / choosing an upgrade / dead. */
   dt: number; alive: boolean;
@@ -129,7 +130,9 @@ export interface AnimFrameInput {
   /** The sim's active signature ability (player.cast): its clock drives the Beam / Sphere clip so the release frame lands on the sim's release tick. */
   /** One-frame trigger: Surge Step started (plays the Lunge clip once). */
   lunge?: boolean;
-  cast?: { id: number; kind: CastKind; face: Facing; t: number; dur?: number; dirX: number; dirY: number; released?: boolean; rt?: number } | null;
+  /** B25.1: kind of the auto-attack beat in flight / about to fire (selects the strike clip), Skybreaker flight seconds (0 = grounded) */
+  beat?: string; flyT?: number;
+  cast?: { id: number; kind: CastKind; face: Facing; t: number; dur?: number; dirX: number; dirY: number; released?: boolean; rt?: number; form?: number } | null;
 }
 /** `legs` is the RunLower frame drawn under the hero sprite while the attack plays during movement (null = the whole body is the clip frame). */
 export interface AnimPose { facing: Facing; clip: KaiClip; frame: number; legs: number | null; /** which sheet set the frame belongs to */ form: KaiForm; /** events raised by the update that produced this pose */ events: readonly KaiAnimEvent[]; }
@@ -157,8 +160,16 @@ function riftFrame(a: KaiClipInfo, t: number, dur: number | undefined, released:
   if (!released) { if (t < RIFT.minCharge) return Math.min(hs - 1, Math.floor(t / RIFT.minCharge * hs)); return hs + Math.floor((t - RIFT.minCharge) * Math.max(8, a.fps)) % (he - hs + 1); }
   const tail = Math.max(0.1, (dur ?? t + 0.5) - (t - rt)); return Math.min(a.frames - 1, rel + Math.floor(Math.min(0.999999, rt / tail) * (a.frames - rel)));
 }
+/** Charged signature techniques: Solar Vortex plays the Sphere palm-orb clip, Thunderstar Breaker the braced Lunge thrust, Singularity Palm the precise BasicPunch palm. Charge ramps into the clip's coil frame and holds there (a planted palm, never the beam stance); the release frame lands on the sim's release and the rest plays out the recovery. */
+export const SIG_CLIP: Record<number, 'Sphere' | 'Lunge' | 'BasicPunch'> = { 1: 'Sphere', 2: 'Lunge', 3: 'BasicPunch' };
+function sigFrame(a: KaiClipInfo, t: number, dur: number | undefined, released: boolean, rt: number): number {
+  const rel = Math.max(2, a.events.release ?? a.events.impact ?? Math.floor(a.frames / 2)), hold = rel - 1;
+  if (!released) return t < 0.3 ? Math.min(hold, Math.floor(t / 0.3 * hold)) : hold - (Math.floor(t * 7) % 2);
+  const tail = Math.max(0.1, (dur ?? t + 0.5) - (t - rt)); return Math.min(a.frames - 1, rel + Math.floor(Math.min(0.999999, rt / tail) * (a.frames - rel)));
+}
 export function castFrame(a: KaiClipInfo, kind: CastKind, t: number, dur?: number, released = false, rt = 0): number {
-  if (kind === 'rift' || kind === 'signature') return riftFrame(a, t, dur, released, rt);
+  if (kind === 'signature') return sigFrame(a, t, dur, released, rt);
+  if (kind === 'rift') return riftFrame(a, t, dur, released, rt);
   if (kind === 'reversal') return Math.min(a.frames - 1, Math.floor(((t * 5) % 1) * Math.min(a.frames, 10)) + (released ? 0 : 0));   // a sustained string of strikes loops a quick strike motion
   if (kind === 'scatter') { const imp = a.events.impact ?? Math.floor(a.frames / 2), lo = Math.max(0, imp - 3), hi = Math.min(a.frames - 1, imp + 2); return lo + Math.floor(((t / 0.14) % 1) * (hi - lo + 1)); }
   if (kind === 'meteor') { const imp = a.events.impact ?? a.events.release ?? Math.floor(a.frames / 2), lo = Math.max(0, imp - 3), hi = Math.min(a.frames - 1, imp + 2); return t < 0.12 ? Math.max(0, Math.floor(t / 0.12 * lo)) : lo + Math.floor((((t - 0.12) / 0.17) % 1) * (hi - lo + 1)); }
@@ -212,6 +223,9 @@ export class KaiAnimator {
   get punching() { return this.punchTime >= 0; }
   get runPunching() { return this.runPunchTime >= 0; }
   private planted = false;
+  /** Strike clip of the current auto beat: punches / palms / fangs use BasicPunch, kicks the Lunge clip, spins the Slam, uppercuts / finishers the Uppercut. */
+  private strikeClip: 'BasicPunch' | 'Lunge' | 'Uppercut' | 'Slam' = 'BasicPunch';
+  private flyWas = false; private flyDur = 0; private landTime = -1; private landDive = false; private flightMode: 'cruise' | 'land' | null = null;
   /** B22: a shot that goes in a different cardinal direction than the run (e.g. backing away from a pursuer) is shown as a short planted strike toward the target, so the visible hand and the shot agree; same-direction shots keep the RunPunchUpper + RunLower composite. */
   private plantedStrike(i: AnimFrameInput): boolean {
     if (this.planted) { if (this.punching || this.runPunchTime >= 0 || i.shot) return true; this.planted = false; return false; }
@@ -232,12 +246,12 @@ export class KaiAnimator {
 
   /** Playback rate and lead time so that the impact frame lands on the sim's weapon tick even when attack speed outruns the 0.875 s clip. */
   private punchPlan(period: number) {
-    const p = this.info('BasicPunch'); const duration = p.frames / p.fps;
-    const rate = Math.min(MAX_PUNCH_RATE, Math.max(1, duration / (period * 0.92)));
-    return { rate, impactT: (p.events.impact ?? 0) / p.fps, duration };
+    const p = this.info(this.strikeClip); const duration = p.frames / p.fps;
+    const rate = Math.min(this.strikeClip === 'Slam' ? 2.6 : MAX_PUNCH_RATE, Math.max(1, duration / (period * 0.92)));
+    return { rate, impactT: ((this.strikeClip === 'BasicPunch' ? p.events.impact : p.events.release) ?? 0) / p.fps, duration };
   }
 
-  private startPunch(t: number, rate: number) { this.punchTime = t; this.punchRate = rate; if (this.clip !== 'BasicPunch') { this.clip = 'BasicPunch'; } }
+  private startPunch(t: number, rate: number) { this.punchTime = t; this.punchRate = rate; if (this.clip !== this.strikeClip) { this.clip = this.strikeClip; } }
 
   /** Pull the form change forward (hurt/dash/death interrupt the cinematic): the sim already committed, so the art must not stay behind. */
   private commitNow(simForm: number) {
@@ -250,7 +264,7 @@ export class KaiAnimator {
     const simForm = this.f1 ? Math.min(i.form ?? 0, this.f3 ? 3 : this.f2 ? 2 : 1) : 0;
     const formArt = (f: number): KaiForm => (f === 3 ? 'f3' : f === 2 ? 'f2' : 'f1');
     if (!i.alive) {
-      if (this.deathTime < 0) { this.commitNow(simForm); this.punchTime = -1; this.runPunchTime = -1; this.hurtTime = -1; this.dashRec = -1; this.dashWas = false; this.revertTime = -1; if (simForm) this.visualForm = formArt(simForm); this.deathTime = 0; this.clip = 'Death'; }
+      if (this.deathTime < 0) { this.commitNow(simForm); this.punchTime = -1; this.runPunchTime = -1; this.hurtTime = -1; this.dashRec = -1; this.dashWas = false; this.revertTime = -1; if (simForm) this.visualForm = formArt(simForm); this.deathTime = 0; this.clip = 'Death'; this.flyWas = false; this.landTime = -1; this.flightMode = null; }
       else this.deathTime += i.dt;
       this.simFormPrev = simForm; this.movingNow = false; return this.pose();
     }
@@ -291,6 +305,7 @@ export class KaiAnimator {
     }
     if (this.revertTime >= 0 && this.transformTime < 0) { this.revertTime += i.dt; if (this.revertTime >= FORM_REVERT_SECONDS || (this.movingNow && this.revertTime >= 0.1)) this.revertTime = -1; }
     const busy = this.hurtTime >= 0 || i.dashing || this.dashRec >= 0 || this.transformTime >= 0 || this.revertTime >= 0;
+    if (!this.punching) this.strikeClip = STRIKE_CLIP[i.beat ?? ''] ?? 'BasicPunch';
     const plan = this.punchPlan(attackPeriod);
     const casting = !!i.cast && !busy;
     if (i.cast && casting) {
@@ -298,6 +313,23 @@ export class KaiAnimator {
       this.castT = i.cast.t; this.castKind = i.cast.kind; this.castDur = i.cast.dur; this.castReleased = !!i.cast.released; this.castRt = i.cast.rt ?? 0; this.punchTime = -1; this.runPunchTime = -1;
     }
     this.casting = casting;
+    // Skybreaker flight: a held airborne glide pose from the Dash art (never the ground run cycle), a Slam-release landing after a dive, a Dash-recovery touchdown otherwise; auto strikes still play as planted upper-body strikes
+    const flying = (i.flyT ?? 0) > 0 && !busy && !casting;
+    this.flightMode = null;
+    if (flying) {
+      if (!this.flyWas) { this.flyWas = true; this.punchTime = -1; this.runPunchTime = -1; this.planted = false; }
+      this.flyDur = i.flyT ?? 0; this.landTime = -1; this.flightMode = 'cruise';
+      if (i.moving) this.turn(facingFromInput(this.facing, i.inputX, i.inputY));
+      if (i.shot && !this.punching) { this.startPunch(Math.max(0, plan.impactT - 3 / this.info(this.strikeClip).fps), plan.rate); this.turn(facingFromVector(this.facing, i.shot.dx, i.shot.dy), true); }
+      if (this.punching) { this.punchTime += i.dt * this.punchRate; if (this.punchTime >= plan.duration) this.punchTime = -1; }
+      this.clip = this.punching ? this.strikeClip : 'Dash'; this.time = 0;
+      return this.pose();
+    }
+    if (this.flyWas) { this.flyWas = false; this.landTime = 0; this.landDive = this.flyDur >= 0.5; this.punchTime = -1; }
+    if (this.landTime >= 0 && !busy && !casting) {
+      this.landTime += i.dt; if (this.landTime > (this.landDive ? 0.32 : 0.2) || i.moving && this.landTime > 0.1) this.landTime = -1;
+      else { this.flightMode = 'land'; this.clip = this.landDive ? 'Slam' : 'Dash'; this.time = 0; return this.pose(); }
+    } else if (busy || casting) this.landTime = -1;
 
     if (casting) { /* the signature ability owns the hands */ }
     else if (!busy && this.movingNow && !this.plantedStrike(i)) {
@@ -305,16 +337,16 @@ export class KaiAnimator {
       // Facing stays input-driven (target changes never turn the body mid-run); the sim keeps sole authority over when the hit lands, we only predict it from attackClock.
       if (i.moving) this.turn(facingFromInput(this.facing, i.inputX, i.inputY));
       const rp = this.info('RunPunchUpper'), rpDur = rp.frames / RUN_PHASES / rp.fps, rpImpact = (rp.events.impact ?? 3 * RUN_PHASES) / RUN_PHASES / rp.fps;
-      if (this.punchTime >= 0) { const bp = this.info('BasicPunch'); this.runPunchTime = Math.min(rpDur - 1e-3, this.punchTime / (bp.frames / bp.fps) * rpDur); this.punchTime = -1; }   // started moving mid-punch: carry its progress over
+      if (this.punchTime >= 0) { const bp = this.info(this.strikeClip); this.runPunchTime = Math.min(rpDur - 1e-3, this.punchTime / (bp.frames / bp.fps) * rpDur); this.punchTime = -1; }   // started moving mid-punch: carry its progress over
       if (i.shot) { if (!(this.runPunching && Math.abs(this.runPunchTime - rpImpact) <= 0.12)) this.runPunchTime = Math.max(0, rpImpact - 1.5 / rp.fps); }
       else if (!this.runPunching && i.hasTarget && i.attackClock <= rpImpact) this.runPunchTime = rpImpact - Math.max(0, i.attackClock);
       if (this.runPunching) { this.runPunchTime += i.dt; if (this.runPunchTime >= rpDur) this.runPunchTime = -1; }
     } else if (!busy) {
-      if (this.runPunchTime >= 0) { const bp = this.info('BasicPunch'), rp = this.info('RunPunchUpper'); this.punchTime = Math.min(bp.frames / bp.fps - 1e-3, this.runPunchTime / (rp.frames / RUN_PHASES / rp.fps) * (bp.frames / bp.fps)); this.runPunchTime = -1; }   // stopped mid-attack: finish it as the standing punch
+      if (this.runPunchTime >= 0) { const bp = this.info(this.strikeClip), rp = this.info('RunPunchUpper'); this.punchTime = Math.min(bp.frames / bp.fps - 1e-3, this.runPunchTime / (rp.frames / RUN_PHASES / rp.fps) * (bp.frames / bp.fps)); this.runPunchTime = -1; }   // stopped mid-attack: finish it as the standing punch
       if (i.shot) {
         // the sim just fired: keep an aligned predicted punch, otherwise (target appeared this instant / extreme fire rate) snap in near the impact frame
         const aligned = this.punching && Math.abs(this.punchTime - plan.impactT) <= 0.2;
-        if (!aligned) { this.startPunch(Math.max(0, plan.impactT - 3 / this.info('BasicPunch').fps), plan.rate); this.turn(facingFromVector(this.facing, i.shot.dx, i.shot.dy), true); }
+        if (!aligned) { this.startPunch(Math.max(0, plan.impactT - 3 / this.info(this.strikeClip).fps), plan.rate); this.turn(facingFromVector(this.facing, i.shot.dx, i.shot.dy), true); }
       } else if (!this.punching && i.hasTarget && i.attackClock <= plan.impactT / plan.rate) {
         this.startPunch(plan.impactT - Math.max(0, i.attackClock) * plan.rate, plan.rate);
         this.turn(facingFromVector(this.facing, i.targetDx, i.targetDy), true);
@@ -331,7 +363,7 @@ export class KaiAnimator {
     if (calm) { this.idleFor += i.dt; if (this.special < 0 && this.idleFor >= 9) { this.special = 0; this.idleFor = 0; } } else { this.idleFor = 0; this.special = -1; }
     if (this.special >= 0 && sp) { this.special += i.dt; if (this.special >= sp.frames / sp.fps) this.special = -1; }
     if (i.lunge && !i.dashing && !casting && this.hurtTime < 0) this.lungeTime = 0; else if (this.lungeTime >= 0) { this.lungeTime += i.dt; if (this.lungeTime > 0.58 || casting || i.dashing) this.lungeTime = -1; }
-    const want: KaiClip = this.special >= 0 ? 'IdleSpecial' : this.hurtTime >= 0 ? 'Hurt' : (i.dashing || this.dashRec >= 0) ? 'Dash' : this.lungeTime >= 0 ? 'Lunge' : (this.transformTime >= 0 || this.revertTime >= 0) ? 'Transform' : casting ? CAST_CLIP[i.cast!.kind] : this.punching ? 'BasicPunch' : this.runPunching && i.moving ? 'RunPunchUpper' : i.moving ? 'Run' : 'Idle';
+    const want: KaiClip = this.special >= 0 ? 'IdleSpecial' : this.hurtTime >= 0 ? 'Hurt' : (i.dashing || this.dashRec >= 0) ? 'Dash' : this.lungeTime >= 0 ? 'Lunge' : (this.transformTime >= 0 || this.revertTime >= 0) ? 'Transform' : casting ? (i.cast!.kind === 'signature' ? SIG_CLIP[i.cast!.form ?? 1] ?? 'Sphere' : CAST_CLIP[i.cast!.kind]) : this.punching ? this.strikeClip : this.runPunching && i.moving ? 'RunPunchUpper' : i.moving ? 'Run' : 'Idle';
     if (want !== this.clip) { this.clip = want; this.time = 0; }
     const runStep = i.dt * Math.min(18, Math.max(10, 14 * i.runSpeed / 250)) / 14;
     if (this.movingNow) this.runTime += runStep; else this.runTime = 0;
@@ -348,7 +380,9 @@ export class KaiAnimator {
     const form = this.formOf(this.clip);
     const a = this.info(this.clip, form);
     let frame: number;
-    if (this.clip === 'Dash') {
+    if (this.flightMode === 'cruise' && this.clip === 'Dash') frame = Math.min(a.frames - 1, this.flyDur < 0.2 ? (a.events.burst_start ?? 2) : (a.events.burst_start ?? 2) + 2);
+    else if (this.flightMode === 'land') frame = this.clip === 'Slam' ? Math.min(a.frames - 1, (a.events.release ?? 11) + Math.floor(this.landTime / 0.32 * Math.max(1, (a.events.recover_start ?? 14) - (a.events.release ?? 11) + 1))) : Math.min(a.frames - 1, (a.events.recover_start ?? a.frames - 3) + Math.floor(this.landTime / 0.2 * 3));
+    else if (this.clip === 'Dash') {
       const rec = a.events.recover_start ?? a.frames - 3;
       frame = this.dashRec >= 0 ? Math.min(a.frames - 1, rec + Math.floor(this.dashRec / DASH_RECOVERY_SECONDS * (a.frames - rec))) : Math.min(rec - 1, Math.floor(this.dashProg * rec));
     } else if (this.clip === 'Transform' && this.cinemaOn) {
@@ -362,7 +396,7 @@ export class KaiAnimator {
     } else if (this.casting && (this.clip === 'Beam' || this.clip === 'Sphere' || this.clip === 'BasicPunch' || this.clip === 'Lunge' || this.clip === 'Uppercut' || this.clip === 'Slam')) {
       frame = castFrame(a, this.castKind, this.castT, this.castDur, this.castReleased, this.castRt);
     } else {
-      const t = this.clip === 'Lunge' ? Math.max(0, this.lungeTime) : this.clip === 'BasicPunch' ? Math.max(0, this.punchTime) : this.clip === 'Hurt' ? Math.max(0, this.hurtTime) : this.clip === 'Death' ? Math.max(0, this.deathTime) : this.time;
+      const t = this.punching && this.clip === this.strikeClip && this.lungeTime < 0 ? Math.max(0, this.punchTime) : this.clip === 'Lunge' ? Math.max(0, this.lungeTime) : this.clip === 'BasicPunch' ? Math.max(0, this.punchTime) : this.clip === 'Hurt' ? Math.max(0, this.hurtTime) : this.clip === 'Death' ? Math.max(0, this.deathTime) : this.time;
       const raw = Math.floor(t * a.fps + 1e-6);
       frame = a.loop ? raw % a.frames : Math.min(a.frames - 1, raw);
     }
