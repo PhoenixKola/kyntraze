@@ -1,0 +1,1127 @@
+{
+ "g1_head": {
+  "frames": 4,
+  "sizes": [
+   [
+    548,
+    565
+   ],
+   [
+    548,
+    565
+   ],
+   [
+    548,
+    565
+   ],
+   [
+    548,
+    565
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g1_head.png"
+ },
+ "g2_head": {
+  "frames": 4,
+  "sizes": [
+   [
+    448,
+    687
+   ],
+   [
+    448,
+    687
+   ],
+   [
+    448,
+    687
+   ],
+   [
+    448,
+    687
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g2_head.png"
+ },
+ "g1_front": {
+  "frames": 4,
+  "sizes": [
+   [
+    492,
+    394
+   ],
+   [
+    492,
+    394
+   ],
+   [
+    492,
+    394
+   ],
+   [
+    492,
+    394
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g1_front.png"
+ },
+ "g2_front": {
+  "frames": 4,
+  "sizes": [
+   [
+    504,
+    550
+   ],
+   [
+    504,
+    550
+   ],
+   [
+    504,
+    550
+   ],
+   [
+    504,
+    550
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g2_front.png"
+ },
+ "g1_back": {
+  "frames": 4,
+  "sizes": [
+   [
+    499,
+    402
+   ],
+   [
+    499,
+    402
+   ],
+   [
+    499,
+    402
+   ],
+   [
+    499,
+    402
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g1_back.png"
+ },
+ "g2_back": {
+  "frames": 4,
+  "sizes": [
+   [
+    302,
+    624
+   ],
+   [
+    302,
+    624
+   ],
+   [
+    302,
+    624
+   ],
+   [
+    302,
+    624
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g2_back.png"
+ },
+ "g1_torso": {
+  "frames": 4,
+  "sizes": [
+   [
+    448,
+    433
+   ],
+   [
+    448,
+    433
+   ],
+   [
+    448,
+    433
+   ],
+   [
+    448,
+    433
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g1_torso.png"
+ },
+ "g2_torso": {
+  "frames": 4,
+  "sizes": [
+   [
+    395,
+    572
+   ],
+   [
+    395,
+    572
+   ],
+   [
+    395,
+    572
+   ],
+   [
+    395,
+    572
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g2_torso.png"
+ },
+ "g1_arm": {
+  "frames": 4,
+  "sizes": [
+   [
+    644,
+    430
+   ],
+   [
+    644,
+    430
+   ],
+   [
+    644,
+    430
+   ],
+   [
+    644,
+    430
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g1_arm.png"
+ },
+ "g2_arm": {
+  "frames": 4,
+  "sizes": [
+   [
+    479,
+    401
+   ],
+   [
+    479,
+    401
+   ],
+   [
+    479,
+    401
+   ],
+   [
+    479,
+    401
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g2_arm.png"
+ },
+ "g1_plates": {
+  "frames": 4,
+  "sizes": [
+   [
+    429,
+    461
+   ],
+   [
+    429,
+    461
+   ],
+   [
+    429,
+    461
+   ],
+   [
+    429,
+    461
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g1_plates.png"
+ },
+ "g2_plates": {
+  "frames": 4,
+  "sizes": [
+   [
+    396,
+    533
+   ],
+   [
+    396,
+    533
+   ],
+   [
+    396,
+    533
+   ],
+   [
+    396,
+    533
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g2_plates.png"
+ },
+ "g1_activation": {
+  "frames": 4,
+  "sizes": [
+   [
+    491,
+    605
+   ],
+   [
+    491,
+    605
+   ],
+   [
+    491,
+    605
+   ],
+   [
+    491,
+    605
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g1_activation.png"
+ },
+ "g2_activation": {
+  "frames": 4,
+  "sizes": [
+   [
+    459,
+    631
+   ],
+   [
+    459,
+    631
+   ],
+   [
+    459,
+    631
+   ],
+   [
+    459,
+    631
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g2_activation.png"
+ },
+ "g1_dissolve": {
+  "frames": 4,
+  "sizes": [
+   [
+    431,
+    619
+   ],
+   [
+    431,
+    619
+   ],
+   [
+    431,
+    619
+   ],
+   [
+    431,
+    619
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g1_dissolve.png"
+ },
+ "g2_dissolve": {
+  "frames": 4,
+  "sizes": [
+   [
+    366,
+    688
+   ],
+   [
+    366,
+    688
+   ],
+   [
+    366,
+    688
+   ],
+   [
+    366,
+    688
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "g2_dissolve.png"
+ },
+ "r_slash": {
+  "frames": 4,
+  "sizes": [
+   [
+    603,
+    411
+   ],
+   [
+    603,
+    411
+   ],
+   [
+    603,
+    411
+   ],
+   [
+    603,
+    411
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_slash.png"
+ },
+ "r_mirror": {
+  "frames": 4,
+  "sizes": [
+   [
+    259,
+    453
+   ],
+   [
+    259,
+    453
+   ],
+   [
+    259,
+    453
+   ],
+   [
+    259,
+    453
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_mirror.png"
+ },
+ "r_echo": {
+  "frames": 4,
+  "sizes": [
+   [
+    481,
+    393
+   ],
+   [
+    481,
+    393
+   ],
+   [
+    481,
+    393
+   ],
+   [
+    481,
+    393
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_echo.png"
+ },
+ "r_portal": {
+  "frames": 4,
+  "sizes": [
+   [
+    433,
+    617
+   ],
+   [
+    433,
+    617
+   ],
+   [
+    433,
+    617
+   ],
+   [
+    433,
+    617
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_portal.png"
+ },
+ "r_crack": {
+  "frames": 4,
+  "sizes": [
+   [
+    439,
+    676
+   ],
+   [
+    439,
+    676
+   ],
+   [
+    439,
+    676
+   ],
+   [
+    439,
+    676
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_crack.png"
+ },
+ "r_seal": {
+  "frames": 4,
+  "sizes": [
+   [
+    456,
+    564
+   ],
+   [
+    456,
+    564
+   ],
+   [
+    456,
+    564
+   ],
+   [
+    456,
+    564
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_seal.png"
+ },
+ "r_pillar": {
+  "frames": 4,
+  "sizes": [
+   [
+    408,
+    660
+   ],
+   [
+    408,
+    660
+   ],
+   [
+    408,
+    660
+   ],
+   [
+    408,
+    660
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_pillar.png"
+ },
+ "r_fang": {
+  "frames": 4,
+  "sizes": [
+   [
+    612,
+    278
+   ],
+   [
+    612,
+    278
+   ],
+   [
+    612,
+    278
+   ],
+   [
+    612,
+    278
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_fang.png"
+ },
+ "r_fangcut": {
+  "frames": 4,
+  "sizes": [
+   [
+    525,
+    314
+   ],
+   [
+    525,
+    314
+   ],
+   [
+    525,
+    314
+   ],
+   [
+    525,
+    314
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_fangcut.png"
+ },
+ "r_impact": {
+  "frames": 4,
+  "sizes": [
+   [
+    451,
+    400
+   ],
+   [
+    451,
+    400
+   ],
+   [
+    451,
+    400
+   ],
+   [
+    451,
+    400
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_impact.png"
+ },
+ "v_cut": {
+  "frames": 4,
+  "sizes": [
+   [
+    378,
+    410
+   ],
+   [
+    378,
+    410
+   ],
+   [
+    378,
+    410
+   ],
+   [
+    378,
+    410
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_cut.png"
+ },
+ "v_clone": {
+  "frames": 4,
+  "sizes": [
+   [
+    677,
+    622
+   ],
+   [
+    677,
+    622
+   ],
+   [
+    677,
+    622
+   ],
+   [
+    677,
+    622
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_clone.png"
+ },
+ "v_seam": {
+  "frames": 4,
+  "sizes": [
+   [
+    481,
+    178
+   ],
+   [
+    481,
+    178
+   ],
+   [
+    481,
+    178
+   ],
+   [
+    481,
+    178
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_seam.png"
+ },
+ "v_shard": {
+  "frames": 4,
+  "sizes": [
+   [
+    323,
+    599
+   ],
+   [
+    323,
+    599
+   ],
+   [
+    323,
+    599
+   ],
+   [
+    323,
+    599
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_shard.png"
+ },
+ "v_ring": {
+  "frames": 4,
+  "sizes": [
+   [
+    451,
+    145
+   ],
+   [
+    451,
+    145
+   ],
+   [
+    451,
+    145
+   ],
+   [
+    451,
+    145
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_ring.png"
+ },
+ "v_blade": {
+  "frames": 4,
+  "sizes": [
+   [
+    120,
+    600
+   ],
+   [
+    120,
+    600
+   ],
+   [
+    120,
+    600
+   ],
+   [
+    120,
+    600
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_blade.png"
+ },
+ "v_core": {
+  "frames": 4,
+  "sizes": [
+   [
+    544,
+    655
+   ],
+   [
+    544,
+    655
+   ],
+   [
+    544,
+    655
+   ],
+   [
+    544,
+    655
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_core.png"
+ },
+ "v_implode": {
+  "frames": 4,
+  "sizes": [
+   [
+    476,
+    516
+   ],
+   [
+    476,
+    516
+   ],
+   [
+    476,
+    516
+   ],
+   [
+    476,
+    516
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_implode.png"
+ },
+ "v_erupt": {
+  "frames": 4,
+  "sizes": [
+   [
+    504,
+    535
+   ],
+   [
+    504,
+    535
+   ],
+   [
+    504,
+    535
+   ],
+   [
+    504,
+    535
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_erupt.png"
+ },
+ "v_reveal_crack": {
+  "frames": 4,
+  "sizes": [
+   [
+    373,
+    718
+   ],
+   [
+    373,
+    718
+   ],
+   [
+    373,
+    718
+   ],
+   [
+    373,
+    718
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_reveal_crack.png"
+ },
+ "v_reveal_halo": {
+  "frames": 4,
+  "sizes": [
+   [
+    428,
+    271
+   ],
+   [
+    428,
+    271
+   ],
+   [
+    428,
+    271
+   ],
+   [
+    428,
+    271
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_reveal_halo.png"
+ },
+ "v_reveal_flash": {
+  "frames": 4,
+  "sizes": [
+   [
+    513,
+    503
+   ],
+   [
+    513,
+    503
+   ],
+   [
+    513,
+    503
+   ],
+   [
+    513,
+    503
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_reveal_flash.png"
+ },
+ "v_reveal_hair": {
+  "frames": 4,
+  "sizes": [
+   [
+    257,
+    558
+   ],
+   [
+    257,
+    558
+   ],
+   [
+    257,
+    558
+   ],
+   [
+    257,
+    558
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_reveal_hair.png"
+ },
+ "r_ground": {
+  "frames": 4,
+  "sizes": [
+   [
+    599,
+    281
+   ],
+   [
+    599,
+    281
+   ],
+   [
+    599,
+    281
+   ],
+   [
+    599,
+    281
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_ground.png"
+ },
+ "v_ground": {
+  "frames": 4,
+  "sizes": [
+   [
+    616,
+    231
+   ],
+   [
+    616,
+    231
+   ],
+   [
+    616,
+    231
+   ],
+   [
+    616,
+    231
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_ground.png"
+ },
+ "r_wisp": {
+  "frames": 4,
+  "sizes": [
+   [
+    286,
+    526
+   ],
+   [
+    286,
+    526
+   ],
+   [
+    286,
+    526
+   ],
+   [
+    286,
+    526
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_wisp.png"
+ },
+ "v_wisp": {
+  "frames": 4,
+  "sizes": [
+   [
+    198,
+    381
+   ],
+   [
+    198,
+    381
+   ],
+   [
+    198,
+    381
+   ],
+   [
+    198,
+    381
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_wisp.png"
+ },
+ "v_frag": {
+  "frames": 4,
+  "sizes": [
+   [
+    244,
+    293
+   ],
+   [
+    244,
+    293
+   ],
+   [
+    244,
+    293
+   ],
+   [
+    244,
+    293
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_frag.png"
+ },
+ "r_fly": {
+  "frames": 4,
+  "sizes": [
+   [
+    397,
+    386
+   ],
+   [
+    397,
+    386
+   ],
+   [
+    397,
+    386
+   ],
+   [
+    397,
+    386
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "r_fly.png"
+ },
+ "v_fly": {
+  "frames": 4,
+  "sizes": [
+   [
+    394,
+    201
+   ],
+   [
+    394,
+    201
+   ],
+   [
+    394,
+    201
+   ],
+   [
+    394,
+    201
+   ]
+  ],
+  "blend": "add",
+  "anchor": "",
+  "source": "v_fly.png"
+ },
+ "_icons": {
+  "dir": "public/ui/icons",
+  "files": [
+   "vex_cf_mirror.png",
+   "vex_cf_execution.png",
+   "vex_cf_oath.png",
+   "vex_cf_fang.png",
+   "vex_cf_1_guard.png",
+   "vex_cf_auto1.png",
+   "vex_cf_legion.png",
+   "vex_cf_sever.png",
+   "vex_cf_domain.png",
+   "vex_cf_horizon.png",
+   "vex_cf_2_guard.png",
+   "vex_cf_judgment.png"
+  ],
+  "size": [
+   96,
+   96
+  ]
+ }
+}

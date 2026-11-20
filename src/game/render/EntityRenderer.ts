@@ -3,6 +3,7 @@ import { KaiPresence } from './kaiPresence';
 import { KaiCombatFx } from './kaiCombatFx';
 import { RenFox } from './renFox';
 import { SoraPhoenix } from './soraPhoenix';
+import { VexFx } from './vexFx';
 import { AUTO, FLY } from '../../content/kaiCombat';
 import Phaser from 'phaser';
 import { RULES } from '../../core/Rules';
@@ -155,7 +156,8 @@ export class EntityRenderer {
     const m = this.motion.update({ dt, style: styleFor(hero, p.form), vx: this.velX, vy: this.velY, maxSpeed: p.speed * 1.2, dashing, dashDx: p.dashDx, dashDy: p.dashDy, casting: !!cast, released: !!cast && cast.released, hurt, hurtDir: facing === 'east' ? -1 : 1, alive: p.hp > 0, frozen, reduced });
     const bank = state.player.flyT > 0 ? Math.max(-0.4, Math.min(0.4, this.velX / 520)) : 0;
     for (const s of [this.hero, this.legs]) { s.setRotation(m.rot + bank).setScale(this.baseScale * m.sx, this.baseScale * m.sy); }
-    this.hoverY = 0;
+    // B28: Voidheart Exile hovers a few px above his GROUND collision feet (the shadow and every gameplay position stay on the ground); flight uses its own lift
+    this.hoverY = hero === 'vex' && p.form === 2 && p.flyT <= 0 && p.hp > 0 && !frozen ? -Math.round((6 + (reduced ? 0 : Math.sin(state.time * 1.8) * 1.8)) * (this.baseScale / 0.5)) : 0;
     this.hero.y += m.dy + this.hoverY; this.legs.y = this.hero.y;
     this.mirrorAura();
   }
@@ -248,7 +250,7 @@ export class EntityRenderer {
     if (state.hero !== 'kai') return undefined; const prof = AUTO[state.player.form as 0 | 1 | 2 | 3], n = prof.beats.length, st = state.hx.autoStep;
     return prof.beats[(fired ? st - 1 + n : st) % n].kind;
   }
-  private renFox: RenFox | null = null; private soraFx: SoraPhoenix | null = null; private liftNow = 0; private readonly presence: KaiPresence; private readonly combatFx: KaiCombatFx; private presenceEv = 0;
+  private renFox: RenFox | null = null; private soraFx: SoraPhoenix | null = null; private vexFx: VexFx | null = null; private liftNow = 0; private readonly presence: KaiPresence; private readonly combatFx: KaiCombatFx; private presenceEv = 0;
   /** B19: Ren / Sora. The character sprite is drawn from the hero sheets when they exist (HeroAnimator over the same sheet contract as Kai); a flat dev body stands in only while a hero has no sheets. The effects layer is always the sim projection in heroFxView. */
   private syncHero(state: GameState, input: InputState, deltaMs: number, reduced: boolean) {
     const p = state.player, dt = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory' ? Math.min(0.1, deltaMs / 1000) : 0, hero = state.hero as HeroArt;
@@ -289,6 +291,7 @@ export class EntityRenderer {
       body.fillStyle(0x000000, 0.3).fillEllipse(x, y, 36, 12);
       if (!dead) { body.fillStyle(ren ? (p.form ? 0xb8141c : 0x4a1018) : (p.form ? 0x2a78e0 : 0x16264f), 1).fillRoundedRect(x - 14, y - 62, 28, 56, 8); body.fillStyle(ren ? 0xffd2a8 : 0xe8f3ff, 1).fillCircle(x, y - 66, 11); body.fillStyle(0xffffff, 0.9).fillTriangle(x + p.aimX * 22, y - 36 + p.aimY * 12, x + p.aimX * 12 - p.aimY * 6, y - 36 + p.aimY * 6 + p.aimX * 6, x + p.aimX * 12 + p.aimY * 6, y - 36 + p.aimY * 6 - p.aimX * 6); }   // dev placeholder body, only while a hero has no sheets
     }
+    if (hero === 'vex') { this.vexFx ??= new VexFx(this.scene); this.vexFx.update({ dt, state, hero: this.hero, hand: this.hand, scale: this.baseScale, reduced, running: state.phase === 'running', dead, crowded: state.enemies.length > 45, facing: this.pose.facing, shake: !this.partner }); }
     if (hero === 'sora') { this.soraFx ??= new SoraPhoenix(this.scene); this.soraFx.update({ dt, state, hero: this.hero, hand: this.hand, scale: this.baseScale, reduced, running: state.phase === 'running', dead, crowded: state.enemies.length > 45, facing: this.pose.facing, shake: !this.partner }); }
     if (hero === 'ren') { this.renFox ??= new RenFox(this.scene); this.renFox.update({ dt, state, hero: this.hero, hand: this.hand, scale: this.baseScale, reduced, running: state.phase === 'running', dead, crowded: state.enemies.length > 45, facing: this.pose.facing, shake: !this.partner }); }
     fx.update(state, dt, reduced, state.enemies.length > 45, x, y);
@@ -334,5 +337,5 @@ export class EntityRenderer {
     for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies!.stats(), boss: this.bosses!.stats() }; }
-  destroy() { this.combatFx.destroy(); this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.renFox?.destroy(); this.soraFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
+  destroy() { this.combatFx.destroy(); this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.renFox?.destroy(); this.soraFx?.destroy(); this.vexFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
 }
