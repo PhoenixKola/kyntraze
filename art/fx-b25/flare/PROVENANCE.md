@@ -112,3 +112,31 @@ Prompt:
 Pixel-art game VFX in the chunky crisp pixel style of the reference image (visible pixels, hard edges, limited palette, no smooth airbrush gradients, no painterly blur). PURE BLACK background (#000000) everywhere, no ground plane, no character, no text, no frame, no border, no watermark. Original design. Additive-blend friendly: glows are bright shapes on black. Theme: Flarebound, golden-orange solar propulsion, fire, white-hot cores. Sheet with exactly FOUR separate sprites in one row, evenly spaced, separated by wide black gaps. Each is a downward-pointing PROPULSION PLUME for a flying character: a vertical jet of energy, widest and brightest at the top, streaming downward and tapering with flickering edges and trailing sparks. Four animation-frame variants of the same plume.
 ```
 
+## 2026-11-20T09:05:14.968Z - tail.png
+
+- File: tail.png (2172x724)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1f833-660e-7bd3-bd34-22cfd580c97b
+- Reference images: aura_a.png
+- Seconds: 35.5
+
+Prompt:
+
+```text
+Pixel-art game VFX in the chunky crisp pixel style of the reference image (visible pixels, hard edges, limited palette, no smooth airbrush gradients, no painterly blur). PURE BLACK background (#000000) everywhere, no ground plane, no character, no text, no frame, no border, no watermark. Original design. Additive-blend friendly: glows are bright shapes on black. Theme: Flarebound, a flowing FIERY dragon made of flame in orange, amber and gold with white-hot cores and drifting embers. Sheet with exactly FOUR separate sprites in one row, evenly spaced, separated by wide black gaps. Each is the TAIL TIP of a Chinese-style dragon seen from the side: a tapering scaled tail ending in a curled fin of spines, flowing to the LEFT, with a trailing fringe. Four variants of the same tail in a slow wave: curl up, straight, curl down, whip.
+```
+
+## 2026-11-20T09:05:17.405Z - limb.png
+
+- File: limb.png (2172x724)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1f833-660d-7d30-9da9-f5e23ce4ce98
+- Reference images: aura_a.png
+- Seconds: 37.9
+
+Prompt:
+
+```text
+Pixel-art game VFX in the chunky crisp pixel style of the reference image (visible pixels, hard edges, limited palette, no smooth airbrush gradients, no painterly blur). PURE BLACK background (#000000) everywhere, no ground plane, no character, no text, no frame, no border, no watermark. Original design. Additive-blend friendly: glows are bright shapes on black. Theme: Flarebound, a flowing FIERY dragon made of flame in orange, amber and gold with white-hot cores and drifting embers. Sheet with exactly FOUR separate sprites in one row, evenly spaced, separated by wide black gaps. Each is the FORELIMB of a Chinese-style dragon seen from the side, an arm with scaled forearm, a mane tuft at the elbow and a hand of FOUR sharp curved talons, reaching to the RIGHT. Same limb in four moments of a strike: (1) drawn back and curled, (2) reaching out, claws spreading, (3) full extension with claws wide open, (4) follow-through with claws closing and trailing energy. The arm enters from the left edge of each sprite (the shoulder end is cut off softly into energy wisps).
+```
+

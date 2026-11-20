@@ -32,3 +32,5 @@ if os.path.exists(p):
         a = np.asarray(sq).astype(np.float32); alpha = np.clip(a.max(axis=2) * 1.6, 0, 255).astype(np.uint8)
         rgba = np.dstack([np.asarray(sq), alpha]); Image.fromarray(rgba, 'RGBA').save(os.path.join(ROOT, 'public', 'ui', 'icons', ['sig_1', 'sig_2', 'sig_3', 'overdrive'][i] + '.png'))
     print('icons', len(boxes))
+
+# B25.1: limb / tail sheets (art/fx-b25/<form>/limb.png, tail.png) are cut by connected components (dilation 14 down to 3 until exactly four >3000 px components are found), each sprite keeping only its own component's pixels so neighbouring sprites that straddle a grid cell never bleed in, trimmed to the bbox + 3 px, into public/art/fx/kai-o/<form>_<limb|tail><0-3>.png.

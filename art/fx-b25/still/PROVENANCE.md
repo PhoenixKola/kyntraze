@@ -112,3 +112,31 @@ Prompt:
 Pixel-art game VFX in the chunky crisp pixel style of the reference image (visible pixels, hard edges, limited palette, no smooth airbrush gradients, no painterly blur). PURE BLACK background (#000000) everywhere, no ground plane, no character, no text, no frame, no border, no watermark. Original design. Additive-blend friendly: glows are bright shapes on black. Theme: Stillfire Apex, silver and white, ethereal, effortless, thin flowing translucent lines with pale blue. Sheet with exactly FOUR separate sprites in one row, evenly spaced, separated by wide black gaps. Each is a round TRANSFORMATION SHIFT BURST seen face-on as an expanding energy ring with rotating radial streaks and a bright flash in the middle, four stages of the same burst: (1) tight bright flash, (2) ring expanding with streaks, (3) large ring with spiral wisps, (4) faint dissipating ring.
 ```
 
+## 2026-11-20T09:05:21.301Z - limb.png
+
+- File: limb.png (2172x724)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1f833-660d-7bd0-9d9d-bd8c2498b2c8
+- Reference images: aura_a.png
+- Seconds: 41.8
+
+Prompt:
+
+```text
+Pixel-art game VFX in the chunky crisp pixel style of the reference image (visible pixels, hard edges, limited palette, no smooth airbrush gradients, no painterly blur). PURE BLACK background (#000000) everywhere, no ground plane, no character, no text, no frame, no border, no watermark. Original design. Additive-blend friendly: glows are bright shapes on black. Theme: Stillfire Apex, an elegant spectral SILVER dragon with soft translucent pearl-white scales, pale blue glow, floating wisps, restrained and graceful. Sheet with exactly FOUR separate sprites in one row, evenly spaced, separated by wide black gaps. Each is the FORELIMB of a Chinese-style dragon seen from the side, an arm with scaled forearm, a mane tuft at the elbow and a hand of FOUR sharp curved talons, reaching to the RIGHT. Same limb in four moments of a strike: (1) drawn back and curled, (2) reaching out, claws spreading, (3) full extension with claws wide open, (4) follow-through with claws closing and trailing energy. The arm enters from the left edge of each sprite (the shoulder end is cut off softly into energy wisps).
+```
+
+## 2026-11-20T09:05:54.684Z - tail.png
+
+- File: tail.png (2172x724)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1f833-f920-7d31-aa58-76f176d78faf
+- Reference images: aura_a.png
+- Seconds: 36.9
+
+Prompt:
+
+```text
+Pixel-art game VFX in the chunky crisp pixel style of the reference image (visible pixels, hard edges, limited palette, no smooth airbrush gradients, no painterly blur). PURE BLACK background (#000000) everywhere, no ground plane, no character, no text, no frame, no border, no watermark. Original design. Additive-blend friendly: glows are bright shapes on black. Theme: Stillfire Apex, an elegant spectral SILVER dragon with soft translucent pearl-white scales, pale blue glow, floating wisps, restrained and graceful. Sheet with exactly FOUR separate sprites in one row, evenly spaced, separated by wide black gaps. Each is the TAIL TIP of a Chinese-style dragon seen from the side: a tapering scaled tail ending in a curled fin of spines, flowing to the LEFT, with a trailing fringe. Four variants of the same tail in a slow wave: curl up, straight, curl down, whip.
+```
+

@@ -5,7 +5,7 @@ import { FLY, SIG } from '../../content/kaiCombat';
 import { OverdriveDragon } from './kaiDragon';
 
 export const KO_FORM = ['', 'flare', 'comet', 'still'] as const;
-export const KO_NAMES = (['flare', 'comet', 'still'] as const).flatMap(f => (['dragon', 'claw', 'orb', 'burst', 'head', 'sigil', 'jet', 'shift'] as const).flatMap(k => [0, 1, 2, 3].map(i => `${f}_${k}${i}`)));
+export const KO_NAMES = (['flare', 'comet', 'still'] as const).flatMap(f => (['dragon', 'claw', 'orb', 'burst', 'head', 'sigil', 'jet', 'shift', 'limb', 'tail'] as const).flatMap(k => [0, 1, 2, 3].map(i => `${f}_${k}${i}`)));
 export const koKey = (n: string) => `ko-${n}`; export const koUrl = (n: string) => `/art/fx/kai-o/${n}.png`;
 const COL = [0, 0xffa83a, 0xffd93a, 0xdfeaff] as const;
 interface Pop { im: Phaser.GameObjects.Image; t: number; dur: number; frames: string[]; w: number; w1: number; a: number; vx: number; vy: number; flat: boolean; spin: number }

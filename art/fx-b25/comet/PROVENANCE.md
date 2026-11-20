@@ -112,3 +112,31 @@ Prompt:
 Pixel-art game VFX in the chunky crisp pixel style of the reference image (visible pixels, hard edges, limited palette, no smooth airbrush gradients, no painterly blur). PURE BLACK background (#000000) everywhere, no ground plane, no character, no text, no frame, no border, no watermark. Original design. Additive-blend friendly: glows are bright shapes on black. Theme: Cometheart, violent saturated gold and yellow with white lightning forks, speed and violence. Sheet with exactly FOUR separate sprites in one row, evenly spaced, separated by wide black gaps. Each is a round TRANSFORMATION SHIFT BURST seen face-on as an expanding energy ring with rotating radial streaks and a bright flash in the middle, four stages of the same burst: (1) tight bright flash, (2) ring expanding with streaks, (3) large ring with spiral wisps, (4) faint dissipating ring.
 ```
 
+## 2026-11-20T09:05:18.612Z - limb.png
+
+- File: limb.png (2172x724)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1f833-660d-7091-bcee-b85abc2302ac
+- Reference images: aura_a.png
+- Seconds: 39.1
+
+Prompt:
+
+```text
+Pixel-art game VFX in the chunky crisp pixel style of the reference image (visible pixels, hard edges, limited palette, no smooth airbrush gradients, no painterly blur). PURE BLACK background (#000000) everywhere, no ground plane, no character, no text, no frame, no border, no watermark. Original design. Additive-blend friendly: glows are bright shapes on black. Theme: Cometheart, a heavy violent dragon of golden lightning, gold and yellow with white forked lightning running over its scales. Sheet with exactly FOUR separate sprites in one row, evenly spaced, separated by wide black gaps. Each is the FORELIMB of a Chinese-style dragon seen from the side, an arm with scaled forearm, a mane tuft at the elbow and a hand of FOUR sharp curved talons, reaching to the RIGHT. Same limb in four moments of a strike: (1) drawn back and curled, (2) reaching out, claws spreading, (3) full extension with claws wide open, (4) follow-through with claws closing and trailing energy. The arm enters from the left edge of each sprite (the shoulder end is cut off softly into energy wisps).
+```
+
+## 2026-11-20T09:05:51.825Z - tail.png
+
+- File: tail.png (2172x724)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a1f833-efc0-71e3-8023-c7476e9ab2d3
+- Reference images: aura_a.png
+- Seconds: 36.5
+
+Prompt:
+
+```text
+Pixel-art game VFX in the chunky crisp pixel style of the reference image (visible pixels, hard edges, limited palette, no smooth airbrush gradients, no painterly blur). PURE BLACK background (#000000) everywhere, no ground plane, no character, no text, no frame, no border, no watermark. Original design. Additive-blend friendly: glows are bright shapes on black. Theme: Cometheart, a heavy violent dragon of golden lightning, gold and yellow with white forked lightning running over its scales. Sheet with exactly FOUR separate sprites in one row, evenly spaced, separated by wide black gaps. Each is the TAIL TIP of a Chinese-style dragon seen from the side: a tapering scaled tail ending in a curled fin of spines, flowing to the LEFT, with a trailing fringe. Four variants of the same tail in a slow wave: curl up, straight, curl down, whip.
+```
+

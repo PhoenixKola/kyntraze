@@ -14,7 +14,7 @@ const sstep = (a: number) => { const t = Math.max(0, Math.min(1, a)); return t *
 export interface DragonInput { dt: number; clock: number; x: number; y: number; sc: number; form: 1 | 2 | 3; amount: number; vx: number; vy: number; aimX: number; aimY: number; fly: boolean; dash: boolean; reduced: boolean; crowded: boolean }
 
 export class OverdriveDragon {
-  private readonly rear: Phaser.GameObjects.Graphics; private readonly front: Phaser.GameObjects.Graphics; private readonly head: Phaser.GameObjects.Image;
+  private readonly rear: Phaser.GameObjects.Graphics; private readonly front: Phaser.GameObjects.Graphics; private readonly head: Phaser.GameObjects.Image; private readonly limb: Phaser.GameObjects.Image; private readonly tail: Phaser.GameObjects.Image; private limbT = 0;
   private readonly cx = new Float32Array(N); private readonly cy = new Float32Array(N); private readonly px = new Float32Array(N); private readonly py = new Float32Array(N);
   private readonly wh: number[][] = [[], []]; private col = { fill: [255, 104, 18], edge: [255, 214, 120] }; private fresh = true;
   private spin = 0; private flyMix = 0; private lunge = 0; private lx = 0; private ly = 0; private jaw = 0; private bolts: number[][] = []; private boltT = 0; private lastForm = 0; private aim = 0;
@@ -22,12 +22,14 @@ export class OverdriveDragon {
     const blank = 'kp-blank'; if (!scene.textures.exists(blank)) scene.textures.createCanvas(blank, 2, 2)!.refresh();
     this.rear = scene.add.graphics().setDepth(9.0).setBlendMode(Phaser.BlendModes.ADD);
     this.front = scene.add.graphics().setDepth(11.3).setBlendMode(Phaser.BlendModes.ADD);
+    this.limb = scene.add.image(0, 0, blank).setBlendMode(Phaser.BlendModes.ADD).setVisible(false).setOrigin(0.04, 0.5).setDepth(11.5);
+    this.tail = scene.add.image(0, 0, blank).setBlendMode(Phaser.BlendModes.ADD).setVisible(false).setOrigin(0.97, 0.5).setDepth(9.0);
     this.head = scene.add.image(0, 0, blank).setBlendMode(Phaser.BlendModes.ADD).setVisible(false).setOrigin(0.3, 0.55);
   }
   /** A strike or signature lunge: the head surges toward the world point and the jaws open. */
-  strike(x: number, y: number, power = 1) { this.lunge = Math.min(1.4, Math.max(this.lunge, 0.7 * power)); this.lx = x; this.ly = y; this.jaw = 1; }
+  strike(x: number, y: number, power = 1) { this.lunge = Math.min(1.4, Math.max(this.lunge, 0.7 * power)); this.lx = x; this.ly = y; this.jaw = 1; this.limbT = 1; }
   get visible() { return this.head.visible; }
-  hide() { this.rear.clear(); this.front.clear(); this.head.setVisible(false); this.fresh = true; this.lunge = 0; }
+  hide() { this.rear.clear(); this.front.clear(); this.head.setVisible(false); this.limb.setVisible(false); this.tail.setVisible(false); this.fresh = true; this.lunge = 0; }
 
   update(i: DragonInput) {
     const { dt, clock, sc } = i;
@@ -94,7 +96,19 @@ export class OverdriveDragon {
       const w = HEAD_W[i.form] * sc * (1 + this.jaw * 0.12) * (0.55 + 0.45 * Math.min(1, A * 1.6));
       this.head.setTexture(fk).setVisible(true).setPosition(Math.round(hx), Math.round(hy)).setScale((w / this.head.width) * (right ? 1 : -1), w / this.head.width).setRotation(ang).setAlpha(Math.min(1, alpha * 1.05)).setDepth(Math.sin(this.aim) < -0.45 && this.flyMix < 0.5 ? 9.05 : 11.45);
     }
+    // ---- ImageGen forelimb: reaches from the shoulder to the struck point and rakes; tail fin (ImageGen) trails off the last link
+    this.limbT = Math.max(0, this.limbT - dt * 2.7);
+    const lk = (n: number) => `ko-${key}_limb${n}`, tk = (n: number) => `ko-${key}_tail${n}`;
+    if (this.limbT > 0 && this.scene.textures.exists(lk(0))) {
+      const u = 1 - this.limbT, fr = Math.min(3, Math.floor(u * 4)), sx = this.px[7], sy = this.py[7], ax = this.lx - sx, ay = this.ly - sy, la = Math.atan2(ay, ax), w = (110 + 70 * Math.sin(Math.min(1, u * 1.6) * 1.5708)) * sc;
+      this.limb.setTexture(lk(fr)).setVisible(true).setPosition(Math.round(sx), Math.round(sy)).setScale(w / this.limb.width * (Math.abs(la) > 1.5708 ? 1 : 1), (w / this.limb.width) * (Math.abs(la) > 1.5708 ? -1 : 1)).setRotation(la).setAlpha(Math.min(1, this.limbT * 3) * alpha);
+    } else this.limb.setVisible(false);
+    const ti = vis - 1;
+    if (ti > 8 && this.scene.textures.exists(tk(0))) {
+      const dxT = this.px[ti] - this.px[ti - 3], dyT = this.py[ti] - this.py[ti - 3], ta = Math.atan2(dyT, dxT) - Math.PI, tw = 105 * sc * (0.6 + 0.4 * A);
+      this.tail.setTexture(tk(Math.floor(clock * 5) % 4)).setVisible(true).setPosition(Math.round(this.px[ti]), Math.round(this.py[ti])).setScale(tw / this.tail.width).setRotation(ta).setAlpha(0.9 * alpha);
+    } else this.tail.setVisible(false);
     this.fresh = false;
   }
-  destroy() { this.rear.destroy(); this.front.destroy(); this.head.destroy(); }
+  destroy() { this.rear.destroy(); this.front.destroy(); this.head.destroy(); this.limb.destroy(); this.tail.destroy(); }
 }
