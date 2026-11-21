@@ -6,11 +6,12 @@ import { PROTOCOL_VERSION, fromInputState, type RoomMode, type ServerMsg } from 
 import type { HeroId } from '../content/heroes';
 import type { ArenaId } from '../content/arenas';
 import { CONNECT_TIMEOUT_MS } from './defaultServer';
+import { isUnlockAll } from '../sim/SaveSystem';
 
 export interface RoomView { code: string; mode: RoomMode; arena: string; state: 'lobby' | 'running' | 'ended'; you: number; players: { name: string; hero: HeroId; ready: boolean; connected: boolean }[] }
 export interface NetResult { won: boolean; seconds: number; kills: number; score: number; runId: string; verified: true; rank?: number }
 export class NetClient {
-  ws: WebSocket | null = null; room: RoomView | null = null; result: NetResult | null = null; error: string | null = null; token = ''; latest: Snap | null = null; private seq = 0; private listeners = new Set<() => void>(); private pings = 0; rtt = 0; private beat: ReturnType<typeof setInterval> | null = null; private pending = new Map<number, number>();
+  ws: WebSocket | null = null; /** set when the other player left a running game */ partnerLeft = false; room: RoomView | null = null; result: NetResult | null = null; error: string | null = null; token = ''; latest: Snap | null = null; private seq = 0; private listeners = new Set<() => void>(); private pings = 0; rtt = 0; private beat: ReturnType<typeof setInterval> | null = null; private pending = new Map<number, number>();
   private stopBeat() { if (this.beat) clearInterval(this.beat); this.beat = null; this.pending.clear(); }
   constructor(private readonly url: string, private readonly name: string) {}
   on(fn: () => void) { this.listeners.add(fn); return () => { this.listeners.delete(fn); }; }
@@ -20,12 +21,12 @@ export class NetClient {
       this.stopBeat(); this.ws?.close(); const ws = this.ws = new WebSocket(this.url); let welcomed = false; const timer = setTimeout(() => { if (!welcomed) { this.error = 'The server did not answer in time. It may still be waking up; try again.'; this.emit(); ws.close(); rej(new Error('timeout')); } }, CONNECT_TIMEOUT_MS);
       const fail = () => { clearTimeout(timer); if (welcomed) return; this.error = 'Could not reach the server'; this.emit(); rej(new Error('connect')); };
       ws.onerror = fail; ws.onclose = () => { clearTimeout(timer); if (this.ws === ws) this.stopBeat(); this.error ??= 'Disconnected'; this.emit(); if (!welcomed) rej(new Error('closed')); };
-      ws.onopen = () => { this.send({ t: 'hello', v: PROTOCOL_VERSION, name: this.name, ...(token ? { token } : {}) }); };
+      ws.onopen = () => { this.send({ t: 'hello', v: PROTOCOL_VERSION, name: this.name, ...(token ? { token } : {}), ...(isUnlockAll() ? { unlock: true } : {}) }); };
       ws.onmessage = e => {
         let m: ServerMsg; try { m = JSON.parse(String(e.data)) as ServerMsg; } catch { return; }
         if (m.t === 'welcome') { welcomed = true; clearTimeout(timer); if (m.token) this.token = m.token; this.error = null; if (!this.beat) this.beat = setInterval(() => { if (ws.readyState !== 1) return; const n = this.pings = (this.pings + 1) % 1e9; this.pending.set(n, performance.now()); if (this.pending.size > 4) this.pending.delete(this.pending.keys().next().value as number); this.send({ t: 'ping', n }); }, 3000); res(); }
         else if (m.t === 'room') this.room = m; else if (m.t === 'snap') { this.latest = m.s as Snap; this.ack = typeof m.ack === 'number' ? m.ack : this.ack; } else if (m.t === 'result') this.result = m;
-        else if (m.t === 'error') { this.error = m.code === 'version' ? 'Update required: this client and the server use different protocol versions.' : m.msg; if (m.code === 'version') rej(new Error('version')); }
+        else if (m.t === 'error') { if (m.code === 'partner_left') this.partnerLeft = true; this.error = m.code === 'version' ? 'Update required: this client and the server use different protocol versions.' : m.msg; if (m.code === 'version') rej(new Error('version')); }
         else if (m.t === 'pong') { const t0 = this.pending.get(m.n); if (t0 !== undefined) { this.pending.delete(m.n); this.rtt = Math.round(performance.now() - t0); } } this.emit();
       };
     });
@@ -58,7 +59,7 @@ export class RemoteSimulation {
   chooseBranch(id: string) { this.net.send({ t: 'pick', kind: 'branch', id }); return true; }
   chooseRelic(id: string) { this.net.send({ t: 'pick', kind: 'relic', id }); return true; }
   chooseLegendary(id: string) { this.net.send({ t: 'pick', kind: 'legend', id }); return true; }
-  togglePause() { /* no pause in a shared run */ } forcePause() { /* none */ }
+  togglePause() { this.net.send({ t: 'pause' }); } forcePause() { if (this.state.phase === 'running') this.net.send({ t: 'pause', on: true }); }
   reroll() { return false; } banish() { return false; } continueEndless() { return false; } extract() { return false; } pushOn() { return false; }
   debugLevelUp() { /* server owns progression */ }
   view<T>(fn: () => T): T { return fn(); } asChooser<T>(fn: () => T): T { return fn(); }

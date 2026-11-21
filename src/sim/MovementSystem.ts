@@ -1,7 +1,7 @@
 import { surgeSpeedMul } from './KaiKit';
 import type { GameState, InputState } from './GameState';
 import { normalize } from '../core/Math';
-import { slideMove } from './CollisionSystem';
+import { slideMove, flyMove, ejectFromSolids } from './CollisionSystem';
 import { cancelCast, castMoveScale } from './AbilitySystem';
 import { APEX } from '../content/stillfire';
 import { FLY, OD } from '../content/kaiCombat';
@@ -28,11 +28,12 @@ export function movePlayer(state: GameState, input: InputState, dt: number) {
     // Form III glides: velocity eases toward the input (ease-in / ease-out), the dash is a near-instant displacement (same ~175 px as before, in 0.13 s)
     const sp = dashing ? 1350 : p.speed * lock * APEX.speedMul, wx = (dashing ? p.dashDx : direction.x) * sp, wy = (dashing ? p.dashDy : direction.y) * sp;
     const k = dashing || p.flyT > 0 ? 1 : 1 - Math.exp(-dt / APEX.glideEase); p.vx += (wx - p.vx) * k; p.vy += (wy - p.vy) * k;
-    slideMove(p, p.vx, p.vy, dt);
+    (p.flyT > 0 ? flyMove : slideMove)(p, p.vx, p.vy, dt);
   } else {
     p.vx = 0; p.vy = 0;
-    slideMove(p, (dashing ? p.dashDx * 800 : direction.x * p.speed * lock) * formSpeed, (dashing ? p.dashDy * 800 : direction.y * p.speed * lock) * formSpeed, dt);
+    (p.flyT > 0 ? flyMove : slideMove)(p, (dashing ? p.dashDx * 800 : direction.x * p.speed * lock) * formSpeed, (dashing ? p.dashDy * 800 : direction.y * p.speed * lock) * formSpeed, dt);
   }
+  if (p.flyT <= 0) ejectFromSolids(p);
   p.dashRemaining = Math.max(0, p.dashRemaining - dt);
   if (apex && dashing && p.dashRemaining <= 0) { p.vx = p.dashDx * p.speed * APEX.speedMul; p.vy = p.dashDy * p.speed * APEX.speedMul; }
   p.dashCooldown = Math.max(0, p.dashCooldown - dt);

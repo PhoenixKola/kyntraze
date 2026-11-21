@@ -18,9 +18,9 @@ function Cards({ title, eyebrow, cards, onPick, accent, art }: { art: (id: strin
     <p className="asc-note">Permanent for this run · unrelated to your saved progress</p>
   </section></div>;
 }
-interface Props { asc: AscView; onBranch: (id: string) => void; onRelic: (id: string) => void; onExtract: () => void; onPushOn: () => void }
-export function AscensionPicker({ asc, onBranch, onRelic, onExtract, onPushOn }: Props) {
-  if (asc.branch) return <Cards title={`CHOOSE A ${asc.branch.skill.toUpperCase()} BRANCH`} eyebrow="ASCENSION PROTOCOL · MUTUALLY EXCLUSIVE" cards={asc.branch.cards} onPick={onBranch} accent="#e9c27a" art={branchArt}/>;
+interface Props { branchKey?: string | null; asc: AscView; onBranch: (id: string) => void; onRelic: (id: string) => void; onExtract: () => void; onPushOn: () => void }
+export function AscensionPicker({ branchKey, asc, onBranch, onRelic, onExtract, onPushOn }: Props) {
+  if (asc.branch) return <Cards title={`CHOOSE A ${asc.branch.skill.toUpperCase()}${branchKey ? ` (${branchKey})` : ''} BRANCH`} eyebrow="ASCENSION PROTOCOL · MUTUALLY EXCLUSIVE" cards={asc.branch.cards} onPick={onBranch} accent="#e9c27a" art={branchArt}/>;
   if (asc.relics) return <Cards title="CLAIM A REALM RELIC" eyebrow="EXPEDITION RELIC" cards={asc.relics} onPick={onRelic} accent="#9fe6e0" art={relicArt}/>;
   if (asc.extract) return <div className="overlay lv-overlay asc-overlay" data-testid="extract-screen"><section className="lv-modal" role="dialog" aria-modal="true" aria-labelledby="ex-title">
     <header className="lv-head"><div><p className="eyebrow">ENDLESS · CYCLE {asc.extract.cycle} SURVIVED</p><h2 id="ex-title">EXTRACT OR PUSH ON?</h2></div></header>

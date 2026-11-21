@@ -1,3 +1,4 @@
+import { loadSave } from '../../sim/SaveSystem';
 import Phaser from 'phaser';
 import { isHeroId, type HeroId } from '../../content/heroes';
 import { applyHero } from '../../sim/RunConfig';
@@ -40,7 +41,7 @@ export class ArenaScene extends Phaser.Scene {
   private fx!: EffectsRenderer;
   private presentation!: Presentation;
   private fixed = new FixedStep();
-  private publishClock = 0; private victoryClock = -1;
+  private publishClock = 0; private offerSig = ''; private calmed = false; private victoryClock = -1;
   private celebrated = false;
   private disposed = false;
   private debug: DebugOverlay | null = null;
@@ -63,7 +64,7 @@ export class ArenaScene extends Phaser.Scene {
     this.entityRenderer = new EntityRenderer(this);
     this.fx = new EffectsRenderer(this);
     this.controller = new InputController(() => this.bridge.togglePause(), () => { if (this.bridge.getSettings().pauseOnBlur) this.bridge.pause(); }, () => this.bridge.pause());
-    { const hp = this.bridge.getPartner(); if (hp) { this.simulation.joinPartner({ ...NO_CONFIG, hero: hp }, 'local', ['P1', 'P2']); this.controller.coop = true; } }
+    { const hp = this.bridge.getPartner(); if (hp) { const sv = loadSave(); this.simulation.joinPartner({ ...NO_CONFIG, hero: hp, heroForm: hp !== 'kai' && !!sv.unlocks?.[hp as 'ren' | 'sora'], vexForms: sv.b22?.vexForms }, 'local', ['P1', 'P2']); this.controller.coop = true; } }
     this.bridge.bind(this.simulation); this.bridge.setInjector(code => this.controller?.inject(code));
     this.audio = sharedAbilityAudio(); this.events.on('b21-cue', this.onCue); this.audio?.setMuted(this.bridge.getSettings().mute);
     window.addEventListener('keydown', this.unlockAudio); window.addEventListener('pointerdown', this.unlockAudio);
@@ -127,7 +128,9 @@ export class ArenaScene extends Phaser.Scene {
     this.fx.render(s, this.reduced);
     this.audio?.setMuted(this.bridge.getSettings().mute); this.audio?.sync(s);
     this.publishClock += delta;
-    if ((s.phase === 'running' && this.publishClock >= 100) || this.bridge.snapshot().phase !== s.phase) { this.publishClock = 0; this.bridge.publish(); }
+    if (twoFighters && !this.calmed) { this.calmed = true; const cam = this.cameras.main, orig = cam.shake.bind(cam); cam.shake = ((ms?: number, k?: number | Phaser.Math.Vector2, force?: boolean) => orig(Math.min(ms ?? 100, 90), typeof k === 'number' ? Math.min(k * 0.3, 0.0012) : k, force)) as typeof cam.shake; }   // co-op: two fighters' hits stack into constant shaking, so every camera shake is softened
+    const sig = s.phase === 'upgrade' ? this.bridge.offerSignature() : '';
+    if ((s.phase === 'running' && this.publishClock >= 100) || this.bridge.snapshot().phase !== s.phase || (s.phase === 'upgrade' && sig !== this.offerSig)) { this.publishClock = 0; this.offerSig = sig; this.bridge.publish(); }
   }
   private revealCur = 0; private cam2: Phaser.Cameras.Scene2D.Camera | null = null; private splitOn = false;
   /** Shared view while close; automatic left/right split (one camera per fighter) when far apart, with hysteresis. */

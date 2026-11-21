@@ -737,3 +737,30 @@ main[data-testid="hero-select"] .arena-strip-go { position: static; white-space:
 /* B26: the Crimson Ascendant skill icons are full-colour ImageGen art, not white glyph masks */
 .slot.art .slot-ico { background: var(--ico) center / contain no-repeat !important; -webkit-mask: none; mask: none; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .7)); }
 .slot.art.cooling .slot-ico { opacity: .45; filter: grayscale(.8); } .slot.art.locked .slot-ico { opacity: .35; filter: grayscale(1); }
+
+.lv-keyhint { color: #ffd98a; font-weight: 700; letter-spacing: .04em; white-space: nowrap; }
+
+/* Co-op: Player 2 panel redesign (readable bars, nothing overlapping, abilities fitted to the panel width) */
+.hud-partner { width: calc(262 * var(--u)); min-width: 214px; gap: calc(5 * var(--u)); padding: calc(7 * var(--u)) calc(9 * var(--u)); top: calc(118 * var(--u)); }
+.hud-partner .pp-head { display: flex; align-items: center; gap: calc(6 * var(--u)); min-height: calc(16 * var(--u)); font-size: max(9px, calc(11 * var(--u))); }
+.hud-partner .pp-head b { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: .14em; color: #f4e2b8; }
+.hud-partner .pp-tag { padding: 1px calc(6 * var(--u)); background: #e9c27a; color: #1a1206; font-weight: 800; letter-spacing: .08em; border-radius: 2px; }
+.hud-partner .pp-lv { color: #9fe6e0; letter-spacing: .1em; font-weight: 700; }
+.hud-partner .pp-state:empty { display: none; }
+.hud-partner .pp-state { padding: 1px calc(6 * var(--u)); border-radius: 2px; letter-spacing: .08em; font-size: max(8px, calc(9 * var(--u))); background: rgba(255, 200, 87, .18); color: #ffd98a; border: 1px solid rgba(255, 200, 87, .5); }
+.hud-partner .pp-state.down { background: rgba(255, 90, 100, .2); color: #ff9aa2; border-color: rgba(255, 90, 100, .6); } .hud-partner .pp-state.out { background: rgba(120, 120, 130, .25); color: #b9bec6; border-color: #6c727a; }
+.hud-partner .pp-hp, .hud-partner .pp-xp, .hud-partner .pp-drive { position: relative; overflow: hidden; background: #0c141b; border: 1px solid #34505f; border-radius: 2px; }
+.hud-partner .pp-hp { height: max(14px, calc(18 * var(--u))); border-color: #6a2f3a; }
+.hud-partner .pp-xp, .hud-partner .pp-drive { height: max(10px, calc(12 * var(--u))); }
+.hud-partner .pp-hp i, .hud-partner .pp-xp i, .hud-partner .pp-drive i { display: block; height: 100%; transition: width .15s linear; }
+.hud-partner .pp-hp i { background: linear-gradient(90deg, #b8303f, #ff6b78); } .hud-partner .pp-xp i { background: linear-gradient(90deg, #2f8fd0, #7fe0ff); }
+.hud-partner .pp-drive i { background: linear-gradient(90deg, #b8741f, #ffc857); } .hud-partner .pp-drive.on i { background: linear-gradient(90deg, #ff6a2b, #ffd36b); box-shadow: 0 0 6px #ff9a3b; }
+.hud-partner .pp-hp span, .hud-partner .pp-xp span, .hud-partner .pp-drive span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: max(8px, calc(10 * var(--u))); font-weight: 700; letter-spacing: .08em; color: #fff; text-shadow: 0 1px 2px #000, 0 0 3px #000; pointer-events: none; }
+.hud-partner .pp-mini { display: grid; grid-template-columns: 1fr 1fr; gap: calc(5 * var(--u)); }
+.hud-partner .hud-slots.compact { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: calc(3 * var(--u)); width: 100%; padding: calc(2 * var(--u)) 0 0; justify-items: center; }
+.hud-partner .hud-slots.compact .slot { width: 100%; max-width: max(30px, calc(36 * var(--u))); height: auto; aspect-ratio: 1; }
+.hud-partner.down { filter: none; border-color: #ff5a64; } .hud-partner.down .hud-slots, .hud-partner.out .hud-slots { opacity: .45; }
+@media (max-height: 420px) { .hud-partner { top: calc(104 * var(--u)); } }
+.mode-opts .outlined-button.on, .hero-pick .outlined-button.on { position: relative; filter: brightness(1.25) saturate(1.2); color: #fff; box-shadow: 0 0 0 2px #e9c27a, 0 0 14px rgba(233, 194, 122, .6); }
+.pick-check { position: absolute; top: -7px; right: -5px; width: 17px; height: 17px; line-height: 17px; text-align: center; font-size: 11px; font-weight: 800; font-style: normal; background: #e9c27a; color: #1a1206; border-radius: 50%; pointer-events: none; z-index: 2; }
+.hero-pick { display: flex; flex-wrap: wrap; gap: calc(8 * var(--u)); }

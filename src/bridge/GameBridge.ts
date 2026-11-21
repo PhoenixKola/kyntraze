@@ -21,7 +21,7 @@ import { bestFormOf } from '../app/ui/victoryPose';
 import { inSlot } from '../sim/CoopSystem';
 import type { GameState as GS } from '../sim/GameState';
 import { ascView } from './ascView';
-import { blankSnapshot, type MiniMap, type RunHud, type UiSnapshot } from './UiSnapshot';
+import { blankSnapshot, type MiniMap, type OfferCard, type RunHud, type UiSnapshot } from './UiSnapshot';
 import { UPGRADES, UPGRADE_BY_ID, type UpgradeId } from '../content/upgrades';
 import { previewUpgrade } from '../sim/UpgradeSystem';
 import { ENEMIES, isBoss, type BossKind } from '../content/enemies';
@@ -78,6 +78,8 @@ export class GameBridge {
   snapshot(): UiSnapshot { return this.current; }
   /** Co-op (local couch): the upgrade / branch / relic / legend offers live in the CHOOSING fighter's slot, so the screen must be built from that slot, not from player 1's. Online clients only ever hold their own slot, so this is a plain call there. */
   private asChooserView<T>(fn: () => T): T { const sm = this.sim as unknown as { view?: <U>(f: () => U) => U }; return sm && typeof sm.view === 'function' && this.sim?.state.phase === 'upgrade' ? sm.view(fn) : fn(); }
+  /** Cheap fingerprint of whatever the level-up screen shows, so the UI is republished the moment a chooser, card set, branch, relic or legend offer changes inside one upgrade phase. */
+  offerSignature(): string { const s = this.sim?.state; if (!s) return ''; return this.asChooserView(() => `${s.party?.chooser ?? ''}|${s.upgradeOffers.join(',')}|${s.b22.branchOffer ? `${s.b22.branchOffer.a}${s.b22.branchOffer.b}` : ''}|${s.b22.relicOffer?.join(',') ?? ''}|${s.b22.legendOffer ?? ''}`); }
   publish(force = false) {
     const s = this.sim?.state; if (!s) return;
     const p = s.player, lance = s.hx?.act?.act === 'celestial_lance' && !s.hx.act.released ? s.hx.act : null;
@@ -90,7 +92,7 @@ export class GameBridge {
     this.current = { b22Crest: this.save.b22?.equipped?.crest ?? null, bestForm: bestFormOf(s.hero, s.run?.formsUsed ?? []), partner: (() => { const P = s.party; const np = (s as unknown as { partner?: { player: { hp: number; maxHp: number; form: number; drive: number; level: number; xp?: number; nextXp?: number }; hero: HeroId; down: { downed: boolean; out: boolean; hold: number } } }).partner; if (!P && np) return { bar: onlineBar(s, np), name: 'P2', hero: np.hero, hp: np.player.hp, maxHp: np.player.maxHp, form: np.player.form, drive: np.player.drive, down: np.down.downed, out: np.down.out, revive: np.down.hold / REVIVE.hold, level: np.player.level, xp: np.player.xp ?? 0, nextXp: np.player.nextXp ?? 1 }; if (!P) return null; const q = slotPlayer(s, 1), d = P.slots[1].down; return { bar: (() => { try { return inSlot(s, 1, () => abilityView(s)); } catch { return null; } })(), name: P.names[1], hero: slotHero(s, 1), hp: q.hp, maxHp: q.maxHp, form: q.form, drive: q.drive, down: d.downed, out: d.out, revive: d.hold / REVIVE.hold, level: q.level, xp: q.xp, nextXp: q.nextXp }; })(), party: s.party ? { resonance: s.party.shared.resonance, resonanceT: s.party.shared.resonanceT, pair: s.party.shared.pair, chooser: s.party.chooser } : null, asc: (() => { try { return this.asChooserView(() => ascView(s)); } catch { return null; } })(), tips: (() => { try { return abilityTips(s); } catch { return null; } })(), phase: s.phase, seed: s.seed, hp: p.hp, maxHp: p.maxHp, xp: p.xp,
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
       dashCooldown: p.dashCooldown, sigCd: p.sigCd, odMeter: p.odMeter, odT: p.odT, sigCharge: sigCharge(s) ? Math.min(1, sigCharge(s)!.charge / SIG.stages[2]) : 0, sigTier: sigCharge(s)?.tier ?? -1, flying: p.flyT > 0, dashLeft: dashMax(s) - Math.min(dashMax(s), p.dashUsed), dashMax: dashMax(s), qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form, dragonCooldown: p.dragonCooldown, cometCooldown: p.cometCooldown, hero: s.hero, heroFormUnlocked: s.hero === 'vex' ? (s.b22.vex.forms[0] || s.b22.vex.forms[1]) : s.heroFormUnlocked, heroReady: s.hero !== 'kai' && formChoices(s).includes(1), lanceCharge: lance ? lance.charge / SORA.e.maxCharge : 0, lanceTier: lance ? SORA.e.tiers.reduce((t, v, i) => (lance.charge >= v ? i : t), -1) : -1, heroAct: s.hx?.act?.act ?? '', cometUnlocked: s.cometUnlocked, cometReady: formChoices(s).includes(2), apexUnlocked: s.apexUnlocked, apexReady: formChoices(s).includes(3), riftCooldown: p.riftCooldown, reversalCooldown: p.reversalCooldown, evadeCooldown: p.evadeCooldown, riftCharge: s.cast?.kind === 'rift' && !s.cast.released ? Math.min(1, s.cast.t / RIFT.maxCharge) : 0, selector: { open: !!s.selector?.open, pick: selectedForm(s) ?? 0, choices: formChoices(s), left: Math.max(0, SELECTOR_MAX - (s.selector?.held ?? 0)) }, cinema: !!s.cinema,
-      formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? this.asChooserView(() => s.upgradeOffers.map(id => offerCard(s, id))) : [], owned: this.asChooserView(() => UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] }))), map: miniMap(s),
+      formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? this.asChooserView(() => s.upgradeOffers.map(id => offerCard(s, id))) : [], owned: this.asChooserView(() => UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] }))), map: withAlly(s, miniMap(s)),
       kit: kitSnap(s), cdMax: { q: [SURGE.cooldown, SCATTER.cooldown, METEOR.cooldown, ECHO.cooldown][p.form] ?? SURGE.cooldown, flare: RISE.cooldown * s.mods.beamCd, crucible: CRUCIBLE.cooldown * s.mods.sphereCd, dash: 3.2 * s.mods.dashCd, beam: (s.hero === 'ren' ? (p.form ? REN_E.cooldown : REN.e.cooldown) : s.hero === 'sora' ? SORA.e.cooldown : BEAM.cooldown) * s.mods.beamCd, sphere: (s.hero === 'ren' ? (p.form ? REN_R.cooldown : REN.r.cooldown) : s.hero === 'sora' ? SORA.r.cooldown : SPHERE.cooldown) * s.mods.sphereCd, form: (s.hero === 'kai' ? RULES.formCooldown : ASCEND.cooldown) * s.mods.formCd, dragon: DRAGON.cooldown * s.mods.beamCd, comet: CANNON.cooldown * s.mods.sphereCd, rift: RIFT.cooldown * s.mods.beamCd, reversal: REVERSAL.cooldown * s.mods.sphereCd, evade: EVASION.cooldown }, run: runHud(s), victoryShown: this.victoryShown, rewardPick: s.rewardPick, contract: this.config.contract, boon: this.config.boon, rerolls: s.run?.rerollsLeft ?? 0, banishes: s.run?.banishesLeft ?? 0, reward: this.reward, marks: this.save.meta.marks, crest: this.save.meta.crest, bosses: s.bossesDefeated, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
     if ((s.phase === 'dead' || s.phase === 'victory') && phaseChanged) {
       const stats = this.sim!.stats();
@@ -153,9 +155,17 @@ function bossHud(s: GameState): BossHud | null {
   return { id: def.id, name: def.name, hp: b.hp, maxHp: b.maxHp, phase: b.ai.phase, phases: def.phaseAt2 !== undefined || def.id === 'sovereign' ? 3 : 2, mode: b.mode, intro: b.mode === 'intro' ? b.modeT : 0, invuln: b.ai.invuln, exposed: b.ai.exposed, parts, shielded: (b.ex?.shield ?? 0) > 0 };
 }
 
-function offerCard(s: GameState, id: UpgradeId) {
+const CATEGORY_SLOT: Partial<Record<string, OfferCard['slot']>> = { core: 'auto', beam: 'e', sphere: 'r', drive: 'f' };
+const UPGRADE_SLOT: Partial<Record<UpgradeId, OfferCard['slot']>> = { pulse: 'q', dashcool: 'dash' };
+function offerCard(s: GameState, id: UpgradeId): OfferCard {
   const u = UPGRADE_BY_ID[id], pv = previewUpgrade(s, id), ov = s.hero === 'kai' ? undefined : UPGRADE_OVERRIDES[s.hero][id];
-  return { id, name: ov?.name ?? u.name, blurb: ov?.blurb ?? u.blurb, catName: s.hero === 'kai' ? undefined : HERO_KIT[s.hero].catNames[u.category], category: u.category, rarity: u.rarity, stack: s.upgradeStacks[id] ?? 0, max: u.maxStacks, label: pv.label, before: pv.before, after: pv.after };
+  return { slot: UPGRADE_SLOT[id] ?? CATEGORY_SLOT[u.category], id, name: ov?.name ?? u.name, blurb: ov?.blurb ?? u.blurb, catName: s.hero === 'kai' ? undefined : HERO_KIT[s.hero].catNames[u.category], category: u.category, rarity: u.rarity, stack: s.upgradeStacks[id] ?? 0, max: u.maxStacks, label: pv.label, before: pv.before, after: pv.after };
+}
+function withAlly(s: GameState, m: MiniMap): MiniMap {
+  const np = (s as unknown as { partner?: { player: { x: number; y: number; aimX: number; aimY: number }; down: { downed: boolean } } }).partner;
+  if (s.party) { const q = slotPlayer(s, 1); return { ...m, ally: { x: q.x, y: q.y, ax: q.aimX, ay: q.aimY, down: s.party.slots[1].down.downed || s.party.slots[1].down.out } }; }
+  if (np) return { ...m, ally: { x: np.player.x, y: np.player.y, ax: np.player.aimX, ay: np.player.aimY, down: np.down.downed } };
+  return m;
 }
 function miniMap(s: GameState): MiniMap {
   const p = s.player, foes: number[] = []; let near = 0, nearest = 9999, eliteNear = false, bossNear = false;

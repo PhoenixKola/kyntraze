@@ -6,20 +6,20 @@ export const PROTOCOL_VERSION = 1, MAX_MSG_BYTES = 2048, INPUT_HZ = 60;
 export type RoomMode = 'classic' | 'fracture_expedition' | 'boss_rush';
 export const ROOM_MODES: readonly RoomMode[] = ['classic', 'fracture_expedition', 'boss_rush'];
 export type ClientMsg =
-  | { t: 'hello'; v: number; name: string; token?: string }
+  | { t: 'hello'; v: number; name: string; token?: string; /** QA / owner switch (?unlock=all): everything unlocked for this player; such runs are never ranked */ unlock?: boolean }
   | { t: 'create'; hero: HeroId; mode: RoomMode; arena: string }
   | { t: 'join'; code: string; hero: HeroId }
   | { t: 'ready'; ready: boolean; hero?: HeroId }
   | { t: 'input'; seq: number; i: WireInput }
   | { t: 'pick'; kind: 'upgrade' | 'branch' | 'relic' | 'legend'; id: string }
-  | { t: 'leave' } | { t: 'ping'; n: number };
+  | { t: 'pause'; on?: boolean } | { t: 'leave' } | { t: 'ping'; n: number };
 export interface WireInput { x: number; y: number; dash: boolean; q: boolean; f: boolean; beam: boolean; sphere: boolean; beamHeld: boolean; fHeld: boolean; sig?: boolean; sigHeld?: boolean; od?: boolean; sigAbort?: boolean; flyHeld?: boolean; /** Form Shift pick 1-3, one-shot */ selPick?: 1 | 2 | 3; aimX?: number; aimY?: number; aimSrc?: 'pointer' | 'stick'; aimDist?: number }
 export type ServerMsg =
   | { t: 'welcome'; v: number; id: string; token: string; serverTime: number }
   | { t: 'room'; code: string; mode: RoomMode; arena: string; state: 'lobby' | 'running' | 'ended'; you: number; players: { name: string; hero: HeroId; ready: boolean; connected: boolean }[] }
   | { t: 'snap'; tick: number; ack: number; s: unknown }
   | { t: 'result'; won: boolean; seconds: number; kills: number; score: number; runId: string; verified: true; rank?: number }
-  | { t: 'error'; code: 'version' | 'bad_message' | 'rate_limit' | 'no_room' | 'room_full' | 'bad_state' | 'forbidden'; msg: string }
+  | { t: 'error'; code: 'version' | 'bad_message' | 'rate_limit' | 'no_room' | 'room_full' | 'bad_state' | 'forbidden' | 'partner_left'; msg: string }
   | { t: 'pong'; n: number };
 
 const fin = (v: unknown, lo: number, hi: number) => typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi;
@@ -30,7 +30,7 @@ export function parseClient(raw: string): ClientMsg | null {
   if (typeof raw !== 'string' || raw.length > MAX_MSG_BYTES) return null;
   let m: unknown; try { m = JSON.parse(raw); } catch { return null; } if (typeof m !== 'object' || m === null) return null; const o = m as Record<string, unknown>;
   switch (o.t) {
-    case 'hello': return fin(o.v, 0, 1e6) && typeof o.name === 'string' && NAME.test(o.name) && (o.token === undefined || (typeof o.token === 'string' && /^[0-9a-f]{48}$/.test(o.token))) ? { t: 'hello', v: o.v as number, name: o.name, token: o.token as string | undefined } : null;
+    case 'hello': return fin(o.v, 0, 1e6) && typeof o.name === 'string' && NAME.test(o.name) && (o.token === undefined || (typeof o.token === 'string' && /^[0-9a-f]{48}$/.test(o.token))) && (o.unlock === undefined || typeof o.unlock === 'boolean') ? { t: 'hello', v: o.v as number, name: o.name, token: o.token as string | undefined, ...(o.unlock === true ? { unlock: true } : {}) } : null;
     case 'create': return isHero(o.hero) && typeof o.mode === 'string' && (ROOM_MODES as readonly string[]).includes(o.mode) && typeof o.arena === 'string' && /^[a-z]{3,12}$/.test(o.arena) ? { t: 'create', hero: o.hero, mode: o.mode as RoomMode, arena: o.arena } : null;
     case 'join': return typeof o.code === 'string' && CODE.test(o.code) && isHero(o.hero) ? { t: 'join', code: o.code, hero: o.hero } : null;
     case 'ready': return typeof o.ready === 'boolean' && (o.hero === undefined || isHero(o.hero)) ? { t: 'ready', ready: o.ready, hero: o.hero as HeroId | undefined } : null;
@@ -43,6 +43,7 @@ export function parseClient(raw: string): ClientMsg | null {
       return { t: 'input', seq: o.seq as number, i: i as unknown as WireInput };
     }
     case 'pick': return (o.kind === 'upgrade' || o.kind === 'branch' || o.kind === 'relic' || o.kind === 'legend') && typeof o.id === 'string' && /^[a-z_]{2,32}$/.test(o.id) ? { t: 'pick', kind: o.kind, id: o.id } : null;
+    case 'pause': return o.on === undefined || typeof o.on === 'boolean' ? { t: 'pause', ...(o.on === undefined ? {} : { on: o.on as boolean }) } : null;
     case 'leave': return { t: 'leave' };
     case 'ping': return fin(o.n, 0, 1e9) ? { t: 'ping', n: o.n as number } : null;
     default: return null;

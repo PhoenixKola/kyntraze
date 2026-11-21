@@ -7,9 +7,9 @@ import type { RoomMode } from '../../net/protocol';
 import { HintBar } from './Chrome';
 import { DEFAULT_SERVER_URL } from '../../net/defaultServer';
 
-interface Props { savedUrl: string; savedName: string; hero: HeroId; onSaveServer: (url: string, name: string) => void; onStart: (net: NetClient, seed: number) => void; onBack: () => void }
+interface Props { notice?: string; savedUrl: string; savedName: string; hero: HeroId; onSaveServer: (url: string, name: string) => void; onStart: (net: NetClient, seed: number) => void; onBack: () => void }
 /** Online co-op lobby: server address (wss:// only; ws:// to localhost for development), a display name, create / join by room code, hero pick and ready. Nothing is sent until you press CONNECT; solo play never touches the network. */
-export function OnlineLobby({ savedUrl, savedName, hero, onSaveServer, onStart, onBack }: Props) {
+export function OnlineLobby({ notice, savedUrl, savedName, hero, onSaveServer, onStart, onBack }: Props) {
   const [url, setUrl] = useState(savedUrl || DEFAULT_SERVER_URL), [name, setName] = useState(savedName || 'Runner'), [code, setCode] = useState(''), [mode, setMode] = useState<RoomMode>('classic'), [h, setH] = useState<HeroId>(hero);
   const [net, setNet] = useState<NetClient | null>(null), [, tick] = useState(0), [busy, setBusy] = useState(false), [fail, setFail] = useState(''), [adv, setAdv] = useState(false);
   const ok = safeServerUrl(url);
@@ -24,7 +24,7 @@ export function OnlineLobby({ savedUrl, savedName, hero, onSaveServer, onStart, 
   const room = net?.room;
   return <main className="selection-layout online-layout" data-testid="online-lobby">
     <div className="screen-header"><button className="text-button" onClick={() => { net?.close(); onBack(); }} data-pad-cancel>← BACK</button><span>ONLINE CO-OP · FRACTURE ALLIANCE</span></div>
-    <p className="eyebrow">TWO RUNNERS · ONE SERVER-OWNED RUN</p><h2 className="large-heading">{room ? `ROOM ${room.code}` : 'JOIN THE ALLIANCE'}</h2>
+    <p className="eyebrow">TWO RUNNERS · ONE SERVER-OWNED RUN</p>{notice && !room && <p className="asc-note" role="status" data-testid="lobby-notice">{notice}</p>}<h2 className="large-heading">{room ? `ROOM ${room.code}` : 'JOIN THE ALLIANCE'}</h2>
     {!net && <div className="online-form">
       {url === DEFAULT_SERVER_URL && !adv ? <p className="asc-note" data-testid="official-server">OFFICIAL SERVER · {DEFAULT_SERVER_URL.replace(/^wss?:\/\//, '')} <button className="text-button" onClick={() => setAdv(true)}>custom server</button></p>
         : <label>SERVER<input value={url} onChange={e => setUrl(e.target.value)} placeholder="wss://your-server.example" data-testid="server-url" spellCheck={false}/></label>}
@@ -36,13 +36,14 @@ export function OnlineLobby({ savedUrl, savedName, hero, onSaveServer, onStart, 
     </div>}
     {net && !room && <div className="online-form">
       {net.error && <p className="asc-note" role="alert" data-testid="net-error">{net.error}</p>}
-      <div className="mode-opts">{HERO_IDS.map(x => <button key={x} className={`outlined-button ${h === x ? 'on' : ''}`} onClick={() => setH(x)}>{x.toUpperCase()}</button>)}</div>
+      <div className="mode-opts" role="group" aria-label="Hero">{HERO_IDS.map(x => <button key={x} className={`outlined-button ${h === x ? 'on' : ''}`} aria-pressed={h === x} onClick={() => setH(x)}>{x.toUpperCase()}{h === x && <i className="pick-check" aria-hidden="true">✓</i>}</button>)}</div>
       <div className="mode-opts">{(['classic', 'fracture_expedition', 'boss_rush'] as RoomMode[]).map(m => <button key={m} className={`outlined-button ${mode === m ? 'on' : ''}`} onClick={() => setMode(m)}>{m.replace(/_/g, ' ').toUpperCase()}</button>)}</div>
       <button className="primary-button" onClick={() => net.send({ t: 'create', hero: h, mode, arena: mode === 'fracture_expedition' ? 'aetherfall' : 'gloam' })} data-testid="create-room">CREATE ROOM</button>
       <div className="mode-opts"><input value={code} maxLength={5} onChange={e => setCode(e.target.value.toUpperCase())} placeholder="CODE" data-testid="room-code"/><button className="outlined-button" onClick={() => net.send({ t: 'join', code, hero: h })} data-testid="join-room">JOIN</button></div>
     </div>}
     {net && room && <div className="online-form" data-testid="room-view">
       <ul>{room.players.map((p, i) => <li key={i}><b>{p.name}</b> · {p.hero.toUpperCase()} · {p.connected ? (p.ready ? 'READY' : 'not ready') : 'disconnected'}{i === room.you ? ' (you)' : ''}</li>)}</ul>
+      {!room.players[room.you]?.ready && <div className="mode-opts" role="group" aria-label="Your hero">{HERO_IDS.map(x => { const on = room.players[room.you]?.hero === x; return <button key={x} className={`outlined-button ${on ? 'on' : ''}`} aria-pressed={on} onClick={() => { setH(x); net.send({ t: 'ready', ready: false, hero: x }); }} data-testid={`room-hero-${x}`}>{x.toUpperCase()}{on && <i className="pick-check" aria-hidden="true">✓</i>}</button>; })}</div>}
       <p className="asc-note">{room.players.length < 2 ? `Share the code ${room.code} with your partner.` : 'Both ready starts the run.'} Mode: {room.mode.replace(/_/g, ' ')}</p>
       <button className="primary-button" onClick={() => net.send({ t: 'ready', ready: !room.players[room.you]?.ready })} data-testid="ready">{room.players[room.you]?.ready ? 'NOT READY' : 'READY'}</button>
     </div>}

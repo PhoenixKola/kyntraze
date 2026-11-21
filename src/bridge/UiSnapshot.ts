@@ -45,11 +45,11 @@ export interface UiSnapshot {
 }
 /** Run progress for the HUD: the clock, the plan's two boss times, and the next event to hint at. */
 export interface RunHud { t: number; wardenAt: number; finaleAt: number; wardenDone: boolean; finaleOut: boolean; nextLabel: string; nextIn: number; announce: { text: string; sub: string; age: number } | null }
-export interface OfferCard { id: UpgradeId; name: string; blurb: string; /** hero-specific category label (Ren: RUSH / IMPACT, Sora: LANCE / HORIZON) */ catName?: string; category: UpgradeCategory; rarity: Rarity; stack: number; max: number; label: string; before: string; after: string }
+export interface OfferCard { /** which ability or control this card improves, for the key hint */ slot?: 'auto' | 'q' | 'e' | 'r' | 'dash' | 'f'; id: UpgradeId; name: string; blurb: string; /** hero-specific category label (Ren: RUSH / IMPACT, Sora: LANCE / HORIZON) */ catName?: string; category: UpgradeCategory; rarity: Rarity; stack: number; max: number; label: string; before: string; after: string }
 export interface OwnedUpgrade { id: UpgradeId; stacks: number }
 /** Minimap feed. `foes` is a flat [x, y, kind, ...] list: kind 0 grunt, 1 caster, 2 elite, 3 boss. Hazards carry warning progress (0..1) or `live` once they have fired. */
 export interface MapHazard { shape: 'circle' | 'rect' | 'cone' | 'sigil' | 'lane'; x: number; y: number; r: number; w: number; h: number; warn: number; live: boolean }
-export interface MiniMap { arena: ArenaId; px: number; py: number; ax: number; ay: number; foes: number[]; hazards: MapHazard[]; near: number; nearest: number; eliteNear: boolean; bossNear: boolean }
+export interface MiniMap { /** the second fighter (co-op), drawn as a second marker */ ally?: { x: number; y: number; ax: number; ay: number; down: boolean }; arena: ArenaId; px: number; py: number; ax: number; ay: number; foes: number[]; hazards: MapHazard[]; near: number; nearest: number; eliteNear: boolean; bossNear: boolean }
 export const blankMap: MiniMap = { arena: 'gloam', px: 1100, py: 800, ax: 0, ay: 1, foes: [], hazards: [], near: 0, nearest: 9999, eliteNear: false, bossNear: false };
 export interface BossPartHud { role: string; hp: number; maxHp: number; id: number }
 export interface BossHud { id: string; name: string; hp: number; maxHp: number; phase: number; phases: number; mode: string; intro: number; invuln: boolean; exposed: boolean; /** B22: authoritative parts (anchors, arms, constructs) with their own health */ parts: BossPartHud[]; /** B22: the core is shielded by its parts */ shielded: boolean }

@@ -77,6 +77,16 @@ export function drawMinimap(ctx: CanvasRenderingContext2D, cw: number, ch: numbe
   ctx.save(); ctx.translate(ppx, ppy); ctx.rotate(Math.atan2(m.ay, m.ax) + Math.PI / 2);
   if (pimg) ctx.drawImage(pimg, -ps / 2, -ps / 2); else { ctx.fillStyle = '#9ff7ff'; ctx.beginPath(); ctx.arc(0, 0, px * 3, 0, TAU); ctx.fill(); }
   ctx.restore();
+  // partner (co-op): a gold chevron with its own halo and a "2", greyed while downed
+  const a = m.ally; if (a) {
+    const ax = a.x * k, ay = a.y * k, as = Math.round(px * 13), ar = px * 10, col = a.down ? 'rgba(160,160,170,' : 'rgba(255,200,110,', ag = ctx.createRadialGradient(ax, ay, 0, ax, ay, ar);
+    ag.addColorStop(0, col + '.5)'); ag.addColorStop(1, col + '0)'); ctx.fillStyle = ag; ctx.fillRect(ax - ar, ay - ar, ar * 2, ar * 2);
+    const ak = `ally${as}${a.down ? 'd' : ''}`; let aimg = cache.get(ak); if (!aimg && ready(icons.player)) { aimg = tinted(icons.player, a.down ? '#9aa0a8' : '#ffd488', as); cache.set(ak, aimg); }
+    ctx.save(); ctx.translate(ax, ay); ctx.rotate(Math.atan2(a.ay, a.ax) + Math.PI / 2);
+    if (aimg) ctx.drawImage(aimg, -as / 2, -as / 2); else { ctx.fillStyle = a.down ? '#9aa0a8' : '#ffd488'; ctx.beginPath(); ctx.arc(0, 0, px * 3, 0, TAU); ctx.fill(); }
+    ctx.restore();
+    ctx.fillStyle = a.down ? '#9aa0a8' : '#ffe2a8'; ctx.font = `bold ${Math.round(px * 6)}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText('2', ax, ay - as * 0.7);
+  }
 }
 
 export function Minimap({ map, boss }: { map: MiniMap; boss: boolean }) {

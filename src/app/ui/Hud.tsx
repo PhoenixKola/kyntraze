@@ -117,12 +117,15 @@ export function Hud({ s, pad, onPause, reduced, onForm, onKey }: Props) {
         </div>
       </div>
     </div>
-    {s.partner && <div className={`hud-panel hud-partner ${s.partner.down ? 'down' : ''}`} data-testid="hud-partner" aria-label="Player 2"><b>P2 · {s.partner.hero.toUpperCase()}</b>
-      <div className="partner-hp" role="progressbar" aria-label="Partner health" aria-valuenow={Math.ceil(s.partner.hp)} aria-valuemax={Math.ceil(s.partner.maxHp)}><i style={{ width: pct(s.partner.hp / s.partner.maxHp * 100) }}/></div>
+    {s.partner && <div className={`hud-panel hud-partner ${s.partner.down ? 'down' : ''} ${s.partner.out ? 'out' : ''}`} data-testid="hud-partner" aria-label="Player 2">
+      <header className="pp-head"><span className="pp-tag">P2</span><b>{s.partner.hero.toUpperCase()}</b><span className="pp-lv">LV {s.partner.level}</span>
+        <span className={`pp-state ${s.partner.out ? 'out' : s.partner.down ? 'down' : s.partner.form ? 'form' : ''}`}>{s.partner.out ? 'OUT' : s.partner.down ? `DOWN ${Math.round(s.partner.revive * 100)}%` : s.partner.form ? 'TRANSFORMED' : ''}</span></header>
+      <div className="pp-hp" role="progressbar" aria-label="Partner health" aria-valuenow={Math.ceil(s.partner.hp)} aria-valuemax={Math.ceil(s.partner.maxHp)}><i style={{ width: pct(s.partner.hp / s.partner.maxHp * 100) }}/><span>{Math.ceil(s.partner.hp)} / {Math.ceil(s.partner.maxHp)}</span></div>
+      <div className="pp-mini">
+        <div className="pp-xp" role="progressbar" aria-label="Partner experience" aria-valuenow={Math.floor(s.partner.xp)} aria-valuemax={s.partner.nextXp}><i style={{ width: pct(s.partner.xp / Math.max(1, s.partner.nextXp) * 100) }}/><span>XP</span></div>
+        <div className={`pp-drive ${s.partner.form ? 'on' : ''}`} role="progressbar" aria-label="Partner transformation drive" aria-valuenow={Math.floor(s.partner.drive)} aria-valuemax={100}><i style={{ width: pct(s.partner.form ? 100 : s.partner.drive) }}/><span>{s.partner.form ? `FORM ${s.partner.form}` : 'DRIVE'}</span></div>
+      </div>
       {s.partner.bar && <AbilityBar s={s.partner.bar} pad={pad} prefix="p2-" compact/>}
-      <div className="partner-xp" role="progressbar" aria-label="Partner experience" aria-valuenow={Math.floor(s.partner.xp)} aria-valuemax={s.partner.nextXp}><i style={{ width: pct(s.partner.xp / Math.max(1, s.partner.nextXp) * 100) }}/><span>LV {s.partner.level}</span></div>
-      <div className={`partner-form ${s.partner.form ? 'on' : ''}`} role="progressbar" aria-label="Partner transformation drive" aria-valuenow={Math.floor(s.partner.drive)} aria-valuemax={100}><i style={{ width: pct(s.partner.form ? 100 : s.partner.drive) }}/><span>{s.partner.form ? `FORM ${s.partner.form}` : 'DRIVE'}</span></div>
-      <small>{s.partner.out ? 'OUT' : s.partner.down ? `DOWN · stand near to revive ${Math.round(s.partner.revive * 100)}%` : s.partner.form ? 'TRANSFORMED' : `LV ${s.partner.level}`}</small>
       {s.party && <u className={`res-bar ${s.party.resonanceT > 0 ? 'live' : ''}`} title="Resonance: earned by fighting together"><i style={{ width: pct(s.party.resonance) }}/></u>}</div>}
     <FormSelector hero={s.hero} open={s.selector.open} pick={s.selector.pick} choices={s.selector.choices} left={s.selector.left} pad={pad} onHover={f => onForm?.(f, false)} onChoose={f => onForm?.(f, true)}/>
     {s.boss && <BossBar b={s.boss}/>}
