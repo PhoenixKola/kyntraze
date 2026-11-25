@@ -51,6 +51,7 @@ import './kit.css';
 import './b30-1.css';
 import './b30-1-loading.css';
 import './b30-1-hud.css';
+import './b30-2.css';
 const initialSave = loadSave();
 interface RunSetup { net?: NetClient; coop?: HeroId; plan: RunPlan | null; challengeId?: string; startRelic?: RelicId | null; hero?: HeroId }
 function GameStage({ bridge, seed, arena, pad, onHome: leaveToTitle, onLobby, onProgress, onSettings, outro }: { onLobby: () => void; outro?: StoryBeat; bridge: GameBridge; seed: number; arena: ArenaId; pad: boolean; onHome: () => void; onProgress: () => void; onSettings: () => void }) {

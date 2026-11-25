@@ -64,7 +64,7 @@ export function AbilityBar({ s, pad, onKey, prefix = '', compact = false, reduce
 function Slot({ idp, id, name, ico, keyLabel, padLabel, pad, seconds, max, state, tone, text, charge, tip, onUse, quiet = false }: SlotProps) {
   const cooling = seconds > 0 && state !== 'active';
   const cls = state === 'active' ? 'active' : state === 'locked' ? 'locked' : cooling ? 'cooling' : 'ready';
-  const style = { '--ico': icon(ico), '--p': `${Math.min(1, seconds / max) * 360}deg` } as CSSProperties;
+  const style = { '--ico': icon(ico), '--p': `${Math.min(1, seconds / max) * 360}deg`, '--r': Math.min(1, seconds / max) } as CSSProperties;
   const live = !!onUse, code = SLOT_KEY[id];
   const prev = useRef<{ cooling: boolean; seconds: number } | null>(null), timer = useRef(0), [fx, setFx] = useState('');
   const flash = (k: string, ms: number) => { setFx(k); window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setFx(''), ms); };

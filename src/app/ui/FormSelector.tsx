@@ -3,34 +3,37 @@ import { ASSET_BASE } from '../assetBase';
 
 type Form = 1 | 2 | 3;
 interface Props { hero?: string; open: boolean; pick: 0 | 1 | 2 | 3; choices: Form[]; left: number; pad: boolean; onHover: (f: Form) => void; onChoose: (f: Form) => void }
-const kit = (n: string) => `${ASSET_BASE}ui/kit/${n}.webp`;
-const INFO: Record<Form, { name: string; sub: string; crest: string }> = {
-  1: { name: 'FLAREBOUND', sub: 'Spends 65% Drive', crest: 'crest-f1' },
-  2: { name: 'COMETHEART', sub: 'Full Drive: gold comet', crest: 'crest-f2' },
-  3: { name: 'STILLFIRE APEX', sub: 'Full Drive: silver hover', crest: 'crest-f3' },
+interface Card { name: string; sub: string; cost: string; moves: string[]; img: string; fc: string }
+const KAI: Record<Form, Card> = {
+  1: { name: 'FLAREBOUND', sub: 'Solar fire and rising pillars', cost: '65% DRIVE', moves: ['Rising Flare', 'Sunfall Crucible', 'Solar Vortex'], img: `${ASSET_BASE}ui/kai-portrait-f1.png`, fc: '#ff8a3c' },
+  2: { name: 'COMETHEART', sub: 'Gold lightning comet', cost: 'FULL DRIVE', moves: ['Dragonfang Rush', 'Cometbreaker Cannon', 'Thunderstar Breaker'], img: `${ASSET_BASE}ui/kai-portrait-f2.png`, fc: '#ffe14d' },
+  3: { name: 'STILLFIRE APEX', sub: 'Silver hover and precision', cost: 'FULL DRIVE', moves: ['Silver Rift', 'Instinct Reversal', 'Perfect Evasion'], img: `${ASSET_BASE}ui/kai-portrait-f3.png`, fc: '#e6f2ff' },
 };
-const VEX_INFO: Partial<Record<Form, { name: string; sub: string; img: string }>> = {
-  1: { name: 'RIFTBOUND', sub: 'Wider parry, faster cooldowns', img: `${ASSET_BASE}ui/heroes/vex-crest-base.webp` },
-  2: { name: 'VOIDHEART EXILE', sub: 'Silver-black precision, marks spread', img: `${ASSET_BASE}ui/heroes/vex-crest-form.webp` },
+const VEX: Partial<Record<Form, Card>> = {
+  1: { name: 'RIFTBOUND', sub: 'Wider parry, faster cooldowns', cost: 'DRIVE', moves: ['Mirror Guard', 'Rift Execution', 'Oath of Ruin'], img: `${ASSET_BASE}ui/heroes/vex-portrait-f1.webp`, fc: '#b46bff' },
+  2: { name: 'VOIDHEART EXILE', sub: 'Silver-black precision, marks spread', cost: 'DRIVE', moves: ['Phantom Legion', 'Dimensional Severance', 'Domain of the Exile'], img: `${ASSET_BASE}ui/heroes/vex-portrait-f2.webp`, fc: '#d7dcff' },
 };
 const Key = ({ k, pad }: { k: string; pad?: boolean }) => <kbd className={`keycap ${pad ? 'pad-key' : ''}`}>{k}</kbd>;
+const FRAME: Record<string, string> = { kai: 'frame_kai', vex: 'frame_vex' };
 
-/** Transform picker. Opens the instant F is pressed with several forms ready; the run is frozen while it is open. Keys: 1 / 2 / 3 start a card, A / D (or arrows) move, F / Enter / Space confirm, Esc cancels; pad: D-pad or stick, Y / A confirm, B cancels. Double-tap F = the remembered card. */
+/** Transform picker. Opens the instant F is pressed with several forms ready; the run is frozen while it is open. Keys: 1 / 2 / 3 start a card, A / D (or arrows) move, F / Enter / Space confirm, Esc cancels; pad: D-PAD or stick, Y / A confirm, B cancels. Double-tap F = the remembered card. */
 export function FormSelector({ hero, open, pick, choices, left, pad, onHover, onChoose }: Props) {
   if (!open) return null;
-  return <div className="fsel" data-testid="form-selector" role="listbox" aria-label="Choose form">
-    <div className="fsel-scrim" aria-hidden="true"/>
-    <div className="fsel-panel">
-      <p className="fsel-title">TRANSFORM</p>
-      <div className="fsel-cards">
-        {choices.map((c, i) => <button key={c} type="button" role="option" aria-selected={c === pick} className={`fsel-card f${c} ${c === pick ? 'on' : ''}`} data-testid={`form-opt-${c}`} onMouseEnter={() => onHover(c)} onClick={() => onChoose(c)}>
-          <span className="fsel-num" aria-hidden="true">{i + 1}</span>
-          <img src={hero === 'vex' && VEX_INFO[c] ? VEX_INFO[c]!.img : kit(INFO[c].crest)} alt="" draggable={false}/>
-          <b>{hero === 'vex' && VEX_INFO[c] ? VEX_INFO[c]!.name : INFO[c].name}</b><small>{hero === 'vex' && VEX_INFO[c] ? VEX_INFO[c]!.sub : INFO[c].sub}</small>
-        </button>)}
+  const vex = hero === 'vex', fr = FRAME[hero ?? 'kai'] ?? 'frame_kai';
+  return <div className={`fsel fz ${vex ? 'h-vex' : 'h-kai'}`} data-testid="form-selector" role="listbox" aria-label="Choose form">
+    <div className="fz-scrim" aria-hidden="true"/>
+    <div className="fz-panel">
+      <header className="fz-head"><i aria-hidden="true"/><div><p className="fz-title">TRANSFORM</p><small>Choose a form · the fight is frozen while you decide</small></div><i aria-hidden="true"/></header>
+      <div className="fz-cards">
+        {choices.map((c, i) => { const d = (vex ? VEX[c] : KAI[c]) ?? KAI[c]; return <button key={c} type="button" role="option" aria-selected={c === pick} className={`fz-card ${c === pick ? 'on' : ''}`} style={{ '--fc': d.fc, '--i': i, '--frame': `url(${ASSET_BASE}ui/hud/${fr}.webp)` } as React.CSSProperties} data-testid={`form-opt-${c}`} onMouseEnter={() => onHover(c)} onClick={() => onChoose(c)}>
+          <span className="fz-num" aria-hidden="true">{i + 1}</span>
+          <span className="fz-art"><img src={d.img} alt="" draggable={false}/></span>
+          <b>{d.name}</b><em className="fz-cost">{d.cost}</em><small>{d.sub}</small>
+          <span className="fz-moves">{d.moves.map(m => <u key={m}>{m}</u>)}</span>
+        </button>; })}
       </div>
-      <div className="fsel-hint"><span><Key k="1 2 3"/>PICK</span><span><Key k={pad ? 'D-PAD' : 'A D'} pad={pad}/>MOVE</span><span><Key k={pad ? 'Y' : 'F'} pad={pad}/>CONFIRM</span><span><Key k={pad ? 'B' : 'ESC'} pad={pad}/>CANCEL</span></div>
-      <i className="fsel-timer" aria-hidden="true"><u style={{ width: `${Math.max(0, Math.min(1, left / 4)) * 100}%` }}/></i>
+      <div className="fz-hint"><span><Key k="1 2 3"/>PICK</span><span><Key k={pad ? 'D-PAD' : 'A D'} pad={pad}/>MOVE</span><span><Key k={pad ? 'Y' : 'F'} pad={pad}/>CONFIRM</span><span><Key k={pad ? 'B' : 'ESC'} pad={pad}/>CANCEL</span></div>
+      <i className="fz-timer" aria-hidden="true"><u style={{ width: `${Math.max(0, Math.min(1, left / 4)) * 100}%` }}/></i>
     </div>
   </div>;
 }
