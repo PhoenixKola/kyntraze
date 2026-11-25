@@ -88,6 +88,8 @@ export class AbilityAudio {
   readonly started: string[] = [];
   constructor(private readonly ctx: CtxLike, private readonly fetchBuffer: (url: string) => Promise<ArrayBuffer>) {}
 
+  /** Runtime-synth hook (Fracture Nexus ambience): the real context and the music / sfx / ui buses, once unlocked. */
+  get synthGraph(): { ctx: AudioContext; music: AudioNode; sfx: AudioNode; ui: AudioNode } | null { return this.master && this.busMusic && this.busSfx && this.busUi ? { ctx: this.ctx as unknown as AudioContext, music: this.busMusic as unknown as AudioNode, sfx: this.busSfx as unknown as AudioNode, ui: this.busUi as unknown as AudioNode } : null; }
   get activeVoices() { return this.voices.size; }
   get loaded() { return this.buffers.size; }
   get state() { return this.ctx.state; }

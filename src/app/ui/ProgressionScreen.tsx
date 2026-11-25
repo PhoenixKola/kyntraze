@@ -4,14 +4,14 @@ import { BOON_IDS, CONTRACTS, CURRENCY, FEATS, MASTERY, UNLOCKS, UNLOCK_BY_ID, t
 import { contractAvailable, equipBoon, equipCrest, featProgress, masteryDone, masteryProgress, purchase, reqMet, setContract, type MetaState } from '../../sim/MetaSystem';
 import { sharedAbilityAudio } from '../../game/audio/abilityAudio';
 import { roundedTime } from '../../core/Math';
-import { HintBar } from './Chrome';
+import { Chip, Cta, Frame, Tabs } from './b29/Kit';
 import { ASSET_BASE } from '../assetBase';
 import { HEROES } from '../../content/heroes';
 import { HERO_KIT } from '../../content/heroKits';
 
 export type ProgressTab = 'armory' | 'contracts' | 'archives';
 const icon = (n: string) => `${ASSET_BASE}ui/meta/${n}.png`;
-const TABS: { id: ProgressTab; label: string }[] = [{ id: 'armory', label: 'ARMORY' }, { id: 'contracts', label: 'CONTRACTS' }, { id: 'archives', label: 'ARCHIVES' }];
+const TABS: { id: ProgressTab; label: string; glyph: string }[] = [{ id: 'armory', label: 'ARMORY', glyph: '⚔' }, { id: 'contracts', label: 'CONTRACTS', glyph: '❖' }, { id: 'archives', label: 'RECORDS', glyph: '✦' }];
 interface Props { vexForms?: [boolean, boolean]; meta: MetaState; unlocks: { cometheart: boolean; stillfire: boolean; ren?: boolean; sora?: boolean }; tab: ProgressTab; onTab: (t: ProgressTab) => void; onMeta: (m: MetaState) => void; onBack: () => void; onDeploy?: () => void; backLabel?: string }
 
 /** Marks balance + equipped crest: always visible so the player never wonders what they can afford. */
@@ -23,9 +23,11 @@ export function ProgressionScreen({ vexForms = [false, false], meta, unlocks, ta
   const [pending, setPending] = useState<UnlockId | null>(null);
   const [fresh, setFresh] = useState<UnlockId | null>(null);
   const [note, setNote] = useState('');
+  const [sel, setSel] = useState<UnlockId | null>(null);
+  const [ct, setCt] = useState<ContractDef | null>(null);
+  const [sub, setSub] = useState<'runners' | 'arenas' | 'feats'>('runners');
   const lock = useRef(0); const timer = useRef<number>(0);
   useEffect(() => () => window.clearTimeout(timer.current), []);
-  useEffect(() => { const h = (e: globalThis.KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onBack(); } }; window.addEventListener('keydown', h, true); return () => window.removeEventListener('keydown', h, true); }, [onBack]);
   useEffect(() => { setPending(null); }, [tab]);
   const noRepeat = (e: KeyboardEvent) => { if (e.repeat && (e.key === 'Enter' || e.key === ' ')) e.preventDefault(); };
   const audio = () => sharedAbilityAudio();
@@ -50,68 +52,68 @@ export function ProgressionScreen({ vexForms = [false, false], meta, unlocks, ta
     else if (st === 'poor') { setNote(`NEED ${u.cost - meta.marks} MORE MARKS`); } else if (st === 'locked') setNote(u.req?.label.toUpperCase() ?? 'LOCKED');
   };
   const tag = (u: UnlockDef) => { const st = state(u); return st === 'equipped' ? 'EQUIPPED' : st === 'owned' ? (u.kind === 'tool' ? 'OWNED' : 'OWNED · TAP TO EQUIP') : st === 'locked' ? `LOCKED · ${u.req?.label.toUpperCase()}` : pending === u.id ? (u.cost > 0 ? `CONFIRM · −${u.cost}` : 'CONFIRM · CLAIM') : u.cost > 0 ? `${u.cost} ${CURRENCY.short}${st === 'poor' ? ' · NOT ENOUGH' : ''}` : 'CLAIM · FREE'; };
-  const card = (u: UnlockDef) => {
+  const row = (title: string, hint?: string) => <h3 className="pa-h"><span>{title}</span>{hint && <small>{hint}</small>}</h3>;
+  const selDef = sel ? UNLOCK_BY_ID[sel] : null;
+  const detail = selDef ? (() => { const st = state(selDef); return <div className="pa-detail-in" data-testid="pa-detail"><span className={`pa-bigico st-${st}`}><img src={icon(selDef.icon)} alt="" draggable={false}/></span><b>{selDef.name}</b><div className="pa-chips"><Chip tone="teal">{selDef.kind.toUpperCase()}</Chip>{selDef.cosmetic && <Chip tone="mute">COSMETIC</Chip>}<Chip tone={st === 'equipped' ? 'gold' : st === 'locked' || st === 'poor' ? 'red' : 'teal'}>{st === 'equipped' ? 'EQUIPPED' : st === 'owned' ? 'OWNED' : st === 'locked' ? 'LOCKED' : st === 'poor' ? 'NEED MARKS' : 'AVAILABLE'}</Chip></div><p>{selDef.effect}</p><small>{tag(selDef)}</small></div>; })()
+    : <div className="pa-detail-in dim"><b>YOUR LOADOUT</b><p>{meta.boon ? `Boon: ${UNLOCK_BY_ID[`boon_${meta.boon}` as UnlockId].name}` : 'No boon equipped.'}</p><p>{meta.contract ? `Contract: ${CONTRACTS.find(c => c.id === meta.contract)?.name}` : 'Standard run.'}</p><small>Hover or focus an item for details. Select it again to buy or equip.</small></div>;
+  const item = (u: UnlockDef) => {
     const st = state(u);
-    return <li key={u.id}><button className={`pg-card st-${st} ${fresh === u.id ? 'is-new' : ''} ${pending === u.id ? 'is-pending' : ''}`} onClick={() => act(u)} onKeyDown={noRepeat} data-testid={`unlock-${u.id}`} data-state={st} aria-pressed={st === 'equipped'} aria-label={`${u.name}. ${u.effect}. ${tag(u)}`}>
-      <span className="pg-ico"><img src={icon(u.icon)} alt="" draggable={false}/></span>
-      <span className="pg-copy"><b>{u.name}</b><span>{u.effect}</span><em>{tag(u)}</em></span>
-    </button></li>;
+    return <li key={u.id}><button type="button" className={`b29-card pa-item st-${st} ${st === 'equipped' ? 'on' : ''} ${st === 'locked' ? 'locked' : ''} ${fresh === u.id ? 'is-new' : ''} ${pending === u.id ? 'is-pending' : ''}`} onClick={() => { setSel(u.id); act(u); }} onFocus={() => setSel(u.id)} onMouseEnter={() => setSel(u.id)} onKeyDown={noRepeat} data-testid={`unlock-${u.id}`} data-state={st} aria-pressed={st === 'equipped'} aria-label={`${u.name}. ${u.effect}. ${tag(u)}`}>
+      <span className="pa-ico"><img src={icon(u.icon)} alt="" draggable={false}/></span><span className="pa-copy"><b>{u.name}</b><small>{tag(u)}</small></span>{st === 'equipped' && <em className="b29-check" aria-hidden="true">✓</em>}</button></li>;
   };
-  const contractCard = (c: ContractDef | null) => {
-    const id = c?.id ?? null, sel = meta.contract === id, ok = !c || contractAvailable(meta, c.id);
-    return <li key={id ?? 'none'}><button className={`pg-card ct ${sel ? 'st-equipped' : ok ? 'st-owned' : 'st-locked'}`} onClick={() => { if (ok) { onMeta(setContract(meta, id)); audio()?.ui('ui_toggle_on'); } else setNote(c?.req?.label.toUpperCase() ?? ''); }} onKeyDown={noRepeat} data-testid={`contract-${id ?? 'none'}`} aria-pressed={sel} aria-label={c ? `${c.name}. ${c.rule}` : 'No contract'}>
-      <span className="pg-ico">{c ? <img src={icon(c.icon)} alt="" draggable={false}/> : <i className="pg-none" aria-hidden="true"/>}</span>
-      <span className="pg-copy"><b>{c ? c.name : 'STANDARD RUN'}</b><span>{c ? c.rule : 'No modifiers. The default way to play.'}</span><em>{sel ? 'SELECTED' : !ok ? `LOCKED · ${c!.req?.label.toUpperCase()}` : c ? `+${c.bonus} ${CURRENCY.short} ON VICTORY` : 'DEFAULT'}</em></span>
-    </button></li>;
+  const ctItem = (c: ContractDef | null) => {
+    const id = c?.id ?? null, on = meta.contract === id, ok = !c || contractAvailable(meta, c.id);
+    return <li key={id ?? 'none'}><button type="button" className={`b29-card pa-item ${on ? 'on' : ''} ${ok ? '' : 'locked'}`} onClick={() => { setCt(c); if (ok) { onMeta(setContract(meta, id)); audio()?.ui('ui_toggle_on'); } else setNote(c?.req?.label.toUpperCase() ?? ''); }} onFocus={() => setCt(c)} onMouseEnter={() => setCt(c)} onKeyDown={noRepeat} data-testid={`contract-${id ?? 'none'}`} aria-pressed={on} aria-label={c ? `${c.name}. ${c.rule}` : 'No contract'}>
+      <span className="pa-ico">{c ? <img src={icon(c.icon)} alt="" draggable={false}/> : <i className="pg-none" aria-hidden="true"/>}</span><span className="pa-copy"><b>{c ? c.name : 'STANDARD RUN'}</b><small>{on ? 'SELECTED' : !ok ? `LOCKED · ${c!.req?.label.toUpperCase()}` : c ? `+${c.bonus} ${CURRENCY.short} ON VICTORY` : 'DEFAULT'}</small></span>{on && <em className="b29-check" aria-hidden="true">✓</em>}</button></li>;
   };
-  const row = (title: string, sub?: string) => <h3 className="pg-h"><span>{title}</span>{sub && <small>{sub}</small>}</h3>;
+  const kaiForms = [{ c: 'base', n: 'BASE', on: true, how: 'Always available' }, { c: 'f1', n: 'FLAREBOUND', on: true, how: 'Drive 65%+ → F' }, { c: 'f2', n: 'COMETHEART', on: unlocks.cometheart, how: 'Earned: Fracture Warden' }, { c: 'f3', n: 'STILLFIRE APEX', on: unlocks.stillfire, how: 'Earned: Null Seraph' }];
+  const featsDone = FEATS.filter(f => meta.feats[f.id] !== undefined).length;
+  const heading = tab === 'armory' ? 'ARMORY' : tab === 'contracts' ? 'CONTRACTS' : 'RECORDS';
+  const ctShown = ct ?? (meta.contract ? CONTRACTS.find(c => c.id === meta.contract) ?? null : null);
 
-  return <main className="selection-layout progress-layout" data-testid="progression">
-    <div className="screen-header"><button className="text-button" onClick={onBack} data-pad-cancel>{backLabel}</button><span>{tab === 'armory' ? 'ARMORY' : tab === 'contracts' ? 'CONTRACTS' : 'ARCHIVES'} / PERMANENT PROGRESSION</span></div>
-    <div className="pg-top"><div><p className="eyebrow">BETWEEN RUNS</p><h2 className="large-heading">THE ARCHIVES</h2></div><MarksBadge marks={meta.marks} crest={meta.crest}/></div>
-    <div className="pg-tabs" role="tablist" aria-label="Progression">{TABS.map(t => <button key={t.id} role="tab" aria-selected={tab === t.id} className={`pg-tab ${tab === t.id ? 'on' : ''}`} onClick={() => onTab(t.id)} data-testid={`tab-${t.id}`} data-pad-default={t.id === tab ? '' : undefined}>{t.label}</button>)}</div>
-    <div className="pg-body" data-testid={`pane-${tab}`}>
-      {tab === 'armory' && <>
-        {row('STARTING BOON', 'EQUIP ONE · APPLIES TO EVERY RUN UNTIL CHANGED')}
-        <ul className="pg-grid">{UNLOCKS.filter(u => u.kind === 'boon').map(card)}</ul>
-        {row('RUN TOOLS', 'LEVEL-UP SCREEN · CHARGES RESET EVERY RUN')}
-        <ul className="pg-grid">{UNLOCKS.filter(u => u.kind === 'tool').map(card)}</ul>
-        {row('PROFILE CRESTS', 'COSMETIC')}
-        <ul className="pg-grid">{UNLOCKS.filter(u => u.kind === 'crest').map(card)}</ul>
-      </>}
-      {tab === 'contracts' && <>
-        {row('OPT-IN CONTRACT', 'ONE AT A TIME · BONUS PAYS ONLY ON VICTORY')}
-        <ul className="pg-grid">{contractCard(null)}{CONTRACTS.map(c => contractCard(c))}</ul>
-        <p className="pg-note">Contracts only change the rules listed on the card. Boss times, telegraphs and the 15:00 finale never change.</p>
-      </>}
-      {tab === 'archives' && <>
-        {row('KAI · TRANSFORMATIONS', 'EARNED BY DEFEATING BOSSES AS KAI')}
-        <ul className="pg-forms">{[{ c: 'base', n: 'BASE', on: true, how: 'Always available' }, { c: 'f1', n: 'FLAREBOUND', on: true, how: 'Drive 65%+ → F' }, { c: 'f2', n: 'COMETHEART', on: unlocks.cometheart, how: 'Earned: Fracture Warden' }, { c: 'f3', n: 'STILLFIRE APEX', on: unlocks.stillfire, how: 'Earned: Null Seraph' }].map(f => <li key={f.c} className={f.on ? 'open' : 'sealed'}><img src={`${ASSET_BASE}ui/kit/crest-${f.c}.webp`} alt="" draggable={false}/><b>{f.on ? f.n : 'SEALED'}</b><span>{f.on ? f.how : 'Defeat a boss to discover it'}</span></li>)}</ul>
-        {row('RUNNERS', 'RECORDS AND TRANSFORMATIONS')}
-        <div className="pg-runners" data-testid="runner-records">{HEROES.map(h => {
-          const r = meta.heroes[h.id], forms: { n: string; on: boolean; how: string }[] = h.id === 'kai'
-            ? [{ n: 'FLAREBOUND', on: true, how: 'Drive 65% + F' }, { n: 'COMETHEART', on: unlocks.cometheart, how: 'Defeat the Fracture Warden' }, { n: 'STILLFIRE APEX', on: unlocks.stillfire, how: 'Defeat the Null Seraph' }]
-            : h.id === 'vex'
-              ? [{ n: 'RIFTBOUND', on: vexForms[0], how: 'Beat the Warden or Trial ch. 2' }, { n: 'VOIDHEART EXILE', on: vexForms[1], how: 'Beat the Oathkeeper (Trial ch. 3)' }]
-              : [{ n: HERO_KIT[h.id].form.toUpperCase(), on: !!unlocks[h.id as 'ren' | 'sora'], how: `Defeat the Fracture Warden as ${h.name}` }];
-          return <article key={h.id} className="pg-runner" style={{ '--accent': h.accent } as CSSProperties}>
-            <header><img src={h.id === 'kai' ? `${ASSET_BASE}ui/kai-portrait-base.png` : `${ASSET_BASE}ui/heroes/${h.id}-portrait-base.webp`} alt="" draggable={false}/><div><b>{h.name}</b><small>{h.title}</small></div></header>
-            <dl><div><dt>RUNS</dt><dd>{r.runs}</dd></div><div><dt>WINS</dt><dd>{r.wins}</dd></div><div><dt>BEST</dt><dd>{r.bestSeconds ? roundedTime(r.bestSeconds) : '—'}</dd></div></dl>
-            <ul>{forms.map(f => <li key={f.n} className={f.on ? 'open' : 'sealed'}><i aria-hidden="true">{f.on ? '✦' : '🔒'}</i><span><b>{f.n}</b><small>{f.on ? 'Unlocked' : f.how}</small></span></li>)}</ul>
-          </article>; })}</div>
-        {row('ARENA MASTERY', 'RECORDS AND OBJECTIVES')}
-        <div className="pg-arenas">{ARENA_IDS.map((a: ArenaId) => { const r = meta.arenas[a]; return <section key={a} className="pg-arena" data-testid={`arena-${a}`}>
-          <header><img src={icon('arena_' + a)} alt="" draggable={false}/><div><b>{ARENAS[a].name.toUpperCase()}</b><span>{r.runs} RUNS · {r.wins} WINS</span></div></header>
-          <dl><dt>BEST TIME</dt><dd>{r.bestSeconds ? roundedTime(r.bestSeconds) : '—'}</dd><dt>BEST SCORE</dt><dd>{r.bestScore ? r.bestScore.toLocaleString() : '—'}</dd><dt>HIGHEST LEVEL</dt><dd>{r.bestLevel || '—'}</dd><dt>WARDEN / SERAPH</dt><dd>{r.wardenKills} / {r.seraphKills}</dd></dl>
-          <ul>{MASTERY[a].map(d => { const done = masteryDone(meta, a, d.id), p = masteryProgress(r, d.id); return <li key={d.id} className={done ? 'done' : ''}><span>{done ? '✓' : '○'} {d.name}<small>{d.blurb}</small></span><i style={{ '--p': `${Math.round((p.value / p.goal) * 100)}%` } as CSSProperties}/><em>{done ? 'DONE' : `+${d.reward}`}</em></li>; })}</ul>
-        </section>; })}</div>
-        {row('FEATS', `${FEATS.filter(f => meta.feats[f.id] !== undefined).length} / ${FEATS.length} COMPLETE`)}
-        <ul className="pg-feats">{FEATS.map(f => { const p = featProgress(meta, f.id); return <li key={f.id} className={p.done ? 'done' : ''} data-testid={`feat-${f.id}`} data-done={p.done}><img src={icon(f.icon)} alt="" draggable={false}/><span><b>{f.name}</b><small>{f.blurb}</small>{f.goal && !p.done ? <i style={{ '--p': `${Math.round((p.value / p.goal) * 100)}%` } as CSSProperties}><u>{p.value.toLocaleString()} / {p.goal.toLocaleString()}</u></i> : <em>{p.done ? 'COMPLETE' : 'LOCKED'} · +{f.reward}</em>}</span></li>; })}</ul>
-      </>}
+  return <Frame testId="progression" className="pa" eyebrow="BETWEEN RUNS · PERMANENT PROGRESSION" title={heading} onBack={onBack} backLabel={backLabel} right={<MarksBadge marks={meta.marks} crest={meta.crest}/>} hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT / CONFIRM' }, { key: 'ESC', pad: 'B', label: 'BACK' }]}>
+    <div className="pa-col">
+      <div className="pg-tabs b29-tabs" role="tablist" aria-label="Progression">{TABS.map(x => <button key={x.id} type="button" role="tab" aria-selected={tab === x.id} className={`b29-tab ${tab === x.id ? 'on' : ''}`} onClick={() => onTab(x.id)} data-testid={`tab-${x.id}`} data-pad-default={x.id === tab ? '' : undefined}><i aria-hidden="true">{x.glyph}</i>{x.label}</button>)}</div>
+      <div className="pa-main">
+        <div className="b29-scroll pa-scroll" data-testid={`pane-${tab}`}>
+          {tab === 'armory' && <>
+            {row('STARTING BOON', 'EQUIP ONE · APPLIES TO EVERY RUN')}<ul className="pa-grid">{UNLOCKS.filter(u => u.kind === 'boon').map(item)}</ul>
+            {row('RUN TOOLS', 'CHARGES RESET EVERY RUN')}<ul className="pa-grid">{UNLOCKS.filter(u => u.kind === 'tool').map(item)}</ul>
+            {row('PROFILE CRESTS', 'COSMETIC')}<ul className="pa-grid">{UNLOCKS.filter(u => u.kind === 'crest').map(item)}</ul>
+          </>}
+          {tab === 'contracts' && <>
+            {row('OPT-IN CONTRACT', 'ONE AT A TIME · BONUS PAYS ONLY ON VICTORY')}<ul className="pa-grid">{ctItem(null)}{CONTRACTS.map(c => ctItem(c))}</ul>
+            <p className="pa-note">Contracts only change the rules listed on the card. Boss times, telegraphs and the 15:00 finale never change.</p>
+          </>}
+          {tab === 'archives' && <>
+            <Tabs value={sub} onChange={setSub} testPrefix="rec" tabs={[{ id: 'runners', label: 'RUNNERS' }, { id: 'arenas', label: 'ARENA MASTERY' }, { id: 'feats', label: 'FEATS', badge: `${featsDone}/${FEATS.length}` }]}/>
+            {sub === 'runners' && <>
+              <ul className="pa-forms">{kaiForms.map(f => <li key={f.c} className={f.on ? 'open' : 'sealed'}><img src={`${ASSET_BASE}ui/kit/crest-${f.c}.webp`} alt="" draggable={false}/><b>{f.on ? f.n : 'SEALED'}</b><span>{f.on ? f.how : 'Defeat a boss to discover it'}</span></li>)}</ul>
+              <div className="pa-runners" data-testid="runner-records">{HEROES.map(h => {
+                const r = meta.heroes[h.id], forms: { n: string; on: boolean; how: string }[] = h.id === 'kai'
+                  ? [{ n: 'FLAREBOUND', on: true, how: 'Drive 65% + F' }, { n: 'COMETHEART', on: unlocks.cometheart, how: 'Defeat the Fracture Warden' }, { n: 'STILLFIRE APEX', on: unlocks.stillfire, how: 'Defeat the Null Seraph' }]
+                  : h.id === 'vex'
+                    ? [{ n: 'RIFTBOUND', on: vexForms[0], how: 'Beat the Warden or Trial ch. 2' }, { n: 'VOIDHEART EXILE', on: vexForms[1], how: 'Beat the Oathkeeper (Trial ch. 3)' }]
+                    : [{ n: HERO_KIT[h.id].form.toUpperCase(), on: !!unlocks[h.id as 'ren' | 'sora'], how: `Defeat the Fracture Warden as ${h.name}` }];
+                return <article key={h.id} className="pg-runner pa-runner" style={{ '--accent': h.accent } as CSSProperties}>
+                  <header><img src={h.id === 'kai' ? `${ASSET_BASE}ui/kai-portrait-base.png` : `${ASSET_BASE}ui/heroes/${h.id}-portrait-base.webp`} alt="" draggable={false}/><div><b>{h.name}</b><small>{h.title}</small></div></header>
+                  <dl><div><dt>RUNS</dt><dd>{r.runs}</dd></div><div><dt>WINS</dt><dd>{r.wins}</dd></div><div><dt>BEST</dt><dd>{r.bestSeconds ? roundedTime(r.bestSeconds) : '—'}</dd></div></dl>
+                  <ul>{forms.map(f => <li key={f.n} className={f.on ? 'open' : 'sealed'}><i aria-hidden="true">{f.on ? '✦' : '🔒'}</i><span><b>{f.n}</b><small>{f.on ? 'Unlocked' : f.how}</small></span></li>)}</ul>
+                </article>; })}</div></>}
+            {sub === 'arenas' && <div className="pa-arenas">{ARENA_IDS.map((a: ArenaId) => { const r = meta.arenas[a]; return <section key={a} className="pa-arena b29-panel" data-testid={`arena-${a}`}>
+              <header><img src={icon('arena_' + a)} alt="" draggable={false}/><div><b>{ARENAS[a].name.toUpperCase()}</b><span>{r.runs} RUNS · {r.wins} WINS</span></div></header>
+              <dl><dt>BEST TIME</dt><dd>{r.bestSeconds ? roundedTime(r.bestSeconds) : '—'}</dd><dt>BEST SCORE</dt><dd>{r.bestScore ? r.bestScore.toLocaleString() : '—'}</dd><dt>HIGHEST LEVEL</dt><dd>{r.bestLevel || '—'}</dd><dt>WARDEN / SERAPH</dt><dd>{r.wardenKills} / {r.seraphKills}</dd></dl>
+              <ul>{MASTERY[a].map(d => { const done = masteryDone(meta, a, d.id), p = masteryProgress(r, d.id); return <li key={d.id} className={done ? 'done' : ''}><span>{done ? '✓' : '○'} {d.name}<small>{d.blurb}</small></span><i style={{ '--p': `${Math.round((p.value / p.goal) * 100)}%` } as CSSProperties}/><em>{done ? 'DONE' : `+${d.reward}`}</em></li>; })}</ul>
+            </section>; })}</div>}
+            {sub === 'feats' && <ul className="pa-feats">{FEATS.map(f => { const p = featProgress(meta, f.id); return <li key={f.id} className={p.done ? 'done' : ''} data-testid={`feat-${f.id}`} data-done={p.done}><img src={icon(f.icon)} alt="" draggable={false}/><span><b>{f.name}</b><small>{f.blurb}</small>{f.goal && !p.done ? <i style={{ '--p': `${Math.round((p.value / p.goal) * 100)}%` } as CSSProperties}><u>{p.value.toLocaleString()} / {p.goal.toLocaleString()}</u></i> : <em>{p.done ? 'COMPLETE' : 'LOCKED'} · +{f.reward}</em>}</span></li>; })}</ul>}
+          </>}
+        </div>
+        {tab !== 'archives' && <aside className="b29-panel pa-detail" aria-label="Details"><h3 className="b29-ph">{tab === 'contracts' ? 'CONTRACT' : 'DETAILS'}</h3>
+          {tab === 'contracts' ? <div className="pa-detail-in"><b>{ctShown ? ctShown.name : 'STANDARD RUN'}</b><p>{ctShown ? ctShown.rule : 'No modifiers. The default way to play.'}</p>{ctShown && <small>{`+${ctShown.bonus} ${CURRENCY.short} on victory`}</small>}</div> : detail}</aside>}
+      </div>
+      <div className="pa-foot"><div className="pg-status" role="status" aria-live="polite" data-testid="pg-note">{note || (meta.boon ? `BOON: ${UNLOCK_BY_ID[`boon_${meta.boon}` as UnlockId].name}` : 'NO BOON EQUIPPED')}{meta.contract ? ` · CONTRACT: ${CONTRACTS.find(c => c.id === meta.contract)?.name}` : ''}</div>
+        {onDeploy && <Cta onClick={onDeploy} testId="pg-deploy">DEPLOY</Cta>}</div>
     </div>
-    <div className="pg-foot"><div className="pg-status" role="status" aria-live="polite" data-testid="pg-note">{note || (meta.boon ? `BOON: ${UNLOCK_BY_ID[`boon_${meta.boon}` as UnlockId].name}` : 'NO BOON EQUIPPED')}{meta.contract ? ` · CONTRACT: ${CONTRACTS.find(c => c.id === meta.contract)?.name}` : ''}</div>
-      {onDeploy && <button className="primary-button" onClick={onDeploy} data-testid="pg-deploy" data-pad-start>DEPLOY <span aria-hidden="true">↗</span></button>}</div>
-    <HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT / CONFIRM' }, { key: 'ESC', pad: 'B', label: 'BACK' }]}/>
-  </main>;
+  </Frame>;
 }
 void BOON_IDS;

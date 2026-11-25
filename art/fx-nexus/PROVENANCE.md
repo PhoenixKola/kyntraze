@@ -56,3 +56,45 @@ Prompt:
 Premium anime sci-fantasy game art, painterly with crisp detail, dark midnight blue palette, teal and cyan fracture energy with small gold and orange accent lights, elegant ruined architecture, calm powerful mood, soft volumetric glow. No characters, no people, no text, no logo, no UI, no border, no watermark. Original design. A wide 16:9 sheet of floating broken platforms, shattered stone pillars, hanging chains and ruined arch fragments drifting at different sizes, with thin glowing teal cracks and a few warm gold lamps on them, ALL on a PURE BLACK background (#000000) so it can be screen-blended over another image. Sparse: leave the centre and the bottom third empty black. No ground plane.
 ```
 
+## 2026-11-25T07:03:36.115Z - rays.png
+
+- File: rays.png (1672x941)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a21183-caad-7833-8b5e-2a23450cc67f
+- Reference images: kai-keyart.webp
+- Seconds: 37.2
+
+Prompt:
+
+```text
+Premium anime sci-fantasy game art, painterly with crisp detail, dark midnight blue palette, teal and cyan fracture energy with small gold and orange accent lights, elegant ruined architecture, calm powerful mood, soft volumetric glow. No characters, no people, no text, no logo, no UI, no border, no watermark. Original design. Soft volumetric GOD-RAYS: a fan of long diagonal teal-cyan light shafts with faint gold highlights and drifting dust, widening downward from a bright point at the top centre, very soft edges, on a PURE BLACK background (#000000), wide 16:9, to be screen-blended. No objects, no ground.
+```
+
+## 2026-11-25T07:03:41.962Z - swirl.png
+
+- File: swirl.png (1254x1254)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a21183-caad-7150-860a-438f42e5ca63
+- Reference images: kai-keyart.webp
+- Seconds: 43.1
+
+Prompt:
+
+```text
+Premium anime sci-fantasy game art, painterly with crisp detail, dark midnight blue palette, teal and cyan fracture energy with small gold and orange accent lights, elegant ruined architecture, calm powerful mood, soft volumetric glow. No characters, no people, no text, no logo, no UI, no border, no watermark. Original design. A single circular dimensional VORTEX seen straight on, centred: layered spiral arms of luminous teal-cyan energy swirling into a bright white-cyan core, thin gold-orange filaments, wispy smoke-like curls, radially symmetric and soft-edged so it fades to black at the rim (nothing touches the image edge), on a PURE BLACK background (#000000), square 1:1, to be screen-blended and rotated.
+```
+
+## 2026-11-25T07:03:47.326Z - shards.png
+
+- File: shards.png (1672x941)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a21183-cac3-7bd0-8506-37ede0d47070
+- Reference images: kai-keyart.webp
+- Seconds: 48.5
+
+Prompt:
+
+```text
+Premium anime sci-fantasy game art, painterly with crisp detail, dark midnight blue palette, teal and cyan fracture energy with small gold and orange accent lights, elegant ruined architecture, calm powerful mood, soft volumetric glow. No characters, no people, no text, no logo, no UI, no border, no watermark. Original design. A sheet of eight separate floating crystal-stone SHARDS and broken carved rune fragments of different shapes and sizes, spaced widely apart in a 4x2 arrangement, each with glowing teal fracture edges and tiny gold rune accents, each fully separated by empty black, on a PURE BLACK background (#000000), wide 16:9.
+```
+

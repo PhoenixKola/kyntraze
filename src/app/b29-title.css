@@ -1,1 +1,17 @@
-/* B29 title */
+/* B29 title: stronger composition, one dominant CTA, one lower info strip. Scoped to .t29 so it overrides the older title rules. */
+.t29 .title-content { top: calc(60 * var(--u)); bottom: calc(86 * var(--u)); max-width: 54%; justify-content: center; }
+.t29 .game-logo span { font-size: calc(58 * var(--u)); } .t29 .game-logo strong { font-size: calc(72 * var(--u)); }
+.t29 .title-subtitle { margin: calc(12 * var(--u)) 0 calc(18 * var(--u)); color: #b9d3d8; }
+.t29 .title-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: calc(8 * var(--u)); width: calc(350 * var(--u)); padding: 0; }
+.t29 .title-buttons .t29-main { grid-column: 1 / -1; padding: calc(13 * var(--u)) calc(22 * var(--u)); animation: t29-pulse 3.2s ease-in-out infinite; }
+.t29 .t29-main b { font-size: max(11px, calc(20 * var(--u))); letter-spacing: .16em; white-space: nowrap; }
+@keyframes t29-pulse { 0%, 100% { box-shadow: 0 0 calc(18 * var(--u)) rgba(255, 170, 70, .3), inset 0 0 calc(14 * var(--u)) rgba(255, 190, 110, .12); } 50% { box-shadow: 0 0 calc(34 * var(--u)) rgba(255, 170, 70, .55), inset 0 0 calc(18 * var(--u)) rgba(255, 190, 110, .2); } }
+.t29 .title-buttons .t29-sec { min-width: 0; padding: calc(8 * var(--u)) 0; font-size: max(9px, calc(12 * var(--u))); letter-spacing: .18em; opacity: .92; }
+.t29 .title-hudline { top: calc(18 * var(--u)); }
+.t29-strip { position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; align-items: center; gap: calc(14 * var(--u)); padding: calc(10 * var(--u)) clamp(24px, 6vw, 90px); background: linear-gradient(180deg, transparent, rgba(3, 7, 12, .88) 38%); border-top: 1px solid rgba(95, 200, 205, .16); }
+.t29-left { display: flex; flex-direction: column; align-items: flex-start; gap: calc(5 * var(--u)); min-width: 0; } .t29-best { white-space: nowrap; font-size: max(7px, calc(10 * var(--u))); letter-spacing: .12em; color: #8fb4bf; } .t29-best b { color: #ffd98a; }
+.t29-right { display: flex; align-items: center; justify-content: flex-end; gap: calc(12 * var(--u)); } .t29-right .chrome-note { font-size: max(7px, calc(9 * var(--u))); letter-spacing: .16em; color: #6f8d98; white-space: nowrap; }
+.t29-strip .hintbar { position: static; margin: 0; } .t29-strip .horizons-btn { padding: calc(6 * var(--u)) calc(14 * var(--u)); font-size: max(8px, calc(11 * var(--u))); }
+.t29 .title-marks { display: none; }
+@media (max-height: 420px) { .t29 .title-content { top: calc(46 * var(--u)); } .t29-right .chrome-note { display: none; } .t29-best { display: none; } .t29-strip { grid-template-columns: auto 1fr auto; } }
+@media (prefers-reduced-motion: reduce) { .t29 .title-buttons .t29-main { animation: none; } }

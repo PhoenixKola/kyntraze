@@ -74,7 +74,7 @@ export default function App() {
   const [view, setView] = useState<'title' | 'select' | 'arena' | 'progress' | 'game' | 'mode' | 'online' | 'archives' | 'nexus'>('title');
   const [mode, setMode] = useState<ModeChoice>({ id: 'classic' });
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [leaving, setLeaving] = useState(false); const [lobbyNote, setLobbyNote] = useState('');
+  const [leaving, setLeaving] = useState(false); const [veil, setVeil] = useState(false); const [lobbyNote, setLobbyNote] = useState('');
   type View = 'title' | 'select' | 'arena' | 'progress' | 'game' | 'mode' | 'online' | 'archives' | 'nexus';
   /** the screen the player opened from the Fracture Nexus: its BACK returns to the hub instead of its usual parent */
   const [hubEntry, setHubEntry] = useState<View | null>(null);
@@ -108,7 +108,7 @@ export default function App() {
   // B16 audio: unlock on the first real gesture, follow the saved mix, play the title theme outside a run (the arena scene owns the score during one)
   useEffect(() => { const a = sharedAbilityAudio(); const un = () => { void a?.unlock(); }; window.addEventListener('pointerdown', un); window.addEventListener('keydown', un); const off = installUiSounds(); return () => { window.removeEventListener('pointerdown', un); window.removeEventListener('keydown', un); off(); }; }, []);
   useEffect(() => { const a = sharedAbilityAudio(); a?.setVolumes(save.settings); a?.setMuted(save.settings.mute); }, [save.settings]);
-  useEffect(() => { if (view !== 'game') sharedAbilityAudio()?.setCue('title', 1.2); }, [view]);
+  useEffect(() => { if (view !== 'game' && view !== 'nexus') sharedAbilityAudio()?.setCue('title', 1.2); }, [view]);
   const [progTab, setProgTab] = useState<ProgressTab>('armory'); const [progFrom, setProgFrom] = useState<'title' | 'select' | 'nexus'>('title');
   /** Meta changes (purchase / equip / contract) are saved at once and survive navigation, reload and retries. */
   const updateMeta = (meta: SaveV1['meta']) => { const updated = { ...save, meta }; setSave(updated); storeSave(updated); };
@@ -116,7 +116,7 @@ export default function App() {
   const home = () => { setHubEntry(null); setView('nexus'); setSettingsOpen(false); setSave(loadSave()); };
   const nexusGo = (d: NexusDest) => {
     if (d === 'title') { setHubEntry(null); go('title'); return; }
-    if (d === 'deploy') { start(); return; }
+    if (d === 'deploy') { setVeil(true); window.setTimeout(() => setVeil(false), 900); start(); return; }
     if (d === 'settings') { setSettingsOpen(true); return; }
     if (d === 'armory' || d === 'contracts' || d === 'records') { setHubEntry('progress'); openProgress('nexus', d === 'records' ? 'archives' : d); return; }
     const to: View = d === 'heroes' ? 'select' : d === 'modes' ? 'mode' : d === 'online' ? 'online' : 'archives'; setHubEntry(to); go(to);
@@ -133,6 +133,7 @@ export default function App() {
     {view === 'progress' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ProgressionScreen vexForms={save.b22?.vexForms ?? [false, false]} meta={save.meta} unlocks={{ cometheart: !!save.unlocks?.cometheart, stillfire: !!save.unlocks?.stillfire, ren: !!save.unlocks?.ren, sora: !!save.unlocks?.sora }} tab={progTab} onTab={setProgTab} onMeta={updateMeta} onBack={() => { if (progFrom === 'nexus') setHubEntry(null); go(progFrom); }} onDeploy={progFrom === 'select' ? () => start() : undefined}/></div>}
     {view === 'arena' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ArenaSelect selected={arena} onSelect={chooseArena} onBack={() => go('select')} allowed={allowedArenas} onSwitchMode={(m, a) => { setMode({ id: m }); chooseArena(a); }}/></div>}
     {view === 'game' && <GameStage outro={run.setup.plan?.mode === 'vex_trial' ? outro : undefined} key={run.serial} bridge={bridge} seed={run.seed} arena={run.arena} pad={pad.connected} onHome={home} onLobby={() => { setLobbyNote('Your partner left the run. Create or join a room to play again.'); setView('online'); }} onProgress={() => { setSave(loadSave()); setProgFrom('select'); setProgTab('armory'); setView('progress'); }} onSettings={() => setSettingsOpen(true)}/>}
+    {veil && <div className="nx-veil" aria-hidden="true"/>}
     {story && <StoryPanel beat={story} doneLabel="BEGIN" onDone={() => { setStory(null); start(false, true); }}/>}
     {settingsOpen && <SettingsPanel settings={save.settings} onChange={updateSettings} onClose={() => setSettingsOpen(false)}/>}
   </div></PadContext.Provider>;
