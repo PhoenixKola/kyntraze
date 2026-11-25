@@ -144,7 +144,7 @@ export function Hud({ s, pad, onPause, reduced, onForm, onKey }: Props) {
         </div>
       </div>
     </div>
-    {s.partner && <div className={`hud-panel hud-partner ${s.partner.down ? 'down' : ''} ${s.partner.out ? 'out' : ''}`} data-testid="hud-partner" aria-label="Player 2">
+    {s.partner && <div className={`hud-panel hud-partner ${s.partner.down ? 'down' : ''} ${s.partner.out ? 'out' : ''}`} data-testid="hud-partner" data-hero={s.partner.hero} aria-label="Player 2">
       <header className="pp-head"><span className="pp-tag">P2</span><b>{s.partner.hero.toUpperCase()}</b><span className="pp-lv">LV {s.partner.level}</span>
         <span className={`pp-state ${s.partner.out ? 'out' : s.partner.down ? 'down' : s.partner.form ? 'form' : ''}`}>{s.partner.out ? 'OUT' : s.partner.down ? `DOWN ${Math.round(s.partner.revive * 100)}%` : s.partner.form ? 'TRANSFORMED' : ''}</span></header>
       <div className="pp-hp" role="progressbar" aria-label="Partner health" aria-valuenow={Math.ceil(s.partner.hp)} aria-valuemax={Math.ceil(s.partner.maxHp)}><i style={{ width: pct(s.partner.hp / s.partner.maxHp * 100) }}/><span>{Math.ceil(s.partner.hp)} / {Math.ceil(s.partner.maxHp)}</span></div>

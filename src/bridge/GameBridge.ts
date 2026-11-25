@@ -63,6 +63,8 @@ export class GameBridge {
   /** B22.6 local couch co-op: the partner's hero (a fresh loadout; no saved unlocks are shared). */
   private partner: HeroId | null = null;
   setCoop(hero2: HeroId | null) { this.partner = hero2; }
+  /** Heroes of this run known before the sim is ready (loading screen): own hero (online: your seat) and the partner. */
+  loadingHeroes(): { hero: HeroId; partner: HeroId | null } { const r = this.net?.room; if (r) { const me = r.players[r.you], them = r.players.find((_, i) => i !== r.you); return { hero: me?.hero ?? this.save.hero ?? 'kai', partner: them?.hero ?? null }; } return { hero: this.save.hero ?? 'kai', partner: this.partner }; }
   /** B22.6 online: the run is owned by the server (no local sim, no local rewards: only the server's verified result counts). */
   private net: NetClient | null = null; setNet(n: NetClient | null) { this.net = n; } getNet() { return this.net; }
   getPartner() { return this.partner; }

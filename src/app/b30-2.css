@@ -89,3 +89,7 @@
 .lv-modal .chip, .build-strip .chip { width: max(26px, calc(38 * var(--u))); height: max(26px, calc(38 * var(--u))); background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--c) 28%, #14202c), #080e15); border: 1px solid color-mix(in srgb, var(--c) 70%, #2a3a46); box-shadow: 0 0 calc(8 * var(--u)) color-mix(in srgb, var(--c) 35%, transparent), inset 0 0 calc(6 * var(--u)) rgba(0, 0, 0, .55); }
 .build-strip .chip.rarity-rare { border-color: #e0a24a; } .build-strip .chip.rarity-epic { border-color: #d9a6ff; box-shadow: 0 0 calc(12 * var(--u)) rgba(197, 139, 255, .65), inset 0 0 calc(6 * var(--u)) rgba(0, 0, 0, .55); }
 .build-strip.empty { border-left-color: #3a5560; }
+
+/* co-op P2 panel carries the same hero material accent as the solo vitals */
+.hud-partner { --hf: #e0a050; border-top: calc(2 * var(--u)) solid var(--hf); box-shadow: 0 0 calc(10 * var(--u)) color-mix(in srgb, var(--hf) 30%, transparent); }
+.hud-partner[data-hero='ren'] { --hf: #e0485a; } .hud-partner[data-hero='sora'] { --hf: #5eb6ff; } .hud-partner[data-hero='vex'] { --hf: #a982ff; }
