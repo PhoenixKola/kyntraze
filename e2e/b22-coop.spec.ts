@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 test('B22 local co-op starts with two fighters and both can be controlled (keyboard P1 + arrow keys P2)', async ({ page }) => {
   await page.setViewportSize({ width: 960, height: 540 }); await page.addInitScript(() => localStorage.setItem('kyntraze-b00-v1-qa', JSON.stringify({ version: 1, hero: 'kai', settings: {} })));
-  await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('mode-open').click(); await page.getByTestId('coop-sora').click(); await page.getByTestId('mode-confirm').click(); await page.getByTestId('start-run').click();
+  await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('mode-open').click(); await page.getByTestId('coop-sora').click(); await page.getByTestId('mode-confirm').click(); await page.getByTestId('start-run').click();
   await page.waitForFunction(() => Boolean((window as unknown as { __KYNT_QA__?: unknown }).__KYNT_QA__)); await page.waitForTimeout(800);
   await expect(page.getByTestId('hud-partner')).toBeVisible();
   const pos = () => page.evaluate(() => { const s = (window as unknown as { __KYNT_QA__: { sim: () => { player: { x: number }; party?: { slots: { bag: { player: { x: number } } }[] } } } }).__KYNT_QA__.sim(); return { p1: s.player.x, p2: s.party!.slots[1].bag.player.x }; });

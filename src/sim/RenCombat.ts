@@ -1,4 +1,5 @@
 /** B26 Ren, Crimson Ascendant (authoritative sim): Crimson Fury auto, Infernal Cyclone (Q), Scarlet Rampage (E), Crimson Catastrophe (R), the charged Crimson Nova Fist (V), Primal Overdrive (the Crimson Nine-Tailed Fox) and Skybreaker flight. Used only when `hero === 'ren'` and the form is Ascendant; the base kit stays in HeroSystem. Every damage call goes through damageEnemy once; committed data (form, aim, target ids, ground points) lives on the HeroCast so a later change cannot reroute a move. Renderers only read the ren_* events and the cast. */
+import { flyIntent } from './KaiCombat';
 import type { AbilityEventKind, Enemy, GameState, HeroCast, InputState } from './GameState';
 import { REN_AUTO, REN_E, REN_FLY, REN_OD, REN_Q, REN_R, REN_V } from '../content/renCombat';
 import { ASCEND, REN } from '../content/heroKits';
@@ -269,7 +270,7 @@ function updateFlight(s: GameState, dt: number) {
   p.flyT += dt; p.air += (1 - p.air) * Math.min(1, dt * REN_FLY.rise); p.drive = Math.max(0, p.drive - REN_FLY.drain * dt);
   if (!held || p.flyT > REN_FLY.maxT || p.drive < 8 || busy) {
     const dive = !busy && p.flyT >= REN_FLY.slamMinT;   // one bounded impact at the real ground contact, only after an eligible flight
-    p.flyT = 0; p.flyCd = REN_FLY.cooldown; p.flyHold = 0;
+    p.flyT = 0; p.flyCd = REN_FLY.cooldown; p.flyHold = 0; p.flyOn = false;
     let n = 0; if (dive) { n = areaHit(s, p.x, p.y, REN_FLY.slamR, p.qDamage * fm(s) * REN_FLY.slamMul, REN_FLY.slamPush, 0.4, 14); ringFx(s, 'slam', p.x, p.y, REN_FLY.slamR, 0.45); p.invulnerable = Math.max(p.invulnerable, 0.15); }
     emit(s, 'ren_fly_land', p.x, p.y, (dive ? 1 : 0) | (Math.min(n, 63) << 8) | odBit(s));
   }
@@ -286,7 +287,7 @@ export function updateRenCombat(s: GameState, dt: number) {
 /** Per tick, per fighter, with their own raw input and the previous tick's held state. */
 export function renCombatInput(s: GameState, input: InputState, prev: { sig: boolean; od: boolean }): { sig: boolean; od: boolean } {
   const sigDown = !!(input.sig || input.sigHeld), odDown = !!input.od;
-  s.sigHeld = !!input.sigHeld; s.flyHeld = !!input.flyHeld;
+  s.sigHeld = !!input.sigHeld; s.flyHeld = flyIntent(s, input);
   if (input.sigAbort) cancelNova(s); else if (sigDown && !prev.sig) startNova(s);
   if (odDown && !prev.od) startRenOverdrive(s);
   return { sig: sigDown, od: odDown };

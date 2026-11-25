@@ -57,7 +57,7 @@ for (const [w, h] of [[960, 540], [640, 360]] as const) test(`controller-only: t
 
 test('keyboard still works untouched while a controller is connected and idle', async ({ page }) => {
   await install(page); await page.goto('/?seed=62&qa=1'); await connect(page);
-  await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click(); await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); await page.waitForTimeout(300);
+  await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click(); await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); await page.waitForTimeout(300);
   const a = await sim(page); await page.keyboard.down('d'); await page.waitForTimeout(500); await page.keyboard.up('d'); expect((await sim(page)).x).toBeGreaterThan(a.x + 30);
   await page.keyboard.press('e'); await page.waitForTimeout(150); expect((await sim(page)).cast).toBe('beam'); await page.keyboard.press('Escape'); await expect(page.getByTestId('pause-menu')).toBeVisible();
 });
@@ -65,7 +65,7 @@ test('keyboard still works untouched while a controller is connected and idle', 
 // B19: Ren / Sora on the mocked pad (X = Q, RB hold = E, LB = R, Y = F). Wiring only, never hardware.
 for (const hero of ['ren', 'sora'] as const) test(`mocked pad drives ${hero}'s Q / E / R and the transformation`, async ({ page }) => {
   await page.setViewportSize({ width: 960, height: 540 }); await install(page); await page.goto(`/?seed=61&qa=1&hero=${hero}&ascend=0`); await connect(page);
-  await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click(); await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); await page.waitForTimeout(500);
+  await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click(); await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); await page.waitForTimeout(500);
   const act = () => page.evaluate(() => { const s = (window as unknown as { __KYNT_QA__: { sim: () => { hx: { act: { act: string } | null }; hero: string; cinema: unknown; player: { form: number } } } }).__KYNT_QA__.sim(); return { act: s.hx.act?.act ?? null, hero: s.hero, cinema: !!s.cinema, form: s.player.form }; });
   await page.evaluate(() => { const s = (window as unknown as { __KYNT_QA__: { sim: () => { player: Record<string, number>; enemies: unknown[]; spawnTimer: number; heroFormUnlocked: boolean } } }).__KYNT_QA__.sim(); s.spawnTimer = 1e9; s.player.hp = 1e6; s.player.maxHp = 1e6; s.player.nextXp = 1e9; s.heroFormUnlocked = true; });
   expect((await act()).hero).toBe(hero);

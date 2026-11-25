@@ -14,7 +14,7 @@ export class InputController {
   setPointerAim(dir: { x: number; y: number; d?: number } | null, moved: boolean) { this.pointerAim = dir; if (moved) this.pointerAt = performance.now(); }
   private readonly onDown = (event: KeyboardEvent) => {
     const code = event.code;
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'ShiftLeft', 'ShiftRight'].includes(code)) event.preventDefault();
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight'].includes(code)) event.preventDefault();
     this.lastDevice = 'kb';
     if (!this.keys.has(code)) this.pressed.add(code);
     this.keys.add(code);
@@ -39,7 +39,7 @@ export class InputController {
     const kx = Number(k('ArrowRight')) - Number(k('ArrowLeft')), ky = Number(k('ArrowDown')) - Number(k('ArrowUp')), usePad = kx === 0 && ky === 0 && had;
     const stick = s.aim.x !== 0 || s.aim.y !== 0;
     this.sigAbort = false;
-    return { x: usePad ? s.move.x : kx, y: usePad ? s.move.y : ky, dash: tap('Enter') || p('A'), q: tap('Comma') || p('X'), f: tap('Semicolon') || p('Y'), beam: tap('Period') || p('RB'), sphere: tap('Slash') || p('LB'), sig: tap('Quote') || s.pressed.has('RT'), sigHeld: k('Quote') || s.held.has('RT'), flyHeld: k('Enter') || s.held.has('A'), od: tap('Backslash') || s.pressed.has('B'), beamHeld: k('Period') || s.held.has('RB'), fHeld: k('Semicolon') || s.held.has('Y'), ...(stick ? { aimX: s.aim.x, aimY: s.aim.y, aimSrc: 'stick' as const } : {}) };
+    return { x: usePad ? s.move.x : kx, y: usePad ? s.move.y : ky, dash: tap('Enter') || p('A'), q: tap('Comma') || p('X'), f: tap('Semicolon') || p('Y'), beam: tap('Period') || p('RB'), sphere: tap('Slash') || p('LB'), sig: tap('Quote') || s.pressed.has('RT'), sigHeld: k('Quote') || s.held.has('RT'), ...(tap('ControlRight') || s.pressed.has('BACK') ? { flyToggle: true } : {}), od: tap('Backslash') || s.pressed.has('B'), beamHeld: k('Period') || s.held.has('RB'), fHeld: k('Semicolon') || s.held.has('Y'), ...(stick ? { aimX: s.aim.x, aimY: s.aim.y, aimSrc: 'stick' as const } : {}) };
   }
   read(): InputState {
     const key = (a: string, b?: string) => this.keys.has(a) || (b ? this.keys.has(b) : false);
@@ -59,7 +59,7 @@ export class InputController {
     const dash = consume('ShiftLeft', 'ShiftRight', 'Space'), q = consume('KeyQ'), f = consume('KeyF'), beam = consume('KeyE'), sphere = consume('KeyR');
     const stick = s.aim.x !== 0 || s.aim.y !== 0, pointer = !stick && this.pointerAim !== null && this.pointerAt > -1e8 && this.lastDevice === 'kb';   // once the mouse has been used it keeps aiming (Lance / Nova / Rift follow the cursor)
     const aim = stick ? { x: s.aim.x, y: s.aim.y, src: 'stick' as const } : pointer ? { x: this.pointerAim!.x, y: this.pointerAim!.y, src: 'pointer' as const, d: this.pointerAim!.d } : null;
-    return { x: usePad ? s.move.x : kx, y: usePad ? s.move.y : ky, dash: dash || p('A'), q: q || p('X'), f: f || p('Y'), beam: beam || p('RB'), sphere: sphere || p('LB'), sig: consume('KeyV') || s.pressed.has('RT'), sigHeld: key('KeyV') || s.held.has('RT'), flyHeld: key('ShiftLeft', 'ShiftRight') || key('Space') || s.held.has('A'), od: consume('KeyG') || (!this.selectorOpen && s.pressed.has('B')), ...(this.sigAbort ? { sigAbort: true } : {}),
+    return { x: usePad ? s.move.x : kx, y: usePad ? s.move.y : ky, dash: dash || p('A'), q: q || p('X'), f: f || p('Y'), beam: beam || p('RB'), sphere: sphere || p('LB'), sig: consume('KeyV') || s.pressed.has('RT'), sigHeld: key('KeyV') || s.held.has('RT'), ...(consume('ControlLeft', 'ControlRight') || s.pressed.has('BACK') ? { flyToggle: true } : {}), od: consume('KeyG') || (!this.selectorOpen && s.pressed.has('B')), ...(this.sigAbort ? { sigAbort: true } : {}),
       beamHeld: key('KeyE') || s.held.has('RB'), fHeld: key('KeyF') || s.held.has('Y'), ...(aim ? { aimX: aim.x, aimY: aim.y, aimSrc: aim.src, ...('d' in aim && aim.d !== undefined ? { aimDist: aim.d } : {}) } : {}), ...(selPick ? { selPick } : {}), ...(selMove ? { selMove } : {}), ...(selConfirm ? { selConfirm } : {}), ...(selCancel ? { selCancel } : {}) };
   }
   destroy() { window.removeEventListener('keydown', this.onDown); window.removeEventListener('keyup', this.onUp); window.removeEventListener('blur', this.onBlur); }

@@ -15,7 +15,7 @@ async function prep(page: Page, w: number, h: number) {
   return problems;
 }
 async function run(page: Page, arena: string, extra = '') {
-  await page.goto(`/?seed=9&qa=1&arena=${arena}${extra}`); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click();
+  await page.goto(`/?seed=9&qa=1&arena=${arena}${extra}`); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click();
   await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); await page.waitForTimeout(300);
   await page.evaluate(() => { const s = (window as unknown as W).__KYNT_QA__!.sim(); s.player.attackClock = 1e9; s.player.hp = 100; s.player.nextXp = 1e9; s.spawnTimer = 1e9; });
 }
@@ -26,7 +26,7 @@ const focused = (page: Page) => page.evaluate(() => (document.activeElement as H
 for (const [w, h] of VIEWPORTS) {
   test(`arena selection: mouse, persistence and the chosen arena really loads (${w}x${h})`, async ({ page }) => {
     const problems = await prep(page, w, h);
-    await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click();
+    await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click();
     await expect(page.getByTestId('arena-open')).toContainText('THE GLOAM CIRCUIT');
     await page.getByTestId('arena-open').click(); await expect(page.getByTestId('arena-select')).toBeVisible();
     const fit = await page.evaluate(() => { const r = (s: string) => document.querySelector(s)!.getBoundingClientRect(); const a = r('[data-testid=arena-card-gloam]'), b = r('[data-testid=arena-card-ashen]'), c = r('[data-testid=arena-confirm]'), hint = r('[data-testid=hint-bar]');
@@ -36,7 +36,7 @@ for (const [w, h] of VIEWPORTS) {
     await page.getByTestId('arena-card-ashen').click(); await expect(page.getByTestId('arena-card-ashen')).toHaveAttribute('aria-checked', 'true'); await expect(page.getByTestId('arena-card-gloam')).toHaveAttribute('aria-checked', 'false');
     await page.screenshot({ path: `test-results/arena-select-${w}x${h}.png` });
     await page.keyboard.press('Escape'); await expect(page.getByTestId('hero-select')).toBeVisible(); await expect(page.getByTestId('arena-open')).toContainText('THE ASHEN RELIQUARY');
-    await page.reload(); await page.getByTestId('play-button').click(); await expect(page.getByTestId('arena-open')).toContainText('THE ASHEN RELIQUARY');   // persisted choice
+    await page.reload(); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await expect(page.getByTestId('arena-open')).toContainText('THE ASHEN RELIQUARY');   // persisted choice
     await page.getByTestId('start-run').click(); await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__));
     expect((await sim(page)).arena).toBe('ashen'); await expect(page.locator('.clock-label')).toHaveText('THE ASHEN RELIQUARY');
     expect(problems).toEqual([]);
@@ -44,7 +44,7 @@ for (const [w, h] of VIEWPORTS) {
 }
 
 test('arena selection with the keyboard only', async ({ page }) => {
-  const problems = await prep(page, 960, 540); await page.goto('/?seed=9&qa=1'); await page.evaluate(() => localStorage.clear()); await page.reload(); await page.getByTestId('play-button').click();
+  const problems = await prep(page, 960, 540); await page.goto('/?seed=9&qa=1'); await page.evaluate(() => localStorage.clear()); await page.reload(); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click();
   await page.getByTestId('arena-open').focus(); await page.keyboard.press('Enter'); await expect(page.getByTestId('arena-select')).toBeVisible();
   await page.getByTestId('arena-card-gloam').focus(); await page.keyboard.press('Tab'); await expect(page.getByTestId('arena-card-ashen')).toBeFocused(); await page.keyboard.press('Enter');
   await expect(page.getByTestId('arena-card-ashen')).toHaveAttribute('aria-checked', 'true'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await expect(page.getByTestId('arena-confirm')).toBeFocused(); await page.keyboard.press('Enter');

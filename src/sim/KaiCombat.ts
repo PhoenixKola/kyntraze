@@ -182,7 +182,7 @@ function updateFlight(s: GameState, dt: number) {
   p.flyT += dt; p.air += (1 - p.air) * Math.min(1, dt * spec.rise); p.drive = Math.max(0, p.drive - spec.drain * dt);
   if (!held || p.flyT > FLY.maxT || p.drive < 8 || busy) {
     const dive = !busy && p.flyT >= FLY.slamMinT;
-    p.flyT = 0; p.flyCd = FLY.cooldown; p.flyHold = 0;
+    p.flyT = 0; p.flyCd = FLY.cooldown; p.flyHold = 0; p.flyOn = false;
     if (dive) { area(s, p.x, p.y, FLY.slam.r, p.qDamage * s.mods.formPower * FLY.slam.dmg, FLY.slam.push); p.invulnerable = Math.max(p.invulnerable, 0.15); }
     emit(s, 'fly_land', p.x, p.y, (dive ? 1 : 0) | (f << 1));
   }
@@ -206,13 +206,20 @@ export function formShiftInput(s: GameState, input: InputState, fDown: boolean, 
   if (input.selPick && input.selPick >= 1 && input.selPick <= 3) { formShift(s, input.selPick as 1 | 2 | 3); return; }
   if (fDown && !wasF && formChoices(s).length === 0 && !s.selector.open) { for (let k = 1; k <= 2; k++) { const to = (((p.form - 1 + k) % 3) + 1) as 1 | 2 | 3; if (formShift(s, to)) return; } }
 }
+/** One press toggles flight; a second press lands (with the dive slam once it has been airborne long enough). Flight that cannot start (cooldown, no Drive) or has ended drops the toggle. Plain flyHeld still works as a hold. */
+export function flyIntent(s: GameState, input: InputState): boolean {
+  const p = s.player;
+  if (input.flyToggle) p.flyOn = !p.flyOn;
+  if (p.flyOn && p.flyT === 0 && (p.flyCd > 0 || p.drive < 12 || p.form < 1)) p.flyOn = false;
+  return !!input.flyHeld || p.flyOn;
+}
 /** Called once per tick per fighter with their raw input and the previous tick's held state; returns the new held flags. */
 export function kaiCombatInput(s: GameState, input: InputState, prev: { sig: boolean; od: boolean }): { sig: boolean; od: boolean } {
   if (s.hero === 'vex') return vexCombatInput(s, input, prev);   // B28: Vex's V / G / flight live in VexCombat
   if (s.hero === 'sora') return soraCombatInput(s, input, prev);   // B27: Sora's V / G / flight live in SoraCombat
   if (s.hero === 'ren') return renCombatInput(s, input, prev);   // B26: Ren's V / G / flight live in RenCombat
   const sigDown = !!(input.sig || input.sigHeld), odDown = !!input.od;
-  s.sigHeld = !!input.sigHeld; s.flyHeld = !!input.flyHeld;
+  s.sigHeld = !!input.sigHeld; s.flyHeld = flyIntent(s, input);
   if (input.sigAbort) cancelSignature(s);
   else if (sigDown && !prev.sig) startSignature(s);
   if (odDown && !prev.od) startOverdrive(s);

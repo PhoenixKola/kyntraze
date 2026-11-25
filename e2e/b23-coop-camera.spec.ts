@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 type Q = { sim: () => { player: { x: number; y: number }; party: { slots: { bag: { player: { x: number; y: number } } }[] } }; scene: () => { splitOn: boolean; cameras: { main: { width: number }; cameras: { visible: boolean }[] } } };
 test('B23 co-op camera: splits when the partners are far apart, merges again when they return', async ({ page }) => {
   test.setTimeout(90000); await page.setViewportSize({ width: 1280, height: 720 }); await page.addInitScript(() => localStorage.setItem('kyntraze-b00-v1-qa', JSON.stringify({ version: 1, hero: 'kai', settings: {} })));
-  await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('mode-open').click(); await page.getByTestId('coop-sora').click(); await page.getByTestId('mode-confirm').click(); await page.getByTestId('start-run').click();
+  await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('mode-open').click(); await page.getByTestId('coop-sora').click(); await page.getByTestId('mode-confirm').click(); await page.getByTestId('start-run').click();
   await page.waitForFunction(() => Boolean((window as unknown as { __KYNT_QA__?: unknown }).__KYNT_QA__)); await page.waitForTimeout(1000);
   const split = () => page.evaluate(() => (window as unknown as { __KYNT_QA__: Q }).__KYNT_QA__.scene().splitOn);
   expect(await split()).toBe(false);

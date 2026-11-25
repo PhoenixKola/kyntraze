@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 async function start(page: Page) {
-  await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click();
+  await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click();
   await page.waitForFunction(() => Boolean((window as unknown as { __KYNT_QA__?: unknown }).__KYNT_QA__)); await page.waitForTimeout(400);
 }
 for (const [w, h] of [[640, 360], [960, 540]] as const) test(`cooldown tiles, XP panel and viewport edges do not overlap at ${w}x${h}`, async ({ page }) => {

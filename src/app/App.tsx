@@ -34,6 +34,8 @@ import { PadContext } from './ui/Chrome';
 import { LoadingScreen } from './ui/LoadingScreen';
 import './ui.css';
 import { keyHint } from './keyHint';
+import { NexusHub, type NexusDest } from './ui/NexusHub';
+import './nexus.css';
 import './kit.css';
 const initialSave = loadSave();
 interface RunSetup { net?: NetClient; coop?: HeroId; plan: RunPlan | null; challengeId?: string; startRelic?: RelicId | null; hero?: HeroId }
@@ -64,13 +66,15 @@ function GameStage({ bridge, seed, arena, pad, onHome: leaveToTitle, onLobby, on
 }
 export default function App() {
   const pad = useControllerNav();
-  const [view, setView] = useState<'title' | 'select' | 'arena' | 'progress' | 'game' | 'mode' | 'online' | 'archives'>('title');
+  const [view, setView] = useState<'title' | 'select' | 'arena' | 'progress' | 'game' | 'mode' | 'online' | 'archives' | 'nexus'>('title');
   const [mode, setMode] = useState<ModeChoice>({ id: 'classic' });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [leaving, setLeaving] = useState(false); const [lobbyNote, setLobbyNote] = useState('');
-  type View = 'title' | 'select' | 'arena' | 'progress' | 'game' | 'mode' | 'online' | 'archives';
+  type View = 'title' | 'select' | 'arena' | 'progress' | 'game' | 'mode' | 'online' | 'archives' | 'nexus';
+  /** the screen the player opened from the Fracture Nexus: its BACK returns to the hub instead of its usual parent */
+  const [hubEntry, setHubEntry] = useState<View | null>(null);
   /** Menu route change: the current screen eases out (~110 ms) and the next eases in. Input is never blocked after the swap; a second press during the exit is ignored. */
-  const go = (to: View) => { if (leaving) return; if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { setView(to); return; } setLeaving(true); window.setTimeout(() => { setView(to); setLeaving(false); }, 110); };
+  const go = (to: View) => { if (leaving) return; if (to === 'nexus' || to === 'title') { /* back at the hub or title: the hub-entry shortcut is spent */ } if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { setView(to); return; } setLeaving(true); window.setTimeout(() => { setView(to); setLeaving(false); }, 110); };
   const [save, setSave] = useState(initialSave);
   const [seedInput, setSeedInput] = useState(new URLSearchParams(window.location.search).get('seed') ?? '');
   const urlArena = new URLSearchParams(window.location.search).get('arena');
@@ -100,19 +104,28 @@ export default function App() {
   useEffect(() => { const a = sharedAbilityAudio(); const un = () => { void a?.unlock(); }; window.addEventListener('pointerdown', un); window.addEventListener('keydown', un); const off = installUiSounds(); return () => { window.removeEventListener('pointerdown', un); window.removeEventListener('keydown', un); off(); }; }, []);
   useEffect(() => { const a = sharedAbilityAudio(); a?.setVolumes(save.settings); a?.setMuted(save.settings.mute); }, [save.settings]);
   useEffect(() => { if (view !== 'game') sharedAbilityAudio()?.setCue('title', 1.2); }, [view]);
-  const [progTab, setProgTab] = useState<ProgressTab>('armory'); const [progFrom, setProgFrom] = useState<'title' | 'select'>('title');
+  const [progTab, setProgTab] = useState<ProgressTab>('armory'); const [progFrom, setProgFrom] = useState<'title' | 'select' | 'nexus'>('title');
   /** Meta changes (purchase / equip / contract) are saved at once and survive navigation, reload and retries. */
   const updateMeta = (meta: SaveV1['meta']) => { const updated = { ...save, meta }; setSave(updated); storeSave(updated); };
-  const openProgress = (from: 'title' | 'select', tab: ProgressTab = 'armory') => { setProgFrom(from); setProgTab(tab); setSave(loadSave()); go('progress'); };
-  const home = () => { setView('title'); setSettingsOpen(false); setSave(loadSave()); };
+  const openProgress = (from: 'title' | 'select' | 'nexus', tab: ProgressTab = 'armory') => { setProgFrom(from); setProgTab(tab); setSave(loadSave()); go('progress'); };
+  const home = () => { setHubEntry(null); setView('nexus'); setSettingsOpen(false); setSave(loadSave()); };
+  const nexusGo = (d: NexusDest) => {
+    if (d === 'title') { setHubEntry(null); go('title'); return; }
+    if (d === 'deploy') { start(); return; }
+    if (d === 'settings') { setSettingsOpen(true); return; }
+    if (d === 'armory' || d === 'contracts' || d === 'records') { setHubEntry('progress'); openProgress('nexus', d === 'records' ? 'archives' : d); return; }
+    const to: View = d === 'heroes' ? 'select' : d === 'modes' ? 'mode' : d === 'online' ? 'online' : 'archives'; setHubEntry(to); go(to);
+  };
+  const back = (view: View, fallback: View) => () => { if (hubEntry === view) { setHubEntry(null); go('nexus'); } else go(fallback); };
   return <PadContext.Provider value={pad.connected}><div className="app">
     {pad.connected && <ControllerBadge/>}
-    {view === 'title' && <div className={`screen ${leaving ? 'leaving' : ''}`}><TitleScreen onArchives={() => go('archives')} onPlay={() => go('select')} onSettings={() => setSettingsOpen(true)} onProgress={() => openProgress('title')} save={save}/></div>}
-    {view === 'mode' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ModeSelect choice={mode} onChoose={c => { setMode(c); if (c.id === 'fracture_expedition' && !REALM_ARENAS.includes(arena)) chooseArena(REALM_ARENAS[0]); if (c.id === 'classic' && !CLASSIC_ARENAS.includes(arena)) chooseArena(CLASSIC_ARENAS[0]); }} onBack={() => go('select')} onOnline={() => go('online')} save={save}/></div>}
-    {view === 'archives' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ArchivesScreen save={save} onBack={() => go('title')} onSave={b => { const u = { ...save, b22: b }; setSave(u); storeSave(u); }}/></div>}
-    {view === 'online' && <div className={`screen ${leaving ? 'leaving' : ''}`}><OnlineLobby notice={lobbyNote} savedUrl={save.b22?.server.url ?? ''} savedName={save.b22?.server.name ?? ''} hero={save.hero ?? 'kai'} onSaveServer={(url, name) => { const b = migrateB22(save.b22); const u = { ...save, b22: { ...b, server: { url, name } } }; setSave(u); storeSave(u); }} onBack={() => go('mode')} onStart={net => { setRun(r => ({ seed: 1, serial: r.serial + 1, arena: (net.room?.arena as ArenaId) ?? 'gloam', setup: { plan: null, net } })); setView('game'); }}/></div>}
-    {view === 'select' && <div className={`screen ${leaving ? 'leaving' : ''}`}><HeroSelect modeName={modeName} onMode={() => go('mode')} locked={lockedHero ? 'HERO LOCKED: VEX' : mode.id === 'daily_challenge' || mode.id === 'weekly_challenge' ? 'ARENA / SEED SET BY THE CHALLENGE' : null} hero={lockedHero ?? save.hero ?? 'kai'} onHero={chooseHero} onBack={() => go('title')} onStart={() => start()} seed={seedInput} onSeed={setSeedInput} arena={arena} onArena={() => go('arena')} onProgress={tab => openProgress('select', tab)} save={save}/></div>}
-    {view === 'progress' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ProgressionScreen vexForms={save.b22?.vexForms ?? [false, false]} meta={save.meta} unlocks={{ cometheart: !!save.unlocks?.cometheart, stillfire: !!save.unlocks?.stillfire, ren: !!save.unlocks?.ren, sora: !!save.unlocks?.sora }} tab={progTab} onTab={setProgTab} onMeta={updateMeta} onBack={() => go(progFrom)} onDeploy={progFrom === 'select' ? () => start() : undefined}/></div>}
+    {view === 'title' && <div className={`screen ${leaving ? 'leaving' : ''}`}><TitleScreen onArchives={() => go('archives')} onPlay={() => { setHubEntry(null); go('nexus'); }} onSettings={() => setSettingsOpen(true)} onProgress={() => openProgress('title')} save={save}/></div>}
+    {view === 'nexus' && <div className={`screen ${leaving ? 'leaving' : ''}`}><NexusHub save={save} hero={save.hero ?? 'kai'} arenaName={ARENAS[arena].name.toUpperCase()} modeName={modeName} onHero={chooseHero} onGo={nexusGo}/></div>}
+    {view === 'mode' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ModeSelect choice={mode} onChoose={c => { setMode(c); if (c.id === 'fracture_expedition' && !REALM_ARENAS.includes(arena)) chooseArena(REALM_ARENAS[0]); if (c.id === 'classic' && !CLASSIC_ARENAS.includes(arena)) chooseArena(CLASSIC_ARENAS[0]); }} onBack={back('mode', 'select')} onOnline={() => go('online')} save={save}/></div>}
+    {view === 'archives' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ArchivesScreen save={save} onBack={back('archives', 'title')} onSave={b => { const u = { ...save, b22: b }; setSave(u); storeSave(u); }}/></div>}
+    {view === 'online' && <div className={`screen ${leaving ? 'leaving' : ''}`}><OnlineLobby notice={lobbyNote} savedUrl={save.b22?.server.url ?? ''} savedName={save.b22?.server.name ?? ''} hero={save.hero ?? 'kai'} onSaveServer={(url, name) => { const b = migrateB22(save.b22); const u = { ...save, b22: { ...b, server: { url, name } } }; setSave(u); storeSave(u); }} onBack={back('online', 'mode')} onStart={net => { setRun(r => ({ seed: 1, serial: r.serial + 1, arena: (net.room?.arena as ArenaId) ?? 'gloam', setup: { plan: null, net } })); setView('game'); }}/></div>}
+    {view === 'select' && <div className={`screen ${leaving ? 'leaving' : ''}`}><HeroSelect modeName={modeName} onMode={() => go('mode')} locked={lockedHero ? 'HERO LOCKED: VEX' : mode.id === 'daily_challenge' || mode.id === 'weekly_challenge' ? 'ARENA / SEED SET BY THE CHALLENGE' : null} hero={lockedHero ?? save.hero ?? 'kai'} onHero={chooseHero} onBack={back('select', 'nexus')} onStart={() => start()} seed={seedInput} onSeed={setSeedInput} arena={arena} onArena={() => go('arena')} onProgress={tab => openProgress('select', tab)} save={save}/></div>}
+    {view === 'progress' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ProgressionScreen vexForms={save.b22?.vexForms ?? [false, false]} meta={save.meta} unlocks={{ cometheart: !!save.unlocks?.cometheart, stillfire: !!save.unlocks?.stillfire, ren: !!save.unlocks?.ren, sora: !!save.unlocks?.sora }} tab={progTab} onTab={setProgTab} onMeta={updateMeta} onBack={() => { if (progFrom === 'nexus') setHubEntry(null); go(progFrom); }} onDeploy={progFrom === 'select' ? () => start() : undefined}/></div>}
     {view === 'arena' && <div className={`screen ${leaving ? 'leaving' : ''}`}><ArenaSelect selected={arena} onSelect={chooseArena} onBack={() => go('select')} allowed={allowedArenas} onSwitchMode={(m, a) => { setMode({ id: m }); chooseArena(a); }}/></div>}
     {view === 'game' && <GameStage outro={run.setup.plan?.mode === 'vex_trial' ? outro : undefined} key={run.serial} bridge={bridge} seed={run.seed} arena={run.arena} pad={pad.connected} onHome={home} onLobby={() => { setLobbyNote('Your partner left the run. Create or join a room to play again.'); setView('online'); }} onProgress={() => { setSave(loadSave()); setProgFrom('select'); setProgTab('armory'); setView('progress'); }} onSettings={() => setSettingsOpen(true)}/>}
     {story && <StoryPanel beat={story} doneLabel="BEGIN" onDone={() => { setStory(null); start(false, true); }}/>}

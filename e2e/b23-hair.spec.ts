@@ -6,7 +6,7 @@ for (const [hero, form] of [['kai', 0], ['kai', 1], ['kai', 3], ['ren', 1], ['so
     test.setTimeout(90000); await page.setViewportSize({ width: 960, height: 540 });
     await page.addInitScript(h => localStorage.setItem('kyntraze-b00-v1-qa', JSON.stringify({ version: 1, hero: h, settings: {} })), hero);
     const errors: string[] = []; page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-    await page.goto(`/?qa=1&hero=${hero}&ascend=1&form3=1`); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click();
+    await page.goto(`/?qa=1&hero=${hero}&ascend=1&form3=1`); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click();
     await page.waitForFunction(() => Boolean((window as unknown as { __KYNT_QA__?: unknown }).__KYNT_QA__)); await page.waitForTimeout(1000);
     await page.evaluate(f => { const s = (window as unknown as { __KYNT_QA__: Q }).__KYNT_QA__.sim(); s.player.form = f; s.player.drive = 100; s.player.hp = s.player.maxHp = 9999; }, form); await page.waitForTimeout(1500);
     const sample = () => page.evaluate(() => (window as unknown as { __KYNT_QA__: Q }).__KYNT_QA__.scene().entityRenderer.debugPose());

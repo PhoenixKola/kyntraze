@@ -7,7 +7,7 @@ async function start(page: Page, enc: string, w = 960, h = 540) {
   await page.setViewportSize({ width: w, height: h });
   await page.addInitScript(() => { const st = { on: false, axes: [0, 0, 0, 0], btn: Array(17).fill(false) }; (window as unknown as W).__pad = st;
     navigator.getGamepads = () => (st.on ? [{ index: 0, id: 'Mock Xbox Controller (STANDARD GAMEPAD)', connected: true, mapping: 'standard', axes: st.axes, buttons: st.btn.map(p => ({ pressed: p, touched: p, value: p ? 1 : 0 })), timestamp: performance.now() } as unknown as Gamepad, null, null, null] : [null, null, null, null]); });
-  await page.goto(`/?seed=9&qa=1&encounter=${enc}`); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click();
+  await page.goto(`/?seed=9&qa=1&encounter=${enc}`); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click();
   await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); await page.waitForTimeout(300);
   await page.evaluate(() => { const s = (window as unknown as W).__KYNT_QA__!.sim(); s.player.attackClock = 1e9; s.player.hp = 100; s.player.nextXp = 1e9; });
   return errors;

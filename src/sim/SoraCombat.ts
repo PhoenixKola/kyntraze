@@ -1,4 +1,5 @@
 /** B27 Sora, Azure Sovereign (authoritative sim): Astral Blades auto, Azure Prison (Q), Heaven's Spear (E), Celestial Collapse (R), the charged Astral Devastation (V), Primal Overdrive (the Astral Phoenix) and Skybreaker flight. Used only when `hero === 'sora'` and the form is Sovereign; the base kit stays in HeroSystem. Every damage call goes through damageEnemy once. The committed plan of each move (ground points, ids, tier, damage, Overdrive bit) lives in a plain SoraField so a later change of the world, the form or the aim cannot reroute it; renderers only read the sora_* events and the fields. */
+import { flyIntent } from './KaiCombat';
 import type { AbilityEventKind, Bolt, Enemy, GameState, HeroCast, InputState, SoraField } from './GameState';
 import { SORA_AUTO, SORA_E, SORA_FLY, SORA_OD, SORA_Q, SORA_R, SORA_V } from '../content/soraCombat';
 import { ASCEND, SORA } from '../content/heroKits';
@@ -270,7 +271,7 @@ function updateFlight(s: GameState, dt: number) {
   p.flyT += dt; p.air += (1 - p.air) * Math.min(1, dt * SORA_FLY.rise); p.drive = Math.max(0, p.drive - SORA_FLY.drain * dt);
   if (!held || p.flyT > SORA_FLY.maxT || p.drive < 8 || busy) {
     const dive = !busy && p.flyT >= SORA_FLY.slamMinT;   // one bounded impact at the real ground contact, only after an eligible flight
-    p.flyT = 0; p.flyCd = SORA_FLY.cooldown; p.flyHold = 0;
+    p.flyT = 0; p.flyCd = SORA_FLY.cooldown; p.flyHold = 0; p.flyOn = false;
     let n = 0; if (dive) { n = areaHit(s, p.x, p.y, SORA_FLY.slamR, p.qDamage * fm(s) * SORA_FLY.slamMul, SORA_FLY.slamPush, 0.4, 14, 'none'); ringFx(s, 'ring', p.x, p.y, SORA_FLY.slamR, 0.4); p.invulnerable = Math.max(p.invulnerable, 0.15); }
     emit(s, 'sora_fly_land', p.x, p.y, (dive ? 1 : 0) | (Math.min(n, 63) << 8) | odBit(s));
   }
@@ -292,7 +293,7 @@ export function updateSoraCombat(s: GameState, dt: number) {
 /** Per tick, per fighter, with their own raw input and the previous tick's held state. */
 export function soraCombatInput(s: GameState, input: InputState, prev: { sig: boolean; od: boolean }): { sig: boolean; od: boolean } {
   const sigDown = !!(input.sig || input.sigHeld), odDown = !!input.od;
-  s.sigHeld = !!input.sigHeld; s.flyHeld = !!input.flyHeld;
+  s.sigHeld = !!input.sigHeld; s.flyHeld = flyIntent(s, input);
   if (input.sigAbort) cancelAstral(s); else if (sigDown && !prev.sig) startAstral(s);
   if (odDown && !prev.od) startSoraOverdrive(s);
   return { sig: sigDown, od: odDown };

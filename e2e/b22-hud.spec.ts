@@ -3,7 +3,7 @@ const SAVE = { version: 1, meta: { v: 1, marks: 0, lifetime: 0, owned: [], boon:
 for (const [w, h] of [[640, 360], [960, 540]] as const) test(`B22 HUD: contract sits inside the clock panel and ability tiles show a tooltip and can be clicked (${w}x${h})`, async ({ page }) => {
   await page.setViewportSize({ width: w, height: h });
   await page.addInitScript(s => { try { localStorage.setItem('kyntraze-b00-v1-qa', JSON.stringify(s)); } catch { /* */ } }, SAVE);
-  await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click();
+  await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click();
   await page.waitForFunction(() => Boolean((window as unknown as { __KYNT_QA__?: unknown }).__KYNT_QA__)); await page.waitForTimeout(500);
   const c = await page.evaluate(() => { const r = (q: string) => { const b = document.querySelector(q)?.getBoundingClientRect(); return b ? { x: b.x, y: b.y, w: b.width, h: b.height } : null; }; return { clock: r('.hud-clock'), contract: r('[data-testid="hud-contract"]'), next: r('.clock-next'), kills: r('.clock-kills') }; });
   expect(c.contract).not.toBeNull(); const k = c.clock!, ct = c.contract!;

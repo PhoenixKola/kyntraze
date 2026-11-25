@@ -6,7 +6,7 @@ const q = (page: Page) => page.evaluate(() => Boolean((window as unknown as { __
 const SHOTS = 'art/progression/review/b20';
 const start = async (page: Page, w: number, h: number) => {
   await page.setViewportSize({ width: w, height: h }); await page.goto('/?seed=71&qa=1'); await page.evaluate(() => localStorage.removeItem('kyntraze-b00-v1-qa')); await page.goto('/?seed=71&qa=1');
-  await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click(); await expect(page.getByTestId('hud')).toBeVisible({ timeout: 20000 });
+  await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click(); await expect(page.getByTestId('hud')).toBeVisible({ timeout: 20000 });
   await page.waitForFunction(() => Boolean((window as unknown as { __KYNT_QA__?: Q }).__KYNT_QA__));
 };
 const checkResults = async (page: Page, w: number, h: number, name: string) => {

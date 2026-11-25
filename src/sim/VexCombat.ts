@@ -1,4 +1,5 @@
 /** B28 Vex, Riftbound (form 1) and Voidheart Exile (form 2) (authoritative sim): Phantom Edge / Invisible Judgment autos, Mirror Guard / Phantom Legion (Q), Rift Execution / Dimensional Severance (E), Oath of Ruin / Domain of the Exile (R), Abyssal Fang / Event Horizon (V), the Abyssal Guardian Overdrive, per-form Skybreaker flight and the Vex-only Form Shift. Used only when `hero === 'vex'` and the form is 1 or 2; the base kit stays in VexSystem. Every damage call goes through damageEnemy once. The committed plan of each move (ground points, ids, tier, damage, form, Overdrive bit) lives in a plain VexField, so a later change of the world, the aim or the form cannot reroute it; renderers only read the vex_* events and the fields. */
+import { flyIntent } from './KaiCombat';
 import type { AbilityEventKind, Enemy, GameState, HeroCast, InputState, VexField, VexFieldKind } from './GameState';
 import { VEX1_AUTO, VEX1_E, VEX1_Q, VEX1_R, VEX1_V, VEX2_AUTO, VEX2_E, VEX2_Q, VEX2_R, VEX2_V, VEX_FLY, VEX_OD, VEX_SHIFT } from '../content/vexCombat';
 import { ASCEND, VEX } from '../content/heroKits';
@@ -417,7 +418,7 @@ function updateFlight(s: GameState, dt: number) {
   p.flyT += dt; p.air += (1 - p.air) * Math.min(1, dt * VEX_FLY.rise); p.drive = Math.max(0, p.drive - spec.drain * dt);
   if (!held || p.flyT > VEX_FLY.maxT || p.drive < 8 || busy) {
     const dive = !busy && p.flyT >= VEX_FLY.slamMinT;   // one bounded impact at the real ground contact, only after an eligible flight
-    p.flyT = 0; p.flyCd = VEX_FLY.cooldown; p.flyHold = 0;
+    p.flyT = 0; p.flyCd = VEX_FLY.cooldown; p.flyHold = 0; p.flyOn = false;
     let n = 0; if (dive) { n = areaHit(s, p.x, p.y, spec.slamR, p.qDamage * fm(s) * spec.slamMul, spec.slamPush, 0.4, 14, 'none'); ringFx(s, 'ring', p.x, p.y, spec.slamR, 0.45); p.invulnerable = Math.max(p.invulnerable, 0.15); }
     emit(s, 'vex_fly_land', p.x, p.y, (dive ? 1 : 0) | (f << 1) | (Math.min(n, 63) << 8) | odBit(s));
   }
@@ -458,7 +459,7 @@ export function updateVexCombat(s: GameState, dt: number) {
 /** Per tick, per fighter, with their own raw input and the previous tick's held state. */
 export function vexCombatInput(s: GameState, input: InputState, prev: { sig: boolean; od: boolean }): { sig: boolean; od: boolean } {
   const sigDown = !!(input.sig || input.sigHeld), odDown = !!input.od;
-  s.sigHeld = !!input.sigHeld; s.flyHeld = !!input.flyHeld;
+  s.sigHeld = !!input.sigHeld; s.flyHeld = flyIntent(s, input);
   if (input.sigAbort) cancelVexV(s); else if (sigDown && !prev.sig) startVexV(s);
   if (odDown && !prev.od) startVexOverdrive(s);
   return { sig: sigDown, od: odDown };

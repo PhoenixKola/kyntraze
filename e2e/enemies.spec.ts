@@ -3,7 +3,7 @@ type W = { __KYNT_QA__?: { sim: () => any; enemyStats: () => { sprites: number; 
 const DEF = { pursuer: { hp: 25, r: 17, sp: 74, dmg: 10 }, flanker: { hp: 18, r: 15, sp: 118, dmg: 7 }, bruiser: { hp: 150, r: 26, sp: 46, dmg: 12 }, ranged: { hp: 20, r: 16, sp: 66, dmg: 6 } };
 async function start(page: Page) {
   const errors: string[] = []; page.on('pageerror', e => errors.push(String(e))); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-  await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click();
+  await page.goto('/?seed=9&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click();
   await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); await page.waitForTimeout(500);
   await page.evaluate(() => { const s = (window as unknown as W).__KYNT_QA__!.sim(); s.enemies.length = 0; s.spawnTimer = 1e9; s.nextFlanker = 1e9; s.player.attackClock = 1e9; s.player.hp = 100; });
   return errors;

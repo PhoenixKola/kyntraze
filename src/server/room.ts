@@ -13,8 +13,8 @@ import type { WsConn } from './ws';
 import type { Store } from './store';
 
 export const GRACE_S = 30, PICK_TIMEOUT_S = 25, SNAP_EVERY = 3, DT = 1 / 60;
-const NO_PULSE = { dash: false, q: false, f: false, beam: false, sphere: false, sig: false, od: false, sigAbort: false, selPick: 0 as 0 | 1 | 2 | 3 };
-export interface Player { id: string; token: string; name: string; hero: HeroId; ready: boolean; conn: WsConn | null; lastSeq: number; input: WireInput | null; pulse: { dash: boolean; q: boolean; f: boolean; beam: boolean; sphere: boolean; sig: boolean; od: boolean; sigAbort: boolean; selPick: 0 | 1 | 2 | 3 }; absentFor: number; slot: number; unlock: boolean }
+const NO_PULSE = { dash: false, q: false, f: false, beam: false, sphere: false, sig: false, od: false, sigAbort: false, flyToggle: false, selPick: 0 as 0 | 1 | 2 | 3 };
+export interface Player { id: string; token: string; name: string; hero: HeroId; ready: boolean; conn: WsConn | null; lastSeq: number; input: WireInput | null; pulse: { dash: boolean; q: boolean; f: boolean; beam: boolean; sphere: boolean; sig: boolean; od: boolean; sigAbort: boolean; flyToggle: boolean; selPick: 0 | 1 | 2 | 3 }; absentFor: number; slot: number; unlock: boolean }
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 export const newCode = () => { const b = randomBytes(5); let s = ''; for (const x of b) s += CODE_CHARS[x % CODE_CHARS.length]; return s; };
 const planOf = (mode: RoomMode, arena: ArenaId): { plan: RunPlan; arena: ArenaId } => mode === 'fracture_expedition' ? { plan: expeditionPlan(REALM_ARENAS.includes(arena) ? (arena as 'aetherfall' | 'paradox') : 'aetherfall'), arena: REALM_ARENAS.includes(arena) ? arena : 'aetherfall' } : mode === 'boss_rush' ? { plan: bossRushPlan('initiation'), arena: 'gloam' } : { plan: CLASSIC_PLAN, arena: CLASSIC_ARENAS.includes(arena) ? arena : 'gloam' };
@@ -41,7 +41,7 @@ export class Room {
   handle(p: Player, m: ClientMsg) {
     switch (m.t) {
       case 'ready': if (this.state !== 'lobby') return; p.ready = m.ready; if (m.hero) p.hero = m.hero; this.broadcastRoom(); if (this.players.length === 2 && this.players.every(q => q.ready)) this.start(); break;
-      case 'input': if (this.state !== 'running' || m.seq <= p.lastSeq) return; p.lastSeq = m.seq; p.input = m.i; p.pulse.dash ||= m.i.dash; p.pulse.q ||= m.i.q; p.pulse.f ||= m.i.f; p.pulse.beam ||= m.i.beam; p.pulse.sphere ||= m.i.sphere; p.pulse.sig ||= !!m.i.sig; p.pulse.od ||= !!m.i.od; p.pulse.sigAbort ||= !!m.i.sigAbort; if (m.i.selPick) p.pulse.selPick = m.i.selPick; break;
+      case 'input': if (this.state !== 'running' || m.seq <= p.lastSeq) return; p.lastSeq = m.seq; p.input = m.i; p.pulse.dash ||= m.i.dash; p.pulse.q ||= m.i.q; p.pulse.f ||= m.i.f; p.pulse.beam ||= m.i.beam; p.pulse.sphere ||= m.i.sphere; p.pulse.sig ||= !!m.i.sig; p.pulse.od ||= !!m.i.od; p.pulse.sigAbort ||= !!m.i.sigAbort; p.pulse.flyToggle ||= !!m.i.flyToggle; if (m.i.selPick) p.pulse.selPick = m.i.selPick; break;
       case 'pause': { const s = this.sim?.state; if (!s || this.state !== 'running' || (s.phase !== 'running' && s.phase !== 'paused')) return; s.phase = m.on === undefined ? (s.phase === 'running' ? 'paused' : 'running') : m.on ? 'paused' : 'running'; break; }
       case 'pick': this.pick(p, m.kind, m.id); break;
       default: break;
@@ -61,7 +61,7 @@ export class Room {
   }
   private inputFor(p: Player): InputState {
     const base = p.input && p.conn ? toInputState(p.input) : { x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false } as InputState;
-    const out: InputState = { ...base, dash: p.pulse.dash, q: p.pulse.q, f: p.pulse.f, beam: p.pulse.beam || !!base.beam, sphere: p.pulse.sphere, ...(p.pulse.sig ? { sig: true } : {}), ...(p.pulse.od ? { od: true } : {}), ...(p.pulse.sigAbort ? { sigAbort: true } : {}), ...(p.pulse.selPick ? { selPick: p.pulse.selPick } : {}) }; p.pulse = { ...NO_PULSE }; return out;
+    const out: InputState = { ...base, dash: p.pulse.dash, q: p.pulse.q, f: p.pulse.f, beam: p.pulse.beam || !!base.beam, sphere: p.pulse.sphere, ...(p.pulse.sig ? { sig: true } : {}), ...(p.pulse.od ? { od: true } : {}), ...(p.pulse.sigAbort ? { sigAbort: true } : {}), ...(p.pulse.flyToggle ? { flyToggle: true } : {}), ...(p.pulse.selPick ? { selPick: p.pulse.selPick } : {}) }; p.pulse = { ...NO_PULSE }; return out;
   }
   private loop() {
     const sim = this.sim; if (!sim || this.state !== 'running') return; const now = performance.now(); this.acc += Math.min(0.25, (now - this.last) / 1000); this.last = now;

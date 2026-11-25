@@ -3,7 +3,7 @@ type Sim = { phase: string; time: number; cinema: { t: number; to: number } | nu
 type Qa = { sim: () => Sim; heroPose: () => { clip: string; visualForm: string } };
 const qa = (page: Page) => page.evaluate(() => { const q = (window as unknown as { __KYNT_QA__: Qa }).__KYNT_QA__, s = q.sim(); return { phase: s.phase, time: s.time, cin: s.cinema ? s.cinema.t : null, to: s.cinema?.to ?? null, form: s.player.form, cast: s.cast?.kind ?? null, released: s.cast?.released ?? null, rcd: s.player.riftCooldown, x: s.player.x, clip: q.heroPose().clip, vis: q.heroPose().visualForm, seen: s.apexSeen }; });
 async function start(page: Page) {
-  await page.goto('/?seed=21&qa=1&form3=1'); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click();
+  await page.goto('/?seed=21&qa=1&form3=1'); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click();
   await page.waitForFunction(() => Boolean((window as unknown as { __KYNT_QA__?: unknown }).__KYNT_QA__));
   await page.evaluate(() => { const s = (window as unknown as { __KYNT_QA__: Qa }).__KYNT_QA__.sim() as Sim & { spawnTimer: number }; s.spawnTimer = 1e9; s.enemies.length = 0; (s.player as unknown as { hp: number }).hp = 1e6; });
 }

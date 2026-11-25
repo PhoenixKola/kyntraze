@@ -61,6 +61,12 @@ describe('Primal Overdrive, Skybreaker and Form Shift', () => {
     run(sim, 0.9, idle({ x: 1, flyHeld: true })); expect(s.player.flyT).toBeGreaterThan(0); expect(s.player.air).toBeGreaterThan(0.5);
     run(sim, 0.1, idle({ x: 1, flyHeld: false })); expect(s.player.flyT).toBe(0); expect(s.abilityEvents.some(e => e.kind === 'fly_land')).toBe(true);
   });
+  it('one Ctrl press toggles flight on, a second press lands with the slam (no holding)', () => {
+    const { sim, s } = setup(2, [[1100, 860]]); s.player.attackClock = 1e9; s.player.dashCooldown = 99;
+    sim.step(DT, idle({ flyToggle: true })); run(sim, 0.9, idle({ x: 1 })); expect(s.player.flyT).toBeGreaterThan(0.5); expect(s.player.air).toBeGreaterThan(0.5);
+    sim.step(DT, idle({ flyToggle: true })); sim.step(DT, idle()); expect(s.player.flyT).toBe(0); expect(s.abilityEvents.some(e => e.kind === 'fly_land' && ((e.n ?? 0) & 1) === 1)).toBe(true);
+    run(sim, 0.5); expect(s.player.flyOn).toBe(false);
+  });
   it('Form Shift switches between unlocked forms for Drive and a shared cooldown, never from base', () => {
     const { s } = setup(1); expect(formShift(s, 2)).toBe(true); expect(s.player.form).toBe(2); expect(s.player.drive).toBeLessThan(100); expect(formShift(s, 3)).toBe(false);
     const b = setup(0); expect(formShift(b.s, 2)).toBe(false);

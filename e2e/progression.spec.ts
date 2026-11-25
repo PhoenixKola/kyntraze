@@ -3,7 +3,7 @@ import { test, expect, type Page } from '@playwright/test';
 type W = Window & { __KYNT_QA__?: { sim: () => { player: Record<string, number>; phase: string; time: number; kills: number; enemies: unknown[]; nextId: number; spawnTimer: number; upgradeOffers: string[] } } };
 const SHOTS = 'art/progression/review/b18';
 const fresh = async (page: Page, path = '/?seed=71&qa=1') => { await page.goto(path); await page.evaluate(() => { localStorage.removeItem('kyntraze-b00-v1-qa'); }); await page.goto(path); };
-const startRun = async (page: Page) => { await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click(); await expect(page.getByTestId('hud')).toBeVisible({ timeout: 20000 }); await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); };
+const startRun = async (page: Page) => { await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click(); await expect(page.getByTestId('hud')).toBeVisible({ timeout: 20000 }); await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__)); };
 /** A natural defeat through real combat: low HP, an enemy on top of Kai, a believable clock and kill count. */
 const dieNaturally = async (page: Page, seconds = 200, kills = 130) => {
   await page.evaluate(([t, k]) => {
@@ -45,7 +45,7 @@ for (const [w, h] of [[960, 540], [640, 360]] as const) test(`B18 loop at ${w}x$
   await page.getByTestId('tab-contracts').click(); await page.getByTestId('contract-overrun').click(); await expect(page.getByTestId('contract-overrun')).toHaveAttribute('aria-pressed', 'true'); await page.screenshot({ path: `${SHOTS}/contracts-selected_${w}x${h}.png` });
   expect((await saved(page)).meta.contract).toBe('overrun'); expect((await saved(page)).meta.boon).toBe('bulwark');
   // the selection survives a reload and reaches the run: contract chip, +20 max HP, faster spawns recorded in the sim
-  await page.reload(); await page.getByTestId('play-button').click(); await expect(page.getByTestId('loadout-boon')).toContainText('BULWARK'); await expect(page.getByTestId('loadout-contract')).toContainText('OVERRUN'); await page.screenshot({ path: `${SHOTS}/hero-loadout_${w}x${h}.png` });
+  await page.reload(); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await expect(page.getByTestId('loadout-boon')).toContainText('BULWARK'); await expect(page.getByTestId('loadout-contract')).toContainText('OVERRUN'); await page.screenshot({ path: `${SHOTS}/hero-loadout_${w}x${h}.png` });
   await page.getByTestId('start-run').click(); await expect(page.getByTestId('hud-contract')).toContainText('OVERRUN'); await page.waitForFunction(() => Boolean((window as unknown as W).__KYNT_QA__));
   expect(await page.evaluate(() => (window as unknown as W).__KYNT_QA__!.sim().player.maxHp)).toBe(120);
   await page.screenshot({ path: `${SHOTS}/hud-contract_${w}x${h}.png` });

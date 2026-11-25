@@ -4,7 +4,7 @@ type Qa = { sim: () => Sim; heroPose: () => { clip: string; visualForm: string }
 /** F opens the form picker (Flarebound + Cometheart ready); a second tap of F starts the highlighted, highest form. */
 const startForm = async (page: Page) => { await page.keyboard.press('f'); await page.waitForTimeout(120); await page.keyboard.press('f'); };
 async function start(page: Page) {
-  await page.goto('/?seed=21&qa=1&form2=1'); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click();
+  await page.goto('/?seed=21&qa=1&form2=1'); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click();
   await page.waitForFunction(() => Boolean((window as unknown as { __KYNT_QA__?: unknown }).__KYNT_QA__));
   await page.evaluate(() => { const s = (window as unknown as { __KYNT_QA__: Qa }).__KYNT_QA__.sim() as Sim & { spawnTimer: number }; s.spawnTimer = 1e9; s.enemies.length = 0; s.player.hp = 1e6; });
 }

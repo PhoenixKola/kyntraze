@@ -10,7 +10,7 @@ for (const [form, name, keys] of [[0, 'surge', ['q']], [1, 'scatter', ['q']], [1
   test(`B22 Kai kit visuals: ${name}`, async ({ page }) => {
     test.setTimeout(90000); await page.setViewportSize({ width: 1280, height: 720 });
     await page.addInitScript(() => localStorage.setItem('kyntraze-b00-v1-qa', JSON.stringify({ version: 1, hero: 'kai', settings: {} })));
-    await page.goto('/?qa=1&ascend=1'); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click(); await boot(page); await page.waitForTimeout(1200);
+    await page.goto('/?qa=1&ascend=1'); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click(); await boot(page); await page.waitForTimeout(1200);
     await setup(page, form); await page.waitForTimeout(700);
     await page.mouse.move(900, 330); await page.keyboard.press(keys[0]);
     for (const t of [250, 350, 450]) { await page.waitForTimeout(t); await page.screenshot({ path: `test-results/kk-${name}-${t}.png` }); }

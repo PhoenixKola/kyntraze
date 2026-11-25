@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 type Qa = { sim: () => { cast: { kind: string } | null; sphere: unknown; player: { beamCooldown: number; sphereCooldown: number; hp: number; nextXp: number }; enemies: unknown[]; phase: string }; heroPose: () => { clip: string } };
 async function start(page: Page) {
-  await page.goto('/?seed=21&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('start-run').click();
+  await page.goto('/?seed=21&qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.getByTestId('start-run').click();
   await page.waitForFunction(() => Boolean((window as unknown as { __KYNT_QA__?: unknown }).__KYNT_QA__));
   await page.evaluate(() => { const s = (window as unknown as { __KYNT_QA__: Qa }).__KYNT_QA__.sim(); s.player.nextXp = 1e9; });
 }
