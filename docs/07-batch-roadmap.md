@@ -4,4 +4,4 @@ B00 actual starter → **B01 combat and sim feel validation** → B02 Kai true s
 
 After user downloads and inspects B00, produce **one** downloadable, precise Codex or Claude Code prompt at a time based on the latest uploaded game ZIP. Do not invent art approvals or push to GitHub automatically.
 
-**B31A Fracture Chronicles** (story campaign) is implemented locally and awaiting owner review; see docs/project/B31A-STATUS.md. Living Fractures is a separate later batch and was not started.
+**B31A Fracture Chronicles** (story campaign) is implemented locally and awaiting owner review; see docs/project/B31A-STATUS.md. **B31B Living Fractures** (opt-in world events) is implemented locally; see docs/project/B31B-STATUS.md.

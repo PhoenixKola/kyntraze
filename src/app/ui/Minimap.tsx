@@ -20,6 +20,7 @@ const PAL: Record<string, { bg0: string; bg1: string; solid: string; lane: strin
   gloam: { bg0: '#0c1f2b', bg1: '#050c14', solid: 'rgba(120,170,190,.42)', lane: 'rgba(95,216,220,.13)', laneRing: 'rgba(95,216,220,.30)', rim: 'rgba(95,216,220,.35)' },
   ashen: { bg0: '#22180f', bg1: '#0a0705', solid: 'rgba(190,150,110,.42)', lane: 'rgba(241,182,111,.10)', laneRing: 'rgba(241,182,111,.30)', rim: 'rgba(241,182,111,.35)' },
 };
+const LF_COL = ['#c58bff', '#ff7aa8', '#ffc24a', '#ff6a5a', '#5fe8e0', '#fff0b0'];
 type Icons = Record<'player' | 'boss', HTMLImageElement>;
 const loadIcons = (): Icons => { const mk = (n: string) => { const im = new Image(); im.src = `${import.meta.env.BASE_URL}ui/map/${n}.png`; return im; }; return { player: mk('player'), boss: mk('boss') }; };
 const tinted = (src: HTMLImageElement, color: string, size: number) => { const c = document.createElement('canvas'); c.width = c.height = size; const g = c.getContext('2d')!; g.drawImage(src, 0, 0, size, size); g.globalCompositeOperation = 'source-in'; g.fillStyle = color; g.fillRect(0, 0, size, size); return c; };
@@ -69,6 +70,20 @@ export function drawMinimap(ctx: CanvasRenderingContext2D, cw: number, ch: numbe
     ctx.strokeStyle = `rgba(255,80,90,${0.35 + 0.5 * pulse})`; ctx.lineWidth = px * 1.4; ctx.beginPath(); ctx.arc(x, y, px * (7 + 3 * pulse), 0, TAU); ctx.stroke();
     ctx.fillStyle = 'rgba(40,6,12,.85)'; ctx.beginPath(); ctx.arc(x, y, px * 6.2, 0, TAU); ctx.fill(); ctx.strokeStyle = '#ff5a64'; ctx.lineWidth = px; ctx.stroke();
     const key = `boss${s}`; let img = cache.get(key); if (!img && ready(icons.boss)) { img = tinted(icons.boss, '#ffe9ea', s); cache.set(key, img); } if (img) ctx.drawImage(img, x - s / 2, y - s / 2);
+  }
+  // B31B Living Fractures: each event is a distinct shape (never colour alone); a hidden cache is only a faint pulsing ping
+  for (const e of m.lf ?? []) {
+    const x = e.x * k, y = e.y * k, r = px * 4.2, c = LF_COL[e.k] ?? '#fff'; ctx.lineWidth = px * 0.9; ctx.strokeStyle = c; ctx.fillStyle = c;
+    if (e.h) { ctx.globalAlpha = 0.25 + 0.3 * pulse; ctx.beginPath(); ctx.arc(x, y, px * 9, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; continue; }
+    ctx.globalAlpha = e.st === 0 ? 0.75 : 1; ctx.beginPath();
+    if (e.k === 0) { ctx.arc(x, y, r, 0, TAU); ctx.stroke(); ctx.beginPath(); ctx.arc(x, y, r * 0.4, 0, TAU); ctx.fill(); }
+    else if (e.k === 1) { for (let i = 0; i < 8; i++) { const a = (i * Math.PI) / 4, rr = i % 2 ? r * 0.45 : r * 1.1; ctx[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * rr, y + Math.sin(a) * rr); } ctx.closePath(); ctx.fill(); }
+    else if (e.k === 2) { ctx.rect(x - r * 0.75, y - r * 0.75, r * 1.5, r * 1.5); ctx.fill(); }
+    else if (e.k === 3) { ctx.moveTo(x, y - r * 1.2); ctx.lineTo(x + r, y + r * 0.8); ctx.lineTo(x - r, y + r * 0.8); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.stroke(); }
+    else if (e.k === 4) { for (let i = 0; i < 6; i++) { const a = (i * Math.PI) / 3; ctx[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * r, y + Math.sin(a) * r); } ctx.closePath(); ctx.fill(); }
+    else { for (let i = 0; i < 8; i++) { const a = (i * Math.PI) / 4 - Math.PI / 2, rr = i % 2 ? r * 0.4 : r * 1.25; ctx[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * rr, y + Math.sin(a) * rr); } ctx.closePath(); ctx.fill(); }
+    if (e.st > 0) { ctx.strokeStyle = '#fff'; ctx.lineWidth = px * 0.8; ctx.beginPath(); ctx.arc(x, y, r * 1.7, -Math.PI / 2, -Math.PI / 2 + TAU * Math.max(0.05, e.p)); ctx.stroke(); }
+    ctx.globalAlpha = 1;
   }
   // player: the strongest mark: a teal halo, then the facing chevron
   const ppx = m.px * k, ppy = m.py * k, ps = Math.round(px * 15), hr = px * 11, halo = ctx.createRadialGradient(ppx, ppy, 0, ppx, ppy, hr);

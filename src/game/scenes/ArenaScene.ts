@@ -24,6 +24,8 @@ import { B22Overlay, RealmProps, createRealmFloor } from '../render/realmWorld';
 import { ARENAS as ARENA_DEFS } from '../../content/arenas';
 import type { ArenaId } from '../../content/arenas';
 import { ArenaMarks } from '../render/arenaMarks';
+import { LfLayer } from '../render/livingFractures';
+import { spawnEvent } from '../../sim/LivingFractures';
 import { LightLayer } from '../render/lightLayer';
 import { EvoFx } from '../render/evoFx';
 import type { InputState } from '../../sim/GameState';
@@ -81,11 +83,12 @@ export class ArenaScene extends Phaser.Scene {
       if (qs.get('debug') === 'hit') this.debug = new DebugOverlay(this);
       const enc = qs.get('encounter'); if (enc) startEncounter(this.simulation.state, enc as Parameters<typeof startEncounter>[1]);
       (window as Window & { __KYNT_QA__?: { grantXp: (offers?: string[]) => void; heroPose: () => unknown; setHeroScale: (n: number) => void; sim: () => unknown; spawn: (kind: string, dx?: number, dy?: number) => void; enemyStats: () => unknown; encounter: (id: string) => void; arenaHazard: () => void; scene: () => unknown; hand: () => unknown; fxOrigin: () => unknown; audio: () => unknown } }).__KYNT_QA__ = { grantXp: (offers?: string[]) => this.bridge.debugGrantXp(offers as never), heroPose: () => this.entityRenderer.debugPose(), hand: () => this.entityRenderer.handAnchor(), fxOrigin: () => this.entityRenderer.fxOrigin(), audio: () => ({ state: this.audio?.state ?? 'none', loaded: this.audio?.loaded ?? 0, active: this.audio?.activeVoices ?? 0, started: [...(this.audio?.started ?? [])], cue: this.audio?.music?.cue ?? null, musicLog: [...(this.audio?.music?.log ?? [])], volume: this.audio?.volume }), setHeroScale: (n: number) => this.entityRenderer.setHeroScale(n), sim: () => this.simulation.state, spawn: (kind: string, dx = 120, dy = 0) => { const st = this.simulation.state; if (isBossKind(kind as never)) { const b = spawnBoss(st, kind as never); if (b) { st.player.x = b.x - dx; st.player.y = b.y - dy; } return; } const d = ENEMIES[kind as MobKind]; addEnemy(st, { kind: kind as MobKind, x: st.player.x + dx, y: st.player.y + dy, hp: d.hp, maxHp: d.hp, radius: d.radius, speed: 0, damage: 0, touchCooldown: 0, attackCd: 99, aimX: -1, aimY: 0, mode: 'move', stepId: 'qa' } as never); }, enemyStats: () => this.entityRenderer.enemyStats(), scene: () => this, arenaHazard: () => { this.simulation.state.arenaHazard.nextAt = this.simulation.state.time; }, encounter: (id: string) => startEncounter(this.simulation.state, id as Parameters<typeof startEncounter>[1]) };
+      (window as unknown as { __KYNT_QA__: Record<string, unknown> }).__KYNT_QA__.lfSpawn = (kind: string, dx = 260, dy = 0) => { const st = this.simulation.state; return spawnEvent(st, kind as never, { x: st.player.x + dx, y: st.player.y + dy })?.id ?? null; };
       (window as unknown as { __KYNT_QA__: Record<string, unknown> }).__KYNT_QA__.killBoss = (kind: string) => { const b = this.simulation.state.enemies.find(e => e.kind === kind && e.hp > 0); if (b) { if (b.ai) b.ai.invuln = false; damageEnemy(this.simulation.state, b, 1e9); } };
     }
   }
-  private b22: B22Overlay | null = null; private realmProps: RealmProps | null = null;
-  private createArena() { const proc = !!ARENA_DEFS[this.arena].procedural; if (proc) { createRealmFloor(this, this.arena); this.realmProps = new RealmProps(this, this.arena); } else { createArenaFloor(this, this.arena); this.props = new ArenaProps(this, this.arena); this.ambience = import.meta.env.DEV && new URLSearchParams(window.location.search).get('noamb') === '1' ? null : new Ambience(this, this.arena); this.hazardView = new ArenaHazardView(this); } this.b22 = new B22Overlay(this); this.marks = new ArenaMarks(this, this.arena); this.floorLights = new LightLayer(this); this.evoFx = new EvoFx(this); this.presentation = new Presentation(this); }
+  private lfLayer: LfLayer | null = null; private b22: B22Overlay | null = null; private realmProps: RealmProps | null = null;
+  private createArena() { const proc = !!ARENA_DEFS[this.arena].procedural; if (proc) { createRealmFloor(this, this.arena); this.realmProps = new RealmProps(this, this.arena); } else { createArenaFloor(this, this.arena); this.props = new ArenaProps(this, this.arena); this.ambience = import.meta.env.DEV && new URLSearchParams(window.location.search).get('noamb') === '1' ? null : new Ambience(this, this.arena); this.hazardView = new ArenaHazardView(this); } this.b22 = new B22Overlay(this); this.lfLayer = new LfLayer(this); this.marks = new ArenaMarks(this, this.arena); this.floorLights = new LightLayer(this); this.evoFx = new EvoFx(this); this.presentation = new Presentation(this); }
   update(_time: number, delta: number) {
     if (this.disposed || !this.simulation) return;
     // Sample action key presses per authoritative simulation tick so 120Hz displays
@@ -117,7 +120,7 @@ export class ArenaScene extends Phaser.Scene {
         const q = pr.debugPose(), k = formKey(pv.view.hero, pv.view.player.form); this.presentation.partner(q.x, q.y, k ? RING_TINT[k] : 0xbff4ff, true, np.down.downed);
       } else { this.pview = null; this.partnerHero = null; this.presentation.partner(0, 0, 0, false, false); }
     }
-    this.b22?.update(s, s.phase === 'running' ? delta / 1000 : 0, this.reduced);
+    this.b22?.update(s, s.phase === 'running' ? delta / 1000 : 0, this.reduced); this.lfLayer?.update(s, s.phase === 'running' ? delta / 1000 : 0, this.reduced);
     this.props?.update(s, this.time.now / 1000); this.ambience?.update(this.time.now / 1000, this.reduced); this.hazardView?.sync(s, s.phase === 'running' ? delta / 1000 : 0); this.marks?.update(s, delta / 1000, this.reduced); this.floorLights?.update(s, delta / 1000, this.reduced); this.evoFx?.update(s, delta / 1000, this.reduced);
     if (s.phase === 'victory') {
       // the Seraph's death is staged for ~2.8 s (suspension, shimmer, dissolve): the gold celebration waits for the shimmer and the results screen for the end of the dissolve
@@ -159,7 +162,7 @@ export class ArenaScene extends Phaser.Scene {
   private dispose() {
     if (this.disposed) return; this.disposed = true; this.scale.off(Phaser.Scale.Events.RESIZE);
     this.events.off('b21-cue', this.onCue); window.removeEventListener('keydown', this.unlockAudio); window.removeEventListener('pointerdown', this.unlockAudio); this.audio?.dispose();
-    this.controller?.destroy(); this.entityRenderer?.destroy(); this.partnerRenderer?.destroy(); this.partnerRenderer = null; this.fx?.destroy(); this.readout?.destroy(); this.presentation?.destroy(); this.debug?.destroy(); this.props?.destroy(); this.realmProps?.destroy(); this.b22?.destroy(); this.ambience?.destroy(); this.hazardView?.destroy(); this.marks?.destroy(); this.floorLights?.destroy(); this.evoFx?.destroy(); this.bridge.unbind();
+    this.controller?.destroy(); this.entityRenderer?.destroy(); this.partnerRenderer?.destroy(); this.partnerRenderer = null; this.fx?.destroy(); this.readout?.destroy(); this.presentation?.destroy(); this.debug?.destroy(); this.props?.destroy(); this.realmProps?.destroy(); this.b22?.destroy(); this.lfLayer?.destroy(); this.ambience?.destroy(); this.hazardView?.destroy(); this.marks?.destroy(); this.floorLights?.destroy(); this.evoFx?.destroy(); this.bridge.unbind();
     delete (window as Window & { __KYNT_QA__?: unknown }).__KYNT_QA__;
   }
 }

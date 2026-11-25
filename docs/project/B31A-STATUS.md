@@ -33,7 +33,7 @@ Ten 16:9 key arts through the project's audited Codex bridge (`art/chronicles/ru
 ## Validation
 - tsc clean; `npm run build` ok; vitest 785 pass (new `b31-chronicles.test.ts`: 13 definitions, gating, legacy-save migration, reward idempotency, all 13 plans launch on the real sim, hold / wave / duel win paths, Nexus chatter).
 - Browser (headless Chromium, software GL), real UI: fail kai_1 (no completion, "lost" result, retry), win it (completion and +150 Marks are already stored while the outro is still open; seen scenes tracked separately), replay (0 extra Marks), next-chapter intro, Esc / Back / Skip in scenes, map statuses, Archives tab. Also `e2e/chronicles.spec.ts`, nexus, pause and loading specs, and the Vex Trial path in `b22-modes` (that spec needs `--timeout=150000`; it takes about 45 s and passes).
-- Captured at 1920x1080 (map), 960x540 and 640x360 (map, scene, Nexus, HUD, results); no console errors. Evidence: `docs/project/b31a-review/`.
+- Captured at 1920x1080 (map), 960x540 and 640x360 (map, scene, Nexus, HUD, results); no console errors. (Evidence screenshots were removed at the owner's request; none are kept in the repo.)
 
 ## Not done / limits
 - Browser wins were reached by advancing the sim clock (hold) or forcing the dead phase, not by playing the full 3:30. Mission balance for fresh players is reasoned from the curves and sim tests, not playtested; duel HP multipliers (35-55%) are untuned.

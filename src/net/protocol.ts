@@ -2,12 +2,13 @@
 import type { InputState } from '../sim/GameState';
 import { HERO_IDS, type HeroId } from '../content/heroes';
 
-export const PROTOCOL_VERSION = 1, MAX_MSG_BYTES = 2048, INPUT_HZ = 60;
+/** v2 (B31B): `create` may carry the Living Fractures flag, `room` reports it and snapshots carry the shared event world. A v1 client or server is refused with an explicit update error. */
+export const PROTOCOL_VERSION = 2, MAX_MSG_BYTES = 2048, INPUT_HZ = 60;
 export type RoomMode = 'classic' | 'fracture_expedition' | 'boss_rush';
 export const ROOM_MODES: readonly RoomMode[] = ['classic', 'fracture_expedition', 'boss_rush'];
 export type ClientMsg =
   | { t: 'hello'; v: number; name: string; token?: string; /** QA / owner switch (?unlock=all): everything unlocked for this player; such runs are never ranked */ unlock?: boolean }
-  | { t: 'create'; hero: HeroId; mode: RoomMode; arena: string }
+  | { t: 'create'; hero: HeroId; mode: RoomMode; arena: string; /** B31B: opt the room into Living Fractures (Classic / Expedition only; the server decides and echoes it back) */ lf?: boolean }
   | { t: 'join'; code: string; hero: HeroId }
   | { t: 'ready'; ready: boolean; hero?: HeroId }
   | { t: 'input'; seq: number; i: WireInput }
@@ -16,7 +17,7 @@ export type ClientMsg =
 export interface WireInput { x: number; y: number; dash: boolean; q: boolean; f: boolean; beam: boolean; sphere: boolean; beamHeld: boolean; fHeld: boolean; sig?: boolean; sigHeld?: boolean; od?: boolean; sigAbort?: boolean; flyHeld?: boolean; flyToggle?: boolean; /** Form Shift pick 1-3, one-shot */ selPick?: 1 | 2 | 3; aimX?: number; aimY?: number; aimSrc?: 'pointer' | 'stick'; aimDist?: number }
 export type ServerMsg =
   | { t: 'welcome'; v: number; id: string; token: string; serverTime: number }
-  | { t: 'room'; code: string; mode: RoomMode; arena: string; state: 'lobby' | 'running' | 'ended'; you: number; players: { name: string; hero: HeroId; ready: boolean; connected: boolean }[] }
+  | { t: 'room'; code: string; mode: RoomMode; arena: string; lf: boolean; state: 'lobby' | 'running' | 'ended'; you: number; players: { name: string; hero: HeroId; ready: boolean; connected: boolean }[] }
   | { t: 'snap'; tick: number; ack: number; s: unknown }
   | { t: 'result'; won: boolean; seconds: number; kills: number; score: number; runId: string; verified: true; rank?: number }
   | { t: 'error'; code: 'version' | 'bad_message' | 'rate_limit' | 'no_room' | 'room_full' | 'bad_state' | 'forbidden' | 'partner_left'; msg: string }
@@ -31,7 +32,7 @@ export function parseClient(raw: string): ClientMsg | null {
   let m: unknown; try { m = JSON.parse(raw); } catch { return null; } if (typeof m !== 'object' || m === null) return null; const o = m as Record<string, unknown>;
   switch (o.t) {
     case 'hello': return fin(o.v, 0, 1e6) && typeof o.name === 'string' && NAME.test(o.name) && (o.token === undefined || (typeof o.token === 'string' && /^[0-9a-f]{48}$/.test(o.token))) && (o.unlock === undefined || typeof o.unlock === 'boolean') ? { t: 'hello', v: o.v as number, name: o.name, token: o.token as string | undefined, ...(o.unlock === true ? { unlock: true } : {}) } : null;
-    case 'create': return isHero(o.hero) && typeof o.mode === 'string' && (ROOM_MODES as readonly string[]).includes(o.mode) && typeof o.arena === 'string' && /^[a-z]{3,12}$/.test(o.arena) ? { t: 'create', hero: o.hero, mode: o.mode as RoomMode, arena: o.arena } : null;
+    case 'create': return isHero(o.hero) && typeof o.mode === 'string' && (ROOM_MODES as readonly string[]).includes(o.mode) && typeof o.arena === 'string' && /^[a-z]{3,12}$/.test(o.arena) && (o.lf === undefined || typeof o.lf === 'boolean') ? { t: 'create', hero: o.hero, mode: o.mode as RoomMode, arena: o.arena, ...(o.lf === true ? { lf: true } : {}) } : null;
     case 'join': return typeof o.code === 'string' && CODE.test(o.code) && isHero(o.hero) ? { t: 'join', code: o.code, hero: o.hero } : null;
     case 'ready': return typeof o.ready === 'boolean' && (o.hero === undefined || isHero(o.hero)) ? { t: 'ready', ready: o.ready, hero: o.hero as HeroId | undefined } : null;
     case 'input': {

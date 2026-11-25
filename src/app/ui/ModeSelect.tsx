@@ -9,7 +9,7 @@ import { ASSET_BASE } from '../assetBase';
 import { isQaRoute } from '../../sim/SaveSystem';
 
 import { HERO_IDS, type HeroId } from '../../content/heroes';
-export interface ModeChoice { id: RunModeId; track?: BossRushTrack; chapter?: 1 | 2 | 3; practice?: boolean; /** B22.6 local couch co-op: the partner's hero (undefined = solo) */ coop?: HeroId }
+export interface ModeChoice { id: RunModeId; track?: BossRushTrack; chapter?: 1 | 2 | 3; practice?: boolean; /** B22.6 local couch co-op: the partner's hero (undefined = solo) */ coop?: HeroId; /** B31B: the opt-in Living Fractures rule (Classic, Endless, Expedition only) */ living?: boolean }
 interface Props { onOnline?: () => void; choice: ModeChoice; onChoose: (c: ModeChoice) => void; onBack: () => void; save: SaveV1; now?: number }
 const fmt = (s: number) => `${Math.floor(s / 3600)}h ${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}m`;
 const MODES: { id: RunModeId; title: string; name: string; blurb: string; length: string; ranked: string }[] = [
@@ -21,13 +21,14 @@ const MODES: { id: RunModeId; title: string; name: string; blurb: string; length
   { id: 'weekly_challenge', title: 'Weekly Challenge', name: 'WEEKLY CHALLENGE', blurb: 'A longer seeded run with two modifiers, fixed for the UTC week.', length: '≈ 15 min', ranked: 'LOCAL record · not server-verified' },
   { id: 'vex_trial', title: 'Trial of the Oathbroken', name: 'TRIAL OF THE OATHBROKEN', blurb: "Vex's three-chapter story: the Broken Oath, the Fractured Accord, Judgment of the Exile.", length: '3 chapters', ranked: 'Unlocks Riftbound and Voidheart Exile' },
 ];
+const LIVE: RunModeId[] = ['classic', 'endless', 'fracture_expedition'];
 export function ModeSelect({ onOnline, choice, onChoose, onBack, save, now }: Props) {
   const [t] = useState(() => now ?? Date.now());
   const b22 = save.b22, daily = dailyChallenge(t), weekly = weeklyChallenge(t), done = b22?.story.done ?? [];
   const best = (id: RunModeId) => { let x = 0; for (const k of Object.keys(b22?.records ?? {})) if (k.startsWith(id + '|')) x = Math.max(x, b22!.records[k].bestScore); return x; };
   void recordKey;
   const chal = choice.id === 'daily_challenge' ? daily : choice.id === 'weekly_challenge' ? weekly : null;
-  const cur = MODES.find(m => m.id === choice.id) ?? MODES[0], qa = isQaRoute(), pick = (id: RunModeId) => onChoose({ coop: id === 'vex_trial' || id === 'daily_challenge' || id === 'weekly_challenge' ? undefined : choice.coop, id, track: id === 'boss_rush' ? (choice.track ?? 'initiation') : undefined, chapter: id === 'vex_trial' ? (choice.chapter ?? 1) : undefined });
+  const cur = MODES.find(m => m.id === choice.id) ?? MODES[0], qa = isQaRoute(), pick = (id: RunModeId) => onChoose({ living: LIVE.includes(id) ? choice.living : undefined, coop: id === 'vex_trial' || id === 'daily_challenge' || id === 'weekly_challenge' ? undefined : choice.coop, id, track: id === 'boss_rush' ? (choice.track ?? 'initiation') : undefined, chapter: id === 'vex_trial' ? (choice.chapter ?? 1) : undefined });
   const face = (h: HeroId) => h === 'kai' ? `${ASSET_BASE}ui/kai-portrait-base.png` : `${ASSET_BASE}ui/heroes/${h}-portrait-base.webp`;
   const coopLocked = ['vex_trial', 'daily_challenge', 'weekly_challenge'].includes(choice.id);
   const support = (id: RunModeId) => id === 'vex_trial' || id === 'daily_challenge' || id === 'weekly_challenge' ? ['SOLO'] : id === 'classic' || id === 'boss_rush' || id === 'fracture_expedition' ? ['SOLO', 'LOCAL CO-OP', 'ONLINE'] : ['SOLO', 'LOCAL CO-OP'];
@@ -45,6 +46,7 @@ export function ModeSelect({ onOnline, choice, onChoose, onBack, save, now }: Pr
         <div className="ms-copy"><p className="eyebrow">Selected mode</p><h3>{cur.title}</h3><p className="ms-blurb">{cur.blurb}</p>
           <dl className="ms-facts">{facts.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl></div>
         <section className="mode-detail ms-opts" data-testid="mode-detail">
+          {LIVE.includes(choice.id) && <div className="ms-optrow ms-living"><button type="button" className={`ms-opt ${choice.living ? 'on' : ''}`} data-testid="living-toggle" aria-pressed={!!choice.living} onClick={() => onChoose({ ...choice, living: !choice.living })}>Living Fractures: {choice.living ? 'on' : 'off'}</button><small className="dim">{choice.living ? 'Optional world events appear while you fight: rift portals, corrupted shrines, caches, roaming elites, relays and celestial echoes. Unranked: they never touch your ranked records.' : 'Off: the run is exactly as it always was, ranked records included.'}</small></div>}
           {choice.id === 'boss_rush' && <div className="ms-optrow">{(Object.keys(BOSS_RUSH_TRACKS) as BossRushTrack[]).map(k => <button key={k} type="button" className={`ms-opt ${choice.track === k ? 'on' : ''}`} data-testid={`track-${k}`} onClick={() => onChoose({ ...choice, track: k })}>{BOSS_RUSH_TRACKS[k].name} · {BOSS_RUSH_TRACKS[k].bosses.length} bosses</button>)}<button type="button" className={`ms-opt ${choice.practice ? 'on' : ''}`} data-testid="practice-toggle" onClick={() => onChoose({ ...choice, practice: !choice.practice })}>Practice (unranked): {choice.practice ? 'on' : 'off'}</button></div>}
           {choice.id === 'vex_trial' && <div className="ms-optrow">{([1, 2, 3] as const).map(c => { const open = qa || c === 1 || done.includes((c - 1) as 1 | 2); return <button key={c} type="button" disabled={!open} className={`ms-opt ${choice.chapter === c ? 'on' : ''}`} data-testid={`chapter-${c}`} onClick={() => onChoose({ ...choice, chapter: c })}>{['I · The Broken Oath', 'II · The Fractured Accord', 'III · Judgment of the Exile'][c - 1]} {done.includes(c) ? '✓' : open ? '' : '🔒'}</button>; })}{qa && <small className="dim">QA route: all chapters open.</small>}</div>}
           {chal && <div className="mode-chal ms-chal" data-testid="challenge-preview"><b>{chal.id}</b> · {ARENAS[chal.arena].name} · {chal.hero ? `hero: ${chal.hero.toUpperCase()}` : 'any hero'} · resets in {fmt(untilReset(chal, t))} (UTC)

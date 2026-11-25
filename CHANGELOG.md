@@ -1,5 +1,11 @@
 # Changelog
 
+## B31B Living Fractures
+- Opt-in run rule on Classic, Endless and Fracture Expedition (Mode Select toggle; online host toggle): six optional world events with their own deterministic director stream. Rift Portal, Corrupted Shrine, Fracture Cache, Roaming Elite, Containment (escort or defend) and Celestial Echo (one trial and blessing per hero), each with arena-specific variants for all four arenas.
+- Event runs are a different seed contract (`<plan>+lf`), unranked, and never write the mode records; with the rule off nothing changes (bit-identical until the first event, tested).
+- Shared world in solo, local co-op and online co-op (server authoritative; protocol v2; clients send nothing but input). HUD tracker, announcements, boon / curse chips, direction hints, bargain preview, minimap markers and a result summary.
+- 27 ImageGen world sprites in one atlas plus HUD icons (public/art/fractures, sources in art/fractures).
+
 ## B31A Fracture Chronicles (local, unpushed)
 - Story campaign: nine new solo missions (Kai, Ren, Sora x3), Vex's three Trial chapters integrated, and a shared finale unlocked by all four arcs. New campaign run mode and a hold encounter step; the HUD shows the live mission objective; unranked, no per-run Marks, one-time chapter rewards.
 - Fracture Chronicles map in the Nexus, cinematic story scenes (parallax art, speaker portraits, back / skip), an Archives tab with replay and lore, Nexus hero chatter that reacts to progress.

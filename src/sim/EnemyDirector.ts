@@ -10,6 +10,7 @@ import { ENDLESS_BOSS_ROTATION, ENDLESS_CYCLE, planBudget, type EncounterStep } 
 import { REALM_BASE, REALM_TABLE, endlessKinds, type RealmSlot } from '../b22/realms';
 import { MODIFIER_RULES } from '../b22/challenges';
 import { spawnWave } from './B22Encounters';
+import { lfMul } from './lfHooks';
 
 export const liveThreat = (state: GameState) => { let t = 0; for (const e of state.enemies) if (e.hp > 0 && e.kind in THREAT_COST && !e.part) t += THREAT_COST[e.kind as MobKind]; return t; };
 const bossSteps = (state: GameState) => state.plan.steps.filter(s => s.kind === 'boss');
@@ -41,11 +42,12 @@ export function updateDirector(state: GameState, rng: SeededRng, dt: number) {
   state.spawnTimer -= dt;
   if (state.spawnTimer > 0) return;
   const t = state.time, e = state.b22.endless, cyc = e ? Math.floor((t - e.fromT) / ENDLESS_CYCLE) : 0;
-  state.spawnTimer = (1.1 - 0.7 * Math.min(1, t / 300)) * rng.between(0.8, 1.2) * state.run.spawnMult;
+  const lfSpawn = lfMul(state, 'spawn');   // B31B: a world curse (Hungry Flame) means more enemies, sooner
+  state.spawnTimer = (1.1 - 0.7 * Math.min(1, t / 300)) * rng.between(0.8, 1.2) * state.run.spawnMult / lfSpawn;
   const rel = e ? t - e.fromT : t;
   let budget = (e ? Math.min(110, 66 * (1 + 0.1 * cyc)) * (rel % ENDLESS_CYCLE < 12 ? 0.55 : 1) : planBudget(plan, t)) * budgetScale(t, state.lastBossDefeatAt, e ? { breathers: false, quietFrom: null } : { breathers: plan.breathers, quietFrom: plan.finaleQuietFrom });
   if (boss) budget = Math.min(budget * 0.5, BOSS_THREAT_CAP);
-  budget *= state.b22.party ? 1.55 : 1;
+  budget *= (state.b22.party ? 1.55 : 1) * lfSpawn;
   let threat = liveThreat(state);
   const batch = 1 + (t > 240 ? 1 : 0) + (t > 600 ? 1 : 0);
   for (let i = 0; i < batch && threat < budget && state.enemies.length < cap; i++) { const k = spawnEnemy(state, rng); if (!k) break; threat += THREAT_COST[k]; }
@@ -95,7 +97,7 @@ export function spawnEnemy(state: GameState, rng: SeededRng): MobKind | null {
   const kind = pickKind(state, rng);
   const def = ENEMIES[kind];
   const e = state.b22.endless, cyc = e ? Math.max(0, Math.floor((state.time - e.fromT) / ENDLESS_CYCLE)) : 0;
-  const hp = (def.hp + Math.floor(state.time / 60) * def.hpPerMinute) * (1 + 0.12 * cyc) * state.run.enemyHpMult;
+  const hp = (def.hp + Math.floor(state.time / 60) * def.hpPerMinute) * (1 + 0.12 * cyc) * state.run.enemyHpMult * lfMul(state, 'foeHp');
   // Place outside the 960x540 camera view where possible, without clipping the world.
   for (let attempt = 0; attempt < 25; attempt++) {
     const theta = rng.between(0, Math.PI * 2), range = rng.between(570, 700);

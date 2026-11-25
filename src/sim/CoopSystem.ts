@@ -7,6 +7,7 @@ import { REVIVE, RESONANCE, PAIR_RULES, pairOf } from '../b22/pairs';
 import type { PartyState } from '../b22/state';
 import type { Enemy } from './GameState';
 import { xpThreshold } from './GameState';
+import { lfMul } from './lfHooks';
 
 export const SLOT_KEYS = ['player', 'hero', 'hx', 'cast', 'sphere', 'mods', 'upgradeStacks', 'aim', 'eHeld', 'b22', 'heroFormUnlocked', 'heroFormUnlockedNow', 'heroFormSeen', 'vexSeen', 'run', 'echoes', 'blasts', 'apexUnlocked', 'apexUnlockedNow', 'cometUnlocked', 'cometUnlockedNow', 'levelUpAt'] as const;
 export type SlotBag = Pick<GameState, (typeof SLOT_KEYS)[number]>;
@@ -57,7 +58,7 @@ export function pickTarget(s: GameState, e: Enemy) { if (s.party) swapTo(s, near
 export function coopGainXp(s: GameState, amount: number) {
   const p = s.party!; if (!Number.isFinite(amount) || amount <= 0 || s.phase !== 'running') return;
   for (let i = 0; i < p.slots.length; i++) {
-    if (p.slots[i].down.out) continue; const q = slotPlayer(s, i), mods = p.cur === i ? s.mods : p.slots[i].bag.mods; q.xp += amount * mods.xp;
+    if (p.slots[i].down.out) continue; const q = slotPlayer(s, i), mods = p.cur === i ? s.mods : p.slots[i].bag.mods; q.xp += amount * mods.xp * lfMul(s, 'xp', i);
     if (q.xp >= q.nextXp) { q.xp -= q.nextXp; q.level++; q.nextXp = xpThreshold(q.level); const lv = p.cur === i ? s.levelUpAt : p.slots[i].bag.levelUpAt; lv.push(s.time); p.queue.push(i); }
   }
 }

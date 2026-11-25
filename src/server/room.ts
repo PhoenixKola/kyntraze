@@ -2,7 +2,8 @@
 import { randomBytes } from 'node:crypto';
 import { Simulation } from '../sim/Simulation';
 import { NO_CONFIG } from '../sim/RunConfig';
-import { CLASSIC_PLAN, bossRushPlan, expeditionPlan, type RunPlan } from '../b22/plan';
+import { CLASSIC_PLAN, bossRushPlan, expeditionPlan, withLiving, type RunPlan } from '../b22/plan';
+import { endLiving } from '../sim/LivingFractures';
 import { CLASSIC_ARENAS, REALM_ARENAS, isArenaId, type ArenaId } from '../content/arenas';
 import type { HeroId } from '../content/heroes';
 import type { InputState } from '../sim/GameState';
@@ -21,9 +22,9 @@ const planOf = (mode: RoomMode, arena: ArenaId): { plan: RunPlan; arena: ArenaId
 export class Room {
   players: Player[] = []; state: 'lobby' | 'running' | 'ended' = 'lobby'; sim: Simulation | null = null; tick = 0; private acc = 0; private last = 0; private timer: ReturnType<typeof setInterval> | null = null; private pickClock = 0; idle = 0;
   readonly runId = randomBytes(9).toString('hex'); private seed = randomBytes(4).readUInt32BE(0);
-  constructor(readonly code: string, readonly mode: RoomMode, readonly arena: ArenaId, private readonly store: Store, private readonly onEmpty: (r: Room) => void) {}
+  constructor(readonly code: string, readonly mode: RoomMode, readonly arena: ArenaId, readonly lf: boolean, private readonly store: Store, private readonly onEmpty: (r: Room) => void) {}
   private send(p: Player, m: ServerMsg) { p.conn?.send(JSON.stringify(m)); }
-  broadcastRoom() { for (const p of this.players) this.send(p, { t: 'room', code: this.code, mode: this.mode, arena: this.arena, state: this.state, you: p.slot, players: this.players.map(q => ({ name: q.name, hero: q.hero, ready: q.ready, connected: !!q.conn })) }); }
+  broadcastRoom() { for (const p of this.players) this.send(p, { t: 'room', code: this.code, mode: this.mode, arena: this.arena, lf: this.lf, state: this.state, you: p.slot, players: this.players.map(q => ({ name: q.name, hero: q.hero, ready: q.ready, connected: !!q.conn })) }); }
   add(name: string, hero: HeroId, conn: WsConn, unlock = false): Player | null {
     if (this.players.length >= 2 || this.state !== 'lobby') return null;
     const p: Player = { id: randomBytes(8).toString('hex'), token: randomBytes(24).toString('hex'), name, hero, ready: false, conn, lastSeq: 0, input: null, pulse: { ...NO_PULSE }, absentFor: 0, slot: this.players.length, unlock };
@@ -53,7 +54,7 @@ export class Room {
     if (ok) this.pickClock = 0;
   }
   start() {
-    const { plan, arena } = planOf(this.mode, this.arena); const [a, b] = this.players;
+    const { plan: base, arena } = planOf(this.mode, this.arena), plan = this.lf ? withLiving(base) : base; const [a, b] = this.players;
     const cfg = (q: Player) => ({ ...NO_CONFIG, hero: q.hero, heroForm: q.unlock && q.hero !== 'kai', ...(q.unlock ? { vexForms: [true, true] as [boolean, boolean] } : {}) });
     this.sim = new Simulation(this.seed, arena, a.unlock, a.unlock, { ...cfg(a), plan }); this.sim.joinPartner(cfg(b), 'online', [a.name, b.name]);
     { const bag = this.sim.state.party!.slots[1].bag; bag.cometUnlocked = b.unlock; bag.apexUnlocked = b.unlock; }
@@ -76,8 +77,8 @@ export class Room {
     }
   }
   finish(abandoned = false) {
-    if (this.state === 'ended') return; this.state = 'ended'; if (this.timer) clearInterval(this.timer); const s = this.sim!.state, won = s.phase === 'victory' && !abandoned, score = this.sim!.stats().score;
-    const rank = abandoned || this.players.some(p => p.unlock) ? null : this.store.add({ runId: this.runId, mode: this.mode, arena: s.arenaId, party: 2, names: this.players.map(p => p.name), heroes: this.players.map(p => p.hero), won, seconds: Math.floor(s.time), kills: s.kills, score, at: Date.now() });
+    if (this.state === 'ended') return; this.state = 'ended'; if (this.timer) clearInterval(this.timer); const s = this.sim!.state, won = s.phase === 'victory' && !abandoned, score = this.sim!.stats().score; endLiving(s);
+    const rank = abandoned || this.lf || this.players.some(p => p.unlock) ? null : this.store.add({ runId: this.runId, mode: this.mode, arena: s.arenaId, party: 2, names: this.players.map(p => p.name), heroes: this.players.map(p => p.hero), won, seconds: Math.floor(s.time), kills: s.kills, score, at: Date.now() });
     for (const p of this.players) this.send(p, { t: 'snap', tick: this.tick, ack: p.lastSeq, s: toSnapshot(s, this.tick, p.slot) });
     for (const p of this.players) this.send(p, { t: 'result', won, seconds: Math.floor(s.time), kills: s.kills, score, runId: this.runId, verified: true, ...(rank ? { rank } : {}) });
     this.broadcastRoom(); setTimeout(() => { for (const p of this.players) p.conn?.close(); this.onEmpty(this); }, 5000);

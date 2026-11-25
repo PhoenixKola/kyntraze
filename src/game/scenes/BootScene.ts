@@ -5,6 +5,8 @@ import { KK_FX, kkKey, kkUrl } from '../render/kaiKitFx';
 import { VFX_NAMES, vfxKey, vfxUrl } from '../render/fxPool';
 import { ARENA_FX, FLOOR_TILE_COUNT, HAZARD_FX, PROPS_KEY, arenaAssetUrl, arenaFxKey, arenaPropNames, floorTileKey, floorTileUrl, parsePropManifest, propKey } from '../render/arenaWorld';
 import { B22_ART } from '../render/realmArt';
+import { LF_ATLAS, LF_MARKS, lfMarkKey } from '../render/livingFractures';
+import { ASSET_BASE } from '../../app/assetBase';
 const DEATH_STRIP_CLASSIC = ['pursuer', 'flanker', 'bruiser', 'ranged', 'aegis', 'cantor'];
 import { ARENAS, type ArenaId } from '../../content/arenas';
 import { enemyDeathKey, enemyDeathUrl, ENEMY_FX_NAMES, enemyFxKey, enemyFxUrl, enemyManifestKey, enemyManifestUrl, enemySheetKey, enemySheetUrl, type EnemyManifest } from '../render/enemyRenderer';
@@ -37,6 +39,8 @@ export class BootScene extends Phaser.Scene {
   preload() {
     this.load.on(Phaser.Loader.Events.PROGRESS, (v: number) => this.report(0, v));
     STARTER_TEXTURES.forEach(tex => this.load.image(tex.key, tex.path));
+    this.load.atlas(LF_ATLAS, `${ASSET_BASE}art/fractures/lf.webp`, `${ASSET_BASE}art/fractures/lf.json`);   // B31B Living Fractures world art (one atlas)
+    LF_MARKS.forEach(m => this.load.image(lfMarkKey(m), `${ASSET_BASE}art/fractures/ui/mark_${m}.webp`));
     KAI_DIRS.forEach(dir => this.load.json(`kai-manifest-${dir}`, kaiManifestUrl(dir)));
     KAI_DIRS.forEach(dir => this.load.json(`kai-f1-manifest-${dir}`, kaiManifestUrl(dir, 'f1')));
     KAI_DIRS.forEach(dir => this.load.json(`kai-f2-manifest-${dir}`, kaiManifestUrl(dir, 'f2')));

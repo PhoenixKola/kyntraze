@@ -11,7 +11,7 @@ import { DEFAULT_SERVER_URL } from '../../net/defaultServer';
 interface Props { notice?: string; savedUrl: string; savedName: string; hero: HeroId; onSaveServer: (url: string, name: string) => void; onStart: (net: NetClient, seed: number) => void; onBack: () => void }
 /** Online co-op lobby: server address (wss:// only; ws:// to localhost for development), a display name, create / join by room code, hero pick and ready. Nothing is sent until you press CONNECT; solo play never touches the network. */
 export function OnlineLobby({ notice, savedUrl, savedName, hero, onSaveServer, onStart, onBack }: Props) {
-  const [url, setUrl] = useState(savedUrl || DEFAULT_SERVER_URL), [name, setName] = useState(savedName || 'Runner'), [code, setCode] = useState(''), [mode, setMode] = useState<RoomMode>('classic'), [h, setH] = useState<HeroId>(hero);
+  const [url, setUrl] = useState(savedUrl || DEFAULT_SERVER_URL), [name, setName] = useState(savedName || 'Runner'), [code, setCode] = useState(''), [mode, setMode] = useState<RoomMode>('classic'), [lf, setLf] = useState(false), [h, setH] = useState<HeroId>(hero);
   const [net, setNet] = useState<NetClient | null>(null), [, tick] = useState(0), [busy, setBusy] = useState(false), [fail, setFail] = useState(''), [adv, setAdv] = useState(false);
   const ok = safeServerUrl(url);
   useEffect(() => { if (!net) return; const off = net.on(() => tick(n => n + 1)); return off; }, [net]);
@@ -52,13 +52,14 @@ export function OnlineLobby({ notice, savedUrl, savedName, hero, onSaveServer, o
       {heroPick(h, setH, 'Hero')}
       <div className="lb-split">
         <div className="lb-half"><h4>Host a game</h4><div className="lb-modes" role="group" aria-label="Mode">{(['classic', 'fracture_expedition', 'boss_rush'] as RoomMode[]).map(m => <Card key={m} on={mode === m} onClick={() => setMode(m)}><b>{m === 'classic' ? 'Classic' : m === 'boss_rush' ? 'Boss Rush' : 'Fracture Expedition'}</b></Card>)}</div>
-          <p className="lb-note">You get a code to share with your friend.</p><Cta onClick={() => net.send({ t: 'create', hero: h, mode, arena: mode === 'fracture_expedition' ? 'aetherfall' : 'gloam' })} testId="create-room" sub="Get a room code">HOST A GAME</Cta></div>
+          {mode !== 'boss_rush' && <button type="button" className={`ms-opt ${lf ? 'on' : ''}`} data-testid="lobby-living" aria-pressed={lf} onClick={() => setLf(!lf)}>Living Fractures: {lf ? 'on' : 'off'}</button>}
+          <p className="lb-note">{lf && mode !== 'boss_rush' ? 'World events appear during the run: portals, shrines, caches, elites, relays and echoes. Both players share them. Unranked.' : 'You get a code to share with your friend.'}</p><Cta onClick={() => net.send({ t: 'create', hero: h, mode, arena: mode === 'fracture_expedition' ? 'aetherfall' : 'gloam', ...(lf && mode !== 'boss_rush' ? { lf: true } : {}) })} testId="create-room" sub="Get a room code">HOST A GAME</Cta></div>
         <div className="lb-half"><h4>Join a friend</h4><label className="lb-field">Room code<input className="lb-code" value={code} maxLength={5} onChange={e => setCode(e.target.value.toUpperCase())} placeholder="· · · · ·" data-testid="room-code" autoComplete="off" spellCheck={false}/></label>
           <p className="lb-note">{code.length < 5 ? 'Enter the five-character code your friend shares.' : 'Ready to join.'}</p><Cta onClick={() => net.send({ t: 'join', code, hero: h })} testId="join-room" disabled={code.length < 5} sub={code.length < 5 ? `${5 - code.length} more characters` : 'Enter the room'} pad={false}>JOIN</Cta></div>
       </div></Panel>}
     {net && room && <Panel title="Your alliance" className="lb-card" data-testid="room-view">
       <div className="lb-roomcode"><small>Room code</small><b>{room.code}</b><button type="button" className="text-button" onClick={() => void navigator.clipboard?.writeText(room.code)} data-testid="copy-code">Copy</button></div>
-      <p className="lb-note">{room.mode === 'classic' ? 'Classic' : room.mode === 'boss_rush' ? 'Boss Rush' : 'Fracture Expedition'} · {room.players.length < 2 ? 'Waiting for your partner to join with the code.' : them?.ready ? 'Your partner is ready.' : 'Your partner is getting ready.'}</p>
+      <p className="lb-note">{room.mode === 'classic' ? 'Classic' : room.mode === 'boss_rush' ? 'Boss Rush' : 'Fracture Expedition'}{room.lf ? ' + Living Fractures (unranked)' : ''} · {room.players.length < 2 ? 'Waiting for your partner to join with the code.' : them?.ready ? 'Your partner is ready.' : 'Your partner is getting ready.'}</p>
       {!me?.ready && <div className="lb-heroes" role="group" aria-label="Your hero">{HERO_IDS.map(x => <Card key={x} on={me?.hero === x} accent={ACC[x]} onClick={() => { setH(x); net.send({ t: 'ready', ready: false, hero: x }); }} testId={`room-hero-${x}`}><b>{x.charAt(0).toUpperCase() + x.slice(1)}</b></Card>)}</div>}
       <Cta onClick={() => net.send({ t: 'ready', ready: !me?.ready })} testId="ready" sub={me?.ready ? 'Press to cancel' : room.players.length < 2 ? 'You can ready up while you wait' : 'Lock in your runner'}>{me?.ready ? 'NOT READY' : 'READY'}</Cta>
     </Panel>}

@@ -28,6 +28,7 @@ import type { BranchId } from '../b22/branches';
 import type { LegendaryId } from '../b22/legendary';
 import type { RelicId } from '../b22/relics';
 import { beginEndlessLeg, continueEndless, extractNow } from './B22Tick';
+import { startLiving, updateLiving } from './LivingFractures';
 import { createParty, inSlot, standing, swapTo, tether, updateRevives, type Slot } from './CoopSystem';
 import { resolveCoop } from './CoopCombos';
 import type { RunConfig as RunCfg } from './RunConfig';
@@ -40,7 +41,7 @@ export class Simulation {
   private fHeld = false;
   private eHeld = false;
   private rHeld = false; private kc = { sig: false, od: false };
-  constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false, apexUnlocked = false, config: RunConfig = NO_CONFIG) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked, apexUnlocked); applyRunConfig(this.state, config); if (this.state.plan.cycle > 0) this.state.b22.endless = { fromT: 0, cycle: 0, bossAt: 120, offered: false, extracted: false }; }
+  constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false, apexUnlocked = false, config: RunConfig = NO_CONFIG) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked, apexUnlocked); applyRunConfig(this.state, config); startLiving(this.state); if (this.state.plan.cycle > 0) this.state.b22.endless = { fromT: 0, cycle: 0, bossAt: 120, offered: false, extracted: false }; }
   private readonly buf = { q: 0, e: 0, r: 0 };
   /** B22.6: bring a second fighter into the SAME simulation (local couch or an online peer). */
   joinPartner(config: RunCfg, mode: 'local' | 'online' = 'local', names: [string, string] = ['P1', 'P2']) { return createParty(this.state, config, mode, names); }
@@ -84,6 +85,7 @@ export class Simulation {
     updateB22(s, dt, input, this.rng);
     updateContactDamage(s);
     if (s.phase !== 'running') return;
+    if (s.lf) updateLiving(s, dt);
     collectPickups(s, dt, () => { s.upgradeOffers = createOffer(s, this.rng); offerLegendary(s); });
     if (s.phase === 'running' && s.bossReward > 0 && s.time >= s.rewardAt) { s.bossReward--; s.phase = 'upgrade'; s.rewardPick = true; s.upgradeOffers = createOffer(s, this.rng, true); offerLegendary(s); }
     pruneDeadEntities(s);
@@ -165,6 +167,7 @@ export class Simulation {
     }
     swapTo(s, 0); void evStart;
     if (s.phase === 'running') resolveCoop(s, dt);
+    if (s.phase === 'running' && s.lf) updateLiving(s, dt);
     if (s.phase !== 'running') return;
     if (s.bossReward > 0 && s.time >= s.rewardAt) { s.bossReward--; s.rewardPick = true; for (let i = 0; i < P.slots.length; i++) if (!P.slots[i].down.out) P.queue.push(i); }
     pruneDeadEntities(s);

@@ -74,12 +74,14 @@ export const drawnByClassic = (s: GameState, h: Hazard) => h.shape !== 'lane' &&
 
 interface Burst { x: number; y: number; t: number; dur: number; r: number; c: number; x2?: number; y2?: number; sig?: Signature; ang?: number; seed?: number }
 /** The dynamic B22 layer: hazards of every new shape, realm actors, parts, marks, zones, scheduled effects and branch / relic / ultimate event flashes. Created for every arena. */
+/** B31B Living Fractures hazard tints (telegraph colour per event hazard) */
+const LF_HAZ: Record<string, number> = { lf_ember: 0xff8a3a, lf_trap: 0xff6a6a, lf_lane: 0x8fd0ff, lf_oath: 0xb18cff, lf_pounce: 0x5fe8ff, lf_blast: 0xff7a3a, lf_ward: 0xc08cff, lf_ambush: 0xffd86a };
 export class B22Overlay {
   private readonly haz: Phaser.GameObjects.Graphics; private readonly act: Phaser.GameObjects.Graphics; private readonly fxg: Phaser.GameObjects.Graphics;
   private finisherAt = -9; private bursts: Burst[] = []; private evCur = 0; private enemyCur = 0; private lastHp = new Map<number, number>(); private clock = 0;
   private readonly scene: Phaser.Scene; private readonly nul: Phaser.GameObjects.Graphics; private readonly imgs = new Map<number, Phaser.GameObjects.Image>(); private used = new Set<number>(); private shiftId = -1; private popCur = 0; private pops: { im: Phaser.GameObjects.Image; t: number; dur: number; size: number; rise: number; fixed?: boolean }[] = []; private phaseOf = new Map<number, number>(); private surge = new Map<number, number>(); private prevPos = new Map<number, { x: number; y: number }>(); private ghosts: { dk?: string; im: Phaser.GameObjects.Image; t: number; dur: number }[] = [];
   constructor(scene: Phaser.Scene) { this.scene = scene; this.nul = scene.add.graphics().setVisible(false); this.haz = scene.add.graphics().setDepth(5.55); this.act = scene.add.graphics().setDepth(6.5); this.fxg = scene.add.graphics().setDepth(10.6).setBlendMode(Phaser.BlendModes.ADD); }
-  private hazardColor(h: Hazard) { return h.echo ? 0x7fe0e8 : h.tag.startsWith('well') ? 0xffcf6a : h.tag === 'shatter' ? 0xf4d78a : h.tag === 'fold' ? 0xb18cff : h.tag === 'lance' || h.tag === 'lance_land' ? 0xf2d27a : h.tag === 'arrival' ? 0xb18cff : h.tag.startsWith('husk') ? 0x6a5cff : h.tag === 'collapse' ? 0xe9c8ff : 0xff5a6a; }
+  private hazardColor(h: Hazard) { return h.tag.startsWith('lf_') ? (LF_HAZ[h.tag] ?? 0xffd86a) : h.echo ? 0x7fe0e8 : h.tag.startsWith('well') ? 0xffcf6a : h.tag === 'shatter' ? 0xf4d78a : h.tag === 'fold' ? 0xb18cff : h.tag === 'lance' || h.tag === 'lance_land' ? 0xf2d27a : h.tag === 'arrival' ? 0xb18cff : h.tag.startsWith('husk') ? 0x6a5cff : h.tag === 'collapse' ? 0xe9c8ff : 0xff5a6a; }
   update(s: GameState, dt: number, reduced: boolean) {
     this.clock += dt; const hg = this.haz, ag = this.act, fg = this.fxg; hg.clear(); ag.clear(); fg.clear();
     // ---- hazards (every shape the sim can resolve)

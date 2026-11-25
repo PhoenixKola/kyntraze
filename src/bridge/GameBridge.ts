@@ -16,6 +16,8 @@ import type { RelicId } from '../b22/relics';
 import type { HeroId } from '../content/heroes';
 import type { Simulation } from '../sim/Simulation';
 import { abilityTips } from './abilityTips';
+import { lfHud, lfMarks } from './lfHud';
+import { endLiving } from '../sim/LivingFractures';
 import { abilityView } from './abilityView';
 import { bestFormOf } from '../app/ui/victoryPose';
 import { inSlot } from '../sim/CoopSystem';
@@ -85,6 +87,7 @@ export class GameBridge {
   offerSignature(): string { const s = this.sim?.state; if (!s) return ''; return this.asChooserView(() => `${s.party?.chooser ?? ''}|${s.upgradeOffers.join(',')}|${s.b22.branchOffer ? `${s.b22.branchOffer.a}${s.b22.branchOffer.b}` : ''}|${s.b22.relicOffer?.join(',') ?? ''}|${s.b22.legendOffer ?? ''}`); }
   publish(force = false) {
     const s = this.sim?.state; if (!s) return;
+    if (!this.net && s.lf && (s.phase === 'dead' || s.phase === 'victory')) endLiving(s);   // B31B: nothing outlives the run, and the result summary is final
     const p = s.player, lance = s.hx?.act?.act === 'celestial_lance' && !s.hx.act.released ? s.hx.act : null;
     const phaseChanged = this.lastPhase !== s.phase;
     if (s.apexUnlockedNow) { s.apexUnlockedNow = false; this.save.unlocks = { cometheart: false, ...(this.save.unlocks ?? {}), stillfire: true }; storeSave(this.save); }
@@ -96,7 +99,7 @@ export class GameBridge {
       nextXp: p.nextXp, level: p.level, seconds: s.time, kills: s.kills, enemies: s.enemies.length,
       dashCooldown: p.dashCooldown, sigCd: p.sigCd, odMeter: p.odMeter, odT: p.odT, sigCharge: sigCharge(s) ? Math.min(1, sigCharge(s)!.charge / SIG.stages[2]) : 0, sigTier: sigCharge(s)?.tier ?? -1, flying: p.flyT > 0, dashLeft: dashMax(s) - Math.min(dashMax(s), p.dashUsed), dashMax: dashMax(s), qCooldown: p.qCooldown, beamCooldown: p.beamCooldown, sphereCooldown: p.sphereCooldown, drive: p.drive, form: p.form, dragonCooldown: p.dragonCooldown, cometCooldown: p.cometCooldown, hero: s.hero, heroFormUnlocked: s.hero === 'vex' ? (s.b22.vex.forms[0] || s.b22.vex.forms[1]) : s.heroFormUnlocked, heroReady: s.hero !== 'kai' && formChoices(s).includes(1), lanceCharge: lance ? lance.charge / SORA.e.maxCharge : 0, lanceTier: lance ? SORA.e.tiers.reduce((t, v, i) => (lance.charge >= v ? i : t), -1) : -1, heroAct: s.hx?.act?.act ?? '', cometUnlocked: s.cometUnlocked, cometReady: formChoices(s).includes(2), apexUnlocked: s.apexUnlocked, apexReady: formChoices(s).includes(3), riftCooldown: p.riftCooldown, reversalCooldown: p.reversalCooldown, evadeCooldown: p.evadeCooldown, riftCharge: s.cast?.kind === 'rift' && !s.cast.released ? Math.min(1, s.cast.t / RIFT.maxCharge) : 0, selector: { open: !!s.selector?.open, pick: selectedForm(s) ?? 0, choices: formChoices(s), left: Math.max(0, SELECTOR_MAX - (s.selector?.held ?? 0)) }, cinema: !!s.cinema,
       formCooldown: p.formCooldown, offers: [...s.upgradeOffers], score: this.sim!.stats().score, deathShown: this.deathShown, boss: bossHud(s), cards: s.phase === 'upgrade' ? this.asChooserView(() => s.upgradeOffers.map(id => offerCard(s, id))) : [], owned: this.asChooserView(() => UPGRADES.filter(u => (s.upgradeStacks[u.id] ?? 0) > 0).map(u => ({ id: u.id, stacks: s.upgradeStacks[u.id] }))), map: withAlly(s, miniMap(s)),
-      kit: kitSnap(s), cdMax: { q: [SURGE.cooldown, SCATTER.cooldown, METEOR.cooldown, ECHO.cooldown][p.form] ?? SURGE.cooldown, flare: RISE.cooldown * s.mods.beamCd, crucible: CRUCIBLE.cooldown * s.mods.sphereCd, dash: 3.2 * s.mods.dashCd, beam: (s.hero === 'ren' ? (p.form ? REN_E.cooldown : REN.e.cooldown) : s.hero === 'sora' ? SORA.e.cooldown : BEAM.cooldown) * s.mods.beamCd, sphere: (s.hero === 'ren' ? (p.form ? REN_R.cooldown : REN.r.cooldown) : s.hero === 'sora' ? SORA.r.cooldown : SPHERE.cooldown) * s.mods.sphereCd, form: (s.hero === 'kai' ? RULES.formCooldown : ASCEND.cooldown) * s.mods.formCd, dragon: DRAGON.cooldown * s.mods.beamCd, comet: CANNON.cooldown * s.mods.sphereCd, rift: RIFT.cooldown * s.mods.beamCd, reversal: REVERSAL.cooldown * s.mods.sphereCd, evade: EVASION.cooldown }, run: runHud(s), victoryShown: this.victoryShown, rewardPick: s.rewardPick, contract: this.config.contract, boon: this.config.boon, rerolls: s.run?.rerollsLeft ?? 0, banishes: s.run?.banishesLeft ?? 0, reward: this.reward, marks: this.save.meta.marks, crest: this.save.meta.crest, bosses: s.bossesDefeated, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
+      kit: kitSnap(s), cdMax: { q: [SURGE.cooldown, SCATTER.cooldown, METEOR.cooldown, ECHO.cooldown][p.form] ?? SURGE.cooldown, flare: RISE.cooldown * s.mods.beamCd, crucible: CRUCIBLE.cooldown * s.mods.sphereCd, dash: 3.2 * s.mods.dashCd, beam: (s.hero === 'ren' ? (p.form ? REN_E.cooldown : REN.e.cooldown) : s.hero === 'sora' ? SORA.e.cooldown : BEAM.cooldown) * s.mods.beamCd, sphere: (s.hero === 'ren' ? (p.form ? REN_R.cooldown : REN.r.cooldown) : s.hero === 'sora' ? SORA.r.cooldown : SPHERE.cooldown) * s.mods.sphereCd, form: (s.hero === 'kai' ? RULES.formCooldown : ASCEND.cooldown) * s.mods.formCd, dragon: DRAGON.cooldown * s.mods.beamCd, comet: CANNON.cooldown * s.mods.sphereCd, rift: RIFT.cooldown * s.mods.beamCd, reversal: REVERSAL.cooldown * s.mods.sphereCd, evade: EVASION.cooldown }, run: runHud(s), victoryShown: this.victoryShown, rewardPick: s.rewardPick, contract: this.config.contract, boon: this.config.boon, rerolls: s.run?.rerollsLeft ?? 0, banishes: s.run?.banishesLeft ?? 0, reward: this.reward, lf: lfHud(s), marks: this.save.meta.marks, crest: this.save.meta.crest, bosses: s.bossesDefeated, sinceRevive: s.time - s.reviveAt, revives: s.mods.revive, arenaName: (ARENAS[s.arenaId] ?? ARENAS.gloam).name.toUpperCase() };
     if ((s.phase === 'dead' || s.phase === 'victory') && phaseChanged) {
       const stats = this.sim!.stats();
       this.finalizeMeta(s);
@@ -124,7 +127,7 @@ export class GameBridge {
     if (!s.plan || !s.b22) return;   // hand-built states (tests) carry no B22 block
     const won = s.phase === 'victory', mode = endlessLeg ? 'endless' as const : s.plan.mode, cyc = s.b22.endless?.cycle ?? 0;
     const chapter = mode === 'vex_trial' ? Number(s.plan.id.slice(-1)) as 1 | 2 | 3 : undefined;
-    const res: B22RunResult = { runId: endlessLeg ? `${this.runId}:endless` : this.runId, mode, hero: s.hero, arena: s.arenaId, party: s.b22.party ? 2 : 1, won: endlessLeg ? !!s.b22.endless?.extracted : won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, cycle: cyc, counters: s.b22.m, relics: s.b22.relics, branches: s.b22.branches, legends: s.b22.legendary, bosses: s.plan.steps.filter(st => st.kind === 'boss' && s.encounter.doneAt[st.id] !== undefined).map(st => st.boss!).concat(s.bossesDefeated > 0 && s.plan.mode === 'classic' ? ['warden'] : []), challengeId: this.challengeId, storyChapter: chapter, chronicleId: chronicleOfPlan(s.plan) ?? undefined, extracted: s.b22.endless?.extracted, practice: s.plan.practice };
+    const res: B22RunResult = { runId: endlessLeg ? `${this.runId}:endless` : this.runId, mode, hero: s.hero, arena: s.arenaId, party: s.b22.party ? 2 : 1, won: endlessLeg ? !!s.b22.endless?.extracted : won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, cycle: cyc, counters: s.b22.m, relics: s.b22.relics, branches: s.b22.branches, legends: s.b22.legendary, bosses: s.plan.steps.filter(st => st.kind === 'boss' && s.encounter.doneAt[st.id] !== undefined).map(st => st.boss!).concat(s.bossesDefeated > 0 && s.plan.mode === 'classic' ? ['warden'] : []), challengeId: this.challengeId, storyChapter: chapter, chronicleId: chronicleOfPlan(s.plan) ?? undefined, extracted: s.b22.endless?.extracted, practice: s.plan.practice, living: !!s.plan.living };
     const out = applyB22Result(migrateB22(this.save.b22), res); this.save.b22 = out.save; this.b22Grant = out.grant;
     storeSave(this.save);
   }
@@ -186,7 +189,7 @@ function miniMap(s: GameState): MiniMap {
     if (d < 380) { near++; if (k === 2) eliteNear = true; }
     if (k === 3 && d < 700) bossNear = true;
   }
-  return { arena: s.arenaId, px: p.x, py: p.y, ax: p.aimX, ay: p.aimY, foes, near, nearest: Math.round(nearest), eliteNear, bossNear,
+  return { lf: s.lf ? lfMarks(s) : undefined, arena: s.arenaId, px: p.x, py: p.y, ax: p.aimX, ay: p.aimY, foes, near, nearest: Math.round(nearest), eliteNear, bossNear,
     hazards: s.hazards.filter(h => h.shape !== 'sigil' && h.damage > 0).map(h => ({ shape: h.shape, x: h.x, y: h.y, r: h.r, w: h.w ?? 0, h: h.h ?? 0, warn: h.fired ? 1 : 1 - Math.max(0, h.delay) / Math.max(0.01, h.total), live: h.fired })) };
 }
 

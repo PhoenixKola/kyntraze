@@ -36,6 +36,7 @@ export interface RunPlan {
   /** extra rules a challenge carries (ids in b22/challenges.ts) */ modifiers: ModifierId[];
   /** endless: seconds per escalation cycle (0 = not endless) */ cycle: number;
   /** a seed contract version; bumped when spawn / content generation changes */ rules: number;
+  /** B31B: the opt-in Living Fractures rule (world events). Such a run is a different seed contract and never enters the ranked boards. */ living?: boolean;
 }
 
 export const mk = (p: Partial<RunPlan> & Pick<RunPlan, 'mode' | 'id' | 'name' | 'steps'>): RunPlan => ({ v: PLAN_VERSION, blurb: '', arena: null, heroLock: null, duration: 0, pool: 'classic', mobs: 'full', threat: THREAT_CURVE, breathers: true, finaleQuietFrom: null, acts: [], unlocks: false, ranked: false, practice: false, interHeal: 0, modifiers: [], cycle: 0, rules: 1, ...p });
@@ -105,6 +106,10 @@ export const planFor = (mode: RunModeId, opts: { arena?: ArenaId; track?: BossRu
   }
 };
 
+/** B31B Living Fractures: the run rule is available on Classic, Endless and the Fracture Expedition only (never Daily / Weekly, Boss Rush, Vex Trial or an authored campaign mission). Event runs carry their own plan id, so they are a distinct seed contract, and are unranked. */
+export const LIVING_MODES: readonly RunModeId[] = ['classic', 'endless', 'fracture_expedition'];
+export const canLive = (plan: RunPlan) => LIVING_MODES.includes(plan.mode) && !plan.practice;
+export const withLiving = (plan: RunPlan): RunPlan => (plan.living || !canLive(plan) ? plan : { ...plan, id: `${plan.id}+lf`, name: `${plan.name} + Living Fractures`, living: true, ranked: false });
 export const stepById = (plan: RunPlan, id: string) => plan.steps.find(s => s.id === id);
 export const planEndsOn = (plan: RunPlan): EncounterStep | undefined => plan.steps.find(s => s.ends);
 /** Threat budget on a plan's own curve (linear interpolation, same contract as encounters.threatBudget). */
@@ -114,8 +119,8 @@ export function planBudget(plan: RunPlan, t: number): number {
   return c[c.length - 1][1];
 }
 /** The versioned seed contract: everything that must match for two runs to be the same run. */
-export interface SeedContract { v: number; seed: number; mode: RunModeId; planId: string; rules: number; arena: ArenaId; hero: HeroId; players: HeroId[]; challengeId: string | null; branches: string[]; relics: string[]; modifiers: string[] }
+export interface SeedContract { /** B31B: event ruleset version when Living Fractures is on */ lf?: number; v: number; seed: number; mode: RunModeId; planId: string; rules: number; arena: ArenaId; hero: HeroId; players: HeroId[]; challengeId: string | null; branches: string[]; relics: string[]; modifiers: string[] }
 export const seedContract = (c: Omit<SeedContract, 'v'>): SeedContract => ({ v: PLAN_VERSION, ...c });
-export const contractKey = (c: SeedContract) => [c.v, c.seed >>> 0, c.mode, c.planId, c.rules, c.arena, c.hero, c.players.join('+'), c.challengeId ?? '-', [...c.modifiers].sort().join(',')].join('|');
+export const contractKey = (c: SeedContract) => [c.v, c.seed >>> 0, c.mode, c.planId, c.rules, c.arena, c.hero, c.players.join('+'), c.challengeId ?? '-', [...c.modifiers].sort().join(',')].concat(c.lf ? [`lf${c.lf}`] : []).join('|');
 /** Stable sub-streams: unrelated systems (UI, FX, network, new content) never consume the main simulation RNG, so Classic replays identically. */
 export function streamSeed(seed: number, stream: string): number { let h = (seed >>> 0) ^ 0x9e3779b9; for (let i = 0; i < stream.length; i++) { h = Math.imul(h ^ stream.charCodeAt(i), 16777619); h ^= h >>> 15; } return h >>> 0; }

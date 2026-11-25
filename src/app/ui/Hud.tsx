@@ -8,6 +8,7 @@ import { roundedTime } from '../../core/Math';
 import { RULES } from '../../core/Rules';
 import type { BossHud } from '../../bridge/UiSnapshot';
 import { Minimap } from './Minimap';
+import { LivingHud } from './LivingHud';
 import { FormSelector } from './FormSelector';
 import type { RunHud } from '../../bridge/UiSnapshot';
 import { ASSET_BASE } from '../assetBase';
@@ -156,6 +157,7 @@ export function Hud({ s, pad, onPause, reduced, onForm, onKey }: Props) {
       {s.party && <u className={`res-bar ${s.party.resonanceT > 0 ? 'live' : ''}`} title="Resonance: earned by fighting together"><i style={{ width: pct(s.party.resonance) }}/></u>}</div>}
     <FormSelector hero={s.hero} open={s.selector.open} pick={s.selector.pick} choices={s.selector.choices} left={s.selector.left} pad={pad} onHover={f => onForm?.(f, false)} onChoose={f => onForm?.(f, true)}/>
     {s.boss && <BossBar b={s.boss}/>}
+    {s.lf && <LivingHud lf={s.lf}/>}
     <Minimap map={s.map} boss={!!s.boss}/>
     <div className="hud-panel hud-clock b30-strip"><span className="clock-label"><i aria-hidden="true"/>{s.arenaName}<i aria-hidden="true"/></span><b>{roundedTime(s.seconds)}</b>
       <div className="clock-row"><span className="clock-kills" aria-label={`${s.kills} defeated`}><i/> {s.kills}<small>defeated</small></span>{(s.run.objText || s.run.nextLabel) && <><span className="clock-sep" aria-hidden="true"/>{s.run.objText ? <em className="clock-next obj" data-testid="hud-objective">{s.run.objText}</em> : <em className={`clock-next ${s.run.nextIn < 30 && s.run.nextIn > 0 ? 'soon' : ''}`}>{s.run.nextIn > 0 ? `${s.run.nextLabel} in ${mmss(s.run.nextIn)}` : s.run.nextLabel}</em>}</>}</div>

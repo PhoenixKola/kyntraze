@@ -33,7 +33,7 @@ export function startServer(o: ServerOpts = {}) {
       if (m.t === 'create') {
         if (me || rooms.size >= maxRooms) { send(c, { t: 'error', code: me ? 'bad_state' : 'room_full', msg: 'cannot create' }); return; }
         let code = newCode(); while (rooms.has(code)) code = newCode(); const arena = isArenaId(m.arena) ? m.arena : 'gloam';
-        const room = new Room(code, m.mode, arena, store, r => { rooms.delete(r.code); for (const [k, v] of tokens) if (v.room === r) tokens.delete(k); r.destroy(); });
+        const room = new Room(code, m.mode, arena, !!m.lf && m.mode !== 'boss_rush', store, r => { rooms.delete(r.code); for (const [k, v] of tokens) if (v.room === r) tokens.delete(k); r.destroy(); });
         rooms.set(code, room); const p = room.add(name, m.hero, c, unlock)!; me = { room, player: p }; tokens.set(p.token, me); send(c, { t: 'welcome', v: PROTOCOL_VERSION, id: p.id, token: p.token, serverTime: Date.now() }); return;
       }
       if (m.t === 'join') {

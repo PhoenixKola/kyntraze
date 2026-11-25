@@ -18,7 +18,7 @@ import { ArchivesScreen } from './ui/ArchivesScreen';
 import type { NetClient } from '../net/RemoteSimulation';
 import { migrateB22 } from '../b22/save';
 import { CLASSIC_ARENAS, REALM_ARENAS } from '../content/arenas';
-import { planFor, type RunPlan } from '../b22/plan';
+import { CLASSIC_PLAN, planFor, withLiving, canLive, type RunPlan } from '../b22/plan';
 import { dailyChallenge, weeklyChallenge } from '../b22/challenges';
 import type { RelicId } from '../b22/relics';
 import { StoryPanel } from './ui/StoryPanel';
@@ -55,6 +55,7 @@ import './b30-1-loading.css';
 import './b30-1-hud.css';
 import './b30-2.css';
 import './b31.css';
+import './b31b.css';
 const initialSave = loadSave();
 interface RunSetup { net?: NetClient; coop?: HeroId; plan: RunPlan | null; challengeId?: string; startRelic?: RelicId | null; hero?: HeroId }
 function GameStage({ bridge, seed, arena, pad, onHome: leaveToTitle, onLobby, onProgress, onSettings, outro, chronId, onChronNext, onChronMap, onOutroSeen }: { chronId?: ChronicleId | null; onChronNext?: (id: ChronicleId) => void; onChronMap?: () => void; onOutroSeen?: () => void; onLobby: () => void; outro?: StoryBeat; bridge: GameBridge; seed: number; arena: ArenaId; pad: boolean; onHome: () => void; onProgress: () => void; onSettings: () => void }) {
@@ -123,6 +124,7 @@ export default function App() {
     if (mode.id === 'daily_challenge' || mode.id === 'weekly_challenge') { const ch = mode.id === 'daily_challenge' ? dailyChallenge(now) : weeklyChallenge(now); setup = { plan: ch.plan, challengeId: ch.id, startRelic: ch.startRelic, hero: ch.hero ?? undefined }; nextArena = ch.arena; nextSeed = ch.seed; }
     else if (mode.id !== 'classic') { const a = mode.id === 'fracture_expedition' && !REALM_ARENAS.includes(arena) ? REALM_ARENAS[0] : arena; nextArena = mode.id === 'vex_trial' ? planFor('vex_trial', { chapter: mode.chapter ?? 1 }).arena ?? arena : a; setup = { plan: planFor(mode.id, { arena: nextArena, track: mode.track, chapter: mode.chapter, practice: mode.practice }), hero: lockedHero ?? undefined }; }
     else if (!CLASSIC_ARENAS.includes(arena)) nextArena = CLASSIC_ARENAS[0];
+    if (mode.living) { const base = setup.plan ?? CLASSIC_PLAN; if (canLive(base)) setup = { ...setup, plan: withLiving(base) }; }   // B31B: opt-in world events; a distinct seed contract, unranked
     setup = { ...setup, coop: mode.coop }; setRun(s => ({ seed: nextSeed, serial: s.serial + 1, arena: nextArena, setup })); setView('game');
   };
   const outro = mode.id === 'vex_trial' ? chapterStory(mode.chapter ?? 1)?.outro : undefined;

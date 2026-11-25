@@ -9,6 +9,7 @@ import { CURRENCY, FEAT_BY_ID, UNLOCK_BY_ID, CONTRACT_BY_ID } from '../../conten
 import { MarksBadge } from './ProgressionScreen';
 import { COSMETICS } from '../../b22/cosmetics';
 import { HERO_BY_ID } from '../../content/heroes';
+import { LF_COPY } from '../../b31/fractures';
 /** B31A: a Fracture Chronicles mission result: chapter wording, first-clear reward, next chapter, map. */
 export interface ChronResult { kicker: string; name: string; reward: number; onNext?: () => void; nextLabel?: string; onMap: () => void }
 interface Props { s: UiSnapshot; onRetry: () => void; onHome: () => void; onProgress: () => void; onEndless?: () => void; chron?: ChronResult }
@@ -31,6 +32,7 @@ export function ResultsScreen({ s, onRetry, onHome, onProgress, onEndless, chron
       {chron && <p className="results-chron" data-testid="chron-reward"><b>{chron.name}</b>{won ? (chron.reward > 0 ? ` · first clear: +${chron.reward} Marks` : ' · replay: no second reward') : ' · the mission was lost. Nothing is taken; try again or return to the map.'}</p>}
       <div className="score-number">{s.score.toLocaleString()} <span>POINTS</span></div>
       <div className="result-grid res-grid"><div>TIME <strong>{roundedTime(s.seconds)}</strong></div><div>LEVEL <strong>{s.level}</strong></div><div>ELIMINATIONS <strong>{s.kills}</strong></div><div>BOSSES <strong>{s.bosses}/2</strong></div><div>ARENA <strong className="res-arena">{s.arenaName.replace(/^THE /, '')}</strong></div><div>SEED <strong>{s.seed}</strong></div></div>
+      {s.lf && (s.lf.summary.hist.length > 0 || s.lf.summary.stats.discovered > 0) && <section className="lf-sum" data-testid="lf-summary"><h4>LIVING FRACTURES · {s.lf.summary.stats.won} won · {s.lf.summary.stats.failed + s.lf.summary.stats.expired} missed{s.lf.summary.stats.relics ? ` · ${s.lf.summary.stats.relics} relic${s.lf.summary.stats.relics > 1 ? 's' : ''}` : ''}</h4><ul>{s.lf.summary.hist.slice(-5).map((h, i) => <li key={i} className={h.outcome}><b>{LF_COPY[h.kind].name}</b><em>{h.outcome.toUpperCase()}</em><span>{h.note}</span></li>)}</ul></section>}
       {rw && <div className="rw-panel" data-testid="reward-panel">
         <header><span>{CURRENCY.name} EARNED</span><b data-testid="reward-total">+{rw.total}</b><MarksBadge marks={rw.balance} crest={s.crest}/></header>
         <ul>{rw.lines.map(l => <li key={l.label}><span>{l.label}</span><b>+{l.marks}</b></li>)}</ul>

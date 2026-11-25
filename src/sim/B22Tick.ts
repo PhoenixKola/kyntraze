@@ -4,7 +4,8 @@ import type { SeededRng } from '../core/SeededRng';
 import { RELIC_RULES } from '../b22/relics';
 import { b22Emit, bump } from '../b22/state';
 import { MODIFIER_RULES } from '../b22/challenges';
-import { ENDLESS_CYCLE, ENDLESS_PLAN } from '../b22/plan';
+import { ENDLESS_CYCLE, ENDLESS_PLAN, withLiving } from '../b22/plan';
+import { livingEndlessLeg } from './LivingFractures';
 import { isBoss } from '../content/enemies';
 import { onAbilityEvent, updateFx, zoneFx, areaFx } from './BranchSystem';
 import { updateUltimate, updateUltimateUnlock } from './UltimateSystem';
@@ -96,7 +97,7 @@ export function updateB22(s: GameState, dt: number, input: InputState, rng: Seed
 /** Starts the Endless leg after a Classic victory (an explicit player choice). The Classic result must already be recorded by the caller. */
 export function beginEndlessLeg(s: GameState): boolean {
   if (s.phase !== 'victory' || s.plan.mode !== 'classic') return false;
-  s.plan = ENDLESS_PLAN; s.phase = 'running'; s.victoryAt = -1; s.b22.endless = { fromT: s.time, cycle: 0, bossAt: s.time + 120, offered: false, extracted: false };
+  s.plan = s.plan.living ? withLiving(ENDLESS_PLAN) : ENDLESS_PLAN; livingEndlessLeg(s); s.phase = 'running'; s.victoryAt = -1; s.b22.endless = { fromT: s.time, cycle: 0, bossAt: s.time + 120, offered: false, extracted: false };
   s.encounter.forced = false; s.spawnTimer = 1.5; s.arenaHazard.nextAt = s.time + 20; s.lastBossDefeatAt = s.time; s.player.hp = Math.min(s.player.maxHp, s.player.hp + s.player.maxHp * 0.5);
   s.b22.m['endless.legs'] = 1; return true;
 }

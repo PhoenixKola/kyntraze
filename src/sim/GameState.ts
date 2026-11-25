@@ -8,6 +8,7 @@ import type { HeroAct } from '../content/heroKits';
 import { CLASSIC_PLAN, type RunPlan } from '../b22/plan';
 import type { B22State } from '../b22/state';
 import type { Party } from './CoopSystem';
+import type { LfState } from '../b31/fractures';
 import { makeB22 } from '../b22/state';
 export type RunPhase = 'running' | 'paused' | 'upgrade' | 'dead' | 'victory' | 'extract';
 /** A one-shot run milestone message (finale warning); the HUD shows it for a few seconds. */
@@ -68,6 +69,7 @@ export type VexFieldKind = 'echo' | 'judg' | 'clone' | 'seal' | 'sever' | 'domai
 export interface VexField extends Omit<SoraField, 'k'> { k: VexFieldKind }
 export interface HeroFx { /** B28: Vex's live fields */ vf?: VexField[]; /** B27: Sora's live fields */ sf?: SoraField[]; /** B26: Overdrive meter hit-rate window (sim time of the window start, gains counted) */ odWin?: { t: number; n: number }; /** B22 Kai kit state (surge buff, scatter shots, clone, pillars, crucible); created on first use */ kk?: import('./KaiKit').KaiKit; act: HeroCast | null; bolts: Bolt[]; orbs: Orb[]; orbT: number; orbPhase: 'none' | 'summon' | 'orbit' | 'converge'; echoOrbs?: Orb[]; orbForm: FormId; orbDamage: number; orbRadius: number; autoStep: number; /** expanding crimson/blue rings the renderer draws and the sim already resolved or will resolve at `at` */ rings: { id: number; x: number; y: number; r: number; t: number; dur: number; kind: 'slam' | 'ring' | 'rebound' | 'horizon' | 'rush' }[]; pending: { at: number; x: number; y: number; radius: number; damage: number; push: number; kind: 'ring' | 'rebound' | 'horizon' }[]; /** lightning arcs / chain links the renderer draws (Sovereign Lance, Ascendant Rush) */ arcs: { id: number; x0: number; y0: number; x1: number; y1: number; t: number; dur: number }[]; /** last automatic strike: direction, step (0..2) and when, so the renderer plays the right punch / cast */ strike: { x: number; y: number; t: number; step: number; hand?: 'left' | 'right' }; /** the player is giving movement input this tick */ moving: boolean; t: number }
 export interface GameState {
+  /** B31B: the Living Fractures director and its events; absent unless the run opted in */ lf?: LfState;
   /** B22: owner id of the hazard currently resolving (so a parry knows who struck) */ lastHazardOwner?: number;
   seed: number; time: number; phase: RunPhase; kills: number; player: Fighter; enemies: Enemy[];
   pickups: Pickup[]; impacts: Impact[]; mods: Mods; echoes: SphereEcho[]; levelUpAt: number[]; reviveAt: number; lastBossDefeatAt: number; announce: Announce | null; bossReward: number; rewardAt: number; rewardPick: boolean; victoryAt: number; upgradeOffers: UpgradeId[]; upgradeStacks: Record<string, number>;

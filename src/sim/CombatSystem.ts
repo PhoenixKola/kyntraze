@@ -1,4 +1,5 @@
 import type { Enemy, GameState } from './GameState';
+import { lfMul } from './lfHooks';
 import { OD } from '../content/kaiCombat';
 import { odGain } from './KaiCombat';
 import { distanceSquared } from '../core/Math';
@@ -31,7 +32,7 @@ export function damagePlayer(state: GameState, damage: number, src = 'contact', 
     let from: { x: number; y: number } | undefined, best = Infinity; for (const e of state.enemies) { if (e.hp <= 0) continue; const d = (e.x - p.x) ** 2 + (e.y - p.y) ** 2; if (d < best) { best = d; from = e; } }
     if (tryPerfectEvasion(state, from)) return false;
   }
-  p.hp = Math.max(0, p.hp - Math.max(0, damage) * state.mods.armor * state.run.damageTakenMult * (state.b22.dawnT > 0 ? 0.65 : 1)); p.invulnerable = RULES.contactInvulnerability; state.b22.bossHurt = true;
+  p.hp = Math.max(0, p.hp - Math.max(0, damage) * state.mods.armor * state.run.damageTakenMult * lfMul(state, 'taken') * (state.b22.dawnT > 0 ? 0.65 : 1)); p.invulnerable = RULES.contactInvulnerability; state.b22.bossHurt = true;
   state.lastHit = { src, t: state.time };
   state.impacts.push({ id: state.nextId++, kind: 'hurt', x: p.x, y: p.y, ttl: 0.4, life: 0.4, heavy: damage >= 20 });
   interruptOnHit(state);
@@ -56,6 +57,7 @@ export function shieldFaces(state: GameState, e: Enemy, arcDeg: number): boolean
 export const xpTimeScale = (t: number) => 1 + t / 400;
 export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts?: HitOpts): boolean {
   if (enemy.hp <= 0) return false;
+  if (state.lf) damage *= lfMul(state, 'dmg');   // B31B: a shrine bargain / event boon on the attacker
   if ((state.hero === 'kai' || state.hero === 'ren' || state.hero === 'sora' || state.hero === 'vex') && state.player.odT > 0) damage *= OD.dmgMul;   // Primal Overdrive (Ren's Crimson Nine-Tailed Fox shares the reference +25%)
   if (enemy.ai?.invuln) return false;
   let dmg = Math.max(0, damage), blocked = false;

@@ -8,7 +8,7 @@ import type { ArenaId } from '../content/arenas';
 import { CONNECT_TIMEOUT_MS } from './defaultServer';
 import { isUnlockAll } from '../sim/SaveSystem';
 
-export interface RoomView { code: string; mode: RoomMode; arena: string; state: 'lobby' | 'running' | 'ended'; you: number; players: { name: string; hero: HeroId; ready: boolean; connected: boolean }[] }
+export interface RoomView { code: string; mode: RoomMode; arena: string; lf?: boolean; state: 'lobby' | 'running' | 'ended'; you: number; players: { name: string; hero: HeroId; ready: boolean; connected: boolean }[] }
 export interface NetResult { won: boolean; seconds: number; kills: number; score: number; runId: string; verified: true; rank?: number }
 export class NetClient {
   ws: WebSocket | null = null; /** set when the other player left a running game */ partnerLeft = false; room: RoomView | null = null; result: NetResult | null = null; error: string | null = null; token = ''; latest: Snap | null = null; private seq = 0; private listeners = new Set<() => void>(); private pings = 0; rtt = 0; private beat: ReturnType<typeof setInterval> | null = null; private pending = new Map<number, number>();
