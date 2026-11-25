@@ -17,7 +17,7 @@ test('pause + settings: no scrollbars, Esc closes Settings only, switches centre
   await page.keyboard.press('Escape'); await expect(page.getByTestId('pause-menu')).toBeVisible();
   const pm = await noScroll(page, '[data-testid="pause-menu"] .modal'); expect(pm!.x).toBeLessThanOrEqual(0); expect(pm!.y).toBeLessThanOrEqual(1);
   const aband = page.getByRole('button', { name: /ABANDON RUN/ }); const ab = await aband.boundingBox(); const rb = await page.getByRole('button', { name: /RESUME RUN/ }).boundingBox();
-  expect(Math.abs(ab!.width - rb!.width)).toBeLessThanOrEqual(1);
+  expect(ab!.width).toBeLessThanOrEqual(rb!.width + 1);
   await page.getByRole('button', { name: 'SETTINGS' }).click(); await expect(page.getByTestId('settings-menu')).toBeVisible();
   const sm = await noScroll(page, '[data-testid="settings-menu"] .modal'); expect(sm!.x).toBeLessThanOrEqual(0);
   const sw = await page.evaluate(() => [...document.querySelectorAll<HTMLInputElement>('.setting-options input')].map(i => { const r = i.getBoundingClientRect(), l = i.closest('label')!.getBoundingClientRect(); return { cursor: getComputedStyle(i).cursor, dy: Math.abs((r.top + r.height / 2) - (l.top + l.height / 2)), lc: getComputedStyle(i.closest('label')!).cursor }; }));

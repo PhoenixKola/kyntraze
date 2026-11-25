@@ -48,6 +48,9 @@ import './b29-1-lobby.css';
 import './b29-1-vault.css';
 import './b30.css';
 import './kit.css';
+import './b30-1.css';
+import './b30-1-loading.css';
+import './b30-1-hud.css';
 const initialSave = loadSave();
 interface RunSetup { net?: NetClient; coop?: HeroId; plan: RunPlan | null; challengeId?: string; startRelic?: RelicId | null; hero?: HeroId }
 function GameStage({ bridge, seed, arena, pad, onHome: leaveToTitle, onLobby, onProgress, onSettings, outro }: { onLobby: () => void; outro?: StoryBeat; bridge: GameBridge; seed: number; arena: ArenaId; pad: boolean; onHome: () => void; onProgress: () => void; onSettings: () => void }) {
@@ -66,11 +69,11 @@ function GameStage({ bridge, seed, arena, pad, onHome: leaveToTitle, onLobby, on
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [host, bridge, seed, arena]);
   const hint = (slot: Parameters<typeof keyHint>[0]) => keyHint(slot, { pad, chooser: snapshot.party?.chooser ?? 0, coop: !!snapshot.party && !bridge.getNet() });
-  return <div className="game-shell" data-testid="game-shell"><div className="arena-viewport" ref={setHost} aria-label="Playable Kyntraze arena"/>{ready && <Hud s={snapshot} pad={pad} onPause={() => bridge.togglePause()} reduced={bridge.getSettings().reducedEffects} onForm={(f, go) => bridge.pickForm(f, go)} onKey={code => bridge.pressKey(code)}/>}{!ready && <LoadingScreen progress={progress} arena={ARENAS[arena].name.toUpperCase()} arenaId={arena} hero={snapshot.hero} boon={snapshot.boon} contract={snapshot.contract} seed={snapshot.seed}/>}
+  return <div className="game-shell" data-testid="game-shell"><div className="arena-viewport" ref={setHost} aria-label="Playable Kyntraze arena"/>{ready && <Hud s={snapshot} pad={pad} onPause={() => bridge.togglePause()} reduced={bridge.getSettings().reducedEffects} onForm={(f, go) => bridge.pickForm(f, go)} onKey={code => bridge.pressKey(code)}/>}{!ready && <LoadingScreen progress={progress} arena={ARENAS[arena].name.toUpperCase()} arenaId={arena} hero={snapshot.hero} boon={snapshot.boon} contract={snapshot.contract} seed={snapshot.seed} partner={snapshot.partner?.hero ?? null}/>}
     {(snapshot.phase === 'upgrade' || snapshot.phase === 'extract') && snapshot.asc && (snapshot.asc.branch || snapshot.asc.relics || snapshot.asc.extract) && <AscensionPicker branchKey={snapshot.asc.branch ? hint(snapshot.asc.branch.slot) : null} asc={snapshot.asc} onBranch={id => bridge.chooseBranch(id)} onRelic={id => bridge.chooseRelic(id)} onExtract={() => bridge.extract()} onPushOn={() => bridge.pushOn()}/>}
     {snapshot.phase === 'upgrade' && !(snapshot.asc?.branch || snapshot.asc?.relics) && snapshot.cards.length === 0 && !snapshot.asc?.legend && <div className="overlay lv-overlay" data-testid="waiting-pick"><section className="lv-modal" role="status"><header className="lv-head"><div><p className="eyebrow">CO-OP</p><h2>YOUR PARTNER IS CHOOSING</h2></div></header></section></div>}
     {snapshot.phase === 'upgrade' && !(snapshot.asc?.branch || snapshot.asc?.relics) && (snapshot.cards.length > 0 || !!snapshot.asc?.legend) && <LevelUpScreen key={`${snapshot.party?.chooser ?? 'solo'}|${snapshot.level}|${snapshot.cards.map(c => c.id).join(',')}`} hint={hint} legend={snapshot.asc?.legend ?? null} onLegend={id => bridge.chooseLegendary(id)} level={snapshot.level} reward={snapshot.rewardPick} cards={snapshot.cards} owned={snapshot.owned} onChoose={id => bridge.choose(id)} rerolls={snapshot.rerolls} banishes={snapshot.banishes} onReroll={() => bridge.reroll()} onBanish={id => bridge.banish(id)} />}
-    {snapshot.phase === 'paused' && <PauseMenu s={snapshot} onResume={() => bridge.togglePause()} onHome={onHome} onSettings={onSettings}/>}
+    {snapshot.phase === 'paused' && <PauseMenu s={snapshot} online={!!bridge.getNet()} onResume={() => bridge.togglePause()} onHome={onHome} onSettings={onSettings}/>}
     {outro && !outroSeen && snapshot.phase === 'victory' && snapshot.victoryShown && <StoryPanel beat={outro} onDone={() => setOutroSeen(true)}/>}
     {(!outro || outroSeen || snapshot.phase !== 'victory') && ((snapshot.phase === 'dead' && snapshot.deathShown) || (snapshot.phase === 'victory' && snapshot.victoryShown)) && <ResultsScreen s={snapshot} onRetry={() => window.dispatchEvent(new CustomEvent('kyntraze-retry'))} onHome={onHome} onProgress={onProgress} onEndless={() => bridge.continueEndless()}/>}
   </div>;

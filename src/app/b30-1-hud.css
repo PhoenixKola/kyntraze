@@ -1,0 +1,87 @@
+/* B30.1 Living Combat HUD. Per-hero frame material, per-form accent, edge-triggered cosmetics (ready / cast / deny / form shift) and the Overdrive mantle.
+   Everything here is decoration over the existing AbilityBar data: compositor-only (opacity, transform, filter), no pointer events, and it never covers the icon, the cooldown number or the key label. */
+.hud-slots { --hf: #e0a050; }
+.hud-slots[data-form='kai0'] { --hf: #e0a050; } .hud-slots[data-form='kai1'] { --hf: #ffb347; } .hud-slots[data-form='kai2'] { --hf: #ffe066; } .hud-slots[data-form='kai3'] { --hf: #dfeaff; }
+.hud-slots[data-form='ren0'] { --hf: #e0485a; } .hud-slots[data-form='ren1'] { --hf: #ff5a3a; }
+.hud-slots[data-form='sora0'] { --hf: #5eb6ff; } .hud-slots[data-form='sora1'] { --hf: #8fdcff; }
+.hud-slots[data-form='vex0'] { --hf: #a982ff; } .hud-slots[data-form='vex1'] { --hf: #b46bff; } .hud-slots[data-form='vex2'] { --hf: #d7dcff; }
+
+.hud-slots:not(.compact) { background: linear-gradient(180deg, rgba(5, 10, 17, .0), rgba(5, 10, 17, .55)); border-radius: 0; box-shadow: 0 calc(2 * var(--u)) 0 -1px color-mix(in srgb, var(--hf) 55%, transparent); padding-top: calc(6 * var(--u)); }
+.hud-slots .slot { z-index: 1; }
+.hud-slots .slot::before { inset: 9%; }
+.hud-slots[data-hero='kai'] .slot::after { background-image: url(/ui/hud/frame_kai.webp); } .hud-slots[data-hero='ren'] .slot::after { background-image: url(/ui/hud/frame_ren.webp); }
+.hud-slots[data-hero='sora'] .slot::after { background-image: url(/ui/hud/frame_sora.webp); } .hud-slots[data-hero='vex'] .slot::after { background-image: url(/ui/hud/frame_vex.webp); }
+.hud-slots .slot::after { background-size: 100% 100%; }
+.hud-slots.tf .slot::after { filter: drop-shadow(0 0 calc(3 * var(--u)) color-mix(in srgb, var(--hf) 80%, transparent)); }
+.hud-slots .slot-sweep { inset: 9%; }
+.slot.passive { cursor: default; }
+
+/* locked: dark icon plus a padlock, never colour alone */
+.slot-lock { position: absolute; left: 6%; bottom: 8%; width: 30%; height: 30%; z-index: 4; background: #b6c9d3; filter: drop-shadow(0 1px 1px #000); pointer-events: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 10V8a6 6 0 0112 0v2h1a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V11a1 1 0 011-1h1zm2 0h8V8a4 4 0 00-8 0v2z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 10V8a6 6 0 0112 0v2h1a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V11a1 1 0 011-1h1zm2 0h8V8a4 4 0 00-8 0v2z'/%3E%3C/svg%3E") center / contain no-repeat; }
+
+/* edge-triggered cosmetics */
+.slot-ring { position: absolute; inset: 4%; z-index: 3; border: 2px solid var(--hf); opacity: 0; pointer-events: none; }
+.slot.fx-ready .slot-ring { animation: s-ready .36s ease-out; }
+.slot.fx-cast { animation: s-cast .16s ease-out; } .slot.fx-cast .slot-ring { animation: s-ready .3s ease-out; }
+.slot.fx-deny { animation: s-deny .17s ease-in-out; }
+@keyframes s-ready { from { opacity: .95; transform: scale(.88); } to { opacity: 0; transform: scale(1.28); } }
+@keyframes s-cast { 0% { transform: scale(1); } 45% { transform: scale(.9); filter: brightness(1.6); } 100% { transform: scale(1); } }
+@keyframes s-deny { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(-2px); } 70% { transform: translateX(2px); } }
+
+/* form shift: one staggered sweep along the row, icons crossfade in, the F tile's ring travels outward */
+.hud-slots.xform .slot { animation: s-form .65s ease-out both; }
+.hud-slots.xform .slot:nth-child(1) { animation-delay: 0ms; } .hud-slots.xform .slot:nth-child(2) { animation-delay: 60ms; } .hud-slots.xform .slot:nth-child(3) { animation-delay: 120ms; } .hud-slots.xform .slot:nth-child(4) { animation-delay: 180ms; } .hud-slots.xform .slot:nth-child(5) { animation-delay: 240ms; } .hud-slots.xform .slot:nth-child(6) { animation-delay: 300ms; } .hud-slots.xform .slot:nth-child(7) { animation-delay: 360ms; } .hud-slots.xform .slot:nth-child(8) { animation-delay: 420ms; }
+.hud-slots.xform .slot-ico { animation: s-ico .45s ease-out both; }
+.hud-slots.xform .slot[data-slot='f'] .slot-ring { animation: s-ready .7s ease-out; }
+.hud-slots.xexit .slot { animation: s-exit .6s ease-out both; }
+@keyframes s-form { 0% { filter: brightness(1); } 35% { filter: brightness(1.8) drop-shadow(0 0 calc(7 * var(--u)) var(--hf)); } 100% { filter: brightness(1); } }
+@keyframes s-ico { from { opacity: .1; transform: scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes s-exit { from { opacity: .45; } to { opacity: 1; } }
+
+/* Overdrive mantle: authored beast, tail / body / head on separate clocks, outside the row */
+.mantle { position: absolute; left: -5%; right: -5%; bottom: calc(100% - 22px); aspect-ratio: 3.3 / 1; pointer-events: none; z-index: 0; opacity: .94; filter: drop-shadow(0 0 calc(8 * var(--u)) color-mix(in srgb, var(--hf) 55%, transparent)); }
+.mantle.out { animation: m-out .5s ease-in forwards; }
+.mantle .seg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; user-select: none; }
+.mantle .seg.tail { clip-path: inset(0 64% 0 0); transform-origin: 36% 58%; animation: m-in .6s ease-out both, m-tail 2.4s ease-in-out .6s infinite alternate; }
+.mantle .seg.body { clip-path: inset(0 31% 0 30%); transform-origin: 50% 55%; animation: m-in .6s ease-out both, m-body 3.1s ease-in-out .6s infinite alternate; }
+.mantle .seg.head { clip-path: inset(0 0 0 66%); transform-origin: 66% 62%; animation: m-in .6s ease-out both, m-head 2.8s ease-in-out .6s infinite alternate; }
+.mantle .seg.whole { animation: m-in .6s ease-out both, m-body 3.4s ease-in-out .6s infinite alternate; }
+.mantle.compact { left: 0; right: 0; bottom: calc(100% - 4px); opacity: .85; }
+.b-fox .seg.tail { animation-duration: .6s, 1.5s; } .b-fox .seg.head { animation-name: m-in, m-claw; animation-duration: .6s, 2.2s; }
+.b-phoenix .seg.head { animation-name: m-in, m-wing; animation-duration: .6s, 2.1s; } .b-phoenix .seg.body { animation-name: m-in, m-wing; animation-duration: .6s, 2.6s; }
+.b-comet { animation: m-zap 2.3s steps(1) infinite; }
+.b-still .seg.body { animation-name: m-in, m-orbit; animation-duration: .6s, 5.2s; } .b-still .seg.tail { animation-duration: .6s, 4.4s; }
+.b-guard1 .seg.tail, .b-guard1 .seg.head { animation-timing-function: ease-out, steps(4); }
+.b-guard2 { filter: saturate(.2) brightness(1.4) drop-shadow(0 0 calc(9 * var(--u)) rgba(190, 200, 255, .6)); } .b-guard2 .seg.tail { animation-name: m-in, m-frag; animation-duration: .6s, 3s; animation-timing-function: ease-out, steps(6); }
+@keyframes m-in { from { opacity: 0; filter: brightness(3); } to { opacity: 1; filter: none; } }
+@keyframes m-out { to { opacity: 0; transform: translateY(-6px); filter: blur(2px); } }
+@keyframes m-tail { from { transform: rotate(-3deg) translateY(2px); } to { transform: rotate(4deg) translateY(-3px); } }
+@keyframes m-body { from { transform: translateY(1px); } to { transform: translateY(-3px); } }
+@keyframes m-head { from { transform: rotate(-2deg) translateY(-2px); } to { transform: rotate(3deg) translateY(2px); } }
+@keyframes m-claw { 0%, 70% { transform: none; } 80% { transform: rotate(-4deg) translate(2px, 2px); } 100% { transform: none; } }
+@keyframes m-wing { from { transform: translateY(3px) scaleY(.96); } to { transform: translateY(-5px) scaleY(1.04); } }
+@keyframes m-zap { 0%, 88%, 100% { filter: drop-shadow(0 0 calc(8 * var(--u)) color-mix(in srgb, var(--hf) 55%, transparent)); } 90% { filter: drop-shadow(0 0 calc(12 * var(--u)) #fff6c0) brightness(1.25); } }
+@keyframes m-orbit { from { transform: translateY(0) rotate(-1.5deg); } to { transform: translateY(-3px) rotate(1.5deg); } }
+@keyframes m-frag { from { transform: translate(0, 0); } to { transform: translate(-3px, 2px) rotate(-2deg); } }
+
+/* reduced effects / reduced motion: every state is still shown, nothing moves or flashes */
+.hud-slots.fx-off .mantle, .hud-slots.fx-off .mantle .seg, .hud-slots.fx-off .slot, .hud-slots.fx-off .slot-ring, .hud-slots.fx-off .slot-ico { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .mantle, .mantle .seg, .slot, .slot-ring, .slot-ico, .hud-slots .slot { animation: none !important; } }
+
+/* ---- solo vitals: hero material frame on the portrait, round level medallion, Overdrive sigil ---- */
+.hud-health.solo { --hf: #e0a050; }
+.hud-health.solo[data-hero='ren'] { --hf: #e0485a; } .hud-health.solo[data-hero='sora'] { --hf: #5eb6ff; } .hud-health.solo[data-hero='vex'] { --hf: #a982ff; }
+.hud-health.solo[data-form='kai1'] { --hf: #ffb347; } .hud-health.solo[data-form='kai2'] { --hf: #ffe066; } .hud-health.solo[data-form='kai3'] { --hf: #dfeaff; } .hud-health.solo[data-form='ren1'] { --hf: #ff5a3a; } .hud-health.solo[data-form='sora1'] { --hf: #8fdcff; } .hud-health.solo[data-form='vex1'] { --hf: #b46bff; } .hud-health.solo[data-form='vex2'] { --hf: #d7dcff; }
+.hud-health.solo[data-hero='kai'] .portrait::after { background-image: url(/ui/hud/frame_kai.webp); } .hud-health.solo[data-hero='ren'] .portrait::after { background-image: url(/ui/hud/frame_ren.webp); }
+.hud-health.solo[data-hero='sora'] .portrait::after { background-image: url(/ui/hud/frame_sora.webp); } .hud-health.solo[data-hero='vex'] .portrait::after { background-image: url(/ui/hud/frame_vex.webp); }
+.hud-health.solo .portrait::after { content: ''; position: absolute; inset: -6%; z-index: 2; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; filter: drop-shadow(0 0 calc(2 * var(--u)) color-mix(in srgb, var(--hf) 70%, transparent)); transition: filter .3s; }
+.hud-health.solo .portrait.is-form::after, .hud-health.solo .portrait.is-form2::after, .hud-health.solo .portrait.is-form3::after { filter: drop-shadow(0 0 calc(5 * var(--u)) var(--hf)); }
+.hud-health.solo .lvl { right: calc(-12 * var(--u)); bottom: calc(-12 * var(--u)); z-index: 5; width: calc(28 * var(--u)); height: calc(28 * var(--u)); min-width: 0; padding: 0; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 50% 35%, #223445, #070d14); color: #fff3d6; font-size: max(10px, calc(13 * var(--u))); line-height: 1; text-shadow: 0 1px 2px #000; }
+.hud-health.solo .lvl-ring { position: absolute; right: calc(-15 * var(--u)); bottom: calc(-15 * var(--u)); width: calc(34 * var(--u)); height: calc(34 * var(--u)); z-index: 6; pointer-events: none; background: url(/ui/hud/ring_kai.webp) center / 100% 100% no-repeat; }
+.hud-health.solo[data-hero='ren'] .lvl-ring { background-image: url(/ui/hud/ring_ren.webp); } .hud-health.solo[data-hero='sora'] .lvl-ring { background-image: url(/ui/hud/ring_sora.webp); } .hud-health.solo[data-hero='vex'] .lvl-ring { background-image: url(/ui/hud/ring_vex.webp); }
+.hud-health.solo .vitals .bar-xp, .hud-health.solo .vitals .bar-form { box-shadow: 0 1px 0 color-mix(in srgb, var(--hf) 45%, transparent); }
+.od-sigil { position: absolute; right: -16%; top: -22%; width: 78%; height: 38%; z-index: 7; pointer-events: none; background-repeat: no-repeat; background-size: 330% auto; background-position: 100% 46%; filter: drop-shadow(0 0 calc(5 * var(--u)) var(--hf)); animation: sig-breathe 2.4s ease-in-out infinite alternate; }
+@keyframes sig-breathe { from { opacity: .75; transform: translateY(1px); } to { opacity: 1; transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) { .od-sigil { animation: none; } }

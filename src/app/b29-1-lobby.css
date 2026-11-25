@@ -23,3 +23,22 @@
 .lb-plate { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; padding: calc(4 * var(--u)) calc(14 * var(--u)); background: linear-gradient(180deg, rgba(8, 16, 26, .92), rgba(4, 9, 16, .92)); border: 1px solid color-mix(in srgb, var(--c, #5fe6e0) 60%, #0b1822); border-top-width: calc(2 * var(--u)); min-width: calc(130 * var(--u)); text-align: center; } .lb-plate b { font-size: max(12px, calc(15 * var(--u))); color: #f4fbfb; letter-spacing: .04em; } .lb-plate small { font-size: max(10px, calc(11 * var(--u))); color: #9ab8c1; }
 @media (max-height: 420px) { .lb-station::before { width: calc(190 * var(--u)); height: calc(160 * var(--u)); } .lb-station .hspr { margin-bottom: calc(36 * var(--u)); } .b29-lobby .b29-body { grid-template-columns: minmax(0, .8fr) calc(396 * var(--u)) minmax(0, .8fr); } .lb-lead { font-size: 10.5px; } .lb-plate { min-width: 0; padding: 2px 8px; } }
 @media (prefers-reduced-motion: reduce) { .hspr, .lb-ghost, .lb-spin { animation: none; } }
+
+/* B30.1: the centre panel is the command hub. Root cause of the clipped box: the grid row had no definite height (auto row + max-height:100% on the card), so the card shrank to its minimum and scrolled inside itself. */
+.b29.b29-lobby .b29-body { grid-template-columns: minmax(0, .72fr) minmax(calc(520 * var(--u)), calc(640 * var(--u))) minmax(0, .72fr); grid-template-rows: minmax(0, 1fr); gap: calc(10 * var(--u)); align-items: stretch; }
+.b29-lobby .lb-center { min-height: 0; justify-content: center; }
+.b29-lobby .lb-card { flex: 0 1 auto; max-height: 100%; padding: calc(14 * var(--u)) calc(18 * var(--u)); gap: calc(10 * var(--u)); background: linear-gradient(180deg, rgba(9, 17, 27, .95), rgba(4, 9, 16, .95)); box-shadow: 0 calc(10 * var(--u)) calc(40 * var(--u)) rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(255, 207, 134, .1); }
+.b29-lobby .lb-card .b29-ph { font-size: max(12px, calc(17 * var(--u))); letter-spacing: .14em; }
+.b29-lobby .lb-heroes .b29-card { padding: calc(8 * var(--u)) calc(4 * var(--u)); } .b29-lobby .lb-heroes .b29-card b { font-size: max(11px, calc(14 * var(--u))); letter-spacing: .12em; }
+.b29-lobby .lb-split { gap: calc(18 * var(--u)); align-items: stretch; } .b29-lobby .lb-half { padding: calc(10 * var(--u)); background: rgba(4, 10, 17, .55); border: 1px solid rgba(95, 200, 205, .2); border-top: calc(2 * var(--u)) solid rgba(255, 207, 134, .55); gap: calc(8 * var(--u)); } .b29-lobby .lb-half:nth-child(2) { border-top-color: rgba(95, 230, 224, .6); } .b29-lobby .lb-half .b29-cta { margin-top: auto; }
+.b29-lobby .lb-half h4 { font-size: max(12px, calc(16 * var(--u))); letter-spacing: .1em; }
+.b29-lobby .lb-modes .b29-card { padding: calc(6 * var(--u)) calc(10 * var(--u)); } .b29-lobby .lb-modes .b29-card b { font-size: max(10.5px, calc(12.5 * var(--u))); }
+.b29-lobby .lb-field input { padding: calc(8 * var(--u)) calc(10 * var(--u)); }
+.b29-lobby .lb-code { font-size: max(16px, calc(26 * var(--u))) !important; }
+@media (max-height: 420px) {
+  .b29.b29-lobby .b29-body { grid-template-columns: minmax(0, .5fr) minmax(calc(560 * var(--u)), calc(600 * var(--u))) minmax(0, .5fr); gap: calc(6 * var(--u)); }
+  .b29-lobby .lb-card { padding: calc(8 * var(--u)) calc(12 * var(--u)); gap: calc(6 * var(--u)); } .b29-lobby .lb-half { padding: calc(6 * var(--u)); gap: calc(5 * var(--u)); }
+  .b29-lobby .lb-station::before { width: calc(150 * var(--u)); height: calc(130 * var(--u)); } .b29-lobby .lb-station .hspr { margin-bottom: calc(30 * var(--u)); transform: scale(.8); transform-origin: bottom center; }
+  .b29-lobby .lb-plate small { display: none; } .b29-lobby .lb-modes .b29-card { padding: calc(3 * var(--u)) calc(8 * var(--u)); } .b29-lobby .lb-note { font-size: 9.5px; }
+}
+.b29-lobby .lb-split { flex: 0 0 auto; min-height: auto; display: grid; grid-template-columns: 1fr 1fr; }
