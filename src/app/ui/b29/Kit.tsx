@@ -5,11 +5,11 @@ import { HintBar, type Hint } from '../Chrome';
 /** B29 menu kit: one frame, one panel language, one card, one primary action, one tab strip. Every menu screen is built from these so they read as the same game. Visual anchor: Fracture Nexus + Settings. All sizes use --u so 640x360 simply scales. */
 export const DEFAULT_HINTS: Hint[] = [{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'TAB', pad: 'D-PAD', label: 'NAVIGATE' }, { key: 'ESC', pad: 'B', label: 'BACK' }];
 
-interface FrameProps { testId?: string; eyebrow: string; title: string; sub?: string; onBack: () => void; backLabel?: string; right?: ReactNode; hints?: Hint[]; className?: string; accent?: string; bg?: string; children: ReactNode }
+interface FrameProps { testId?: string; eyebrow: string; title: string; sub?: string; onBack: () => void; backLabel?: string; right?: ReactNode; hints?: Hint[]; className?: string; accent?: string; bg?: string; /** keep the screen's own art bright (darken only behind text columns) */ lit?: boolean; children: ReactNode }
 /** Screen frame: dimmed living backdrop, header (back, eyebrow, title, optional right slot), body, hint bar. Esc / pad B go back. */
-export function Frame({ testId, eyebrow, title, sub, onBack, backLabel = '← BACK', right, hints = DEFAULT_HINTS, className = '', accent, bg, children }: FrameProps) {
+export function Frame({ testId, eyebrow, title, sub, onBack, backLabel = '← BACK', right, hints = DEFAULT_HINTS, className = '', accent, bg, lit, children }: FrameProps) {
   useEffect(() => { const h = (e: KeyboardEvent) => { if (e.key === 'Escape' && !e.defaultPrevented) { e.preventDefault(); onBack(); } }; window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h); }, [onBack]);
-  return <main className={`b29 ${className}`} data-testid={testId} style={accent ? ({ '--acc': accent } as CSSProperties) : undefined}>
+  return <main className={`b29 ${lit ? 'lit' : ''} ${className}`} data-testid={testId} style={accent ? ({ '--acc': accent } as CSSProperties) : undefined}>
     <div className="b29-bg" style={{ backgroundImage: `url(${ASSET_BASE}${bg ?? 'art/nexus/bg.webp'})` }} aria-hidden="true"/><div className="b29-veil" aria-hidden="true"/>
     <header className="b29-head"><button type="button" className="text-button b29-back" onClick={onBack} data-pad-cancel>{backLabel}</button>
       <div className="b29-titles"><p className="eyebrow"><span className="orange-tick"/>{eyebrow}</p><h2>{title}</h2>{sub && <p className="b29-sub">{sub}</p>}</div>{right && <div className="b29-right">{right}</div>}</header>
@@ -20,8 +20,8 @@ export function Frame({ testId, eyebrow, title, sub, onBack, backLabel = '← BA
 export const Panel = ({ title, className = '', children, ...rest }: { title?: string; className?: string; children: ReactNode } & React.HTMLAttributes<HTMLElement>) =>
   <section {...rest} className={`b29-panel ${className}`}>{title && <h3 className="b29-ph">{title}</h3>}{children}</section>;
 /** Selectable card: `on` = selected (gold edge + check), `locked` = sealed, `accent` colours the selection. Renders a real button. */
-export function Card({ on, locked, accent, onClick, children, className = '', testId, label, disabled }: { on?: boolean; locked?: boolean; accent?: string; onClick?: () => void; children: ReactNode; className?: string; testId?: string; label?: string; disabled?: boolean }) {
-  return <button type="button" className={`b29-card ${on ? 'on' : ''} ${locked ? 'locked' : ''} ${className}`} style={accent ? ({ '--c': accent } as CSSProperties) : undefined} onClick={onClick} aria-pressed={on} aria-label={label} data-testid={testId} disabled={disabled}>{children}{on && <em className="b29-check" aria-hidden="true">✓</em>}{locked && <em className="b29-lock" aria-hidden="true">LOCKED</em>}</button>;
+export function Card({ on, insp, locked, accent, onClick, children, className = '', testId, label, disabled }: { on?: boolean; /** inspected (shown in the detail panel) but not selected */ insp?: boolean; locked?: boolean; accent?: string; onClick?: () => void; children: ReactNode; className?: string; testId?: string; label?: string; disabled?: boolean }) {
+  return <button type="button" className={`b29-card ${on ? 'on' : ''} ${insp && !on ? 'insp' : ''} ${locked ? 'locked' : ''} ${className}`} style={accent ? ({ '--c': accent } as CSSProperties) : undefined} onClick={onClick} aria-pressed={on} aria-label={label} data-testid={testId} disabled={disabled}>{children}{on && <em className="b29-check" aria-hidden="true">✓</em>}{locked && <em className="b29-lock" aria-hidden="true">LOCKED</em>}</button>;
 }
 /** The one primary action of a screen. */
 export const Cta = ({ children, sub, onClick, disabled, testId, pad }: { children: ReactNode; sub?: ReactNode; onClick: () => void; disabled?: boolean; testId?: string; pad?: boolean }) =>

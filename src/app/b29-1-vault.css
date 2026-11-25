@@ -1,0 +1,25 @@
+/* B29.1 Armory (relic vault), Contracts (pact altar), Records: larger readable cards, a real pedestal for the inspected item, explicit actions. */
+
+.pa-grid { grid-template-columns: repeat(auto-fill, minmax(calc(210 * var(--u)), 1fr)); gap: calc(7 * var(--u)); }
+.pa-item { min-height: calc(60 * var(--u)); padding: calc(6 * var(--u)) calc(10 * var(--u)); }
+.pa-item .pa-ico { width: calc(46 * var(--u)); height: calc(46 * var(--u)); min-width: 30px; min-height: 30px; }
+.pa-item .pa-copy b { font-size: max(11px, calc(13.5 * var(--u))); letter-spacing: .02em; } .pa-item .pa-copy small { font-size: max(10px, calc(11 * var(--u))); letter-spacing: .01em; }
+.pa-h { font-size: max(11px, calc(13 * var(--u))); letter-spacing: .1em; } .pa-h small { font-size: max(9.5px, calc(10.5 * var(--u))); letter-spacing: .04em; }
+.pa-note { font-size: max(10px, calc(11.5 * var(--u))); }
+.pa-detail { width: calc(272 * var(--u)); min-width: 190px; background: radial-gradient(ellipse at 50% 24%, rgba(255, 190, 110, .16), transparent 60%), linear-gradient(180deg, rgba(8, 16, 26, .92), rgba(5, 10, 17, .92)); }
+.pa-contracts .pa-detail { background: radial-gradient(ellipse at 50% 24%, rgba(255, 90, 100, .16), transparent 60%), linear-gradient(180deg, rgba(14, 8, 16, .92), rgba(8, 5, 12, .92)); border-top-color: rgba(255, 120, 110, .6); }
+.pa-detail-in.pedestal { align-items: center; text-align: center; gap: calc(7 * var(--u)); }
+.pedestal .pa-bigico { width: calc(104 * var(--u)); height: calc(104 * var(--u)); border-radius: 50%; box-shadow: 0 0 calc(24 * var(--u)) rgba(255, 190, 110, .35), inset 0 0 calc(16 * var(--u)) rgba(255, 190, 110, .2); animation: pa-float 4.5s ease-in-out infinite alternate; } .pedestal .pa-bigico img { width: 70%; height: 70%; object-fit: contain; image-rendering: pixelated; }
+.pa-contracts .pedestal .pa-bigico { border-color: rgba(255, 120, 110, .6); box-shadow: 0 0 calc(24 * var(--u)) rgba(255, 90, 100, .38), inset 0 0 calc(16 * var(--u)) rgba(255, 90, 100, .2); }
+@keyframes pa-float { from { transform: translateY(0); } to { transform: translateY(calc(-4 * var(--u))); } }
+.pedestal > b { font-size: max(13px, calc(18 * var(--u))) !important; letter-spacing: .04em !important; }
+.pedestal .pa-effect { font-size: max(11.5px, calc(14 * var(--u))) !important; color: #fff3d6 !important; line-height: 1.4; } .pedestal .pa-blurb { font-size: max(10.5px, calc(12 * var(--u))) !important; color: #a9c4cb !important; } .pa-req { margin: 0; font-size: max(10.5px, calc(12 * var(--u))); color: #ffb4ba; }
+.pa-terms { margin: 0; width: 100%; display: grid; gap: 3px; text-align: left; } .pa-terms div { display: grid; grid-template-columns: calc(104 * var(--u)) 1fr; gap: 6px; } .pa-terms dt { font-size: max(10px, calc(11 * var(--u))); color: #7fe6e0; text-transform: uppercase; letter-spacing: .08em; } .pa-terms dd { margin: 0; font-size: max(10.5px, calc(12 * var(--u))); color: #eaf8f8; }
+.pa-act { margin-top: auto; min-width: 0; width: 100%; padding: calc(7 * var(--u)) calc(10 * var(--u)); } .pa-act b { font-size: max(11px, calc(14 * var(--u))) !important; letter-spacing: .14em !important; }
+.pa-foot .pg-status { font-size: max(10px, calc(11.5 * var(--u))); letter-spacing: .04em; }
+.pa-runners { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(8 * var(--u)); } .pa-runner header b { font-size: max(12px, calc(15 * var(--u))); } .pa-runner header small, .pa-runner li small, .pa-runner dt { font-size: max(10px, calc(11 * var(--u))); } .pa-runner li b { font-size: max(10.5px, calc(12 * var(--u))); } .pa-runner dd { font-size: max(12px, calc(14 * var(--u))); }
+.pa-arena li small, .pa-feats li small { font-size: max(10px, calc(11 * var(--u))); }
+@media (max-height: 420px) { .pa-grid { grid-template-columns: repeat(auto-fill, minmax(calc(250 * var(--u)), 1fr)); } .pa-detail { width: calc(236 * var(--u)); } .pedestal .pa-bigico { width: calc(70 * var(--u)); height: calc(70 * var(--u)); } .pa-grid { grid-template-columns: repeat(auto-fill, minmax(calc(190 * var(--u)), 1fr)); } .pa-runners { grid-template-columns: 1fr; } .pedestal .pa-blurb { display: none; } }
+@media (prefers-reduced-motion: reduce) { .pedestal .pa-bigico { animation: none; } }
+.pa-item .pa-copy b { white-space: normal !important; overflow: visible !important; line-height: 1.15; }
+.ar.lit .b29-bg { filter: brightness(.5) saturate(1.1); } .ar.lit .b29-veil { background: linear-gradient(90deg, rgba(3, 7, 14, .78), rgba(3, 7, 14, .5) 40%, rgba(3, 7, 14, .5) 60%, rgba(3, 7, 14, .78)), linear-gradient(180deg, rgba(2, 6, 14, .5), transparent 20%, transparent 80%, rgba(2, 6, 14, .8)); }

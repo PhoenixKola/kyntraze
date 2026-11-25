@@ -35,7 +35,7 @@ export function ArchivesScreen({ save, onBack, onSave }: Props) {
   const total = MILESTONES.length, earned = MILESTONES.filter(m => b22.mastery[m.id]).length;
   const formDone = (f: string) => MILESTONES.filter(m => m.form === f && b22.mastery[m.id]).length;
   const equipBtn = (id: string, ok: boolean, on: boolean, run: () => void, locked = 'LOCKED') => <button type="button" className={`ar-equip ${on ? 'on' : ''}`} disabled={!ok} data-testid={`equip-${id}`} onClick={run}>{ok ? (on ? 'EQUIPPED · REMOVE' : 'EQUIP') : locked}</button>;
-  return <Frame testId="archives" className="ar" eyebrow="ARCHIVES · SHATTERED HORIZONS" title={TITLE[tab]} onBack={onBack} hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'TAB', pad: 'D-PAD', label: 'NAVIGATE' }, { key: 'ESC', pad: 'B', label: 'BACK' }]}
+  return <Frame testId="archives" className="ar" eyebrow="THE ARCHIVE LIBRARY" title={TITLE[tab].charAt(0) + TITLE[tab].slice(1).toLowerCase()} bg="art/menu/library.webp" lit onBack={onBack} hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'TAB', pad: 'D-PAD', label: 'NAVIGATE' }, { key: 'ESC', pad: 'B', label: 'BACK' }]}
     right={<span className="ar-total" aria-label={`${earned} of ${total} mastery milestones`}><b>{earned}</b>/{total}<small>MILESTONES</small></span>}>
     <div className="ar-col">
       <div className="b29-tabs ar-tabs" role="tablist">{TABS.map(([k, n]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={`b29-tab ${tab === k ? 'on' : ''}`} data-testid={`arc-${k}`} onClick={() => setTab(k)}><img className="tab-ico" src={`${ASSET_BASE}ui/icons/tab_${k}.png`} alt="" draggable={false}/>{n}</button>)}</div>

@@ -4,7 +4,7 @@ const seed = (page: Page, extra: object = {}) => page.addInitScript(x => localSt
 for (const [w, h] of [[1280, 720], [960, 540], [1920, 1080]] as const) test(`B22 UI: mode select fits the screen with co-op + confirm visible, arenas list all four (${w}x${h})`, async ({ page }) => {
   await page.setViewportSize({ width: w, height: h }); await seed(page); await page.goto('/?qa=1'); await page.getByTestId('play-button').click(); await page.getByTestId('nexus-heroes').click(); await page.waitForTimeout(500);
   await page.screenshot({ path: `test-results/b22-ui-heroselect-${w}.png` });
-  await page.getByTestId('mode-open').click(); await page.waitForTimeout(400); await page.screenshot({ path: `test-results/b22-ui-modes-${w}.png` });
+  await page.getByTestId('mode-open').click(); await page.getByTestId('coop-local').click(); await page.waitForTimeout(400); await page.screenshot({ path: `test-results/b22-ui-modes-${w}.png` });
   for (const id of ['coop-off', 'coop-kai', 'mode-confirm']) { const b = await page.getByTestId(id).boundingBox(); expect(b, id).not.toBeNull(); expect(b!.y + b!.height, `${id} inside viewport`).toBeLessThanOrEqual(h + 1); }
   await page.getByTestId('coop-vex').click(); await page.getByTestId('mode-confirm').click(); await page.getByTestId('arena-open').click(); await page.waitForTimeout(400); await page.screenshot({ path: `test-results/b22-ui-arenas-${w}.png` });
   await expect(page.getByTestId('arena-card-aetherfall')).toBeVisible(); await expect(page.getByTestId('arena-card-paradox')).toBeVisible();

@@ -24,10 +24,10 @@ const BLURB: Record<HeroId, string> = { kai: 'Kinetic vanguard. Momentum and com
 const FRAME: Record<HeroId, [number, number]> = { kai: [152, 167], ren: [160, 170], sora: [152, 167], vex: [166, 170] };
 const sheet = (h: HeroId, clip: 'idle' | 'basicpunch') => `${ASSET_BASE}art/${h}/south/sheets/${h}_south_${clip}.png`;
 const FX_COUNT = 7;
-function forms(save: SaveV1, h: HeroId): [number, number] {
+function forms(save: SaveV1, h: HeroId): [number, number] {   // transformations unlocked / total (base is not counted, for every hero)
   if (h === 'kai') return [1 + Number(!!save.unlocks?.cometheart) + Number(!!save.unlocks?.stillfire), 3];
-  if (h === 'vex') { const v = save.b22?.vexForms ?? [false, false]; return [1 + Number(v[0]) + Number(v[1]), 3]; }
-  return [1 + Number(!!save.unlocks?.[h as 'ren' | 'sora']), 2];
+  if (h === 'vex') { const v = save.b22?.vexForms ?? [false, false]; return [Number(v[0]) + Number(v[1]), 2]; }
+  return [Number(!!save.unlocks?.[h as 'ren' | 'sora']), 1];
 }
 /** Sanctuary attunement 0..3 from unlocked forms, mastery milestones, finished story chapters and a recorded run. Drives extra aurora, floor runes and lit beacons. */
 function attunement(save: SaveV1): { tier: 0 | 1 | 2 | 3; energy: number; mastery: [number, number] } {
@@ -57,7 +57,9 @@ export function NexusHub({ save, hero, arenaName, modeName, onHero, onGo }: Prop
     return () => { window.removeEventListener('pointerdown', go); window.removeEventListener('keydown', go); hubAudio.stop(0.9); };
   }, []);
   const pick = (id: HeroId) => { if (id !== hero) onHero(id); hubAudio.hero(id); if (reduced) return; setPunch({ id, n: Date.now() }); window.setTimeout(() => setPunch(p => (p && p.id === id ? null : p)), 900); };
-  const deploy = () => { if (diving) return; hubAudio.deploy(); setDiving(true); window.setTimeout(() => onGo('deploy'), reduced ? 220 : 980); };
+  const diveTimer = useRef<number>(0);
+  useEffect(() => () => window.clearTimeout(diveTimer.current), []);   // leaving the hub never starts a run late
+  const deploy = () => { if (diving) return; hubAudio.deploy(); setDiving(true); diveTimer.current = window.setTimeout(() => onGo('deploy'), reduced ? 220 : 980); };
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (diving) return;
@@ -102,7 +104,7 @@ export function NexusHub({ save, hero, arenaName, modeName, onHero, onGo }: Prop
         <span className={`nx-fx fx-${h.id}`} aria-hidden="true">{Array.from({ length: FX_COUNT }, (_, k) => <i key={k} style={{ '--k': k } as CSSProperties}/>)}</span>
         <span className="nx-lift"><Sprite id={h.id} punch={pn}/></span>
         {pn && <span key={punch!.n} className={`nx-burst b-${h.id}`} aria-hidden="true"/>}
-        <span className="nx-hero-cap"><b>{h.name}</b><small>{n}/{m} FORMS</small></span>{on && <em className="nx-check" aria-hidden="true">✓</em>}</button>; })}</section>
+        <span className="nx-hero-cap"><b>{on ? '✓ ' : ''}{h.name}</b><small>{n}/{m} FORMS</small></span></button>; })}</section>
       <aside className="nx-focus" aria-live="polite"><b style={{ color: c }}>{sel.name} · {sel.title}</b><span>{BLURB[hero]}</span><small>{sel.weapon} · {fn}/{fm} forms unlocked</small>
         <small className="nx-att" title="Grows with unlocked forms, mastery and story progress"><span>ATTUNEMENT</span><i className={att.tier >= 1 ? 'on' : ''}/><i className={att.tier >= 2 ? 'on' : ''}/><i className={att.tier >= 3 ? 'on' : ''}/></small></aside>
       <HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'TAB', pad: 'D-PAD', label: 'NAVIGATE' }, { key: 'ESC', pad: 'B', label: 'TITLE' }]}/>

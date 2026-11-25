@@ -41,6 +41,11 @@ import './b29-hero-mode.css';
 import './b29-arena-online.css';
 import './b29-archives.css';
 import './b29-title.css';
+import './b29-1-hero.css';
+import './b29-1-mode.css';
+import './b29-1-arena.css';
+import './b29-1-lobby.css';
+import './b29-1-vault.css';
 import './kit.css';
 const initialSave = loadSave();
 interface RunSetup { net?: NetClient; coop?: HeroId; plan: RunPlan | null; challengeId?: string; startRelic?: RelicId | null; hero?: HeroId }
