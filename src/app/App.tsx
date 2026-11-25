@@ -37,7 +37,10 @@ import { keyHint } from './keyHint';
 import { NexusHub, type NexusDest } from './ui/NexusHub';
 import './nexus.css';
 import './b29.css';
-import './b29-screens.css';
+import './b29-hero-mode.css';
+import './b29-arena-online.css';
+import './b29-archives.css';
+import './b29-title.css';
 import './kit.css';
 const initialSave = loadSave();
 interface RunSetup { net?: NetClient; coop?: HeroId; plan: RunPlan | null; challengeId?: string; startRelic?: RelicId | null; hero?: HeroId }
