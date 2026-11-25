@@ -8,7 +8,7 @@ export function TitleScreen({ onArchives, onPlay, onSettings, onProgress, save }
   return <main className="title-layout t29" data-testid="title-screen">
     <div className="title-art" aria-hidden="true"/>
     <div className="title-shade" aria-hidden="true"/>
-    <div className="title-kai" aria-hidden="true"><span className="title-kai-glow"/><span className="title-kai-sprite"/></div>
+    <div className="title-kai" aria-hidden="true"><span className="tk-spot"/><span className="tk-rays"/><span className="title-kai-glow"/><span className="tk-ring"/><span className="tk-ring r2"/><span className="title-kai-sprite"/><span className="tk-flare"/>{[0, 1, 2, 3, 4, 5].map(i => <i key={i} className="tk-shard" style={{ '--i': i } as React.CSSProperties}/>)}{[0, 1, 2, 3, 4, 5, 6, 7].map(i => <u key={i} className="tk-ember" style={{ '--i': i } as React.CSSProperties}/>)}</div>
     <div className="title-hudline"><span className="mark"><i className="logo-sigil" aria-hidden="true"/>K / F</span><span className="b29-chip mute">v{typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev'}</span></div>
     <div className="title-content">
       <img className="logo-mark" src={`${import.meta.env.BASE_URL}ui/kit/logo-mark.webp`} alt="" draggable={false}/>

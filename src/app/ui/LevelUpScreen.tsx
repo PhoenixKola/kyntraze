@@ -33,6 +33,8 @@ export function LevelUpScreen({ hint, legend, onLegend, level, reward, cards, ow
   const isPad = usePad();
   const [pick, setPick] = useState<UpgradeId | null>(null), timer = useRef<number>(0);
   useEffect(() => () => window.clearTimeout(timer.current), []);
+  const offerKey = cards.map(c => c.id).join(',');
+  useEffect(() => { window.clearTimeout(timer.current); setPick(null); }, [offerKey, level]);   // a new offer (the next fighter's, or a reroll) is never stuck in the previous pick's exit state
   const onChoose = useCallback((id: UpgradeId) => {   // play the exit first, then hand the choice to the game (one choice only)
     if (pick) return; setPick(id);
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;

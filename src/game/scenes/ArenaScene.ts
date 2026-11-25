@@ -1,3 +1,4 @@
+import { CombatReadout } from '../render/combatReadout';
 import { loadSave } from '../../sim/SaveSystem';
 import Phaser from 'phaser';
 import { isHeroId, type HeroId } from '../../content/heroes';
@@ -41,7 +42,7 @@ export class ArenaScene extends Phaser.Scene {
   private fx!: EffectsRenderer;
   private presentation!: Presentation;
   private fixed = new FixedStep();
-  private publishClock = 0; private offerSig = ''; private calmed = false; private victoryClock = -1;
+  private readout: CombatReadout | null = null; private publishClock = 0; private offerSig = ''; private calmed = false; private victoryClock = -1;
   private celebrated = false;
   private disposed = false;
   private debug: DebugOverlay | null = null;
@@ -62,7 +63,7 @@ export class ArenaScene extends Phaser.Scene {
     applyZoom(); this.scale.on(Phaser.Scale.Events.RESIZE, applyZoom);
     this.createArena();
     this.entityRenderer = new EntityRenderer(this);
-    this.fx = new EffectsRenderer(this);
+    this.fx = new EffectsRenderer(this); this.readout = new CombatReadout(this);
     this.controller = new InputController(() => this.bridge.togglePause(), () => { if (this.bridge.getSettings().pauseOnBlur) this.bridge.pause(); }, () => this.bridge.pause());
     { const hp = this.bridge.getPartner(); if (hp) { const sv = loadSave(); this.simulation.joinPartner({ ...NO_CONFIG, hero: hp, heroForm: hp !== 'kai' && !!sv.unlocks?.[hp as 'ren' | 'sora'], vexForms: sv.b22?.vexForms }, 'local', ['P1', 'P2']); this.controller.coop = true; } }
     this.bridge.bind(this.simulation); this.bridge.setInjector(code => this.controller?.inject(code));
@@ -125,7 +126,7 @@ export class ArenaScene extends Phaser.Scene {
       if (this.victoryClock > VICTORY_RESULTS_MS) this.bridge.markVictoryShown();
     } else this.victoryClock = -1;
     this.debug?.draw(s);
-    this.fx.render(s, this.reduced);
+    this.fx.render(s, this.reduced); this.readout?.update(s, s.phase === 'running' && simDelta > 0 ? delta / 1000 : 0, this.reduced);
     this.audio?.setMuted(this.bridge.getSettings().mute); this.audio?.sync(s);
     this.publishClock += delta;
     if (twoFighters && !this.calmed) { this.calmed = true; const cam = this.cameras.main, orig = cam.shake.bind(cam); cam.shake = ((ms?: number, k?: number | Phaser.Math.Vector2, force?: boolean) => orig(Math.min(ms ?? 100, 90), typeof k === 'number' ? Math.min(k * 0.3, 0.0012) : k, force)) as typeof cam.shake; }   // co-op: two fighters' hits stack into constant shaking, so every camera shake is softened
@@ -158,7 +159,7 @@ export class ArenaScene extends Phaser.Scene {
   private dispose() {
     if (this.disposed) return; this.disposed = true; this.scale.off(Phaser.Scale.Events.RESIZE);
     this.events.off('b21-cue', this.onCue); window.removeEventListener('keydown', this.unlockAudio); window.removeEventListener('pointerdown', this.unlockAudio); this.audio?.dispose();
-    this.controller?.destroy(); this.entityRenderer?.destroy(); this.partnerRenderer?.destroy(); this.partnerRenderer = null; this.fx?.destroy(); this.presentation?.destroy(); this.debug?.destroy(); this.props?.destroy(); this.realmProps?.destroy(); this.b22?.destroy(); this.ambience?.destroy(); this.hazardView?.destroy(); this.marks?.destroy(); this.floorLights?.destroy(); this.evoFx?.destroy(); this.bridge.unbind();
+    this.controller?.destroy(); this.entityRenderer?.destroy(); this.partnerRenderer?.destroy(); this.partnerRenderer = null; this.fx?.destroy(); this.readout?.destroy(); this.presentation?.destroy(); this.debug?.destroy(); this.props?.destroy(); this.realmProps?.destroy(); this.b22?.destroy(); this.ambience?.destroy(); this.hazardView?.destroy(); this.marks?.destroy(); this.floorLights?.destroy(); this.evoFx?.destroy(); this.bridge.unbind();
     delete (window as Window & { __KYNT_QA__?: unknown }).__KYNT_QA__;
   }
 }

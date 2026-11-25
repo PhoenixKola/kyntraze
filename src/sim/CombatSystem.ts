@@ -82,7 +82,7 @@ export function damageEnemy(state: GameState, enemy: Enemy, damage: number, opts
   }
   dmg = b22PreDamage(state, enemy, dmg, opts);
   enemy.hp = Math.max(0, enemy.hp - dmg); if (dmg > 0 && !enemy.part && !opts?.noOd) odGain(state);
-  state.impacts.push({ id: state.nextId++, kind: blocked ? 'block' : 'hit', x: enemy.x, y: enemy.y, ttl: 0.16, life: 0.16, boss, heavy: !blocked && (dmg >= 30 || (boss && !!enemy.ai?.exposed)), kill: enemy.hp <= 0 });
+  state.impacts.push({ id: state.nextId++, kind: blocked ? 'block' : 'hit', x: enemy.x, y: enemy.y, ttl: 0.16, life: 0.16, boss, heavy: !blocked && (dmg >= 30 || (boss && !!enemy.ai?.exposed)), kill: enemy.hp <= 0, dmg: Math.round(dmg), eid: enemy.id });
   b22PostDamage(state, enemy, dmg, opts);
   if (enemy.part) { const core = state.enemies.find(c => c.id === enemy.part!.of); if (core) behaviorOf(core.kind)?.onPartHit?.(state, core, enemy, dmg); }
   if (enemy.hp > 0) {
