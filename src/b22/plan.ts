@@ -6,9 +6,9 @@ import type { HeroId } from '../content/heroes';
 import type { ModifierId } from './challenges';
 
 export const PLAN_VERSION = 1;
-export type RunModeId = 'classic' | 'endless' | 'fracture_expedition' | 'boss_rush' | 'daily_challenge' | 'weekly_challenge' | 'vex_trial';
-export const RUN_MODE_IDS: readonly RunModeId[] = ['classic', 'endless', 'fracture_expedition', 'boss_rush', 'daily_challenge', 'weekly_challenge', 'vex_trial'];
-export type StepKind = 'boss' | 'relic' | 'elite_wave';
+export type RunModeId = 'classic' | 'endless' | 'fracture_expedition' | 'boss_rush' | 'daily_challenge' | 'weekly_challenge' | 'vex_trial' | 'campaign';
+export const RUN_MODE_IDS: readonly RunModeId[] = ['classic', 'endless', 'fracture_expedition', 'boss_rush', 'daily_challenge', 'weekly_challenge', 'vex_trial', 'campaign'];
+export type StepKind = 'boss' | 'relic' | 'elite_wave' | 'hold';
 /** What defeating a boss step pays: the Warden-style heal + a guaranteed rare pick, a relic offer, nothing extra, or the end of the run. */
 export type StepReward = 'heal_pick' | 'relic' | 'none' | 'victory';
 export interface EncounterStep {
@@ -19,6 +19,7 @@ export interface EncounterStep {
   /** run time of the pre-arrival warning, and its text */ warnAt?: number; warnText?: string; warnSub?: string;
   /** boss health multiplier for shorter tracks (1 = full) */ hpMul?: number;
   /** elite_wave: which mobs to drop (kind, count) */ wave?: { kind: string; n: number }[];
+  /** hold: seconds the player must survive from the step's start; the step completes when they have */ hold?: number;
   /** the act this step opens, for the HUD */ act?: number;
 }
 export type MobPolicy = 'full' | 'adds' | 'none';
@@ -37,7 +38,7 @@ export interface RunPlan {
   /** a seed contract version; bumped when spawn / content generation changes */ rules: number;
 }
 
-const mk = (p: Partial<RunPlan> & Pick<RunPlan, 'mode' | 'id' | 'name' | 'steps'>): RunPlan => ({ v: PLAN_VERSION, blurb: '', arena: null, heroLock: null, duration: 0, pool: 'classic', mobs: 'full', threat: THREAT_CURVE, breathers: true, finaleQuietFrom: null, acts: [], unlocks: false, ranked: false, practice: false, interHeal: 0, modifiers: [], cycle: 0, rules: 1, ...p });
+export const mk = (p: Partial<RunPlan> & Pick<RunPlan, 'mode' | 'id' | 'name' | 'steps'>): RunPlan => ({ v: PLAN_VERSION, blurb: '', arena: null, heroLock: null, duration: 0, pool: 'classic', mobs: 'full', threat: THREAT_CURVE, breathers: true, finaleQuietFrom: null, acts: [], unlocks: false, ranked: false, practice: false, interHeal: 0, modifiers: [], cycle: 0, rules: 1, ...p });
 
 export const FINALE_WARN = 870;
 /** Classic: the original 15-minute Warden + Seraph campaign. Boss times are NOT tunable per run. */

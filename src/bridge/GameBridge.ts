@@ -34,7 +34,8 @@ import { formChoices, selectedForm, activateForm, SELECTOR_MAX } from '../sim/Fo
 import { BOSS_SCHEDULE } from '../content/encounters';
 import { RULES } from '../core/Rules';
 import { storeSave, type SaveV1, type GameSettings } from '../sim/SaveSystem';
-import { blankMeta, finalizeRun, contractAvailable, type RunReward, type RunResult } from '../sim/MetaSystem';
+import { CHRONICLE_BY_ID, chronicleOfPlan, type ChronicleId } from '../b31/chronicles';
+import { MARKS_CAP, blankMeta, finalizeRun, contractAvailable, type RunReward, type RunResult } from '../sim/MetaSystem';
 import { NO_CONFIG, toolCharges, type RunConfig } from '../sim/RunConfig';
 import { ASCEND, HERO_KIT, REN, SORA, UPGRADE_OVERRIDES } from '../content/heroKits';
 import { categoryStacks } from '../sim/UpgradeSystem';
@@ -109,21 +110,27 @@ export class GameBridge {
     if (this.finalized) return; this.finalized = true; if (this.net) return; if (this.endlessLeg) { this.recordB22(s, true); return; }   // the Classic result was recorded at the victory; the Endless leg never repeats Classic rewards
     let maxCat = 0; for (const c of ['core', 'beam', 'sphere', 'survival', 'mobility', 'pickup', 'drive'] as UpgradeCategory[]) maxCat = Math.max(maxCat, categoryStacks(s, c));
     const won = s.phase === 'victory', warden = s.bossesDefeated >= 1 || won;
-    const classic = (s.plan?.mode ?? 'classic') === 'classic', practice = !!s.plan?.practice;
+    const classic = (s.plan?.mode ?? 'classic') === 'classic', practice = !!s.plan?.practice || s.plan?.mode === 'campaign';   // story missions are unranked and never pay per-run Marks (the one-time chapter reward is granted in recordB22)
     const result: RunResult = { hero: s.hero, runId: this.runId, arena: s.arenaId, won: classic && won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, wardenKills: classic && warden ? 1 : 0, seraphKills: classic && won ? 1 : 0, formsUsed: [...(s.run?.formsUsed ?? [])], maxCategoryStacks: maxCat, contract: this.config.contract };
     const out = practice ? { meta: this.save.meta, reward: null } : finalizeRun(this.save.meta, result);
     this.recordB22(s, false);
-    this.save.meta = { ...out.meta, introSeen: true }; this.reward = out.reward ? { ...out.reward, firstRun: out.reward.firstRun && !out.meta.introSeen } : null; storeSave(this.save);
+    this.save.meta = { ...out.meta, introSeen: true };
+    for (const id of this.b22Grant?.chronicles ?? []) if (this.save.meta) { const m = CHRONICLE_BY_ID[id as ChronicleId].marks; this.save.meta = { ...this.save.meta, marks: Math.min(MARKS_CAP, this.save.meta.marks + m), lifetime: this.save.meta.lifetime + m }; }
+    // B31A: the one-time chapter reward is applied after the run's own meta so it is never overwritten
+    this.reward = out.reward ? { ...out.reward, firstRun: out.reward.firstRun && !out.meta.introSeen } : null; storeSave(this.save);
   }
   /** B22 records / mastery / cosmetics, applied at most once per run id (the ledger inside the save). Offline numbers stay LOCAL records. */
   private recordB22(s: GameState, endlessLeg: boolean) {
     if (!s.plan || !s.b22) return;   // hand-built states (tests) carry no B22 block
     const won = s.phase === 'victory', mode = endlessLeg ? 'endless' as const : s.plan.mode, cyc = s.b22.endless?.cycle ?? 0;
     const chapter = mode === 'vex_trial' ? Number(s.plan.id.slice(-1)) as 1 | 2 | 3 : undefined;
-    const res: B22RunResult = { runId: endlessLeg ? `${this.runId}:endless` : this.runId, mode, hero: s.hero, arena: s.arenaId, party: s.b22.party ? 2 : 1, won: endlessLeg ? !!s.b22.endless?.extracted : won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, cycle: cyc, counters: s.b22.m, relics: s.b22.relics, branches: s.b22.branches, legends: s.b22.legendary, bosses: s.plan.steps.filter(st => st.kind === 'boss' && s.encounter.doneAt[st.id] !== undefined).map(st => st.boss!).concat(s.bossesDefeated > 0 && s.plan.mode === 'classic' ? ['warden'] : []), challengeId: this.challengeId, storyChapter: chapter, extracted: s.b22.endless?.extracted, practice: s.plan.practice };
-    const out = applyB22Result(migrateB22(this.save.b22), res); this.save.b22 = out.save; this.b22Grant = out.grant; storeSave(this.save);
+    const res: B22RunResult = { runId: endlessLeg ? `${this.runId}:endless` : this.runId, mode, hero: s.hero, arena: s.arenaId, party: s.b22.party ? 2 : 1, won: endlessLeg ? !!s.b22.endless?.extracted : won, seconds: s.time, kills: s.kills, level: s.player.level, score: this.sim!.stats().score, cycle: cyc, counters: s.b22.m, relics: s.b22.relics, branches: s.b22.branches, legends: s.b22.legendary, bosses: s.plan.steps.filter(st => st.kind === 'boss' && s.encounter.doneAt[st.id] !== undefined).map(st => st.boss!).concat(s.bossesDefeated > 0 && s.plan.mode === 'classic' ? ['warden'] : []), challengeId: this.challengeId, storyChapter: chapter, chronicleId: chronicleOfPlan(s.plan) ?? undefined, extracted: s.b22.endless?.extracted, practice: s.plan.practice };
+    const out = applyB22Result(migrateB22(this.save.b22), res); this.save.b22 = out.save; this.b22Grant = out.grant;
+    storeSave(this.save);
   }
   /** Called by the renderer when the Death clip has finished and held. Ignored unless the sim is actually dead, so it can never show Results early. */
+  /** B31A: marks earned for the chapter this run just completed for the first time (0 on replays and failures). */
+  firstClearMarks(): number { const id = chronicleOfPlan(this.sim?.state.plan ?? { id: '', mode: '' }); return id && this.b22Grant?.chronicles.includes(id) ? CHRONICLE_BY_ID[id].marks : 0; }
   markDeathShown() { if (this.sim?.state.phase !== 'dead' || this.deathShown) return; this.deathShown = true; this.publish(true); }
   /** Called by the scene once the victory beat has played. Ignored unless the run is actually won. */
   markVictoryShown() { if (this.sim?.state.phase !== 'victory' || this.victoryShown) return; this.victoryShown = true; this.publish(true); }
@@ -183,12 +190,23 @@ function miniMap(s: GameState): MiniMap {
     hazards: s.hazards.filter(h => h.shape !== 'sigil' && h.damage > 0).map(h => ({ shape: h.shape, x: h.x, y: h.y, r: h.r, w: h.w ?? 0, h: h.h ?? 0, warn: h.fired ? 1 : 1 - Math.max(0, h.delay) / Math.max(0.01, h.total), live: h.fired })) };
 }
 
+const clock = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+/** B31A: what the player is doing right now in a Chronicles mission, from the plan and the live encounter state. */
+function campaignObjective(s: GameState): string {
+  const st = s.plan.steps.find(x => s.encounter.doneAt[x.id] === undefined);
+  if (!st) return 'MISSION COMPLETE';
+  const up = !!s.encounter.spawned[st.id];
+  if (st.kind === 'hold') return up ? `HOLD THE LINE · ${clock(Math.max(0, st.at + (st.hold ?? 0) - s.time))}` : 'PREPARE';
+  if (st.kind === 'elite_wave') { const n = (s.encounter.waves?.[st.id] ?? []).filter(id => s.enemies.some(e => e.id === id && e.hp > 0)).length; return up ? `BREAK THE WAVE · ${n} LEFT` : st.trigger === 'time' ? `ASSAULT IN ${clock(Math.max(0, st.at - s.time))}` : 'BRACE'; }
+  if (st.kind === 'boss') return up ? `DEFEAT ${(st.warnText ?? 'THE BOSS').replace(/^(THE|AN ECHO OF THE|A SHADOW OF THE) /, '')}` : 'BRACE';
+  return 'MISSION';
+}
 function runHud(s: GameState): RunHud {
   const [w, f] = [BOSS_SCHEDULE[0].at, BOSS_SCHEDULE[1].at], wardenDone = !!s.encounter.spawned.warden && !s.enemies.some(e => e.kind === 'warden' && e.hp > 0);
   const finaleOut = !!s.encounter.spawned.seraph, bossUp = s.enemies.some(e => isBoss(e.kind) && e.hp > 0);
   const next = !s.encounter.spawned.warden ? { label: 'FRACTURE WARDEN', at: w } : !finaleOut ? { label: 'NULL SERAPH', at: f } : { label: bossUp ? 'DEFEAT THE SERAPH' : '', at: 0 };
   const a = s.announce && s.time - s.announce.at < 6 ? { text: s.announce.text, sub: s.announce.sub, age: s.time - s.announce.at } : null;
-  return { t: s.time, wardenAt: w, finaleAt: f, wardenDone: wardenDone || s.bossesDefeated > 0, finaleOut, nextLabel: next.label, nextIn: Math.max(0, next.at - s.time), announce: a };
+  return { t: s.time, wardenAt: w, finaleAt: f, wardenDone: wardenDone || s.bossesDefeated > 0, finaleOut, nextLabel: next.label, nextIn: Math.max(0, next.at - s.time), announce: a, objText: s.plan?.mode === 'campaign' ? campaignObjective(s) : undefined };
 }
 
 /** Online: the partner's fighter snapshot (player, hero, hx, cast, mods, ultimate) laid over the local state gives the same ability view as a local second fighter. */

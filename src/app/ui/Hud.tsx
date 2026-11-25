@@ -158,7 +158,7 @@ export function Hud({ s, pad, onPause, reduced, onForm, onKey }: Props) {
     {s.boss && <BossBar b={s.boss}/>}
     <Minimap map={s.map} boss={!!s.boss}/>
     <div className="hud-panel hud-clock b30-strip"><span className="clock-label"><i aria-hidden="true"/>{s.arenaName}<i aria-hidden="true"/></span><b>{roundedTime(s.seconds)}</b>
-      <div className="clock-row"><span className="clock-kills" aria-label={`${s.kills} defeated`}><i/> {s.kills}<small>defeated</small></span>{s.run.nextLabel && <><span className="clock-sep" aria-hidden="true"/><em className={`clock-next ${s.run.nextIn < 30 && s.run.nextIn > 0 ? 'soon' : ''}`}>{s.run.nextIn > 0 ? `${s.run.nextLabel} in ${mmss(s.run.nextIn)}` : s.run.nextLabel}</em></>}</div>
+      <div className="clock-row"><span className="clock-kills" aria-label={`${s.kills} defeated`}><i/> {s.kills}<small>defeated</small></span>{(s.run.objText || s.run.nextLabel) && <><span className="clock-sep" aria-hidden="true"/>{s.run.objText ? <em className="clock-next obj" data-testid="hud-objective">{s.run.objText}</em> : <em className={`clock-next ${s.run.nextIn < 30 && s.run.nextIn > 0 ? 'soon' : ''}`}>{s.run.nextIn > 0 ? `${s.run.nextLabel} in ${mmss(s.run.nextIn)}` : s.run.nextLabel}</em>}</>}</div>
       <RunTrack r={s.run}/>{s.contract && <span className="clock-contract" data-testid="hud-contract">CONTRACT · {CONTRACT_BY_ID[s.contract].name}</span>}</div>
     {s.run.announce && !s.boss && <div className="finale-banner" data-testid="finale-banner" role="alert"><b>{s.run.announce.text}</b><span>{s.run.announce.sub}</span></div>}
     {s.phase === 'victory' && !s.victoryShown && <div className="victory-banner" data-testid="victory-banner" role="status"><b>THE FRACTURE HOLDS</b><span>NULL SERAPH DEFEATED</span></div>}

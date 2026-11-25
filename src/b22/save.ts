@@ -8,6 +8,7 @@ import { RELIC_IDS, type RelicId } from './relics';
 import { BRANCHES } from './branches';
 import { LEGENDARIES } from './legendary';
 import { BOSS_KINDS } from '../content/enemies';
+import { chronicleOfPlan, CHRONICLE_BY_ID, isChronicleId, type ChronicleProgress } from '../b31/chronicles';
 
 export const B22_SAVE_VERSION = 1, LEDGER_KEEP = 80;
 export interface ModeRecord { runs: number; wins: number; bestSeconds: number; bestScore: number; bestKills: number; bestCycle: number; bestLevel: number }
@@ -19,9 +20,10 @@ export interface B22Save {
   seen: { relics: RelicId[]; branches: string[]; legends: string[]; bosses: string[] };
   server: { url: string; name: string };
   ledger: string[];
+  /** B31A Fracture Chronicles: completed chapter ids, played scene ids (seen is NOT completion), Nexus visit counter, last campaign outcome */ chronicles: ChronicleProgress;
 }
 const blankRecord = (): ModeRecord => ({ runs: 0, wins: 0, bestSeconds: 0, bestScore: 0, bestKills: 0, bestCycle: 0, bestLevel: 0 });
-export const blankB22 = (): B22Save => ({ v: 1, vexForms: [false, false], story: { done: [], seen: false }, mastery: {}, owned: [], equipped: { outfit: {}, crest: null, aura: {} }, records: {}, challenges: {}, seen: { relics: [], branches: [], legends: [], bosses: [] }, server: { url: '', name: '' }, ledger: [] });
+export const blankB22 = (): B22Save => ({ v: 1, vexForms: [false, false], story: { done: [], seen: false }, mastery: {}, owned: [], equipped: { outfit: {}, crest: null, aura: {} }, records: {}, challenges: {}, seen: { relics: [], branches: [], legends: [], bosses: [] }, server: { url: '', name: '' }, ledger: [], chronicles: { done: [], seen: [], visits: 0, last: null } });
 const num = (v: unknown, hi = 1e9) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(0, Math.floor(v))) : 0);
 const strs = (v: unknown, ok: (x: string) => boolean, cap = 400): string[] => (Array.isArray(v) ? [...new Set(v.filter((x): x is string => typeof x === 'string' && ok(x)))].slice(0, cap) : []);
 export const recordKey = (mode: RunModeId | string, hero: HeroId, arena: ArenaId, party = 1) => `${mode}|${hero}|${arena}|${party}`;
@@ -50,18 +52,20 @@ export function migrateB22(raw: unknown): B22Save {
   b.seen = { relics: strs(se.relics, x => (RELIC_IDS as string[]).includes(x)) as RelicId[], branches: strs(se.branches, x => BRANCHES.some(y => y.id === x)), legends: strs(se.legends, x => LEGENDARIES.some(y => y.id === x)), bosses: strs(se.bosses, x => (BOSS_KINDS as readonly string[]).includes(x)) };
   const sv = (typeof r.server === 'object' && r.server ? r.server : {}) as Record<string, unknown>; b.server = { url: safeServerUrl(sv.url), name: typeof sv.name === 'string' ? sv.name.replace(/[^\w .-]/g, '').slice(0, 24) : '' };
   b.ledger = strs(r.ledger, x => x.length < 80, LEDGER_KEEP);
+  { const c = (typeof r.chronicles === 'object' && r.chronicles ? r.chronicles : {}) as Record<string, unknown>, last = (typeof c.last === 'object' && c.last ? c.last : null) as Record<string, unknown> | null;
+    b.chronicles = { done: strs(c.done, isChronicleId, 20), seen: strs(c.seen, x => /^[a-z]+_?\d?\.(intro|outro)$/.test(x) && isChronicleId(x.split('.')[0]), 40), visits: num(c.visits, 1e6), last: last && isChronicleId(last.id) ? { id: last.id as string, won: last.won === true } : null }; }
   return b;
 }
 /** What one finished run carries into the B22 save. `counters` are the sim's per-run mastery counters. */
-export interface B22RunResult { runId: string; mode: RunModeId; hero: HeroId; arena: ArenaId; party: 1 | 2; won: boolean; seconds: number; kills: number; level: number; score: number; cycle: number; counters: Record<string, number>; relics: string[]; branches: string[]; legends: string[]; bosses: string[]; challengeId?: string; storyChapter?: 1 | 2 | 3; extracted?: boolean; practice?: boolean }
-export interface B22Grant { milestones: string[]; cosmetics: string[]; vexForms: number[]; story: number[] }
+export interface B22RunResult { runId: string; mode: RunModeId; hero: HeroId; arena: ArenaId; party: 1 | 2; won: boolean; seconds: number; kills: number; level: number; score: number; cycle: number; counters: Record<string, number>; relics: string[]; branches: string[]; legends: string[]; bosses: string[]; challengeId?: string; storyChapter?: 1 | 2 | 3; chronicleId?: string; extracted?: boolean; practice?: boolean }
+export interface B22Grant { milestones: string[]; cosmetics: string[]; vexForms: number[]; story: number[]; /** chapters completed for the first time by this result */ chronicles: string[] }
 export const judgeMilestones = (counters: Record<string, number>, have: Record<string, true>): string[] => MILESTONES.filter(m => !have[m.id] && (counters[m.counter] ?? 0) >= m.goal).map(m => m.id);
 /** Applies a result exactly once per run id. A repeated id returns the same save and an empty grant. */
 export function applyB22Result(prev: B22Save, r: B22RunResult): { save: B22Save; grant: B22Grant } {
-  const empty: B22Grant = { milestones: [], cosmetics: [], vexForms: [], story: [] };
+  const empty: B22Grant = { milestones: [], cosmetics: [], vexForms: [], story: [], chronicles: [] };
   if (!r.runId || prev.ledger.includes(r.runId) || r.practice) return { save: prev, grant: empty };
-  const s: B22Save = { ...prev, mastery: { ...prev.mastery }, owned: [...prev.owned], records: { ...prev.records }, challenges: { ...prev.challenges }, seen: { relics: [...prev.seen.relics], branches: [...prev.seen.branches], legends: [...prev.seen.legends], bosses: [...prev.seen.bosses] }, vexForms: [...prev.vexForms] as [boolean, boolean], story: { done: [...prev.story.done], seen: prev.story.seen }, ledger: [...prev.ledger, r.runId].slice(-LEDGER_KEEP) };
-  const grant: B22Grant = { milestones: [], cosmetics: [], vexForms: [], story: [] };
+  const s: B22Save = { ...prev, mastery: { ...prev.mastery }, owned: [...prev.owned], records: { ...prev.records }, challenges: { ...prev.challenges }, seen: { relics: [...prev.seen.relics], branches: [...prev.seen.branches], legends: [...prev.seen.legends], bosses: [...prev.seen.bosses] }, vexForms: [...prev.vexForms] as [boolean, boolean], story: { done: [...prev.story.done], seen: prev.story.seen }, chronicles: { ...prev.chronicles, done: [...prev.chronicles.done], seen: [...prev.chronicles.seen] }, ledger: [...prev.ledger, r.runId].slice(-LEDGER_KEEP) };
+  const grant: B22Grant = { milestones: [], cosmetics: [], vexForms: [], story: [], chronicles: [] };
   const k = recordKey(r.mode, r.hero, r.arena, r.party), x = { ...(s.records[k] ?? blankRecord()) };
   x.runs++; if (r.won) x.wins++; x.bestSeconds = Math.max(x.bestSeconds, Math.floor(r.seconds)); x.bestScore = Math.max(x.bestScore, Math.floor(r.score)); x.bestKills = Math.max(x.bestKills, r.kills); x.bestCycle = Math.max(x.bestCycle, r.cycle); x.bestLevel = Math.max(x.bestLevel, r.level); s.records[k] = x;
   for (const id of judgeMilestones(r.counters, s.mastery)) { s.mastery[id] = true; grant.milestones.push(id); const rw = MILESTONE_BY_ID[id].reward.id; if (!s.owned.includes(rw)) { s.owned.push(rw); grant.cosmetics.push(rw); } }
@@ -76,9 +80,13 @@ export function applyB22Result(prev: B22Save, r: B22RunResult): { save: B22Save;
     if (r.storyChapter >= 2 && !s.vexForms[0]) { s.vexForms[0] = true; grant.vexForms.push(1); }   // Riftbound: finish chapter 2
     if (r.storyChapter === 3 && !s.vexForms[1]) { s.vexForms[1] = true; grant.vexForms.push(2); }   // Voidheart Exile: defeat the Oathkeeper in the final chapter
   }
+  if ((r.mode === 'campaign' || r.mode === 'vex_trial') && r.chronicleId && isChronicleId(r.chronicleId)) {   // B31A: completion is written here, at the moment of victory, before any outro plays; the run-id ledger above makes it once-only
+    s.chronicles.last = { id: r.chronicleId, won: r.won };
+    if (r.won && !s.chronicles.done.includes(r.chronicleId)) { s.chronicles.done = [...s.chronicles.done, r.chronicleId]; if (CHRONICLE_BY_ID[r.chronicleId].marks > 0) grant.chronicles.push(r.chronicleId); }
+  }
   const crest = r.mode === 'endless' && r.cycle >= 3 ? 'crest_endless' : r.mode === 'boss_rush' && r.won ? (r.bosses.includes('sovereign') ? 'crest_sovereign' : 'crest_boss_rush') : r.mode === 'fracture_expedition' && r.won ? 'crest_expedition' : r.mode === 'vex_trial' && r.won && r.storyChapter === 3 ? 'crest_vanguard' : r.mode === 'daily_challenge' && r.won ? 'crest_daily' : r.party === 2 && r.won ? 'crest_alliance' : '';
   if (crest && isCosmeticId(crest) && !s.owned.includes(crest)) { s.owned.push(crest); grant.cosmetics.push(crest); }
-  void COSMETICS; return { save: s, grant };
+  void COSMETICS; void chronicleOfPlan; return { save: s, grant };
 }
 /** Outfit unlock conditions, evaluated from real saved facts (never granted for free). */
 export function outfitUnlocked(o: OutfitDef, ctx: { heroWins: Record<string, number>; b22: B22Save }): boolean {

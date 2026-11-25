@@ -17,15 +17,16 @@ import { branchArt, legendArt, outfitArt, relicArt, ultArt } from '../../b22/art
 import { Card, Chip, Frame, Panel, Tabs } from './b29/Kit';
 import { StoryPanel } from './StoryPanel';
 import { STORY, type StoryBeat } from '../../b22/story';
+import { CHRONICLES, CHRONICLE_BY_ID, chronicleDone, chronicleLock, sceneUnlocked, type ChronicleId } from '../../b31/chronicles';
 const FORM_PIC: Partial<Record<string, string>> = { flarebound: 'ui/kit/crest-f1.webp', cometheart: 'ui/kit/crest-f2.webp', stillfire: 'ui/kit/crest-f3.webp', riftbound: 'art/b22/vex_riftbound.png', voidheart_exile: 'art/b22/vex_voidheart.png', crimson_ascendant: 'ui/heroes/ren-portrait-f1.webp', azure_sovereign: 'ui/heroes/sora-portrait-f1.webp' };
 const hide = (e: React.SyntheticEvent<HTMLImageElement>) => { e.currentTarget.style.display = 'none'; };
 const Ic = ({ n, big }: { n: string; big?: boolean }) => <img className={big ? 'ar-pic' : 'ar-ico'} src={`${ASSET_BASE}art/b22/${n}.png`} alt="" draggable={false} onError={hide}/>;
 
-type Tab = 'story' | 'mastery' | 'cosmetics' | 'codex' | 'records' | 'boards';
+type Tab = 'story' | 'chronicles' | 'mastery' | 'cosmetics' | 'codex' | 'records' | 'boards';
 type Codex = 'relics' | 'branches' | 'recipes' | 'bosses' | 'ults';
 interface Props { save: SaveV1; onBack: () => void; onSave: (b: B22Save) => void }
-const TABS: [Tab, string][] = [['story', 'STORY'], ['mastery', 'MASTERY'], ['cosmetics', 'OUTFITS & CRESTS'], ['codex', 'CODEX'], ['records', 'RECORDS'], ['boards', 'BOARDS']];
-const TITLE: Record<Tab, string> = { story: 'TRIAL OF THE OATHBROKEN', mastery: 'MASTERY', cosmetics: 'OUTFITS & CRESTS', codex: 'CODEX', records: 'LOCAL RECORDS', boards: 'CHALLENGE BOARDS' };
+const TABS: [Tab, string][] = [['story', 'STORY'], ['chronicles', 'CHRONICLES'], ['mastery', 'MASTERY'], ['cosmetics', 'OUTFITS & CRESTS'], ['codex', 'CODEX'], ['records', 'RECORDS'], ['boards', 'BOARDS']];
+const TITLE: Record<Tab, string> = { story: 'TRIAL OF THE OATHBROKEN', chronicles: 'FRACTURE CHRONICLES', mastery: 'MASTERY', cosmetics: 'OUTFITS & CRESTS', codex: 'CODEX', records: 'LOCAL RECORDS', boards: 'CHALLENGE BOARDS' };
 /** Archives: everything B22 adds that is not a run: seven mastery paths (21 milestones), outfits with real unlock conditions, a codex of relics / branches / recipes / bosses / pair attacks, local records by mode, and the leaderboard status (LOCAL unless a server verified it). */
 export function ArchivesScreen({ save, onBack, onSave }: Props) {
   const [tab, setTab] = useState<Tab>('mastery'); const [replay, setReplay] = useState<StoryBeat | null>(null); const b22 = save.b22 ?? blankB22();
@@ -38,12 +39,19 @@ export function ArchivesScreen({ save, onBack, onSave }: Props) {
   return <Frame testId="archives" className="ar" eyebrow="THE ARCHIVE LIBRARY" title={TITLE[tab].charAt(0) + TITLE[tab].slice(1).toLowerCase()} bg="art/menu/library.webp" lit onBack={onBack} hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'TAB', pad: 'D-PAD', label: 'NAVIGATE' }, { key: 'ESC', pad: 'B', label: 'BACK' }]}
     right={<span className="ar-total" aria-label={`${earned} of ${total} mastery milestones`}><b>{earned}</b>/{total}<small>MILESTONES</small></span>}>
     <div className="ar-col">
-      <div className="b29-tabs ar-tabs" role="tablist">{TABS.map(([k, n]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={`b29-tab ${tab === k ? 'on' : ''}`} data-testid={`arc-${k}`} onClick={() => setTab(k)}><img className="tab-ico" src={`${ASSET_BASE}ui/icons/tab_${k}.png`} alt="" draggable={false}/>{n}</button>)}</div>
+      <div className="b29-tabs ar-tabs" role="tablist">{TABS.map(([k, n]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={`b29-tab ${tab === k ? 'on' : ''}`} data-testid={`arc-${k}`} onClick={() => setTab(k)}><img className="tab-ico" src={`${ASSET_BASE}ui/icons/tab_${k === 'chronicles' ? 'story' : k}.png`} alt="" draggable={false}/>{n}</button>)}</div>
       <section className="ar-body">
         {tab === 'story' && <div className="b29-scroll ar-scroll"><div className="ar-story">{STORY.map(c => { const open = c.n === 1 || (b22.story.done as number[]).includes(c.n - 1), done = (b22.story.done as number[]).includes(c.n);
           return <Panel key={c.n} className={`ar-chapter ${done ? 'done' : open ? '' : 'locked'}`}><div className="ar-chead"><span className="ar-num">{done ? '✓' : open ? c.n : '🔒'}</span><div><b>{c.name}</b><Chip tone={done ? 'gold' : open ? 'teal' : 'mute'}>{done ? 'COMPLETE' : open ? 'AVAILABLE' : 'LOCKED'}</Chip></div></div>
             {open ? <div className="ar-btns"><button type="button" className="ar-equip" data-testid={`replay-intro-${c.n}`} onClick={() => setReplay(c.intro)}>REPLAY OPENING</button><button type="button" className="ar-equip" disabled={!done} data-testid={`replay-outro-${c.n}`} onClick={() => setReplay(c.outro)}>REPLAY ENDING</button></div> : <small>Finish the previous chapter to unlock.</small>}</Panel>; })}</div></div>}
 
+        {tab === 'chronicles' && (() => { const pg = { chronicles: b22.chronicles, story: { done: b22.story.done as number[] } }, got = CHRONICLES.filter(c => chronicleDone(pg, c.id)).length;
+          const play = (id: ChronicleId, part: 'intro' | 'outro') => { const sid = `${id}.${part}`; if (!b22.chronicles.seen.includes(sid)) onSave({ ...b22, chronicles: { ...b22.chronicles, seen: [...b22.chronicles.seen, sid] } }); setReplay(CHRONICLE_BY_ID[id][part]); };
+          return <div className="b29-scroll ar-scroll" data-testid="archives-chronicles"><p className="ar-wide ar-note"><b>{got}/{CHRONICLES.length}</b> chapters finished. Scenes you have not played stay sealed; lore appears when a chapter is complete.</p>
+            <div className="ar-list">{CHRONICLES.map(c => { const done = chronicleDone(pg, c.id), lock = chronicleLock(pg, c.id);
+              return <Panel key={c.id} className={`ar-entry-card ${done ? '' : 'dim'}`} data-testid={`arch-chron-${c.id}`}><div className="ar-chead"><span className="ar-num">{done ? '✓' : lock ? '🔒' : '▶'}</span><div><b>{lock && !done ? 'SEALED CHAPTER' : c.name}</b><Chip tone={done ? 'gold' : lock ? 'mute' : 'teal'}>{c.kicker}</Chip></div></div>
+                {done ? <p className="ar-lore"><b>{c.lore.title}.</b> {c.lore.text}</p> : <small>{lock ?? c.objective}</small>}
+                <div className="ar-btns">{(['intro', 'outro'] as const).map(p => <button key={p} type="button" className="ar-equip" disabled={!sceneUnlocked(pg, c.id, p)} data-testid={`arch-scene-${c.id}-${p}`} onClick={() => play(c.id, p)}>{p === 'intro' ? 'OPENING' : 'ENDING'}</button>)}</div></Panel>; })}</div></div>; })()}
         {tab === 'mastery' && <div className="ar-split">
           <div className="b29-scroll ar-rail" role="list" aria-label="Mastery paths">{FORM_KEYS.map(f => { const n = formDone(f), master = !!b22.mastery[`${f}.master`];
             return <Card key={f} on={form === f} accent={FORM_INFO[f].accent} onClick={() => setForm(f)} className="ar-form"><img className={`ar-crest ${master ? 'earned' : ''}`} src={`${ASSET_BASE}ui/crests/crest_${f}.png`} alt="" draggable={false} data-testid={`crest-art-${f}`} onError={hide}/>

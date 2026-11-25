@@ -1,5 +1,11 @@
 # Changelog
 
+## B31A Fracture Chronicles (local, unpushed)
+- Story campaign: nine new solo missions (Kai, Ren, Sora x3), Vex's three Trial chapters integrated, and a shared finale unlocked by all four arcs. New campaign run mode and a hold encounter step; the HUD shows the live mission objective; unranked, no per-run Marks, one-time chapter rewards.
+- Fracture Chronicles map in the Nexus, cinematic story scenes (parallax art, speaker portraits, back / skip), an Archives tab with replay and lore, Nexus hero chatter that reacts to progress.
+- Additive save block b22.chronicles (done / seen scenes / visits / last result); legacy Vex completions count without migration.
+- Ten ImageGen key arts in public/art/chronicles, sources in art/chronicles.
+
 ## 0.23.0 (B23 completion pass, local; PARTIAL - see B23-STATUS.md)
 - Local co-op: the partner is drawn from their own sheets (BootScene loads every fighting hero) and animates (P2 input is now stored per slot); Vex has explicit `vex*` asset keys, no Ren alias; Voidheart upper/legs/anchors resolve one appearance; outfits only re-skin their own hero.
 - Living hair: tips of the hair deform from real motion with roots pinned (idle sway, run trail, cast / hurt kicks) for all 11 appearances x 4 facings, via a mask-skinned warp of the shipped pixels. Reduced Effects halves it; pause/cinematic freeze it.

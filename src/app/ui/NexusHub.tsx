@@ -6,9 +6,12 @@ import { hubAudio } from '../../game/audio/hubAudio';
 import { sharedAbilityAudio } from '../../game/audio/abilityAudio';
 import { ASSET_BASE } from '../assetBase';
 import { HintBar } from './Chrome';
+import { nexusLine } from '../../b31/nexusChatter';
+import { allArcsDone, arcDone, chronicleDone } from '../../b31/chronicles';
 
-export type NexusDest = 'deploy' | 'heroes' | 'modes' | 'online' | 'armory' | 'contracts' | 'archives' | 'records' | 'settings' | 'title';
+export type NexusDest = 'deploy' | 'heroes' | 'modes' | 'online' | 'armory' | 'contracts' | 'archives' | 'records' | 'settings' | 'title' | 'chronicles';
 const NAV: { id: NexusDest; label: string; sub: string; glyph: string }[] = [
+  { id: 'chronicles', label: 'FRACTURE CHRONICLES', sub: 'The story of the four runners', glyph: '✧' },
   { id: 'heroes', label: 'HEROES', sub: 'Runner, arena and seed', glyph: '◈' },
   { id: 'modes', label: 'MODES & CO-OP', sub: 'Run types, couch co-op', glyph: '⬡' },
   { id: 'online', label: 'ONLINE CO-OP', sub: 'Fracture Alliance', glyph: '◎' },
@@ -75,6 +78,9 @@ export function NexusHub({ save, hero, arenaName, modeName, onHero, onGo }: Prop
     window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key);
   });
   const sel = HEROES.find(h => h.id === hero) ?? HEROES[0], [fn, fm] = forms(save, sel.id), c = ACCENT[hero];
+  const progress = useMemo(() => ({ chronicles: save.b22?.chronicles, story: { done: save.b22?.story?.done ?? [] } }), [save.b22]);
+  const say = useMemo(() => nexusLine(progress, hero, { done: fn, total: fm }, save.b22?.chronicles?.visits ?? 0), [progress, hero, fn, fm, save.b22?.chronicles?.visits]);
+  const arcN = arcDone(progress, hero), tale = allArcsDone(progress) ? (chronicleDone(progress, 'finale') ? 'Line knotted' : 'Finale open') : `${arcN}/3 chronicles`;
   return <main ref={root} className={`nexus t${att.tier} ${reduced ? 'calm' : ''} ${diving ? 'diving' : ''}`} style={{ '--energy': att.energy.toFixed(2), '--acc': c } as CSSProperties} onPointerMove={move} data-testid="nexus-hub">
     <div className="nx-stage">
       <div className="nx-layer nx-bg" style={{ backgroundImage: `url(${ASSET_BASE}art/nexus/bg.webp)` }} aria-hidden="true"/>
@@ -105,7 +111,8 @@ export function NexusHub({ save, hero, arenaName, modeName, onHero, onGo }: Prop
         <span className="nx-lift"><Sprite id={h.id} punch={pn}/></span>
         {pn && <span key={punch!.n} className={`nx-burst b-${h.id}`} aria-hidden="true"/>}
         <span className="nx-hero-cap"><b>{on ? '✓ ' : ''}{h.name}</b><small>{n}/{m} FORMS</small></span></button>; })}</section>
-      <aside className="nx-focus" aria-live="polite"><b style={{ color: c }}>{sel.name} · {sel.title}</b><span>{BLURB[hero]}</span><small>{sel.weapon} · {fn}/{fm} forms unlocked</small>
+      <aside className="nx-focus" aria-live="polite"><b style={{ color: c }}>{sel.name} · {sel.title}</b><span>{BLURB[hero]}</span><small>{sel.weapon} · {fn}/{fm} forms unlocked · {tale}</small>
+        <blockquote className="nx-say" data-testid="nexus-say"><b style={{ color: c }}>{say.who}</b><q>{say.text}</q></blockquote>
         <small className="nx-att" title="Grows with unlocked forms, mastery and story progress"><span>ATTUNEMENT</span><i className={att.tier >= 1 ? 'on' : ''}/><i className={att.tier >= 2 ? 'on' : ''}/><i className={att.tier >= 3 ? 'on' : ''}/></small></aside>
       <HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'TAB', pad: 'D-PAD', label: 'NAVIGATE' }, { key: 'ESC', pad: 'B', label: 'TITLE' }]}/>
     </div>

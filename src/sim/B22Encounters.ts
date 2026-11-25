@@ -49,6 +49,13 @@ export function spawnWave(state: GameState, rng: SeededRng, st: EncounterStep) {
 export function updateEncounters(state: GameState, rng: SeededRng) {
   const w = state.encounter.waves; if (!w) return;
   for (const st of state.plan.steps) {
+    if (st.kind === 'hold') {   // B31A: survive until the hold timer runs out
+      if (state.encounter.spawned[st.id] && state.encounter.doneAt[st.id] === undefined && state.time >= st.at + (st.hold ?? 0)) {
+        state.encounter.doneAt[st.id] = state.time; state.announce = { id: 'step', text: 'THE LINE HOLDS', sub: st.ends ? 'The mission is complete' : 'Hold fast', at: state.time };
+        if (st.ends) state.b22.endStep = st.id;
+      }
+      continue;
+    }
     const ids = w[st.id]; if (st.kind !== 'elite_wave' || !ids || state.encounter.doneAt[st.id] !== undefined) continue;
     if (state.enemies.some(e => ids.includes(e.id) && e.hp > 0)) continue;
     state.encounter.doneAt[st.id] = state.time; state.announce = { id: 'step', text: 'WAVE BROKEN', sub: st.ends ? 'The trial is complete' : 'A relic answers', at: state.time };

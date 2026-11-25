@@ -22,7 +22,7 @@ function useRunAnim(hero: string): RunAnim | null {
   useEffect(() => { let off = false; const base = `/art/${hero}/east`; fetch(`${base}/manifest.json`).then(r => r.json()).then(m => { const c = m.animations.Run; if (!off) setA({ url: `${base}/${c.sheet}`, w: c.frame_width ?? m.frame_width, h: c.frame_height ?? m.frame_height, frames: c.frames, fps: c.fps }); }).catch(() => undefined); return () => { off = true; }; }, [hero]);
   return a;
 }
-export function LoadingScreen({ progress, arena = 'THE GLOAM CIRCUIT', hero = 'kai', arenaId = 'gloam', boon = null, contract = null, seed = 0, partner = null }: { progress: number; arena?: string; hero?: string; arenaId?: ArenaId; boon?: BoonId | null; contract?: ContractId | null; seed?: number; partner?: string | null }) {
+export function LoadingScreen({ progress, arena = 'THE GLOAM CIRCUIT', hero = 'kai', arenaId = 'gloam', boon = null, contract = null, seed = 0, partner = null, objective }: { objective?: string; progress: number; arena?: string; hero?: string; arenaId?: ArenaId; boon?: BoonId | null; contract?: ContractId | null; seed?: number; partner?: string | null }) {
   const run = useRunAnim(hero), pRun = useRunAnim(partner ?? hero);
   const [intro] = useState(() => { const first = !introPlayed; introPlayed = true; return first; });
   const [ti, setTi] = useState(() => Math.floor(Math.random() * TIPS.length));
@@ -40,6 +40,7 @@ export function LoadingScreen({ progress, arena = 'THE GLOAM CIRCUIT', hero = 'k
       <p className="lz-kicker">DEPLOYING TO</p>
       <h1 className="lz-dest">{arena}</h1>
       <figure className="lz-card" aria-hidden="true"><img src={`${ASSET_BASE}art/menu/arena-${arenaId}.webp`} alt="" draggable={false}/><i/><i/><i/><i/></figure>
+      {objective && <p className="lz-obj" data-testid="loading-objective"><em>OBJECTIVE</em>{objective}</p>}
       <div className="loading-chips" aria-label="Run summary"><span>{hero.toUpperCase()}{partner ? ` + ${partner.toUpperCase()}` : ''}</span>{boon && UNLOCK_BY_ID[`boon_${boon}` as UnlockId] && <span>{UNLOCK_BY_ID[`boon_${boon}` as UnlockId].name}</span>}{contract && <span>{CONTRACT_BY_ID[contract].name}</span>}{seed > 0 && <span>Seed {seed}</span>}</div>
     </div>
     <div className="lz-foot">

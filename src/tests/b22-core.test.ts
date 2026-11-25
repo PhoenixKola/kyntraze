@@ -50,7 +50,7 @@ describe('B22 run plans', () => {
     expect(CLASSIC_PLAN.steps.filter(s => s.ends)).toHaveLength(1);
   });
   it('every mode id resolves to a plan; Expedition lasts about 20 minutes in three acts with a relic path; boss rush tracks have 3 / 5 / Sovereign legs', () => {
-    for (const m of RUN_MODE_IDS) expect(planFor(m).mode === m || m === 'daily_challenge' || m === 'weekly_challenge').toBe(true);
+    for (const m of RUN_MODE_IDS) expect(planFor(m).mode === m || m === 'daily_challenge' || m === 'weekly_challenge' || m === 'campaign').toBe(true);
     for (const a of ['aetherfall', 'paradox'] as const) { const p = expeditionPlan(a); expect(p.acts).toHaveLength(3); expect(p.steps.at(-1)!.at).toBeGreaterThanOrEqual(1000); expect(p.steps.at(-1)!.ends).toBe(true); expect(p.steps.some(s => s.reward === 'relic')).toBe(true); expect(p.pool).toBe('realm'); expect(p.unlocks).toBe(false); }
     expect(BOSS_RUSH_TRACKS.initiation.bosses).toHaveLength(3); expect(BOSS_RUSH_TRACKS.veteran.bosses).toHaveLength(5); expect(BOSS_RUSH_TRACKS.sovereign_trial.bosses.at(-1)).toBe('sovereign');
     for (const t of ['initiation', 'veteran', 'sovereign_trial'] as const) { const p = bossRushPlan(t); expect(p.steps.filter(s => s.ends)).toHaveLength(1); expect(p.steps.at(-1)!.ends).toBe(true); expect(p.unlocks).toBe(false); }
