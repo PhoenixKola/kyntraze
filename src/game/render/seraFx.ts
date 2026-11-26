@@ -37,7 +37,7 @@ export class SeraFx {
   private kick(v: number, reduced: boolean) { if (!reduced) this.shake = Math.max(this.shake, v); }
   private img(slot: Slot, n: string, blend: Phaser.BlendModes = NORMAL) { let im = this.slots[slot]; if (!im && this.has(n)) { im = this.scene.add.image(0, 0, seraKey(n)).setBlendMode(blend); this.slots[slot] = im; } return im; }
   private place(im: Phaser.GameObjects.Image | undefined, x: number, y: number, w: number, a: number, depth: number, o: { flip?: number; rot?: number; ox?: number; oy?: number } = {}) {
-    if (!im) return; im.setVisible(a > 0.01).setPosition(x, y).setDepth(depth).setOrigin(o.ox ?? 0.5, o.oy ?? 0.5).setDisplaySize(w, w * (im.height / im.width)).setFlipX((o.flip ?? 1) < 0).setAlpha(a).setRotation(o.rot ?? 0);
+    if (!im) return; const fl = (o.flip ?? 1) < 0, ox = o.ox ?? 0.5; im.setVisible(a > 0.01).setPosition(x, y).setDepth(depth).setOrigin(fl ? 1 - ox : ox, o.oy ?? 0.5).setDisplaySize(w, w * (im.height / im.width)).setFlipX(fl).setAlpha(a).setRotation(fl ? -(o.rot ?? 0) : (o.rot ?? 0));   // a mirrored sprite mirrors its anchor and tilt too, or its far half falls outside the frame
   }
   private star(x: number, y: number, r: number, a: number, color = PEARL) { this.g.lineStyle(1.4, color, a).beginPath(); this.g.moveTo(x - r, y); this.g.lineTo(x + r, y); this.g.moveTo(x, y - r * 1.3); this.g.lineTo(x, y + r * 1.3); this.g.strokePath(); this.g.fillStyle(color, a).fillCircle(x, y, r * 0.3); }
 
@@ -109,8 +109,9 @@ export class SeraFx {
   private mantle(vx: number, bx: number, by: number, f: number, back: boolean, moving: boolean, alive: boolean) {
     const FEATHER = [{ n: 'mf_1', len: 64, ang: 0.52 }, { n: 'mf_3', len: 54, ang: 0.86 }, { n: 'mf_6', len: 46, ang: 1.18 }, { n: 'mf_4', len: 34, ang: 1.5 }, { n: 'mf_5', len: 78, ang: 0.28 }];
     const drift = Math.max(-0.5, Math.min(0.5, -vx * 0.0014)), run = moving ? 0.12 : 0;
+    const SHOW = back ? [4, 0, 1] : [0, 1, 2, 3, 4];   // from behind: three long tidy feathers per side, not a tangle
     for (let side = 0; side < 2; side++) for (let i = 0; i < FEATHER.length; i++) {
-      const F = FEATHER[i], k = side * FEATHER.length + i; let im = this.mf[k];
+      const F = FEATHER[i], k = side * FEATHER.length + i; let im = this.mf[k]; if (!SHOW.includes(i)) { im?.setVisible(false); continue; }
       if (!im) { if (!this.has(F.n)) continue; im = this.scene.add.image(0, 0, seraKey(F.n)).setBlendMode(NORMAL); this.mf[k] = im; }
       const sgn = side === 0 ? -1 : 1, phase = this.clock * 2.4 + i * 0.8 + side, rot = Math.PI + sgn * (F.ang + 0.06 * Math.sin(phase) + run) + drift * (0.6 + 0.12 * i);   // feather tip points down and out from the shoulder
       const w = F.len * (im.width / im.height); im.setVisible(alive).setOrigin(0.5, 0.97).setPosition(bx + sgn * 13 - f * 6, by - 30).setRotation(rot).setDisplaySize(w, F.len).setAlpha(0.95).setDepth(back ? 10.3 : 8.9);

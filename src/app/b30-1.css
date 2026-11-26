@@ -39,7 +39,7 @@
 .pz-actions { display: flex; flex-direction: column; gap: calc(8 * var(--u)); margin-top: auto; }
 .pz-resume { width: 100%; padding: calc(11 * var(--u)) calc(14 * var(--u)); font-size: max(13px, calc(17 * var(--u))); letter-spacing: .16em; }
 .pz-row { display: grid; grid-template-columns: 1fr 1.5fr; gap: calc(8 * var(--u)); } .pz-row button { width: 100%; padding: calc(8 * var(--u)) calc(10 * var(--u)); font-size: max(10px, calc(12 * var(--u))); letter-spacing: .1em; min-width: 0; }
-.pz-abandon { background: rgba(60, 10, 16, .55) !important; border-color: rgba(255, 90, 100, .45) !important; color: #ffc9ce !important; }
+.pz-abandon { background: none !important; color: #ffdcdc; }
 .pz .hintbar { margin-top: calc(2 * var(--u)); justify-content: flex-start; }
 @media (max-height: 420px) { .pz .pz-card { width: min(calc(740 * var(--u)), 97vw); padding: calc(10 * var(--u)) calc(14 * var(--u)); gap: calc(10 * var(--u)); } .pz-crest { width: calc(64 * var(--u)); height: calc(64 * var(--u)); } .pz-crest i { height: calc(26 * var(--u)); } .pz-main { gap: calc(6 * var(--u)); } .pz .hintbar { display: none; } .pz .build-strip { max-height: calc(70 * var(--u)); overflow: hidden; } }
 @media (prefers-reduced-motion: reduce) { .pz .pz-card { animation: none; } }

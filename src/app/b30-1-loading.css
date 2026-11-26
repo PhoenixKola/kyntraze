@@ -32,3 +32,7 @@
 .lz .loading-shade { background: linear-gradient(90deg, rgba(3, 7, 14, .9), rgba(3, 7, 14, .45) 52%, rgba(3, 7, 14, .55)), linear-gradient(180deg, rgba(2, 6, 14, .4), transparent 30%, rgba(2, 6, 14, .85)); }
 @media (max-height: 420px) { .lz .lz-body { margin-top: 16px; width: calc(470 * var(--u)); } .lz-card { width: calc(300 * var(--u)); } .lz-stage { bottom: 34%; } .lz-stage .lh-sprite { transform: translate(-50%, 0) scale(1.5); } .lz.duo .lz-stage .lh-sprite.a { transform: translate(-125%, 0) scale(1.45); } .lz.duo .lz-stage .lh-sprite.b { transform: translate(25%, 0) scale(1.45); } .lz-tip { min-height: 2.2em; } }
 @media (prefers-reduced-motion: reduce) { .lz-card::after, .lz-rail i::after, .lz-tip, .lz.intro .lz-body, .lz.intro .lz-foot { animation: none; } }
+
+/* B36: the arena name stays on one line, scaled to the column, so it never crowds the objective */
+.lz-dest { white-space: nowrap; font-size: max(16px, calc(31 * var(--u))); letter-spacing: .04em; }
+.lz .lz-body { width: calc(470 * var(--u)); }

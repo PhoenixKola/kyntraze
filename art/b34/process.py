@@ -25,12 +25,17 @@ def clean(s):
     from scipy import ndimage
     a = np.array(s); lab, n = ndimage.label(a[..., 3] > 24); sz = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1)); keep = [i + 1 for i, v in enumerate(sz) if v >= 0.04 * max(sz)]
     a[..., 3] = np.where(np.isin(lab, keep), a[..., 3], 0); return Image.fromarray(a)
+def main_cluster(s):
+    from scipy import ndimage
+    a = np.array(s); m = a[..., 3] > 24; g = max(6, int(0.012 * a.shape[1])); big = ndimage.binary_dilation(m, iterations=g); lab, n = ndimage.label(big)
+    if n < 2: return s
+    sz = ndimage.sum(m, lab, range(1, n + 1)); k = int(np.argmax(sz)) + 1; a[..., 3] = np.where(lab == k, a[..., 3], 0); return Image.fromarray(a)
 def grid(name, cols, rows, names, width, dest=None, size=None):
     p = f'{SRC}/{name}.png'
     if not os.path.exists(p): return
     im = Image.open(p); W, H = im.size
     for i, n in enumerate(names):
-        c, r = i % cols, i // cols; s = flood(im.crop((c * W // cols, r * H // rows, (c + 1) * W // cols, (r + 1) * H // rows)), black); s = clean(s) if n in CLEAN else s; s = s.crop(s.getbbox())
+        c, r = i % cols, i // cols; s = flood(im.crop((c * W // cols, r * H // rows, (c + 1) * W // cols, (r + 1) * H // rows)), black); s = clean(s) if n in CLEAN else s; s = s if size else main_cluster(s); s = s.crop(s.getbbox())
         if size: s = s.resize((size, size), Image.LANCZOS); s.save(f'{dest}/{n}.png')
         else: k = width / s.width; s = s.resize((width, max(1, round(s.height * k))), Image.LANCZOS); s.save(f'{OUT}/{n}.webp', 'WEBP', quality=90, method=6, exact=True)
         print(n, s.size)

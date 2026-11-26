@@ -98,7 +98,7 @@ export class AshFx {
     const moving = Math.hypot(p.vx, p.vy) > 40 || s.hx.moving; if (Math.abs(p.aimX) > 0.2) this.side += ((p.aimX >= 0 ? 1 : -1) - this.side) * Math.min(1, dt * 8);
     this.lx += (p.x - this.lx) * Math.min(1, dt * 7); this.ly += (p.y - this.ly) * Math.min(1, dt * 7); const A = this.foxA * (reduced ? 0.7 : 1), f = this.side >= 0 ? 1 : -1, sway = Math.sin(this.clock * 3.2);
     const body = this.img('foxBody', 'ef_body'), head = this.img('foxHead', 'ef_head'), tails = this.img('foxTails', 'ef_tails'), stream = this.img('foxStream', 'ef_stream');
-    const set = (im: Phaser.GameObjects.Image | null, x: number, y: number, w: number, a: number, depth: number, flip: number, rot = 0, ox = 0.5, oy = 0.5) => { if (!im) return; im.setVisible(a > 0.01).setPosition(x, y).setDepth(depth).setOrigin(ox, oy).setDisplaySize(w, w * (im.height / im.width)).setFlipX(flip < 0).setAlpha(a).setRotation(rot); };
+    const set = (im: Phaser.GameObjects.Image | null, x: number, y: number, w: number, a: number, depth: number, flip: number, rot = 0, ox = 0.5, oy = 0.5) => { if (!im) return; im.setVisible(a > 0.01).setPosition(x, y).setDepth(depth).setOrigin(flip < 0 ? 1 - ox : ox, oy).setDisplaySize(w, w * (im.height / im.width)).setFlipX(flip < 0).setAlpha(a).setRotation(flip < 0 ? -rot : rot); };
     const bx = this.lx, by = this.ly + MID;
     set(tails, bx - f * 34, by - 10 + sway * 4, 190, 0.7 * A * (moving ? 0.2 : 1), 8.9, f, sway * 0.04, 0.82, 0.5);
     set(stream, bx - f * 16, by - 4, 230, 0.75 * A * (moving ? 1 : 0), 8.95, f, 0, 0.92, 0.5);
