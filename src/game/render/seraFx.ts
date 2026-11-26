@@ -22,7 +22,7 @@ type Slot = 'phTail' | 'phChest' | 'phHead' | 'phWingA' | 'phWingB' | 'phWing2A'
 export class SeraFx {
   private pops: Pop[] = []; private readonly g: Phaser.GameObjects.Graphics; private lastEvent = 0; private readonly director = new ImpactDirector(); private shake = 0; private clock = 0;
   private readonly slots: Partial<Record<Slot, Phaser.GameObjects.Image>> = {}; private readonly bolts: Phaser.GameObjects.Image[] = []; private readonly boltHits = new Map<number, number>();
-  private phA = 0; private side = 1; private lx = 0; private ly = 0; private aura = 0; private jet = 0; private starT = 0; private trailT = 0;
+  private phA = 0; private side = 1; private lx = 0; private ly = 0; private starT = 0; private trailT = 0;
   constructor(private readonly scene: Phaser.Scene, private readonly events: boolean) { this.g = scene.add.graphics().setDepth(3.66); }
   takeHitstop() { return this.director.take(); }
   takeShake() { const v = this.shake; this.shake = 0; return v; }
@@ -41,7 +41,7 @@ export class SeraFx {
   }
   private star(x: number, y: number, r: number, a: number, color = PEARL) { this.g.lineStyle(1.4, color, a).beginPath(); this.g.moveTo(x - r, y); this.g.lineTo(x + r, y); this.g.moveTo(x, y - r * 1.3); this.g.lineTo(x, y + r * 1.3); this.g.strokePath(); this.g.fillStyle(color, a).fillCircle(x, y, r * 0.3); }
 
-  update(dt: number, s: GameState, reduced: boolean, crowded: boolean, facing: string, lift: number) {
+  update(dt: number, s: GameState, reduced: boolean, crowded: boolean, _facing: string, lift: number) {
     this.g.clear(); const run = s.phase === 'running'; this.director.tick(run ? dt : 0); this.clock += run ? dt : 0;
     const p = s.player, sera = s.hero === 'sora' && p.form === 2, R = Math.random, lite = reduced || crowded, cin = s.cinema, ly = p.y + lift;
     if (this.events) for (const ev of s.abilityEvents) if (ev.id > this.lastEvent) { this.lastEvent = ev.id; this.onEvent(ev, s, reduced); }
@@ -65,12 +65,9 @@ export class SeraFx {
       this.g.lineStyle(1.2, ROSE, 0.7 * left).strokeCircle(e.x, by, 7.5); this.star(e.x, by, 6.5 * pu, 0.95 * left);
     }
     // ---- presence: mantle panels, a floating halo fragment, two or three orbiting feathers, a faint dusk ring on the ground
-    const moving = Math.hypot(p.vx, p.vy) > 40 || s.hx.moving, f = facing === 'west' ? -1 : 1, back = facing === 'north', bx = p.x, by = ly + MID;
-    this.mantle(p.vx, bx, by, f, back, moving, p.hp > 0);
-    this.place(this.img('halo', 'sm_halo', ADD), bx + 1, by - 62 + Math.sin(this.clock * 2.1) * 2, 34, 0.8, 10.8, { rot: Math.sin(this.clock * 1.3) * 0.1 });
-    for (let i = 0; i < 3; i++) { const o = this.img(`orbit${i}` as Slot, 'sm_feather'), a = this.clock * 0.9 + (i * Math.PI * 2) / 3, on = !lite && p.hp > 0; this.place(o, bx + Math.cos(a) * 26, by - 6 + Math.sin(a) * 9, 14, on ? 0.9 : 0, Math.sin(a) > 0 ? 9.8 : 8.95, { rot: a + Math.PI / 2 }); }
+    const bx = p.x, by = ly + MID;
+        if (p.flyT <= 0) { const hx = bx + 1, hy = by - 56 + Math.sin(this.clock * 2.1) * 2, tw = 0.8 + 0.2 * Math.sin(this.clock * 3); this.g.lineStyle(2.4, VIOLET, 0.55).strokeEllipse(hx, hy, 30, 9); this.g.lineStyle(1.3, PEARL, 0.95).strokeEllipse(hx, hy, 30, 9); this.star(hx, hy - 4.5, 3.2 * tw, 0.95); this.star(hx - 15, hy, 2 * tw, 0.8); this.star(hx + 15, hy, 2 * tw, 0.8); }   // a clean closed halo above the crest
     this.g.lineStyle(1.5, VIOLET, 0.25 + 0.08 * Math.sin(this.clock * 3)).strokeEllipse(p.x, p.y + GY + 2, 62, 20);
-    this.aura += dt; if (!lite && p.hp > 0 && this.aura > 0.18) { this.aura = 0; this.pop('sm_feather', p.x + (R() - 0.5) * 28, ly + GY - 8, 12 + R() * 6, 1.0, { depth: 9, vy: -30 - R() * 20, vx: (R() - 0.5) * 16, a: 0.7, grow: 0.7, rot: R() * 6, spin: (R() - 0.5) * 3 }); }
     // ---- feathers in flight: sprites follow the real bolts; a new hit on a bolt plays one small refraction (the sim's hit, never a guess)
     this.bolt(s, reduced);
     // ---- telegraphs that follow the simulation's committed geometry
@@ -100,22 +97,8 @@ export class SeraFx {
       this.g.lineStyle(1.5, ROSE, 0.3 + 0.12 * c.tier).strokeEllipse(p.x, p.y + GY + 2, 50 + 22 * c.tier, 18 + 6 * c.tier);
     } else { this.slots.orb?.setVisible(false); if (c?.act !== 'astral_rebirth') this.slots.front?.setVisible(false); }
     // ---- flight: drifting pearl feathers under the boots
-    if (p.flyT > 0 && !lite) { this.jet += dt; if (this.jet > 0.06) { this.jet = 0; this.pop('sm_feather', p.x + (R() - 0.5) * 14, ly + GY - 4, 16, 0.5, { depth: 9, vy: 90 + R() * 50, vx: (R() - 0.5) * 36, a: 0.8, grow: 0.6, rot: R() * 6, spin: (R() - 0.5) * 6 }); } }
-    if ((p.flyT > 0 || p.dashRemaining > 0) && !reduced) { const sp = Math.hypot(p.vx, p.vy); this.trailT += dt; if (sp > 40 && this.trailT > 0.045) { this.trailT = 0; const a = Math.atan2(p.vy, p.vx); this.pop('sf_lance', p.x - Math.cos(a) * 14, ly + MID - Math.sin(a) * 14, 120, 0.3, { rot: a, origin: [1, 0.5], a: 0.65, grow: 1.1, depth: 9.2 }); this.pop('sm_feather', p.x, ly + MID, 18, 0.5, { rot: a, vx: -p.vx * 0.15, vy: -p.vy * 0.15, a: 0.7, grow: 0.6, depth: 9.1 }); } }   // a pearl streak and shed feathers follow the glide and the dash
+    if ((p.flyT > 0 || p.dashRemaining > 0) && !reduced) { const sp = Math.hypot(p.vx, p.vy); this.trailT += dt; if (sp > 40 && this.trailT > 0.045) { this.trailT = 0; const a = Math.atan2(p.vy, p.vx); this.pop('sf_lance', p.x - Math.cos(a) * 14, ly + MID - Math.sin(a) * 14, 120, 0.3, { rot: a, origin: [1, 0.5], a: 0.65, grow: 1.1, depth: 9.2 }); } }   // a pearl streak and shed feathers follow the glide and the dash
     this.phoenix(dt, s, reduced, ly, false);
-  }
-  /** The mantle is built from individual ImageGen feathers on a fan at each shoulder (geometry, not a flat panel): each feather has its own length, fan angle and sway phase, lags behind movement, and trails back when running or gliding. */
-  private readonly mf: Phaser.GameObjects.Image[] = [];
-  private mantle(vx: number, bx: number, by: number, f: number, back: boolean, moving: boolean, alive: boolean) {
-    const FEATHER = [{ n: 'mf_1', len: 64, ang: 0.52 }, { n: 'mf_3', len: 54, ang: 0.86 }, { n: 'mf_6', len: 46, ang: 1.18 }, { n: 'mf_4', len: 34, ang: 1.5 }, { n: 'mf_5', len: 78, ang: 0.28 }];
-    const drift = Math.max(-0.5, Math.min(0.5, -vx * 0.0014)), run = moving ? 0.12 : 0;
-    const SHOW = back ? [4, 0, 1] : [0, 1, 2, 3, 4];   // from behind: three long tidy feathers per side, not a tangle
-    for (let side = 0; side < 2; side++) for (let i = 0; i < FEATHER.length; i++) {
-      const F = FEATHER[i], k = side * FEATHER.length + i; let im = this.mf[k]; if (!SHOW.includes(i)) { im?.setVisible(false); continue; }
-      if (!im) { if (!this.has(F.n)) continue; im = this.scene.add.image(0, 0, seraKey(F.n)).setBlendMode(NORMAL); this.mf[k] = im; }
-      const sgn = side === 0 ? -1 : 1, phase = this.clock * 2.4 + i * 0.8 + side, rot = Math.PI + sgn * (F.ang + 0.06 * Math.sin(phase) + run) + drift * (0.6 + 0.12 * i);   // feather tip points down and out from the shoulder
-      const w = F.len * (im.width / im.height); im.setVisible(alive).setOrigin(0.5, 0.97).setPosition(bx + sgn * 13 - f * 6, by - 30).setRotation(rot).setDisplaySize(w, F.len).setAlpha(0.95).setDepth(back ? 10.3 : 8.9);
-    }
   }
   private bolt(s: GameState, reduced: boolean) {
     const list = s.hx.bolts.filter(b => b.kind === 'feather'), live = new Set<number>();
@@ -128,7 +111,7 @@ export class SeraFx {
     for (let i = list.length; i < this.bolts.length; i++) this.bolts[i]?.setVisible(false);
     for (const id of this.boltHits.keys()) if (!live.has(id)) this.boltHits.delete(id);
   }
-  private hidePresence() { for (const im of this.mf) im?.setVisible(false); for (const k of ['halo', 'orbit0', 'orbit1', 'orbit2', 'orb', 'proj', 'diagram'] as Slot[]) this.slots[k]?.setVisible(false); for (const b of this.bolts) b.setVisible(false); this.hidePhoenix(); }
+  private hidePresence() { for (const k of ['halo', 'orbit0', 'orbit1', 'orbit2', 'orb', 'proj', 'diagram'] as Slot[]) this.slots[k]?.setVisible(false); for (const b of this.bolts) b.setVisible(false); this.hidePhoenix(); }
   private hidePhoenix() { for (const k of ['phTail', 'phChest', 'phHead', 'phWingA', 'phWingB', 'phWing2A', 'phWing2B'] as Slot[]) this.slots[k]?.setVisible(false); }
   private hideLive() { this.hidePresence(); this.slots.front?.setVisible(false); }
   /** Eventide Phoenix (Overdrive): long articulated wings, a luminous chest, a crested head and a trailing constellation tail behind Sora; his real hits flick the wing feathers */
@@ -199,5 +182,5 @@ export class SeraFx {
       default: break;
     }
   }
-  destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of Object.values(this.slots)) im?.destroy(); for (const b of this.bolts) b?.destroy(); for (const m of this.mf) m?.destroy(); this.g.destroy(); }
+  destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of Object.values(this.slots)) im?.destroy(); for (const b of this.bolts) b?.destroy(); this.g.destroy(); }
 }
