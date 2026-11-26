@@ -7,6 +7,7 @@ import { ASCEND } from '../content/heroKits';
 import { formChoices, activateForm } from '../sim/FormSystem';
 import { seraShift, tracesOf } from '../sim/SoraSeraph';
 import { damageEnemy } from '../sim/CombatSystem';
+import { dashMax } from '../sim/MovementSystem';
 import { SLOT_KEYS } from '../sim/CoopSystem';
 import { migrateB22, blankB22 } from '../b22/save';
 import { withEverythingUnlocked } from '../sim/SaveSystem';
@@ -163,5 +164,20 @@ describe('flight, Overdrive and integration hazards', () => {
   it('Azure Sovereign and Ren are untouched by form 2 existing', () => {
     const { sim, s } = sora(1, [[1300, 800]]); sim.step(DT, idle({ q: true })); expect(s.hx.act?.act).toBe('azure_prison'); collect(sim, 1.5); sim.step(DT, idle({ beam: true })); expect(s.hx.act?.act).toBe('heavens_spear');
     const r = new Simulation(7, 'gloam', false, false, { ...NO_CONFIG, hero: 'ren', heroForm: true, renF2: true }); r.state.player.form = 2; r.state.player.drive = 100; r.state.spawnTimer = 1e9; r.state.enemies = [mob(1, 1200, 800)]; r.state.player.x = 1100; r.state.player.y = 800; r.step(DT, idle({ q: true })); expect(r.state.hx.act?.act).toBe('eclipse_maul');
+  });
+});
+
+describe('B35 fixes', () => {
+  it('both second forms carry two dash charges, the first forms keep one', () => {
+    expect(dashMax(sora(2).s)).toBe(2); expect(dashMax(sora(1).s)).toBe(1);
+    const r = new Simulation(7, 'gloam', false, false, { ...NO_CONFIG, hero: 'ren', heroForm: true, renF2: true }); r.state.player.form = 2; expect(dashMax(r.state)).toBe(2); r.state.player.form = 1; expect(dashMax(r.state)).toBe(1);
+  });
+  it('a Sora needle chases the foe it was aimed at and never slips past a moving or tiny one', () => {
+    const { sim, s } = sora(0, [[1400, 800]]); s.player.attackClock = 0; s.enemies[0].radius = 8; s.enemies[0].speed = 0; const hp = s.enemies[0].hp;
+    for (let k = 0; k < 120; k++) { s.enemies[0].y = 800 + Math.sin(k / 6) * 90; sim.step(DT, idle()); }
+    expect(s.enemies[0].hp).toBeLessThan(hp);
+  });
+  it('fast bolts are swept: a thin bolt cannot tunnel through a small foe between two ticks', () => {
+    const { sim, s } = sora(0, [[1200, 800]]); s.enemies[0].radius = 4; s.hx.bolts.push({ id: 9001, x: 1180, y: 800, vx: 3000, vy: 0, ttl: 1, damage: 5, radius: 2, kind: 'needle', pierce: 0, hits: [], homing: 0, form: 0 }); const hp = s.enemies[0].hp; sim.step(DT, idle()); expect(s.enemies[0].hp).toBeLessThan(hp);
   });
 });

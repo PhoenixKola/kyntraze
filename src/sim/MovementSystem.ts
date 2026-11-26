@@ -12,8 +12,8 @@ import { SORA_FLY } from '../content/soraCombat';
 import { SERA_FLY } from '../content/soraSeraph';
 import { VEX_FLY } from '../content/vexCombat';
 import { ASCEND } from '../content/heroKits';
-/** Dash charges: Kai Form II = 2, Form III = 3, Vex Form II (last form) = 2, everything else 1. */
-export function dashMax(state: GameState): number { const f = state.player.form; return state.hero === 'kai' ? (f === 3 ? 3 : f === 2 ? 2 : 1) : state.hero === 'vex' && f === 2 ? 2 : 1; }
+/** Dash charges: Kai Form II = 2, Form III = 3, Vex Form II = 2, Ren Ashen Eclipse = 2, Sora Eventide Seraph = 2, everything else 1. */
+export function dashMax(state: GameState): number { const f = state.player.form; return state.hero === 'kai' ? (f === 3 ? 3 : f === 2 ? 2 : 1) : (state.hero === 'vex' || state.hero === 'ren' || state.hero === 'sora') && f === 2 ? 2 : 1; }
 export function movePlayer(state: GameState, input: InputState, dt: number) {
   const p = state.player;
   const direction = normalize(input.x, input.y);

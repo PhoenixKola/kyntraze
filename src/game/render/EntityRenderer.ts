@@ -283,7 +283,7 @@ export class EntityRenderer {
       if (hitFlash) { this.hero.setTint(0xffeef2); this.hero.tintMode = Phaser.TintModes.FILL; } else this.hero.clearTint();   // Voidheart Exile is its own recoloured sheet set (vexf2-*), not a tint
       if (pose.legs !== null) {
         const lf = clipFrame(m, 'RunLower'), lkey = heroTextureKey(hero, pose.facing, 'RunLower', look); if (this.legs.texture.key !== lkey) this.legs.setTexture(lkey);
-        this.legs.setFrame(pose.legs).setOrigin(lf.ox / lf.w, lf.oy / lf.h).setPosition(x, y).setAlpha(alpha).setVisible(true); if (hitFlash) { this.legs.setTint(0xffeef2); this.legs.tintMode = Phaser.TintModes.FILL; } else this.legs.clearTint();
+        this.legs.setFrame(pose.legs).setOrigin(lf.ox / lf.w, lf.oy / lf.h).setPosition(x, y - (hero === 'ren' && pose.facing === 'north' ? Math.round(3 * this.baseScale) : 0)).setAlpha(alpha).setVisible(true); if (hitFlash) { this.legs.setTint(0xffeef2); this.legs.tintMode = Phaser.TintModes.FILL; } else this.legs.clearTint();
       } else this.legs.setVisible(false);
       this.hairStep(state, dt, hero, key, pose.frame, pose.clip, hurt, reduced);
       this.applyMotion(state, dt, hero, reduced, hurt, p.dashRemaining > 0, pose.clip, pose.facing);
@@ -316,12 +316,12 @@ export class EntityRenderer {
   }
   /** Afterimages behind a rushing / dashing hero: pooled copies of the current frame, additive and tinted (crimson for Ren, blue-white for Sora), fading in ~0.28 s. */
   private ghostTrail(state: GameState, dt: number, x: number, y: number, hero: 'ren' | 'sora' | 'kai', reduced: boolean) {
-    const p = state.player, surge = state.hero === 'kai' && (state.hx.kk?.surge ?? 0) > 0 && Math.hypot(p.vx, p.vy) > 20, fast = surge || (state.hero !== 'kai' && (state.hx.act?.act === 'meteor_rush' || (state.hero === 'ren' && p.form >= 1 && (state.hx.act?.act === 'scarlet_rampage' || p.flyT > 0)) || p.dashRemaining > 0)), cap = reduced ? 3 : 8;
+    const p = state.player, surge = state.hero === 'kai' && (state.hx.kk?.surge ?? 0) > 0 && Math.hypot(p.vx, p.vy) > 20, fast = surge || (state.hero !== 'kai' && (state.hx.act?.act === 'meteor_rush' || ((state.hero === 'ren' || state.hero === 'sora') && p.form >= 1 && (state.hx.act?.act === 'scarlet_rampage' || p.flyT > 0)) || p.dashRemaining > 0)), cap = reduced ? 3 : 8;
     this.ghostClock -= dt;
     if (fast && this.ghostClock <= 0 && this.hero.visible) {
       this.ghostClock = p.form ? 0.028 : 0.04;
       let g = this.ghosts.find(q => q.life <= 0); if (!g && this.ghosts.length < cap) { g = { spr: this.scene.add.sprite(0, 0, this.hairLayer.srcKey || this.hero.texture.key, 0).setScale(this.hero.scaleX).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.2), life: 0 }; this.ghosts.push(g); }
-      if (g) { g.life = 0.28; g.spr.setTexture(this.hairLayer.srcKey || this.hero.texture.key, this.hairLayer.srcFrame).setOrigin(this.hero.originX, this.hero.originY).setPosition(x, y).setTint(surge ? 0x4fb8ff : state.hero === 'vex' ? vexTint(state.player.form).ghost : hero === 'ren' ? (state.player.form === 2 ? 0xff9a3c : 0xff3a2e) : state.player.form === 2 ? 0xf2c4e0 : 0x6fc8ff); g.spr.tintMode = Phaser.TintModes.FILL; }
+      if (g) { g.life = 0.28; g.spr.setTexture(this.hairLayer.srcKey || this.hero.texture.key, this.hairLayer.srcFrame).setOrigin(this.hero.originX, this.hero.originY).setPosition(x, y).setTint(surge ? 0x4fb8ff : state.hero === 'vex' ? vexTint(state.player.form).ghost : hero === 'ren' ? (state.player.form === 2 ? 0xc8793a : 0xff3a2e) : state.player.form === 2 ? 0xf0b8d8 : 0x6fc8ff); g.spr.tintMode = Phaser.TintModes.FILL; }
     }
     for (const g of this.ghosts) { if (g.life > 0) { g.life -= dt; g.spr.setVisible(g.life > 0).setAlpha(Math.max(0, g.life / 0.28) * (p.form ? 0.55 : 0.4)); } else g.spr.setVisible(false); }
   }

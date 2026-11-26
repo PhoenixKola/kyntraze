@@ -17,35 +17,49 @@ const base = ASSET_BASE;
 
 /** Victory and defeat share one structure (stats, build, actions) so the flow is the same; victory adds the key art, crest and a gold treatment. */
 export function ResultsScreen({ s, onRetry, onHome, onProgress, onEndless, chron }: Props) {
-  const won = s.phase === 'victory', rw = s.reward;
-  return <div className={`overlay results-overlay ${won ? 'won' : 'lost'}`} data-testid="results-screen" data-outcome={won ? 'victory' : 'defeat'}>
+  const won = s.phase === 'victory', rw = s.reward, canEndless = won && !!s.asc?.canEndless && !!onEndless, chronNext = !!(chron && won && chron.onNext);
+  const heroName = HERO_BY_ID[s.hero].name;
+  const stats: [string, string | number, string?][] = [['TIME', roundedTime(s.seconds)], ['LEVEL', s.level], ['ELIMS', s.kills], ['BOSSES', `${s.bosses}/2`], ['ARENA', s.arenaName.replace(/^THE /, ''), 'wide'], ['SEED', s.seed, 'wide']];
+  return <div className={`overlay results-overlay rx ${won ? 'won' : 'lost'}`} data-testid="results-screen" data-outcome={won ? 'victory' : 'defeat'}>
+    <div className="rx-bg" style={{ backgroundImage: `url(${base}ui/${won ? 'victory-key' : 'defeat-key'}.webp)` }} aria-hidden="true"/><div className="rx-shade" aria-hidden="true"/><div className="rx-motes" aria-hidden="true"><i/><i/><i/><i/><i/><i/></div>
     {won && <VictoryPoseView hero={s.hero} form={s.bestForm}/>}
-    {won && <div className="res-art" style={{ backgroundImage: `url(${base}ui/victory-key.webp)` }} aria-hidden="true"/>}
-    <section className={`modal compact-modal result-modal ${won ? 'result-win' : ''}`} role="dialog" aria-modal="true" aria-labelledby="result-title">
+    <section className="rx-panel" role="dialog" aria-modal="true" aria-labelledby="result-title">
       <ModalX onClose={onHome} label="Back to title"/>
-      <div className="result-scroll">
-      {won && <img className="res-crest" src={`${base}ui/victory-crest.png`} alt="" draggable={false}/>}
-      <p className="eyebrow" data-testid="result-hero">{chron ? `${HERO_BY_ID[s.hero].name} · ${chron.kicker}`.replace(/^(\w+) ·  · /i, '$1 · ') : won ? 'THE NULL SERAPH IS DOWN' : 'CONNECTION TO THE ZONE LOST'}</p>
-      {s.b22Crest && <p className="res-b22crest" data-testid="res-b22crest"><img src={`${base}ui/crests/${s.b22Crest}_s.png`} alt="" draggable={false} onError={e => { e.currentTarget.style.display = 'none'; }}/>EQUIPPED CREST · {COSMETICS.find(c => c.id === s.b22Crest)?.name.toUpperCase() ?? ''}</p>}
-      <h2 id="result-title">{chron ? (won ? 'CHAPTER COMPLETE' : 'MISSION FAILED') : won ? 'THE FRACTURE HOLDS' : 'RUN TERMINATED'}</h2>
-      {chron ? <p className="res-sub" data-testid="chron-result">{chron.name}{won ? (chron.reward > 0 ? ` · first clear +${chron.reward} Marks` : ' · replay, no second reward') : ' · nothing is lost. Try again, or step back to the map.'}</p> : won && <p className="res-sub">Kai sealed the rift. The zone falls quiet.</p>}
-      {chron && <p className="results-chron" data-testid="chron-reward"><b>{chron.name}</b>{won ? (chron.reward > 0 ? ` · first clear: +${chron.reward} Marks` : ' · replay: no second reward') : ' · the mission was lost. Nothing is taken; try again or return to the map.'}</p>}
-      <div className="score-number">{s.score.toLocaleString()} <span>POINTS</span></div>
-      <div className="result-grid res-grid"><div>TIME <strong>{roundedTime(s.seconds)}</strong></div><div>LEVEL <strong>{s.level}</strong></div><div>ELIMINATIONS <strong>{s.kills}</strong></div><div>BOSSES <strong>{s.bosses}/2</strong></div><div>ARENA <strong className="res-arena">{s.arenaName.replace(/^THE /, '')}</strong></div><div>SEED <strong>{s.seed}</strong></div></div>
-      {s.lf && (s.lf.summary.hist.length > 0 || s.lf.summary.stats.discovered > 0) && <section className="lf-sum" data-testid="lf-summary"><h4>LIVING FRACTURES · {s.lf.summary.stats.won} won · {s.lf.summary.stats.failed + s.lf.summary.stats.expired} missed{s.lf.summary.stats.relics ? ` · ${s.lf.summary.stats.relics} relic${s.lf.summary.stats.relics > 1 ? 's' : ''}` : ''}</h4><ul>{s.lf.summary.hist.slice(-5).map((h, i) => <li key={i} className={h.outcome}><b>{LF_COPY[h.kind].name}</b><em>{h.outcome.toUpperCase()}</em><span>{h.note}</span></li>)}</ul></section>}
-      {rw && <div className="rw-panel" data-testid="reward-panel">
-        <header><span>{CURRENCY.name} EARNED</span><b data-testid="reward-total">+{rw.total}</b><MarksBadge marks={rw.balance} crest={s.crest}/></header>
-        <ul>{rw.lines.map(l => <li key={l.label}><span>{l.label}</span><b>+{l.marks}</b></li>)}</ul>
-        {(rw.newFeats.length > 0 || rw.unlocked.length > 0) && <div className="rw-new">{rw.newFeats.map(f => <span key={f} className="rw-chip feat">★ {FEAT_BY_ID[f].name}</span>)}{rw.unlocked.map(u => <span key={u} className="rw-chip unlock">NEW: {UNLOCK_BY_ID[u].name}</span>)}</div>}
-        {rw.contract && <p className="rw-contract">{CONTRACT_BY_ID[rw.contract].name}: {rw.contractDone ? 'COMPLETE' : 'NOT COMPLETED · bonus pays on victory'}</p>}
-        {rw.firstRun && <p className="rw-intro">Marks are <b>permanent</b>. XP and upgrades reset every run; spend marks in the Armory on starting boons, tools and contracts.</p>}
-      </div>}
-      <BuildStrip owned={s.owned} title="BUILD"/>
+      <i className="rx-corner a" aria-hidden="true"/><i className="rx-corner b" aria-hidden="true"/><i className="rx-corner c" aria-hidden="true"/><i className="rx-corner d" aria-hidden="true"/>
+      <header className="rx-head">
+        <img className="rx-crest" src={`${base}ui/${won ? 'victory-crest' : 'defeat-crest'}.png`} alt="" draggable={false}/>
+        <div className="rx-titles">
+          <p className="eyebrow rx-eyebrow" data-testid="result-hero">{chron ? `${heroName} · ${chron.kicker}`.replace(/^(\w+) ·  · /i, '$1 · ') : won ? 'THE NULL SERAPH IS DOWN' : 'CONNECTION TO THE ZONE LOST'}</p>
+          <h2 id="result-title" className="rx-title">{chron ? (won ? 'CHAPTER COMPLETE' : 'MISSION FAILED') : won ? 'THE FRACTURE HOLDS' : 'RUN TERMINATED'}</h2>
+          {chron ? <p className="rx-sub" data-testid="chron-result">{chron.name}{won ? (chron.reward > 0 ? ` · first clear +${chron.reward} Marks` : ' · replay, no second reward') : ' · nothing is lost. Try again, or step back to the map.'}</p> : won && <p className="rx-sub">{heroName} sealed the rift. The zone falls quiet.</p>}
+          {s.b22Crest && <p className="res-b22crest rx-equipped" data-testid="res-b22crest"><img src={`${base}ui/crests/${s.b22Crest}_s.png`} alt="" draggable={false} onError={e => { e.currentTarget.style.display = 'none'; }}/>EQUIPPED CREST · {COSMETICS.find(c => c.id === s.b22Crest)?.name.toUpperCase() ?? ''}</p>}
+        </div>
+        <div className="rx-score"><span className="rx-score-label">SCORE</span><b className="rx-score-num">{s.score.toLocaleString()}</b><span className="rx-score-unit">POINTS</span></div>
+      </header>
+      <div className="rx-scroll">
+        {chron && <p className="rx-chron" data-testid="chron-reward"><b>{chron.name}</b>{won ? (chron.reward > 0 ? ` · first clear: +${chron.reward} Marks` : ' · replay: no second reward') : ' · the mission was lost. Nothing is taken; try again or return to the map.'}</p>}
+        <div className="rx-stats">{stats.map(([k, v, w]) => <div key={k} className={`rx-stat ${w ?? ''}`} title={k === 'ELIMS' ? 'ELIMINATIONS' : k}><span>{k}</span><strong className={k === 'ARENA' ? 'res-arena' : ''}>{v}</strong></div>)}</div>
+        {s.lf && (s.lf.summary.hist.length > 0 || s.lf.summary.stats.discovered > 0) && <section className="lf-sum rx-lf" data-testid="lf-summary"><h4>LIVING FRACTURES · {s.lf.summary.stats.won} won · {s.lf.summary.stats.failed + s.lf.summary.stats.expired} missed{s.lf.summary.stats.relics ? ` · ${s.lf.summary.stats.relics} relic${s.lf.summary.stats.relics > 1 ? 's' : ''}` : ''}</h4><ul>{s.lf.summary.hist.slice(-5).map((h, i) => <li key={i} className={h.outcome}><b>{LF_COPY[h.kind].name}</b><em>{h.outcome.toUpperCase()}</em><span>{h.note}</span></li>)}</ul></section>}
+        {rw && <div className="rw-panel rx-rw" data-testid="reward-panel">
+          <header><span>{CURRENCY.name} EARNED</span><b data-testid="reward-total">+{rw.total}</b><MarksBadge marks={rw.balance} crest={s.crest}/></header>
+          <ul>{rw.lines.map(l => <li key={l.label}><span>{l.label}</span><b>+{l.marks}</b></li>)}</ul>
+          {(rw.newFeats.length > 0 || rw.unlocked.length > 0) && <div className="rw-new">{rw.newFeats.map(f => <span key={f} className="rw-chip feat">★ {FEAT_BY_ID[f].name}</span>)}{rw.unlocked.map(u => <span key={u} className="rw-chip unlock">NEW: {UNLOCK_BY_ID[u].name}</span>)}</div>}
+          {rw.contract && <p className="rw-contract">{CONTRACT_BY_ID[rw.contract].name}: {rw.contractDone ? 'COMPLETE' : 'NOT COMPLETED · bonus pays on victory'}</p>}
+          {rw.firstRun && <p className="rw-intro">Marks are <b>permanent</b>. XP and upgrades reset every run; spend marks in the Armory on starting boons, tools and contracts.</p>}
+        </div>}
+        <BuildStrip owned={s.owned} title="BUILD"/>
       </div>
-      <div className="result-foot">
-      <div className="stacked-actions">{chron && won && chron.onNext && <button className="primary-button" onClick={chron.onNext} data-testid="chron-next" data-pad-default>{chron.nextLabel ?? 'NEXT CHAPTER'} <span>→</span></button>}{won && s.asc?.canEndless && onEndless && <button className="primary-button" onClick={onEndless} data-testid="continue-endless">CONTINUE · ENDLESS <span>∞</span></button>}<button className={(won && s.asc?.canEndless) || (chron && won && chron.onNext) ? 'outlined-button' : 'primary-button'} onClick={onRetry} data-pad-default={chron && won && chron.onNext ? undefined : ''} data-pad-start data-testid="results-retry">{chron ? (won ? 'REPLAY MISSION' : 'RETRY MISSION') : won ? 'RUN IT AGAIN' : 'RETRY SAME SEED'} <span>↗</span></button>{chron && <button className="outlined-button" onClick={chron.onMap} data-testid="chron-map">CHRONICLES</button>}<button className="outlined-button" onClick={onProgress} data-testid="results-armory">ARMORY{rw && rw.balance > 0 ? ` · ${rw.balance}` : ''}</button><button className="outlined-button" onClick={onHome}>RETURN TO TITLE</button></div>
-      <HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'ENTER', pad: 'START', label: 'RETRY' }]}/>
-      </div>
+      <footer className="rx-foot">
+        <div className="rx-actions">
+          {chronNext && <button className="rx-btn gold" onClick={chron!.onNext} data-testid="chron-next" data-pad-default><b>{chron!.nextLabel ?? 'NEXT CHAPTER'}</b><span>→</span></button>}
+          {canEndless && <button className="rx-btn gold" onClick={onEndless} data-testid="continue-endless"><b>CONTINUE · ENDLESS</b><span>∞</span></button>}
+          <button className={`rx-btn ${canEndless || chronNext ? 'ghost' : 'gold'}`} onClick={onRetry} data-pad-default={chronNext ? undefined : ''} data-pad-start data-testid="results-retry"><b>{chron ? (won ? 'REPLAY MISSION' : 'RETRY MISSION') : won ? 'RUN IT AGAIN' : 'RETRY SAME SEED'}</b><span>↗</span></button>
+          {chron && <button className="rx-btn ghost" onClick={chron.onMap} data-testid="chron-map"><b>CHRONICLES</b></button>}
+          <button className="rx-btn ghost" onClick={onProgress} data-testid="results-armory"><b>ARMORY{rw && rw.balance > 0 ? ` · ${rw.balance}` : ''}</b></button>
+          <button className="rx-btn ghost" onClick={onHome}><b>RETURN TO TITLE</b></button>
+        </div>
+        <HintBar hints={[{ key: 'ENTER', pad: 'A', label: 'SELECT' }, { key: 'ENTER', pad: 'START', label: 'RETRY' }]}/>
+      </footer>
     </section>
   </div>;
 }

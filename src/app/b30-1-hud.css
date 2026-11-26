@@ -85,3 +85,9 @@
 .od-sigil { position: absolute; right: -16%; top: -22%; width: 78%; height: 38%; z-index: 7; pointer-events: none; background-repeat: no-repeat; background-size: 330% auto; background-position: 100% 46%; filter: drop-shadow(0 0 calc(5 * var(--u)) var(--hf)); animation: sig-breathe 2.4s ease-in-out infinite alternate; }
 @keyframes sig-breathe { from { opacity: .75; transform: translateY(1px); } to { opacity: 1; transform: translateY(-2px); } }
 @media (prefers-reduced-motion: reduce) { .od-sigil { animation: none; } }
+
+/* B35: Eclipse Nine-Tailed Fox and Eventide Phoenix mantles reuse the Overdrive fox / phoenix motion */
+.b-ashfox .seg.tail { animation-duration: .6s, 1.5s; } .b-ashfox .seg.head { animation-name: m-in, m-claw; animation-duration: .6s, 2.2s; }
+.b-eventide .seg.head { animation-name: m-in, m-wing; animation-duration: .6s, 2.1s; } .b-eventide .seg.body { animation-name: m-in, m-wing; animation-duration: .6s, 2.6s; }
+.hud-slots[data-form='ren2'] { --hf: #ff9a3c; } .hud-slots[data-form='sora2'] { --hf: #f0b8d8; }
+.hud-health.solo[data-form='ren2'] { --hf: #ff9a3c; } .hud-health.solo[data-form='sora2'] { --hf: #f0b8d8; }

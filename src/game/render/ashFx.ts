@@ -16,11 +16,11 @@ const EMBER = 0xff9a3c, IVORY = 0xf0e2c8;
 interface Pop { im: Phaser.GameObjects.Image; t: number; dur: number; w: number; grow: number; vx: number; vy: number; spin: number; fade: 'out' | 'inout' | 'snap'; a: number; sy: number }
 interface PopOpt { depth?: number; blend?: Phaser.BlendModes; rot?: number; origin?: [number, number]; sy?: number; vx?: number; vy?: number; spin?: number; grow?: number; fade?: 'out' | 'inout' | 'snap'; a?: number; flip?: boolean }
 const MAX_POPS = 130;
-type Slot = 'foxBody' | 'foxHead' | 'foxTails' | 'foxStream' | 'core' | 'gauntlet';
+type Slot = 'foxBody' | 'foxHead' | 'foxTails' | 'foxStream' | 'core' | 'gauntlet' | 'ghost';
 
 export class AshFx {
   private pops: Pop[] = []; private g: Phaser.GameObjects.Graphics; private lastEvent = 0; private readonly director = new ImpactDirector(); private shake = 0; private clock = 0;
-  private foxBody: Phaser.GameObjects.Image | null = null; private foxHead: Phaser.GameObjects.Image | null = null; private foxTails: Phaser.GameObjects.Image | null = null; private foxStream: Phaser.GameObjects.Image | null = null; private core: Phaser.GameObjects.Image | null = null; private gauntlet: Phaser.GameObjects.Image | null = null;
+  private ghost: Phaser.GameObjects.Image | null = null; private suck = 0; private foxBody: Phaser.GameObjects.Image | null = null; private foxHead: Phaser.GameObjects.Image | null = null; private foxTails: Phaser.GameObjects.Image | null = null; private foxStream: Phaser.GameObjects.Image | null = null; private core: Phaser.GameObjects.Image | null = null; private gauntlet: Phaser.GameObjects.Image | null = null;
   private foxA = 0; private side = 1; private lx = 0; private ly = 0; private aura = 0; private jet = 0;
   constructor(private readonly scene: Phaser.Scene, private readonly events: boolean) { this.g = scene.add.graphics().setDepth(3.66); }
   takeHitstop() { return this.director.take(); }
@@ -72,8 +72,13 @@ export class AshFx {
       const u = Math.min(1, c.t / ASH_R.windup), hw = ASH_R.halfWidth * s.mods.sphereRadius, nx = -c.dirY, ny = c.dirX;
       this.g.lineStyle(2, EMBER, 0.35 + 0.35 * u); this.g.beginPath(); this.g.moveTo(c.sx + nx * hw, c.sy + ny * hw + 16); this.g.lineTo(c.tx + nx * hw, c.ty + ny * hw + 16); this.g.moveTo(c.sx - nx * hw, c.sy - ny * hw + 16); this.g.lineTo(c.tx - nx * hw, c.ty - ny * hw + 16); this.g.strokePath();   // the lane the fox will cross
       const RR = ASH_R.ruptureR * s.mods.sphereRadius; this.g.lineStyle(2.5, EMBER, 0.25 + 0.4 * u).strokeEllipse(c.tx, c.ty + 14, RR * 2, RR * 1.05);
-      const h = hand(s, c.dirX, c.dirY, 22, 'orb'), core = this.img('core', 'af_core'); if (core) core.setVisible(true).setPosition(h.x, h.y).setDepth(11.6).setDisplaySize(30 + 90 * u, (30 + 90 * u) * 0.79).setAlpha(0.95);   // the eclipse core crushed between the fists
-    } else this.core?.setVisible(false);
+      const h = hand(s, c.dirX, c.dirY, 22, 'orb'), core = this.img('core', 'af_core'), ease = u * u * (3 - 2 * u);
+      if (core) core.setVisible(true).setPosition(h.x, h.y).setDepth(11.6).setDisplaySize(36 + 150 * ease, (36 + 150 * ease) * 0.79).setAlpha(0.95);   // the eclipse core crushed between the fists, growing with the real windup
+      // the world answers the build-up: a spectral fox gathers at the head of the lane, ash and embers are drawn inward, the ground ring under Ren tightens, and the rupture circle fills with a crater glow
+      const fh = this.img('ghost', 'ef_head'); if (fh && !lite) fh.setVisible(true).setPosition(c.sx + c.dirX * 30, c.sy + c.dirY * 30 + MID).setRotation(0).setFlipX(c.dirX < 0).setDepth(9.5).setDisplaySize(70 + 90 * ease, (70 + 90 * ease) * (fh.height / fh.width)).setAlpha(0.18 + 0.5 * ease);
+      this.suck += dt; if (!lite && this.suck > 0.04) { this.suck = 0; const a = Math.random() * Math.PI * 2, r = 120 + Math.random() * 90; this.pop('af_cinders', h.x + Math.cos(a) * r, h.y + Math.sin(a) * r * 0.7, 30 + Math.random() * 22, 0.34, { depth: 11.3, vx: -Math.cos(a) * r / 0.34, vy: -Math.sin(a) * r * 0.7 / 0.34, a: 0.9, grow: 0.4 }); }
+      this.g.lineStyle(3, IVORY, 0.25 + 0.4 * u).strokeEllipse(p.x, p.y + GY + 2, 240 * (1 - 0.6 * ease), 76 * (1 - 0.6 * ease)); this.g.fillStyle(EMBER, 0.06 + 0.12 * u).fillEllipse(c.tx, c.ty + 14, RR * 2 * (0.4 + 0.6 * ease), RR * 1.05 * (0.4 + 0.6 * ease));
+    } else { this.core?.setVisible(false); this.ghost?.setVisible(false); }
     if (c?.act === 'eclipse_fang' && !c.released) {   // gauntlet charge: the claw grows with the real tier
       const h = hand(s, c.dirX, c.dirY, 24, 'orb'), want = c.tier >= 3 ? 'af_bite' : 'af_claws', g = this.img('gauntlet', want, ADD);
       if (g) { if (g.texture.key !== ashKey(want)) g.setTexture(ashKey(want)); const w = 30 + 26 * c.tier + 8 * Math.sin(this.clock * 18); g.setVisible(true).setPosition(h.x, h.y).setRotation(ang(c.dirX, c.dirY) + (c.tier >= 3 ? Math.PI / 2 : 0)).setDepth(11.6).setDisplaySize(w, w * (g.height / g.width)).setAlpha(0.6 + 0.12 * c.tier); }
@@ -81,11 +86,12 @@ export class AshFx {
     } else this.gauntlet?.setVisible(false);
     // ---- flight: ember jets under the boots
     if (p.flyT > 0 && !lite) { this.jet += dt; if (this.jet > 0.05) { this.jet = 0; this.pop('af_cinders', p.x + (R() - 0.5) * 12, p.y + GY - 4, 30, 0.35, { depth: 9, vy: 120 + R() * 60, vx: (R() - 0.5) * 30, a: 0.8, grow: 0.5 }); } }
+    if ((p.flyT > 0 || p.dashRemaining > 0) && !reduced) { const sp = Math.hypot(p.vx, p.vy); this.jet += dt * 0.5; if (sp > 40 && this.jet > 0.04) { this.jet = 0; const a = Math.atan2(p.vy, p.vx); this.pop('af_tail', p.x - Math.cos(a) * 10, p.y + MID - Math.sin(a) * 10, 150, 0.32, { rot: a + Math.PI, origin: [0.05, 0.5], a: 0.6, grow: 1.1, blend: NORMAL, depth: 9.2 }); } }   // an ash-tail streak follows the pounce and the flight
     // ---- Eclipse Nine-Tailed Fox (Overdrive): a layered beast behind Ren; paws and jaws strike with his real hits
     this.fox(dt, s, reduced);
   }
   private hideFox() { this.foxBody?.setVisible(false); this.foxHead?.setVisible(false); this.foxTails?.setVisible(false); this.foxStream?.setVisible(false); }
-  private hideLive() { this.hideFox(); this.core?.setVisible(false); this.gauntlet?.setVisible(false); }
+  private hideLive() { this.hideFox(); this.core?.setVisible(false); this.gauntlet?.setVisible(false); this.ghost?.setVisible(false); }
   private fox(dt: number, s: GameState, reduced: boolean) {
     const p = s.player, on = p.odT > 0 && p.hp > 0; this.foxA += ((on ? 1 : 0) - this.foxA) * Math.min(1, dt * (on ? 6 : 4));
     if (this.foxA < 0.02) { this.hideFox(); return; }
@@ -97,7 +103,7 @@ export class AshFx {
     set(tails, bx - f * 34, by - 10 + sway * 4, 190, 0.7 * A * (moving ? 0.2 : 1), 8.9, f, sway * 0.04, 0.82, 0.5);
     set(stream, bx - f * 16, by - 4, 230, 0.75 * A * (moving ? 1 : 0), 8.95, f, 0, 0.92, 0.5);
     set(body, bx - f * 8, by + 10, 200, 0.62 * A, 9.0, f, 0, 0.5, 0.55);
-    set(head, bx + f * 40, by - 46 + Math.sin(this.clock * 2.4) * 3, 118, 0.8 * A, 10.9, f, 0, 0.5, 0.5);
+    set(head, bx + f * 40, by - 46 + Math.sin(this.clock * 2.4) * 3, 118, 0.8 * A, 9.55, f, 0, 0.5, 0.5);
   }
   private onEvent(ev: AbilityEvent, s: GameState, reduced: boolean) {
     const { x, y } = ev, n = ev.n ?? 0, kind = ev.kind, hits = (n >> 8) & 63, p = s.player, od = (n & 16384) !== 0, R = Math.random, tx = ev.tx ?? x, ty = ev.ty ?? y;
@@ -133,6 +139,7 @@ export class AshFx {
         if (hits > 0) { this.heavy('finisher', reduced); this.kick(0.0056, reduced); if (od && !reduced) this.pop('ef_jaw', x, y + MID, 240, 0.35, { blend: NORMAL, a: 0.85, grow: 1.2, depth: 11.4 }); }
         break;
       }
+      case 'ash_r_core': this.flat('af_crater', x, y + 14, ASH_R.ruptureR * 2.1, ASH_R.windup + 0.5, { fade: 'inout', a: 0.7, grow: 1.1 }); this.flat('af_front', x, y + 14, ASH_R.ruptureR * 1.4, ASH_R.windup, { fade: 'inout', a: 0.5, grow: 1.5 }); break;
       case 'ash_r_strike': {   // the huge spectral fox crosses the lane (events carry the lane start in tx,ty), nine tail arcs fan behind it
         const sx = tx, sy = ty, a = ang(x - sx, y - sy), len = Math.hypot(x - sx, y - sy);
         this.pop('ef_head', sx, sy + MID, 260, 0.34, { origin: [0.5, 0.5], vx: Math.cos(a) * (len / 0.3), vy: Math.sin(a) * (len / 0.3), blend: NORMAL, a: 0.9, grow: 1.1, depth: 11.2, flip: Math.cos(a) < 0 });
@@ -160,11 +167,11 @@ export class AshFx {
       }
       case 'ren_fly_start': if (p.form === 2) this.flat('af_front', p.x, p.y + GY, 200, 0.4, { grow: 1.6 }); break;
       case 'ren_fly_land': if (p.form === 2 && (n & 1)) { this.flat('af_crater', x, y + 14, 300, 1.2, { a: 0.9 }); this.flat('af_front', x, y + 14, 360, 0.5, { grow: 1.6 }); this.pop('af_erupt', x, y + GY * 0.4, 200, 0.45, { origin: [0.5, 0.95], grow: 1.2 }); if (((n >> 8) & 63) > 0) { this.heavy('heavy', reduced); this.kick(0.0045, reduced); } } break;
-      case 'ren_od_start': if (n === 2) { this.pop('ef_head', p.x + 20, p.y + MID - 40, 230, 0.6, { blend: NORMAL, a: 0.9, grow: 1.3, depth: 11.4 }); this.flat('af_front', p.x, p.y + GY, 300, 0.6, { grow: 1.8 }); } break;
+      case 'ren_od_start': if (n === 2) { this.pop('ef_head', p.x + 20, p.y + MID - 40, 230, 0.6, { blend: NORMAL, a: 0.9, grow: 1.3, depth: 9.55 }); this.flat('af_front', p.x, p.y + GY, 300, 0.6, { grow: 1.8 }); } break;
       case 'ren_od_end': if (p.form === 2) for (let i = 0; i < 8; i++) this.pop('af_cinders', p.x + (R() - 0.5) * 60, p.y + MID + (R() - 0.5) * 60, 44, 0.9, { vy: -60 - R() * 40, vx: (R() - 0.5) * 50, a: 0.8, grow: 0.5 }); break;
       default: break;
     }
   }
-  destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of [this.foxBody, this.foxHead, this.foxTails, this.foxStream, this.core, this.gauntlet]) im?.destroy(); this.g.destroy(); }
+  destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of [this.foxBody, this.foxHead, this.foxTails, this.foxStream, this.core, this.gauntlet, this.ghost]) im?.destroy(); this.g.destroy(); }
 }
 void ASH;

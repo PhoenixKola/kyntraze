@@ -81,7 +81,7 @@ export class HeroFxView {
 
     // ---- Sora's orbs and bolts
     for (const o of h.orbs) this.orb(o.x, o.y, h.orbPhase === 'converge' ? 1 : 0.8, h.orbPhase === 'converge', s, o.tx, o.ty);
-    for (const b of h.bolts) if (!(b.kind === 'blade' && this.scene.textures.exists('sp-feather_blade0'))) this.bolt(b.x, b.y, b.vx, b.vy, b.kind === 'needle' ? 1 : 1.25, b.form === 1);
+    for (const b of h.bolts) if (b.kind !== 'feather' && !(b.kind === 'blade' && this.scene.textures.exists('sp-feather_blade0'))) this.bolt(b.x, b.y, b.vx, b.vy, b.kind === 'needle' ? 1 : 1.25, b.form === 1);
 
     // ---- the Lance
     if (c?.act === 'celestial_lance') this.lance(c, s, calmFx);

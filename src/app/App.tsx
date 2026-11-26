@@ -55,6 +55,7 @@ import './b30-1-loading.css';
 import './b30-1-hud.css';
 import './b30-2.css';
 import './b31.css';
+import './b35.css';
 import './b31b.css';
 const initialSave = loadSave();
 interface RunSetup { net?: NetClient; coop?: HeroId; plan: RunPlan | null; challengeId?: string; startRelic?: RelicId | null; hero?: HeroId }

@@ -51,3 +51,8 @@
 .ar-entry-card.dim { opacity: .75; }
 .ch-copy small { white-space: nowrap; } .ch-thumb { width: calc(62 * var(--u)); } .ch-copy b { font-size: max(10px, calc(12 * var(--u))); }
 .sc-head h2 { color: #fff; }
+
+/* B35: the objective lives in the footer stack (it grows upward), and the destination card shrinks a little so the two never collide */
+.lz.has-obj .lz-card { width: min(100%, calc(300 * var(--u))); } .lz.has-obj .lz-body { margin-top: clamp(16px, 6vh, 64px); } .lz-foot .lz-obj { margin: 0 0 calc(4 * var(--u)); max-width: min(100%, 720px); }
+/* B35: the scrolling map no longer clips the lifted card or its glow */
+.ch-map { padding-top: calc(8 * var(--u)); padding-bottom: calc(8 * var(--u)); padding-left: calc(4 * var(--u)); margin-top: calc(-6 * var(--u)); }

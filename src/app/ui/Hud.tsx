@@ -30,7 +30,7 @@ interface SlotProps { idp?: string; id: string; name: string; ico: string; keyLa
 /** One ability tile: silhouette icon, a clockwise dark sweep that shrinks as the cooldown ends (readable without reading the number), a seconds readout and the key / pad glyph. */
 type BarView = Pick<UiSnapshot, (typeof ABILITY_KEYS)[number]>;
 /** One fighter's ability row: dash, Q, E, R, F with real cooldown sweeps, charge / active state and tooltips. Used for the first player and (compact, no click) for the second co-op fighter. */
-const BEAST: Record<string, string> = { kai1: 'flare', kai2: 'comet', kai3: 'still', ren1: 'fox', sora1: 'phoenix', vex1: 'guard1', vex2: 'guard2' };
+const BEAST: Record<string, string> = { kai1: 'flare', kai2: 'comet', kai3: 'still', ren1: 'fox', ren2: 'ashfox', sora1: 'phoenix', sora2: 'eventide', vex1: 'guard1', vex2: 'guard2' };
 /** B30.1: the Overdrive mantle. One authored beast per transformed form, split into tail / body / head segments that move on their own clocks, drawn OUTSIDE the ability row and only while Overdrive is actually running (odT > 0). Leaves with a short fade. Pure decoration: no pointer events, no state of its own beyond in / out. */
 function Mantle({ k, on, compact }: { k: string; on: boolean; compact: boolean }) {
   const [vis, setVis] = useState<'off' | 'in' | 'out'>('off'), last = useRef(k);

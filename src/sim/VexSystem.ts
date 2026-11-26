@@ -39,7 +39,7 @@ export function vexAuto(s: GameState) {
   }
   if (fin && s.b22.vex.requiem > 0) s.b22.vex.requiem = 0;
   s.hx.strike = { x: dir.x, y: dir.y, t: s.time, step, hand: strikeHand(faceOf(dir.x, dir.y), dir.x, dir.y, step) };   // the blade hand: a target on the left is struck with a left-hand swing
-  emit(s, fin ? 'auto_finisher' : 'auto_hit', p.x + dir.x * 34, p.y + dir.y * 34, hits);
+  emit(s, fin ? 'auto_finisher' : 'auto_hit', hits > 0 ? tgt.x - dir.x * tgt.radius * 0.4 : p.x + dir.x * 34, hits > 0 ? tgt.y - dir.y * tgt.radius * 0.4 : p.y + dir.y * 34, hits);   // the strike mark sits on the foe that was hit, not on the fighter
 }
 
 /* ------------------------------------------------------------------ Q: Parry Halo */

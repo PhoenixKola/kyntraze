@@ -7,16 +7,17 @@ import { KAI_GROUND_DY } from '../../assets/kaiAnimation';
 import { hand } from '../../sim/HeroSystem';
 import { ImpactDirector } from './impactDirector';
 
-export const SERA_FX = ['ph_head', 'ph_chest', 'ph_wingup', 'ph_wingback', 'ph_tail', 'ph_front', 'sf_feather', 'sf_lance', 'sf_node', 'sf_spear', 'sf_diagram', 'sf_trace', 'sf_burst', 'sf_star', 'sf_nova', 'sm_left', 'sm_right', 'sm_halo', 'sm_feather'] as const;
+export const MANTLE_FEATHERS = ['mf_1', 'mf_2', 'mf_3', 'mf_4', 'mf_5', 'mf_6'] as const;
+export const SERA_FX = ['ph_head', 'ph_chest', 'ph_wingup', 'ph_wingback', 'ph_tail', 'ph_front', 'sf_feather', 'sf_lance', 'sf_node', 'sf_spear', 'sf_diagram', 'sf_trace', 'sf_burst', 'sf_star', 'sf_nova', 'sm_halo', 'sm_feather', ...MANTLE_FEATHERS] as const;
 export const seraKey = (n: string) => `b34-${n}`;
-export const seraUrl = (n: string) => `/art/b34/${n}.webp`;
+export const seraUrl = (n: string) => (n.startsWith('mf_') ? `/art/b35/${n}.webp` : `/art/b34/${n}.webp`);
 const GY = KAI_GROUND_DY, MID = GY - 34, ADD = Phaser.BlendModes.ADD, NORMAL = Phaser.BlendModes.NORMAL;
 const ang = (dx: number, dy: number) => Math.atan2(dy, dx);
 const PEARL = 0xfff1e0, ROSE = 0xf4b6d4, VIOLET = 0x8a5cc0;
 interface Pop { im: Phaser.GameObjects.Image; t: number; delay: number; dur: number; w: number; grow: number; vx: number; vy: number; spin: number; fade: 'out' | 'inout' | 'snap'; a: number; sy: number }
 interface PopOpt { depth?: number; blend?: Phaser.BlendModes; rot?: number; origin?: [number, number]; sy?: number; vx?: number; vy?: number; spin?: number; grow?: number; fade?: 'out' | 'inout' | 'snap'; a?: number; flip?: boolean; delay?: number }
 const MAX_POPS = 130;
-type Slot = 'phTail' | 'phChest' | 'phHead' | 'phWingA' | 'phWingB' | 'phWing2A' | 'phWing2B' | 'mantleL' | 'mantleR' | 'halo' | 'orb' | 'orbit0' | 'orbit1' | 'orbit2' | 'proj' | 'front' | 'diagram';
+type Slot = 'phTail' | 'phChest' | 'phHead' | 'phWingA' | 'phWingB' | 'phWing2A' | 'phWing2B' | 'halo' | 'orb' | 'orbit0' | 'orbit1' | 'orbit2' | 'proj' | 'front' | 'diagram';
 
 export class SeraFx {
   private pops: Pop[] = []; private readonly g: Phaser.GameObjects.Graphics; private lastEvent = 0; private readonly director = new ImpactDirector(); private shake = 0; private clock = 0;
@@ -64,9 +65,8 @@ export class SeraFx {
       this.g.lineStyle(1.2, ROSE, 0.7 * left).strokeCircle(e.x, by, 7.5); this.star(e.x, by, 6.5 * pu, 0.95 * left);
     }
     // ---- presence: mantle panels, a floating halo fragment, two or three orbiting feathers, a faint dusk ring on the ground
-    const moving = Math.hypot(p.vx, p.vy) > 40 || s.hx.moving, f = facing === 'west' ? -1 : 1, back = facing === 'north', sway = Math.sin(this.clock * 2.6), lean = Math.max(-0.35, Math.min(0.35, -p.vx * 0.0012)), bx = p.x, by = ly + MID;
-    this.place(this.img('mantleL', 'sm_left'), bx - 11 * f, by - 24, 38, p.hp > 0 ? 0.95 : 0, back ? 9.5 : 8.9, { rot: -0.06 + sway * 0.05 + lean + (moving ? -0.08 * f : 0), ox: 0.95, oy: 0.05 });
-    this.place(this.img('mantleR', 'sm_right'), bx + 11 * f, by - 24, 38, p.hp > 0 ? 0.95 : 0, back ? 9.5 : 8.9, { rot: 0.06 - sway * 0.05 + lean + (moving ? 0.08 * f : 0), ox: 0.05, oy: 0.05 });
+    const moving = Math.hypot(p.vx, p.vy) > 40 || s.hx.moving, f = facing === 'west' ? -1 : 1, back = facing === 'north', bx = p.x, by = ly + MID;
+    this.mantle(p.vx, bx, by, f, back, moving, p.hp > 0);
     this.place(this.img('halo', 'sm_halo', ADD), bx + 1, by - 62 + Math.sin(this.clock * 2.1) * 2, 34, 0.8, 10.8, { rot: Math.sin(this.clock * 1.3) * 0.1 });
     for (let i = 0; i < 3; i++) { const o = this.img(`orbit${i}` as Slot, 'sm_feather'), a = this.clock * 0.9 + (i * Math.PI * 2) / 3, on = !lite && p.hp > 0; this.place(o, bx + Math.cos(a) * 26, by - 6 + Math.sin(a) * 9, 14, on ? 0.9 : 0, Math.sin(a) > 0 ? 9.8 : 8.95, { rot: a + Math.PI / 2 }); }
     this.g.lineStyle(1.5, VIOLET, 0.25 + 0.08 * Math.sin(this.clock * 3)).strokeEllipse(p.x, p.y + GY + 2, 62, 20);
@@ -101,7 +101,20 @@ export class SeraFx {
     } else { this.slots.orb?.setVisible(false); if (c?.act !== 'astral_rebirth') this.slots.front?.setVisible(false); }
     // ---- flight: drifting pearl feathers under the boots
     if (p.flyT > 0 && !lite) { this.jet += dt; if (this.jet > 0.06) { this.jet = 0; this.pop('sm_feather', p.x + (R() - 0.5) * 14, ly + GY - 4, 16, 0.5, { depth: 9, vy: 90 + R() * 50, vx: (R() - 0.5) * 36, a: 0.8, grow: 0.6, rot: R() * 6, spin: (R() - 0.5) * 6 }); } }
+    if ((p.flyT > 0 || p.dashRemaining > 0) && !reduced) { const sp = Math.hypot(p.vx, p.vy); this.trailT += dt; if (sp > 40 && this.trailT > 0.045) { this.trailT = 0; const a = Math.atan2(p.vy, p.vx); this.pop('sf_lance', p.x - Math.cos(a) * 14, ly + MID - Math.sin(a) * 14, 120, 0.3, { rot: a, origin: [1, 0.5], a: 0.65, grow: 1.1, depth: 9.2 }); this.pop('sm_feather', p.x, ly + MID, 18, 0.5, { rot: a, vx: -p.vx * 0.15, vy: -p.vy * 0.15, a: 0.7, grow: 0.6, depth: 9.1 }); } }   // a pearl streak and shed feathers follow the glide and the dash
     this.phoenix(dt, s, reduced, ly, false);
+  }
+  /** The mantle is built from individual ImageGen feathers on a fan at each shoulder (geometry, not a flat panel): each feather has its own length, fan angle and sway phase, lags behind movement, and trails back when running or gliding. */
+  private readonly mf: Phaser.GameObjects.Image[] = [];
+  private mantle(vx: number, bx: number, by: number, f: number, back: boolean, moving: boolean, alive: boolean) {
+    const FEATHER = [{ n: 'mf_1', len: 64, ang: 0.52 }, { n: 'mf_3', len: 54, ang: 0.86 }, { n: 'mf_6', len: 46, ang: 1.18 }, { n: 'mf_4', len: 34, ang: 1.5 }, { n: 'mf_5', len: 78, ang: 0.28 }];
+    const drift = Math.max(-0.5, Math.min(0.5, -vx * 0.0014)), run = moving ? 0.12 : 0;
+    for (let side = 0; side < 2; side++) for (let i = 0; i < FEATHER.length; i++) {
+      const F = FEATHER[i], k = side * FEATHER.length + i; let im = this.mf[k];
+      if (!im) { if (!this.has(F.n)) continue; im = this.scene.add.image(0, 0, seraKey(F.n)).setBlendMode(NORMAL); this.mf[k] = im; }
+      const sgn = side === 0 ? -1 : 1, phase = this.clock * 2.4 + i * 0.8 + side, rot = Math.PI + sgn * (F.ang + 0.06 * Math.sin(phase) + run) + drift * (0.6 + 0.12 * i);   // feather tip points down and out from the shoulder
+      const w = F.len * (im.width / im.height); im.setVisible(alive).setOrigin(0.5, 0.97).setPosition(bx + sgn * 13 - f * 6, by - 30).setRotation(rot).setDisplaySize(w, F.len).setAlpha(0.95).setDepth(back ? 10.3 : 8.9);
+    }
   }
   private bolt(s: GameState, reduced: boolean) {
     const list = s.hx.bolts.filter(b => b.kind === 'feather'), live = new Set<number>();
@@ -114,7 +127,7 @@ export class SeraFx {
     for (let i = list.length; i < this.bolts.length; i++) this.bolts[i]?.setVisible(false);
     for (const id of this.boltHits.keys()) if (!live.has(id)) this.boltHits.delete(id);
   }
-  private hidePresence() { for (const k of ['mantleL', 'mantleR', 'halo', 'orbit0', 'orbit1', 'orbit2', 'orb', 'proj', 'diagram'] as Slot[]) this.slots[k]?.setVisible(false); for (const b of this.bolts) b.setVisible(false); this.hidePhoenix(); }
+  private hidePresence() { for (const im of this.mf) im?.setVisible(false); for (const k of ['halo', 'orbit0', 'orbit1', 'orbit2', 'orb', 'proj', 'diagram'] as Slot[]) this.slots[k]?.setVisible(false); for (const b of this.bolts) b.setVisible(false); this.hidePhoenix(); }
   private hidePhoenix() { for (const k of ['phTail', 'phChest', 'phHead', 'phWingA', 'phWingB', 'phWing2A', 'phWing2B'] as Slot[]) this.slots[k]?.setVisible(false); }
   private hideLive() { this.hidePresence(); this.slots.front?.setVisible(false); }
   /** Eventide Phoenix (Overdrive): long articulated wings, a luminous chest, a crested head and a trailing constellation tail behind Sora; his real hits flick the wing feathers */
@@ -127,7 +140,7 @@ export class SeraFx {
     this.place(this.img('phWingB', 'ph_wingback'), bx - f * 5, by - 10, 118, 0.5 * A, 8.92, { flip: f, rot: -0.2 + flap * 0.18, ox: 0.08, oy: 0.5 });
     this.place(this.img('phChest', 'ph_chest'), bx - f * 5, by + 6, 84, 0.6 * A, 9.0, { flip: f, ox: 0.5, oy: 0.55 });
     this.place(this.img('phWingA', 'ph_wingup'), bx - f * 3, by - 14, 134, 0.66 * A, 9.04, { flip: f, rot: -0.1 + flap * 0.16, ox: 0.1, oy: 0.92 });
-    this.place(this.img('phHead', 'ph_head'), bx + f * 26, by - 44 + Math.sin(this.clock * 2.4) * 3, 62, 0.8 * A, 10.9, { flip: f });
+    this.place(this.img('phHead', 'ph_head'), bx + f * 26, by - 44 + Math.sin(this.clock * 2.4) * 3, 62, 0.8 * A, 9.55, { flip: f });
   }
   private phoenixStrike(px: number, py: number, a: number, od: boolean, reduced: boolean) { if (od && !reduced) this.pop('ph_wingback', px - Math.cos(a) * 30, py + MID * 0.6 - Math.sin(a) * 15, 150, 0.3, { rot: a, origin: [0.1, 0.5], grow: 1.25, blend: NORMAL, a: 0.8, depth: 11.4 }); }
   private onEvent(ev: AbilityEvent, s: GameState, reduced: boolean) {
@@ -180,10 +193,10 @@ export class SeraFx {
       }
       case 'sora_fly_start': if (p.form === 2) this.flat('sf_nova', p.x, p.y + GY, 200, 0.4, { grow: 1.6 }); break;
       case 'sora_fly_land': if (p.form === 2 && (n & 1)) { this.flat('sf_nova', x, y + 14, 300, 0.7, { a: 0.9, grow: 1.5 }); this.pop('sf_burst', x, y, 180, 0.4, { grow: 1.3 }); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2; this.pop('sm_feather', x, y, 26, 0.7, { vx: Math.cos(a) * 140, vy: Math.sin(a) * 70, rot: a, grow: 0.8 }); } if (((n >> 8) & 63) > 0) { this.heavy('heavy', reduced); this.kick(0.004, reduced); } } break;
-      case 'sora_od_start': if (n === 2) { this.pop('ph_head', p.x + 16, p.y + MID - 40, 130, 0.6, { blend: NORMAL, a: 0.9, grow: 1.3, depth: 11.4 }); this.flat('sf_nova', p.x, p.y + GY, 220, 0.6, { grow: 1.6 }); } break;
+      case 'sora_od_start': if (n === 2) { this.pop('ph_head', p.x + 16, p.y + MID - 40, 130, 0.6, { blend: NORMAL, a: 0.9, grow: 1.3, depth: 9.55 }); this.flat('sf_nova', p.x, p.y + GY, 220, 0.6, { grow: 1.6 }); } break;
       case 'sora_od_end': if (p.form === 2) for (let i = 0; i < 8; i++) this.pop('sm_feather', p.x + (R() - 0.5) * 60, p.y + MID + (R() - 0.5) * 60, 22, 1.0, { vy: -50 - R() * 30, vx: (R() - 0.5) * 50, a: 0.8, grow: 0.6, rot: R() * 6, spin: 2 }); break;
       default: break;
     }
   }
-  destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of Object.values(this.slots)) im?.destroy(); for (const b of this.bolts) b?.destroy(); this.g.destroy(); }
+  destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of Object.values(this.slots)) im?.destroy(); for (const b of this.bolts) b?.destroy(); for (const m of this.mf) m?.destroy(); this.g.destroy(); }
 }

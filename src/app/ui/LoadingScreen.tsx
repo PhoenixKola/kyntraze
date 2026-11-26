@@ -31,7 +31,7 @@ export function LoadingScreen({ progress, arena = 'THE GLOAM CIRCUIT', hero = 'k
   useEffect(() => { let raf = 0; const tick = () => { setShown(s => s + (progress - s) * 0.18); raf = requestAnimationFrame(tick); }; raf = requestAnimationFrame(tick); return () => cancelAnimationFrame(raf); }, [progress]);
   const pct = Math.round(Math.min(1, shown) * 100), tip = TIPS[ti], p = Math.min(1, shown);
   const sprite = (r: RunAnim | null, cls: string) => r && <div className={`lh-sprite ${cls}`} style={{ width: r.w, height: r.h, backgroundImage: `url(${r.url})`, '--n': r.frames, '--w': `${r.w}px`, animationDuration: `${r.frames / r.fps}s` } as React.CSSProperties}/>;
-  return <div className={`loading-screen lz ${intro ? 'intro' : 'no-intro'} ${partner ? 'duo' : ''}`} data-testid="loading-screen" role="progressbar" aria-label="Loading" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} style={{ '--p': p } as React.CSSProperties}>
+  return <div className={`loading-screen lz ${intro ? 'intro' : 'no-intro'} ${partner ? 'duo' : ''} ${objective ? 'has-obj' : ''}`} data-testid="loading-screen" role="progressbar" aria-label="Loading" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} style={{ '--p': p } as React.CSSProperties}>
     <div className="loading-scenic" style={{ backgroundImage: `url(${ASSET_BASE}art/menu/arena-${arenaId}.webp)` }} aria-hidden="true"/><div className="loading-shade" aria-hidden="true"/>
     <div className="lz-portal" aria-hidden="true"><i/><i/><i/><u/></div><div className="loading-lines" aria-hidden="true"><i/><i/><i/><i/></div>
     <div className="lz-stage" aria-hidden="true"><div className="lz-glow"/>{sprite(run, 'a')}{partner && sprite(pRun, 'b')}<div className="lz-floor"/></div>
@@ -40,10 +40,10 @@ export function LoadingScreen({ progress, arena = 'THE GLOAM CIRCUIT', hero = 'k
       <p className="lz-kicker">DEPLOYING TO</p>
       <h1 className="lz-dest">{arena}</h1>
       <figure className="lz-card" aria-hidden="true"><img src={`${ASSET_BASE}art/menu/arena-${arenaId}.webp`} alt="" draggable={false}/><i/><i/><i/><i/></figure>
-      {objective && <p className="lz-obj" data-testid="loading-objective"><em>OBJECTIVE</em>{objective}</p>}
       <div className="loading-chips" aria-label="Run summary"><span>{hero.toUpperCase()}{partner ? ` + ${partner.toUpperCase()}` : ''}</span>{boon && UNLOCK_BY_ID[`boon_${boon}` as UnlockId] && <span>{UNLOCK_BY_ID[`boon_${boon}` as UnlockId].name}</span>}{contract && <span>{CONTRACT_BY_ID[contract].name}</span>}{seed > 0 && <span>Seed {seed}</span>}</div>
     </div>
     <div className="lz-foot">
+      {objective && <p className="lz-obj" data-testid="loading-objective"><em>OBJECTIVE</em>{objective}</p>}
       <div className="lz-meta"><span>STABILISING THE FRACTURE</span><b>{pct}%</b></div>
       <div className="lz-rail"><i style={{ width: `${pct}%` }}/><u style={{ left: `${pct}%` }}/></div>
       <p className="loading-tip lz-tip" key={ti}><em>{tip.startsWith('Lore') ? 'LORE' : 'TIP'}</em> {tip.replace(/^Lore: /, '')}</p>

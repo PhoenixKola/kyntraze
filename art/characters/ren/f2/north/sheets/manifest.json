@@ -5,14 +5,14 @@
  "direction": "north",
  "status": "PRODUCTION CANDIDATE - owner approval required",
  "source_blend": "rig/ren-north.blend",
- "frame_width": 122,
+ "frame_width": 106,
  "frame_height": 175,
  "origin_px": [
   51.0,
   172.0
  ],
  "origin_normalized": [
-  0.418033,
+  0.481132,
   0.982857
  ],
  "origin_meaning": "ground point midway between the stance feet (same convention as SOUTH)",
@@ -85,7 +85,7 @@
    "events": {
     "impact": 24
    },
-   "frame_width": 102,
+   "frame_width": 86,
    "frame_height": 118,
    "origin_px": [
     42.0,
@@ -215,10 +215,10 @@
     "recover_start": 20,
     "interruptible_from": 22
    },
-   "frame_width": 94,
+   "frame_width": 88,
    "frame_height": 172,
    "origin_px": [
-    45.0,
+    44.0,
     170.0
    ],
    "terminal": "once",
@@ -261,10 +261,10 @@
     "recover_start": 6,
     "interruptible_from": 8
    },
-   "frame_width": 90,
+   "frame_width": 86,
    "frame_height": 172,
    "origin_px": [
-    42.0,
+    43.0,
     170.0
    ],
    "terminal": "once",
@@ -283,10 +283,10 @@
     "recover_start": 8,
     "interruptible_from": 11
    },
-   "frame_width": 92,
+   "frame_width": 86,
    "frame_height": 172,
    "origin_px": [
-    44.0,
+    43.0,
     170.0
    ],
    "terminal": "once",
@@ -305,10 +305,10 @@
     "recover_start": 7,
     "interruptible_from": 10
    },
-   "frame_width": 90,
+   "frame_width": 86,
    "frame_height": 172,
    "origin_px": [
-    42.0,
+    43.0,
     170.0
    ],
    "terminal": "once",
@@ -327,10 +327,10 @@
     "recover_start": 10,
     "interruptible_from": 13
    },
-   "frame_width": 92,
+   "frame_width": 88,
    "frame_height": 179,
    "origin_px": [
-    44.0,
+    45.0,
     177.0
    ],
    "terminal": "once",
@@ -350,7 +350,7 @@
     "recover_start": 19,
     "interruptible_from": 22
    },
-   "frame_width": 92,
+   "frame_width": 90,
    "frame_height": 172,
    "origin_px": [
     44.0,
@@ -374,10 +374,10 @@
     "recover_start": 15,
     "interruptible_from": 18
    },
-   "frame_width": 90,
+   "frame_width": 86,
    "frame_height": 172,
    "origin_px": [
-    42.0,
+    43.0,
     170.0
    ],
    "terminal": "once",
@@ -398,10 +398,10 @@
     "recover_start": 20,
     "interruptible_from": 23
    },
-   "frame_width": 92,
+   "frame_width": 86,
    "frame_height": 172,
    "origin_px": [
-    44.0,
+    43.0,
     170.0
    ],
    "terminal": "once",
@@ -421,10 +421,10 @@
     "recover_start": 11,
     "interruptible_from": 11
    },
-   "frame_width": 92,
+   "frame_width": 88,
    "frame_height": 172,
    "origin_px": [
-    44.0,
+    45.0,
     170.0
    ],
    "terminal": "once",
@@ -443,10 +443,10 @@
     "recover_start": 8,
     "interruptible_from": 10
    },
-   "frame_width": 92,
+   "frame_width": 86,
    "frame_height": 172,
    "origin_px": [
-    44.0,
+    43.0,
     170.0
    ],
    "terminal": "once",
@@ -465,10 +465,10 @@
     "recover_start": 7,
     "interruptible_from": 9
    },
-   "frame_width": 90,
+   "frame_width": 86,
    "frame_height": 194,
    "origin_px": [
-    42.0,
+    43.0,
     192.0
    ],
    "terminal": "once",
@@ -482,10 +482,10 @@
    "duration_s": 0.4,
    "blender_action": "Glide",
    "events": {},
-   "frame_width": 86,
+   "frame_width": 82,
    "frame_height": 141,
    "origin_px": [
-    37.0,
+    38.0,
     166.0
    ],
    "terminal": "once",
@@ -505,10 +505,10 @@
     "recover_start": 10,
     "interruptible_from": 15
    },
-   "frame_width": 92,
+   "frame_width": 86,
    "frame_height": 172,
    "origin_px": [
-    44.0,
+    45.0,
     170.0
    ],
    "terminal": "once",

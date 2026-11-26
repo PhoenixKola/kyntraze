@@ -44,7 +44,7 @@ export class VexFx {
     switch (e.kind) {
       case 'vex_auto': {
         const step = n & 3, fin = (n & 32) !== 0; this.snap = 0.2; this.strikeArm(f, ang, fin ? 1.3 : 1);
-        if (((n >> 2) & 3) === 1) this.pop('r_slash', [step], e.x, e.y - 24 * sc, 150 * sc, 175 * sc, fin ? 0.3 : 0.2, { rot: ang, a: 0.95, depth: 10.8, flipX: Math.cos(ang) < 0 && false });
+        if (((n >> 2) & 3) === 1) this.pop('r_slash', [step], tx, ty - 24 * sc, 150 * sc, 175 * sc, fin ? 0.3 : 0.2, { rot: ang, a: 0.95, depth: 10.8, flipX: Math.cos(ang) < 0 && false });
         if (fin && !red) this.shake(o, 60, 0.0012); break;
       }
       case 'vex_judg_cut': { if ((n & 1) === 0) break; const t = (n >> 1) & 3; this.pop('v_cut', [t], e.x, e.y - 14, 105, 125, 0.28, { a: 0.95, depth: 10.8, rot: (e.id % 7) * 0.45 }); break; }

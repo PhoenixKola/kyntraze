@@ -96,7 +96,7 @@ function renAuto(s: GameState) {
   const dmg = p.attackDamage * formMul(s, form ? ASCEND.ren.autoMul : 1) * (fin ? REN.auto.finisherMul : 1);
   let hits = 0; for (const e of cands) { damageEnemy(s, e, dmg); hits++; if (fin) push(s, e, e.x - p.x, e.y - p.y, REN.auto.finisherPush / 4, 0.2); driveGain(s, fin ? 2.4 : 1.4); }
   s.hx.strike = { x: dir.x, y: dir.y, t: s.time, step, hand: strikeHand(faceOf(dir.x, dir.y), dir.x, dir.y, step) };
-  emit(s, fin ? 'auto_finisher' : 'auto_hit', p.x + dir.x * 34, p.y + dir.y * 34, hits);
+  emit(s, fin ? 'auto_finisher' : 'auto_hit', hits > 0 ? tgt.x - dir.x * tgt.radius * 0.4 : p.x + dir.x * 34, hits > 0 ? tgt.y - dir.y * tgt.radius * 0.4 : p.y + dir.y * 34, hits);   // the strike mark sits on the foe that was hit, not on the fighter
 }
 function soraAuto(s: GameState) {
   if (s.player.form === 2) { seraAuto(s); return; }   // B34: Eventide Seraph has its own Prism Feathers
@@ -108,14 +108,14 @@ function soraAuto(s: GameState) {
   const n = Math.min(cands.length, p.targets + (form ? 1 : 0)), dmg = p.attackDamage * formMul(s, form ? ASCEND.sora.autoMul : 1);
   for (let i = 0; i < n; i++) {
     const t = cands[i], dir = normalize(t.x - p.x, t.y - p.y), o = hand(s, dir.x, dir.y, SORA.auto.muzzle);
-    spawnBolt(s, { x: o.x, y: o.y, dirX: dir.x, dirY: dir.y, speed: SORA.auto.speed, ttl: (p.attackRange + 60) / SORA.auto.speed + 0.12, damage: dmg, radius: SORA.auto.radius, kind: 'needle', pierce: form ? SORA.auto.formPierce : 0, homing: SORA.auto.homing });
+    spawnBolt(s, { x: o.x, y: o.y, dirX: dir.x, dirY: dir.y, speed: SORA.auto.speed, ttl: (p.attackRange + 60) / SORA.auto.speed + 0.12, damage: dmg, radius: SORA.auto.radius, kind: 'needle', pierce: form ? SORA.auto.formPierce : 0, homing: SORA.auto.homing, lock: t.id });
     if (i === 0) { const st = s.hx.autoStep++ % 2; s.hx.strike = { x: dir.x, y: dir.y, t: s.time, step: st, hand: strikeHand(faceOf(dir.x, dir.y), dir.x, dir.y, st) }; }
   }
   emit(s, 'needle_fire', p.x, p.y, n);
 }
-function spawnBolt(s: GameState, o: { x: number; y: number; dirX: number; dirY: number; speed: number; ttl: number; damage: number; radius: number; kind: Bolt['kind']; pierce: number; homing: number }) {
+function spawnBolt(s: GameState, o: { lock?: number; x: number; y: number; dirX: number; dirY: number; speed: number; ttl: number; damage: number; radius: number; kind: Bolt['kind']; pierce: number; homing: number }) {
   if (s.hx.bolts.length >= BOLT_CAP) s.hx.bolts.shift();
-  s.hx.bolts.push({ id: s.nextId++, x: o.x, y: o.y, vx: o.dirX * o.speed, vy: o.dirY * o.speed, ttl: o.ttl, damage: o.damage, radius: o.radius, kind: o.kind, pierce: o.pierce, hits: [], homing: o.homing, form: s.player.form });
+  s.hx.bolts.push({ id: s.nextId++, x: o.x, y: o.y, vx: o.dirX * o.speed, vy: o.dirY * o.speed, ttl: o.ttl, damage: o.damage, radius: o.radius, kind: o.kind, pierce: o.pierce, hits: [], homing: o.homing, form: s.player.form, ...(o.lock !== undefined ? { lock: o.lock } : {}) });
 }
 
 /* ------------------------------------------------------------------ Q */
@@ -429,19 +429,24 @@ function updateBolts(s: GameState, dt: number) {
   const bolts = s.hx.bolts; if (!bolts.length) return; const keep: Bolt[] = [];
   for (const b of bolts) {
     b.ttl -= dt; if (b.ttl <= 0) continue;
-    if (b.homing > 0) {   // gentle steering toward the nearest enemy ahead, speed unchanged
+    const locked = b.lock !== undefined ? s.enemies.find(e => e.id === b.lock && alive(e) && !b.hits.includes(e.id)) : undefined;
+    if (locked) { const sp = Math.hypot(b.vx, b.vy), want = Math.atan2(locked.y - b.y, locked.x - b.x), cur = Math.atan2(b.vy, b.vx); let da = want - cur; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2; const a = cur + clamp(da, -16 * dt, 16 * dt); b.vx = Math.cos(a) * sp; b.vy = Math.sin(a) * sp; }   // an aimed needle chases its own target (turn rate capped), so it cannot slip past a moving foe
+    else if (b.homing > 0) {   // gentle steering toward the nearest enemy ahead, speed unchanged
       let best: Enemy | null = null, bd = 260 * 260; const sp = Math.hypot(b.vx, b.vy);
       for (const e of s.enemies) { if (!alive(e) || b.hits.includes(e.id)) continue; const dx = e.x - b.x, dy = e.y - b.y, d2 = dx * dx + dy * dy; if (d2 < bd && (dx * b.vx + dy * b.vy) > 0) { bd = d2; best = e; } }
       if (best) { const want = Math.atan2(best.y - b.y, best.x - b.x), cur = Math.atan2(b.vy, b.vx); let da = want - cur; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2; const a = cur + da * clamp(b.homing * 60 * dt, 0, 1); b.vx = Math.cos(a) * sp; b.vy = Math.sin(a) * sp; }
     }
-    b.x += b.vx * dt; b.y += b.vy * dt;
-    if (blocked(b.x, b.y, 0)) continue;
-    let dead = false;
-    for (const e of s.enemies) {
-      if (!alive(e) || b.hits.includes(e.id)) continue; if ((e.x - b.x) ** 2 + (e.y - b.y) ** 2 > (e.radius + b.radius) ** 2) continue;
-      damageEnemy(s, e, b.damage, { proj: true }); b.hits.push(e.id); if (b.kind === 'feather') addTrace(s, e); if (b.kind === 'needle') driveGain(s, 1.1);
-      if (b.pierce <= 0) { dead = true; break; } b.pierce--;
+    // swept movement: a fast thin bolt is tested every few pixels of its path, so it can never tunnel through a foe between two ticks
+    const stepN = Math.max(1, Math.ceil((Math.hypot(b.vx, b.vy) * dt) / 6)), sx = (b.vx * dt) / stepN, sy = (b.vy * dt) / stepN; let dead = false, wall = false;
+    for (let k = 0; k < stepN && !dead && !wall; k++) {
+      b.x += sx; b.y += sy; if (blocked(b.x, b.y, 0)) { wall = true; break; }
+      for (const e of s.enemies) {
+        if (!alive(e) || b.hits.includes(e.id)) continue; if ((e.x - b.x) ** 2 + (e.y - b.y) ** 2 > (e.radius + b.radius) ** 2) continue;
+        damageEnemy(s, e, b.damage, { proj: true }); b.hits.push(e.id); if (b.kind === 'feather') addTrace(s, e); if (b.kind === 'needle') driveGain(s, 1.1);
+        if (b.pierce <= 0) { dead = true; break; } b.pierce--;
+      }
     }
+    if (wall) continue;
     if (!dead) keep.push(b);
   }
   s.hx.bolts = keep;
