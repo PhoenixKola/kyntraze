@@ -2,7 +2,7 @@
 import type { HeroId } from './heroes';
 import type { UpgradeCategory, UpgradeId } from './upgrades';
 
-export type HeroAct = 'crimson_break' | 'meteor_rush' | 'bloodstar' | 'azure_volley' | 'celestial_lance' | 'zero_horizon' | 'parry_halo' | 'rift_reversal' | 'oathbreaker_seal' | 'infernal_cyclone' | 'scarlet_rampage' | 'crimson_catastrophe' | 'nova_fist' | 'azure_prison' | 'heavens_spear' | 'azure_collapse' | 'astral_devastation' | 'mirror_guard' | 'rift_execution' | 'oath_ruin' | 'abyssal_fang' | 'phantom_legion' | 'dim_severance' | 'domain_exile' | 'event_horizon' | 'ultimate';
+export type HeroAct = 'crimson_break' | 'meteor_rush' | 'bloodstar' | 'azure_volley' | 'celestial_lance' | 'zero_horizon' | 'parry_halo' | 'rift_reversal' | 'oathbreaker_seal' | 'infernal_cyclone' | 'scarlet_rampage' | 'crimson_catastrophe' | 'nova_fist' | 'azure_prison' | 'heavens_spear' | 'azure_collapse' | 'astral_devastation' | 'mirror_guard' | 'rift_execution' | 'oath_ruin' | 'abyssal_fang' | 'phantom_legion' | 'dim_severance' | 'domain_exile' | 'event_horizon' | 'eclipse_maul' | 'ninefold_rupture' | 'ashen_cataclysm' | 'eclipse_fang' | 'ultimate';
 
 /** Both new heroes have exactly one transformation (form id 1). The unlock is the same milestone for each, earned by playing that hero. */
 export const ASCEND = {

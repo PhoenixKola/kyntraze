@@ -17,7 +17,7 @@ export const isUnlockAll = () => { try { const v = new URLSearchParams(globalThi
 export const activeSaveKey = () => (isQaRoute() ? QA_SAVE_KEY : isUnlockAll() ? UNLOCK_ALL_KEY : SAVE_KEY);
 /** Pure: the save with everything unlocked (progress records and settings are kept). */
 export function withEverythingUnlocked(save: SaveV1): SaveV1 {
-  const b22 = { ...save.b22!, vexForms: [true, true] as [boolean, boolean], story: { done: [1, 2, 3] as (1 | 2 | 3)[], seen: true }, mastery: Object.fromEntries(MILESTONES.map(m => [m.id, true])) as Record<string, true>, owned: [...new Set([...(save.b22?.owned ?? []), ...COSMETICS.map(c => c.id), ...OUTFITS.map(o => o.id)])] };
+  const b22 = { ...save.b22!, vexForms: [true, true] as [boolean, boolean], renF2: true, story: { done: [1, 2, 3] as (1 | 2 | 3)[], seen: true }, mastery: Object.fromEntries(MILESTONES.map(m => [m.id, true])) as Record<string, true>, owned: [...new Set([...(save.b22?.owned ?? []), ...COSMETICS.map(c => c.id), ...OUTFITS.map(o => o.id)])] };
   const meta = { ...save.meta!, marks: MARKS_CAP, owned: Object.keys(UNLOCK_BY_ID) as UnlockId[], feats: { ...Object.fromEntries(FEATS.map(f => [f.id, 0])), ...save.meta!.feats }, mastery: { ...Object.fromEntries(ARENA_IDS.flatMap(a => MASTERY[a].map(d => [`${a}.${d.id}`, true]))) as Record<string, true>, ...save.meta!.mastery }, introSeen: true };
   return { ...save, b22, meta, unlocks: { cometheart: true, stillfire: true, ren: true, sora: true } };
 }

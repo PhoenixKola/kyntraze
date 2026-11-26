@@ -55,7 +55,7 @@ export class Room {
   }
   start() {
     const { plan: base, arena } = planOf(this.mode, this.arena), plan = this.lf ? withLiving(base) : base; const [a, b] = this.players;
-    const cfg = (q: Player) => ({ ...NO_CONFIG, hero: q.hero, heroForm: q.unlock && q.hero !== 'kai', ...(q.unlock ? { vexForms: [true, true] as [boolean, boolean] } : {}) });
+    const cfg = (q: Player) => ({ ...NO_CONFIG, hero: q.hero, heroForm: q.unlock && q.hero !== 'kai', renF2: q.unlock && q.hero === 'ren', ...(q.unlock ? { vexForms: [true, true] as [boolean, boolean] } : {}) });
     this.sim = new Simulation(this.seed, arena, a.unlock, a.unlock, { ...cfg(a), plan }); this.sim.joinPartner(cfg(b), 'online', [a.name, b.name]);
     { const bag = this.sim.state.party!.slots[1].bag; bag.cometUnlocked = b.unlock; bag.apexUnlocked = b.unlock; }
     this.state = 'running'; this.last = performance.now(); this.broadcastRoom(); this.timer = setInterval(() => this.loop(), 8);

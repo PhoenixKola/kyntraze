@@ -17,7 +17,7 @@ export type HeroForm = 'base' | 'f1' | 'f2';
 export const HERO_ART: readonly HeroArt[] = ['ren', 'sora', 'vex'];
 export const isHeroArt = (h: string): h is HeroArt => h === 'ren' || h === 'sora' || h === 'vex';
 /** Which sheet sets exist (all four facings, every clip). A missing set draws the clearly-marked dev placeholder body instead of half a rig. */
-export const HERO_SHEETS: Record<HeroArt, { base: boolean; f1: boolean; f2: boolean; anchors: boolean }> = { ren: { base: true, f1: true, f2: false, anchors: true }, sora: { base: true, f1: true, f2: false, anchors: true }, vex: { base: true, f1: true, f2: true, anchors: true } };
+export const HERO_SHEETS: Record<HeroArt, { base: boolean; f1: boolean; f2: boolean; anchors: boolean }> = { ren: { base: true, f1: true, f2: true, anchors: true }, sora: { base: true, f1: true, f2: false, anchors: true }, vex: { base: true, f1: true, f2: true, anchors: true } };
 export const heroForms = (h: HeroArt): HeroForm[] => (['base', 'f1', 'f2'] as const).filter(f => HERO_SHEETS[h][f]);
 /** Motion/FX rig family: Vex reuses Ren's state machine and effect logic (his art, textures and sounds are his own explicit keys). */
 export const rigOf = (h: HeroArt): 'ren' | 'sora' => (h === 'sora' ? 'sora' : 'ren');
@@ -62,7 +62,8 @@ export class HeroAnimator {
   constructor(readonly hero: HeroArt, private readonly base: KaiManifests, private readonly f1?: KaiManifests, private readonly f2?: KaiManifests) {}
   get dead() { return this.deathT >= 0; }
   deathPresented() { if (this.deathT < 0) return false; const d = this.info('Death'); return this.deathT >= d.frames / d.fps + DEATH_HOLD; }
-  private set(form: 'base' | 'f1' = this.visualForm) { if (form === 'f1' && this.hero === 'vex' && this.formNow === 2 && this.f2 && this.clip !== 'Transform') return this.f2; return form === 'f1' && this.f1 ? this.f1 : this.base; }
+  private cinemaTo = 0;
+  private set(form: 'base' | 'f1' = this.visualForm) { if (form === 'f1' && this.hero === 'ren' && this.f2 && ((this.clip === 'Transform' && this.cinemaTo === 2) || (this.clip !== 'Transform' && this.formNow === 2))) return this.f2; if (form === 'f1' && this.hero === 'vex' && this.formNow === 2 && this.f2 && this.clip !== 'Transform') return this.f2; return form === 'f1' && this.f1 ? this.f1 : this.base; }
   private info(clip: KaiClip, form: 'base' | 'f1' = this.clip === 'Transform' ? 'f1' : this.visualForm): KaiClipInfo { return this.set(form)[this.facing].animations[clip] as KaiClipInfo; }
   private turn(f: Facing, force = false) { if (f !== this.facing && (force || this.sinceTurn >= FACING_DWELL)) { this.facing = f; this.sinceTurn = 0; } }
   private leg() { const r = this.info('Run'); return Math.floor(this.runTime * r.fps + 1e-6) % RUN_PHASES % r.frames; }
@@ -74,7 +75,7 @@ export class HeroAnimator {
     this.formNow = i.form; this.sinceTurn += i.dt; this.moveNow = i.moving || i.dashing; this.actView = i.act; this.furyView = this.renForm() || this.vexForm() ? i.fury ?? null : null;
     if (i.cinema && this.f1) {
       if (!this.cinemaOn) { this.cinemaOn = true; this.strikeT = -1; this.hurtT = -1; this.dashRec = -1; ev.push('form_start'); }
-      this.cinemaT = i.cinema.t; this.cinemaDur = i.cinema.dur; this.cinemaCommit = i.cinema.commitAt; this.clip = 'Transform';
+      this.cinemaTo = (i.cinema as { to?: number }).to ?? 0; this.cinemaT = i.cinema.t; this.cinemaDur = i.cinema.dur; this.cinemaCommit = i.cinema.commitAt; this.clip = 'Transform';
       if (i.cinema.t >= i.cinema.commitAt && this.visualForm !== (this.f1 ? 'f1' : 'base')) { this.visualForm = this.f1 ? 'f1' : 'base'; ev.push('form_commit'); }
       this.formPrev = i.form; this.moveNow = false; return this.pose(events);
     }
@@ -119,6 +120,11 @@ export class HeroAnimator {
     switch (a.act) {
       case 'crimson_break': case 'azure_volley': return moving ? 'RunPunchUpper' : 'BasicPunch';
       case 'meteor_rush': return a.hop < a.hops && a.hopT <= REN.e.hopTime ? 'Dash' : a.hop >= a.hops ? 'Dash' : 'BasicPunch';
+      // B33: Ashen Eclipse's moves reuse the Ascendant clips until its own poses are authored (reported as reuse): the rush, the pound and the lunge suit them
+      case 'eclipse_maul': return this.renForm() && this.has('Rampage') ? 'Rampage' : 'Dash';
+      case 'ninefold_rupture': return this.renForm() && this.has(a.hop >= 1 ? 'Rampage' : 'Pound') ? (a.hop >= 1 ? 'Rampage' : 'Pound') : 'Sphere';
+      case 'ashen_cataclysm': return this.renForm() && this.has('Pound') ? 'Pound' : 'Sphere';
+      case 'eclipse_fang': return this.renForm() && this.has(a.released ? 'Lunge' : 'NovaCharge') ? (a.released ? 'Lunge' : 'NovaCharge') : a.released ? 'Dash' : 'BasicPunch';
       case 'infernal_cyclone': return this.renForm() && this.has('Cyclone') ? 'Cyclone' : this.has('Slam') ? 'Slam' : 'Sphere';   // B26: Ren-authored clip in Crimson Ascendant, older mapping when a sheet set lacks it
       case 'scarlet_rampage': return this.renForm() && this.has('Rampage') ? 'Rampage' : a.hop === 0 || a.hop === 1 ? 'Dash' : 'BasicPunch';
       case 'crimson_catastrophe': return this.renForm() && this.has('Pound') ? 'Pound' : 'Sphere';

@@ -101,7 +101,7 @@ export class RenFox {
   }
 
   update(o: RenFoxInput) {
-    const dt = o.running ? o.dt : 0, s = o.state, p = s.player, h = o.hero, sc = o.scale / 0.5, ren = s.hero === 'ren' && p.form >= 1; this.clock += dt;
+    const dt = o.running ? o.dt : 0, s = o.state, p = s.player, h = o.hero, sc = o.scale / 0.5, ren = s.hero === 'ren' && p.form === 1; this.clock += dt;
     for (const e of s.abilityEvents) if (e.id > this.last) { this.last = e.id; if (!o.dead && e.kind.startsWith('ren_')) this.onEvent(e, o); }
     // pops (flipbooks)
     for (let i = this.pops.length - 1; i >= 0; i--) {

@@ -2,6 +2,7 @@
 import type { GameState } from '../sim/GameState';
 import { BEAM, SPHERE } from '../content/abilities';
 import { REN_E, REN_FORM_INFO, REN_Q, REN_R } from '../content/renCombat';
+import { ASH_E, ASH_FORM_INFO, ASH_Q, ASH_R } from '../content/renEclipse';
 import { SORA_E, SORA_FORM_INFO, SORA_Q, SORA_R } from '../content/soraCombat';
 import { VEX1_E, VEX1_Q, VEX1_R, VEX2_E, VEX2_Q, VEX2_R, VEX_FORM_INFO } from '../content/vexCombat';
 import { HERO_KIT, REN, SORA, VEX } from '../content/heroKits';
@@ -28,7 +29,11 @@ export function abilityTips(s: GameState): Record<TipSlot, AbilityTip> {
     else if (f === 1) { et = { name: RISE.name, key: 'E', pad: 'RB', blurb: 'Sweep your palm: a lane of fire pillars erupts one after another in front of you, shoving and staggering common enemies.', stats: [['Pillars', n(RISE.pillars + (m.beamLinger > 0 ? 1 : 0))], ['Damage / pillar', n(RISE.damage * m.beamDamage * m.formPower, 1)], ['Radius', `${n(RISE.radius * m.beamWidth)} px`], ['Cooldown', cd(RISE.cooldown * m.beamCd)]] }; rt = { name: CRUCIBLE.name, key: 'R', pad: 'LB', blurb: 'Gather a golden halo and plant a solar crucible. It draws foes gently inward, pulses, then ends in one rising eruption.' + ult, stats: [['Damage / pulse', n(CRUCIBLE.pulseDamage * m.sphereDamage * m.formPower, 1)], ['Eruption', n(CRUCIBLE.finalDamage * m.sphereDamage * m.formPower)], ['Radius', `${n(CRUCIBLE.radius * m.sphereRadius)} px`], ['Cooldown', cd(CRUCIBLE.cooldown * m.sphereCd)]] }; }
     else { et = { name: 'Fracture Lance', key: 'E', pad: 'RB', blurb: 'A piercing blade of light that pulses along its path.', stats: [['Damage / pulse', n(BEAM.damage * m.beamDamage, 1)], ['Pulses', n(5 + m.beamLinger)], ['Length', `${BEAM.length} px`], ['Cooldown', cd(BEAM.cooldown * m.beamCd)]] }; rt = { name: 'Nova Bloom', key: 'R', pad: 'LB', blurb: 'Throw a golden sphere that detonates in a large burst.' + ult, stats: [['Damage', n(SPHERE.damage * m.sphereDamage)], ['Radius', `${n(SPHERE.radius * m.sphereRadius)} px`], ['Cooldown', cd(SPHERE.cooldown * m.sphereCd)]] }; }
   } else if (s.hero === 'ren') {
-    if (f >= 1) {   // B26: Crimson Ascendant's own Q / E / R, numbers from the same content table the sim reads
+    if (f === 2) {   // B33: Ashen Eclipse
+      qt = { name: ASH_Q.name, key: 'Q', pad: 'X', blurb: ASH_FORM_INFO.q.text, stats: [['Strikes', `${ASH_Q.strikes}`], ['Finisher', n(q * m.formPower * ASH_Q.finalMul)], ['Cooldown', cd(ASH_Q.cooldown)]] };
+      et = { name: ASH_E.name, key: 'E', pad: 'RB', blurb: ASH_FORM_INFO.e.text, stats: [['Rupture', n(q * m.formPower * m.beamDamage * ASH_E.mul)], ['Rupture radius', `${n(ASH_E.R * m.beamWidth)} px`], ['Cooldown', cd(ASH_E.cooldown * m.beamCd)]] };
+      rt = { name: ASH_R.name, key: 'R', pad: 'LB', blurb: ASH_FORM_INFO.r.text + ult, stats: [['Strike / rupture', `${n(ASH_R.strikeMul * m.sphereDamage * m.formPower)} / ${n(ASH_R.ruptureMul * m.sphereDamage * m.formPower)}`], ['Rupture radius', `${n(ASH_R.ruptureR * m.sphereRadius)} px`], ['Cooldown', cd(ASH_R.cooldown * m.sphereCd)]] };
+    } else if (f >= 1) {   // B26: Crimson Ascendant's own Q / E / R, numbers from the same content table the sim reads
       const rs = p.qRadius / REN.base.qRadius;
       qt = { name: REN_Q.name, key: 'Q', pad: 'X', blurb: REN_FORM_INFO.q.text, stats: [['Release', n(q * m.formPower * REN_Q.releaseMul)], ['Pull / blast radius', `${n(REN_Q.pullR * rs)} / ${n(REN_Q.releaseR * rs)} px`], ['Cooldown', cd(REN_Q.cooldown)]] };
       et = { name: REN_E.name, key: 'E', pad: 'RB', blurb: REN_FORM_INFO.e.text, stats: [['Slam', n(q * m.formPower * m.beamDamage * REN_E.slamMul)], ['Slam radius', `${n(REN_E.slamR * m.beamWidth)} px`], ['Cooldown', cd(REN_E.cooldown * m.beamCd)]] };

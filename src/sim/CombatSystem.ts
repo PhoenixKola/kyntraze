@@ -138,7 +138,7 @@ function bossDefeated(state: GameState, boss: Enemy) {
     state.announce = { id: 'cometheart', text: 'COMETHEART UNLOCKED', sub: 'Full Drive + F awakens Form II', at: state.time + 2.5 };
   }
   pushEnemyEvent(state, 'boss_defeated', boss, 0, 0, boss.kind);
-  if (step?.ends || step?.reward === 'victory') { if (plan.unlocks && boss.kind === 'seraph' && !state.apexUnlocked && state.hero === 'kai') state.apexUnlockedNow = true; if (state.phase === 'running') winRun(state); return; }   // B13: a Seraph victory unlocks Stillfire Apex for the NEXT run (never mid-run)
+  if (step?.ends || step?.reward === 'victory') { if (plan.unlocks && boss.kind === 'seraph' && !state.apexUnlocked && state.hero === 'kai') state.apexUnlockedNow = true; if (plan.unlocks && boss.kind === 'seraph' && state.hero === 'ren' && state.heroFormUnlocked && !state.renF2) state.renF2Now = true; if (state.phase === 'running') winRun(state); return; }   // B13: a Seraph victory unlocks Stillfire Apex for the NEXT run (never mid-run)
   // the mid-run payoff: a heal now, then a guaranteed Rare-or-better pick once the death animation has played
   const heal = plan.mode === 'boss_rush' ? plan.interHeal : 0.4;
   state.player.hp = Math.min(state.player.maxHp, state.player.hp + state.player.maxHp * heal); state.bossReward++; state.rewardAt = state.time + def.deathT + 0.8;

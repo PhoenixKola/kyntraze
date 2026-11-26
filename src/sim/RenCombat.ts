@@ -9,25 +9,27 @@ import { damageEnemy } from './CombatSystem';
 import { clamp, normalize } from '../core/Math';
 import { freeAim } from './ApexSystem';
 import { handOffset, strikeHand } from './Strike';
+import { cancelFang, startFang, updateBrands } from './RenEclipse';
+import { ASH_FLY } from '../content/renEclipse';
 import { aimDir, newCast, nearest, pathClear, pickGround, push } from './HeroSystem';
 import { faceOf, fistWorld } from './AbilitySystem';
 
 const alive = (e: Enemy) => e.hp > 0;
-const byDistId = (x: number, y: number) => (a: Enemy, b: Enemy) => (a.x - x) ** 2 + (a.y - y) ** 2 - ((b.x - x) ** 2 + (b.y - y) ** 2) || a.id - b.id;
+export const byDistId = (x: number, y: number) => (a: Enemy, b: Enemy) => (a.x - x) ** 2 + (a.y - y) ** 2 - ((b.x - x) ** 2 + (b.y - y) ** 2) || a.id - b.id;
 const easeOut = (u: number) => 1 - (1 - clamp(u, 0, 1)) ** 3;
-const odBit = (s: GameState) => (s.player.odT > 0 ? REN_OD.bit : 0);
+export const odBit = (s: GameState) => (s.player.odT > 0 ? REN_OD.bit : 0);
 export const renForm = (s: GameState) => s.hero === 'ren' && s.player.form >= 1;
-const fm = (s: GameState) => s.mods.formPower;
+export const fm = (s: GameState) => s.mods.formPower;
 /** Boss bodies, boss parts, shielded or invulnerable enemies are never grabbed, pulled or displaced. */
-const fixed = (e: Enemy) => isBoss(e.kind) || !!e.part || !!e.ai?.invuln || (e.blockT ?? 0) > 0;
-function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number, tx?: number, ty?: number) {
+export const fixed = (e: Enemy) => isBoss(e.kind) || !!e.part || !!e.ai?.invuln || (e.blockT ?? 0) > 0;
+export function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number, tx?: number, ty?: number) {
   s.abilityEvents.push({ id: s.nextId++, kind, x, y, n, ...(tx !== undefined ? { tx, ty } : {}) });
   if (s.abilityEvents.length > 40) s.abilityEvents.splice(0, s.abilityEvents.length - 40);
 }
-const ringFx = (s: GameState, kind: 'slam' | 'ring' | 'rush', x: number, y: number, r: number, dur: number) => { s.hx.rings.push({ id: s.nextId++, x, y, r, t: 0, dur, kind }); if (s.hx.rings.length > 24) s.hx.rings.shift(); };
-const once = (c: HeroCast, key: number) => { if (c.hits.includes(key)) return false; c.hits.push(key); return true; };
+export const ringFx = (s: GameState, kind: 'slam' | 'ring' | 'rush', x: number, y: number, r: number, dur: number) => { s.hx.rings.push({ id: s.nextId++, x, y, r, t: 0, dur, kind }); if (s.hx.rings.length > 24) s.hx.rings.shift(); };
+export const once = (c: HeroCast, key: number) => { if (c.hits.includes(key)) return false; c.hits.push(key); return true; };
 /** One area hit, deterministic order (distance then id), capped target count; ordinary enemies are pushed outward, fixed ones never. Returns the number of enemies hurt. */
-function areaHit(s: GameState, x: number, y: number, r: number, dmg: number, pushPx: number, stagger: number, cap: number, minR = 0): number {
+export function areaHit(s: GameState, x: number, y: number, r: number, dmg: number, pushPx: number, stagger: number, cap: number, minR = 0): number {
   let n = 0;
   for (const e of s.enemies.filter(alive).sort(byDistId(x, y))) {
     if (n >= cap) break; const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy); if (d > r + e.radius || d < minR) continue;
@@ -267,18 +269,18 @@ function updateFlight(s: GameState, dt: number) {
     if (!busy && held && p.flyHold >= REN_FLY.holdToLift && p.flyCd <= 0 && p.drive >= REN_FLY.minDrive && p.dashRemaining <= 0) { p.flyT = 0.001; emit(s, 'ren_fly_start', p.x, p.y, odBit(s)); }
     return;
   }
-  p.flyT += dt; p.air += (1 - p.air) * Math.min(1, dt * REN_FLY.rise); p.drive = Math.max(0, p.drive - REN_FLY.drain * dt);
+  const ash = p.form === 2, FL = ash ? ASH_FLY : REN_FLY; p.flyT += dt; p.air += (1 - p.air) * Math.min(1, dt * FL.rise); p.drive = Math.max(0, p.drive - FL.drain * dt);
   if (!held || p.flyT > REN_FLY.maxT || p.drive < 8 || busy) {
     const dive = !busy && p.flyT >= REN_FLY.slamMinT;   // one bounded impact at the real ground contact, only after an eligible flight
     p.flyT = 0; p.flyCd = REN_FLY.cooldown; p.flyHold = 0; p.flyOn = false;
-    let n = 0; if (dive) { n = areaHit(s, p.x, p.y, REN_FLY.slamR, p.qDamage * fm(s) * REN_FLY.slamMul, REN_FLY.slamPush, 0.4, 14); ringFx(s, 'slam', p.x, p.y, REN_FLY.slamR, 0.45); p.invulnerable = Math.max(p.invulnerable, 0.15); }
+    let n = 0; if (dive) { n = areaHit(s, p.x, p.y, FL.slamR, p.qDamage * fm(s) * FL.slamMul, FL.slamPush, 0.4, 14); ringFx(s, 'slam', p.x, p.y, FL.slamR, 0.45); p.invulnerable = Math.max(p.invulnerable, 0.15); }
     emit(s, 'ren_fly_land', p.x, p.y, (dive ? 1 : 0) | (Math.min(n, 63) << 8) | odBit(s));
   }
 }
 
 /* ------------------------------------------------------------------ per tick + input */
 export function updateRenCombat(s: GameState, dt: number) {
-  const p = s.player; if (s.hero !== 'ren') return;
+  const p = s.player; if (s.hero !== 'ren') return; updateBrands(s);
   p.sigCd = Math.max(0, p.sigCd - dt);   // ticks in base and every form, never reset by form changes
   if (p.hp <= 0 || s.cinema) { if (p.odT > 0) { p.odT = 0; emit(s, 'ren_od_end', p.x, p.y, p.form); } if (p.flyT > 0) { p.flyT = 0; p.air = 0; } return; }
   if (p.odT > 0) { p.odT -= dt; if (p.odT <= 0 || p.form < 1) { p.odT = 0; emit(s, 'ren_od_end', p.x, p.y, p.form); } }
@@ -288,7 +290,7 @@ export function updateRenCombat(s: GameState, dt: number) {
 export function renCombatInput(s: GameState, input: InputState, prev: { sig: boolean; od: boolean }): { sig: boolean; od: boolean } {
   const sigDown = !!(input.sig || input.sigHeld), odDown = !!input.od;
   s.sigHeld = !!input.sigHeld; s.flyHeld = flyIntent(s, input);
-  if (input.sigAbort) cancelNova(s); else if (sigDown && !prev.sig) startNova(s);
+  if (input.sigAbort) { cancelNova(s); cancelFang(s); } else if (sigDown && !prev.sig) { if (s.player.form === 2) startFang(s); else startNova(s); }
   if (odDown && !prev.od) startRenOverdrive(s);
   return { sig: sigDown, od: odDown };
 }

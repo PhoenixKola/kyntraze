@@ -23,6 +23,7 @@ export const heroFxUrl = (hero: string, n: string) => `/art/fx/${hero}/${n}.png`
 const PAL = {
   ren: { core: 0xfff0d8, hot: 0xff7a3d, mid: 0xff2e2a, deep: 0x8a0f1c, dark: 0x2a0508, ember: 0xffb36b },
   sora: { core: 0xffffff, hot: 0xcfeeff, mid: 0x4db8ff, deep: 0x1c5fd6, dark: 0x081840, ember: 0x9fe8ff },
+  ash: { core: 0xf4ead8, hot: 0xff9a3c, mid: 0x7a665a, deep: 0x1a1210, dark: 0x0c0808, ember: 0xffb36b },
 };
 interface Flash { x: number; y: number; t: number; dur: number; r: number; kind: 'slash' | 'burst' | 'flare' | 'dust' | 'crack' | 'pillar' | 'muzzle'; ang: number; big: boolean }
 const hash = (n: number) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
@@ -214,7 +215,7 @@ export class HeroFxView {
     }
   }
   private reveal(cin: NonNullable<GameState['cinema']>, s: GameState, foot: { x: number; y: number }, calm: boolean, reduced: boolean) {
-    const pal = PAL[this.hero], t = cin.t, u = Math.min(1, t / cin.dur), commit = Math.min(1, t / cin.commitAt);
+    const pal = this.hero === 'ren' && cin.to === 2 ? PAL.ash : PAL[this.hero], t = cin.t, u = Math.min(1, t / cin.dur), commit = Math.min(1, t / cin.commitAt);
     this.zoom = reduced ? 1 : 1 + 0.2 * Math.sin(Math.min(1, t / (cin.dur * 0.8)) * Math.PI * 0.5) * (t < cin.commitAt + 0.5 ? 1 : 1 - Math.min(1, (t - cin.commitAt - 0.5) / 0.6));
     // gathering: spiralling motes pulled into the body, an escalating pulse, then the eruption column and shockwave at the break
     const n = calm ? 10 : 24; for (let i = 0; i < n; i++) { const ph = (t * 1.1 + i / n) % 1, a = (i / n) * Math.PI * 2 + t * 4 * (1 + commit), r = (1 - ph) * (90 - 30 * commit); this.glow.fillStyle(i % 2 ? pal.hot : pal.mid, 0.85 * ph).fillCircle(foot.x + Math.cos(a) * r, foot.y - 30 + Math.sin(a) * r * 0.75, 1.8 + 2 * ph); }

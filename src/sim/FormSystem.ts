@@ -7,10 +7,11 @@ import { slideMove } from './CollisionSystem';
 import { cancelCast } from './AbilitySystem';
 import { ASCEND } from '../content/heroKits';
 import { VEX_REVEAL } from '../content/vexCombat';
+import { ASH } from '../content/renEclipse';
 import { clearHero } from './HeroSystem';
 import { b22Emit } from '../b22/state';
 /** B23: one reveal event per form at the real commit moment (same frame as the sprite / stats change); the renderer and audio read it by id (advancedFx / b22Sfx). */
-const revealKey = (hero: string, form: number) => (hero === 'kai' ? ['', 'flare', 'comet', 'still'][form] : hero === 'vex' ? `vex${form}` : hero) || '';
+const revealKey = (hero: string, form: number) => (hero === 'kai' ? ['', 'flare', 'comet', 'still'][form] : hero === 'vex' ? `vex${form}` : hero === 'ren' && form === 2 ? 'ren2' : hero) || '';
 export const emitReveal = (s: GameState) => { const k = revealKey(s.hero, s.player.form); if (k) b22Emit(s.b22, `reveal_${k}`, s.player.x, s.player.y, { n: 150 }); };
 
 function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number) {
@@ -22,7 +23,7 @@ export function formChoices(state: GameState): (1 | 2 | 3)[] {
   const p = state.player; const r: (1 | 2 | 3)[] = [];
   if (state.phase !== 'running' || state.cinema || p.formCooldown > 0 || p.hp <= 0) return r;
   if (state.hero === 'vex') { const f = state.b22.vex.forms; if (p.form === 0 && p.drive >= ASCEND.charge - 1e-6) { if (f[0]) r.push(1); if (f[1]) r.push(2); } return r; }   // B22: Vex has Riftbound and Voidheart Exile
-  if (state.hero !== 'kai') { if (state.heroFormUnlocked && p.form === 0 && p.drive >= ASCEND.charge - 1e-6) r.push(1); return r; }   // B19: Ren / Sora have Base + ONE transformation
+  if (state.hero !== 'kai') { if (state.heroFormUnlocked && p.form === 0 && p.drive >= ASCEND.charge - 1e-6) { r.push(1); if (state.hero === 'ren' && state.renF2) r.push(2); } return r; }   // B19: Ren / Sora have Base + ONE transformation
   if (p.form === 0 && p.drive >= RULES.formCharge) r.push(1);
   if (state.cometUnlocked && p.form < 2 && p.drive >= COMET.charge - 1e-6) r.push(2);
   if (state.apexUnlocked && p.form !== 3 && state.time >= state.apexGate && p.drive >= APEX.charge - 1e-6) r.push(3);
@@ -46,10 +47,10 @@ export function activateForm(state: GameState, want?: 1 | 2 | 3) {
     return true;
   }
   // Cometheart / Stillfire Apex: the whole sim freezes for the reveal; the form itself commits at `commitAt` so the art, the stats and the effects agree.
-  const hero = state.hero !== 'kai', apex = which === 3, first = (state.hero === 'vex' ? state.vexSeen[which - 1] : hero ? state.heroFormSeen : apex ? state.apexSeen : state.cometSeen) === 0, c = state.hero === 'vex' && which === 2 && first ? VEX_REVEAL.first : hero ? (first ? ASCEND.cinemaFirst : ASCEND.cinemaRepeat) : apex ? (first ? APEX.cinemaFirst : APEX.cinemaRepeat) : (first ? COMET.cinemaFirst : COMET.cinemaRepeat);
+  const hero = state.hero !== 'kai', apex = which === 3, first = (state.hero === 'vex' ? state.vexSeen[which - 1] : hero && state.hero === 'ren' && which === 2 ? state.renSeen2 : hero ? state.heroFormSeen : apex ? state.apexSeen : state.cometSeen) === 0, c = state.hero === 'vex' && which === 2 && first ? VEX_REVEAL.first : state.hero === 'ren' && which === 2 ? (first ? ASH.cinemaFirst : ASH.cinemaRepeat) : hero ? (first ? ASCEND.cinemaFirst : ASCEND.cinemaRepeat) : apex ? (first ? APEX.cinemaFirst : APEX.cinemaRepeat) : (first ? COMET.cinemaFirst : COMET.cinemaRepeat);
   state.cinema = { t: 0, dur: c.dur, breakAt: c.breakAt, commitAt: c.commitAt, first, from: p.form, to: which, broke: false, committed: false };
   state.cast = null; state.sphere = null; p.dashRemaining = 0; p.vx = 0; p.vy = 0; if (hero) clearHero(state);
-  emit(state, hero ? 'ascend_start' : apex ? 'form3_start' : 'form2_start', p.x, p.y, first ? 1 : 0);
+  emit(state, hero && state.hero === 'ren' && which === 2 ? 'ash_start' : hero ? 'ascend_start' : apex ? 'form3_start' : 'form2_start', p.x, p.y, first ? 1 : 0);
   return true;
 }
 /** Seconds the selector may stay open before it cancels itself (the sim is frozen meanwhile). */
@@ -75,8 +76,8 @@ export function updateSelector(s: GameState, dt: number, cmd: SelectorCmd) {
 }
 /** One frozen-world tick of the cinematic. Nothing else in the sim advances while this runs (see Simulation.step). */
 export function updateCinema(s: GameState, dt: number) {
-  const c = s.cinema; if (!c) return; const p = s.player; const hero = s.hero !== 'kai', apex = c.to === 3, K = hero ? ASCEND : apex ? APEX : COMET;
-  const ev = (a: 'break' | 'commit') => (hero ? (a === 'break' ? 'ascend_break' : 'ascend_commit') : apex ? (a === 'break' ? 'form3_break' : 'form3_commit') : (a === 'break' ? 'form2_break' : 'form2_commit')) as AbilityEventKind;
+  const c = s.cinema; if (!c) return; const p = s.player; const hero = s.hero !== 'kai', apex = c.to === 3, K = s.hero === 'ren' && c.to === 2 ? ASH : hero ? ASCEND : apex ? APEX : COMET;
+  const ash = s.hero === 'ren' && c.to === 2, ev = (a: 'break' | 'commit') => (ash ? (a === 'break' ? 'ash_break' : 'ash_commit') : hero ? (a === 'break' ? 'ascend_break' : 'ascend_commit') : apex ? (a === 'break' ? 'form3_break' : 'form3_commit') : (a === 'break' ? 'form2_break' : 'form2_commit')) as AbilityEventKind;
   c.t += dt;
   if (apex && c.first && !c.broke && c.t >= 0.9 && c.t - dt < 0.9) emit(s, 'form3_omen', p.x, p.y);
   if (!c.broke && c.t >= c.breakAt) {
@@ -90,10 +91,10 @@ export function updateCinema(s: GameState, dt: number) {
     }
   }
   if (!c.committed && c.t >= c.commitAt) { c.committed = true; p.form = c.to; p.drive = 100; emit(s, ev('commit'), p.x, p.y); emitReveal(s); }
-  if (c.t >= c.dur - 1e-9) { if (!c.committed) { c.committed = true; p.form = c.to; p.drive = 100; } s.cinema = null; if (s.hero === 'vex') s.vexSeen[c.to - 1]++; if (hero) s.heroFormSeen++; else if (apex) s.apexSeen++; else s.cometSeen++; p.invulnerable = Math.max(p.invulnerable, 0.5); }
+  if (c.t >= c.dur - 1e-9) { if (!c.committed) { c.committed = true; p.form = c.to; p.drive = 100; } s.cinema = null; if (s.hero === 'vex') s.vexSeen[c.to - 1]++; if (s.hero === 'ren' && c.to === 2) s.renSeen2++; else if (hero) s.heroFormSeen++; else if (apex) s.apexSeen++; else s.cometSeen++; p.invulnerable = Math.max(p.invulnerable, 0.5); }
 }
 export function endForm2(s: GameState) { const p = s.player; emit(s, 'form2_end', p.x, p.y); p.form = 0; p.formCooldown = COMET.cooldown * s.mods.formCd; }
-export function endAscend(s: GameState) { const p = s.player; emit(s, 'ascend_end', p.x, p.y); p.form = 0; p.formCooldown = ASCEND.cooldown * s.mods.formCd; }
+export function endAscend(s: GameState) { const p = s.player, ash = s.hero === 'ren' && p.form === 2; emit(s, ash ? 'ash_end' : 'ascend_end', p.x, p.y); p.form = 0; p.formCooldown = (ash ? ASH.cooldown : ASCEND.cooldown) * s.mods.formCd; s.hx.brands = []; }
 export function endForm3(s: GameState) {
   const p = s.player; emit(s, 'form3_end', p.x, p.y); p.form = 0; p.formCooldown = APEX.cooldown * s.mods.formCd; p.vx = 0; p.vy = 0;
   if (s.cast && s.cast.kind === 'rift' && !s.cast.released) cancelCast(s);   // an unreleased charge dies with the form (its cooldown stays spent)

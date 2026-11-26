@@ -67,7 +67,7 @@ export class ArenaScene extends Phaser.Scene {
     this.entityRenderer = new EntityRenderer(this);
     this.fx = new EffectsRenderer(this); this.readout = new CombatReadout(this);
     this.controller = new InputController(() => this.bridge.togglePause(), () => { if (this.bridge.getSettings().pauseOnBlur) this.bridge.pause(); }, () => this.bridge.pause());
-    { const hp = this.bridge.getPartner(); if (hp) { const sv = loadSave(); this.simulation.joinPartner({ ...NO_CONFIG, hero: hp, heroForm: hp !== 'kai' && !!sv.unlocks?.[hp as 'ren' | 'sora'], vexForms: sv.b22?.vexForms }, 'local', ['P1', 'P2']); this.controller.coop = true; } }
+    { const hp = this.bridge.getPartner(); if (hp) { const sv = loadSave(); this.simulation.joinPartner({ ...NO_CONFIG, hero: hp, heroForm: hp !== 'kai' && !!sv.unlocks?.[hp as 'ren' | 'sora'], vexForms: sv.b22?.vexForms, renF2: hp === 'ren' && !!sv.b22?.renF2 }, 'local', ['P1', 'P2']); this.controller.coop = true; } }
     this.bridge.bind(this.simulation); this.bridge.setInjector(code => this.controller?.inject(code));
     this.audio = sharedAbilityAudio(); this.events.on('b21-cue', this.onCue); this.audio?.setMuted(this.bridge.getSettings().mute);
     window.addEventListener('keydown', this.unlockAudio); window.addEventListener('pointerdown', this.unlockAudio);

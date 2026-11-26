@@ -13,6 +13,10 @@ const VEX: Partial<Record<Form, Card>> = {
   1: { name: 'RIFTBOUND', sub: 'Wider parry, faster cooldowns', cost: 'DRIVE', moves: ['Mirror Guard', 'Rift Execution', 'Oath of Ruin'], img: `${ASSET_BASE}ui/heroes/vex-portrait-f1.webp`, fc: '#b46bff' },
   2: { name: 'VOIDHEART EXILE', sub: 'Silver-black precision, marks spread', cost: 'DRIVE', moves: ['Phantom Legion', 'Dimensional Severance', 'Domain of the Exile'], img: `${ASSET_BASE}ui/heroes/vex-portrait-f2.webp`, fc: '#d7dcff' },
 };
+const REN: Partial<Record<Form, Card>> = {
+  1: { name: 'CRIMSON ASCENDANT', sub: 'Crimson fury, close-range pressure', cost: 'FULL DRIVE', moves: ['Infernal Cyclone', 'Scarlet Rampage', 'Crimson Catastrophe'], img: `${ASSET_BASE}ui/heroes/ren-portrait-f1.webp`, fc: '#ff4a3a' },
+  2: { name: 'ASHEN ECLIPSE', sub: 'Ash Brands and eclipse eruptions', cost: 'FULL DRIVE', moves: ['Eclipse Maul', 'Ninefold Rupture', 'Ashen Cataclysm'], img: `${ASSET_BASE}ui/heroes/ren-portrait-f2.webp`, fc: '#ffb36b' },
+};
 const Key = ({ k, pad }: { k: string; pad?: boolean }) => <kbd className={`keycap ${pad ? 'pad-key' : ''}`}>{k}</kbd>;
 const FRAME: Record<string, string> = { kai: 'frame_kai', vex: 'frame_vex' };
 
@@ -25,7 +29,7 @@ export function FormSelector({ hero, open, pick, choices, left, pad, onHover, on
     <div className="fz-panel">
       <header className="fz-head"><i aria-hidden="true"/><div><p className="fz-title">TRANSFORM</p><small>Choose a form · the fight is frozen while you decide</small></div><i aria-hidden="true"/></header>
       <div className="fz-cards">
-        {choices.map((c, i) => { const d = (vex ? VEX[c] : KAI[c]) ?? KAI[c]; return <button key={c} type="button" role="option" aria-selected={c === pick} className={`fz-card ${c === pick ? 'on' : ''}`} style={{ '--fc': d.fc, '--i': i, '--frame': `url(${ASSET_BASE}ui/hud/${fr}.webp)` } as React.CSSProperties} data-testid={`form-opt-${c}`} onMouseEnter={() => onHover(c)} onClick={() => onChoose(c)}>
+        {choices.map((c, i) => { const d = (vex ? VEX[c] : hero === 'ren' ? REN[c] : KAI[c]) ?? KAI[c]; return <button key={c} type="button" role="option" aria-selected={c === pick} className={`fz-card ${c === pick ? 'on' : ''}`} style={{ '--fc': d.fc, '--i': i, '--frame': `url(${ASSET_BASE}ui/hud/${fr}.webp)` } as React.CSSProperties} data-testid={`form-opt-${c}`} onMouseEnter={() => onHover(c)} onClick={() => onChoose(c)}>
           <span className="fz-num" aria-hidden="true">{i + 1}</span>
           <span className="fz-art"><img src={d.img} alt="" draggable={false}/></span>
           <b>{d.name}</b><em className="fz-cost">{d.cost}</em><small>{d.sub}</small>

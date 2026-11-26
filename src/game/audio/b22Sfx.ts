@@ -175,3 +175,28 @@ export function b32Sfx(kind: string, n = 0, b?: number): string | null {
   if (kind === 'clone_end') return n === 1 ? 'kk_echo_shatter' : 'kk_echo_fade';
   return null;
 }
+
+/** B33 Ashen Eclipse: a recipe per beat / stage / outcome, chosen from the simulation's report (beat, hits, miss, tier), so no two stages of one technique share a sound. */
+Object.assign(SFX, {
+  ash_hook: { f0: 150, f1: 70, dur: 0.2, noise: 0.5, decay: 12, wave: 'saw', gain: 0.6 }, ash_kick: { f0: 110, f1: 55, dur: 0.22, noise: 0.55, decay: 11, wave: 'saw', gain: 0.65 }, ash_claw: { f0: 520, f1: 180, dur: 0.18, noise: 0.6, decay: 14, wave: 'saw', gain: 0.55 }, ash_crush: { f0: 90, f1: 38, dur: 0.5, noise: 0.65, decay: 6, wave: 'sine', gain: 0.95 },
+  ash_brand: { f0: 1400, f1: 900, dur: 0.1, noise: 0, decay: 22, wave: 'bell', gain: 0.22, fm: 2.4 }, ash_erupt: { f0: 130, f1: 50, dur: 0.45, noise: 0.7, decay: 7, wave: 'sine', gain: 0.8 },
+  ash_q_start: { f0: 200, f1: 520, dur: 0.18, noise: 0.4, decay: 9, wave: 'saw', gain: 0.45 }, ash_q_hit: { f0: 170, f1: 70, dur: 0.22, noise: 0.55, decay: 11, wave: 'saw', gain: 0.7 }, ash_q_fin: { f0: 100, f1: 40, dur: 0.5, noise: 0.7, decay: 6, wave: 'sine', gain: 0.95 }, ash_q_miss: { f0: 600, f1: 250, dur: 0.13, noise: 0.45, decay: 20, wave: 'saw', gain: 0.25 },
+  ash_e_coil: { f0: 300, f1: 900, dur: 0.5, noise: 0.25, decay: 3, wave: 'saw', gain: 0.45 }, ash_e_dive: { f0: 900, f1: 120, dur: 0.26, noise: 0.5, decay: 9, wave: 'saw', gain: 0.6 }, ash_e_rupture: { f0: 80, f1: 30, dur: 0.8, noise: 0.75, decay: 4.5, wave: 'sine', gain: 1.0 },
+  ash_r_core: { f0: 120, f1: 640, dur: 0.8, noise: 0.2, decay: 2.6, wave: 'sine', gain: 0.6 }, ash_r_strike: { f0: 700, f1: 90, dur: 0.5, noise: 0.6, decay: 5, wave: 'saw', gain: 0.9 }, ash_r_rupture: { f0: 70, f1: 26, dur: 1.0, noise: 0.8, decay: 3.4, wave: 'sine', gain: 1.0 },
+  ash_v_charge: { f0: 140, f1: 300, dur: 0.4, noise: 0.3, decay: 4, wave: 'saw', gain: 0.35 }, ash_v_tier: { f0: 500, f1: 900, dur: 0.16, noise: 0.1, decay: 14, wave: 'bell', gain: 0.4, fm: 2.2 }, ash_v_release: { f0: 800, f1: 140, dur: 0.24, noise: 0.5, decay: 10, wave: 'saw', gain: 0.6 }, ash_v_hit: { f0: 190, f1: 70, dur: 0.24, noise: 0.55, decay: 10, wave: 'saw', gain: 0.75 }, ash_v_pulse: { f0: 120, f1: 45, dur: 0.45, noise: 0.65, decay: 6, wave: 'sine', gain: 0.85 }, ash_v_jaw: { f0: 1000, f1: 160, dur: 0.3, noise: 0.5, decay: 9, wave: 'saw', gain: 0.8 }, ash_v_miss: { f0: 500, f1: 220, dur: 0.14, noise: 0.4, decay: 20, wave: 'saw', gain: 0.22 }, ash_v_block: { f0: 300, f1: 200, dur: 0.12, noise: 0.5, decay: 22, wave: 'square', gain: 0.3 }, ash_v_cancel: { f0: 400, f1: 150, dur: 0.18, noise: 0.2, decay: 14, wave: 'sine', gain: 0.2 },
+  ash_reveal_start: { f0: 70, f1: 40, dur: 2.0, noise: 0.1, decay: 1.4, wave: 'sine', gain: 0.5 }, ash_reveal_break: { f0: 60, f1: 24, dur: 1.0, noise: 0.8, decay: 3, wave: 'sine', gain: 1.0 }, ash_reveal_commit: { f0: 300, f1: 1500, dur: 0.7, noise: 0.2, decay: 4, wave: 'bell', gain: 0.6, fm: 1.6 }, ash_shift: { f0: 400, f1: 900, dur: 0.25, noise: 0.25, decay: 9, wave: 'bell', gain: 0.5, fm: 2 }, ash_end: { f0: 500, f1: 120, dur: 0.5, noise: 0.3, decay: 5, wave: 'sine', gain: 0.4 },
+} satisfies Record<string, Recipe>);
+export function ashSfx(kind: string, n = 0): string | null {
+  const hits = (n >> 8) & 63;
+  switch (kind) {
+    case 'ash_auto': { if (hits <= 0) return null; const b = n & 3; return (n & 32) !== 0 ? 'ash_crush' : b === 0 ? 'ash_hook' : b === 1 ? 'ash_kick' : 'ash_claw'; }
+    case 'ash_brand': return 'ash_brand'; case 'ash_eruption': return 'ash_erupt';
+    case 'ash_q_start': return 'ash_q_start'; case 'ash_q_hit': return hits <= 0 ? ((n & 32) ? 'ash_q_miss' : null) : (n & 16) ? 'ash_q_fin' : 'ash_q_hit';
+    case 'ash_e_coil': return 'ash_e_coil'; case 'ash_e_dive': return 'ash_e_dive'; case 'ash_e_rupture': return 'ash_e_rupture';
+    case 'ash_r_core': return 'ash_r_core'; case 'ash_r_strike': return 'ash_r_strike'; case 'ash_r_rupture': return 'ash_r_rupture';
+    case 'ash_v_charge': return 'ash_v_charge'; case 'ash_v_tier': return 'ash_v_tier'; case 'ash_v_release': return 'ash_v_release'; case 'ash_v_hit': return 'ash_v_hit';
+    case 'ash_v_pulse': return ((n >> 5) & 7) >= 3 && (n & 31) < 2 ? 'ash_v_jaw' : 'ash_v_pulse'; case 'ash_v_miss': return 'ash_v_miss'; case 'ash_v_block': return 'ash_v_block'; case 'ash_v_cancel': return 'ash_v_cancel';
+    case 'ash_start': return 'ash_reveal_start'; case 'ash_break': return 'ash_reveal_break'; case 'ash_commit': return 'ash_reveal_commit'; case 'ash_shift': return 'ash_shift'; case 'ash_end': return 'ash_end';
+    default: return null;
+  }
+}

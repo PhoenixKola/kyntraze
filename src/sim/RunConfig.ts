@@ -8,7 +8,7 @@ import type { RelicId } from '../b22/relics';
 import { MODIFIER_RULES } from '../b22/challenges';
 
 /** B18: what the player chose before deploying. Captured once at run start and applied deterministically (no RNG), so a seed + config always replays identically. */
-export interface RunConfig { boon: BoonId | null; contract: ContractId | null; rerolls: number; banishes: number; /** B19: the runner and whether its transformation is unlocked in the save (Kai's own forms keep their separate flags) */ hero?: HeroId; heroForm?: boolean;
+export interface RunConfig { boon: BoonId | null; contract: ContractId | null; rerolls: number; banishes: number; /** B19: the runner and whether its transformation is unlocked in the save (Kai's own forms keep their separate flags) */ hero?: HeroId; heroForm?: boolean; /** B33: Ren's Ashen Eclipse unlocked in the save */ renF2?: boolean;
   /** B22: the run plan (omitted = Classic), Vex's transformation unlocks (Riftbound, Voidheart), a starting relic, whether the ultimate may be earned, and the co-op partner (set by the party layer) */ plan?: RunPlan; vexForms?: [boolean, boolean]; startRelic?: RelicId | null }
 export const NO_CONFIG: RunConfig = { boon: null, contract: null, rerolls: 0, banishes: 0 };
 export const toolCharges = (rerollOwned: boolean, banishOwned: boolean) => ({ rerolls: rerollOwned ? RUN_TOOLS.rerolls : 0, banishes: banishOwned ? RUN_TOOLS.banishes : 0 });
@@ -22,6 +22,7 @@ export function applyRunConfig(state: GameState, config: RunConfig) {
   state.plan = config.plan ?? CLASSIC_PLAN; state.b22.modifiers = [...state.plan.modifiers];
   applyHero(state, config.hero ?? 'kai', !!config.heroForm);
   if (config.vexForms) state.b22.vex.forms = [...config.vexForms];
+  state.renF2 = state.hero === 'ren' && state.heroFormUnlocked && !!config.renF2;
   if (config.startRelic) state.b22.relics.push(config.startRelic);
   const mods = state.plan.modifiers;
   if (mods.includes('glass_vanguard')) { p.maxHp = Math.round(p.maxHp * MODIFIER_RULES.glass.hp); p.hp = p.maxHp; state.mods.xp *= MODIFIER_RULES.glass.xp; }

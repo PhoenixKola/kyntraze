@@ -1,5 +1,10 @@
 # Changelog
 
+## B33 Ren: Ashen Eclipse
+- Ren's second and final transformation: a long obsidian-and-ash mane, charcoal-and-bone costume, a new reveal (a silent eclipse, a pressure front, nine tail shadows) and the Eclipse Nine-Tailed Fox Overdrive. Earned by defeating the Null Seraph as Ren after Crimson Ascendant; usable from the next run. Form Shift with Crimson Ascendant costs 18 Drive like Vex's.
+- New kit: Cinderfang Chain, Eclipse Maul, Ninefold Rupture, Ashen Cataclysm, Eclipse Fang, Ashen Skybreaker, and the capped Ash Brand mark that finishers detonate.
+- ImageGen: portrait, 8 icons, the Eclipse Fox family and ash effects; the body sheets are built through the existing Ren rig (no new bespoke poses).
+
 ## B32 Ability identity and combat feedback
 - Solo flight is now Left Alt (co-op Ctrl / Right Ctrl and the controller are unchanged); hints updated.
 - Cometheart Meteor Drive rebuilt: charged windup, real beat-point lane preview, lightning arc per beat, contact frames only on a real hit, a different whiff, a final crack / shock / end-point ring with a finisher hit-stop; timings retuned (cooldown unchanged).

@@ -15,6 +15,7 @@ import { ApexFx } from './stillfireFx';
 import { AbilityFx } from './abilityFx';
 import { KaiKitFx } from './kaiKitFx';
 import { B32Fx } from './b32Fx';
+import { AshFx } from './ashFx';
 import { PASSIVE_AURA } from './fxPolicy';
 import { CONTOUR, ContourController, EDGE_STATES, edgePalette, formKey, registerContourFilter } from './contourFilter';
 import { HeroFxView } from './heroFxView';
@@ -40,7 +41,7 @@ export class EntityRenderer {
   private readonly apexFx: ApexFx;
   private readonly cometFx: CometFx;
   private readonly formFx: FormFx;
-  private readonly abilityFx: AbilityFx; private readonly kitFx: KaiKitFx; private readonly b32: B32Fx | null;
+  private readonly abilityFx: AbilityFx; private readonly kitFx: KaiKitFx; private readonly b32: B32Fx | null; private ashFx: AshFx | null = null;
   private readonly anchors: AnchorTable | undefined;
   private hand: HandAnchor | null = null;
   private readonly enemies: EnemyRenderer | null;
@@ -57,7 +58,7 @@ export class EntityRenderer {
   private ghosts: { spr: Phaser.GameObjects.Sprite; life: number }[] = []; private ghostClock = 0;
   private furyId = 0; private furyBeat = -1; private furyTime = -9;
   /** Ren's last Crimson Fury beat and how long ago it landed, from the real ren_auto events (null before the first one) */
-  private furyView(state: GameState): { beat: number; t: number } | null { for (const e of state.abilityEvents) if (e.id > this.furyId) { this.furyId = e.id; if (e.kind === 'ren_auto' || e.kind === 'vex_auto') { this.furyBeat = (e.n ?? 0) & 3; this.furyTime = state.time; } } return this.furyBeat < 0 ? null : { beat: this.furyBeat, t: state.time - this.furyTime }; }
+  private furyView(state: GameState): { beat: number; t: number } | null { for (const e of state.abilityEvents) if (e.id > this.furyId) { this.furyId = e.id; if (e.kind === 'ren_auto' || e.kind === 'vex_auto' || e.kind === 'ash_auto') { this.furyBeat = (e.n ?? 0) & 3; this.furyTime = state.time; } } return this.furyBeat < 0 ? null : { beat: this.furyBeat, t: state.time - this.furyTime }; }
   private heroDeadT = 0; private heroAnim: HeroAnimator | null | undefined; private heroAnchors: AnchorTable | undefined;
   private heroFx: HeroFxView | null = null; private heroBody: Phaser.GameObjects.Graphics | null = null;
   private orbs = new Map<number, { gem: Phaser.GameObjects.Image; glow: Phaser.GameObjects.Image }>();
@@ -131,7 +132,7 @@ export class EntityRenderer {
   private edgePower = 0; private edgeFlow = 1;
   /** B12: camera punch-in factor of the Form II reveal, and a pending visual hit-stop (ms) the scene turns into skipped sim ticks. */
   cameraZoom() { return this.cometFx.cameraZoom() * this.apexFx.cameraZoom() * (this.heroFx?.cameraZoom() ?? 1); }
-  takeHitstop() { return Math.max(this.cometFx.takeHitstop(), this.apexFx.takeHitstop(), this.heroFx?.takeHitstop() ?? 0, this.b32?.takeHitstop() ?? 0); }
+  takeHitstop() { return Math.max(this.cometFx.takeHitstop(), this.apexFx.takeHitstop(), this.heroFx?.takeHitstop() ?? 0, this.b32?.takeHitstop() ?? 0, this.ashFx?.takeHitstop() ?? 0); }
   /** Hero animation state, for the dev-only QA hook. */
   deathPresented() { return this.heroFx ? (this.heroAnim ? this.heroAnim.deathPresented() : this.heroDeadT > 1) : this.animator.deathPresented(); }
   /** QA-only size comparison; the shipped default stays KAI_SCALE. */
@@ -273,7 +274,7 @@ export class EntityRenderer {
       const pose = anim.update({ dt, alive: !dead, moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, inputX: input.x, inputY: input.y, runSpeed: p.speed * (p.form ? 1.1 : 1), dashing: p.dashRemaining > 0, dashX: p.dashDx, dashY: p.dashDy, dashRemaining: p.dashRemaining, hurt, form: p.form, cinema: state.cinema ? { t: state.cinema.t, dur: state.cinema.dur, commitAt: state.cinema.commitAt } : null, act: view, strike: state.hx.strike, fury: this.furyView(state), flyT: p.flyT });
       this.pose = pose; const form: 'base' | 'f1' = pose.form === 'f1' ? 'f1' : 'base';
       // one appearance for BOTH body layers: Voidheart Exile (Vex f2) resolves its upper, legs and anchors from the same set
-      const look: HeroForm = hero === 'vex' && p.form === 2 && form === 'f1' && !!this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f2')) ? 'f2' : form, set = this.scene.registry.get(HERO_REGISTRY_KEY(hero, look)) as KaiManifests, m = set[pose.facing], fr = clipFrame(m, pose.clip), key = heroTextureKey(hero, pose.facing, pose.clip, look);
+      const wantF2 = (hero === 'vex' && p.form === 2) || (hero === 'ren' && (p.form === 2 || (state.cinema?.to === 2 && pose.clip === 'Transform'))), look: HeroForm = wantF2 && form === 'f1' && !!this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f2')) ? 'f2' : form, set = this.scene.registry.get(HERO_REGISTRY_KEY(hero, look)) as KaiManifests, m = set[pose.facing], fr = clipFrame(m, pose.clip), key = heroTextureKey(hero, pose.facing, pose.clip, look);
       if (this.hero.texture.key !== key) this.hero.setTexture(key);
       this.hero.setFrame(pose.frame).setOrigin(fr.ox / fr.w, fr.oy / fr.h).setPosition(x, y).setVisible(true);
       const hitFlash = !dead && p.invulnerable > RULES.contactInvulnerability - 0.1 && !state.hx.act, alpha = !dead && pose.clip !== 'Transform' && p.invulnerable > 0 && Math.floor(state.time * 18) % 2 === 0 ? 0.86 : 1;
@@ -286,7 +287,7 @@ export class EntityRenderer {
       this.hairStep(state, dt, hero, key, pose.frame, pose.clip, hurt, reduced);
       this.applyMotion(state, dt, hero, reduced, hurt, p.dashRemaining > 0, pose.clip, pose.facing);
       this.ghostTrail(state, dt, x, y, rigOf(hero), reduced); this.blinkTrail(state, dt, reduced);
-      this.hand = this.heroAnchors ? handAnchorWorld(this.heroAnchors, look === 'f2' ? 'f2' : form, pose.facing, pose.clip, pose.frame, x, y + this.hoverY, this.baseScale) : null;
+      this.hand = this.heroAnchors ? handAnchorWorld(this.heroAnchors, look === 'f2' && hero === 'vex' ? 'f2' : form, pose.facing, pose.clip, pose.frame, x, y + this.hoverY, this.baseScale) : null;
 
     } else {
       this.hero.setVisible(false); this.legs.setVisible(false); this.heroDeadT = dead ? this.heroDeadT + dt : 0; const ren = hero === 'ren';
@@ -296,6 +297,7 @@ export class EntityRenderer {
     if (hero === 'vex') { this.vexFx ??= new VexFx(this.scene); this.vexFx.update({ dt, state, hero: this.hero, hand: this.hand, scale: this.baseScale, reduced, running: state.phase === 'running', dead, crowded: state.enemies.length > 45, facing: this.pose.facing, shake: !this.partner }); }
     if (hero === 'sora') { this.soraFx ??= new SoraPhoenix(this.scene); this.soraFx.update({ dt, state, hero: this.hero, hand: this.hand, scale: this.baseScale, reduced, running: state.phase === 'running', dead, crowded: state.enemies.length > 45, facing: this.pose.facing, shake: !this.partner }); }
     if (hero === 'ren') { this.renFox ??= new RenFox(this.scene); this.renFox.update({ dt, state, hero: this.hero, hand: this.hand, scale: this.baseScale, reduced, running: state.phase === 'running', dead, crowded: state.enemies.length > 45, facing: this.pose.facing, shake: !this.partner }); }
+    if (hero === 'ren') { this.ashFx ??= new AshFx(this.scene, !this.partner); this.ashFx.update(dt, state, reduced, state.enemies.length > 45); const ash = this.ashFx.takeShake(); if (ash > 0 && !reduced) this.scene.cameras.main.shake(100, ash); }
     fx.update(state, dt, reduced, state.enemies.length > 45, x, y);
     const sh = fx.takeShake(); if (sh > 0 && !reduced) this.scene.cameras.main.shake(110, sh);
   }
@@ -339,5 +341,5 @@ export class EntityRenderer {
     for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies!.stats(), boss: this.bosses!.stats() }; }
-  destroy() { this.combatFx.destroy(); this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.b32?.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.renFox?.destroy(); this.soraFx?.destroy(); this.vexFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
+  destroy() { this.combatFx.destroy(); this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.b32?.destroy(); this.ashFx?.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.renFox?.destroy(); this.soraFx?.destroy(); this.vexFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
 }

@@ -186,7 +186,7 @@ export class Simulation {
     if (input.q && !edge.q) { if (!castQ()) bf.q = ABILITY_BUFFER; else bf.q = 0; } else if (bf.q > 0 && castQ()) bf.q = 0;
     const fDown = !!(input.f || input.fHeld); const wasF = edge.f; formShiftInput(s, input, fDown, wasF); formInput(s, fDown, wasF);
     if (s.selector.open) { activateForm(s); s.selector.open = false; }
-    if (s.cinema) { const c = s.cinema; s.cinema = null; s.player.form = c.to as 1 | 2 | 3; s.player.drive = 100; s.player.invulnerable = Math.max(s.player.invulnerable, 0.5); if (s.hero === 'vex') s.vexSeen[c.to - 1]++; if (s.hero !== 'kai') s.heroFormSeen++; slot.formAt = s.time; s.b22.ev.push({ id: s.b22.evId++, kind: 'form_instant', x: s.player.x, y: s.player.y }); }
+    if (s.cinema) { const c = s.cinema; s.cinema = null; s.player.form = c.to as 1 | 2 | 3; s.player.drive = 100; s.player.invulnerable = Math.max(s.player.invulnerable, 0.5); if (s.hero === 'vex') s.vexSeen[c.to - 1]++; if (s.hero === 'ren' && c.to === 2) s.renSeen2++; else if (s.hero !== 'kai') s.heroFormSeen++; slot.formAt = s.time; s.b22.ev.push({ id: s.b22.evId++, kind: 'form_instant', x: s.player.x, y: s.player.y }); }
     const bufE = s.hero !== 'sora';
     const castE = () => { const ok = !ult && startAbility(s, 'beam'); if (ok) { onCast(s, 'e'); slot.aimAtE = { x: s.player.aimX, y: s.player.aimY, t: s.time }; } return ok; };
     const castR = () => { if (ult) return false; if (ultReady(s) && startUltimate(s)) return true; const ok = startAbility(s, 'sphere'); if (ok) onCast(s, 'r'); return ok; };

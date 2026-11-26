@@ -30,6 +30,7 @@ const FX_COUNT = 7;
 function forms(save: SaveV1, h: HeroId): [number, number] {   // transformations unlocked / total (base is not counted, for every hero)
   if (h === 'kai') return [1 + Number(!!save.unlocks?.cometheart) + Number(!!save.unlocks?.stillfire), 3];
   if (h === 'vex') { const v = save.b22?.vexForms ?? [false, false]; return [Number(v[0]) + Number(v[1]), 2]; }
+  if (h === 'ren') return [Number(!!save.unlocks?.ren) + Number(!!save.b22?.renF2), 2];
   return [Number(!!save.unlocks?.[h as 'ren' | 'sora']), 1];
 }
 /** Sanctuary attunement 0..3 from unlocked forms, mastery milestones, finished story chapters and a recorded run. Drives extra aurora, floor runes and lit beacons. */

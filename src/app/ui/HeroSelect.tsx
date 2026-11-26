@@ -18,8 +18,8 @@ const FANTASY: Record<HeroId, string> = {
   vex: 'A fallen vanguard who punishes mistakes with ripostes and cuts through space itself.',
 };
 /** What each runner is for, in plain words (qualitative, no invented numbers). */
-const STYLE: Record<HeroId, string> = { kai: 'Close range · momentum · 3 transformations', ren: 'Close range · heavy hits · 1 transformation', sora: 'Long range · blades · 1 transformation', vex: 'Mid range · ripostes and cuts · 2 transformations' };
-const unlocked = (save: SaveV1, hero: HeroId, f: FormView) => f.k === 'base' || f.k === 'f1' && hero === 'kai' ? true : hero === 'kai' ? !!save.unlocks?.[f.k === 'f2' ? 'cometheart' : 'stillfire'] : hero === 'vex' ? !!save.b22?.vexForms?.[f.k === 'f1' ? 0 : 1] : !!save.unlocks?.[hero as 'ren' | 'sora'];
+const STYLE: Record<HeroId, string> = { kai: 'Close range · momentum · 3 transformations', ren: 'Close range · heavy hits · 2 transformations', sora: 'Long range · blades · 1 transformation', vex: 'Mid range · ripostes and cuts · 2 transformations' };
+const unlocked = (save: SaveV1, hero: HeroId, f: FormView) => f.k === 'base' || f.k === 'f1' && hero === 'kai' ? true : hero === 'kai' ? !!save.unlocks?.[f.k === 'f2' ? 'cometheart' : 'stillfire'] : hero === 'vex' ? !!save.b22?.vexForms?.[f.k === 'f1' ? 0 : 1] : hero === 'ren' && f.k === 'f2' ? !!save.b22?.renF2 : !!save.unlocks?.[hero as 'ren' | 'sora'];
 const crestOf = (hero: HeroId, f: FormView) => hero === 'kai' ? kitImg(f.kitIcon) : `${ASSET_BASE}ui/heroes/${hero}-crest-${f.k === 'base' ? 'base' : 'form'}.webp`;
 
 /** Looping idle of the inspected appearance, from the real transparent game sheets. Locked appearances are a silhouette teaser. */

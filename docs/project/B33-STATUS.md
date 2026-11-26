@@ -1,0 +1,49 @@
+# B33 Ren: Ashen Eclipse: status
+
+Baseline: B32 (`6e84606`). Done solo, no subagents. Not pushed unless the owner asks.
+
+## Concept (chosen from three directions, `art/characters/ren/f2/source/concept.png`)
+Direction A: a long wild swept-back obsidian mane with bone-ash tips and thin ember fissures, orange eclipse-ring eyes, charcoal-and-bone battle costume (torn waist strips, ash-grey forearm wraps, scarred skin with glowing fissure pixels). Ren's face, build and boots are kept; hair, palette and silhouette are new. Directions B (claw-split mane) and C (five horn-crown) were rejected: A is the least Kai-like and reads best at game size. The Eclipse Fox (Overdrive) is a new asset family (nine individually readable tails, head, body, paw, jaw), not a tinted Crimson Fox.
+
+## Unlock rule (exact)
+Win a run by defeating the Null Seraph (Classic-style plan with `unlocks`) with **Ren**, after Crimson Ascendant is already unlocked. The kill sets `renF2Now`; `GameBridge` writes `b22.renF2` at that moment; the form is usable from the **next** run, never the run that earns it. Other heroes, a Warden kill, a QA-forced kill without the plan's unlock flag, or a locked Ascendant earn nothing. Old saves default to locked (`migrateB22`); no history is invented (the only per-hero evidence in old saves is the single best run, which is not reliable enough to grant from). `?unlock=all` opens it in its own store (`withEverythingUnlocked`, server QA players via `unlock`); the real save is untouched and such runs stay unranked as before. Chronicles missions and Celestial Echoes grant nothing.
+
+## What the form does
+| Input | Technique | Implemented behaviour |
+|---|---|---|
+| Auto | Cinderfang Chain | Four close-range beats (body hook, low kick, cross-claw, crushing uppercut) at arm's reach only (nothing ranged). Beats 1-3 leave an Ash Brand on the foes they strike; the uppercut sweeps (capped) and detonates the marks on every foe it struck. |
+| Q | Eclipse Maul | Aimed rush: up to 3 strikes with real collision-safe travel (never through the target or a wall, i-frames 0.1 s each), the third a compact finisher that detonates marks. With nothing ahead it is one short committed lunge: no finisher, no impact. Bosses are hurt, never moved. 7 s cooldown. |
+| E | Ninefold Rupture | 0.5 s coil with a warning ring and nine converging tail shadows, then a pounce (short i-frames) and a radial rupture centred on the REAL landing point; marked foes inside erupt; ordinary foes are staggered and pushed, bosses take honest damage only. 11 s. |
+| R | Ashen Cataclysm | 0.8 s windup crushing an eclipse core between the fists with the lane and rupture circle drawn from the committed geometry; a spectral fox strike down a wall-clipped lane (each foe struck once), then a closing rupture at the far end (each foe once). 24 s. |
+| V (hold) | Eclipse Fang | Claw gauntlet whose silhouette grows with the real charge tier; release is a piercing lunge (each foe struck once, cap 6). Tier 0-1: one maul pulse; tier 2: plus a follow-up; tier 3: upper bite, lower bite, then an eruption that detonates every mark inside. A miss spends the cooldown but caps it at 8 s and plays no pulse; a cancelled charge is free; block is a separate cue. Shared 45 s signature cooldown. |
+| G | Eclipse Nine-Tailed Fox | Same capped meter, 10 s, +25% / +8% / faster strikes. Visually a layered Eclipse Fox (body, head, nine tails, stream while moving) whose paws and jaws strike with his real hits and shadow his Q/E/R/V. |
+| Alt (solo) | Ashen Skybreaker | Flight uses the shared toggle; its own faster lift (speed 1.45), ember jets and a harder landing rupture (r 150, only after an eligible flight). Finite Drive, no invulnerability. |
+| Ash Brand | | Form-II melee contacts mark real targets: cap 3 stacks per foe, 6 s life (refreshed), at most 20 marked foes. A finisher consumes a foe's marks once for one bounded eruption (damage per stack, small capped splash to neighbours). Eruptions never mark or consume, so nothing chains; leaving the form clears all marks. Pips show above marked foes. |
+
+## Lifecycle and compatibility
+Form id 2 for Ren with explicit hero+form dispatch (`RenEclipse.ts`, `ashForm`); Kai's tier-2 logic and Vex's f2 are untouched. Base -> either unlocked form with full Drive: one ready form starts at once, two open the existing selector (Ren cards added). Shift 1 <-> 2 with F while transformed: 18 Drive, minimum 20, 2.5 s cooldown, refused in base, during the reveal, when locked, with the selector open, or to the same form; an unreleased V charge ends, a released V keeps its form, other acts end, no refill. Own drain (4.1/s vs 3.4), speed 1.14, auto 1.38, form cooldown 24 s. Separate per-form reveal counters (`renSeen2`), long first reveal 3.5 s, short repeat 1.1 s, both with the eclipse core, break pressure front and nine tail shadows; new ash_start / break / commit / end events carry their own audio. Co-op: `renF2`, `renF2Now`, `renSeen2` are slot-swapped (`SLOT_KEYS`); `hx.brands` and `renF2` are in the snapshot, additive, **protocol version unchanged** (old clients ignore the fields). The server applies all damage; a QA `unlock` player gets the flag via the room config. Ranked/Daily rules untouched: the new form only exists once earned or under `?unlock=all`.
+
+Not added (honest): form-2 mastery milestones and aura/edge rewards (the contour key `ash` maps to the Ascendant's mastery slot), form-2 victory pose and outfit variants, a form-2 specific Nexus/Chronicles beat.
+
+## Assets and provenance
+- Hair: 3 concept directions, then 4 head/mane sheets (south, north, east, west) via ImageGen (`art/characters/ren/f2/source`, `gen_heads.py`, `PROVENANCE.md`). `scripts/prepare_f2.py` quantizes them to the rig grid and applies the ash costume recolor to every body part (crimson trim to bone-ash, cloth to charcoal, ragged burned hems, ember fissure pixels), deterministic, no painted pixels. `scripts/build_f2.sh` runs the existing Blender rig (the Ascendant clip set) into `art/characters/ren/f2/<dir>/sheets`; `scripts/b33-ren-publish.py` publishes 24 clips x 4 directions to `public/art/ren-f2`. North is its own view, not a mirror.
+- Portrait, 8 HUD icons, the Eclipse Fox family (6 sprites) and 9 ash effect sprites via ImageGen (`art/b33`, `run.py`, `process.py`, prompts, `PROVENANCE.md`): `public/ui/heroes/ren-portrait-f2.webp`, `public/ui/icons/ren2_*.png`, `public/art/b33/*.webp` (about 1.5 MB).
+- Runtime: `RenEclipse.ts` (sim), `content/renEclipse.ts` (numbers), `render/ashFx.ts` (all form-II presentation, pooled, hard cap 130 sprites + one Graphics), HUD/tooltips/selector/hero select/progress/nexus wiring, `edgePalette` contour `ash`.
+
+## Known art limits
+- The form uses the Ascendant's clip set on the new body: the rush, pound and lunge poses are reused for Eclipse Maul, Rupture, Cataclysm and Fang (the animator maps them to `Rampage` / `Pound` / `Lunge` / `NovaCharge`). **No bespoke Blender poses were authored**; the technique identity comes from the new effect layers. The lowered predator stance is therefore not a separate animation, and the idle is the Ascendant idle with the new mane and costume.
+- The costume is a recolor-and-tear of the existing parts on the same rig, so the garment silhouette changes mostly through palette, torn hems and the mane; one-shoulder asymmetry from the concept is not modelled.
+- Mane and cloth motion come from the existing hair rig behaviour only.
+
+## Evidence
+- `npm run typecheck`, `npm run build` clean. 23 new unit tests (`src/tests/b33-ren-eclipse.test.ts`): unlock gating and the Seraph rule, QA unlock-all, form offers, per-form reveal counters, drain and cooldown, shift both ways and every refusal, auto reach and the finisher, brand cap / expiry / no-chain, determinism, Maul with and without a target, boss and wall safety, Rupture timing and boss fairness, Cataclysm once-per-stage, V tiers / cancel / miss / jaw, slot fields, recipes, Ascendant kit unchanged. Full `npm test` after the final edit: 69 files passed, 1 skipped, 863 tests passed, 0 failed.
+- Browser (`e2e/b33-ren.spec.ts`, headless Chromium, real key presses: F, card 2, reveal, auto, Q, E, R, hold V, G, Alt, F shift both ways): no page errors; Hero Select shows Ashen Eclipse with its real kit; strips and stills under `test-results/b33` (gitignored).
+- Frame time (`e2e/b33-perf.spec.ts`, Q/E/R spam into 40 stationary foes, headless software GL, 1280x720): Ascendant avg 38.5 ms / p95 50.1, Eclipse avg 37.7 / p95 50.1. No measurable cost; absolute numbers are software rendering, not the target machine.
+- Regression browser run (heroes, Chronicles, Living Fractures specs): 13 passed; the opt-in Living Fractures test timed out under two parallel workers (a loading stall) and passes alone; the heroes 'death shows the Results ... Retry' test asserts the old results eyebrow text (`result-hero` now reads CONNECTION TO THE ZONE LOST) at both sizes, a stale assertion unrelated to this batch and not fixed here.
+
+## Not verified (owner checks)
+- **No human watched any of this at normal speed in a visible window**; the strips are script screenshots for my own inspection, not visual approval. Reveal timing, hit-stop weight, Eclipse Fox size and the lack of bespoke poses need your eyes.
+- **Audio was not listened to** (synthesized recipes); no controller; reduced-effects mode was not visually reviewed.
+- Two local co-op players and two online clients were not exercised in a browser with this form; the state is slot-swapped and snapshotted and the sim is server-side, but flow was verified at unit level only. Reconnect not tested.
+- B31 Living Fractures and a Chronicles mission were not re-run for this batch beyond the unit suite.
+- Balance numbers are first-pass reasoning from the Ascendant curves, not tuned by play.
