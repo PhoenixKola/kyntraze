@@ -4,4 +4,4 @@ B00 actual starter → **B01 combat and sim feel validation** → B02 Kai true s
 
 After user downloads and inspects B00, produce **one** downloadable, precise Codex or Claude Code prompt at a time based on the latest uploaded game ZIP. Do not invent art approvals or push to GitHub automatically.
 
-**B31A Fracture Chronicles** (story campaign) is implemented locally and awaiting owner review; see docs/project/B31A-STATUS.md. **B31B Living Fractures** (opt-in world events) is implemented locally; see docs/project/B31B-STATUS.md.
+**B31A Fracture Chronicles** (story campaign) is implemented locally and awaiting owner review; see docs/project/B31A-STATUS.md. **B31B Living Fractures** (opt-in world events) is implemented locally; see docs/project/B31B-STATUS.md. **B32 Ability identity and combat feedback** (targeted: Meteor Drive, Silver Echo, Surge Step, Left Alt flight, hero contact layers) is implemented locally; see docs/project/B32-STATUS.md. B33 (Ren) and B34 (Sora) are next.

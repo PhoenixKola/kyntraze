@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { STARTER_TEXTURES } from '../../assets/atlasRegistry';
 import { ABILITY_FX_NAMES, abilityFxKey, abilityFxUrl } from '../render/abilityFx';
 import { KK_FX, kkKey, kkUrl } from '../render/kaiKitFx';
+import { B32_FX, b32Key, b32Url } from '../render/b32Fx';
 import { VFX_NAMES, vfxKey, vfxUrl } from '../render/fxPool';
 import { ARENA_FX, FLOOR_TILE_COUNT, HAZARD_FX, PROPS_KEY, arenaAssetUrl, arenaFxKey, arenaPropNames, floorTileKey, floorTileUrl, parsePropManifest, propKey } from '../render/arenaWorld';
 import { B22_ART } from '../render/realmArt';
@@ -66,6 +67,7 @@ export class BootScene extends Phaser.Scene {
     this.load.json(KAI_ANCHORS_KEY, KAI_ANCHORS_URL);
     ABILITY_FX_NAMES.forEach(n => this.load.image(abilityFxKey(n), abilityFxUrl(n)));
     KK_FX.forEach(n => this.load.image(kkKey(n), kkUrl(n)));
+    B32_FX.forEach(n => this.load.image(b32Key(n), b32Url(n)));   // B32 ability identity sprites (ImageGen)
     KP_NAMES.forEach(n => this.load.image(kpKey(n), kpUrl(n)));
     VX_NAMES.forEach(n => this.load.image(vxKey(n), vxUrl(n)));   // B28 Abyssal Guardian (two looks) + Vex FX (ImageGen)
     SP_NAMES.forEach(n => this.load.image(spKey(n), spUrl(n)));   // B27 Astral Phoenix + Sora form FX (ImageGen)

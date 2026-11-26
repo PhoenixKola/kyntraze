@@ -1,5 +1,11 @@
 # Changelog
 
+## B32 Ability identity and combat feedback
+- Solo flight is now Left Alt (co-op Ctrl / Right Ctrl and the controller are unchanged); hints updated.
+- Cometheart Meteor Drive rebuilt: charged windup, real beat-point lane preview, lightning arc per beat, contact frames only on a real hit, a different whiff, a final crack / shock / end-point ring with a finisher hit-stop; timings retuned (cooldown unchanged).
+- Stillfire Silver Echo: pale silver spectral double with sigil, life ring, target reticle, visible strikes, and distinct destroyed vs expired endings. Surge Step shows its live state and expiry.
+- Sora (Prison, Spears, Collapse), Ren (Cyclone, Rampage, Catastrophe) and Vex (perfect counter vs guard, relocation tears, seals, cuts) gain contact-aware effect layers; 36 ImageGen sprites in public/art/b32. New audio cues chosen from the simulation's hit reports.
+
 ## B31B Living Fractures
 - Opt-in run rule on Classic, Endless and Fracture Expedition (Mode Select toggle; online host toggle): six optional world events with their own deterministic director stream. Rift Portal, Corrupted Shrine, Fracture Cache, Roaming Elite, Containment (escort or defend) and Celestial Echo (one trial and blessing per hero), each with arena-specific variants for all four arenas.
 - Event runs are a different seed contract (`<plan>+lf`), unranked, and never write the mode records; with the rule off nothing changes (bit-identical until the first event, tested).

@@ -14,6 +14,7 @@ import { CometFx } from './cometFx';
 import { ApexFx } from './stillfireFx';
 import { AbilityFx } from './abilityFx';
 import { KaiKitFx } from './kaiKitFx';
+import { B32Fx } from './b32Fx';
 import { PASSIVE_AURA } from './fxPolicy';
 import { CONTOUR, ContourController, EDGE_STATES, edgePalette, formKey, registerContourFilter } from './contourFilter';
 import { HeroFxView } from './heroFxView';
@@ -39,7 +40,7 @@ export class EntityRenderer {
   private readonly apexFx: ApexFx;
   private readonly cometFx: CometFx;
   private readonly formFx: FormFx;
-  private readonly abilityFx: AbilityFx; private readonly kitFx: KaiKitFx;
+  private readonly abilityFx: AbilityFx; private readonly kitFx: KaiKitFx; private readonly b32: B32Fx | null;
   private readonly anchors: AnchorTable | undefined;
   private hand: HandAnchor | null = null;
   private readonly enemies: EnemyRenderer | null;
@@ -68,7 +69,7 @@ export class EntityRenderer {
     this.f2 = scene.registry.get(KAI_F2_REGISTRY_KEY) as KaiManifests | undefined;
     this.f3 = scene.registry.get(KAI_F3_REGISTRY_KEY) as KaiManifests | undefined;
     this.hairLayer = new HairLayer(scene); this.outfitLayer = new OutfitLayer(scene, scene.registry.get(HAIR_ANCHORS_KEY) as HairTable | undefined); this.hairTable = scene.registry.get(HAIR_ANCHORS_KEY) as HairTable | undefined;
-    this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1, this.f2, this.f3); this.cometFx = new CometFx(scene); this.kitFx = new KaiKitFx(scene, this.f3); this.apexFx = new ApexFx(scene); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = partner ? null : new EnemyRenderer(scene); this.bosses = partner ? null : new BossRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
+    this.manifests = manifests; this.animator = new KaiAnimator(manifests, this.f1, this.f2, this.f3); this.cometFx = new CometFx(scene); this.kitFx = new KaiKitFx(scene, this.f3); this.b32 = partner || (import.meta.env.DEV && (window as unknown as { __KYNT_NO_B32__?: boolean }).__KYNT_NO_B32__) ? null : new B32Fx(scene); this.apexFx = new ApexFx(scene); this.formFx = new FormFx(scene); this.abilityFx = new AbilityFx(scene); this.enemies = partner ? null : new EnemyRenderer(scene); this.bosses = partner ? null : new BossRenderer(scene); this.anchors = scene.registry.get(KAI_ANCHORS_KEY) as AnchorTable | undefined;
     this.presence = new KaiPresence(scene); this.combatFx = new KaiCombatFx(scene);
     this.hero = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Idle'), 0).setScale(KAI_SCALE).setDepth(10);
     this.legs = scene.add.sprite(1100, 800, kaiTextureKey('south', 'Run'), 0).setScale(KAI_SCALE).setDepth(9.9).setVisible(false);
@@ -130,7 +131,7 @@ export class EntityRenderer {
   private edgePower = 0; private edgeFlow = 1;
   /** B12: camera punch-in factor of the Form II reveal, and a pending visual hit-stop (ms) the scene turns into skipped sim ticks. */
   cameraZoom() { return this.cometFx.cameraZoom() * this.apexFx.cameraZoom() * (this.heroFx?.cameraZoom() ?? 1); }
-  takeHitstop() { return Math.max(this.cometFx.takeHitstop(), this.apexFx.takeHitstop(), this.heroFx?.takeHitstop() ?? 0); }
+  takeHitstop() { return Math.max(this.cometFx.takeHitstop(), this.apexFx.takeHitstop(), this.heroFx?.takeHitstop() ?? 0, this.b32?.takeHitstop() ?? 0); }
   /** Hero animation state, for the dev-only QA hook. */
   deathPresented() { return this.heroFx ? (this.heroAnim ? this.heroAnim.deathPresented() : this.heroDeadT > 1) : this.animator.deathPresented(); }
   /** QA-only size comparison; the shipped default stays KAI_SCALE. */
@@ -235,7 +236,8 @@ export class EntityRenderer {
     this.formFx.update(dt, this.hero.x, this.hero.y, this.baseScale / KAI_SCALE, this.animator.visualForm === 'f1', !dead, this.pose.events, reducedEffects, emphasis, state.enemies.length > 45, this.hero);
     const dead2 = dead;
     this.hand = this.anchors ? handAnchorWorld(this.anchors, this.pose.form, this.pose.facing, this.pose.clip, this.pose.frame, this.hero.x, this.hero.y, this.baseScale) : null;
-    if (!this.partner || this.ownKaiFx) { this.abilityFx.update(dt, state, reducedEffects, this.animator.visualForm !== 'base', this.hand); this.kitFx.update(dt, state, reducedEffects, this.baseScale); }   // a Kai partner of a non-Kai runner draws their own ability layers (the first renderer draws Ren / Sora / Vex layers through heroFx)
+    if (!this.partner || this.ownKaiFx) { this.abilityFx.update(dt, state, reducedEffects, this.animator.visualForm !== 'base', this.hand); this.kitFx.update(dt, state, reducedEffects, this.baseScale); }
+    this.b32?.update(dt, state, reducedEffects, state.enemies.length > 45); const b32s = this.b32?.takeShake() ?? 0; if (b32s > 0 && !reducedEffects) this.scene.cameras.main.shake(100, b32s);   // a Kai partner of a non-Kai runner draws their own ability layers (the first renderer draws Ren / Sora / Vex layers through heroFx)
     this.apexFx.update({ dt, state, hero: this.hero, x: this.hero.x, y: this.hero.y, facing: this.pose.facing, reduced: reducedEffects, crowded: state.enemies.length > 45, f3: this.animator.visualForm === 'f3' && !dead2,
       moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, speed: Math.hypot(p.vx, p.vy), dashing: p.dashRemaining > 0, hand: this.hand, events: this.pose.events });
     this.cometFx.update({ dt, state, hero: this.hero, x: this.hero.x, y: this.hero.y, facing: this.pose.facing, reduced: reducedEffects, crowded: state.enemies.length > 45, f2: this.animator.visualForm === 'f2' && !dead2 && p.form !== 3 && state.cinema?.to !== 3,
@@ -337,5 +339,5 @@ export class EntityRenderer {
     for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies!.stats(), boss: this.bosses!.stats() }; }
-  destroy() { this.combatFx.destroy(); this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.renFox?.destroy(); this.soraFx?.destroy(); this.vexFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
+  destroy() { this.combatFx.destroy(); this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.b32?.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.renFox?.destroy(); this.soraFx?.destroy(); this.vexFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
 }

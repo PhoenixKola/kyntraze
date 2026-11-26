@@ -28,7 +28,7 @@ export interface UiSnapshot {
   owned: OwnedUpgrade[];
   map: MiniMap;
   /** Cooldown lengths after upgrades (the HUD sweep needs the real maximum). */
-  /** B22 Kai kit readouts for the HUD: Surge seconds left, Silver Echo hp / life fractions, Crucible zone live, and whether the sustained Reversal / Rift chain is running */ kit: { surge: number; cloneHp: number; cloneLife: number; crucible: boolean; chain: 'none' | 'rift' | 'reversal' };
+  /** B22 Kai kit readouts for the HUD: Surge seconds left, Silver Echo hp / life fractions, Crucible zone live, and whether the sustained Reversal / Rift chain is running */ kit: { surge: number; cloneHp: number; cloneLife: number; crucible: boolean; beat: number; chain: 'none' | 'rift' | 'reversal' };
   cdMax: { q: number; flare: number; crucible: number; dash: number; beam: number; sphere: number; form: number; dragon: number; comet: number; rift: number; reversal: number; evade: number };
   /** Seconds since Second Wind fired (drives a short HUD flash), or a large number. */
   sinceRevive: number; revives: number;
@@ -55,7 +55,7 @@ export interface MiniMap { /** B31B: event markers (k = kind, st = 0 idle / 1 ac
 export const blankMap: MiniMap = { arena: 'gloam', px: 1100, py: 800, ax: 0, ay: 1, foes: [], hazards: [], near: 0, nearest: 9999, eliteNear: false, bossNear: false };
 export interface BossPartHud { role: string; hp: number; maxHp: number; id: number }
 export interface BossHud { id: string; name: string; hp: number; maxHp: number; phase: number; phases: number; mode: string; intro: number; invuln: boolean; exposed: boolean; /** B22: authoritative parts (anchors, arms, constructs) with their own health */ parts: BossPartHud[]; /** B22: the core is shielded by its parts */ shielded: boolean }
-export const blankSnapshot: UiSnapshot = { kit: { surge: 0, cloneHp: 0, cloneLife: 0, crucible: false, chain: 'none' }, phase: 'running', seed: 0, hp: 100, maxHp: 100, xp: 0, nextXp: 7,
+export const blankSnapshot: UiSnapshot = { kit: { surge: 0, cloneHp: 0, cloneLife: 0, crucible: false, beat: 0, chain: 'none' }, phase: 'running', seed: 0, hp: 100, maxHp: 100, xp: 0, nextXp: 7,
   level: 1, seconds: 0, kills: 0, enemies: 0, dashCooldown: 0, sigCd: 0, odMeter: 0, odT: 0, sigCharge: 0, sigTier: -1, flying: false, dashLeft: 1, dashMax: 1, qCooldown: 0, beamCooldown: 0, sphereCooldown: 0, drive: 0,
   form: 0, formCooldown: 0, dragonCooldown: 0, cometCooldown: 0, apexUnlocked: false, apexReady: false, riftCooldown: 0, reversalCooldown: 0, evadeCooldown: 0, riftCharge: 0, selector: { open: false, pick: 0, choices: [], left: 4 }, cometUnlocked: false, cometReady: false, hero: 'kai', heroFormUnlocked: false, heroReady: false, lanceCharge: 0, lanceTier: -1, heroAct: '', cinema: false, offers: [], score: 0, deathShown: false, boss: null, arenaName: 'THE GLOAM CIRCUIT', cards: [], owned: [], map: blankMap, cdMax: { q: 8.5, flare: 9, crucible: 18, dash: 3.2, beam: 7, sphere: 16, form: 6, dragon: 9, comet: 22, rift: 8, reversal: 14, evade: 9 }, sinceRevive: 999, revives: 0, victoryShown: false, rewardPick: false, bosses: 0,
   bestForm: 0, b22Crest: null, tips: null, asc: null, partner: null, party: null, contract: null, boon: null, rerolls: 0, banishes: 0, reward: null, marks: 0, crest: null, lf: null, run: { t: 0, wardenAt: 480, finaleAt: 900, wardenDone: false, finaleOut: false, nextLabel: 'FRACTURE WARDEN', nextIn: 480, announce: null } };

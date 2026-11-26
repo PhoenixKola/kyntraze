@@ -9,7 +9,7 @@ import { faceOf, punchOrigin } from './AbilitySystem';
 import { freeAim } from './ApexSystem';
 
 export interface KShot { id: number; x: number; y: number; vx: number; vy: number; ttl: number; dmg: number; hand: 0 | 1; ang: number }
-export interface Clone { id: number; x: number; y: number; hp: number; maxHp: number; life: number; maxLife: number; atk: number; dmg: number; face: Face; moving: boolean; hitCd: Record<number, number>; flash: number; swing: number; radius: number }
+export interface Clone { tid?: number; id: number; x: number; y: number; hp: number; maxHp: number; life: number; maxLife: number; atk: number; dmg: number; face: Face; moving: boolean; hitCd: Record<number, number>; flash: number; swing: number; radius: number }
 export interface Pillar { id: number; x: number; y: number; at: number; fired: boolean; r: number; dmg: number }
 export interface Crucible { id: number; x: number; y: number; t: number; life: number; r: number; pulse: number; pulses: number; dmg: number; finalDmg: number; finalR: number; done: boolean }
 export interface KaiKit { surge: number; surgeForm: number; fired: number; shots: KShot[]; clone: Clone | null; pillars: Pillar[]; riseHits: Record<number, number>; riseDir: { x: number; y: number; ox: number; oy: number; t: number } | null; crucible: Crucible | null; meteorBeat: number }
@@ -47,7 +47,7 @@ export function kaiQ(s: GameState): boolean {
     p.qCooldown = SCATTER.cooldown; startCast(s, 'scatter', dir, dur); k.fired = 0; emit(s, 'hero_q', p.x, p.y); return true;
   }
   if (p.form === 2) {
-    const dir = aimOrNearest(s, 300), dur = METEOR.windup + METEOR.beats * METEOR.beatEvery + METEOR.recover;
+    const dir = aimOrNearest(s, 300), dur = METEOR.windup + METEOR.beats * METEOR.beatEvery + METEOR.finalPause + METEOR.recover;
     p.qCooldown = METEOR.cooldown; k.meteorBeat = 0; startCast(s, 'meteor', dir, dur); emit(s, 'meteor_start', p.x, p.y); return true;
   }
   if (k.clone) return false;   // one echo per Kai; never stacked, never cloned
@@ -150,17 +150,17 @@ function updateShots(s: GameState, k: KaiKit, dt: number) {
 /** Meteor Drive: windup, then three body-driven advancing strike beats along the locked lane; each beat hits an enemy at most once. */
 function castMeteor(s: GameState, c: Cast) {
   const k = kitOf(s), p = s.player;
-  while (k.meteorBeat < METEOR.beats && c.t >= METEOR.windup + k.meteorBeat * METEOR.beatEvery - 1e-9) {
-    const b = k.meteorBeat++, last = b === METEOR.beats - 1;
+  while (k.meteorBeat < METEOR.beats && c.t >= METEOR.windup + k.meteorBeat * METEOR.beatEvery + (k.meteorBeat === METEOR.beats - 1 ? METEOR.finalPause : 0) - 1e-9) {
+    const b = k.meteorBeat++, last = b === METEOR.beats - 1, sx = p.x, sy = p.y;
     for (let sub = 0; sub < 4; sub++) { const nx = p.x + c.dirX * METEOR.step / 4, ny = p.y + c.dirY * METEOR.step / 4; if (blocked(nx, ny, p.radius)) break; p.x = nx; p.y = ny; }
     p.invulnerable = Math.max(p.invulnerable, METEOR.iframes); c.released = true;
-    const fx = p.x + c.dirX * 30, fy = p.y + c.dirY * 30, dmg = p.qDamage * METEOR.damageMul * (last ? METEOR.finalMul : 1) * s.mods.formPower; let n = 0;
+    const fx = p.x + c.dirX * 30, fy = p.y + c.dirY * 30, dmg = p.qDamage * METEOR.damageMul * (last ? METEOR.finalMul : 1) * s.mods.formPower, reach = last ? METEOR.finalReach : METEOR.reach; let n = 0;
     for (const e of s.enemies) {
-      if (!alive(e) || Math.hypot(e.x - fx, e.y - fy) > METEOR.reach + e.radius) continue;
+      if (!alive(e) || Math.hypot(e.x - fx, e.y - fy) > reach + e.radius) continue;
       damageEnemy(s, e, dmg, { area: true, slot: 'q' }); n++;
       if (e.hp > 0 && !isBoss(e.kind)) for (let i = 0; i < 3; i++) slideMove(e, c.dirX * (last ? METEOR.finalKnock : METEOR.knock) / 0.45, c.dirY * (last ? METEOR.finalKnock : METEOR.knock) / 0.45, 0.15);
     }
-    emit(s, 'meteor_beat', fx, fy, last ? 100 + n : n);
+    s.abilityEvents.push({ id: s.nextId++, kind: 'meteor_beat', x: fx, y: fy, tx: sx, ty: sy, n: last ? 100 + n : n, b }); if (s.abilityEvents.length > 40) s.abilityEvents.splice(0, s.abilityEvents.length - 40);
   }
   if (c.t >= c.dur - 1e-9) { emit(s, 'meteor_end', p.x, p.y); s.cast = null; }
 }
@@ -212,8 +212,9 @@ function updateClone(s: GameState, k: KaiKit, dt: number) {
   const p = s.player; let tgt: Enemy | null = null, bd = Infinity;
   for (const e of s.enemies) { if (!alive(e)) continue; const d = Math.hypot(e.x - c.x, e.y - c.y); if (d < ECHO.seek && d < bd) { bd = d; tgt = e; } }
   let mx = 0, my = 0;
+  if ((tgt?.id ?? 0) !== (c.tid ?? 0)) { c.tid = tgt?.id; if (tgt) s.abilityEvents.push({ id: s.nextId++, kind: 'clone_target', x: c.x, y: c.y, tx: tgt.x, ty: tgt.y }); }
   if (tgt) { const d = bd, v = normalize(tgt.x - c.x, tgt.y - c.y); c.face = faceOf(v.x, v.y); if (d > ECHO.keep + 30) { mx = v.x; my = v.y; } else if (d < ECHO.keep - 40) { mx = -v.x; my = -v.y; }
-    if (d <= p.attackRange && c.atk <= 0) { c.atk = ECHO.atkEvery; c.swing = 0.2; s.impacts.push({ id: s.nextId++, kind: 'shot', x: c.x, y: c.y - 15, targetX: tgt.x, targetY: tgt.y, ttl: 0.2, life: 0.2 }); damageEnemy(s, tgt, c.dmg, { slot: 'none' }); } }
+    if (d <= p.attackRange && c.atk <= 0) { c.atk = ECHO.atkEvery; c.swing = 0.2; s.impacts.push({ id: s.nextId++, kind: 'shot', x: c.x, y: c.y - 15, targetX: tgt.x, targetY: tgt.y, ttl: 0.2, life: 0.2 }); damageEnemy(s, tgt, c.dmg, { slot: 'none' }); s.abilityEvents.push({ id: s.nextId++, kind: 'clone_strike', x: c.x, y: c.y, tx: tgt.x, ty: tgt.y }); } }
   else { const d = Math.hypot(p.x - c.x, p.y - c.y); if (d > 120) { const v = normalize(p.x - c.x, p.y - c.y); mx = v.x; my = v.y; } }
   c.moving = mx !== 0 || my !== 0; if (c.moving) slideMove(c, mx * ECHO.speed, my * ECHO.speed, dt);
   for (const e of s.enemies) {
@@ -230,7 +231,7 @@ export function decoyFor(s: GameState, e: { x: number; y: number }): { x: number
 }
 export function endKaiKit(s: GameState) { const k = s.hx.kk; if (!k) return; k.shots = []; k.pillars = []; k.crucible = null; if (k.clone) { emit(s, 'clone_end', k.clone.x, k.clone.y); k.clone = null; } k.surge = 0; }
 
-export function kitSnap(s: GameState): { surge: number; cloneHp: number; cloneLife: number; crucible: boolean; chain: 'none' | 'rift' | 'reversal' } {
+export function kitSnap(s: GameState): { surge: number; cloneHp: number; cloneLife: number; crucible: boolean; chain: 'none' | 'rift' | 'reversal'; beat: number } {
   const k = s.hx?.kk, c = s.cast, ch = c?.kind === 'reversal' && !c.released && c.dur > 1e8 ? 'reversal' : c?.kind === 'rift' && c.chain && c.chain.state !== 'done' && c.chain.state !== 'main' ? 'rift' : 'none';
-  return { surge: surgeActive(s) ? k!.surge : 0, cloneHp: k?.clone ? k.clone.hp / k.clone.maxHp : 0, cloneLife: k?.clone ? k.clone.life : 0, crucible: !!k?.crucible, chain: ch };
+  return { surge: surgeActive(s) ? k!.surge : 0, cloneHp: k?.clone ? k.clone.hp / k.clone.maxHp : 0, cloneLife: k?.clone ? k.clone.life : 0, crucible: !!k?.crucible, chain: ch, beat: c?.kind === 'meteor' ? Math.min(METEOR.beats, (k?.meteorBeat ?? 0) + 1) : 0 };
 }

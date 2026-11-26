@@ -7,7 +7,7 @@ const TIPS = [
   'Fill the DRIVE bar to 65 % and press F to transform.',
   'Dash makes you briefly untouchable. Use it to cross a swarm.',
   'Pick up the teal shards: they are your experience.',
-  'Press Ctrl once to fly while transformed; press it again to land with a slam.',
+  'Press Left Alt once to fly (Ctrl in co-op) while transformed; press it again to land with a slam.',
   'Elites wear a gold health bar. Break their guard, then punish the recovery.',
   'The Fracture Warden arrives at 8:00. The Null Seraph waits at 15:00.',
   'Overdrive fills while you fight transformed. Press G when it is ready.',

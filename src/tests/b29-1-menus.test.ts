@@ -15,7 +15,7 @@ describe('B29.1 hero showcase data', () => {
     for (const h of HEROES) formsFor(h.id).forEach((_, i) => {
       const keys = kitFor(h.id, i).map(a => a.key);
       for (const k of ['AUTO', 'Q', 'E', 'R', 'SHIFT']) expect(keys, `${h.id}/${i} ${k}`).toContain(k);
-      if (i > 0) for (const k of ['V', 'G', 'CTRL']) expect(keys, `${h.id}/${i} ${k}`).toContain(k); else expect(keys).not.toContain('V');
+      if (i > 0) for (const k of ['V', 'G', 'ALT']) expect(keys, `${h.id}/${i} ${k}`).toContain(k); else expect(keys).not.toContain('V');
       for (const a of kitFor(h.id, i)) { expect(a.name.length).toBeGreaterThan(2); expect(a.text.length).toBeGreaterThan(10); expect(pub(`ui/icons/${a.icon}.png`), `${h.id}/${i} icon ${a.icon}`).toBe(true); }
     });
   });

@@ -20,7 +20,7 @@ import type { HeroId } from '../content/heroes';
 export interface AbilityView {
   hero: HeroId; form: 0 | 1 | 2 | 3; drive: number; formCooldown: number; dashCooldown: number; sigCd: number; odMeter: number; odT: number; sigCharge: number; sigTier: number; flying: boolean; dashLeft: number; dashMax: number; qCooldown: number; beamCooldown: number; sphereCooldown: number; dragonCooldown: number; cometCooldown: number; riftCooldown: number; reversalCooldown: number; evadeCooldown: number;
   heroFormUnlocked: boolean; heroReady: boolean; cometUnlocked: boolean; cometReady: boolean; apexUnlocked: boolean; apexReady: boolean; cinema: boolean; lanceCharge: number; lanceTier: number; riftCharge: number;
-  kit: { surge: number; cloneHp: number; cloneLife: number; crucible: boolean; chain: 'none' | 'rift' | 'reversal' };
+  kit: { surge: number; cloneHp: number; cloneLife: number; crucible: boolean; chain: 'none' | 'rift' | 'reversal'; beat: number };
   cdMax: { q: number; flare: number; crucible: number; dash: number; beam: number; sphere: number; form: number; dragon: number; comet: number; rift: number; reversal: number; evade: number };
   tips: Record<TipSlot, AbilityTip> | null; ult: { name: string; charge: number; cd: number; ready: boolean; active: boolean } | null;
 }

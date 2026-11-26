@@ -20,7 +20,7 @@ export const CONTROLLER_LAYOUT: readonly { action: string; keys: string; pad: st
   { action: 'Q ability: Impact / Crimson Break / Azure Volley', keys: 'Q', pad: 'X' },
   { action: 'E ability: Fracture Lance / Meteor Rush / Celestial Lance (hold to charge)', keys: 'E', pad: 'RB or RT' },
   { action: 'R ability: Nova Bloom / Bloodstar Impact / Zero Horizon', keys: 'R', pad: 'LB or LT' },
-  { action: 'Fly on / off (transformed): press once, press again to land with a slam', keys: 'CTRL (P2: RIGHT CTRL)', pad: 'BACK / SELECT' },
+  { action: 'Fly on / off (transformed): press once, press again to land with a slam', keys: 'LEFT ALT (co-op: P1 CTRL, P2 RIGHT CTRL)', pad: 'BACK / SELECT' },
   { action: 'Transform (Kai: three forms, Ren / Sora: one)', keys: 'F (picker: 1-2-3 / A-D, F confirms; F F = last)', pad: 'Y (D-PAD pick, Y / A confirm, B cancel)' },
   { action: 'Aim: Lance / Nova / Rift / Bloodstar / Celestial Lance', keys: 'MOUSE', pad: 'RIGHT STICK' },
   { action: 'Pause / resume', keys: 'ESC', pad: 'START' },

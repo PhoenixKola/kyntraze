@@ -1,0 +1,24 @@
+"""B32 ImageGen sheets (black background, cut to alpha by process.py). Run: python art/b32/run.py [name...]"""
+import subprocess, os, concurrent.futures as cf
+env = dict(os.environ); env['CODEX_BIN'] = r'C:\Program Files\WindowsApps\OpenAI.Codex_26.1111.2228.0_x64__2p2nqsd0c76g0\app\resources\codex.exe'
+D = 'art/b32'
+BASE = ("Visual-effect sprite sheet for a premium anime action game, hand-painted 2D, crisp razor-sharp shapes, bold readable silhouettes that still read at 120 pixels, strong value contrast, glow only as part of the shape. "
+        "PURE BLACK (#000000) background, every element separated from its neighbours by generous pure-black margin, no ground, no scenery, no characters, no cast shadow. Absolutely no text, letters, numbers, logo, watermark or UI. Original design. ")
+J = {
+ 'kai_lightning': (BASE + "SIX lightning elements in a 3 by 2 grid, all gold-white with a hot white core and orange-amber edge: 1 a long horizontal jagged lightning arc, thin and violent; 2 a forked branching bolt travelling left to right with three branches; 3 a short snapping double arc; 4 a spiral of electricity coiling around an invisible horizontal axis like a charged limb; 5 a flat crawling lightning web seen from above on the ground; 6 a thick vertical bolt strike with a forked tip. Same energy level, centred in each cell.", ['public/art/fx/kai-abilities/streak.png']),
+ 'kai_impact': (BASE + "SIX impact elements in a 3 by 2 grid, gold, white and ember orange: 1 a sharp white starburst impact frame with long radial spikes; 2 a cracked ground fissure star seen from above, dark cracks lit gold from inside, radiating from a centre; 3 a thick curved crescent slash arc with a tapering comet tail; 4 a flat shockwave ring with flying debris chips; 5 a fanged claw-shaped lightning burst; 6 a meteor comet head with a long horizontal streaming tail. Centred in each cell.", ['public/art/fx/kai-abilities/impact.png']),
+ 'kai_silver': (BASE + "SIX silver-and-lavender spatial-cut elements in a 3 by 2 grid, cool silver-white with soft violet edges, elegant and precise: 1 a long thin straight slice line with tiny sparks, like a cut in space; 2 a burst of mirror-glass shards flying outward; 3 a flat floor sigil ring made of fine silver lines and diamond marks, seen at a low oblique angle; 4 a cluster of falling silver glass fragments; 5 a long wispy afterimage streak tapering to a point; 6 a diamond-shaped targeting reticle with four corner ticks. Centred in each cell.", ['public/art/kaikit/tpring.png']),
+ 'sora_crystal': (BASE + "SIX crystalline elements in a 3 by 2 grid, clear azure and white-blue glass with bright facets and tiny refraction highlights: 1 a small sharp crystal shard pointing right; 2 a medium faceted crystal shard pointing right; 3 a large faceted crystal spear head pointing right; 4 an elegant white feather-shaped blade with glowing blue edge pointing right; 5 a vertical crystal lattice bar of a prison cage, hexagonal facets; 6 a four-point star lance flare with two very long thin horizontal rays and two shorter vertical rays. Centred in each cell.", ['public/art/fx/sora/sl_orb2.png']),
+ 'ren_force': (BASE + "SIX brute-force elements in a 3 by 2 grid, crimson, molten orange and cream-white hot cores with black-red cracks: 1 a triple parallel claw-slash mark, three tapering diagonal gashes of fire; 2 a huge spectral clenched fist seen from the side, made of crimson flame, knuckles forward to the right; 3 a flat expanding shock-front ring with trailing cinders seen from above; 4 an impact crater seen from above with radial cracks and glowing embers; 5 a heavy X cross-slash made of two thick fiery crescents; 6 a burst of flying cinders and sparks. Centred in each cell.", ['public/art/fx/ren/rs_impact.png']),
+ 'vex_void': (BASE + "SIX void elements in a 3 by 2 grid, black-violet voids with sharp luminous violet-silver rims: 1 a jagged vertical tear in space, black interior, bright violet edge glow; 2 a runic seal circle shattered into floating broken pieces; 3 a slender white-silver crescent slash with a dark negative-space trail; 4 a spectral sword blade silhouette in violet-black with a silver edge line, pointing right; 5 a distortion ripple ring with fine double lines; 6 a sharp white-violet X-shaped counter flash with long thin rays. Centred in each cell.", ['public/art/fx/vex-guardian' if False else 'public/art/kaikit/tpring.png']),
+}
+def run(n):
+    pr, rf = J[n]; open(f'{D}/{n}-prompt.txt', 'w', encoding='utf-8').write(pr)
+    cmd = ['python', 'scripts/gen-image.py', D, n]
+    for r in (rf or []): cmd += ['--img', r]
+    r = subprocess.run(cmd, capture_output=True, text=True, env=env); return n, r.returncode, (r.stdout + r.stderr)[-160:]
+if __name__ == '__main__':
+    import sys
+    names = sys.argv[1:] or list(J)
+    with cf.ThreadPoolExecutor(3) as ex:
+        for r in ex.map(run, names): print(r, flush=True)

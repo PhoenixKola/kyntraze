@@ -10,7 +10,7 @@ import type { HeroId } from '../content/heroes';
 
 export interface KitAbility { key: string; name: string; text: string; icon: string }
 export interface FormView { k: string; label: string; full: string; kitIcon: string; sheet: string; frame: [number, number]; how: string }
-const FLIGHT: KitAbility = { key: 'CTRL', name: 'Skybreaker flight', text: 'Transformed only: press once to lift off, press again to land with a slam. Costs Drive while airborne.', icon: 'dash' };
+const FLIGHT: KitAbility = { key: 'ALT', name: 'Skybreaker flight', text: 'Transformed only (Left Alt; Ctrl in co-op): press once to lift off, press again to land with a slam. Costs Drive while airborne.', icon: 'dash' };
 const OD = (hero: HeroId): KitAbility => ({ key: 'G', name: 'Primal Overdrive', text: 'Fight while transformed to fill the meter, then press G for 10 s of +25% damage and a spectral beast.', icon: hero === 'ren' ? 'ren_cf_overdrive' : hero === 'sora' ? 'sora_cf_overdrive' : hero === 'vex' ? 'vex_cf_oath' : 'overdrive' });
 const sheetOf = (dir: string, h: HeroId) => `art/${dir}/south/sheets/${h}_south_idle.png`;
 
