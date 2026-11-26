@@ -66,7 +66,7 @@ describe('unlock milestone + save', () => {
 });
 
 function formII(enemies: Array<[number, number, number?]>, aim: [number, number] = [1, 0]) {
-  const o = setup(true, enemies); o.s.player.form = 2; o.s.player.aimX = aim[0]; o.s.player.aimY = aim[1]; return o;
+  const o = setup(true, enemies); o.s.run.noFamiliar = true; o.s.player.form = 2; o.s.player.aimX = aim[0]; o.s.player.aimY = aim[1]; return o;
 }
 describe('Dragonfang Rush (E in Form II)', () => {
   it('lunges, bites each enemy in the lane once, spares the flanks and has its own cooldown (Fracture Lance is untouched)', () => {

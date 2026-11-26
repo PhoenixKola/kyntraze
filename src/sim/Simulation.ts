@@ -29,6 +29,7 @@ import type { LegendaryId } from '../b22/legendary';
 import type { RelicId } from '../b22/relics';
 import { beginEndlessLeg, continueEndless, extractNow } from './B22Tick';
 import { startLiving, updateLiving } from './LivingFractures';
+import { updateFamiliar } from './Familiar';
 import { createParty, inSlot, standing, swapTo, tether, updateRevives, type Slot } from './CoopSystem';
 import { resolveCoop } from './CoopCombos';
 import type { RunConfig as RunCfg } from './RunConfig';
@@ -85,6 +86,7 @@ export class Simulation {
     updateDrive(s, dt);
     updateAbilities(s, dt);
     if (s.hero !== 'kai') updateHero(s, dt);
+    updateFamiliar(s, dt);
     updateDirector(s, this.rng, dt);
     moveEnemies(s, dt);
     updateEnemyShots(s, dt);
@@ -205,6 +207,6 @@ export class Simulation {
     { const k = stepV(s, input, { sig: !!edge.sig, od: !!edge.od }, bf, dt); edge.sig = k.sig; edge.od = k.od; }
     const p = s.player; p.qCooldown = Math.max(0, p.qCooldown - dt);
     if (s.mods.regen > 0 && !s.run.noRegen) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
-    updateDrive(s, dt); updateAbilities(s, dt); if (s.hero !== 'kai') updateHero(s, dt);
+    updateDrive(s, dt); updateAbilities(s, dt); if (s.hero !== 'kai') updateHero(s, dt); updateFamiliar(s, dt);
   }
 }

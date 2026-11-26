@@ -20,7 +20,7 @@ import type { GameState } from '../sim/GameState';
 
 const lfSim = (o: { plan?: RunPlan; arena?: ArenaId; hero?: HeroId; seed?: number } = {}) => {
   const { sim, s } = quiet({ plan: withLiving(o.plan ?? CLASSIC_PLAN), arena: o.arena ?? 'gloam', hero: o.hero ?? 'kai', seed: o.seed ?? 4 });
-  s.lf!.nextAt = 1e9; s.player.x = 300; s.player.y = 300; return { sim, s };
+  s.run.noFamiliar = true; s.lf!.nextAt = 1e9; s.player.x = 300; s.player.y = 300; return { sim, s };
 };
 const foot = (s: GameState, x: number, y: number) => { s.player.x = x; s.player.y = y - PLAYER_FOOT_DY; };
 const killIds = (s: GameState, ev: LfEvent) => { for (const e of s.enemies) if (ev.ids.includes(e.id)) e.hp = 0; };

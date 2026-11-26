@@ -13,7 +13,7 @@ export interface RunConfig { boon: BoonId | null; contract: ContractId | null; r
 export const NO_CONFIG: RunConfig = { boon: null, contract: null, rerolls: 0, banishes: 0 };
 export const toolCharges = (rerollOwned: boolean, banishOwned: boolean) => ({ rerolls: rerollOwned ? RUN_TOOLS.rerolls : 0, banishes: banishOwned ? RUN_TOOLS.banishes : 0 });
 
-export interface RunState { config: RunConfig; rerollsLeft: number; banishesLeft: number; /** cards struck by the player this run */ banished: UpgradeId[]; /** cards a contract removes from the pool */ excluded: UpgradeId[]; spawnMult: number; hazardMult: number; /** B22 contracts */ damageTakenMult: number; enemyHpMult: number; noRegen: boolean; formsUsed: number[] }
+export interface RunState { config: RunConfig; /** QA / isolation tests only: no Celestial Familiar for this fighter */ noFamiliar?: boolean; rerollsLeft: number; banishesLeft: number; /** cards struck by the player this run */ banished: UpgradeId[]; /** cards a contract removes from the pool */ excluded: UpgradeId[]; spawnMult: number; hazardMult: number; /** B22 contracts */ damageTakenMult: number; enemyHpMult: number; noRegen: boolean; formsUsed: number[] }
 export const makeRunState = (config: RunConfig = NO_CONFIG): RunState => ({ config, rerollsLeft: config.rerolls, banishesLeft: config.banishes, banished: [], excluded: [], spawnMult: 1, hazardMult: 1, damageTakenMult: 1, enemyHpMult: 1, noRegen: false, formsUsed: [] });
 
 /** Applies the boon and contract to a fresh state. Every effect is a small fixed number from content/meta.ts. */

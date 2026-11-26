@@ -33,7 +33,7 @@ describe('B07 enemy content', () => {
 
 describe('B07 seeded director', () => {
   const cache = new Map<number, ReturnType<typeof surveyRaw>>(); const survey = (seed: number) => { if (!cache.has(seed)) cache.set(seed, surveyRaw(seed)); return cache.get(seed)!; };
-  const surveyRaw = (seed: number) => { const sim = new Simulation(seed), s = sim.state; s.player.hp = 1e9; s.player.maxHp = 1e9; s.player.attackClock = 1e9; const first: Partial<Record<EnemyKind, number>> = {}; const peak: Record<string, number> = { bruiser: 0, ranged: 0 };
+  const surveyRaw = (seed: number) => { const sim = new Simulation(seed), s = sim.state; s.run.noFamiliar = true; s.player.hp = 1e9; s.player.maxHp = 1e9; s.player.attackClock = 1e9; const first: Partial<Record<EnemyKind, number>> = {}; const peak: Record<string, number> = { bruiser: 0, ranged: 0 };
     for (let i = 0; i < 230 * 30; i++) { sim.step(1 / 30, idle); const t = s.time; { s.player.x = 1100; s.player.y = 800; s.enemies = s.enemies.filter(e => t - e.spawnedAt < 20);   // a player who keeps clearing the field, so the population cap never starves the director
  const live = { bruiser: 0, ranged: 0 };
       for (const e of s.enemies) { first[e.kind] ??= t; if (e.kind in live) live[e.kind as 'bruiser']++; } for (const k of ['bruiser', 'ranged'] as const) peak[k] = Math.max(peak[k], live[k]); } }

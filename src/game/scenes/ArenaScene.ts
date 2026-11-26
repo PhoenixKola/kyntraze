@@ -16,6 +16,7 @@ import { Presentation } from '../render/arenaArt';
 import { Ambience, ArenaHazardView, ArenaProps, createArenaFloor } from '../render/arenaWorld';
 import { NO_CONFIG } from '../../sim/RunConfig';
 import { RemoteSimulation } from '../../net/RemoteSimulation';
+import { FamiliarLayer } from '../render/familiarFx';
 import { blankPartnerView, partnerView } from '../../net/snapshot';
 import type { GameState } from '../../sim/GameState';
 import { inSlot, slotPlayer } from '../../sim/CoopSystem';
@@ -65,7 +66,7 @@ export class ArenaScene extends Phaser.Scene {
     applyZoom(); this.scale.on(Phaser.Scale.Events.RESIZE, applyZoom);
     this.createArena();
     this.entityRenderer = new EntityRenderer(this);
-    this.fx = new EffectsRenderer(this); this.readout = new CombatReadout(this);
+    this.fx = new EffectsRenderer(this); this.readout = new CombatReadout(this); this.fams = new FamiliarLayer(this);
     this.controller = new InputController(() => this.bridge.togglePause(), () => { if (this.bridge.getSettings().pauseOnBlur) this.bridge.pause(); }, () => this.bridge.pause());
     { const hp = this.bridge.getPartner(); if (hp) { const sv = loadSave(); this.simulation.joinPartner({ ...NO_CONFIG, hero: hp, heroForm: hp !== 'kai' && !!sv.unlocks?.[hp as 'ren' | 'sora'], vexForms: sv.b22?.vexForms, renF2: hp === 'ren' && !!sv.b22?.renF2, soraF2: hp === 'sora' && !!sv.b22?.soraF2 }, 'local', ['P1', 'P2']); this.controller.coop = true; } }
     this.bridge.bind(this.simulation); this.bridge.setInjector(code => this.controller?.inject(code));
@@ -87,7 +88,7 @@ export class ArenaScene extends Phaser.Scene {
       (window as unknown as { __KYNT_QA__: Record<string, unknown> }).__KYNT_QA__.killBoss = (kind: string) => { const b = this.simulation.state.enemies.find(e => e.kind === kind && e.hp > 0); if (b) { if (b.ai) b.ai.invuln = false; damageEnemy(this.simulation.state, b, 1e9); } };
     }
   }
-  private lfLayer: LfLayer | null = null; private b22: B22Overlay | null = null; private realmProps: RealmProps | null = null;
+  private fams: FamiliarLayer | null = null; private lfLayer: LfLayer | null = null; private b22: B22Overlay | null = null; private realmProps: RealmProps | null = null;
   private createArena() { const proc = !!ARENA_DEFS[this.arena].procedural; if (proc) { createRealmFloor(this, this.arena); this.realmProps = new RealmProps(this, this.arena); } else { createArenaFloor(this, this.arena); this.props = new ArenaProps(this, this.arena); this.ambience = import.meta.env.DEV && new URLSearchParams(window.location.search).get('noamb') === '1' ? null : new Ambience(this, this.arena); this.hazardView = new ArenaHazardView(this); } this.b22 = new B22Overlay(this); this.lfLayer = new LfLayer(this); this.marks = new ArenaMarks(this, this.arena); this.floorLights = new LightLayer(this); this.evoFx = new EvoFx(this); this.presentation = new Presentation(this); }
   update(_time: number, delta: number) {
     if (this.disposed || !this.simulation) return;
@@ -120,6 +121,7 @@ export class ArenaScene extends Phaser.Scene {
         const q = pr.debugPose(), k = formKey(pv.view.hero, pv.view.player.form); this.presentation.partner(q.x, q.y, k ? RING_TINT[k] : 0xbff4ff, true, np.down.downed);
       } else { this.pview = null; this.partnerHero = null; this.presentation.partner(0, 0, 0, false, false); }
     }
+    this.fams?.update(s, s.phase === 'running' && simDelta > 0 ? delta / 1000 : 0, this.reduced);
     this.b22?.update(s, s.phase === 'running' ? delta / 1000 : 0, this.reduced); this.lfLayer?.update(s, s.phase === 'running' ? delta / 1000 : 0, this.reduced);
     this.props?.update(s, this.time.now / 1000); this.ambience?.update(this.time.now / 1000, this.reduced); this.hazardView?.sync(s, s.phase === 'running' ? delta / 1000 : 0); this.marks?.update(s, delta / 1000, this.reduced); this.floorLights?.update(s, delta / 1000, this.reduced); this.evoFx?.update(s, delta / 1000, this.reduced);
     if (s.phase === 'victory') {
@@ -162,7 +164,7 @@ export class ArenaScene extends Phaser.Scene {
   private dispose() {
     if (this.disposed) return; this.disposed = true; this.scale.off(Phaser.Scale.Events.RESIZE);
     this.events.off('b21-cue', this.onCue); window.removeEventListener('keydown', this.unlockAudio); window.removeEventListener('pointerdown', this.unlockAudio); this.audio?.dispose();
-    this.controller?.destroy(); this.entityRenderer?.destroy(); this.partnerRenderer?.destroy(); this.partnerRenderer = null; this.fx?.destroy(); this.readout?.destroy(); this.presentation?.destroy(); this.debug?.destroy(); this.props?.destroy(); this.realmProps?.destroy(); this.b22?.destroy(); this.lfLayer?.destroy(); this.ambience?.destroy(); this.hazardView?.destroy(); this.marks?.destroy(); this.floorLights?.destroy(); this.evoFx?.destroy(); this.bridge.unbind();
+    this.controller?.destroy(); this.entityRenderer?.destroy(); this.partnerRenderer?.destroy(); this.partnerRenderer = null; this.fx?.destroy(); this.fams?.destroy(); this.readout?.destroy(); this.presentation?.destroy(); this.debug?.destroy(); this.props?.destroy(); this.realmProps?.destroy(); this.b22?.destroy(); this.lfLayer?.destroy(); this.ambience?.destroy(); this.hazardView?.destroy(); this.marks?.destroy(); this.floorLights?.destroy(); this.evoFx?.destroy(); this.bridge.unbind();
     delete (window as Window & { __KYNT_QA__?: unknown }).__KYNT_QA__;
   }
 }

@@ -27,6 +27,7 @@ import { KO_NAMES, koKey, koUrl } from '../render/kaiCombatFx';
 import { RF_NAMES, rfKey, rfUrl } from '../render/renFox';
 import { EV_NAMES, evUrl, SP_NAMES, spKey, spUrl } from '../render/soraPhoenix';
 import { VX_NAMES, vxKey, vxUrl } from '../render/vexFx';
+import { FAM_IDS, FAM_KINDS, FAM_MANIFEST_KEY, FAM_MANIFEST_URL, famBodyKey, famBodyUrl, famFxKey, famFxUrl } from '../render/familiarFx';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
 import { B14_FX_NAMES, b14Key, b14Url } from '../render/b14fx';
@@ -54,7 +55,8 @@ export class BootScene extends Phaser.Scene {
     }
     { const oid = equippedOutfit(); if (hasAccessory(oid, this.hero0)) for (const v of ['front', 'side', 'back'] as AccView[]) this.load.image(accKey(oid, v), accUrl(oid, v)); }   // B23: the equipped outfit's head accessory (3 views)
     this.load.json(HAIR_ANCHORS_KEY, '/art/hair-anchors.json');   // B23: per-frame head anchors for the hair rig (optional: without it the hair simply stays pinned)
-    this.load.json(F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL);
+    this.load.json(F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL); this.load.json(FAM_MANIFEST_KEY, FAM_MANIFEST_URL);   // Celestial Familiars: pose-sheet frame sizes
+    for (const id of FAM_IDS) for (const kind of FAM_KINDS) this.load.image(famFxKey(id, kind), famFxUrl(id, kind));
     B21_GROUPS.forEach(g => this.load.json(b21ManifestKey(g), b21ManifestUrl(g)));   // B21: optional art groups, a missing manifest is ignored
     B22_ART.forEach(n => this.load.image(`b22-${n}`, `art/b22/${n}.png`));
     COMET_FX_NAMES.forEach(n => this.load.image(cometFxKey(n), cometFxUrl(n)));
@@ -112,6 +114,7 @@ export class BootScene extends Phaser.Scene {
       }
       this.registry.set(HERO_ANCHORS_KEY(h), this.cache.json.get(HERO_ANCHORS_KEY(h)));
     }
+    { const fm = this.cache.json.get(FAM_MANIFEST_KEY) as Record<string, { fw: number; fh: number }> | undefined; if (fm) for (const id of FAM_IDS) if (fm[id]) this.load.spritesheet(famBodyKey(id), famBodyUrl(id), { frameWidth: fm[id].fw, frameHeight: fm[id].fh, endFrame: 11 }); }
     for (const g of B21_GROUPS) for (const n of b21Names(this.cache.json.get(b21ManifestKey(g)))) this.load.image(b21Key(g, n), b21Url(g, n));
     const fx3 = this.cache.json.get(F3_FX_MANIFEST_KEY) as Record<string, unknown> | undefined;
     if (fx3 && typeof fx3 === 'object') for (const n of Object.keys((fx3 as { sprites?: Record<string, unknown> }).sprites ?? fx3)) if (/^[a-z0-9_]+$/.test(n)) this.load.image(f3fxKey(n), f3fxUrl(n));

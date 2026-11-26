@@ -9,7 +9,7 @@ import type { Enemy } from './GameState';
 import { xpThreshold } from './GameState';
 import { lfMul } from './lfHooks';
 
-export const SLOT_KEYS = ['player', 'hero', 'hx', 'cast', 'sphere', 'mods', 'upgradeStacks', 'aim', 'eHeld', 'b22', 'heroFormUnlocked', 'heroFormUnlockedNow', 'heroFormSeen', 'renF2', 'renF2Now', 'renSeen2', 'soraF2', 'soraF2Now', 'soraSeen2', 'vexSeen', 'run', 'echoes', 'blasts', 'apexUnlocked', 'apexUnlockedNow', 'cometUnlocked', 'cometUnlockedNow', 'levelUpAt'] as const;
+export const SLOT_KEYS = ['player', 'hero', 'hx', 'cast', 'sphere', 'mods', 'upgradeStacks', 'aim', 'eHeld', 'b22', 'heroFormUnlocked', 'heroFormUnlockedNow', 'heroFormSeen', 'renF2', 'renF2Now', 'renSeen2', 'soraF2', 'soraF2Now', 'soraSeen2', 'vexSeen', 'run', 'echoes', 'blasts', 'apexUnlocked', 'apexUnlockedNow', 'cometUnlocked', 'cometUnlockedNow', 'levelUpAt', 'fam'] as const;
 export type SlotBag = Pick<GameState, (typeof SLOT_KEYS)[number]>;
 export interface Down { downed: boolean; out: boolean; t: number; revives: number; hold: number }
 export interface Edge { sig?: boolean; od?: boolean; q: boolean; f: boolean; e: boolean; r: boolean; buf: { q: number; e: number; r: number; v: number } }
@@ -67,7 +67,7 @@ export const pendingChoice = (s: GameState) => !!s.party && s.party.queue.length
 /* ------------------------------------------------------------------ downed / revive */
 export function downFighter(s: GameState) {
   const p = s.party!, i = p.cur, d = p.slots[i].down; if (d.downed || d.out) return;
-  s.player.hp = 0; s.player.vx = 0; s.player.vy = 0; s.cast = null; s.hx.act = null; s.b22.ult.act = null;
+  s.player.hp = 0; s.player.vx = 0; s.player.vy = 0; s.cast = null; s.hx.act = null; s.b22.ult.act = null; s.fam = undefined;
   d.downed = true; d.t = 0; d.hold = 0; s.impacts.push({ id: s.nextId++, kind: 'hurt', x: s.player.x, y: s.player.y, ttl: 0.5, life: 0.5, heavy: true });
   if (!p.slots.some((_, k) => k !== i && standing(s, k))) s.phase = 'dead';   // nobody left standing
 }

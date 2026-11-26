@@ -225,3 +225,11 @@ export function seraSfx(kind: string, n = 0): string | null {
     default: return null;
   }
 }
+
+/** Celestial Familiars: quiet, short cues so a companion never competes with the hero's own sounds (runtime-synthesised). */
+Object.assign(SFX, {
+  fam_spawn: { f0: 500, f1: 1100, dur: 0.5, noise: 0.1, decay: 4, wave: 'bell', gain: 0.28, fm: 2 }, fam_attack: { f0: 700, f1: 380, dur: 0.12, noise: 0.3, decay: 18, wave: 'saw', gain: 0.18 },
+  fam_hit: { f0: 520, f1: 200, dur: 0.1, noise: 0.35, decay: 22, wave: 'square', gain: 0.16 }, fam_merge: { f0: 300, f1: 1400, dur: 0.7, noise: 0.15, decay: 3, wave: 'bell', gain: 0.4, fm: 2.4 },
+  fam_return: { f0: 1200, f1: 420, dur: 0.6, noise: 0.12, decay: 3.5, wave: 'bell', gain: 0.32, fm: 2 },
+});
+export function famSfx(kind: string): string | null { return kind === 'fam_spawn' || kind === 'fam_attack' || kind === 'fam_hit' || kind === 'fam_merge' || kind === 'fam_return' ? kind : null; }

@@ -1,5 +1,11 @@
 # Changelog
 
+## B37 Celestial Familiars
+- Every hero now fights beside a small beast companion: Kai's Solar Wyrmling (lunge-bite and fire burst), Ren's Ember Kit (three darting slashes at the most wounded foe), Sora's Dawn Fledgling (two feather flares), Vex's Abyssal Warden (a shove-and-stagger void pulse). It follows at a readable distance, assists every ~3-4 s (sooner right after a hero cast), flinches when the hero is hit, and cannot be hit or targeted.
+- Primal Overdrive fuses it into the hero (it sinks into the chest with a thread of light, a flash and a ring; no separate entity or attacks while Overdrive runs) and it re-forms from the hero when Overdrive ends. Defeat clears it; a revive summons it again.
+- Assist damage is a bounded share of the hero's auto-attack and never feeds the Overdrive meter, the Ultimate gauge, relic procs or mastery logs. Fully deterministic, per-fighter state: both co-op fighters and both online players see both beasts (it travels in the snapshots).
+- ImageGen: four 12-pose sheets (idle x4, move x4, windup, strike, recover, hit) and one effect sheet (shot, burst and summon sigil per beast); small quiet synthesised cues.
+
 ## B34 Sora: Eventide Seraph
 - Sora's second and final transformation: a sweeping crest of separated pearl-and-champagne feather locks over a dusk-violet layer, a dusk-violet costume with prism trim, a floating feather mantle, halo fragment and orbiting feathers, a new reveal (stars gather into a broken constellation, a Phoenix shadow opens, a prismatic shockfront) and the Eventide Phoenix Overdrive. Earned by defeating the Null Seraph as Sora after Azure Sovereign; usable from the next run. F while transformed shifts between Sovereign and Seraph (18 Drive, 20 minimum, 2.5 s).
 - New kit: Prism Feathers, Constellation Pierce, Seraph's Descent, Eventide Judgment, Astral Rebirth, Celestial Glide, and the capped Star Trace mark (set by direct feather hits, consumed once by the constellation techniques).
