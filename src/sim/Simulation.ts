@@ -33,7 +33,7 @@ import { createParty, inSlot, standing, swapTo, tether, updateRevives, type Slot
 import { resolveCoop } from './CoopCombos';
 import type { RunConfig as RunCfg } from './RunConfig';
 /** Seconds a refused Q / E / R press stays armed (B20). */
-export const ABILITY_BUFFER = 0.15;
+export const ABILITY_BUFFER = 0.2;
 /** V is a hold/release technique; a press refused only because another cast, a dash or a cooldown is about to end used to be lost (the edge was already consumed). It is now retried for V_BUFFER seconds, even if the key was already released (a tap then releases at the minimum hold). */
 export const V_BUFFER = 0.3;
 function stepV(s: GameState, input: InputState, prev: { sig: boolean; od: boolean }, bf: { v: number }, dt: number): { sig: boolean; od: boolean } {

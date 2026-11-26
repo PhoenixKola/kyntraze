@@ -14,13 +14,17 @@ import { VEX_FLY } from '../content/vexCombat';
 import { ASCEND } from '../content/heroKits';
 /** Dash charges: Kai Form II = 2, Form III = 3, Vex Form II = 2, Ren Ashen Eclipse = 2, Sora Eventide Seraph = 2, everything else 1. */
 export function dashMax(state: GameState): number { const f = state.player.form; return state.hero === 'kai' ? (f === 3 ? 3 : f === 2 ? 2 : 1) : (state.hero === 'vex' || state.hero === 'ren' || state.hero === 'sora') && f === 2 ? 2 : 1; }
+const DASH_BUFFER = 0.4;
 export function movePlayer(state: GameState, input: InputState, dt: number) {
   const p = state.player;
   const direction = normalize(input.x, input.y);
   const apex = p.form === 3;
   const dmax = dashMax(state); p.dashUsed = Math.min(p.dashUsed, dmax);
-  if (input.dash && (p.dashUsed < dmax || p.dashCooldown <= 0) && (direction.x !== 0 || direction.y !== 0)) {
-    cancelCast(state);
+  // A single dash press never destroys a cast: it is buffered and fires the moment the hands are free. Pressing dash twice within the window bails out of the cast.
+  let casting = state.hero === 'kai' ? !!state.cast : !!state.hx.act; p.dashBuf = Math.max(0, (p.dashBuf ?? 0) - dt);
+  if (input.dash && casting) { if (p.dashBuf > 0) { cancelCast(state); casting = false; } p.dashBuf = DASH_BUFFER; }   // a second press while the first is waiting is a deliberate bail-out and cancels the cast
+  if ((input.dash || p.dashBuf > 0) && !casting && (p.dashUsed < dmax || p.dashCooldown <= 0) && (direction.x !== 0 || direction.y !== 0)) {
+    p.dashBuf = 0;
     p.dashDx = direction.x; p.dashDy = direction.y; p.dashRemaining = apex ? 0.13 : 0.22; p.dashUsed = Math.min(dmax, p.dashUsed + 1); if (p.dashCooldown <= 0) p.dashCooldown = 3.2 * state.mods.dashCd; p.invulnerable = Math.max(p.invulnerable, 0.25);
     state.impacts.push({ id: state.nextId++, kind: 'dash', x: p.x, y: p.y, ttl: apex ? 0.3 : 0.22, life: apex ? 0.3 : 0.22 });
     if (apex) state.abilityEvents.push({ id: state.nextId++, kind: 'form3_dash', x: p.x, y: p.y });

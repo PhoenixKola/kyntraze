@@ -87,7 +87,11 @@ export function soraQ(s: GameState): boolean {
 }
 function updatePrison(s: GameState, f: SoraField, dt: number): boolean {
   const before = f.t; f.t += dt; const hold0 = SORA_Q.form, hold1 = SORA_Q.form + SORA_Q.hold, R = f.r;
-  if (f.t >= hold0 && before < hold0) { for (const e of s.enemies.filter(alive).sort(byDistId(f.x, f.y))) if (!fixed(e) && Math.hypot(e.x - f.x, e.y - f.y) <= R + e.radius && f.hit.length < SORA_Q.cap) f.hit.push(e.id); }
+  if (f.t >= hold0 && before < hold0) {
+    for (const e of s.enemies.filter(alive).sort(byDistId(f.x, f.y))) if (!fixed(e) && Math.hypot(e.x - f.x, e.y - f.y) <= R + e.radius && f.hit.length < SORA_Q.cap) f.hit.push(e.id);
+    const n = areaHit(s, f.x, f.y, R, f.dmg * SORA_Q.formMul, 0, 0, SORA_Q.cap, 'q'); emit(s, 'sora_q_tick', f.x, f.y, 0 | (Math.min(n, 63) << 8) | (f.od ? SORA_OD.bit : 0));   // the crystals erupt on formation: a real hit at once, not only after a second
+  }
+  if (f.t >= hold0 && f.t < hold1) for (const e of s.enemies.filter(alive)) if (!fixed(e) && !f.hit.includes(e.id) && f.hit.length < SORA_Q.cap && Math.hypot(e.x - f.x, e.y - f.y) <= R + e.radius) f.hit.push(e.id);   // anything that walks in is caught too
   if (f.t >= hold0 && f.t < hold1) {
     for (const e of s.enemies) {
       if (!alive(e) || fixed(e) || !f.hit.includes(e.id)) continue; e.stagger = Math.max(e.stagger, 0.12);   // the game's own slow: ordinary captured enemies crawl

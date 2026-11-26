@@ -147,7 +147,7 @@ describe('E Silver Rift', () => {
   it('hits a boss too, has a cooldown (no spam), and cancelling a charge is never free', () => {
     const { sim, s } = apexForm(); s.enemies = [enemy(700, 1300, 770, 4000, 'warden')]; sim.step(DT, idle({ beam: true, beamHeld: true, aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(sim, 0.3, idle({ aimX: 1, aimY: 0, aimSrc: 'pointer' })); run(sim, 1);
     expect(s.enemies[0].hp).toBeLessThan(4000); expect(s.player.riftCooldown).toBeGreaterThan(5); run(sim, 4); expect(s.cast).toBeNull(); sim.step(DT, idle({ beam: true, beamHeld: true })); expect(s.cast).toBeNull();
-    const c = apexForm(); c.sim.step(DT, idle({ beam: true, beamHeld: true })); c.sim.step(DT, idle({ beamHeld: true, x: 1, dash: true })); expect(c.s.cast).toBeNull(); expect(c.s.player.riftCooldown).toBeGreaterThanOrEqual(RIFT.cancelCooldown - 0.1);
+    const c = apexForm(); c.sim.step(DT, idle({ beam: true, beamHeld: true })); c.sim.step(DT, idle({ beamHeld: true, x: 1, dash: true })); expect(c.s.cast).not.toBeNull(); c.sim.step(DT, idle({ beamHeld: true, x: 1, dash: true })); expect(c.s.cast).toBeNull(); expect(c.s.player.riftCooldown).toBeGreaterThanOrEqual(RIFT.cancelCooldown - 0.1);
   });
   it('Lance upgrades carry into Silver Rift (damage, width, pulses)', () => {
     const base = apexForm([[1300, 770, 4000]]); const up = apexForm([[1300, 770, 4000]]); up.s.mods.beamDamage = 2; up.s.mods.beamWidth = 1.5;

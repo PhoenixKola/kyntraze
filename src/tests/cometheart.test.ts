@@ -91,7 +91,7 @@ describe('Dragonfang Rush (E in Form II)', () => {
   });
   it('is interrupted by a hit during the wind-up (cooldown stays spent) and by the dash', () => {
     const { sim, s } = formII([]); tap(sim, { beam: true }); run(sim, 0.1); s.player.invulnerable = 0; damagePlayer(s, 5); expect(s.cast).toBeNull(); expect(s.player.dragonCooldown).toBeGreaterThan(0);
-    s.player.invulnerable = 0; s.player.dragonCooldown = 0; run(sim, 0.7); tap(sim, { beam: true }); run(sim, 0.05); tap(sim, { x: 1, dash: true }); expect(s.cast).toBeNull();
+    s.player.invulnerable = 0; s.player.dragonCooldown = 0; run(sim, 0.7); tap(sim, { beam: true }); run(sim, 0.05); tap(sim, { x: 1, dash: true }); expect(s.cast).not.toBeNull(); tap(sim, { x: 1, dash: true }); expect(s.cast).toBeNull();
   });
 });
 

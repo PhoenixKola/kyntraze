@@ -32,8 +32,8 @@ describe('Fracture Lance (beam)', () => {
     for (let i = 0; i < 120; i++) sim.step(DT, idle({ beam: true })); expect(s.player.beamCooldown).toBeGreaterThan(BEAM.cooldown - 2.1);
     expect(s.cast?.len ?? 0).toBeLessThan(200);
   });
-  it('dash cancels the cast; a hit cancels only the wind-up', () => {
-    let { sim, s } = setup(); press(sim, 'beam'); run(sim, 0.1); sim.step(DT, idle({ dash: true, x: 1 })); expect(s.cast).toBeNull();
+  it('one dash press never kills the cast (it waits), a second press bails out; a hit cancels only the wind-up', () => {
+    let { sim, s } = setup(); press(sim, 'beam'); run(sim, 0.1); sim.step(DT, idle({ dash: true, x: 1 })); expect(s.cast).not.toBeNull(); sim.step(DT, idle({ x: 1 })); sim.step(DT, idle({ dash: true, x: 1 })); expect(s.cast).toBeNull();
     ({ sim, s } = setup()); press(sim, 'beam'); run(sim, 0.1); damagePlayer(s, 5); expect(s.cast).toBeNull();
     ({ sim, s } = setup()); press(sim, 'beam'); run(sim, BEAM.charge + 0.05); damagePlayer(s, 5); expect(s.cast).not.toBeNull();
   });

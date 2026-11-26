@@ -5,7 +5,7 @@ export const SORA_AUTO = {
   beats: [{ kind: 'left', n: 1, mul: 0.95 }, { kind: 'right', n: 1, mul: 0.95 }, { kind: 'cross', n: 2, mul: 1.5 }, { kind: 'fan', n: 3, mul: 1.65 }] as readonly { kind: 'left' | 'right' | 'cross' | 'fan'; n: number; mul: number }[],
   fanSpread: 0.3,
 } as const;
-export const SORA_Q = { name: 'Azure Prison', cooldown: 8, range: 320, defaultRange: 210, radius: 128, windup: 0.3, recover: 0.1, form: 0.35, hold: 1.0, ticks: 2, tickMul: 0.35, shatterMul: 3.4, slow: 0.14, edge: 0.9, cap: 12, moveWindup: 0.45, bossFair: 0.6 } as const;
+export const SORA_Q = { name: 'Azure Prison', cooldown: 8, range: 320, defaultRange: 210, radius: 160, windup: 0.3, recover: 0.1, form: 0.2, hold: 1.1, ticks: 4, tickMul: 0.5, shatterMul: 6, formMul: 1.4, slow: 0.14, edge: 0.9, cap: 16, moveWindup: 0.45, bossFair: 0.6 } as const;
 export const SORA_E = { name: "Heaven's Spear", cooldown: 10, range: 380, laneRange: 560, coneCos: Math.cos(0.7), spears: 3, spearsMax: 6, lead: 0.42, gap: 0.14, radius: 64, mul: 2.3, windup: 0.3, recover: 0.12, spacing: 78, repeatMul: 0.4, cap: 10, moveWindup: 0.35, laneWidthMul: 0.8 } as const;
 export const SORA_R = { name: 'Celestial Collapse', cooldown: 22, range: 380, defaultRange: 250, windup: 0.35, recover: 0.1, pull: 1.25, pullR: 185, pullSpeed: 150, burstR: 200, tickEvery: 0.25, tickMul: 0.18, burstMul: 6.5, push: 140, stagger: 0.5, cap: 16, echoGap: 0.45, echoMul: 0.55, focusR: 0.78, focusMul: 1.7, moveScale: 0.5 } as const;
 export const SORA_V = {
