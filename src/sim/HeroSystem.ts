@@ -12,6 +12,7 @@ import { HERO_ANCHORS } from '../content/heroAnchors';
 import { KAI_GROUND_DY, KAI_SCALE } from '../assets/kaiAnimation';
 import { densestOrbTarget } from './BranchSystem';
 import { isRenAct, renE, renFuryAuto, renMoveScale, renQ, renR, renCancelAct, updateRenAct, updateRenCombat } from './RenCombat';
+import { addTrace, isSeraAct, seraAuto, seraCancelAct, seraE, seraMoveScale, seraQ, seraR, updateSeraAct } from './SoraSeraph';
 import { isSoraAct, soraBladeAuto, soraCancelAct, soraE, soraMoveScale, soraQ, soraR, updateSoraAct, updateSoraCombat } from './SoraCombat';
 import { updateVexAct, updateVexMarks, vexAuto, vexE, vexMoveScale, vexQ, vexR } from './VexSystem';
 import { ashAuto, ashCancelAct, ashE, ashMoveScale, ashQ, ashR, isAshAct, updateAshAct } from './RenEclipse';
@@ -98,6 +99,7 @@ function renAuto(s: GameState) {
   emit(s, fin ? 'auto_finisher' : 'auto_hit', p.x + dir.x * 34, p.y + dir.y * 34, hits);
 }
 function soraAuto(s: GameState) {
+  if (s.player.form === 2) { seraAuto(s); return; }   // B34: Eventide Seraph has its own Prism Feathers
   if (inForm(s)) { soraBladeAuto(s); return; }   // B27: Azure Sovereign has its own four-beat Astral Blades
   const p = s.player, form = inForm(s), period = Math.max(0.16, p.attackPeriod * (form ? 0.8 : 1));
   const cands = s.enemies.filter(e => alive(e) && (e.x - p.x) ** 2 + (e.y - p.y) ** 2 <= (p.attackRange + e.radius) ** 2).sort((a, b) => (a.x - p.x) ** 2 + (a.y - p.y) ** 2 - ((b.x - p.x) ** 2 + (b.y - p.y) ** 2));
@@ -121,6 +123,7 @@ export function heroActivateQ(s: GameState): boolean {
   const p = s.player; if (p.qCooldown > 0 || s.hx.act || s.cinema || p.dashRemaining > 0 || p.hp <= 0) return false;
   const form = inForm(s);
   if (s.hero === 'vex') return form ? vexFormQ(s) : vexQ(s);   // B28: Mirror Guard / Phantom Legion replace Parry Halo while transformed
+  if (s.hero === 'sora' && s.player.form === 2) return seraQ(s);   // B34: Constellation Pierce in Eventide Seraph
   if (s.hero === 'sora' && form) return soraQ(s);   // B27: Azure Prison replaces Azure Volley in the transformed state
   if (s.hero === 'ren' && p.form === 2) return ashQ(s);   // B33: Eclipse Maul replaces Infernal Cyclone in Ashen Eclipse
   if (s.hero === 'ren' && form) return renQ(s);   // B26: Infernal Cyclone replaces Crimson Break in the transformed state
@@ -172,13 +175,13 @@ function updateAzureVolley(s: GameState, c: HeroCast) {
 /* ------------------------------------------------------------------ E */
 export function heroStartE(s: GameState): boolean {
   const p = s.player; if (p.beamCooldown > 0 || s.hx.act || s.cinema || p.dashRemaining > 0 || p.hp <= 0 || s.phase !== 'running') return false;
-  return s.hero === 'ren' ? (p.form === 2 ? ashE(s) : inForm(s) ? renE(s) : startRush(s)) : s.hero === 'vex' ? (inForm(s) ? vexFormE(s) : vexE(s)) : inForm(s) ? soraE(s) : startLance(s);
+  return s.hero === 'ren' ? (p.form === 2 ? ashE(s) : inForm(s) ? renE(s) : startRush(s)) : s.hero === 'vex' ? (inForm(s) ? vexFormE(s) : vexE(s)) : p.form === 2 ? seraE(s) : inForm(s) ? soraE(s) : startLance(s);
 }
 export function heroStartR(s: GameState): boolean {
   const p = s.player;
   if (s.hero === 'vex' && !inForm(s) && s.b22.marks.some(m => m.src === 'seal') && s.phase === 'running' && !s.cinema && p.hp > 0) return vexR(s);   // R again: detonate the Seal early (base form only)
   if (p.sphereCooldown > 0 || s.hx.act || s.cinema || p.dashRemaining > 0 || p.hp <= 0 || s.phase !== 'running') return false;   // the cooldown / busy guard had been swallowed by the comment above
-  return s.hero === 'ren' ? (p.form === 2 ? ashR(s) : inForm(s) ? renR(s) : startBloodstar(s)) : s.hero === 'vex' ? (inForm(s) ? vexFormR(s) : vexR(s)) : inForm(s) ? soraR(s) : startHorizon(s);
+  return s.hero === 'ren' ? (p.form === 2 ? ashR(s) : inForm(s) ? renR(s) : startBloodstar(s)) : s.hero === 'vex' ? (inForm(s) ? vexFormR(s) : vexR(s)) : p.form === 2 ? seraR(s) : inForm(s) ? soraR(s) : startHorizon(s);
 }
 /** Meteor Rush plan: chain of nearest unvisited enemies, each reachable by a wall-free straight line. Fixed at the press, so the route is predictable. */
 function planRush(s: GameState, count: number): { x: number; y: number; id: number }[] {
@@ -416,6 +419,7 @@ export function updateHero(s: GameState, dt: number) {
     case 'infernal_cyclone': case 'scarlet_rampage': case 'crimson_catastrophe': case 'nova_fist': updateRenAct(s, c, dt, before); break;
     case 'eclipse_maul': case 'ninefold_rupture': case 'ashen_cataclysm': case 'eclipse_fang': updateAshAct(s, c, dt, before); break;
     case 'azure_prison': case 'heavens_spear': case 'azure_collapse': case 'astral_devastation': updateSoraAct(s, c, dt); break;
+    case 'constellation_pierce': case 'seraphs_descent': case 'eventide_judgment': case 'astral_rebirth': updateSeraAct(s, c, dt); break;
     case 'mirror_guard': case 'rift_execution': case 'oath_ruin': case 'abyssal_fang': case 'phantom_legion': case 'dim_severance': case 'domain_exile': case 'event_horizon': updateVexFormAct(s, c, dt); break;
     case 'ultimate': break;
   }
@@ -435,7 +439,7 @@ function updateBolts(s: GameState, dt: number) {
     let dead = false;
     for (const e of s.enemies) {
       if (!alive(e) || b.hits.includes(e.id)) continue; if ((e.x - b.x) ** 2 + (e.y - b.y) ** 2 > (e.radius + b.radius) ** 2) continue;
-      damageEnemy(s, e, b.damage, { proj: true }); b.hits.push(e.id); if (b.kind === 'needle') driveGain(s, 1.1);
+      damageEnemy(s, e, b.damage, { proj: true }); b.hits.push(e.id); if (b.kind === 'feather') addTrace(s, e); if (b.kind === 'needle') driveGain(s, 1.1);
       if (b.pierce <= 0) { dead = true; break; } b.pierce--;
     }
     if (!dead) keep.push(b);
@@ -458,6 +462,7 @@ export function heroMoveScale(s: GameState): number {
     case 'infernal_cyclone': case 'scarlet_rampage': case 'crimson_catastrophe': case 'nova_fist': return renMoveScale(c);
     case 'eclipse_maul': case 'ninefold_rupture': case 'ashen_cataclysm': case 'eclipse_fang': return ashMoveScale(c);
     case 'azure_prison': case 'heavens_spear': case 'azure_collapse': case 'astral_devastation': return soraMoveScale(c);
+    case 'constellation_pierce': case 'seraphs_descent': case 'eventide_judgment': case 'astral_rebirth': return seraMoveScale(c);
     case 'mirror_guard': case 'rift_execution': case 'oath_ruin': case 'abyssal_fang': case 'phantom_legion': case 'dim_severance': case 'domain_exile': case 'event_horizon': return vexFormMoveScale(c);
     case 'ultimate': return 0.2;
   }
@@ -467,6 +472,7 @@ export function cancelHero(s: GameState) {
   const c = s.hx.act; if (!c) return;
   if (isAshAct(c)) { ashCancelAct(s, c); return; }
   if (isRenAct(c)) { renCancelAct(s, c); return; }
+  if (isSeraAct(c)) { seraCancelAct(s, c); return; }
   if (isSoraAct(c)) { soraCancelAct(s, c); return; }
   if (isVexFormAct(c)) { vexFormCancelAct(s, c); return; }
   if (c.act === 'celestial_lance' && !c.released) s.player.beamCooldown = Math.max(s.player.beamCooldown, SORA.e.cooldown * SORA.e.cancelCooldown * s.mods.beamCd);
@@ -474,6 +480,6 @@ export function cancelHero(s: GameState) {
   emit(s, 'cast_cancel', s.player.x, s.player.y); s.hx.act = null;
 }
 /** A hit interrupts only an unreleased Lance charge; every other move is committed. */
-export function interruptHero(s: GameState) { const c = s.hx.act; if (c && ((c.act === 'celestial_lance' && !c.released) || (c.act === 'nova_fist' && !c.released) || (c.act === 'eclipse_fang' && !c.released) || (c.act === 'astral_devastation' && !c.released) || ((c.act === 'abyssal_fang' || c.act === 'event_horizon') && !c.released))) cancelHero(s); }
+export function interruptHero(s: GameState) { const c = s.hx.act; if (c && ((c.act === 'celestial_lance' && !c.released) || (c.act === 'nova_fist' && !c.released) || (c.act === 'eclipse_fang' && !c.released) || (c.act === 'astral_devastation' && !c.released) || (c.act === 'astral_rebirth' && !c.released) || ((c.act === 'abyssal_fang' || c.act === 'event_horizon') && !c.released))) cancelHero(s); }
 /** Hard reset used by the transformation reveal: nothing of the old move may leak into the cinematic. */
-export function clearHero(s: GameState) { s.hx.act = null; s.hx.brands = []; s.hx.sf = []; s.hx.vf = []; s.hx.bolts = []; s.hx.orbs = []; s.hx.orbPhase = 'none'; s.hx.pending = []; s.hx.arcs = []; s.hx.rings = []; }
+export function clearHero(s: GameState) { s.hx.act = null; s.hx.brands = []; s.hx.traces = []; s.hx.sf = []; s.hx.vf = []; s.hx.bolts = []; s.hx.orbs = []; s.hx.orbPhase = 'none'; s.hx.pending = []; s.hx.arcs = []; s.hx.rings = []; }

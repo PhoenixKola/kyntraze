@@ -77,8 +77,8 @@ export class SoraPhoenix {
   }
 
   update(o: SoraFxInput) {
-    const dt = o.running ? o.dt : 0, s = o.state, p = s.player, h = o.hero, sc = o.scale / 0.5, sora = s.hero === 'sora' && p.form >= 1; this.clock += dt;
-    for (const e of s.abilityEvents) if (e.id > this.last) { this.last = e.id; if (!o.dead && e.kind.startsWith('sora_')) this.onEvent(e, o); }
+    const dt = o.running ? o.dt : 0, s = o.state, p = s.player, h = o.hero, sc = o.scale / 0.5, sora = s.hero === 'sora' && p.form === 1; this.clock += dt;
+    for (const e of s.abilityEvents) if (e.id > this.last) { this.last = e.id; if (!o.dead && p.form !== 2 && e.kind.startsWith('sora_')) this.onEvent(e, o); }
     for (let i = this.pops.length - 1; i >= 0; i--) {
       const q = this.pops[i]; if (q.delay > 0) { q.delay -= dt; q.im.setAlpha(0); continue; }
       q.t += dt; const u = q.t / q.dur; if (u >= 1) { q.im.destroy(); this.pops.splice(i, 1); continue; }

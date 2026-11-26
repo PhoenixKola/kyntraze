@@ -1,7 +1,7 @@
 /** B27 Sora, Azure Sovereign (authoritative sim): Astral Blades auto, Azure Prison (Q), Heaven's Spear (E), Celestial Collapse (R), the charged Astral Devastation (V), Primal Overdrive (the Astral Phoenix) and Skybreaker flight. Used only when `hero === 'sora'` and the form is Sovereign; the base kit stays in HeroSystem. Every damage call goes through damageEnemy once. The committed plan of each move (ground points, ids, tier, damage, Overdrive bit) lives in a plain SoraField so a later change of the world, the form or the aim cannot reroute it; renderers only read the sora_* events and the fields. */
 import { flyIntent } from './KaiCombat';
 import type { AbilityEventKind, Bolt, Enemy, GameState, HeroCast, InputState, SoraField } from './GameState';
-import { SORA_AUTO, SORA_E, SORA_FLY, SORA_OD, SORA_Q, SORA_R, SORA_V } from '../content/soraCombat';
+import { SORA_AUTO, SORA_E, SORA_FLY as SORA_FLY_1, SORA_OD, SORA_Q, SORA_R, SORA_V } from '../content/soraCombat';
 import { ASCEND, SORA } from '../content/heroKits';
 import { isBoss } from '../content/enemies';
 import { blocked, slideMove } from './CollisionSystem';
@@ -11,25 +11,27 @@ import { freeAim } from './ApexSystem';
 import { strikeHand } from './Strike';
 import { aimDir, hand, newCast, nearest, pickGround, push } from './HeroSystem';
 import { faceOf } from './AbilitySystem';
+import { SERA_FLY } from '../content/soraSeraph';
+import { cancelRebirth, seraStartV, updateSeraField, updateTraces, SERA_FIELDS } from './SoraSeraph';
 
-const alive = (e: Enemy) => e.hp > 0;
-const byDistId = (x: number, y: number) => (a: Enemy, b: Enemy) => (a.x - x) ** 2 + (a.y - y) ** 2 - ((b.x - x) ** 2 + (b.y - y) ** 2) || a.id - b.id;
-const odBit = (s: GameState) => (s.player.odT > 0 ? SORA_OD.bit : 0);
+export const alive = (e: Enemy) => e.hp > 0;
+export const byDistId = (x: number, y: number) => (a: Enemy, b: Enemy) => (a.x - x) ** 2 + (a.y - y) ** 2 - ((b.x - x) ** 2 + (b.y - y) ** 2) || a.id - b.id;
+export const odBit = (s: GameState) => (s.player.odT > 0 ? SORA_OD.bit : 0);
 export const soraForm = (s: GameState) => s.hero === 'sora' && s.player.form >= 1;
-const fm = (s: GameState) => s.mods.formPower;
+export const fm = (s: GameState) => s.mods.formPower;
 const has = (s: GameState, id: string) => (s.b22.branches as string[]).includes(id);
 const legend = (s: GameState, id: string) => (s.b22.legendary as string[]).includes(id);
 /** Boss bodies, boss parts, shielded or invulnerable enemies are never held, pulled or displaced. */
-const fixed = (e: Enemy) => isBoss(e.kind) || !!e.part || !!e.ai?.invuln || (e.blockT ?? 0) > 0;
+export const fixed = (e: Enemy) => isBoss(e.kind) || !!e.part || !!e.ai?.invuln || (e.blockT ?? 0) > 0;
 const FIELD_CAP = 10, BOLT_CAP = 90;
-function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number, tx?: number, ty?: number) {
+export function emit(s: GameState, kind: AbilityEventKind, x: number, y: number, n?: number, tx?: number, ty?: number) {
   s.abilityEvents.push({ id: s.nextId++, kind, x, y, n, ...(tx !== undefined ? { tx, ty } : {}) });
   if (s.abilityEvents.length > 40) s.abilityEvents.splice(0, s.abilityEvents.length - 40);
 }
 const fields = (s: GameState) => (s.hx.sf ??= []);
-function addField(s: GameState, f: Omit<SoraField, 'id' | 't' | 'hit'>) { const a = fields(s); if (a.length >= FIELD_CAP) a.shift(); a.push({ id: s.nextId++, t: 0, hit: [], ...f }); }
+export function addField(s: GameState, f: Omit<SoraField, 'id' | 't' | 'hit'>) { const a = fields(s); if (a.length >= FIELD_CAP) a.shift(); a.push({ id: s.nextId++, t: 0, hit: [], ...f }); }
 /** One area hit, deterministic order (distance then id), capped target count; ordinary enemies are pushed outward, fixed ones never. Returns the ids hurt. */
-function areaHit(s: GameState, x: number, y: number, r: number, dmg: number, pushPx: number, stagger: number, cap: number, slot: 'q' | 'e' | 'r' | 'none', ids?: number[]): number {
+export function areaHit(s: GameState, x: number, y: number, r: number, dmg: number, pushPx: number, stagger: number, cap: number, slot: 'q' | 'e' | 'r' | 'none', ids?: number[]): number {
   let n = 0;
   for (const e of s.enemies.filter(alive).sort(byDistId(x, y))) {
     if (n >= cap) break; const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy); if (d > r + e.radius) continue;
@@ -39,9 +41,9 @@ function areaHit(s: GameState, x: number, y: number, r: number, dmg: number, pus
   }
   return n;
 }
-const ringFx = (s: GameState, kind: 'slam' | 'ring' | 'horizon', x: number, y: number, r: number, dur: number) => { s.hx.rings.push({ id: s.nextId++, x, y, r, t: 0, dur, kind }); if (s.hx.rings.length > 24) s.hx.rings.shift(); };
+export const ringFx = (s: GameState, kind: 'slam' | 'ring' | 'horizon', x: number, y: number, r: number, dur: number) => { s.hx.rings.push({ id: s.nextId++, x, y, r, t: 0, dur, kind }); if (s.hx.rings.length > 24) s.hx.rings.shift(); };
 /** nearest free point on the way from the fighter to a wanted ground point (a mark never sits inside a wall) */
-function freePoint(s: GameState, x: number, y: number): { x: number; y: number } {
+export function freePoint(s: GameState, x: number, y: number): { x: number; y: number } {
   const p = s.player; let r = Math.hypot(x - p.x, y - p.y); const d = normalize(x - p.x, y - p.y);
   while (r > 0 && blocked(p.x + d.x * r, p.y + d.y * r, 0)) r -= 10;
   return { x: p.x + d.x * r, y: p.y + d.y * r };
@@ -168,7 +170,7 @@ function updateCollapse(s: GameState, f: SoraField, dt: number): boolean {
 /* ------------------------------------------------------------------ V Astral Devastation */
 const tierOf = (charge: number) => SORA_V.stages.reduce((t, v, i) => (charge >= v ? i + 1 : t), 0);
 export const astralReady = (s: GameState) => { const p = s.player; return soraForm(s) && p.sigCd <= 0; };
-export const astralCharge = (s: GameState): { charge: number; tier: number } | null => { const c = s.hx.act; return c && c.act === 'astral_devastation' && !c.released ? { charge: c.charge, tier: tierOf(c.charge) } : null; };
+export const astralCharge = (s: GameState): { charge: number; tier: number } | null => { const c = s.hx.act; return c && (c.act === 'astral_devastation' || c.act === 'astral_rebirth') && !c.released ? { charge: c.charge, tier: tierOf(c.charge) } : null; };
 function vAim(s: GameState) { const fa = freeAim(s); if (fa) return { x: fa.x, y: fa.y }; const t = nearest(s, SORA_V.range); return t ? normalize(t.x - s.player.x, t.y - s.player.y) : normalize(s.player.aimX, s.player.aimY); }
 export function startAstral(s: GameState): boolean {
   const p = s.player;
@@ -176,7 +178,7 @@ export function startAstral(s: GameState): boolean {
   const d = vAim(s), c = newCast(s, 'astral_devastation', d, SORA_V.maxHold + 2); s.hx.act = c; emit(s, 'sora_v_charge', p.x, p.y, odBit(s)); return true;
 }
 /** An unreleased charge is cancelled for free (cooldown untouched); a released technique always finishes. */
-export function cancelAstral(s: GameState) { const c = s.hx.act; if (c && c.act === 'astral_devastation' && !c.released) { s.hx.act = null; emit(s, 'sora_v_cancel', s.player.x, s.player.y); } }
+export function cancelAstral(s: GameState) { cancelRebirth(s); const c = s.hx.act; if (c && c.act === 'astral_devastation' && !c.released) { s.hx.act = null; emit(s, 'sora_v_cancel', s.player.x, s.player.y); } }
 function releaseAstral(s: GameState, c: HeroCast) {
   const p = s.player, d = vAim(s), tier = tierOf(c.charge), o = hand(s, d.x, d.y, 24, 'orb'), range = SORA_V.range + SORA_V.rangeTier * tier;
   c.released = true; c.tier = tier; c.dirX = d.x; c.dirY = d.y; c.face = faceOf(d.x, d.y); c.dur = c.t + SORA_V.recover; p.sigCd = SORA_V.cooldown;   // a real release spends the cooldown even on a miss
@@ -260,7 +262,7 @@ export function soraOdGain(s: GameState, kill = false) {
 
 /* ------------------------------------------------------------------ Skybreaker */
 function updateFlight(s: GameState, dt: number) {
-  const p = s.player, held = s.flyHeld;
+  const p = s.player, held = s.flyHeld, SORA_FLY = s.player.form === 2 ? SERA_FLY : SORA_FLY_1;
   p.flyCd = Math.max(0, p.flyCd - dt); p.flyHold = held ? p.flyHold + dt : 0;
   if (p.flyT === 0) p.air = Math.max(0, p.air - dt * 8);
   const busy = !!s.hx.act || !!s.cinema || p.hp <= 0 || p.form < 1 || !!s.b22.ult.act;
@@ -285,16 +287,17 @@ export function updateSoraCombat(s: GameState, dt: number) {
   if (p.odT > 0) { p.odT -= dt; if (p.odT <= 0 || p.form < 1) { p.odT = 0; emit(s, 'sora_od_end', p.x, p.y, p.form); } }
   const a = s.hx.sf; if (a?.length) {
     const keep: SoraField[] = [];
-    for (const f of a) { const done = f.k === 'prison' ? updatePrison(s, f, dt) : f.k === 'spears' ? updateSpears(s, f, dt) : f.k === 'collapse' ? updateCollapse(s, f, dt) : updateAstral(s, f, dt); if (!done) keep.push(f); }
+    for (const f of a) { const done = SERA_FIELDS.has(f.k) ? updateSeraField(s, f, dt) : f.k === 'prison' ? updatePrison(s, f, dt) : f.k === 'spears' ? updateSpears(s, f, dt) : f.k === 'collapse' ? updateCollapse(s, f, dt) : updateAstral(s, f, dt); if (!done) keep.push(f); }
     s.hx.sf = keep;
   }
+  updateTraces(s);
   updateFlight(s, dt);
 }
 /** Per tick, per fighter, with their own raw input and the previous tick's held state. */
 export function soraCombatInput(s: GameState, input: InputState, prev: { sig: boolean; od: boolean }): { sig: boolean; od: boolean } {
   const sigDown = !!(input.sig || input.sigHeld), odDown = !!input.od;
   s.sigHeld = !!input.sigHeld; s.flyHeld = flyIntent(s, input);
-  if (input.sigAbort) cancelAstral(s); else if (sigDown && !prev.sig) startAstral(s);
+  if (input.sigAbort) cancelAstral(s); else if (sigDown && !prev.sig) { if (s.player.form === 2) seraStartV(s); else startAstral(s); }
   if (odDown && !prev.od) startSoraOverdrive(s);
   return { sig: sigDown, od: odDown };
 }

@@ -12,6 +12,7 @@ import { freeAim } from './ApexSystem';
 import { handOffset, strikeHand } from './Strike';
 import { surgeAutoMul } from './KaiKit';
 import { fangCharge, ashShiftInput } from './RenEclipse';
+import { seraShiftInput } from './SoraSeraph';
 import { novaCharge, renCombatInput, renOdGain } from './RenCombat';
 import { astralCharge, soraCombatInput, soraOdGain } from './SoraCombat';
 import { vexCharge, vexCombatInput, vexOdGain, vexShift, vexShiftInput } from './VexCombat';
@@ -204,6 +205,7 @@ export function formShift(s: GameState, to: 1 | 2 | 3): boolean {
 export function formShiftInput(s: GameState, input: InputState, fDown: boolean, wasF: boolean) {
   const p = s.player; if (s.hero === 'vex') { vexShiftInput(s, input, fDown, wasF); return; }
   if (s.hero === 'ren') { ashShiftInput(s, fDown, wasF); return; }
+  if (s.hero === 'sora') { seraShiftInput(s, fDown, wasF); return; }
   if (s.hero !== 'kai' || p.form < 1) return;
   if (input.selPick && input.selPick >= 1 && input.selPick <= 3) { formShift(s, input.selPick as 1 | 2 | 3); return; }
   if (fDown && !wasF && formChoices(s).length === 0 && !s.selector.open) { for (let k = 1; k <= 2; k++) { const to = (((p.form - 1 + k) % 3) + 1) as 1 | 2 | 3; if (formShift(s, to)) return; } }

@@ -17,7 +17,7 @@ export type HeroForm = 'base' | 'f1' | 'f2';
 export const HERO_ART: readonly HeroArt[] = ['ren', 'sora', 'vex'];
 export const isHeroArt = (h: string): h is HeroArt => h === 'ren' || h === 'sora' || h === 'vex';
 /** Which sheet sets exist (all four facings, every clip). A missing set draws the clearly-marked dev placeholder body instead of half a rig. */
-export const HERO_SHEETS: Record<HeroArt, { base: boolean; f1: boolean; f2: boolean; anchors: boolean }> = { ren: { base: true, f1: true, f2: true, anchors: true }, sora: { base: true, f1: true, f2: false, anchors: true }, vex: { base: true, f1: true, f2: true, anchors: true } };
+export const HERO_SHEETS: Record<HeroArt, { base: boolean; f1: boolean; f2: boolean; anchors: boolean }> = { ren: { base: true, f1: true, f2: true, anchors: true }, sora: { base: true, f1: true, f2: true, anchors: true }, vex: { base: true, f1: true, f2: true, anchors: true } };
 export const heroForms = (h: HeroArt): HeroForm[] => (['base', 'f1', 'f2'] as const).filter(f => HERO_SHEETS[h][f]);
 /** Motion/FX rig family: Vex reuses Ren's state machine and effect logic (his art, textures and sounds are his own explicit keys). */
 export const rigOf = (h: HeroArt): 'ren' | 'sora' => (h === 'sora' ? 'sora' : 'ren');
@@ -63,7 +63,7 @@ export class HeroAnimator {
   get dead() { return this.deathT >= 0; }
   deathPresented() { if (this.deathT < 0) return false; const d = this.info('Death'); return this.deathT >= d.frames / d.fps + DEATH_HOLD; }
   private cinemaTo = 0;
-  private set(form: 'base' | 'f1' = this.visualForm) { if (form === 'f1' && this.hero === 'ren' && this.f2 && ((this.clip === 'Transform' && this.cinemaTo === 2) || (this.clip !== 'Transform' && this.formNow === 2))) return this.f2; if (form === 'f1' && this.hero === 'vex' && this.formNow === 2 && this.f2 && this.clip !== 'Transform') return this.f2; return form === 'f1' && this.f1 ? this.f1 : this.base; }
+  private set(form: 'base' | 'f1' = this.visualForm) { if (form === 'f1' && (this.hero === 'ren' || this.hero === 'sora') && this.f2 && ((this.clip === 'Transform' && this.cinemaTo === 2) || (this.clip !== 'Transform' && this.formNow === 2))) return this.f2; if (form === 'f1' && this.hero === 'vex' && this.formNow === 2 && this.f2 && this.clip !== 'Transform') return this.f2; return form === 'f1' && this.f1 ? this.f1 : this.base; }
   private info(clip: KaiClip, form: 'base' | 'f1' = this.clip === 'Transform' ? 'f1' : this.visualForm): KaiClipInfo { return this.set(form)[this.facing].animations[clip] as KaiClipInfo; }
   private turn(f: Facing, force = false) { if (f !== this.facing && (force || this.sinceTurn >= FACING_DWELL)) { this.facing = f; this.sinceTurn = 0; } }
   private leg() { const r = this.info('Run'); return Math.floor(this.runTime * r.fps + 1e-6) % RUN_PHASES % r.frames; }
@@ -138,6 +138,9 @@ export class HeroAnimator {
       case 'bloodstar': case 'zero_horizon': return 'Sphere';
       case 'celestial_lance': return 'Beam';
       // B27: Sora's Sovereign moves reuse the existing gather / thrust clips until his own poses are authored (reported as reuse, not as new poses)
+      case 'constellation_pierce': return moving ? 'RunPunchUpper' : 'Beam';   // B34: Eventide Seraph reuses the Sovereign clips (reported as reuse, not new poses)
+      case 'seraphs_descent': case 'eventide_judgment': return 'Sphere';
+      case 'astral_rebirth': return a.released ? 'Beam' : 'Sphere';
       case 'azure_prison': return moving ? 'RunPunchUpper' : 'Sphere';
       case 'heavens_spear': case 'azure_collapse': return 'Sphere';
       case 'astral_devastation': return a.released ? 'Beam' : 'Sphere';

@@ -16,6 +16,7 @@ import { AbilityFx } from './abilityFx';
 import { KaiKitFx } from './kaiKitFx';
 import { B32Fx } from './b32Fx';
 import { AshFx } from './ashFx';
+import { SeraFx } from './seraFx';
 import { PASSIVE_AURA } from './fxPolicy';
 import { CONTOUR, ContourController, EDGE_STATES, edgePalette, formKey, registerContourFilter } from './contourFilter';
 import { HeroFxView } from './heroFxView';
@@ -41,7 +42,7 @@ export class EntityRenderer {
   private readonly apexFx: ApexFx;
   private readonly cometFx: CometFx;
   private readonly formFx: FormFx;
-  private readonly abilityFx: AbilityFx; private readonly kitFx: KaiKitFx; private readonly b32: B32Fx | null; private ashFx: AshFx | null = null;
+  private readonly abilityFx: AbilityFx; private readonly kitFx: KaiKitFx; private readonly b32: B32Fx | null; private ashFx: AshFx | null = null; private seraFx: SeraFx | null = null;
   private readonly anchors: AnchorTable | undefined;
   private hand: HandAnchor | null = null;
   private readonly enemies: EnemyRenderer | null;
@@ -98,9 +99,9 @@ export class EntityRenderer {
     const smp = this.auraTrack.update(state, state.phase === 'running' ? dt : 0, Math.hypot(p.vx, p.vy) / Math.max(1, p.speed)), t = state.time;
     const COL: Record<AuraState, number> = { ren: 0xff3a1a, sora: 0x2a9dff, flare: 0xff7a10, comet: 0xffb21a, still: 0x9fc4ff };   // deep hues: a pale glow colour saturates to white on the bright forms
     const on = !!st && state.phase === 'running' && p.hp > 0 && !state.cinema, crowd = state.enemies.length > 45 ? 0.8 : 1;
-    let k = 0; if (on) { const flick = st === 'comet' ? 0.65 + 0.5 * Math.abs(Math.sin(Math.floor(t * 26) * 12.9898)) : st === 'still' ? 0.92 + 0.08 * Math.sin(t * 2.2) : 0.88 + 0.12 * Math.sin(t * 7.3); const WEIGHT: Record<AuraState, number> = { ren: 1, sora: 1, flare: 0.9, comet: 0.55, still: 0.5 }; k = Math.min(5, (2.4 + 3.6 * (smp.k - 0.5)) * WEIGHT[st!]) * flick * (reduced ? 0.55 : crowd); }   // per-form weight: bright gold forms need far less glow or the character washes out
+    let k = 0; if (on) { const flick = st === 'comet' ? 0.65 + 0.5 * Math.abs(Math.sin(Math.floor(t * 26) * 12.9898)) : st === 'still' ? 0.92 + 0.08 * Math.sin(t * 2.2) : 0.88 + 0.12 * Math.sin(t * 7.3); const WEIGHT: Record<AuraState, number> = { ren: 1, sora: 1, flare: 0.9, comet: 0.55, still: 0.5 }; k = Math.min(5, (2.4 + 3.6 * (smp.k - 0.5)) * WEIGHT[st!] * (state.hero === 'sora' && f === 2 ? 0.7 : 1)) * flick * (reduced ? 0.55 : crowd); }   // per-form weight: bright gold forms need far less glow or the character washes out
     if (!PASSIVE_AURA) k = 0;
-    for (const c of this.auraGlow) { c.outerStrength = Math.max(0, k); c.active = k > 0.02; if (st) c.color = (state.hero === 'vex' ? 0x8f5cff : COL[st]); }
+    for (const c of this.auraGlow) { c.outerStrength = Math.max(0, k); c.active = k > 0.02; if (st) c.color = (state.hero === 'vex' ? 0x8f5cff : state.hero === 'sora' && f === 2 ? 0xe9b4dc : COL[st]); }
     this.auraBody.setVisible(k > 0.02);   // inactive = the shader pass is skipped entirely, so untransformed heroes pay nothing
     // embers/motes that rise off the silhouette itself (never wider than the body), rate follows the activity state
     this.auraMotes ??= new FxPool(this.scene, 60);
@@ -132,7 +133,7 @@ export class EntityRenderer {
   private edgePower = 0; private edgeFlow = 1;
   /** B12: camera punch-in factor of the Form II reveal, and a pending visual hit-stop (ms) the scene turns into skipped sim ticks. */
   cameraZoom() { return this.cometFx.cameraZoom() * this.apexFx.cameraZoom() * (this.heroFx?.cameraZoom() ?? 1); }
-  takeHitstop() { return Math.max(this.cometFx.takeHitstop(), this.apexFx.takeHitstop(), this.heroFx?.takeHitstop() ?? 0, this.b32?.takeHitstop() ?? 0, this.ashFx?.takeHitstop() ?? 0); }
+  takeHitstop() { return Math.max(this.cometFx.takeHitstop(), this.apexFx.takeHitstop(), this.heroFx?.takeHitstop() ?? 0, this.b32?.takeHitstop() ?? 0, this.ashFx?.takeHitstop() ?? 0, this.seraFx?.takeHitstop() ?? 0); }
   /** Hero animation state, for the dev-only QA hook. */
   deathPresented() { return this.heroFx ? (this.heroAnim ? this.heroAnim.deathPresented() : this.heroDeadT > 1) : this.animator.deathPresented(); }
   /** QA-only size comparison; the shipped default stays KAI_SCALE. */
@@ -274,7 +275,7 @@ export class EntityRenderer {
       const pose = anim.update({ dt, alive: !dead, moving: (input.x !== 0 || input.y !== 0) && this.moveHold > 0, inputX: input.x, inputY: input.y, runSpeed: p.speed * (p.form ? 1.1 : 1), dashing: p.dashRemaining > 0, dashX: p.dashDx, dashY: p.dashDy, dashRemaining: p.dashRemaining, hurt, form: p.form, cinema: state.cinema ? { t: state.cinema.t, dur: state.cinema.dur, commitAt: state.cinema.commitAt } : null, act: view, strike: state.hx.strike, fury: this.furyView(state), flyT: p.flyT });
       this.pose = pose; const form: 'base' | 'f1' = pose.form === 'f1' ? 'f1' : 'base';
       // one appearance for BOTH body layers: Voidheart Exile (Vex f2) resolves its upper, legs and anchors from the same set
-      const wantF2 = (hero === 'vex' && p.form === 2) || (hero === 'ren' && (p.form === 2 || (state.cinema?.to === 2 && pose.clip === 'Transform'))), look: HeroForm = wantF2 && form === 'f1' && !!this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f2')) ? 'f2' : form, set = this.scene.registry.get(HERO_REGISTRY_KEY(hero, look)) as KaiManifests, m = set[pose.facing], fr = clipFrame(m, pose.clip), key = heroTextureKey(hero, pose.facing, pose.clip, look);
+      const wantF2 = (hero === 'vex' && p.form === 2) || ((hero === 'ren' || hero === 'sora') && (p.form === 2 || (state.cinema?.to === 2 && pose.clip === 'Transform'))), look: HeroForm = wantF2 && form === 'f1' && !!this.scene.registry.get(HERO_REGISTRY_KEY(hero, 'f2')) ? 'f2' : form, set = this.scene.registry.get(HERO_REGISTRY_KEY(hero, look)) as KaiManifests, m = set[pose.facing], fr = clipFrame(m, pose.clip), key = heroTextureKey(hero, pose.facing, pose.clip, look);
       if (this.hero.texture.key !== key) this.hero.setTexture(key);
       this.hero.setFrame(pose.frame).setOrigin(fr.ox / fr.w, fr.oy / fr.h).setPosition(x, y).setVisible(true);
       const hitFlash = !dead && p.invulnerable > RULES.contactInvulnerability - 0.1 && !state.hx.act, alpha = !dead && pose.clip !== 'Transform' && p.invulnerable > 0 && Math.floor(state.time * 18) % 2 === 0 ? 0.86 : 1;
@@ -297,6 +298,7 @@ export class EntityRenderer {
     if (hero === 'vex') { this.vexFx ??= new VexFx(this.scene); this.vexFx.update({ dt, state, hero: this.hero, hand: this.hand, scale: this.baseScale, reduced, running: state.phase === 'running', dead, crowded: state.enemies.length > 45, facing: this.pose.facing, shake: !this.partner }); }
     if (hero === 'sora') { this.soraFx ??= new SoraPhoenix(this.scene); this.soraFx.update({ dt, state, hero: this.hero, hand: this.hand, scale: this.baseScale, reduced, running: state.phase === 'running', dead, crowded: state.enemies.length > 45, facing: this.pose.facing, shake: !this.partner }); }
     if (hero === 'ren') { this.renFox ??= new RenFox(this.scene); this.renFox.update({ dt, state, hero: this.hero, hand: this.hand, scale: this.baseScale, reduced, running: state.phase === 'running', dead, crowded: state.enemies.length > 45, facing: this.pose.facing, shake: !this.partner }); }
+    if (hero === 'sora') { this.seraFx ??= new SeraFx(this.scene, !this.partner); this.seraFx.update(dt, state, reduced, state.enemies.length > 45, this.pose.facing, -this.liftNow); const sh = this.seraFx.takeShake(); if (sh > 0 && !reduced) this.scene.cameras.main.shake(100, sh); }
     if (hero === 'ren') { this.ashFx ??= new AshFx(this.scene, !this.partner); this.ashFx.update(dt, state, reduced, state.enemies.length > 45); const ash = this.ashFx.takeShake(); if (ash > 0 && !reduced) this.scene.cameras.main.shake(100, ash); }
     fx.update(state, dt, reduced, state.enemies.length > 45, x, y);
     const sh = fx.takeShake(); if (sh > 0 && !reduced) this.scene.cameras.main.shake(110, sh);
@@ -319,7 +321,7 @@ export class EntityRenderer {
     if (fast && this.ghostClock <= 0 && this.hero.visible) {
       this.ghostClock = p.form ? 0.028 : 0.04;
       let g = this.ghosts.find(q => q.life <= 0); if (!g && this.ghosts.length < cap) { g = { spr: this.scene.add.sprite(0, 0, this.hairLayer.srcKey || this.hero.texture.key, 0).setScale(this.hero.scaleX).setBlendMode(Phaser.BlendModes.ADD).setDepth(9.2), life: 0 }; this.ghosts.push(g); }
-      if (g) { g.life = 0.28; g.spr.setTexture(this.hairLayer.srcKey || this.hero.texture.key, this.hairLayer.srcFrame).setOrigin(this.hero.originX, this.hero.originY).setPosition(x, y).setTint(surge ? 0x4fb8ff : state.hero === 'vex' ? vexTint(state.player.form).ghost : hero === 'ren' ? 0xff3a2e : 0x6fc8ff); g.spr.tintMode = Phaser.TintModes.FILL; }
+      if (g) { g.life = 0.28; g.spr.setTexture(this.hairLayer.srcKey || this.hero.texture.key, this.hairLayer.srcFrame).setOrigin(this.hero.originX, this.hero.originY).setPosition(x, y).setTint(surge ? 0x4fb8ff : state.hero === 'vex' ? vexTint(state.player.form).ghost : hero === 'ren' ? (state.player.form === 2 ? 0xff9a3c : 0xff3a2e) : state.player.form === 2 ? 0xf2c4e0 : 0x6fc8ff); g.spr.tintMode = Phaser.TintModes.FILL; }
     }
     for (const g of this.ghosts) { if (g.life > 0) { g.life -= dt; g.spr.setVisible(g.life > 0).setAlpha(Math.max(0, g.life / 0.28) * (p.form ? 0.55 : 0.4)); } else g.spr.setVisible(false); }
   }
@@ -341,5 +343,5 @@ export class EntityRenderer {
     for (const [id, orb] of this.orbs) if (!activeOrbs.has(id)) { orb.gem.destroy(); orb.glow.destroy(); this.orbs.delete(id); }
   }
   enemyStats() { return { ...this.enemies!.stats(), boss: this.bosses!.stats() }; }
-  destroy() { this.combatFx.destroy(); this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.b32?.destroy(); this.ashFx?.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.renFox?.destroy(); this.soraFx?.destroy(); this.vexFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
+  destroy() { this.combatFx.destroy(); this.presence.destroy(); this.outfitLayer.destroy(); this.kitFx.destroy(); this.b32?.destroy(); this.ashFx?.destroy(); this.seraFx?.destroy(); this.auraBody.destroy(); this.auraMotes?.destroy(); this.kaiAura?.destroy(); this.cometFx.destroy(); this.apexFx.destroy(); this.formFx.destroy(); this.abilityFx.destroy(); this.enemies?.destroy(); this.bosses?.destroy(); this.hero.destroy(); this.legs.destroy(); for (const g of this.blinkGhosts) g.spr.destroy(); this.heroFx?.destroy(); this.renFox?.destroy(); this.soraFx?.destroy(); this.vexFx?.destroy(); this.heroBody?.destroy(); for (const g of this.ghosts) g.spr.destroy(); for (const orb of this.orbs.values()) { orb.gem.destroy(); orb.glow.destroy(); } this.orbs.clear(); this.hairLayer.destroy(); }
 }

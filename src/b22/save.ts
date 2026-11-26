@@ -14,7 +14,7 @@ export const B22_SAVE_VERSION = 1, LEDGER_KEEP = 80;
 export interface ModeRecord { runs: number; wins: number; bestSeconds: number; bestScore: number; bestKills: number; bestCycle: number; bestLevel: number }
 export interface ChallengeProof { best: number; attempts: number; done: boolean; /** always 'local': only a server may mark a score verified */ status: 'local' }
 export interface B22Save {
-  v: 1; vexForms: [boolean, boolean]; /** B33: Ren's Ashen Eclipse (earned by a Null Seraph victory with Ren) */ renF2?: boolean; story: { done: (1 | 2 | 3)[]; seen: boolean };
+  v: 1; vexForms: [boolean, boolean]; /** B33: Ren's Ashen Eclipse (earned by a Null Seraph victory with Ren) */ renF2?: boolean; /** B34: Sora's Eventide Seraph (earned by a Null Seraph victory with Sora) */ soraF2?: boolean; story: { done: (1 | 2 | 3)[]; seen: boolean };
   mastery: Record<string, true>; owned: string[]; equipped: { outfit: Partial<Record<HeroId, OutfitId>>; crest: string | null; /** edge detail reward id per mastery form (FormKey) */ aura: Partial<Record<FormKey, string>> };
   records: Record<string, ModeRecord>; challenges: Record<string, ChallengeProof>;
   seen: { relics: RelicId[]; branches: string[]; legends: string[]; bosses: string[] };
@@ -37,6 +37,7 @@ export function safeServerUrl(raw: unknown): string {
 export function migrateB22(raw: unknown): B22Save {
   const b = blankB22(); if (typeof raw !== 'object' || raw === null) return b; const r = raw as Record<string, unknown>;
   if (r.renF2 === true) b.renF2 = true;
+  if (r.soraF2 === true) b.soraF2 = true;
   if (Array.isArray(r.vexForms)) b.vexForms = [r.vexForms[0] === true, r.vexForms[1] === true];
   const st = (typeof r.story === 'object' && r.story ? r.story : {}) as Record<string, unknown>; b.story = { done: ([1, 2, 3] as const).filter(c => Array.isArray(st.done) && st.done.includes(c)), seen: st.seen === true };
   if (typeof r.mastery === 'object' && r.mastery) for (const k of Object.keys(r.mastery)) if (isMilestoneId(k) && (r.mastery as Record<string, unknown>)[k] === true) b.mastery[k] = true;

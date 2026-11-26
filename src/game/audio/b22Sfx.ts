@@ -200,3 +200,28 @@ export function ashSfx(kind: string, n = 0): string | null {
     default: return null;
   }
 }
+
+/** B34 Eventide Seraph: a bell-and-air motif (bright high partials, soft noise) distinct from every other hero's; one recipe per beat / stage / outcome, chosen from the simulation's report (beat, hits, miss, tier). */
+Object.assign(SFX, {
+  sera_feather: { f0: 1500, f1: 900, dur: 0.1, noise: 0.15, decay: 20, wave: 'bell', gain: 0.3, fm: 2.6 }, sera_lance: { f0: 1100, f1: 500, dur: 0.18, noise: 0.2, decay: 12, wave: 'bell', gain: 0.5, fm: 2.2 }, sera_trace: { f0: 2200, f1: 1800, dur: 0.09, noise: 0, decay: 24, wave: 'bell', gain: 0.2, fm: 3 }, sera_burst: { f0: 1300, f1: 600, dur: 0.22, noise: 0.15, decay: 11, wave: 'bell', gain: 0.55, fm: 2.4 },
+  sera_q_cast: { f0: 700, f1: 1700, dur: 0.14, noise: 0.2, decay: 12, wave: 'bell', gain: 0.4, fm: 2 }, sera_q_lance: { f0: 1800, f1: 700, dur: 0.16, noise: 0.25, decay: 14, wave: 'bell', gain: 0.45, fm: 2.8 }, sera_q_hit: { f0: 1000, f1: 420, dur: 0.2, noise: 0.3, decay: 11, wave: 'bell', gain: 0.6, fm: 2 },
+  sera_e_node: { f0: 600, f1: 1200, dur: 0.14, noise: 0.05, decay: 14, wave: 'bell', gain: 0.3, fm: 2.2 }, sera_e_strike: { f0: 520, f1: 130, dur: 0.4, noise: 0.5, decay: 8, wave: 'sine', gain: 0.85 }, sera_e_conv: { f0: 400, f1: 1500, dur: 0.5, noise: 0.15, decay: 5, wave: 'bell', gain: 0.65, fm: 1.8 },
+  sera_r_cast: { f0: 200, f1: 700, dur: 0.5, noise: 0.15, decay: 4, wave: 'sine', gain: 0.5 }, sera_r_node: { f0: 900, f1: 1700, dur: 0.12, noise: 0, decay: 16, wave: 'bell', gain: 0.35, fm: 2.4 }, sera_r_link: { f0: 500, f1: 1400, dur: 0.5, noise: 0.1, decay: 4, wave: 'bell', gain: 0.55, fm: 1.7 }, sera_r_sweep: { f0: 1200, f1: 150, dur: 0.6, noise: 0.5, decay: 4.5, wave: 'saw', gain: 0.75 }, sera_r_nova: { f0: 110, f1: 40, dur: 1.1, noise: 0.6, decay: 3.2, wave: 'sine', gain: 1.0 },
+  sera_v_charge: { f0: 300, f1: 800, dur: 0.4, noise: 0.1, decay: 4, wave: 'bell', gain: 0.3, fm: 1.8 }, sera_v_tier: { f0: 900, f1: 1600, dur: 0.16, noise: 0, decay: 14, wave: 'bell', gain: 0.4, fm: 2.4 }, sera_v_release: { f0: 1500, f1: 300, dur: 0.26, noise: 0.35, decay: 9, wave: 'bell', gain: 0.6, fm: 2 }, sera_v_hit: { f0: 700, f1: 260, dur: 0.26, noise: 0.45, decay: 9, wave: 'saw', gain: 0.7 }, sera_v_pulse: { f0: 160, f1: 60, dur: 0.4, noise: 0.5, decay: 7, wave: 'sine', gain: 0.8 }, sera_v_phoenix: { f0: 90, f1: 34, dur: 0.9, noise: 0.55, decay: 4, wave: 'sine', gain: 1.0 }, sera_v_miss: { f0: 900, f1: 400, dur: 0.12, noise: 0.3, decay: 20, wave: 'bell', gain: 0.2, fm: 2 }, sera_v_block: { f0: 300, f1: 200, dur: 0.12, noise: 0.5, decay: 20, wave: 'saw', gain: 0.3 }, sera_v_cancel: { f0: 700, f1: 300, dur: 0.1, noise: 0.1, decay: 18, wave: 'bell', gain: 0.2, fm: 2 },
+  sera_reveal_start: { f0: 220, f1: 330, dur: 2.2, noise: 0.05, decay: 1.2, wave: 'bell', gain: 0.4, fm: 1.4 }, sera_reveal_break: { f0: 70, f1: 28, dur: 1.1, noise: 0.5, decay: 2.8, wave: 'sine', gain: 1.0 }, sera_reveal_commit: { f0: 500, f1: 2200, dur: 0.9, noise: 0.1, decay: 3.4, wave: 'bell', gain: 0.65, fm: 1.9 }, sera_shift: { f0: 800, f1: 1500, dur: 0.26, noise: 0.15, decay: 8, wave: 'bell', gain: 0.5, fm: 2.2 }, sera_end: { f0: 900, f1: 300, dur: 0.5, noise: 0.15, decay: 6, wave: 'bell', gain: 0.4, fm: 1.8 },
+} satisfies Record<string, Recipe>);
+export function seraSfx(kind: string, n = 0): string | null {
+  const hits = (n >> 8) & 63;
+  switch (kind) {
+    case 'sera_auto': return (n & 3) === 3 ? 'sera_lance' : 'sera_feather';
+    case 'sera_trace': return 'sera_trace'; case 'sera_burst': return 'sera_burst';
+    case 'sera_q_cast': return 'sera_q_cast'; case 'sera_q_lance': return ((n >> 4) & 31) > 0 ? 'sera_q_hit' : 'sera_q_lance';
+    case 'sera_e_node': return 'sera_e_node'; case 'sera_e_strike': return 'sera_e_strike'; case 'sera_e_conv': return 'sera_e_conv';
+    case 'sera_r_cast': return 'sera_r_cast'; case 'sera_r_node': return 'sera_r_node'; case 'sera_r_link': return 'sera_r_link'; case 'sera_r_sweep': return 'sera_r_sweep'; case 'sera_r_nova': return 'sera_r_nova';
+    case 'sera_v_charge': return 'sera_v_charge'; case 'sera_v_tier': return 'sera_v_tier'; case 'sera_v_release': return 'sera_v_release'; case 'sera_v_hit': return 'sera_v_hit';
+    case 'sera_v_pulse': return ((n >> 5) & 7) >= 3 && (n & 31) === 2 ? 'sera_v_phoenix' : hits > 0 || (n & 31) === 0 ? 'sera_v_pulse' : null;
+    case 'sera_v_miss': return 'sera_v_miss'; case 'sera_v_block': return 'sera_v_block'; case 'sera_v_cancel': return 'sera_v_cancel';
+    case 'sera_start': return 'sera_reveal_start'; case 'sera_break': return 'sera_reveal_break'; case 'sera_commit': return 'sera_reveal_commit'; case 'sera_shift': return 'sera_shift'; case 'sera_end': return 'sera_end';
+    default: return null;
+  }
+}

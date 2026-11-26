@@ -4,6 +4,7 @@ import { ABILITY_FX_NAMES, abilityFxKey, abilityFxUrl } from '../render/abilityF
 import { KK_FX, kkKey, kkUrl } from '../render/kaiKitFx';
 import { B32_FX, b32Key, b32Url } from '../render/b32Fx';
 import { ASH_FX, ashKey, ashUrl } from '../render/ashFx';
+import { SERA_FX, seraKey, seraUrl } from '../render/seraFx';
 import { VFX_NAMES, vfxKey, vfxUrl } from '../render/fxPool';
 import { ARENA_FX, FLOOR_TILE_COUNT, HAZARD_FX, PROPS_KEY, arenaAssetUrl, arenaFxKey, arenaPropNames, floorTileKey, floorTileUrl, parsePropManifest, propKey } from '../render/arenaWorld';
 import { B22_ART } from '../render/realmArt';
@@ -69,6 +70,7 @@ export class BootScene extends Phaser.Scene {
     ABILITY_FX_NAMES.forEach(n => this.load.image(abilityFxKey(n), abilityFxUrl(n)));
     KK_FX.forEach(n => this.load.image(kkKey(n), kkUrl(n)));
     B32_FX.forEach(n => this.load.image(b32Key(n), b32Url(n)));
+    SERA_FX.forEach(n => this.load.image(seraKey(n), seraUrl(n)));   // B34 Eventide Seraph sprites (ImageGen)
     ASH_FX.forEach(n => this.load.image(ashKey(n), ashUrl(n)));   // B33 Ashen Eclipse sprites (ImageGen)   // B32 ability identity sprites (ImageGen)
     KP_NAMES.forEach(n => this.load.image(kpKey(n), kpUrl(n)));
     VX_NAMES.forEach(n => this.load.image(vxKey(n), vxUrl(n)));   // B28 Abyssal Guardian (two looks) + Vex FX (ImageGen)
@@ -105,7 +107,7 @@ export class BootScene extends Phaser.Scene {
       for (const form of heroForms(h)) {
         const raw = KAI_DIRS.map(dir => this.cache.json.get(`hero-${h}-${form}-manifest-${dir}`)); if (!raw.every(r => r && typeof r === 'object' && (r as { direction?: string }).direction)) continue;
         const set = {} as KaiManifests; KAI_DIRS.forEach((dir, i) => { set[dir] = parseKaiManifest(raw[i], dir, form === 'base' ? 'base' : 'f1'); }); this.registry.set(HERO_REGISTRY_KEY(h, form), set);
-        for (const dir of KAI_DIRS) for (const clip of [...(form === 'base' ? KAI_CLIPS : KAI_F1_CLIPS), ...(h === 'vex' ? VEX_CLIPS : []), ...(h === 'ren' && (form === 'f1' || form === 'f2') ? REN_F1_CLIPS : []), ...(h === 'sora' && form === 'f1' ? SORA_F1_CLIPS : []), ...(h === 'vex' && form === 'f1' ? VEX_F1_CLIPS : []), ...(h === 'vex' && form === 'f2' ? VEX_F2_CLIPS : [])]) { const m = set[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue; this.load.spritesheet(heroTextureKey(h, dir, clip, form), heroSheetUrl(h, dir, a, form), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 }); }
+        for (const dir of KAI_DIRS) for (const clip of [...(form === 'base' ? KAI_CLIPS : KAI_F1_CLIPS), ...(h === 'vex' ? VEX_CLIPS : []), ...(h === 'ren' && (form === 'f1' || form === 'f2') ? REN_F1_CLIPS : []), ...(h === 'sora' && (form === 'f1' || form === 'f2') ? SORA_F1_CLIPS : []), ...(h === 'vex' && form === 'f1' ? VEX_F1_CLIPS : []), ...(h === 'vex' && form === 'f2' ? VEX_F2_CLIPS : [])]) { const m = set[dir], a = m.animations[clip as keyof typeof m.animations] as KaiClipInfo | undefined; if (!a) continue; this.load.spritesheet(heroTextureKey(h, dir, clip, form), heroSheetUrl(h, dir, a, form), { frameWidth: a.frame_width ?? m.frame_width, frameHeight: a.frame_height ?? m.frame_height, endFrame: a.frames - 1 }); }
       }
       this.registry.set(HERO_ANCHORS_KEY(h), this.cache.json.get(HERO_ANCHORS_KEY(h)));
     }

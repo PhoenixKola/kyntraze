@@ -1,4 +1,4 @@
-import { B22Sfx, B22_EVENT_SFX, EVENT_SFX, ashSfx, b32Sfx, kaiCombatSfx, renCombatSfx, signatureSfx, soraCombatSfx, vexCombatSfx } from './b22Sfx';
+import { B22Sfx, B22_EVENT_SFX, EVENT_SFX, ashSfx, b32Sfx, seraSfx, kaiCombatSfx, renCombatSfx, signatureSfx, soraCombatSfx, vexCombatSfx } from './b22Sfx';
 import { isBoss } from '../../content/enemies';
 import type { AbilityEvent, EnemyEvent, GameState, Impact } from '../../sim/GameState';
 import { MusicDirector, STINGERS, type MusicCue } from './music';
@@ -389,7 +389,7 @@ export class AbilityAudio {
     if (!s.b22 || s.phase !== 'running') return;
     for (const ev of s.b22.ev) { if (ev.id <= this.b22Cur) continue; this.b22Cur = ev.id; const r = B22_EVENT_SFX[ev.kind] ?? signatureSfx(ev.kind); if (r) this.b22Play(r); }
     for (const ev of s.abilityEvents) { if (ev.id <= this.b22Ab) continue; this.b22Ab = ev.id; if (ev.kind === 'kai_auto') { const key = (ev.n ?? 0) & 255; if (key === this.autoKey && ev.id - this.autoId <= 1) { this.autoId = ev.id; continue; } this.autoKey = key; this.autoId = ev.id; }
-      const r = ashSfx(ev.kind, ev.n ?? 0) ?? b32Sfx(ev.kind, ev.n ?? 0, ev.b) ?? EVENT_SFX[ev.kind] ?? kaiCombatSfx(ev.kind, ev.n ?? 0) ?? renCombatSfx(ev.kind, ev.n ?? 0) ?? soraCombatSfx(ev.kind, ev.n ?? 0) ?? vexCombatSfx(ev.kind, ev.n ?? 0); if (r) this.b22Play(r); }
+      const r = seraSfx(ev.kind, ev.n ?? 0) ?? ashSfx(ev.kind, ev.n ?? 0) ?? b32Sfx(ev.kind, ev.n ?? 0, ev.b) ?? EVENT_SFX[ev.kind] ?? kaiCombatSfx(ev.kind, ev.n ?? 0) ?? renCombatSfx(ev.kind, ev.n ?? 0) ?? soraCombatSfx(ev.kind, ev.n ?? 0) ?? vexCombatSfx(ev.kind, ev.n ?? 0); if (r) this.b22Play(r); }
   }
   /** Scene teardown (retry / home): reset per-run counters and cut effect voices. The context, buses and score survive so the next scene (or the menu) continues the music. */
   dispose() { this.nextHover = 0; this.nextAmbient = 0; this.nextCrackle = 0; this.lastEvent = 0; this.lastImpact = 0; this.lastHitAt.clear(); this.lastEnemyEvent = 0; this.b22Cur = 0; this.b22Ab = 0; this.lastEnemy.clear(); this.lastPhase = ''; this.lastBosses = 0; this.victorySeen = -1; this.lastDrive = 0; this.finalWarned = false; this.eventDuck = { until: 0, level: 1 }; this.lastDuck = -1; this.preloaded = ''; this.music?.setDuck(1, 0.3); this.stopAll(0.01, true); }

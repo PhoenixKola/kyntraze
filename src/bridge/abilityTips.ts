@@ -3,6 +3,7 @@ import type { GameState } from '../sim/GameState';
 import { BEAM, SPHERE } from '../content/abilities';
 import { REN_E, REN_FORM_INFO, REN_Q, REN_R } from '../content/renCombat';
 import { ASH_E, ASH_FORM_INFO, ASH_Q, ASH_R } from '../content/renEclipse';
+import { SERA_E, SERA_FORM_INFO, SERA_Q, SERA_R } from '../content/soraSeraph';
 import { SORA_E, SORA_FORM_INFO, SORA_Q, SORA_R } from '../content/soraCombat';
 import { VEX1_E, VEX1_Q, VEX1_R, VEX2_E, VEX2_Q, VEX2_R, VEX_FORM_INFO } from '../content/vexCombat';
 import { HERO_KIT, REN, SORA, VEX } from '../content/heroKits';
@@ -43,6 +44,10 @@ export function abilityTips(s: GameState): Record<TipSlot, AbilityTip> {
     et = { name: REN.e.name, key: 'E', pad: 'RB', blurb: hk!.blurbs.e, stats: [['Damage / strike', n(REN.e.damage * m.beamDamage)], ['Strikes', n((f ? REN.e.formHops : REN.e.hops) + m.beamLinger)], ['Cooldown', cd(REN.e.cooldown * m.beamCd)]] };
     rt = { name: REN.r.name, key: 'R', pad: 'LB', blurb: hk!.blurbs.r + ult, stats: [['Damage', n(REN.r.damage * m.sphereDamage * (f ? REN.r.formDamage : 1))], ['Radius', `${n(REN.r.radius * m.sphereRadius)} px`], ['Cooldown', cd(REN.r.cooldown * m.sphereCd)]] };
     }
+  } else if (s.hero === 'sora' && f === 2) {   // B34: Eventide Seraph
+    qt = { name: SERA_Q.name, key: 'Q', pad: 'X', blurb: SERA_FORM_INFO.q.text, stats: [['Damage / lance', n(q * m.formPower * SERA_Q.mul)], ['Lances', n(SERA_Q.lanes)], ['Cooldown', cd(SERA_Q.cooldown)]] };
+    et = { name: SERA_E.name, key: 'E', pad: 'RB', blurb: SERA_FORM_INFO.e.text, stats: [['Damage / strike', n(q * m.formPower * m.beamDamage * SERA_E.mul)], ['Nodes', n(Math.min(SERA_E.nodesMax, SERA_E.nodes + Math.max(0, Math.round(m.beamLinger))))], ['Cooldown', cd(SERA_E.cooldown * m.beamCd)]] };
+    rt = { name: SERA_R.name, key: 'R', pad: 'LB', blurb: SERA_FORM_INFO.r.text + ult, stats: [['Sweep / nova', `${n(q * m.formPower * m.sphereDamage * SERA_R.sweepMul)} / ${n(q * m.formPower * m.sphereDamage * SERA_R.novaMul)}`], ['Nova radius', `${n(SERA_R.novaR * m.sphereRadius)} px`], ['Cooldown', cd(SERA_R.cooldown * m.sphereCd)]] };
   } else if (s.hero === 'sora' && f >= 1) {   // B27: Azure Sovereign's own Q / E / R, numbers from the same content table the sim reads
     const rs = p.qRadius / SORA.base.qRadius;
     qt = { name: SORA_Q.name, key: 'Q', pad: 'X', blurb: SORA_FORM_INFO.q.text, stats: [['Shatter', n(q * m.formPower * SORA_Q.shatterMul)], ['Prison radius', `${n(SORA_Q.radius * rs)} px`], ['Cooldown', cd(SORA_Q.cooldown)]] };

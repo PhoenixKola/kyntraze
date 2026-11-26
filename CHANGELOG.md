@@ -1,5 +1,10 @@
 # Changelog
 
+## B34 Sora: Eventide Seraph
+- Sora's second and final transformation: a sweeping crest of separated pearl-and-champagne feather locks over a dusk-violet layer, a dusk-violet costume with prism trim, a floating feather mantle, halo fragment and orbiting feathers, a new reveal (stars gather into a broken constellation, a Phoenix shadow opens, a prismatic shockfront) and the Eventide Phoenix Overdrive. Earned by defeating the Null Seraph as Sora after Azure Sovereign; usable from the next run. F while transformed shifts between Sovereign and Seraph (18 Drive, 20 minimum, 2.5 s).
+- New kit: Prism Feathers, Constellation Pierce, Seraph's Descent, Eventide Judgment, Astral Rebirth, Celestial Glide, and the capped Star Trace mark (set by direct feather hits, consumed once by the constellation techniques).
+- ImageGen: portrait, 8 icons, the Eventide Phoenix family, celestial effects and mantle pieces; the body sheets are built through the existing Sora rig (no new bespoke poses).
+
 ## B33 Ren: Ashen Eclipse
 - Ren's second and final transformation: a long obsidian-and-ash mane, charcoal-and-bone costume, a new reveal (a silent eclipse, a pressure front, nine tail shadows) and the Eclipse Nine-Tailed Fox Overdrive. Earned by defeating the Null Seraph as Ren after Crimson Ascendant; usable from the next run. Form Shift with Crimson Ascendant costs 18 Drive like Vex's.
 - New kit: Cinderfang Chain, Eclipse Maul, Ninefold Rupture, Ashen Cataclysm, Eclipse Fang, Ashen Skybreaker, and the capped Ash Brand mark that finishers detonate.

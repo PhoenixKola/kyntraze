@@ -12,14 +12,14 @@ import { HERO_KIT } from '../../content/heroKits';
 export type ProgressTab = 'armory' | 'contracts' | 'archives';
 const icon = (n: string) => `${ASSET_BASE}ui/meta/${n}.png`;
 const TABS: { id: ProgressTab; label: string; glyph: string }[] = [{ id: 'armory', label: 'ARMORY', glyph: '⚔' }, { id: 'contracts', label: 'CONTRACTS', glyph: '❖' }, { id: 'archives', label: 'RECORDS', glyph: '✦' }];
-interface Props { vexForms?: [boolean, boolean]; renF2?: boolean; meta: MetaState; unlocks: { cometheart: boolean; stillfire: boolean; ren?: boolean; sora?: boolean }; tab: ProgressTab; onTab: (t: ProgressTab) => void; onMeta: (m: MetaState) => void; onBack: () => void; onDeploy?: () => void; backLabel?: string }
+interface Props { vexForms?: [boolean, boolean]; renF2?: boolean; soraF2?: boolean; meta: MetaState; unlocks: { cometheart: boolean; stillfire: boolean; ren?: boolean; sora?: boolean }; tab: ProgressTab; onTab: (t: ProgressTab) => void; onMeta: (m: MetaState) => void; onBack: () => void; onDeploy?: () => void; backLabel?: string }
 
 /** Marks balance + equipped crest: always visible so the player never wonders what they can afford. */
 export function MarksBadge({ marks, crest }: { marks: number; crest?: string | null }) {
   return <span className="pg-marks" data-testid="marks-balance" aria-label={`${marks} ${CURRENCY.name}`}>{crest && UNLOCK_BY_ID[crest as UnlockId] && <img className="pg-crest-mini" src={icon(UNLOCK_BY_ID[crest as UnlockId].icon)} alt="" draggable={false}/>}<img src={icon('mark')} alt="" draggable={false}/><b>{marks.toLocaleString()}</b><em>{CURRENCY.short}</em></span>;
 }
 
-export function ProgressionScreen({ vexForms = [false, false], renF2 = false, meta, unlocks, tab, onTab, onMeta, onBack, onDeploy, backLabel = '← BACK' }: Props) {
+export function ProgressionScreen({ vexForms = [false, false], renF2 = false, soraF2 = false, meta, unlocks, tab, onTab, onMeta, onBack, onDeploy, backLabel = '← BACK' }: Props) {
   const [pending, setPending] = useState<UnlockId | null>(null);
   const [fresh, setFresh] = useState<UnlockId | null>(null);
   const [note, setNote] = useState('');
@@ -93,7 +93,7 @@ export function ProgressionScreen({ vexForms = [false, false], renF2 = false, me
                   ? [{ n: 'FLAREBOUND', on: true, how: 'Drive 65% + F' }, { n: 'COMETHEART', on: unlocks.cometheart, how: 'Defeat the Fracture Warden' }, { n: 'STILLFIRE APEX', on: unlocks.stillfire, how: 'Defeat the Null Seraph' }]
                   : h.id === 'vex'
                     ? [{ n: 'RIFTBOUND', on: vexForms[0], how: 'Beat the Warden or Trial ch. 2' }, { n: 'VOIDHEART EXILE', on: vexForms[1], how: 'Beat the Oathkeeper (Trial ch. 3)' }]
-                    : [{ n: HERO_KIT[h.id].form.toUpperCase(), on: !!unlocks[h.id as 'ren' | 'sora'], how: `Defeat the Fracture Warden as ${h.name}` }, ...(h.id === 'ren' ? [{ n: 'ASHEN ECLIPSE', on: renF2, how: 'Defeat the Null Seraph as Ren' }] : [])];
+                    : [{ n: HERO_KIT[h.id].form.toUpperCase(), on: !!unlocks[h.id as 'ren' | 'sora'], how: `Defeat the Fracture Warden as ${h.name}` }, ...(h.id === 'ren' ? [{ n: 'ASHEN ECLIPSE', on: renF2, how: 'Defeat the Null Seraph as Ren' }] : h.id === 'sora' ? [{ n: 'EVENTIDE SERAPH', on: soraF2, how: 'Defeat the Null Seraph as Sora' }] : [])];
                 return <article key={h.id} className="pg-runner pa-runner" style={{ '--accent': h.accent } as CSSProperties}>
                   <header><img src={h.id === 'kai' ? `${ASSET_BASE}ui/kai-portrait-base.png` : `${ASSET_BASE}ui/heroes/${h.id}-portrait-base.webp`} alt="" draggable={false}/><div><b>{h.name}</b><small>{h.title}</small></div></header>
                   <dl><div><dt>RUNS</dt><dd>{r.runs}</dd></div><div><dt>WINS</dt><dd>{r.wins}</dd></div><div><dt>BEST</dt><dd>{r.bestSeconds ? roundedTime(r.bestSeconds) : '—'}</dd></div></dl>

@@ -13,6 +13,7 @@ export const CONTOUR: Record<string, Palette> = {
   still: { c1: rgb(0x6f86b8), c2: rgb(0xc9d6ee), c3: rgb(0xffffff), flow: 1.7, jag: 0.0, sparks: 0.4 },
   ren: { c1: rgb(0x9a0a18), c2: rgb(0xff3a2a), c3: rgb(0xffc060), flow: 3.6, jag: 0.5, sparks: 0.8 },
   ash: { c1: rgb(0x1a1210), c2: rgb(0xc8793a), c3: rgb(0xf0e2c8), flow: 2.2, jag: 0.6, sparks: 0.6 },
+  sera: { c1: rgb(0x6a3f95), c2: rgb(0xf0b8d8), c3: rgb(0xfff4e4), flow: 1.6, jag: 0.1, sparks: 0.5 },
   sora: { c1: rgb(0x0a3fb0), c2: rgb(0x35c2ff), c3: rgb(0xe6fbff), flow: 2.6, jag: 0.3, sparks: 0.6 },
   vex1: { c1: rgb(0x3b0f8a), c2: rgb(0xa06af0), c3: rgb(0xf0dcff), flow: 3.0, jag: 0.8, sparks: 0.9 },
   vex2: { c1: rgb(0x0c0e12), c2: rgb(0x7d8896), c3: rgb(0xeef3fa), flow: 1.9, jag: 0.2, sparks: 0.3 },
@@ -41,6 +42,6 @@ export const finisherFor = (contourKey: string): string | null => { const f = CO
 export const edgePalette = (key: string): Palette => { const f = CONTOUR_FORM[key]; return f && equippedDetails[f] && AURA_DETAIL[key] ? AURA_DETAIL[key] : CONTOUR[key]; };
 
 /** Palette key of the transformation a fighter is in (null = untransformed), shared by the stroke, the ground ring and the effects. */
-export const formKey = (hero: string, form: number): string | null => hero === 'kai' ? (form === 1 ? 'flare' : form === 2 ? 'comet' : form === 3 ? 'still' : null) : hero === 'vex' ? (form === 1 ? 'vex1' : form === 2 ? 'vex2' : null) : form >= 1 ? (hero === 'ren' ? (form === 2 ? 'ash' : 'ren') : 'sora') : null;
+export const formKey = (hero: string, form: number): string | null => hero === 'kai' ? (form === 1 ? 'flare' : form === 2 ? 'comet' : form === 3 ? 'still' : null) : hero === 'vex' ? (form === 1 ? 'vex1' : form === 2 ? 'vex2' : null) : form >= 1 ? (hero === 'ren' ? (form === 2 ? 'ash' : 'ren') : (form === 2 ? 'sera' : 'sora')) : null;
 /** Ground ring / halo colour for each palette key (the mid colour of the form's contour). */
-export const RING_TINT: Record<string, number> = { flare: 0xff9a2e, comet: 0xffd12a, still: 0xc9d6ee, ren: 0xff3a2a, ash: 0xc8793a, sora: 0x35c2ff, vex1: 0xa06af0, vex2: 0x8a929e, surge: 0x3ab4ff };
+export const RING_TINT: Record<string, number> = { flare: 0xff9a2e, comet: 0xffd12a, still: 0xc9d6ee, ren: 0xff3a2a, ash: 0xc8793a, sera: 0xf0c4de, sora: 0x35c2ff, vex1: 0xa06af0, vex2: 0x8a929e, surge: 0x3ab4ff };

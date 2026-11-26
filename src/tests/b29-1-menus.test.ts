@@ -8,7 +8,7 @@ const pub = (p: string) => existsSync(`public/${p}`);
 describe('B29.1 hero showcase data', () => {
   it('lists base plus every real transformation per hero (Kai 3, Ren 2, Sora 1, Vex 2) with real idle sheets', () => {
     const n = Object.fromEntries(HEROES.map(h => [h.id, formsFor(h.id).length - 1]));
-    expect(n).toEqual({ kai: 3, ren: 2, sora: 1, vex: 2 });
+    expect(n).toEqual({ kai: 3, ren: 2, sora: 2, vex: 2 });
     for (const h of HEROES) for (const f of formsFor(h.id)) expect(pub(f.sheet), f.sheet).toBe(true);
   });
   it('every appearance has a real kit: auto, Q, E, R, dash; transformed ones add V, Overdrive and flight', () => {

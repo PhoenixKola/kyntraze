@@ -1,0 +1,72 @@
+# Image generation log
+
+## 2026-11-26T08:37:33.989Z - mantle.png
+
+- File: mantle.png (1312x1199)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a21700-1c38-79c3-acf3-78cffd1be18a
+- Reference images: concept.png
+- Seconds: 41.5
+
+Prompt:
+
+```text
+Four separate cosmetic pieces for a character's celestial mantle, hand-painted 2D game sprites, crisp, 2 by 2 grid: 1 the LEFT mantle panel: a drooping layered cluster of seven feather-edged luminous panels in pearl and champagne with rose tips and a dusk-violet underside, rooted at the top right, hanging down and slightly left; 2 the RIGHT mantle panel: the mirror of it, rooted at the top left, hanging down and slightly right; 3 a broken HALO fragment: an open arc of floating pearl shards with three small four-pointed stars, flat, like a crown ring; 4 one small orbiting FEATHER, pearl and rose with a thin violet edge, pointing right. PURE BLACK (#000000) background, every element separated by generous pure-black margin, no ground, no scenery, no cast shadow, absolutely no text, letters, numbers, logo, watermark or UI. Original design. Palette: luminous cream / mother-of-pearl cores, pale rose and champagne, deep dusk-violet, thin prismatic aqua-pink-gold edge reflections; NOT blue, NOT red, NOT plain white.
+```
+
+## 2026-11-26T08:37:42.973Z - phoenix.png
+
+- File: phoenix.png (1536x1024)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a21700-1c61-7493-914f-fb2c9c7b8359
+- Reference images: concept.png, head_side0.png
+- Seconds: 50.4
+
+Prompt:
+
+```text
+Eventide Phoenix beast sprite sheet for a premium anime action game, hand-painted 2D, crisp bold silhouettes, a mythic celestial bird made of luminous cream and pearl feathers with dark dusk-violet feather tips, a glowing core, trailing constellation lines of tiny stars, translucent with prism rim light. Long elegant wings built from individually readable articulated feather shapes. SIX items in a 3 by 2 grid: 1 the phoenix HEAD in side view facing RIGHT with a long swept crest of feathers and an open beak; 2 the phoenix chest and neck, side view facing RIGHT, glowing core at the breast, cut off at the belly; 3 ONE huge wing raised up and back, side view, root at the lower left, five to seven long separate flight feathers fanned out, dark dusk tips; 4 ONE huge wing swept back almost horizontal, side view, root at the left, long layered feathers; 5 the long TAIL: three very long trailing feather streamers with tiny constellation stars along them, flowing to the LEFT, rooted at the right; 6 the full phoenix seen from the FRONT with both wings spread symmetrically wide, head down-facing, a halo of stars. PURE BLACK (#000000) background, every element separated by generous pure-black margin, no ground, no scenery, no cast shadow, absolutely no text, letters, numbers, logo, watermark or UI. Original design. Palette: luminous cream / mother-of-pearl cores, pale rose and champagne, deep dusk-violet, thin prismatic aqua-pink-gold edge reflections; NOT blue, NOT red, NOT plain white.
+```
+
+## 2026-11-26T08:37:48.418Z - icons.png
+
+- File: icons.png (1774x887)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a21700-1c5b-7892-a021-56c30354a8bf
+- Reference images: concept.png
+- Seconds: 55.9
+
+Prompt:
+
+```text
+Eight HUD ability icons in a 4 by 2 grid, each a bold simple painted emblem inside a dark round medallion with a thin pearl rim and a faint rose-gold glow, reading clearly at 48 pixels. 1 PRISM FEATHERS: two crossing luminous feathers with a prism edge. 2 CONSTELLATION PIERCE: three star-lances radiating in a fan joined by thin constellation lines. 3 SERAPH'S DESCENT: a large feather-lance falling vertically onto a ground ring with small star nodes. 4 EVENTIDE JUDGMENT: a connected constellation diagram with a phoenix silhouette above it. 5 ASTRAL REBIRTH: a winged star orb. 6 EVENTIDE PHOENIX: a phoenix head in profile with long feather crest. 7 EVENTIDE SERAPH FORM: a halo fragment over a swept feather crest silhouette. 8 STAR TRACE: a small bright star mark inside a thin ring. Equal size, evenly spaced. PURE BLACK (#000000) background, every element separated by generous pure-black margin, no ground, no scenery, no cast shadow, absolutely no text, letters, numbers, logo, watermark or UI. Original design. Palette: luminous cream / mother-of-pearl cores, pale rose and champagne, deep dusk-violet, thin prismatic aqua-pink-gold edge reflections; NOT blue, NOT red, NOT plain white.
+```
+
+## 2026-11-26T08:37:50.554Z - fx.png
+
+- File: fx.png (1536x1024)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a21700-1c5e-7520-b429-97a2954f4b3b
+- Reference images: concept.png
+- Seconds: 58
+
+Prompt:
+
+```text
+Eventide Seraph combat effect sprites for a premium anime action game, hand-painted 2D, razor-sharp shapes, readable at 120 pixels, bright cores with luminous cream and pale-rose edges and a thin prism fringe so they read on both dark and bright arenas. NINE items in a 3 by 3 grid: 1 a single spectral FEATHER LANCE pointing right, crisp, with a faint streak; 2 a long thin STAR LANCE pointing right, needle-like with a bright diamond tip; 3 a flat ground NODE sigil seen at an oblique angle: a ring with a four-pointed star in the middle and small tick marks; 4 a tall vertical DESCENDING FEATHER LANCE pointing straight down, huge, with a bright tip at the bottom and a pale glow; 5 a flat CONSTELLATION DIAGRAM: seven bright stars joined by thin lines in a readable astral figure; 6 a small STAR TRACE mark: a bright four-pointed star in a thin ring; 7 a REFRACTION BURST impact: a starburst of thin prism shards radiating; 8 a WINGED STAR projectile: a glowing orb with two small feathered wings, pointing right; 9 a flat PRISMATIC NOVA ring seen at an oblique angle: a bright cream rim with prism colour fringes and a dark violet inner glow. PURE BLACK (#000000) background, every element separated by generous pure-black margin, no ground, no scenery, no cast shadow, absolutely no text, letters, numbers, logo, watermark or UI. Original design. Palette: luminous cream / mother-of-pearl cores, pale rose and champagne, deep dusk-violet, thin prismatic aqua-pink-gold edge reflections; NOT blue, NOT red, NOT plain white.
+```
+
+## 2026-11-26T08:37:55.223Z - portrait.png
+
+- File: portrait.png (1254x1254)
+- Codex: 0.169.0-alpha.11.1 (model: gpt-6.1-sol)
+- Thread: 01a21700-1c60-7741-afba-790d6cded958
+- Reference images: concept.png, portrait-sov-pix.png
+- Seconds: 62.7
+
+Prompt:
+
+```text
+Pixel-art bust portrait for a game hero-select, square 1:1. Attached: (1) the design sheet whose LEFT figure (Design A) is the target look; (2) SORA's Azure Sovereign bust (same framing, pixel scale, shading and pose to match). Draw SORA EVENTIDE SERAPH in the same pixel language and framing: head and shoulders, three-quarter view facing slightly right, a sweeping crest of broad separated feather-shaped mother-of-pearl and champagne locks with pale-rose tips over a dusk-violet inner layer, eyes glowing pale rose-gold, calm focused expression, one open bare shoulder, a floating feather-edged luminous mantle on the other shoulder, a high dusk-violet collar with a small pearl gem, a few small drifting star motes and a broken halo fragment behind the head. Flat solid magenta #ff00ff background. Chunky pixel blocks, no anti-aliasing, no gradients, no text, no watermark.
+```
+
