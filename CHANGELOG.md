@@ -4,6 +4,7 @@
 - Every hero now fights beside a small beast companion: Kai's Solar Wyrmling (lunge-bite and fire burst), Ren's Ember Kit (three darting slashes at the most wounded foe), Sora's Dawn Fledgling (two feather flares), Vex's Abyssal Warden (a shove-and-stagger void pulse). It follows at a readable distance, assists every ~3-4 s (sooner right after a hero cast), flinches when the hero is hit, and cannot be hit or targeted.
 - Primal Overdrive fuses it into the hero (it sinks into the chest with a thread of light, a flash and a ring; no separate entity or attacks while Overdrive runs) and it re-forms from the hero when Overdrive ends. Defeat clears it; a revive summons it again.
 - Assist damage is a bounded share of the hero's auto-attack and never feeds the Overdrive meter, the Ultimate gauge, relic procs or mastery logs. Fully deterministic, per-fighter state: both co-op fighters and both online players see both beasts (it travels in the snapshots).
+- The beast and every one of its effects take the colour of its hero's current form (Kai: blue, orange, yellow, silver; Ren: ember, crimson, ash; Sora: azure, royal blue, pearl; Vex: indigo, violet, gray), from per-form recolors of the ImageGen art. Hero select shows each hero's familiar beside them, recoloured to the inspected form.
 - ImageGen: four 12-pose sheets (idle x4, move x4, windup, strike, recover, hit) and one effect sheet (shot, burst and summon sigil per beast); small quiet synthesised cues.
 
 ## B34 Sora: Eventide Seraph

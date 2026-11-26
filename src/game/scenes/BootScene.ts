@@ -27,7 +27,7 @@ import { KO_NAMES, koKey, koUrl } from '../render/kaiCombatFx';
 import { RF_NAMES, rfKey, rfUrl } from '../render/renFox';
 import { EV_NAMES, evUrl, SP_NAMES, spKey, spUrl } from '../render/soraPhoenix';
 import { VX_NAMES, vxKey, vxUrl } from '../render/vexFx';
-import { FAM_IDS, FAM_KINDS, FAM_MANIFEST_KEY, FAM_MANIFEST_URL, famBodyKey, famBodyUrl, famFxKey, famFxUrl } from '../render/familiarFx';
+import { FAM_FORMS, FAM_HERO_ID, FAM_KINDS, FAM_MANIFEST_KEY, FAM_MANIFEST_URL, famBodyKey, famBodyUrl, famFxKey, famFxUrl } from '../render/familiarFx';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
 import { B14_FX_NAMES, b14Key, b14Url } from '../render/b14fx';
@@ -36,8 +36,8 @@ import { F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL, f3fxKey, f3fxUrl } from '../ren
 import { KAI_F3_REGISTRY_KEY, KAI_F2_REGISTRY_KEY, KAI_ANCHORS_KEY, KAI_ANCHORS_URL, KAI_CLIPS, KAI_KIT_CLIPS, REN_F1_CLIPS, SORA_F1_CLIPS, VEX_F1_CLIPS, VEX_F2_CLIPS, KAI_DIRS, KAI_F1_CLIPS, KAI_F1_REGISTRY_KEY, KAI_REGISTRY_KEY, kaiManifestUrl, kaiSheetUrl, kaiTextureKey, parseKaiManifest, type KaiClipInfo, type KaiManifests } from '../../assets/kaiAnimation';
 export class BootScene extends Phaser.Scene {
   /** Every hero that fights this run (the runner plus co-op partners): each gets its own explicitly keyed sheet set. Kai's sheets are always loaded. */
-  private readonly arts: HeroArt[]; private readonly hero0: HeroId;
-  constructor(private readonly arena: ArenaId = 'gloam', hero: HeroId = 'kai', mates: readonly HeroId[] = []) { super({ key: 'BootScene' }); this.hero0 = hero; this.arts = [...new Set([hero, ...mates])].filter(isHeroArt); }
+  private readonly arts: HeroArt[]; private readonly hero0: HeroId; private readonly fighters: HeroId[];
+  constructor(private readonly arena: ArenaId = 'gloam', hero: HeroId = 'kai', mates: readonly HeroId[] = []) { super({ key: 'BootScene' }); this.hero0 = hero; this.fighters = [...new Set<HeroId>([hero, ...mates])]; this.arts = [...new Set([hero, ...mates])].filter(isHeroArt); }
   /** Two load phases (starter assets, then the ~100 Kai sheets whose frame sizes come from the manifests): report one combined 0..1 to the loading screen. */
   private report(phase: 0 | 1, v: number) { window.dispatchEvent(new CustomEvent('kyntraze-load', { detail: phase === 0 ? v * 0.2 : 0.2 + v * 0.8 })); }
   preload() {
@@ -56,7 +56,7 @@ export class BootScene extends Phaser.Scene {
     { const oid = equippedOutfit(); if (hasAccessory(oid, this.hero0)) for (const v of ['front', 'side', 'back'] as AccView[]) this.load.image(accKey(oid, v), accUrl(oid, v)); }   // B23: the equipped outfit's head accessory (3 views)
     this.load.json(HAIR_ANCHORS_KEY, '/art/hair-anchors.json');   // B23: per-frame head anchors for the hair rig (optional: without it the hair simply stays pinned)
     this.load.json(F3_FX_MANIFEST_KEY, F3_FX_MANIFEST_URL); this.load.json(FAM_MANIFEST_KEY, FAM_MANIFEST_URL);   // Celestial Familiars: pose-sheet frame sizes
-    for (const id of FAM_IDS) for (const kind of FAM_KINDS) this.load.image(famFxKey(id, kind), famFxUrl(id, kind));
+    for (const h of this.fighters) for (let f = 0; f < FAM_FORMS[h]; f++) for (const kind of FAM_KINDS) this.load.image(famFxKey(FAM_HERO_ID[h], f, kind), famFxUrl(FAM_HERO_ID[h], f, kind));
     B21_GROUPS.forEach(g => this.load.json(b21ManifestKey(g), b21ManifestUrl(g)));   // B21: optional art groups, a missing manifest is ignored
     B22_ART.forEach(n => this.load.image(`b22-${n}`, `art/b22/${n}.png`));
     COMET_FX_NAMES.forEach(n => this.load.image(cometFxKey(n), cometFxUrl(n)));
@@ -114,7 +114,7 @@ export class BootScene extends Phaser.Scene {
       }
       this.registry.set(HERO_ANCHORS_KEY(h), this.cache.json.get(HERO_ANCHORS_KEY(h)));
     }
-    { const fm = this.cache.json.get(FAM_MANIFEST_KEY) as Record<string, { fw: number; fh: number }> | undefined; if (fm) for (const id of FAM_IDS) if (fm[id]) this.load.spritesheet(famBodyKey(id), famBodyUrl(id), { frameWidth: fm[id].fw, frameHeight: fm[id].fh, endFrame: 11 }); }
+    { const fm = this.cache.json.get(FAM_MANIFEST_KEY) as Record<string, { fw: number; fh: number }> | undefined; if (fm) for (const h of this.fighters) { const id = FAM_HERO_ID[h]; if (fm[id]) for (let f = 0; f < FAM_FORMS[h]; f++) this.load.spritesheet(famBodyKey(id, f), famBodyUrl(id, f), { frameWidth: fm[id].fw, frameHeight: fm[id].fh, endFrame: 11 }); } }
     for (const g of B21_GROUPS) for (const n of b21Names(this.cache.json.get(b21ManifestKey(g)))) this.load.image(b21Key(g, n), b21Url(g, n));
     const fx3 = this.cache.json.get(F3_FX_MANIFEST_KEY) as Record<string, unknown> | undefined;
     if (fx3 && typeof fx3 === 'object') for (const n of Object.keys((fx3 as { sprites?: Record<string, unknown> }).sprites ?? fx3)) if (/^[a-z0-9_]+$/.test(n)) this.load.image(f3fxKey(n), f3fxUrl(n));

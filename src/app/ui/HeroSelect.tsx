@@ -8,6 +8,7 @@ import type { ProgressTab } from './ProgressionScreen';
 import { CONTRACT_BY_ID, UNLOCK_BY_ID, type UnlockId } from '../../content/meta';
 import { Card, Chip, Cta, Frame, Tabs } from './b29/Kit';
 import { formsFor, kitFor, type FormView } from '../heroKitView';
+import { FAMILIARS, famForm } from '../../content/familiars';
 
 const kitImg = (n: string) => `${ASSET_BASE}ui/kit/${n}.webp`;
 const PORTRAIT = (h: HeroId) => h === 'kai' ? `${ASSET_BASE}ui/kai-portrait-base.png` : `${ASSET_BASE}ui/heroes/${h}-portrait-base.webp`;
@@ -22,6 +23,15 @@ const STYLE: Record<HeroId, string> = { kai: 'Close range · momentum · 3 trans
 const unlocked = (save: SaveV1, hero: HeroId, f: FormView) => f.k === 'base' || f.k === 'f1' && hero === 'kai' ? true : hero === 'kai' ? !!save.unlocks?.[f.k === 'f2' ? 'cometheart' : 'stillfire'] : hero === 'vex' ? !!save.b22?.vexForms?.[f.k === 'f1' ? 0 : 1] : hero === 'ren' && f.k === 'f2' ? !!save.b22?.renF2 : hero === 'sora' && f.k === 'f2' ? !!save.b22?.soraF2 : !!save.unlocks?.[hero as 'ren' | 'sora'];
 const crestOf = (hero: HeroId, f: FormView) => hero === 'kai' ? kitImg(f.kitIcon) : `${ASSET_BASE}ui/heroes/${hero}-crest-${f.k === 'base' ? 'base' : 'form'}.webp`;
 
+const FAM_ID = { kai: 'dragon', ren: 'fox', sora: 'phoenix', vex: 'guardian' } as const;
+/** The hero's Celestial Familiar in the colour of the inspected form (its real idle frames); a silhouette while the form is locked. */
+function FamPreview({ hero, fi }: { hero: HeroId; fi: number }) {
+  const d = FAMILIARS[hero], id = FAM_ID[hero], f = famForm(hero, fi);
+  return <div className="hs-fam" key={`${hero}-${f}`} data-testid="hs-familiar">
+    <span className={`hs-fam-spr ${id}`} style={{ backgroundImage: `url(${ASSET_BASE}art/fam/${id}_f${f}.webp)` } as CSSProperties} role="img" aria-label={`${d.name}, idle`}/>
+    <span className="hs-fam-tag"><em>Familiar</em><b>{d.name}</b></span>
+  </div>;
+}
 /** Looping idle of the inspected appearance, from the real transparent game sheets. Locked appearances are a silhouette teaser. */
 function Showcase({ hero, form, locked, burst }: { hero: HeroId; form: FormView; locked: boolean; burst: number }) {
   const [w, h] = form.frame;
@@ -45,8 +55,8 @@ export function HeroSelect({ modeName, onMode, locked, hero, onHero, onProgress,
         <img className="hs-face" src={PORTRAIT(h.id)} alt="" draggable={false}/><span className="hs-hero-t"><b>{h.name}</b><small>{h.title.charAt(0) + h.title.slice(1).toLowerCase()}</small><small className="hs-tf">{n}/{m} forms</small></span><i className="hs-no" aria-hidden="true">0{i + 1}</i></Card>; })}</nav>
     <section className="hs-spot" style={{ '--c': sel.accent } as CSSProperties} aria-live="polite" aria-label={`${sel.name} showcase`}>
       <header className="hs-name"><Chip tone="gold">{sel.title}</Chip><h3 style={{ color: sel.accent }}>{sel.name}</h3><p>{STYLE[sel.id]}</p><p className="hs-fantasy">{FANTASY[sel.id]}</p></header>
-      <Showcase hero={sel.id} form={cur} locked={isLocked} burst={burst}/>
-      <div className="hs-info"><b>{isLocked ? 'Locked appearance' : cur.full}</b><small>{isLocked ? cur.how : fi === 0 ? 'Starting appearance. Transformations awaken in a run with F.' : 'Preview only. Awakens in a run once Drive is full.'}</small></div>
+      <Showcase hero={sel.id} form={cur} locked={isLocked} burst={burst}/><FamPreview hero={sel.id} fi={Math.min(fi, forms.length - 1)}/>
+      <div className="hs-info"><b>{isLocked ? 'Locked appearance' : cur.full}</b><small>{isLocked ? cur.how : fi === 0 ? 'Starting appearance. Transformations awaken in a run with F.' : 'Preview only. Awakens in a run once Drive is full.'}</small><small className="hs-fam-note">{FAMILIARS[sel.id].title}: assists in combat and fuses into you during Overdrive.</small></div>
       <ul className="hs-forms" aria-label={`${sel.name} appearances`}>{forms.map((f, i) => { const lk = !unlocked(save, sel.id, f); return <li key={f.k}><button type="button" className={`hs-form ${i === fi ? 'insp' : ''} ${lk ? 'sealed' : ''}`} onClick={() => setFi(i)} aria-pressed={i === fi} data-testid={`form-${f.k}`} title={lk ? f.how : f.full}>
         <img src={crestOf(sel.id, f)} alt="" draggable={false}/><span><b>{lk ? 'Locked' : f.label}</b><small>{i === 0 ? 'Base' : lk ? 'Sealed' : 'Unlocked'}</small></span></button></li>; })}<li className="hs-count"><Chip tone={open === forms.length ? 'gold' : 'mute'}>{open - 1}/{forms.length - 1} transformations</Chip></li></ul>
     </section>

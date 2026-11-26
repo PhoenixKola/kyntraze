@@ -43,3 +43,17 @@
 @media (max-height: 420px) { .hs-name .hs-fantasy, .hs-count { display: none; } .hs-name p { font-size: 10px; } .hs-stage { left: 40%; bottom: calc(86 * var(--u)); --k: calc(var(--u) * 1.5); } .hs-roster { width: calc(158 * var(--u)); } .hs-hero-t small:not(.hs-tf) { display: none; } .hs-forms { flex-wrap: nowrap; } .hs-form { min-width: 0; padding: calc(3 * var(--u)) calc(7 * var(--u)) calc(3 * var(--u)) calc(4 * var(--u)); } .hs-form img { width: calc(22 * var(--u)); height: calc(22 * var(--u)); } .hs-form small { display: none; } .hs-info small { display: none; } }
 @media (prefers-reduced-motion: reduce) { .hs-spr, .hs-aura, .hs-stage { animation: none; } }
 .hs-hero.on .hs-no { display: none; }
+
+/* Celestial Familiar beside the inspected hero: idle row of its pose sheet (4 frames), coloured to the inspected form */
+.hs-fam { position: absolute; z-index: 3; left: calc(8 * var(--u)); top: 41%; display: flex; flex-direction: column; align-items: center; gap: calc(6 * var(--u)); pointer-events: none; animation: hs-fam-float 3.6s ease-in-out infinite; }
+.hs-fam-spr { display: block; width: calc(124 * var(--u)); height: calc(124 * var(--u)); background-repeat: no-repeat; background-size: 400% 300%; background-position: 0 0; animation: hs-fam-idle .9s step-end infinite; filter: drop-shadow(0 calc(6 * var(--u)) calc(10 * var(--u)) rgba(0, 0, 0, .5)); }
+.hs-fam-spr.phoenix { height: calc(93 * var(--u)); }
+.hs-fam-tag { display: none; flex-direction: column; align-items: center; line-height: 1.1; text-shadow: 0 1px 6px #000; }
+.hs-fam-tag em { font-style: normal; font-size: calc(10 * var(--u)); letter-spacing: .2em; text-transform: uppercase; color: var(--c, #eeb56c); opacity: .85; }
+.hs-fam-tag b { font-size: calc(14 * var(--u)); color: #f4efe4; }
+.hs-fam-note { display: block; margin-top: calc(3 * var(--u)); opacity: .75; }
+.hs-stage.locked ~ .hs-fam .hs-fam-spr { filter: brightness(0) drop-shadow(0 0 calc(8 * var(--u)) color-mix(in srgb, var(--c) 40%, transparent)); opacity: .7; }
+@keyframes hs-fam-idle { 0% { background-position: 0 0; } 25% { background-position: 33.3333% 0; } 50% { background-position: 66.6667% 0; } 75% { background-position: 100% 0; } }
+@keyframes hs-fam-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(calc(-8 * var(--u))); } }
+@media (max-height: 420px) { .hs-fam { left: calc(4 * var(--u)); top: 44%; } .hs-fam-note { display: none; } }
+@media (prefers-reduced-motion: reduce) { .hs-fam, .hs-fam-spr { animation: none; } }

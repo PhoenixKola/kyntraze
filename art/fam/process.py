@@ -5,9 +5,10 @@ import os, json, numpy as np
 from PIL import Image, ImageFilter
 from scipy import ndimage
 from collections import deque
-SRC = 'art/fam'; OUT = 'public/art/fam'; os.makedirs(OUT, exist_ok=True)
+SRC = 'art/fam'; OUT = 'art/fam/native'; PUB = 'public/art/fam'; os.makedirs(OUT, exist_ok=True); os.makedirs(PUB, exist_ok=True)
 FRAME_W = 256
-def flood(im, thr=26, blur=0.8):
+THR = {'fox': 5, 'guardian': 5}   # near-black bodies: only the true (<= 1) background may be keyed out
+def flood(im, thr=26, blur=0.8, enclosed=0):
     a = np.asarray(im.convert('RGB')).astype(np.int16); h, w, _ = a.shape; dark = a.max(axis=2) <= thr; out = np.zeros((h, w), bool); q = deque()
     for x in range(w):
         for y in (0, h - 1):
@@ -20,6 +21,11 @@ def flood(im, thr=26, blur=0.8):
         for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
             ny, nx = y + dy, x + dx
             if 0 <= ny < h and 0 <= nx < w and not out[ny, nx] and dark[ny, nx]: out[ny, nx] = True; q.append((ny, nx))
+    if enclosed:   # big pure-black pockets between tails / limbs are background too; the small chest disc is kept
+        lab, n = ndimage.label((a.max(axis=2) <= 3) & ~out)
+        for i in range(1, n + 1):
+            m = lab == i
+            if m.sum() > enclosed: out |= m
     al = Image.fromarray(np.where(out, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(blur)); r = im.convert('RGBA'); r.putalpha(al); return r
 def tidy(s, keep_streaks=True):
     """drop dust and anything touching the cell border (a neighbour's sliver); keep the main body and any large streak"""
@@ -38,7 +44,7 @@ for name in ['dragon', 'fox', 'phoenix', 'guardian']:
     im = Image.open(p); W, H = im.size; cw, ch = W // 4, H // 3; k = FRAME_W / cw; fw, fh = FRAME_W, round(ch * k)
     cells = []
     for i in range(12):
-        c, r = i % 4, i // 4; s = tidy(flood(im.crop((c * cw, r * ch, (c + 1) * cw, (r + 1) * ch)))); cells.append(s.resize((fw, fh), Image.LANCZOS))
+        c, r = i % 4, i // 4; s = tidy(flood(im.crop((c * cw, r * ch, (c + 1) * cw, (r + 1) * ch)), thr=THR.get(name, 26), enclosed=900)); cells.append(s.resize((fw, fh), Image.LANCZOS))
     cents = []
     for s in cells:
         al = np.asarray(s)[..., 3].astype(float); ys, xs = np.mgrid[0:fh, 0:fw]; t = al.sum() or 1; cents.append(((al * xs).sum() / t, (al * ys).sum() / t))
@@ -50,7 +56,7 @@ for name in ['dragon', 'fox', 'phoenix', 'guardian']:
     sheet.save(f'{OUT}/{name}.webp', 'WEBP', quality=88, method=6, exact=True)
     manifest[name] = {'fw': fw, 'fh': fh, 'cols': 4, 'rows': 3, 'px': round(cx), 'py': round(cy)}
     print(name, fw, fh, round(cx), round(cy))
-json.dump(manifest, open(f'{OUT}/manifest.json', 'w'))
+json.dump(manifest, open(f'{PUB}/manifest.json', 'w'))
 fxp = f'{SRC}/fx.png'
 if os.path.exists(fxp):
     im = Image.open(fxp); W, H = im.size

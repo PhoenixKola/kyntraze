@@ -1,16 +1,18 @@
 /** Celestial Familiars (view): draws every fighter's companion from the simulation's `fam` state alone (solo, local co-op slot 2, and the online partner's snapshot view), so each player sees every beast. Body = ImageGen pose sheet (idle 0-3, move 4-7, windup 8, strike 9, recover 10, hit 11); the Overdrive fusion, the re-forming, strike streaks, impacts and the hero-beast link are layered on top with the effect sprites. */
 import Phaser from 'phaser';
 import type { Familiar, GameState } from '../../sim/GameState';
-import { FAMILIARS, FAM_MERGE, FAM_REFORM, FAM_SPAWN, type FamiliarDef } from '../../content/familiars';
+import { FAMILIARS, FAM_FORMS, FAM_MERGE, FAM_REFORM, FAM_SPAWN, famForm, famPalette, type FamiliarDef } from '../../content/familiars';
 import type { HeroId } from '../../content/heroes';
 import { vfxKey } from './fxPool';
 
 export const FAM_IDS = ['dragon', 'fox', 'phoenix', 'guardian'] as const;
 export const FAM_KINDS = ['shot', 'burst', 'sigil'] as const;
-export const famBodyKey = (id: string) => `fam-body-${id}`;
-export const famBodyUrl = (id: string) => `/art/fam/${id}.webp`;
-export const famFxKey = (id: string, kind: string) => `fam-fx-${id}-${kind}`;
-export const famFxUrl = (id: string, kind: string) => `/art/fam/fx_${id}_${kind}.webp`;
+export const famBodyKey = (id: string, form: number) => `fam-body-${id}-f${form}`;
+export const famBodyUrl = (id: string, form: number) => `/art/fam/${id}_f${form}.webp`;
+export const famFxKey = (id: string, form: number, kind: string) => `fam-fx-${id}-f${form}-${kind}`;
+export const famFxUrl = (id: string, form: number, kind: string) => `/art/fam/fx_${id}_f${form}_${kind}.webp`;
+export const FAM_HERO_ID: Record<HeroId, (typeof FAM_IDS)[number]> = { kai: 'dragon', ren: 'fox', sora: 'phoenix', vex: 'guardian' };
+export { FAM_FORMS };
 export const FAM_MANIFEST_KEY = 'fam-manifest', FAM_MANIFEST_URL = '/art/fam/manifest.json';
 /** displayed width (px) of one 256 px frame */
 const SIZE: Record<string, number> = { dragon: 112, fox: 108, phoenix: 138, guardian: 112 };
@@ -42,21 +44,21 @@ class FamView {
   }
   destroy() { this.body.destroy(); this.glow.destroy(); this.sigil.destroy(); this.g.destroy(); this.link.destroy(); for (const f of this.fx) f.img.destroy(); this.fx.length = 0; }
 }
-interface Who { key: string; hero: HeroId; fam: Familiar | undefined; px: number; py: number; hp: number }
+interface Who { key: string; hero: HeroId; form: number; fam: Familiar | undefined; px: number; py: number; hp: number }
 export class FamiliarLayer {
   private readonly views = new Map<string, FamView>(); private man: Record<string, Man> | null = null;
   constructor(private readonly scene: Phaser.Scene) { const m = scene.cache.json.get(FAM_MANIFEST_KEY); if (m && typeof m === 'object') this.man = m as Record<string, Man>; }
   /** every fighter whose beast should be drawn: the local one, the local co-op partner (second slot) or the online partner (their server view) */
   private fighters(s: GameState): Who[] {
-    const out: Who[] = [{ key: 'a', hero: s.hero, fam: s.fam, px: s.player.x, py: s.player.y, hp: s.player.hp }];
-    if (s.party) { const b = s.party.slots[1].bag; out.push({ key: 'b', hero: b.hero, fam: b.fam, px: b.player.x, py: b.player.y, hp: b.player.hp }); }
-    else { const n = (s as unknown as { partner?: { hero: HeroId; fam?: Familiar | null; player: { x: number; y: number; hp: number } } }).partner; if (n && n.player) out.push({ key: 'b', hero: n.hero, fam: n.fam ?? undefined, px: n.player.x, py: n.player.y, hp: n.player.hp }); }
+    const out: Who[] = [{ key: 'a', hero: s.hero, form: famForm(s.hero, s.player.form), fam: s.fam, px: s.player.x, py: s.player.y, hp: s.player.hp }];
+    if (s.party) { const b = s.party.slots[1].bag; out.push({ key: 'b', hero: b.hero, form: famForm(b.hero, b.player.form), fam: b.fam, px: b.player.x, py: b.player.y, hp: b.player.hp }); }
+    else { const n = (s as unknown as { partner?: { hero: HeroId; fam?: Familiar | null; player: { x: number; y: number; hp: number; form: number } } }).partner; if (n && n.player) out.push({ key: 'b', hero: n.hero, form: famForm(n.hero, n.player.form), fam: n.fam ?? undefined, px: n.player.x, py: n.player.y, hp: n.player.hp }); }
     return out;
   }
   update(s: GameState, dt: number, reduced: boolean) {
     const seen = new Set<string>(), run = s.phase !== 'dead';
     for (const w of this.fighters(s)) {
-      const v = this.views.get(w.key) ?? (() => { const n = new FamView(this.scene); this.views.set(w.key, n); return n; })(), def = FAMILIARS[w.hero], tex = famBodyKey(def.id);
+      const v = this.views.get(w.key) ?? (() => { const n = new FamView(this.scene); this.views.set(w.key, n); return n; })(), def = FAMILIARS[w.hero], tex = famBodyKey(def.id, w.form);
       seen.add(w.key); const f = w.fam;
       if (!f || !run || w.hp <= 0 || !this.scene.textures.exists(tex)) { v.hide(); v.tick(dt); continue; }
       this.draw(v, s, f, def, w, tex, dt, reduced);
@@ -65,8 +67,8 @@ export class FamiliarLayer {
   }
   /** the fusion lands: a flash and ring on the hero's chest where the beast sank in */
   private fuse(v: FamView, def: FamiliarDef, w: Who) {
-    const x = w.px, y = w.py - 30; v.spawn(famFxKey(def.id, 'burst'), x, y, 'burst', 0.42, 0.18, 0.62, 0.95, def.edge, 10.8);
-    v.spawn(famFxKey(def.id, 'sigil'), x, y + 26, 'ring', 0.55, 0.2, 0.75, 0.8, def.accent, 3.8);
+    const x = w.px, y = w.py - 30, pal = famPalette(w.hero, w.form); v.spawn(famFxKey(def.id, w.form, 'burst'), x, y, 'burst', 0.42, 0.18, 0.62, 0.95, pal.edge, 10.8);
+    v.spawn(famFxKey(def.id, w.form, 'sigil'), x, y + 26, 'ring', 0.55, 0.2, 0.75, 0.8, pal.accent, 3.8);
   }
   private draw(v: FamView, s: GameState, f: Familiar, def: FamiliarDef, w: Who, tex: string, dt: number, reduced: boolean) {
     const m = this.man?.[def.id], fw = m?.fw ?? 256, fh = m?.fh ?? 256, ox = (m?.px ?? 128) / fw, oy = (m?.py ?? 128) / fh, T = s.time, sc = (SIZE[def.id] ?? 110) / fw;
@@ -74,21 +76,21 @@ export class FamiliarLayer {
     const px0 = v.x, py0 = v.y, far = Math.hypot(f.x - v.x, f.y - v.y) > 300 || v.fresh;
     const k = far ? 1 : 1 - Math.exp(-dt * (f.mode === 'strike' || f.mode === 'windup' || f.mode === 'merge' ? 36 : 20)); v.x += (f.x - v.x) * k; v.y += (f.y - v.y) * k; v.fresh = false;
     v.speed = dt > 0 ? Math.hypot(v.x - px0, v.y - py0) / dt : 0;
-    const chestX = w.px, chestY = w.py - 30;
+    const chestX = w.px, chestY = w.py - 30, pal = famPalette(w.hero, w.form), fk = (kind: string) => famFxKey(def.id, w.form, kind);
     // lifecycle transitions
     if (v.prevMode !== f.mode) {
       if (v.prevMode === 'merge' && f.mode === 'gone') this.fuse(v, def, w);
-      if (f.mode === 'merge' && v.prevMode !== 'merge') v.spawn(famFxKey(def.id, 'sigil'), v.x, v.y + 14, 'ring', 0.5, 0.45, 0.2, 0.85, def.accent, 3.8);
-      if (f.mode === 'reform' && (v.prevMode === 'gone' || v.prevMode === 'merge' || v.prevMode === '')) { v.spawn(famFxKey(def.id, 'burst'), f.k ? chestX : v.x, f.k ? chestY : v.y - def.hover * 0.5, 'burst', 0.5, 0.14, 0.7, 0.9, def.edge, 10.8); v.spawn(famFxKey(def.id, 'sigil'), v.x, v.y + 12, 'ring', 0.9, 0.25, 0.8, 0.9, def.accent, 3.8); }
+      if (f.mode === 'merge' && v.prevMode !== 'merge') v.spawn(fk('sigil'), v.x, v.y + 14, 'ring', 0.5, 0.45, 0.2, 0.85, pal.accent, 3.8);
+      if (f.mode === 'reform' && (v.prevMode === 'gone' || v.prevMode === 'merge' || v.prevMode === '')) { v.spawn(fk('burst'), f.k ? chestX : v.x, f.k ? chestY : v.y - def.hover * 0.5, 'burst', 0.5, 0.14, 0.7, 0.9, pal.edge, 10.8); v.spawn(fk('sigil'), v.x, v.y + 12, 'ring', 0.9, 0.25, 0.8, 0.9, pal.accent, 3.8); }
       v.prevMode = f.mode;
     }
     if (f.mode === 'gone') { v.body.setVisible(false); v.glow.setVisible(false); v.sigil.setVisible(false); v.link.clear(); v.g.clear(); v.tick(dt); return; }
     // impacts and strike streaks from the sim's own ledger
     for (const q of f.fx) if (q.at > v.lastFx) {
       v.lastFx = Math.max(v.lastFx, q.at); const big = q.k === 3 || q.k === 4, rot = Math.atan2(q.y - (v.y - def.hover * 0.4), q.x - v.x);
-      v.spawn(famFxKey(def.id, 'burst'), q.x, q.y - 8, 'burst', big ? 0.4 : 0.26, big ? 0.16 : 0.1, big ? 0.55 : 0.28, 0.9, 0xffffff, 10.7);
-      if (q.k <= 2 || q.k === 3) v.spawn(famFxKey(def.id, 'shot'), q.x, q.y - 8, 'shot', 0.22, 0.34, 0.5, 0.85, 0xffffff, 10.6, q.k === 4 ? 0 : rot, 1, 0.5);
-      if (q.k === 4) v.spawn(famFxKey(def.id, 'sigil'), q.x, q.y + 6, 'ring', 0.45, 0.25, 0.8, 0.85, def.accent, 3.8);
+      v.spawn(fk('burst'), q.x, q.y - 8, 'burst', big ? 0.4 : 0.26, big ? 0.16 : 0.1, big ? 0.55 : 0.28, 0.9, 0xffffff, 10.7);
+      if (q.k <= 2 || q.k === 3) v.spawn(fk('shot'), q.x, q.y - 8, 'shot', 0.22, 0.34, 0.5, 0.85, 0xffffff, 10.6, q.k === 4 ? 0 : rot, 1, 0.5);
+      if (q.k === 4) v.spawn(fk('sigil'), q.x, q.y + 6, 'ring', 0.45, 0.25, 0.8, 0.85, pal.accent, 3.8);
     }
     // frame, scale and alpha by mode
     const heroHurt = T - f.hurt < 0.28, moving = v.speed > 70; let frame = 0, alpha = 1, scl = 1, lift = def.hover, tilt = 0;
@@ -105,20 +107,20 @@ export class FamiliarLayer {
     v.body.setVisible(true).setOrigin(origX, oy).setFlipX(flip).setScale(sc * scl).setPosition(Math.round(v.x), Math.round(yy)).setAlpha(alpha).setRotation(rot).setDepth(dep).clearTint();
     // emergence / windup glow over the body
     const glowA = f.mode === 'reform' ? (1 - clamp01(f.t / (f.k ? FAM_REFORM : FAM_SPAWN))) * 0.85 : f.mode === 'merge' ? clamp01(f.t / FAM_MERGE) * 0.8 : f.mode === 'windup' ? 0.28 * clamp01(f.t / def.windup) : 0;
-    if (glowA > 0.02) { v.glow.setVisible(true).setOrigin(origX, oy).setFlipX(flip).setScale(sc * scl).setPosition(Math.round(v.x), Math.round(yy)).setRotation(rot).setDepth(dep + 0.01).setAlpha(glowA); v.glow.tintMode = Phaser.TintModes.FILL; v.glow.setTint(def.edge); } else v.glow.setVisible(false);
+    if (glowA > 0.02) { v.glow.setVisible(true).setOrigin(origX, oy).setFlipX(flip).setScale(sc * scl).setPosition(Math.round(v.x), Math.round(yy)).setRotation(rot).setDepth(dep + 0.01).setAlpha(glowA); v.glow.tintMode = Phaser.TintModes.FILL; v.glow.setTint(pal.edge); } else v.glow.setVisible(false);
     // ground shadow and summon sigil
     v.g.clear(); const sh = clamp01(1 - lift / 120); v.g.fillStyle(0x000000, 0.26 * alpha * sh).fillEllipse(v.x, v.y + 14, 52 * (0.7 + 0.3 * sh) * scl, 13 * scl);
-    if (f.mode === 'reform') { const u = clamp01(f.t / (f.k ? FAM_REFORM : FAM_SPAWN)); v.sigil.setTexture(famFxKey(def.id, 'sigil')).setVisible(true).setPosition(v.x, v.y + 12).setScale(0.28 + 0.16 * u).setAlpha(0.8 * (1 - u) ** 1.4).setTint(def.accent).setRotation(0); }
+    if (f.mode === 'reform') { const u = clamp01(f.t / (f.k ? FAM_REFORM : FAM_SPAWN)); v.sigil.setTexture(fk('sigil')).setVisible(true).setPosition(v.x, v.y + 12).setScale(0.28 + 0.16 * u).setAlpha(0.8 * (1 - u) ** 1.4).setTint(pal.accent).setRotation(0); }
     else v.sigil.setVisible(false);
     // hero-beast bond: a thread during fusion / re-forming, a few drifting motes while it follows
     v.link.clear();
     if (f.mode === 'merge' || (f.mode === 'reform' && f.k === 1)) {
       const u = f.mode === 'merge' ? clamp01(f.t / FAM_MERGE) : 1 - clamp01(f.t / FAM_REFORM), a = (f.mode === 'merge' ? 0.55 * (1 - u * 0.4) : 0.4 * u), bx = v.x, by = yy - 8;
-      v.link.lineStyle(2.2, def.edge, a); v.link.beginPath(); v.link.moveTo(bx, by); v.link.lineTo(bx + (chestX - bx) * 0.5 + Math.sin(v.clock * 20) * 4, by + (chestY - by) * 0.5 + Math.cos(v.clock * 17) * 4); v.link.lineTo(chestX, chestY); v.link.strokePath();
+      v.link.lineStyle(2.2, pal.edge, a); v.link.beginPath(); v.link.moveTo(bx, by); v.link.lineTo(bx + (chestX - bx) * 0.5 + Math.sin(v.clock * 20) * 4, by + (chestY - by) * 0.5 + Math.cos(v.clock * 17) * 4); v.link.lineTo(chestX, chestY); v.link.strokePath();
     }
     if (!reduced) {
       v.moteT -= dt; const active = f.mode === 'merge' || f.mode === 'reform' || (f.mode === 'follow' && moving && v.speed > 140);
-      if (active && v.moteT <= 0) { v.moteT = f.mode === 'follow' ? 0.09 : 0.035; const a = v.clock * 37; v.spawn(vfxKey('spark', false), v.x - (flip ? -1 : 1) * 10 + Math.cos(a) * 8, yy + Math.sin(a) * 8, 'mote', 0.45, 0.2, 0.05, 0.7, def.edge, 9.5, 0, 0.5, 0.5, Math.cos(a) * 26, Math.sin(a) * 26 - 12); }
+      if (active && v.moteT <= 0) { v.moteT = f.mode === 'follow' ? 0.09 : 0.035; const a = v.clock * 37; v.spawn(vfxKey('spark', false), v.x - (flip ? -1 : 1) * 10 + Math.cos(a) * 8, yy + Math.sin(a) * 8, 'mote', 0.45, 0.2, 0.05, 0.7, pal.edge, 9.5, 0, 0.5, 0.5, Math.cos(a) * 26, Math.sin(a) * 26 - 12); }
     }
     v.tick(dt);
   }
