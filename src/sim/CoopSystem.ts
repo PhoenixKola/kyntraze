@@ -12,11 +12,11 @@ import { lfMul } from './lfHooks';
 export const SLOT_KEYS = ['player', 'hero', 'hx', 'cast', 'sphere', 'mods', 'upgradeStacks', 'aim', 'eHeld', 'b22', 'heroFormUnlocked', 'heroFormUnlockedNow', 'heroFormSeen', 'renF2', 'renF2Now', 'renSeen2', 'soraF2', 'soraF2Now', 'soraSeen2', 'vexSeen', 'run', 'echoes', 'blasts', 'apexUnlocked', 'apexUnlockedNow', 'cometUnlocked', 'cometUnlockedNow', 'levelUpAt'] as const;
 export type SlotBag = Pick<GameState, (typeof SLOT_KEYS)[number]>;
 export interface Down { downed: boolean; out: boolean; t: number; revives: number; hold: number }
-export interface Edge { sig?: boolean; od?: boolean; q: boolean; f: boolean; e: boolean; r: boolean; buf: { q: number; e: number; r: number } }
+export interface Edge { sig?: boolean; od?: boolean; q: boolean; f: boolean; e: boolean; r: boolean; buf: { q: number; e: number; r: number; v: number } }
 export interface Slot { bag: SlotBag; name: string; edge: Edge; down: Down; input: InputState; lastHits: { id: number; dmg: number; slot: string | null; x: number; y: number }[]; formAt: number; aimAtE: { x: number; y: number; t: number } | null; prevForm?: number }
 export interface Party { slots: Slot[]; cur: number; queue: number[]; chooser: number | null; mode: 'local' | 'online'; shared: PartyState; names: string[] }
 const blankInput = (): InputState => ({ x: 0, y: 0, dash: false, q: false, f: false, beam: false, sphere: false });
-const mkSlot = (bag: SlotBag, name: string): Slot => ({ bag, name, edge: { q: false, f: false, e: false, r: false, buf: { q: 0, e: 0, r: 0 } }, down: { downed: false, out: false, t: 0, revives: 0, hold: 0 }, input: blankInput(), lastHits: [], formAt: -99, aimAtE: null });
+const mkSlot = (bag: SlotBag, name: string): Slot => ({ bag, name, edge: { q: false, f: false, e: false, r: false, buf: { q: 0, e: 0, r: 0, v: 0 } }, down: { downed: false, out: false, t: 0, revives: 0, hold: 0 }, input: blankInput(), lastHits: [], formAt: -99, aimAtE: null });
 const bagOf = (s: GameState): SlotBag => { const b = {} as Record<string, unknown>; for (const k of SLOT_KEYS) b[k] = s[k]; return b as unknown as SlotBag; };
 
 /** Turns a solo state into a 2-fighter party. `second` is the partner's loadout (hero, forms, boon...). The partner starts beside the first fighter. */

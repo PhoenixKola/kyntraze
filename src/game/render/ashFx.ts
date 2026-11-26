@@ -16,12 +16,12 @@ const EMBER = 0xff9a3c, IVORY = 0xf0e2c8;
 interface Pop { im: Phaser.GameObjects.Image; t: number; dur: number; w: number; grow: number; vx: number; vy: number; spin: number; fade: 'out' | 'inout' | 'snap'; a: number; sy: number }
 interface PopOpt { depth?: number; blend?: Phaser.BlendModes; rot?: number; origin?: [number, number]; sy?: number; vx?: number; vy?: number; spin?: number; grow?: number; fade?: 'out' | 'inout' | 'snap'; a?: number; flip?: boolean }
 const MAX_POPS = 130;
-type Slot = 'foxBody' | 'foxHead' | 'foxTails' | 'foxStream' | 'core' | 'gauntlet' | 'ghost';
+type Slot = 'foxBody' | 'foxHead' | 'foxTails' | 'foxStream' | 'core' | 'gauntlet' | 'ghost' | 'tele';
 
 export class AshFx {
   private pops: Pop[] = []; private g: Phaser.GameObjects.Graphics; private lastEvent = 0; private readonly director = new ImpactDirector(); private shake = 0; private clock = 0;
   private ghost: Phaser.GameObjects.Image | null = null; private suck = 0; private foxBody: Phaser.GameObjects.Image | null = null; private foxHead: Phaser.GameObjects.Image | null = null; private foxTails: Phaser.GameObjects.Image | null = null; private foxStream: Phaser.GameObjects.Image | null = null; private core: Phaser.GameObjects.Image | null = null; private gauntlet: Phaser.GameObjects.Image | null = null;
-  private foxA = 0; private side = 1; private lx = 0; private ly = 0; private aura = 0; private jet = 0;
+  private tele: Phaser.GameObjects.Image | null = null; private teleTails: Phaser.GameObjects.Image[] = []; private foxA = 0; private side = 1; private lx = 0; private ly = 0; private aura = 0; private jet = 0;
   constructor(private readonly scene: Phaser.Scene, private readonly events: boolean) { this.g = scene.add.graphics().setDepth(3.66); }
   takeHitstop() { return this.director.take(); }
   takeShake() { const v = this.shake; this.shake = 0; return v; }
@@ -63,21 +63,30 @@ export class AshFx {
     this.g.lineStyle(1.5, EMBER, 0.2 + 0.08 * Math.sin(this.clock * 3)).strokeEllipse(p.x, p.y + GY + 2, 64, 20);
     // ---- telegraphs that follow the simulation's committed geometry
     const c = s.hx.act;
+    if (!(c?.act === 'ninefold_rupture' && c.hop === 0) && !(c?.act === 'ashen_cataclysm' && c.beats === 0)) this.hideTele();
     if (c?.act === 'ninefold_rupture' && c.hop === 0) {
       const R0 = ASH_E.R * s.mods.beamWidth, u = Math.min(1, c.t / ASH_E.coil), pulse = 0.5 + 0.5 * Math.sin(this.clock * 22);
-      this.g.lineStyle(2.5, EMBER, 0.5 + 0.3 * pulse).strokeEllipse(c.tx, c.ty + 14, R0 * 2, R0 * 1.05); this.g.fillStyle(0x201010, 0.1 + 0.12 * u).fillEllipse(c.tx, c.ty + 14, R0 * 2, R0 * 1.05);
-      for (let i = 0; i < ASH_E.tails; i++) { const a = (i / ASH_E.tails) * Math.PI * 2 + 0.3, r = R0 * (1.5 - 1.15 * u), tx = c.tx + Math.cos(a) * r, ty = c.ty + 14 + Math.sin(a) * r * 0.5; this.g.lineStyle(3, IVORY, 0.55 * (0.4 + u)).lineBetween(tx, ty, c.tx + Math.cos(a) * (r - 38), c.ty + 14 + Math.sin(a) * (r - 38) * 0.5); }   // nine tail shadows converge
+      this.circle(c.tx, c.ty + 14, R0, u, pulse); this.g.fillStyle(0x201010, 0.1 + 0.12 * u).fillEllipse(c.tx, c.ty + 14, R0 * 2, R0 * 1.05);
+      for (let i = 0; i < ASH_E.tails; i++) {   // nine ghost tails sweep in from the rim and converge on the point of rupture
+        const a = (i / ASH_E.tails) * Math.PI * 2 + 0.3, r = R0 * (1.5 - 1.15 * u); let t = this.teleTails[i]; if (!t) { if (!this.has('af_tail')) continue; t = this.scene.add.image(0, 0, ashKey('af_tail')).setBlendMode(NORMAL).setOrigin(0.05, 0.5); this.teleTails[i] = t; }
+        const w = 70 + 70 * u; t.setVisible(true).setPosition(c.tx + Math.cos(a + u * 0.6) * r, c.ty + 14 + Math.sin(a + u * 0.6) * r * 0.5).setRotation(a + u * 0.6 + Math.PI).setDepth(9.1).setDisplaySize(w, w * (t.height / t.width)).setAlpha(0.2 + 0.6 * u);
+      }
+      this.suck += dt; if (!lite && this.suck > 0.05) { this.suck = 0; const a = Math.random() * Math.PI * 2, r = R0 * (0.9 + Math.random() * 0.5); this.pop('af_cinders', c.tx + Math.cos(a) * r, c.ty + 14 + Math.sin(a) * r * 0.5, 24 + Math.random() * 14, 0.4, { depth: 9.4, vx: -Math.cos(a) * r / 0.4, vy: -Math.sin(a) * r * 0.5 / 0.4, a: 0.85, grow: 0.4 }); }
     }
     if (c?.act === 'ashen_cataclysm' && c.beats === 0) {
       const u = Math.min(1, c.t / ASH_R.windup), hw = ASH_R.halfWidth * s.mods.sphereRadius, nx = -c.dirY, ny = c.dirX;
-      this.g.lineStyle(2, EMBER, 0.35 + 0.35 * u); this.g.beginPath(); this.g.moveTo(c.sx + nx * hw, c.sy + ny * hw + 16); this.g.lineTo(c.tx + nx * hw, c.ty + ny * hw + 16); this.g.moveTo(c.sx - nx * hw, c.sy - ny * hw + 16); this.g.lineTo(c.tx - nx * hw, c.ty - ny * hw + 16); this.g.strokePath();   // the lane the fox will cross
-      const RR = ASH_R.ruptureR * s.mods.sphereRadius; this.g.lineStyle(2.5, EMBER, 0.25 + 0.4 * u).strokeEllipse(c.tx, c.ty + 14, RR * 2, RR * 1.05);
+      const lane = [[c.sx + nx * hw, c.sy + ny * hw + 16], [c.tx + nx * hw, c.ty + ny * hw + 16], [c.tx - nx * hw, c.ty - ny * hw + 16], [c.sx - nx * hw, c.sy - ny * hw + 16]];
+      this.g.fillStyle(0x1a0c08, 0.1 + 0.22 * u).fillPoints(lane.map(([x, y]) => new Phaser.Math.Vector2(x, y)), true);   // the lane the fox will cross: a soft dark ground band, not a drawn line
+      const L = Math.hypot(c.tx - c.sx, c.ty - c.sy) || 1, ux = (c.tx - c.sx) / L, uy = (c.ty - c.sy) / L, march = (this.clock * 150) % 18;
+      for (let d = march; d < L; d += 18) for (const sgn of [-1, 1]) this.g.fillStyle(EMBER, (0.25 + 0.5 * u) * (1 - d / L * 0.6)).fillCircle(c.sx + ux * d + sgn * nx * hw, c.sy + uy * d + sgn * ny * hw + 16, 1.6);   // embers march along both edges toward the fox's path end
+      if (!lite && this.suck > 0.03) { const d = Math.random() * L, o = (Math.random() * 2 - 1) * hw; this.pop('af_cinders', c.sx + ux * d + nx * o, c.sy + uy * d + ny * o + 16, 22 + Math.random() * 14, 0.45, { depth: 9.3, vx: ux * 240, vy: uy * 240 - 20, a: 0.8, grow: 0.5 }); }
+      const RR = ASH_R.ruptureR * s.mods.sphereRadius; this.circle(c.tx, c.ty + 14, RR, u, 0.5 + 0.5 * Math.sin(this.clock * 18));
       const h = hand(s, c.dirX, c.dirY, 22, 'orb'), core = this.img('core', 'af_core'), ease = u * u * (3 - 2 * u);
       if (core) core.setVisible(true).setPosition(h.x, h.y).setDepth(11.6).setDisplaySize(36 + 150 * ease, (36 + 150 * ease) * 0.79).setAlpha(0.95);   // the eclipse core crushed between the fists, growing with the real windup
       // the world answers the build-up: a spectral fox gathers at the head of the lane, ash and embers are drawn inward, the ground ring under Ren tightens, and the rupture circle fills with a crater glow
       const fh = this.img('ghost', 'ef_head'); if (fh && !lite) fh.setVisible(true).setPosition(c.sx + c.dirX * 30, c.sy + c.dirY * 30 + MID).setRotation(0).setFlipX(c.dirX < 0).setDepth(9.5).setDisplaySize(70 + 90 * ease, (70 + 90 * ease) * (fh.height / fh.width)).setAlpha(0.18 + 0.5 * ease);
       this.suck += dt; if (!lite && this.suck > 0.04) { this.suck = 0; const a = Math.random() * Math.PI * 2, r = 120 + Math.random() * 90; this.pop('af_cinders', h.x + Math.cos(a) * r, h.y + Math.sin(a) * r * 0.7, 30 + Math.random() * 22, 0.34, { depth: 11.3, vx: -Math.cos(a) * r / 0.34, vy: -Math.sin(a) * r * 0.7 / 0.34, a: 0.9, grow: 0.4 }); }
-      this.g.lineStyle(3, IVORY, 0.25 + 0.4 * u).strokeEllipse(p.x, p.y + GY + 2, 240 * (1 - 0.6 * ease), 76 * (1 - 0.6 * ease)); this.g.fillStyle(EMBER, 0.06 + 0.12 * u).fillEllipse(c.tx, c.ty + 14, RR * 2 * (0.4 + 0.6 * ease), RR * 1.05 * (0.4 + 0.6 * ease));
+      this.g.lineStyle(3, IVORY, 0.25 + 0.4 * u).strokeEllipse(p.x, p.y + GY + 2, 240 * (1 - 0.6 * ease), 76 * (1 - 0.6 * ease));
     } else { this.core?.setVisible(false); this.ghost?.setVisible(false); }
     if (c?.act === 'eclipse_fang' && !c.released) {   // gauntlet charge: the claw grows with the real tier
       const h = hand(s, c.dirX, c.dirY, 24, 'orb'), want = c.tier >= 3 ? 'af_bite' : 'af_claws', g = this.img('gauntlet', want, ADD);
@@ -91,7 +100,13 @@ export class AshFx {
     this.fox(dt, s, reduced);
   }
   private hideFox() { this.foxBody?.setVisible(false); this.foxHead?.setVisible(false); this.foxTails?.setVisible(false); this.foxStream?.setVisible(false); }
-  private hideLive() { this.hideFox(); this.core?.setVisible(false); this.gauntlet?.setVisible(false); this.ghost?.setVisible(false); }
+  private hideTele() { this.tele?.setVisible(false); for (const t of this.teleTails) t.setVisible(false); }
+  /** A crater glow filling the committed circle, a rotating rim of ember dots, no stroked outline. */
+  private circle(cx: number, cy: number, rx: number, u: number, pulse: number) {
+    const cr = this.img('tele', 'af_crater', ADD); if (cr) cr.setVisible(true).setPosition(cx, cy).setDepth(3.72).setDisplaySize(rx * 2.15, rx * 1.15).setAlpha(Math.min(0.95, 0.2 + 0.65 * u) * (0.85 + 0.15 * pulse));
+    for (let i = 0; i < 30; i++) { const a = (i / 30) * Math.PI * 2 + this.clock * 0.7, big = i % 3 === 0; this.g.fillStyle(big ? IVORY : EMBER, (0.35 + 0.5 * u) * (big ? 0.9 : 0.7)).fillCircle(cx + Math.cos(a) * rx, cy + Math.sin(a) * rx * 0.525, (big ? 2.2 : 1.4) + pulse * 0.8); }
+  }
+  private hideLive() { this.hideTele(); this.hideFox(); this.core?.setVisible(false); this.gauntlet?.setVisible(false); this.ghost?.setVisible(false); }
   private fox(dt: number, s: GameState, reduced: boolean) {
     const p = s.player, on = p.odT > 0 && p.hp > 0; this.foxA += ((on ? 1 : 0) - this.foxA) * Math.min(1, dt * (on ? 6 : 4));
     if (this.foxA < 0.02) { this.hideFox(); return; }
@@ -172,6 +187,6 @@ export class AshFx {
       default: break;
     }
   }
-  destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of [this.foxBody, this.foxHead, this.foxTails, this.foxStream, this.core, this.gauntlet, this.ghost]) im?.destroy(); this.g.destroy(); }
+  destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of [this.foxBody, this.foxHead, this.foxTails, this.foxStream, this.core, this.gauntlet, this.ghost, this.tele, ...this.teleTails]) im?.destroy(); this.g.destroy(); }
 }
 void ASH;

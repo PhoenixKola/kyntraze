@@ -6,6 +6,8 @@ import { hand } from '../../sim/HeroSystem';
 
 export const SP_SETS = ['head_side', 'head_front', 'head_back', 'body', 'wing_side', 'tail', 'feather_blade', 'activation', 'dissolve', 'ground_ring', 'prison_form', 'prison_shatter', 'spear', 'spear_impact', 'mark_sigil', 'collapse_vortex', 'collapse_burst', 'astral_orb', 'orb_trail', 'astral_burst', 'astral_ring', 'flight_wings', 'flight_ring', 'wisps', 'wisp_arc'] as const;
 export const SP_NAMES = SP_SETS.flatMap(s => [0, 1, 2, 3].map(i => `${s}${i}`));
+export const EV_SETS: readonly string[] = ['head_side', 'head_front', 'head_back', 'body', 'wing_side', 'tail'];
+export const EV_NAMES = EV_SETS.flatMap(s => [0, 1, 2, 3].map(i => `ev_${s}${i}`)); export const evUrl = (n: string) => `/art/b36/ev/${n}.png`;
 export const spKey = (n: string) => `sp-${n}`; export const spUrl = (n: string) => `/art/fx/sora-phoenix/${n}.png`;
 type SpSet = (typeof SP_SETS)[number];
 interface Pop { im: Phaser.GameObjects.Image; t: number; delay: number; dur: number; set: SpSet; frames: number[]; w: number; w1: number; a: number; vx: number; vy: number; spin: number; sx: number; sy: number; byH: boolean }
@@ -16,7 +18,7 @@ const R_ALL = [0, 1, 2, 3];
 
 export class SoraPhoenix {
   private pops: Pop[] = []; private last = 0; private clock = 0; private lx = 0; private ly = 0; private px = 0; private py = 0; private fresh = true; private side = 1;
-  private amt = 0; private wasOd = false; private mv = 0; private snap = 0; private snapFrame = 2; private cry = 0; private lunge = 0; private cup = 0; private ringClock = 0; private pulseT = 0; private lastDash = false; private wE = 1; private wS = 0; private wN = 0;
+  private amt = 0; private wasOd = false; private mv = 0; private snap = 0; private snapFrame = 2; private cry = 0; private lunge = 0; private cup = 0; private pulseT = 0; private lastDash = false; private wE = 1; private wS = 0; private wN = 0;
   private readonly body: Phaser.GameObjects.Image; private readonly tail: Phaser.GameObjects.Image; private readonly head: Phaser.GameObjects.Image; private readonly wingFar: Phaser.GameObjects.Image; private readonly wingNear: Phaser.GameObjects.Image; private readonly wingL: Phaser.GameObjects.Image; private readonly wingR: Phaser.GameObjects.Image;
   private readonly ground: Phaser.GameObjects.Image; private readonly jet: Phaser.GameObjects.Image[] = []; private readonly wisp: Phaser.GameObjects.Image[] = []; private readonly orb: Phaser.GameObjects.Image; private readonly ring: Phaser.GameObjects.Image;
   private readonly blades: Phaser.GameObjects.Image[] = []; private readonly prisms: Phaser.GameObjects.Image[] = []; private readonly vortex: Phaser.GameObjects.Image[] = []; private readonly flyOrbs: Phaser.GameObjects.Image[] = []; private readonly flyTrails: Phaser.GameObjects.Image[] = []; private readonly fgrounds: Phaser.GameObjects.Image[] = [];
@@ -30,7 +32,9 @@ export class SoraPhoenix {
     for (let i = 0; i < 3; i++) { this.flyOrbs.push(mk(10.6)); this.flyTrails.push(mk(10.5)); }
   }
   private has(n: string) { return this.scene.textures.exists(spKey(n)); }
-  private tex(im: Phaser.GameObjects.Image, set: SpSet, i: number) { const k = spKey(`${set}${i & 3}`); if (!this.scene.textures.exists(k)) { im.setVisible(false); return false; } if (im.texture.key !== k) im.setTexture(k); return true; }
+  /** Form 2 (Eventide Seraph) uses the same rig with its own palette: keys carry an `ev_` prefix for the six phoenix layers. */
+  private pre = '';
+  private tex(im: Phaser.GameObjects.Image, set: SpSet, i: number) { const k = spKey(`${EV_SETS.includes(set) ? this.pre : ''}${set}${i & 3}`); if (!this.scene.textures.exists(k)) { im.setVisible(false); return false; } if (im.texture.key !== k) im.setTexture(k); return true; }
   private pop(set: SpSet, frames: number[], x: number, y: number, w: number, w1: number, dur: number, o: PopOpt = {}) {
     if (this.pops.length >= 48 || !this.has(`${set}${frames[0]}`)) return;
     const im = this.scene.add.image(x, y, spKey(`${set}${frames[0]}`)).setBlendMode(Phaser.BlendModes.ADD).setDepth(o.depth ?? 11.2).setRotation(o.rot ?? 0).setOrigin(o.ox ?? 0.5, o.oy ?? 0.5).setAlpha(0);
@@ -77,7 +81,7 @@ export class SoraPhoenix {
   }
 
   update(o: SoraFxInput) {
-    const dt = o.running ? o.dt : 0, s = o.state, p = s.player, h = o.hero, sc = o.scale / 0.5, sora = s.hero === 'sora' && p.form === 1; this.clock += dt;
+    const dt = o.running ? o.dt : 0, s = o.state, p = s.player, h = o.hero, sc = o.scale / 0.5, sora = s.hero === 'sora' && p.form >= 1; this.pre = p.form === 2 ? 'ev_' : ''; this.clock += dt;
     for (const e of s.abilityEvents) if (e.id > this.last) { this.last = e.id; if (!o.dead && p.form !== 2 && e.kind.startsWith('sora_')) this.onEvent(e, o); }
     for (let i = this.pops.length - 1; i >= 0; i--) {
       const q = this.pops[i]; if (q.delay > 0) { q.delay -= dt; q.im.setAlpha(0); continue; }
@@ -92,7 +96,7 @@ export class SoraPhoenix {
     this.lx += (h.x - this.lx) * Math.min(1, dt * 8); this.ly += (h.y - this.ly) * Math.min(1, dt * 8);
     const f = o.facing; if (f === 'east') this.side = 1; else if (f === 'west') this.side = -1;
     const act = s.hx.act, flying = p.flyT > 0, od = p.odT > 0, charging = !!act && act.act === 'astral_devastation' && !act.released;
-    if (this.wasOd && !od && this.amt > 0.2) this.pop('dissolve', R_ALL, this.lx, this.ly - 70 * sc, 250 * sc, 220 * sc, 0.6, { a: 0.8, depth: 9.0 });
+    if (this.wasOd && !od && this.amt > 0.2 && p.form !== 2) this.pop('dissolve', R_ALL, this.lx, this.ly - 70 * sc, 250 * sc, 220 * sc, 0.6, { a: 0.8, depth: 9.0 });
     this.wasOd = od;
     const want = od ? (p.odT < 1.0 ? clamp(p.odT / 1.0, 0, 1) : 1) : 0; this.amt += (want - this.amt) * Math.min(1, dt * (od ? 3.2 : 9));
     this.snap = Math.max(0, this.snap - dt); this.cry = Math.max(0, this.cry - dt); this.lunge = Math.max(0, this.lunge - dt * 3.2); this.cup = Math.max(0, this.cup - dt);
@@ -118,10 +122,8 @@ export class SoraPhoenix {
     else if (A * this.wN > 0.01 && this.tex(this.head, 'head_back', Math.floor(this.clock * 3))) { const k = (72 * sc * breath) / this.head.width; this.head.setVisible(true).setOrigin(0.5, 0.85).setPosition(Math.round(this.lx), Math.round(this.ly - 88 * sc)).setScale(k).setRotation(0).setAlpha(A * this.wN * 1.15); }
     else if (!hv) this.head.setVisible(false);
     // ground pressure under the beast
-    if (this.amt > 0.05 && this.tex(this.ground, 'ground_ring', 1 + (Math.floor(this.clock * 3) & 1))) this.ground.setVisible(true).setPosition(Math.round(this.lx), Math.round(this.ly + 4)).setScale((170 * sc * (1 + 0.05 * Math.sin(this.clock * 3.4))) / this.ground.width).setAlpha(this.amt * 0.3 * calm); else this.ground.setVisible(false);
-    // ---- Skybreaker: wing-shaped light bursts only while flying (never in the plain transformed form)
-    for (let i = 0; i < 2; i++) { const im = this.jet[i]; if (flying && this.tex(im, 'flight_wings', Math.floor(this.clock * 12) + i * 2)) { const sd = i ? 1 : -1, k = (96 * sc * (0.94 + 0.06 * Math.sin(this.clock * 15 + i))) / im.width; im.setVisible(true).setOrigin(0.5, 0.1).setPosition(Math.round(h.x + sd * 8 * sc), Math.round(h.y - 10 * sc)).setScale(k * sd * -1, k).setRotation(sd * 0.28 + lean).setAlpha(0.42 * calm); } else im.setVisible(false); }
-    if (flying) { this.ringClock -= dt; if (this.ringClock <= 0 && !o.reduced) { this.ringClock = 0.6; this.pop('flight_ring', [1, 2], h.x, h.y + 6, 56, 110, 0.3, { depth: 3.8, a: 0.35, squash: 0.62 }); } }
+    if (p.form !== 2 && this.amt > 0.05 && this.tex(this.ground, 'ground_ring', 1 + (Math.floor(this.clock * 3) & 1))) this.ground.setVisible(true).setPosition(Math.round(this.lx), Math.round(this.ly + 4)).setScale((170 * sc * (1 + 0.05 * Math.sin(this.clock * 3.4))) / this.ground.width).setAlpha(this.amt * 0.3 * calm); else this.ground.setVisible(false);
+    for (const im of this.jet) im.setVisible(false);   // flight keeps only the silhouette: no wing bursts
     // ---- committed fields (read from the sim, so they match the damage geometry exactly)
     const fields = s.hx.sf ?? []; const pr = fields.filter(q => q.k === 'prison'), co = fields.filter(q => q.k === 'collapse'), as = fields.filter(q => q.k === 'astral');
     for (let i = 0; i < 3; i++) {
@@ -155,10 +157,10 @@ export class SoraPhoenix {
       if (!o.reduced && tier >= 1 && this.tex(this.ring, 'astral_ring', Math.floor(this.clock * 12))) this.ring.setVisible(true).setPosition(Math.round(hp.x), Math.round(hp.y)).setScale((size * 2) / this.ring.width).setRotation(-this.clock * 6).setAlpha(0.35 + 0.12 * tier); else this.ring.setVisible(false);
     } else { this.orb.setVisible(false); this.ring.setVisible(false); }
     // ---- form presence: restrained ground rings, a dash pulse, body-bound feather wisps at the shoulders
-    const dashing = p.dashRemaining > 0; if (dashing && !this.lastDash && !o.reduced) this.pop('ground_ring', [1, 2, 3], h.x, h.y + 6, 80, 200, 0.4, { depth: 3.8, a: 0.4, squash: 0.5 }); this.lastDash = dashing;
-    if (sp > 110 && !flying && !o.reduced && !o.crowded) { this.pulseT -= dt; if (this.pulseT <= 0) { this.pulseT = 0.9; this.pop('ground_ring', [0, 1], h.x, h.y + 6, 60, 120, 0.35, { depth: 3.7, a: 0.22, squash: 0.5 }); } }
+    const dashing = p.dashRemaining > 0; if (dashing && !this.lastDash && !o.reduced && p.form !== 2) this.pop('ground_ring', [1, 2, 3], h.x, h.y + 6, 80, 200, 0.4, { depth: 3.8, a: 0.4, squash: 0.5 }); this.lastDash = dashing;
+    if (p.form !== 2 && sp > 110 && !flying && !o.reduced && !o.crowded) { this.pulseT -= dt; if (this.pulseT <= 0) { this.pulseT = 0.9; this.pop('ground_ring', [0, 1], h.x, h.y + 6, 60, 120, 0.35, { depth: 3.7, a: 0.22, squash: 0.5 }); } }
     const wa = (o.reduced || o.crowded ? 0.12 : 0.28) + (act ? 0.2 : 0) + (od ? 0.1 : 0);
-    for (let i = 0; i < 2; i++) { const im = this.wisp[i]; if (!this.tex(im, 'wisps', Math.floor(this.clock * 7) + i * 2) || this.wS > 0.5) { im.setVisible(false); continue; } const sd = i ? 1 : -1; im.setVisible(true).setOrigin(0.5, 1).setPosition(Math.round(h.x + sd * 13 * sc), Math.round(h.y - 58 * sc)).setScale((26 * sc) / im.width * (i ? -1 : 1)).setRotation(sd * 0.18 - lean).setAlpha(wa); }
+    for (let i = 0; i < 2; i++) { const im = this.wisp[i]; if (p.form === 2 || !this.tex(im, 'wisps', Math.floor(this.clock * 7) + i * 2) || this.wS > 0.5) { im.setVisible(false); continue; } const sd = i ? 1 : -1; im.setVisible(true).setOrigin(0.5, 1).setPosition(Math.round(h.x + sd * 13 * sc), Math.round(h.y - 58 * sc)).setScale((26 * sc) / im.width * (i ? -1 : 1)).setRotation(sd * 0.18 - lean).setAlpha(wa); }
   }
   private hideLayers() { for (const im of [this.tail, this.body, this.head, this.wingFar, this.wingNear, this.wingL, this.wingR, this.ground, ...this.jet, ...this.wisp, this.orb, this.ring, ...this.blades, ...this.prisms, ...this.vortex, ...this.flyOrbs, ...this.flyTrails, ...this.fgrounds]) im.setVisible(false); }
   destroy() { for (const q of this.pops) q.im.destroy(); this.pops = []; for (const im of [this.tail, this.body, this.head, this.wingFar, this.wingNear, this.wingL, this.wingR, this.ground, ...this.jet, ...this.wisp, this.orb, this.ring, ...this.blades, ...this.prisms, ...this.vortex, ...this.flyOrbs, ...this.flyTrails, ...this.fgrounds]) im.destroy(); }

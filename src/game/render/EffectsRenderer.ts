@@ -11,6 +11,8 @@ import { heroFxKey } from './heroFxView';
 const MAX_HIT_BURSTS_PER_FRAME = 8;
 const DASH_TRAIL_STEP = 0.028;
 
+/** Second forms keep their own dash / hit palette: grey-keyed Ren / Sora art multiplied by these, so no Crimson red or Sovereign blue leaks in. */
+const REN_F2_TINT = { main: 0xe8a860, ghost: 0xa8683a }, SORA_F2_TINT = { main: 0xf6c8e2, ghost: 0xc9a0cc };
 export class EffectsRenderer {
   private readonly pool: FxPool;
   private lastId = 0;
@@ -19,8 +21,8 @@ export class EffectsRenderer {
 
   render(state: GameState, reduced = false) {
     const p = state.player, hero = state.hero, mine = hero !== 'kai', solar = !mine && p.form >= 1 && p.form !== 3;   // B20: Ren / Sora never borrow Kai's orange solar set; they have their own ImageGen dash and hit art
-    this.vexNow = hero === 'vex'; this.vexForm = p.form; const rh = hero === 'vex' ? 'ren' : hero;
-    const g2 = hero === 'vex' && p.form === 2, hk = (n: string) => { const key = heroFxKey(hero === 'vex' ? 'vex' : rh === 'ren' ? 'ren' : 'sora', n); return g2 ? grayKey(this.scene, key) : key; }, hcol = hero === 'vex' ? vexTint(p.form).main : rh === 'ren' ? 0xff4a3a : 0x9fe8ff;   // B13: Stillfire Apex keeps the cool cyan/silver effect set
+    this.f2Tint = hero !== 'kai' && hero !== 'vex' && p.form === 2 ? (hero === 'ren' ? REN_F2_TINT : SORA_F2_TINT) : null; this.vexNow = hero === 'vex' || !!this.f2Tint; this.vexForm = p.form; const rh = hero === 'vex' ? 'ren' : hero;
+    const g2 = (hero === 'vex' || !!this.f2Tint) && p.form === 2, hk = (n: string) => { const key = heroFxKey(hero === 'vex' ? 'vex' : rh === 'ren' ? 'ren' : 'sora', n); return g2 ? grayKey(this.scene, key) : key; }, hcol = hero === 'vex' ? vexTint(p.form).main : this.f2Tint ? this.f2Tint.main : rh === 'ren' ? 0xff4a3a : 0x9fe8ff;   // B13: Stillfire Apex keeps the cool cyan/silver effect set
     const k = (n: string) => vfxKey(n, solar);
     const running = state.phase === 'running' || state.phase === 'dead' || state.phase === 'victory';
     const dt = running ? Math.min(0.05, this.scene.game.loop.delta / 1000) : 0;   // frozen with the sim while paused / choosing an upgrade
@@ -130,10 +132,12 @@ export class EffectsRenderer {
 
   /** Ren / Sora dash start: hero-coloured crescent, speed lines and ground dust; transformed dashes are larger and add the ring/afterimage layer. */
   private vexNow = false; private vexForm = 0;
-  private vtint(): { tint?: number } { return this.vexNow ? { tint: vexTint(this.vexForm).main } : {}; }
+  private f2Tint: { main: number; ghost: number } | null = null;
+  private tintOf() { return this.f2Tint ?? vexTint(this.vexForm); }
+  private vtint(): { tint?: number } { return this.vexNow ? { tint: this.tintOf().main } : {}; }
   private spawnHeroDash(x: number, y: number, dx: number, dy: number, hk: (n: string) => string, form: boolean, reduced: boolean) {
     const len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, ang = Math.atan2(uy, ux), fy = y + KAI_GROUND_DY - 4, ren = hk('x').includes('-ren-');
-    this.pool.spawn({ key: vfxKey('dust', false), x: x - ux * 8, y: fy, depth: 5.8, life: 0.4, blend: 'normal', tint: this.vexNow ? vexTint(this.vexForm).ghost : ren ? 0xb8504a : 0x8fb4e0, s0: 0.32, s1: 0.58, a0: 0.8, a1: 0, vy: -16, vx: -ux * 20 });
+    this.pool.spawn({ key: vfxKey('dust', false), x: x - ux * 8, y: fy, depth: 5.8, life: 0.4, blend: 'normal', tint: this.vexNow ? this.tintOf().ghost : ren ? 0xb8504a : 0x8fb4e0, s0: 0.32, s1: 0.58, a0: 0.8, a1: 0, vy: -16, vx: -ux * 20 });
     if (reduced) return;
     this.pool.spawn({ ...this.vtint(), key: hk(ren ? 'rs_dashslash' : 'sm_dashslash'), x: x + ux * 8, y: y - 8 + uy * 8, depth: 9.3, life: 0.22, blend: 'add', rot: ang + Math.PI, s0: form ? 0.2 : 0.15, s1: form ? 0.3 : 0.22, a0: 1, a1: 0, vx: ux * 90, vy: uy * 90 });
     if (form) this.pool.spawn({ ...this.vtint(), key: hk(ren ? 'rs_ring' : 'sm_ring'), x, y: fy, depth: 5.5, life: 0.3, blend: 'add', s0: 0.08, s1: 0.28, sy: 1, a0: 0.9, a1: 0 });

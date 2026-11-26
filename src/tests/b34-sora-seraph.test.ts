@@ -93,13 +93,13 @@ describe('Prism Feathers and Star Traces', () => {
 });
 
 describe('Constellation Pierce (Q)', () => {
-  it('fires three lances in order along the aim and hits what they cross', () => {
+  it('fires five lances in order along the aim and hits what they cross', () => {
     const { sim, s } = sora(2, [[1300, 800], [1500, 805]]); const hp0 = s.enemies.map(e => e.hp); sim.step(DT, idle({ q: true })); expect(s.hx.act?.act).toBe('constellation_pierce');
-    const ev = collect(sim, 1).filter(e => e.kind === 'sera_q_lance'); expect(ev.map(e => e.n! & 15)).toEqual([0, 1, 2]); expect(ev.some(e => ((e.n! >> 4) & 31) > 0)).toBe(true); expect(s.enemies[0].hp).toBeLessThan(hp0[0]);
+    const ev = collect(sim, 1).filter(e => e.kind === 'sera_q_lance'); expect(ev.map(e => e.n! & 15)).toEqual([0, 1, 2, 3, 4]); expect(ev.some(e => ((e.n! >> 4) & 31) > 0)).toBe(true); expect(s.enemies[0].hp).toBeLessThan(hp0[0]);
   });
   it('a lance stops at a wall and never reaches a foe behind it', () => {
     const { sim, s } = sora(2, [[1300, 800]]); s.player.x = 120; s.player.y = 800; s.player.aimX = -1; sim.step(DT, idle({ q: true })); const ev = collect(sim, 1).filter(e => e.kind === 'sera_q_lance');
-    expect(ev.length).toBe(3); for (const e of ev) expect(Math.hypot(e.tx! - e.x, e.ty! - e.y)).toBeLessThan(300);
+    expect(ev.length).toBe(5); for (const e of ev) expect(Math.hypot(e.tx! - e.x, e.ty! - e.y)).toBeLessThan(300);
   });
   it('consumes a trace once for a precision follow-up; an untraced foe gets none', () => {
     const { sim, s } = sora(2, [[1300, 800], [1310, 830]]); tracesOf(s).push({ id: 100, t: 99 }); sim.step(DT, idle({ q: true })); const ev = collect(sim, 1);
@@ -179,5 +179,15 @@ describe('B35 fixes', () => {
   });
   it('fast bolts are swept: a thin bolt cannot tunnel through a small foe between two ticks', () => {
     const { sim, s } = sora(0, [[1200, 800]]); s.enemies[0].radius = 4; s.hx.bolts.push({ id: 9001, x: 1180, y: 800, vx: 3000, vy: 0, ttl: 1, damage: 5, radius: 2, kind: 'needle', pierce: 0, hits: [], homing: 0, form: 0 }); const hp = s.enemies[0].hp; sim.step(DT, idle()); expect(s.enemies[0].hp).toBeLessThan(hp);
+  });
+  it('a V press refused while another cast is busy is buffered and starts the moment the hands are free (V no longer drops randomly)', () => {
+    const { sim, s } = sora(2, [[1300, 800]]); sim.step(DT, idle({ q: true })); expect(s.hx.act?.act).toBe('constellation_pierce');
+    sim.step(DT, idle({ sig: true, sigHeld: true })); expect(s.hx.act?.act).toBe('constellation_pierce');   // refused: hands busy
+    let started = false; for (let k = 0; k < 40 && !started; k++) { sim.step(DT, idle({ sigHeld: true })); started = s.hx.act?.act === 'astral_rebirth'; }
+    expect(started).toBe(true);
+  });
+  it('a buffered V is dropped after its window and by an abort', () => {
+    const { sim, s } = sora(2, [[1300, 800]]); s.player.sigCd = 30; sim.step(DT, idle({ sig: true, sigHeld: true })); s.player.sigCd = 0; for (let k = 0; k < 40; k++) sim.step(DT, idle());
+    expect(s.hx.act?.act).not.toBe('astral_rebirth');
   });
 });

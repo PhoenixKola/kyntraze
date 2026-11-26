@@ -70,7 +70,10 @@ export function seraAuto(s: GameState) {
 /* ------------------------------------------------------------------ Q Constellation Pierce */
 const segDist = (px: number, py: number, ax: number, ay: number, bx: number, by: number) => { const vx = bx - ax, vy = by - ay, l2 = vx * vx + vy * vy, t = l2 ? clamp(((px - ax) * vx + (py - ay) * vy) / l2, 0, 1) : 0; return Math.hypot(px - (ax + vx * t), py - (ay + vy * t)); };
 export function seraQ(s: GameState): boolean {
-  const p = s.player, dir = aimDir(s, SERA_Q.range), o = hand(s, dir.x, dir.y, 22), ends: number[] = [];
+  const p = s.player; let dir = aimDir(s, SERA_Q.range); const cosA = Math.cos(SERA_Q.assist); let best: Enemy | null = null, bd = 1e9;
+  for (const e of s.enemies) { if (!alive(e) || e.hp <= 0) continue; const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy); if (d > SERA_Q.range || d < 1 || (dx * dir.x + dy * dir.y) / d < cosA || d >= bd) continue; best = e; bd = d; }   // the fan centres on the nearest foe in front, so a lance is never wasted beside it
+  if (best) { const dx = best.x - p.x, dy = best.y - p.y, d = Math.hypot(dx, dy); dir = { x: dx / d, y: dy / d }; }
+  const o = hand(s, dir.x, dir.y, 22), ends: number[] = [];
   p.qCooldown = SERA_Q.cooldown;
   const c = newCast(s, 'constellation_pierce', dir, SERA_Q.windup + SERA_Q.recover); s.hx.act = c;
   for (let i = 0; i < SERA_Q.lanes; i++) {

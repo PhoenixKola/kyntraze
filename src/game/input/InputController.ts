@@ -45,6 +45,7 @@ export class InputController {
     const key = (a: string, b?: string) => this.keys.has(a) || (b ? this.keys.has(b) : false);
     const consume = (...codes: string[]) => { const active = codes.some(code => this.pressed.has(code)); codes.forEach(code => this.pressed.delete(code)); return active; };
     // one unified path: keyboard and controller are merged here, once per simulation tick, so a button can never produce two actions
+    const abort = this.sigAbort; this.sigAbort = false;   // a window blur cancels an open charge once; it must not stay set and cancel every later V
     const s = this.pad.sample(performance.now() / 1000);
     if (s.lost && this.lastDevice === 'pad') this.onPadLost();
     if (s.pressed.size || s.move.x || s.move.y) this.lastDevice = 'pad';
@@ -59,7 +60,7 @@ export class InputController {
     const dash = consume('ShiftLeft', 'ShiftRight', 'Space'), q = consume('KeyQ'), f = consume('KeyF'), beam = consume('KeyE'), sphere = consume('KeyR');
     const stick = s.aim.x !== 0 || s.aim.y !== 0, pointer = !stick && this.pointerAim !== null && this.pointerAt > -1e8 && this.lastDevice === 'kb';   // once the mouse has been used it keeps aiming (Lance / Nova / Rift follow the cursor)
     const aim = stick ? { x: s.aim.x, y: s.aim.y, src: 'stick' as const } : pointer ? { x: this.pointerAim!.x, y: this.pointerAim!.y, src: 'pointer' as const, d: this.pointerAim!.d } : null;
-    return { x: usePad ? s.move.x : kx, y: usePad ? s.move.y : ky, dash: dash || p('A'), q: q || p('X'), f: f || p('Y'), beam: beam || p('RB'), sphere: sphere || p('LB'), sig: consume('KeyV') || s.pressed.has('RT'), sigHeld: key('KeyV') || s.held.has('RT'), ...((this.coop ? consume('ControlLeft', 'ControlRight') : consume('AltLeft')) || s.pressed.has('BACK') ? { flyToggle: true } : {}), od: consume('KeyG') || (!this.selectorOpen && s.pressed.has('B')), ...(this.sigAbort ? { sigAbort: true } : {}),
+    return { x: usePad ? s.move.x : kx, y: usePad ? s.move.y : ky, dash: dash || p('A'), q: q || p('X'), f: f || p('Y'), beam: beam || p('RB'), sphere: sphere || p('LB'), sig: consume('KeyV') || s.pressed.has('RT'), sigHeld: key('KeyV') || s.held.has('RT'), ...((this.coop ? consume('ControlLeft', 'ControlRight') : consume('AltLeft')) || s.pressed.has('BACK') ? { flyToggle: true } : {}), od: consume('KeyG') || (!this.selectorOpen && s.pressed.has('B')), ...(abort ? { sigAbort: true } : {}),
       beamHeld: key('KeyE') || s.held.has('RB'), fHeld: key('KeyF') || s.held.has('Y'), ...(aim ? { aimX: aim.x, aimY: aim.y, aimSrc: aim.src, ...('d' in aim && aim.d !== undefined ? { aimDist: aim.d } : {}) } : {}), ...(selPick ? { selPick } : {}), ...(selMove ? { selMove } : {}), ...(selConfirm ? { selConfirm } : {}), ...(selCancel ? { selCancel } : {}) };
   }
   destroy() { window.removeEventListener('keydown', this.onDown); window.removeEventListener('keyup', this.onUp); window.removeEventListener('blur', this.onBlur); }

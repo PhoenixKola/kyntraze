@@ -43,16 +43,16 @@ export const SORA = {
 } as const;
 
 /** Display metadata the HUD, hero select and results read. */
-export interface HeroKitInfo { act: { q: string; e: string; r: string }; auto: string; form: string; /** a second transformation (Vex) */ form2?: string; formShort: string; quote: string; roleLine: string; blurbs: { auto: string; q: string; e: string; r: string; form: string }; catNames: Partial<Record<UpgradeCategory, string>> }
+export interface HeroKitInfo { act: { q: string; e: string; r: string }; auto: string; form: string; /** a second transformation */ form2?: string; formShort: string; quote: string; roleLine: string; blurbs: { auto: string; q: string; e: string; r: string; form: string }; catNames: Partial<Record<UpgradeCategory, string>> }
 export const HERO_KIT: Record<'ren' | 'sora' | 'vex', HeroKitInfo> = {
   ren: {
-    act: { q: REN.q.name, e: REN.e.name, r: REN.r.name }, auto: REN.auto.name, form: 'Crimson Ascendant', formShort: 'ASCENDANT',
+    act: { q: REN.q.name, e: REN.e.name, r: REN.r.name }, auto: REN.auto.name, form: 'Crimson Ascendant', form2: 'Ashen Eclipse', formShort: 'ASCENDANT',
     quote: 'Pressure is the only plan.', roleLine: 'Close-range brawler · risk and momentum',
     blurbs: { auto: 'Heavy chained punches hit every enemy in a short arc; every third blow lands harder.', q: 'A rapid five-beat punch combination that steps into the crowd. Works while moving.', e: 'Rush through up to three nearby enemies, exploding on each. With nobody near, dash forward and burst.', r: 'Leap to the target, slam down and release a crimson shockwave that throws the crowd back.', form: 'Full Drive and F: red hair and a Crimson Nine-Tailed Fox energy. Crimson Fury, Infernal Cyclone, Scarlet Rampage, Crimson Catastrophe, hold V for Crimson Nova Fist, G for the fox Overdrive, hold dash to fly.' },
     catNames: { core: 'CORE', beam: 'RUSH', sphere: 'IMPACT', survival: 'SURVIVAL', mobility: 'MOBILITY', pickup: 'SALVAGE', drive: 'ASCENT' },
   },
   sora: {
-    act: { q: SORA.q.name, e: SORA.e.name, r: SORA.r.name }, auto: SORA.auto.name, form: 'Azure Sovereign', formShort: 'SOVEREIGN',
+    act: { q: SORA.q.name, e: SORA.e.name, r: SORA.r.name }, auto: SORA.auto.name, form: 'Azure Sovereign', form2: 'Eventide Seraph', formShort: 'SOVEREIGN',
     quote: 'Distance is a kind of grace.', roleLine: 'Ranged controller · spacing and precision',
     blurbs: { auto: 'Fast homing blue needles fire at the nearest enemies from a safe distance.', q: 'A quick fan of blue energy bolts for lane control. Works while moving.', e: 'Hold E to gather a piercing beam, release to fire. Longer charge means wider, longer and harder.', r: 'Summon orbiting spheres, then send them to converge on enemies and detonate together.', form: 'Full Drive and F: electric blue hair and an Astral Phoenix aura. Astral Blades, Azure Prison, Heaven’s Spear, Celestial Collapse, hold V for Astral Devastation, G for the phoenix Overdrive, hold dash to fly.' },
     catNames: { core: 'CORE', beam: 'LANCE', sphere: 'HORIZON', survival: 'SURVIVAL', mobility: 'MOBILITY', pickup: 'SALVAGE', drive: 'SOVEREIGN' },

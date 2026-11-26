@@ -25,7 +25,7 @@ import { HERO_SHEETS, HERO_ANCHORS_KEY, HERO_REGISTRY_KEY, heroAnchorsUrl, heroF
 import { KP_NAMES, kpKey, kpUrl } from '../render/kaiPresence';
 import { KO_NAMES, koKey, koUrl } from '../render/kaiCombatFx';
 import { RF_NAMES, rfKey, rfUrl } from '../render/renFox';
-import { SP_NAMES, spKey, spUrl } from '../render/soraPhoenix';
+import { EV_NAMES, evUrl, SP_NAMES, spKey, spUrl } from '../render/soraPhoenix';
 import { VX_NAMES, vxKey, vxUrl } from '../render/vexFx';
 import { FORM_FX_NAMES, formFxKey, formFxUrl } from '../render/formFx';
 import { COMET_FX_NAMES, cometFxKey, cometFxUrl } from '../render/cometFx';
@@ -74,6 +74,7 @@ export class BootScene extends Phaser.Scene {
     ASH_FX.forEach(n => this.load.image(ashKey(n), ashUrl(n)));   // B33 Ashen Eclipse sprites (ImageGen)   // B32 ability identity sprites (ImageGen)
     KP_NAMES.forEach(n => this.load.image(kpKey(n), kpUrl(n)));
     VX_NAMES.forEach(n => this.load.image(vxKey(n), vxUrl(n)));   // B28 Abyssal Guardian (two looks) + Vex FX (ImageGen)
+    EV_NAMES.forEach(n => this.load.image(spKey(n), evUrl(n)));   // B36 Eventide Phoenix: the Sovereign rig in the Seraph palette
     SP_NAMES.forEach(n => this.load.image(spKey(n), spUrl(n)));   // B27 Astral Phoenix + Sora form FX (ImageGen)
     RF_NAMES.forEach(n => this.load.image(rfKey(n), rfUrl(n)));   // B26 Crimson Nine-Tailed Fox + Ren form FX (ImageGen); a missing file leaves that layer off
     KO_NAMES.forEach(n => this.load.image(koKey(n), koUrl(n)));   // Primal Overdrive / signature / flight / form-shift art (ImageGen)   // Kai transformation presence (ImageGen); a missing file just leaves that layer off

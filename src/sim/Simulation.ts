@@ -34,6 +34,15 @@ import { resolveCoop } from './CoopCombos';
 import type { RunConfig as RunCfg } from './RunConfig';
 /** Seconds a refused Q / E / R press stays armed (B20). */
 export const ABILITY_BUFFER = 0.15;
+/** V is a hold/release technique; a press refused only because another cast, a dash or a cooldown is about to end used to be lost (the edge was already consumed). It is now retried for V_BUFFER seconds, even if the key was already released (a tap then releases at the minimum hold). */
+export const V_BUFFER = 0.3;
+function stepV(s: GameState, input: InputState, prev: { sig: boolean; od: boolean }, bf: { v: number }, dt: number): { sig: boolean; od: boolean } {
+  const before = s.cast ?? s.hx.act ?? null, retry = bf.v > 0 && !input.sigAbort, press = !!(input.sig || input.sigHeld) && !prev.sig;
+  const k = kaiCombatInput(s, retry ? { ...input, sig: true } : input, retry ? { ...prev, sig: false } : prev);
+  const started = (s.cast ?? s.hx.act ?? null) !== before;
+  bf.v = input.sigAbort || started ? 0 : press ? V_BUFFER : retry ? Math.max(0, bf.v - dt) : 0;
+  return k;
+}
 export class Simulation {
   readonly state: GameState;
   readonly rng: SeededRng;
@@ -42,7 +51,7 @@ export class Simulation {
   private eHeld = false;
   private rHeld = false; private kc = { sig: false, od: false };
   constructor(seed: number, arenaId: ArenaId = 'gloam', cometUnlocked = false, apexUnlocked = false, config: RunConfig = NO_CONFIG) { this.rng = new SeededRng(seed); setActiveArena(arenaId); this.state = makeState(seed, arenaId, cometUnlocked, apexUnlocked); applyRunConfig(this.state, config); startLiving(this.state); if (this.state.plan.cycle > 0) this.state.b22.endless = { fromT: 0, cycle: 0, bossAt: 120, offered: false, extracted: false }; }
-  private readonly buf = { q: 0, e: 0, r: 0 };
+  private readonly buf = { q: 0, e: 0, r: 0, v: 0 };
   /** B22.6: bring a second fighter into the SAME simulation (local couch or an online peer). */
   joinPartner(config: RunCfg, mode: 'local' | 'online' = 'local', names: [string, string] = ['P1', 'P2']) { return createParty(this.state, config, mode, names); }
   step(dt: number, input: InputState, input2?: InputState) {
@@ -70,7 +79,7 @@ export class Simulation {
     if (input.beam && !this.eHeld) { if (!castE() && bufE) bf.e = ABILITY_BUFFER; else bf.e = 0; } else if (bf.e > 0 && bufE && castE()) bf.e = 0;
     if (input.sphere && !this.rHeld) { if (!castR()) bf.r = ABILITY_BUFFER; else bf.r = 0; } else if (bf.r > 0 && castR()) bf.r = 0;
     this.qHeld = input.q; this.fHeld = fDown; this.eHeld = !!input.beam || !!input.beamHeld; this.rHeld = !!input.sphere; s.eHeld = !!input.beamHeld;
-    this.kc = kaiCombatInput(s, input, this.kc);
+    this.kc = stepV(s, input, this.kc, this.buf, dt);
     const p = s.player; p.qCooldown = Math.max(0, p.qCooldown - dt);
     if (s.mods.regen > 0 && !s.run.noRegen) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
     updateDrive(s, dt);
@@ -193,7 +202,7 @@ export class Simulation {
     if (input.beam && !edge.e) { if (!castE() && bufE) bf.e = ABILITY_BUFFER; else bf.e = 0; } else if (bf.e > 0 && bufE && castE()) bf.e = 0;
     if (input.sphere && !edge.r) { if (!castR()) bf.r = ABILITY_BUFFER; else bf.r = 0; } else if (bf.r > 0 && castR()) bf.r = 0;
     edge.q = input.q; edge.f = fDown; edge.e = !!input.beam || !!input.beamHeld; edge.r = !!input.sphere; s.eHeld = !!input.beamHeld;
-    { const k = kaiCombatInput(s, input, { sig: !!edge.sig, od: !!edge.od }); edge.sig = k.sig; edge.od = k.od; }
+    { const k = stepV(s, input, { sig: !!edge.sig, od: !!edge.od }, bf, dt); edge.sig = k.sig; edge.od = k.od; }
     const p = s.player; p.qCooldown = Math.max(0, p.qCooldown - dt);
     if (s.mods.regen > 0 && !s.run.noRegen) p.hp = Math.min(p.maxHp, p.hp + s.mods.regen * dt);
     updateDrive(s, dt); updateAbilities(s, dt); if (s.hero !== 'kai') updateHero(s, dt);

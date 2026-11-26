@@ -16,7 +16,7 @@ const R_ALL = [0, 1, 2, 3];
 export class RenFox {
   private pops: Pop[] = []; private last = 0; private clock = 0; private lx = 0; private ly = 0; private px = 0; private py = 0; private fresh = true; private side = 1;
   private amt = 0; private wasOd = false; private mv = 0; private squash = 1; private lunge = 0; private ringClock = 0; private strikeAt = -9; private strikeA = 0; private lastDash = false;
-  private wE = 1; private wS = 0; private wN = 0; private lastAim = { x: 1, y: 0 };
+  private wE = 1; private wS = 0; private wN = 0;
   private readonly rest: Phaser.GameObjects.Image; private readonly stream: Phaser.GameObjects.Image; private readonly front: Phaser.GameObjects.Image; private readonly back: Phaser.GameObjects.Image; private readonly halo: Phaser.GameObjects.Image[] = [];
   private readonly ground: Phaser.GameObjects.Image; private readonly fan: Phaser.GameObjects.Image; private readonly wisp: Phaser.GameObjects.Image[] = []; private readonly arc: Phaser.GameObjects.Image; private readonly orb: Phaser.GameObjects.Image; private readonly spiral: Phaser.GameObjects.Image; private readonly cyc: Phaser.GameObjects.Image[] = [];
   constructor(private readonly scene: Phaser.Scene) {
@@ -114,7 +114,6 @@ export class RenFox {
     const vx = dt > 0 ? (h.x - this.px) / dt : 0, vy = dt > 0 ? (h.y - this.py) / dt : 0, sp = Math.hypot(vx, vy); this.px = h.x; this.py = h.y;
     this.lx += (h.x - this.lx) * Math.min(1, dt * 9); this.ly += (h.y - this.ly) * Math.min(1, dt * 9);
     const f = o.facing; if (f === 'east') this.side = 1; else if (f === 'west') this.side = -1;
-    if (s.aim.x || s.aim.y) this.lastAim = { x: s.aim.x, y: s.aim.y };
     const act = s.hx.act, flying = p.flyT > 0, od = p.odT > 0;
     // ---- activation / expiry of the fox
     if (this.wasOd && !od && this.amt > 0.2) this.pop('dissolve', R_ALL, this.lx - this.side * 14 * sc, this.ly - 70 * sc, 230 * sc, 200 * sc, 0.6, { a: 0.8, depth: 9.0, squash: this.side < 0 ? -1 : 1 });
@@ -146,12 +145,7 @@ export class RenFox {
     } else { this.back.setVisible(false); this.halo[0].setVisible(false); this.halo[1].setVisible(false); }
     // ground pressure under the beast
     if (this.amt > 0.05 && this.tex(this.ground, 'ground_ring', 1 + (Math.floor(this.clock * 3) & 1))) this.ground.setVisible(true).setPosition(Math.round(this.lx), Math.round(this.ly + 4)).setScale((170 * sc * (1 + 0.05 * Math.sin(this.clock * 3.4))) / this.ground.width).setAlpha(this.amt * 0.3 * calm); else this.ground.setVisible(false);
-    // ---- Skybreaker: heavy forward tail fan streaming behind the lifted body (comet-like), regardless of the beast
-    if (flying && this.tex(this.fan, 'flight_fan', fr)) {
-      const mvx = sp > 40 ? vx : this.lastAim.x * 40, mvy = sp > 40 ? vy : this.lastAim.y * 40, a = Math.atan2(mvy, mvx) + Math.PI;
-      this.fan.setVisible(true).setOrigin(1, 0.5).setPosition(Math.round(h.x), Math.round(h.y - 46 * sc)).setScale((170 * sc * (0.95 + 0.05 * Math.sin(this.clock * 14))) / this.fan.width, (170 * sc) / this.fan.width).setRotation(a - Math.PI).setAlpha(0.5 * calm);
-      this.ringClock -= dt; if (this.ringClock <= 0 && !o.reduced) { this.ringClock = 0.55; this.pop('flight_ring', [1, 2], h.x, h.y + 6, 60, 120, 0.3, { depth: 3.8, a: 0.4, squash: 0.62 }); }
-    } else this.fan.setVisible(false);
+    this.fan.setVisible(false);   // flight keeps only the silhouette: no tail fan behind the lifted body
     // ---- live cast layers: spinning arcs of Infernal Cyclone, the sphere compressed in the fist of Crimson Nova Fist, Scarlet Rampage's momentum
     if (act && act.act === 'infernal_cyclone' && act.t >= REN_Q.windup * 0.5 && !act.released) {
       const u = clamp((act.t - REN_Q.windup * 0.5) / (REN_Q.windup + REN_Q.spin), 0, 1), R = REN_Q.pullR * (0.5 + 0.5 * u);
